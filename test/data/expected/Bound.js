@@ -1,0 +1,198 @@
+module.exports = function() {
+    return {
+        directValue: {
+            getPaths: {
+                count: 0,
+                query: [["summary"]]
+            },
+            getPathMaps: {
+                query: [{summary: null}]
+            },
+
+            optimizedPaths: [
+                ["videos", "1234", "summary"]
+            ],
+
+            AsValues: {
+                values: [{
+                    "path": ["summary"],
+                    "value": {
+                        "title": "House of Cards",
+                        "url": "/movies/1234"
+                    }
+                }]
+            },
+
+            AsJSON: {
+                values: [{
+                    json: {
+                        "title": "House of Cards",
+                        "url": "/movies/1234"
+                    }
+                }]
+            },
+
+            AsPathMap: {
+                values: [{
+                    json: {
+                        summary: {
+                            "$type": "leaf",
+                            "title": "House of Cards",
+                            "url": "/movies/1234"
+                        }
+                    }
+                }]
+            }
+        },
+        toOnly: {
+            getPaths: {
+                query: [
+                    [{to: 1}, "summary"]
+                ]
+            },
+
+            getPathMaps: {
+                query: [{
+                    "0": {
+                        "summary": null
+                    },
+                    "1": {
+                        "summary": null
+                    }
+                }]
+            },
+
+            optimizedPaths: [
+                ["videos", "1234", "summary"],
+                ["videos", "766", "summary"]
+            ],
+
+            AsValues: {
+                values: [
+                    {
+                        "path": ["0", "summary"],
+                        "value": {
+                            "title": "House of Cards",
+                            "url": "/movies/1234"
+                        }
+                    },
+                    {
+                        "path": ["1", "summary"],
+                        "value": {
+                            "title": "Terminator 3",
+                            "url": "/movies/766"
+                        }
+                    }
+                ]
+            },
+
+            AsJSON: {
+                values: [{
+                    json: {
+                        0: {
+                            "title": "House of Cards",
+                            "url": "/movies/1234"
+                        },
+                        1: {
+                            "title": "Terminator 3",
+                            "url": "/movies/766"
+                        }
+                    }
+                }]
+            },
+
+            AsPathMap: {
+                values: [{
+                    json: {
+                        0: {
+                            __key: "0",
+                            __generation: 0,
+                            summary: {
+                                "$type": "leaf",
+                                "title": "House of Cards",
+                                "url": "/movies/1234"
+                            }
+                        },
+                        1: {
+                            __key: "1",
+                            __generation: 0,
+                            summary: {
+                                "$type": "leaf",
+                                "title": "Terminator 3",
+                                "url": "/movies/766"
+                            }
+                        }
+                    }
+                }]
+            }
+        },
+        onReference: {
+            getPaths: {
+                query: [
+                    ["0", "summary"]
+                ]
+            },
+
+            setPaths: {
+                query: [
+                    {
+                        "path": ["0", "summary"],
+                        "value": {
+                            "$size": 10,
+                            "title": "House of Cards",
+                            "url": "/movies/1234"
+                        }
+                    }
+                ]
+            },
+            getPathMaps: {
+                query: [{
+                    0: {
+                        summary: null
+                    }
+                }]
+            },
+
+            optimizedPaths: [
+                ["videos", "1234", "summary"]
+            ],
+
+            AsValues: {
+                values: [
+                    {
+                        "path": ["0", "summary"],
+                        "value": {
+                            "title": "House of Cards",
+                            "url": "/movies/1234"
+                        }
+                    }
+                ]
+            },
+
+            AsJSON: {
+                values: [{
+                    json: {
+                        "title": "House of Cards",
+                        "url": "/movies/1234"
+                    }
+                }]
+            },
+
+            AsPathMap: {
+                values: [{
+                    json: {
+                        0: {
+                            __key: "0",
+                            __generation: 0,
+                            summary: {
+                                "$type": "leaf",
+                                "title": "House of Cards",
+                                "url": "/movies/1234"
+                            }
+                        }
+                    }
+                }]
+            }
+        }
+    };
+};

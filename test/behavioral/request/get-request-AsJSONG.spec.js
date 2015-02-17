@@ -1,0 +1,87 @@
+var jsong = require("../../../bin/Falcor");
+var Model = jsong.Model;
+var Rx = require("rx");
+var LocalDataSource = require("../../data/LocalDataSource");
+var UnoDataSource = require("../../data/UnoDataSource");
+var Cache = require("../../data/Cache");
+var RCache = require("../../data/ReducedCache");
+var Expected = require("../../data/expected");
+var getTestRunner = require("../../getTestRunner");
+var testRunner = require("../../testRunner");
+var References = Expected.References;
+var Complex = Expected.Complex;
+var Values = Expected.Values;
+var chai = require("chai");
+var expect = chai.expect;
+var noOp = function() {};
+
+function getDataModel(cache) {
+    return testRunner.getModel(new LocalDataSource(Cache()), cache || {});
+}
+
+describe("AsJSONG", function() {
+    it("should get a value from the dataSource", function(done) {
+        var expected = References().simpleReference0;
+        var dataModel = getDataModel();
+        var obs = dataModel.
+            get(["genreList", 0, 0, "summary"]).
+            toJSONG();
+        getTestRunner.
+            async(obs, dataModel, expected, {
+                onNextExpected: expected.AsJSONG
+            }).
+            subscribe(noOp, null, done);
+    });
+
+    it("should get a complex value from the dataSource", function(done) {
+        var expected = Complex().toOnly;
+        var dataModel = getDataModel();
+        var obs = dataModel.
+            get(["genreList", 0, {to:1}, "summary"]).
+            toJSONG();
+        getTestRunner.
+            async(obs, dataModel, expected, {
+                onNextExpected: expected.AsJSONG
+            }).
+            subscribe(noOp, null, done);
+    });
+
+    it("should get a complex value from the cache and the dataSource", function(done) {
+        var expected = Complex().toOnly;
+        var dataModel = getDataModel(RCache.MinimalCache());
+        var obs = dataModel.
+            get(["genreList", 0, {to:1}, "summary"]).
+            toJSONG();
+        getTestRunner.
+            async(obs, dataModel, expected, {
+                onNextExpected: expected.AsJSONG
+            }).
+            subscribe(noOp, null, done);
+    });
+    
+    it("should perform retries.", function(done) {
+        var expected = References().simpleReference0;
+        var dataModel = testRunner.getModel(new LocalDataSource(Cache(), {miss:2}), {});
+        var setJSONGsAsJSONG = Model.prototype._setJSONGsAsJSONG;
+        var count = 0;
+        Model.prototype._setJSONGsAsJSONG = function() {
+            count++;
+            debugger;
+            return setJSONGsAsJSONG.apply(null, arguments);
+        };
+        
+        var obs = dataModel.
+            get(["genreList", 0, 0, "summary"]).
+            toJSONG();
+        getTestRunner.
+            async(obs, dataModel, expected, {
+                onNextExpected: expected.AsJSONG
+            }).
+            subscribe(noOp, null, function() {
+                expect(count).to.equal(3);
+                Model.prototype._setJSONGsAsJSONG = setJSONGsAsJSONG;
+                done();
+            });
+    });
+});
+

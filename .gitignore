@@ -1,0 +1,9 @@
+node_modules
+.DS_Store
+bin/
+!tasks/bin
+*.iml
+coverage
+.idea
+tmp/
+*.tar.gz
