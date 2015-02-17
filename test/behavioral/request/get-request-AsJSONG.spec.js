@@ -58,30 +58,5 @@ describe("AsJSONG", function() {
             }).
             subscribe(noOp, null, done);
     });
-    
-    it("should perform retries.", function(done) {
-        var expected = References().simpleReference0;
-        var dataModel = testRunner.getModel(new LocalDataSource(Cache(), {miss:2}), {});
-        var setJSONGsAsJSONG = Model.prototype._setJSONGsAsJSONG;
-        var count = 0;
-        Model.prototype._setJSONGsAsJSONG = function() {
-            count++;
-            debugger;
-            return setJSONGsAsJSONG.apply(null, arguments);
-        };
-        
-        var obs = dataModel.
-            get(["genreList", 0, 0, "summary"]).
-            toJSONG();
-        getTestRunner.
-            async(obs, dataModel, expected, {
-                onNextExpected: expected.AsJSONG
-            }).
-            subscribe(noOp, null, function() {
-                expect(count).to.equal(3);
-                Model.prototype._setJSONGsAsJSONG = setJSONGsAsJSONG;
-                done();
-            });
-    });
 });
 

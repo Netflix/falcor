@@ -12,8 +12,24 @@ var chai = require("chai");
 var expect = chai.expect;
 var noOp = function() {};
 var getDataModel = testRunner.getModel;
+describe('Bind', function() {
+    it('should bind to an undefined sentinel and onCompleted.', function(done) {
+        var model = getDataModel(null, Cache());
+        model = model.
+            bind(["misc", "usentinel"]).
+            subscribe(function(x) {
+                done('onNext called with value' + x + ' on a bound model to an sentinel of undefined.  Expected to onCompleted onl  Expected to onCompleted only.');
+            }, done, done);
+    });
+});
 
 describe("BindSync", function() {
+    it('should bind to an undefined sentinel and return undefined.', function(done) {
+        var model = getDataModel(null, Cache());
+        model = model.bindSync(["misc", "usentinel"]);
+        expect(model).to.equals(undefined);
+    });
+    
     describe("Cache Only", function() {
         it("should bind to an object.", function(done) {
             var model = getDataModel(null, Cache());
@@ -27,11 +43,28 @@ describe("BindSync", function() {
         it("should bind through a reference.", function(done) {
             var model = getDataModel(null, Cache());
             var expected = Bound().onReference;
-            debugger;
             model = model.bindSync(["genreList", 0]);
             getTestRunner.
                 async(Rx.Observable.return(42), model, expected, {useNewModel: false}).
                 subscribe(noOp, done, done);
+        });
+
+        it("should throw when trying to get JSONG.", function(done) {
+            var model = getDataModel(null, Cache());
+            var expected = Bound().onReference;
+            model.
+                bindSync(["genreList", 0]).
+                get([0, 'summary']).
+                toJSONG().
+                subscribe(function(x) {
+                    done('onNext called with value' + x + ' on a bound model requesting toJSONG().');
+                }, function(err) {
+                    expect(err).to.equals('It is not legal to use the JSON Graph format from a bound Model. JSON Graph format can only be used from a root model.');
+                    done();
+                }, function() {
+                    done('onCompleted called on a bound model requesting toJSONG().');
+                })
+            
         });
     });
     
@@ -91,7 +124,9 @@ describe("BindSync", function() {
                     done();
                 });
         });
-
+    });
+    
+    describe('Set', function() {
         it("should bind and set the value.", function(done) {
             var model = getDataModel(null, Cache());
             var expected = Bound().directValue;

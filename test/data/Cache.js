@@ -1,7 +1,7 @@
 var expiredTimestamp = Date.now() - 100;
 var Cache = function() {
     return {
-        "$size": 1002,
+        "$size": 1053,
         "genreList": {
             "$size": 81,
             "-1": ["lists", "def"],
@@ -301,6 +301,28 @@ var Cache = function() {
                 }
             },
             "missingValue": { "$type": "sentinel" }
+        },
+        "misc": {
+            "$size": 51,
+            "usentinel": {
+                "$size": 51,
+                "$type": "sentinel",
+                "value": undefined
+            }
+        }
+    };
+};
+
+Cache.PathValues = function() {
+    return {
+        genreList: {
+            2: {
+                path: ['genreList', 2, null],
+                value: {
+                    message: 'Red is the new Black'
+                }
+            }
+
         }
     };
 };
