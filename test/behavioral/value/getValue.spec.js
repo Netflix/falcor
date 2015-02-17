@@ -13,7 +13,7 @@ var expect = chai.expect;
 var noOp = function() {};
 var getDataModel = testRunner.getModel;
 
-describe.only('#getValue', function() {
+describe('#getValue', function() {
     it('should perform a getValue.', function(done) {
         var model = getDataModel();
         model.
