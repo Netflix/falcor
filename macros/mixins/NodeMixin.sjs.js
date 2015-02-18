@@ -254,7 +254,7 @@ macro NodeMixin {
                     } else if($this.isSentinel($type)) {
                         $dest[$SIZE] = $size = SENTINEL_SIZE + ((typeof $value === "string") && $value.length || 1);
                     } else if($this.isError($type)) {
-                        $dest[$SIZE] = $size = SENTINEL_SIZE + ($this.size() || 1);
+                        $dest[$SIZE] = $size = $this.size() || (SENTINEL_SIZE + 1);
                     } else if($this.isPrimitive()) {
                         $size = SENTINEL_SIZE + ((typeof $value === "string") && $value.length || 1);
                         $type = "sentinel";

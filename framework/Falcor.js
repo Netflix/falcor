@@ -43,3 +43,5 @@ function NOOP() {};
 
 jsong.__Internals = {};
 jsong.Observable = Rx.Observable;
+jsong.EXPIRES_NOW = 0;
+jsong.EXPIRES_NEVER = 1;

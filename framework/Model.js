@@ -1,15 +1,21 @@
 
 jsong.Model = Model;
 
+Model.EXPIRES_NOW = jsong.EXPIRES_NOW;
+Model.EXPIRES_NEVER = jsong.EXPIRES_NEVER;
+
 function Model(options) {
     options || (options = {});
     this._dataSource = options.dataSource;
-    this._cache = options.cache || {};
     this._maxSize = options.maxSize || Math.pow(2, 53) - 1;
     this._collectRatio = options.collectRatio || 0.75;
     this._scheduler = new jsong.ImmediateScheduler();
     this._request = new RequestQueue(this, this._scheduler);
     this._errorSelector = options.errorSelector || Model.prototype._errorSelector;
+    this._cache = {};
+    if(options.cache && typeof options.cache === "object") {
+        this.setCache(options.cache);
+    }
     this._retryCount = 3;
 }
 
@@ -26,8 +32,79 @@ Model.prototype = {
     _errorSelector: function(x, y) { return y; },
     get: modelOperation("get"),
     set: modelOperation("set"),
-    call: modelOperation("call"),
     invalidate: modelOperation("inv"),
+    call: function(callPath, args, suffixes, paths, selector) {
+        
+        var model = this,
+            boundPath = model._path || [],
+            dataSource = model._dataSource,
+            localFn;
+        
+        callPath = boundPath.concat(callPath);
+        args && Array.isArray(args) && args.length > 0 || (args = []);
+        suffixes && Array.isArray(suffixes) && suffixes.length > 0 || (suffixes = []);
+        paths = Array.prototype.slice.call(arguments, 3);
+        
+        if(typeof (selector = paths[paths.length - 1]) !== "function") {
+            selector = undefined;
+        }
+        
+        localFn = getValueSync(model, callPath).value;
+        
+        if(typeof localFn !== "function" && dataSource == null) {
+            throw new Error("Model#call couldn't resolve a call source.");
+        }
+        
+        return ModelResponse.create(function(options) {
+            
+            var rootModel = model.clone(["_path", []]), disposable;
+            
+            if(typeof localFn === "function") {
+                rootModel._root.allowSync = true;
+                disposable = localFn.
+                    apply(rootModel, args).
+                    subscribe(function(envelope) {
+                        
+                        var envPaths = envelope.paths,
+                            envJSONG = envelope.jsong || envelope.values || envelope.value,
+                            
+                            pathsWithSuffixes = envPaths.reduce(function(paths, path) {
+                                return paths.concat(suffixes.map(function(suffix) {
+                                    return path.concat(suffix);
+                                }));
+                            }, []);
+                        
+                        rootModel["_setJSONGsAsValues"](rootModel, [{
+                            paths: pathsWithSuffixes,
+                            jsong: envJSONG
+                        }], undefined, model._errorSelector);
+                        
+                        var getPaths = pathsWithSuffixes.concat(paths.map(function(path) {
+                            return callPath.slice(0, -1).concat(path);
+                        }));
+                        if(selector) { getPaths.push(selector); }
+                        
+                        disposable = rootModel.get.apply(rootModel, getPaths).subscribe(options);
+                    });
+                rootModel._root.allowSync = false;
+            } else if(dataSource) {
+                disposable = dataSource.
+                    call(callPath, args, suffixes, paths).
+                    subscribe(function(envelope) {
+                        
+                        var getPaths = envelope.paths;
+                        if(selector) { getPaths.push(selector); }
+                        
+                        disposable = rootModel.get.apply(model, getPaths).subscribe(options);
+                    });
+            }
+            
+            return function() {
+                disposable && disposable.dispose();
+                disposable = undefined;
+            };
+        });
+    },
     getValue: function(path) {
         return this.get(path, function(x) { return x });
     },
@@ -46,7 +123,7 @@ Model.prototype = {
             paths[i] = arguments[i + 1];
         }
         
-        if(n === 0) { observer.onError(new Error("Model#bind requires at least one value path.")); }
+        if(n === 0) { throw new Error("Model#bind requires at least one value path."); }
         
         return Rx.Observable.create(function(observer) {
             
@@ -84,7 +161,7 @@ Model.prototype = {
         return this.clone(["_retryMax", x]);
     },
     setCache: function(cache) {
-        return this._setPathMapsAsValues(this, [cache], 0, this._errorSelector);
+        return this._setPathMapsAsValues(this, [cache], undefined, this._errorSelector, []);
     },
     getBoundValue: function() {
         return this.syncCheck("getBoundValue") && this._getBoundValue(this);
@@ -130,10 +207,13 @@ Model.prototype = {
         if(boundValue.shorted) {
             if(boundValue = boundValue.value) {
                 if(boundValue[$TYPE] === ERROR) {
-                    throw new Error("Model#bindSync can\'t bind to or beyond an error: " + boundValue.toString());
+                    throw boundValue;
+                    // throw new Error("Model#bindSync can\'t bind to or beyond an error: " + boundValue.toString());
                 }
             }
             return undefined;
+        } else if(boundValue.value && boundValue.value[$TYPE] === ERROR) {
+            throw boundValue.value;
         }
         return this.clone(["_path", boundValue.path]);
     },
@@ -405,7 +485,12 @@ function modelOperation(name) {
                 }
             }
 
-            recurse(args, pathSetValues);
+            try {
+                recurse(args, pathSetValues);
+            } catch(e) {
+                errors = [e];
+                executeOnErrorOrCompleted();
+            }
 
             function emitValues() {
                 if (disposed) {
@@ -534,7 +619,7 @@ function processOperations(model, operations) {
         var boundPath = model._path;
         
         if(boundPath.length > 0 && operation.format === "AsJSONG") {
-            throw new Error("Model#" + operation.methodName + " cannot be called from a bound Model.");
+            throw new Error("It is not legal to use the JSON Graph format from a bound Model. JSON Graph format can only be used from a root model.");
         }
 
         var results = operation.isValues ?

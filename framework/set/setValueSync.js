@@ -60,9 +60,14 @@ function setValueSync(model, path, value, errorSelector) {
         node[$TYPE] = ERROR;
     }
     
+    var shorted = appendNullKey;
+    while(!shorted && ++depth <= height) {
+        shorted = path[depth] != null;
+    }
+    
     return {
         value: node,
         path: optimizedPath,
-        shorted: depth < height || appendNullKey
+        shorted: shorted
     };
 }

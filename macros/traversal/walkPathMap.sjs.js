@@ -31,7 +31,15 @@ macro walkPathMap {
         $type   = $parent.type();
         $value  = $parent.value($type);
         if($parent.isEdge($type, $value)) {
-            $ret = $node = $parent;
+            $node = $parent;
+            $parent = $stack;
+            key = $depth - 1;
+            isKeySet = false;
+            $node = $stepEdge(key, isKeySet, $depth, $(
+                $roots, $parents, $nodes) (,) ... , $(
+                $types, $values, $sizes, $timestamps, $expires) (,) ...
+            )
+            $ret = $node;
         } else {
             $ret = tailrec follow_path_map($parents (,) ... , $depth) {
                 if((obj_exists(
@@ -41,7 +49,17 @@ macro walkPathMap {
                     key      = $pathMapStack[offset + 3])                                               || true) && ((
                     isKeySet = keys.length > 1) || keys.length > 0                                             ))    {
                     key = keys[index];
-                    if(key != null) {
+                    if(key == __NULL) {
+                        $pathMapStack[offset = 3 * ($depth + 1)] = $pathMap[__NULL];
+                        $pathMapStack[offset + 1] = keys;
+                        $pathMapStack[offset + 2] = 0;
+                        return follow_path_map($($stacks[$depth] = $nodes) (,) ... , $depth + 1);
+                    } else if(key === $SIZE || internalKeys(key)) {
+                        return $node;
+                    } else if(falcorKeys(key)) {
+                        $parent[key] || ($parent[key] = $pathMap[key]);
+                        return $node;
+                    } else {
                         isKeySet = $stepKeySet($pathMap, $depth, key)
                         $pathMapStack[offset = 4 * ($depth + 1)] = $pathMap = $pathMap[key];
                         if((obj_exists($pathMap)) && (
@@ -60,11 +78,6 @@ macro walkPathMap {
                             $pathMapStack[offset + 3] = key;
                             return follow_path_map($($stacks[$depth] = $nodes) (,) ... , $depth + 1);
                         }
-                    } else {
-                        $pathMapStack[offset = 3 * ($depth + 1)] = $pathMap[__NULL];
-                        $pathMapStack[offset + 1] = keys;
-                        $pathMapStack[offset + 2] = 0;
-                        return follow_path_map($($stacks[$depth] = $nodes) (,) ... , $depth + 1);
                     }
                 }
                 

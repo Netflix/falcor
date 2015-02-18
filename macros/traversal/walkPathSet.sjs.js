@@ -31,7 +31,15 @@ macro walkPathSet {
         $type   = $parent.type();
         $value  = $parent.value($type);
         if($parent.isEdge($type, $value)) {
-            $ret = $node = $parent;
+            $node = $parent;
+            $parent = $stack;
+            key = $depth - 1;
+            isKeySet = false;
+            $node = $stepEdge(key, isKeySet, $depth, $(
+                $roots, $parents, $nodes) (,) ... , $(
+                $types, $values, $sizes, $timestamps, $expires) (,) ...
+            )
+            $ret = $node;
         } else {
             $ret = tailrec follow_path($parents (,) ... , $depth) {
                 key = $path[$depth];

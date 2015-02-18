@@ -18,6 +18,10 @@ describe("Model", function() {
         require("./set/set.spec");
     });
 
+    describe("#call", function() {
+        require("./call/call.spec");
+    });
+
     describe("--behavioral", function() {
         require("./behavioral")
     });
