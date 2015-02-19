@@ -6,6 +6,12 @@ Every user wants to believe the entire cloud is stored on their device. Falcor c
 
 Application servers use Falcor to represent all of their cloud data sources as one *Virtual JSON object.* Clients work with the *Virtual JSON object* in the cloud using the same simple APIs they use to work with in-memory JSON objects. Falcor transparently and efficiently manages all of the network communication needed to keep model data on the client and the server in sync.
 
+### Getting Started
+
+```
+npm install falcor
+```
+
 ##  One Model, Available Everywhere
 
 *Falcor is not a replacement for your database, application server, or your MVC framework.* Falcor let's you take any number of cloud data sources and represent them as a *Virtual JSON object* on the server.  On the client you use this virtual JSON object as the *M in your MVC.*
@@ -72,13 +78,13 @@ var app = express();
 
 var person = new falcor.Model({
   cache: {
-	   name: “Steve McGuire”,
-	   occupation: “Developer”,
-	   location: {
-		    country: “US”,
-		    city: “Pacifica”,
-		    address: “344 Seaside”
-	   }
+    name: “Steve McGuire”,
+    occupation: “Developer”,
+    location: {
+      country: “US”,
+      city: “Pacifica”,
+      address: “344 Seaside”
+    }
   }
 });
 
@@ -94,5 +100,7 @@ Now we've moved all of the data to the server without having to change the way i
 
 ## Introducing JSON Graph
 
-Almost every single application's domain model is a graph.  Many application servers use JSON to send domain model objects over the wire. Converting graph data into JSON is a hazard, because JSON is heirarchical format.
+Nearly every application's domain model is graph.   however most application servers use JSON to send domain model objects over the wire. Converting graph data into JSON is a hazard, because JSON is heirarchical format. When you expand a graph into a tree, you get duplicates.
+
+
 
