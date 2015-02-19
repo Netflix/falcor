@@ -2,10 +2,97 @@
 
 ## What is Falcor?
 
-Every web application user wants to believe that all of the data in the cloud is on their device. Falcor makes the developer believe. Application servers use Falcor to define a model and expose it to clients as a single JSON object. Falcor lets you work with your model using familiar JSON APIs that works the same way regardless of whether the data is in the cloud, or has been downloaded into the local cache.
+Every user wants to believe the entire cloud is stored on their device. Falcor creates this illusion for the developer.
 
-*Falcor is not a replacement for your database, application server, or your MVC framework.* Falcor is a library that lets you model all your cloud data sources as a single virtual JSON model. 
+Application servers use Falcor to represent all of their cloud data sources as one *Virtual JSON object.* Clients work with the *Virtual JSON object* in the cloud using the same simple APIs they use to work with in-memory JSON objects. Falcor transparently and efficiently manages all of the network communication needed to keep model data on the client and the server in sync.
 
- Falcor gives you a single, familiar API for working with the data, regardless of whether API for working it possible to work with all the data in the cloud  as if it was sitting right on your client's device.
+##  One Model, Available Everywhere
 
-## One Model, Available Everywhere
+*Falcor is not a replacement for your database, application server, or your MVC framework.* Falcor let's you take any number of cloud data sources and represent them as a *Virtual JSON object* on the server.  On the client you use this virtual JSON object as the *M in your MVC.*
+
+## The Data is the API
+
+When you work with JSON data on the client, you use simple operations like get and set to retrieves and mutate data within the object. 
+
+```JavaScript
+var person = {
+ 	name: “Steve McGuire”,
+ 	occupation: “Developer”,
+ 	location: {
+  		country: “US”,
+	  	city: “Pacifica”,
+		  address: “344 Seaside”
+	 }
+}
+
+print(person[“location”][“address”]);		
+// prints 344 Seaside
+
+```
+If we take the same JSON object and load in into a Falcor Model we can retrieve data from it using the same series of keys. The only difference is that the API is Reactive (Push).
+
+```JavaScript
+var person = new falcor.Model({
+  cache: {
+	   name: “Steve McGuire”,
+	   occupation: “Developer”,
+	   location: {
+		    country: “US”,
+		    city: “Pacifica”,
+		    address: “344 Seaside”
+	   }
+  }
+});
+
+person.get([“location”, “address”],
+	 (address) => print(address)).
+    toPromise();
+
+// prints 344 Seaside
+```
+
+Using push APIs allows us to gives us the flexibility to move the data to the server without changing the way the client API.
+
+```JavaScript
+// Browser
+var person = new falcor.Model({
+  source: new falcor.XMLHttpSource("/person.json")
+});
+
+person.get([“location”, “address”],
+	 (address) => print(address)).
+    toPromise();
+
+// prints 344 Seaside
+
+// Server
+var falcor = require('falcor');
+var express = require('express');
+var app = express();
+
+var person = new falcor.Model({
+  cache: {
+	   name: “Steve McGuire”,
+	   occupation: “Developer”,
+	   location: {
+		    country: “US”,
+		    city: “Pacifica”,
+		    address: “344 Seaside”
+	   }
+  }
+});
+
+var modelServer = new falcor.HttpModelServer(person);
+
+app.get('/person.json', function (req, res) {
+  res.end(modelServer.serve(req));
+});
+
+var server = app.listen(80);
+```
+Now we've moved all of the data to the server without having to change the way in which we modify and retrieve data on the client. Now we can go one step further, and convert our server model to a virtual model so that we can store data in our backend data stores rather than in-memory on the Node server.
+
+## Introducing JSON Graph
+
+Almost every single application's domain model is a graph.  Many application servers use JSON to send domain model objects over the wire. Converting graph data into JSON is a hazard, because JSON is heirarchical format.
+
