@@ -19,29 +19,104 @@ function getModel(newModel, cache) {
     return newModel ? testRunner.getModel(null, cache || {}) : model;
 }
 
-describe("Call", function() {
+describe.only("Call", function() {
     it("executes a local function with the call args", function(done) {
-        var model = getDataModel(null, ReducedCache()),
-            expected = Expected.Values().direct;
         
-        debugger;
-        model.setValueSync(["lists", "my-list", "add"], function(videoID) {
-            var pbv  = this._getValueSync(this, ["lists", "my-list"]),
-                path = pbv.path;
-            return this.set({
-                path: path.concat(0),
+        var model = getDataModel(new LocalDataSource(Cache()), ReducedCache());
+        
+        model.withoutDataSource().setValueSync(["lists", "my-list", "add"], function(videoID) {
+            return Rx.Observable.return({
+                path: [0],
                 value: ["videos", videoID]
-            }).toJSONG();
+            });
         });
-        
-        model._dataSource = new LocalDataSource(Cache());
         
         model.
             call(["lists", "my-list", "add"], [1234], [["summary"]]).
-            flatMap(function(video) {
-                return model.get(["lists", "my-list", 0, "summary"]).map(function(video2) {
-                    return [video, video2];
-                });
+            concat(model.get(["lists", "my-list", 0, "summary"])).
+            toArray().
+            subscribe(function(videos) {
+                testRunner.compare(videos[0], videos[1]);
+                done();
+            });
+    });
+    
+    it("executes a local function with call args on a bound Model", function(done) {
+        
+        var model = getDataModel(new LocalDataSource(Cache()), ReducedCache());
+        
+        model
+            .bind(["lists", "my-list"], ["0"])
+            .flatMap(function(model) {
+                return model.withoutDataSource().set({
+                    path: ["add"],
+                    value: function(videoID) {
+                        return Rx.Observable.return({
+                            path: [0],
+                            value: ["videos", videoID]
+                        });
+                    }
+                }, function() { return model; });
+            }).
+            flatMap(function(model) {
+                return model.
+                    call(["add"], [1234], [["summary"]]).
+                    concat(model.get([0, "summary"])).
+                    toArray();
+            }).
+            subscribe(function(videos) {
+                testRunner.compare(videos[0], videos[1]);
+                done();
+            });
+    });
+    
+    it("executes a local function with call args and maps the result paths through a selector", function(done) {
+        
+        var model = getDataModel(new LocalDataSource(Cache()), ReducedCache());
+        
+        model.withoutDataSource().setValueSync(["lists", "my-list", "add"], function(videoID) {
+            return Rx.Observable.return({
+                path: [0],
+                value: ["videos", videoID]
+            });
+        });
+        
+        model.
+            call(["lists", "my-list", "add"], [1234], [["summary"]], function(paths) {
+                return this.getValueSync(paths[0]);
+            }).
+            concat(model.get(["lists", "my-list", 0, "summary"], function(x) { return x; })).
+            toArray().
+            subscribe(function(videos) {
+                testRunner.compare(videos[0], videos[1]);
+                done();
+            });
+    });
+    
+    it("executes a local function with call args on a bound Model and maps the result paths through a selector", function(done) {
+        
+        var model = getDataModel(new LocalDataSource(Cache()), ReducedCache());
+        
+        model
+            .bind(["lists", "my-list"], ["0"])
+            .flatMap(function(model) {
+                return model.withoutDataSource().set({
+                    path: ["add"],
+                    value: function(videoID) {
+                        return Rx.Observable.return({
+                            path: [0],
+                            value: ["videos", videoID]
+                        });
+                    }
+                }, function() { return model; });
+            }).
+            flatMap(function(model) {
+                return model.
+                    call(["add"], [1234], [["summary"]], function(paths) {
+                        return this.getValueSync(paths[0]);
+                    }).
+                    concat(model.get([0, "summary"], function(x) { return x; })).
+                    toArray();
             }).
             subscribe(function(videos) {
                 testRunner.compare(videos[0], videos[1]);

@@ -49,6 +49,8 @@ gulp.task("build.operations", ["build.macros"], function() {
             "./framework/set/pathMaps/*.js",
             "./framework/set/jsong/*.js",
             
+            "./framework/call/call.js",
+            
             "./framework/invalidate/*.js",
         ]).
         pipe(gulp.dest("tmp/framework/operations"));

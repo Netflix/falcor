@@ -27,7 +27,6 @@ describe("Selector", function() {
             get(["genreList", 0, 0, "summary"], function(vid) {
                 expect(vid).to.deep.equals(expected.AsJSON.values[0].json);
             });
-        debugger;
         getTestRunner.
             async(obs, dataModel, expected).
             subscribe(noOp, done, done);
@@ -102,10 +101,8 @@ describe("Selector", function() {
             ["genreList", 1, {to:1}, "summary"],
             ["genreList", 4, 0, "summary"]
         ];
-        debugger;
         var obs = dataModel.
             get.apply(dataModel, paths.concat(function(genreList0, genreList1) {
-                debugger;
                 expect(genreList0).to.deep.equals(expected.AsJSON.values[0].json);
                 expect(genreList1).to.deep.equals(expected2.AsJSON.values[0].json);
             }));
@@ -130,10 +127,8 @@ describe("Selector", function() {
             ["genreList", 1, {to:1}, "summary"],
             ["genreList", 4, 0, "summary"]
         ];
-        debugger;
         var obs = dataModel.
             get.apply(dataModel, paths.concat(function(genreList0, genreList1) {
-                debugger;
                 expect(genreList0).to.deep.equals(expected.AsJSON.values[0].json);
                 expect(genreList1).to.deep.equals(expected2.AsJSON.values[0].json);
             }));

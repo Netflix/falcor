@@ -27,7 +27,6 @@ describe("RequestQueue", function() {
     it("should immediately fire off a request.", function(done) {
         var queue = new RequestQueue(dataModel, immediate);
         var trigger = true;
-        debugger;
         requestTestRunner(References().simpleReference0, queue).
             subscribe(function() {
                 expect(trigger).to.be.ok;

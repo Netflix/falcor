@@ -337,16 +337,16 @@ module.exports = function() {
             },
 
             AsJSON: {
-                values: []
+                values: [undefined]
             },
 
-            AsJSONG: {
-                values: []
-            },
+            // AsJSONG: {
+            //     values: []
+            // },
 
-            AsPathMap: {
-                values: []
-            }
+            // AsPathMap: {
+            //     values: []
+            // }
         }
     };
 };

@@ -62,6 +62,9 @@ LocalSource.prototype = {
                 exec();
             }
         });
+    },
+    call: function(path, args, suffixes, paths) {
+        return Rx.Observable.empty();
     }
 };
 

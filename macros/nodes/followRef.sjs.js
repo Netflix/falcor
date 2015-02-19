@@ -26,6 +26,10 @@ macro followRef {
             )
             $type = $node.type();
             $value = $node.value($type);
+            $expire = $node.expires();
+            if($node.isObject() && ($node.isExpired($expire) || $node.isInvalid())) {
+                $node = $value = $node.expire();
+            }
         } while($node.isLink($type, $value));
         if($node == null) {
             while($refDepth <= $refHeight) {
