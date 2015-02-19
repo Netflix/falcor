@@ -20,13 +20,17 @@ macro followPathSetRef {
             $refs[$depth] = $value;
             $refIndex = $depth + 1;
             $refDepth = 0;
-            $ret = $follow(
+            $node = $follow(
                 $refDepth, $refHeight, $refLength, $value, $(
                 $roots, $parents, $nodes) (,) ... , $(
                 $types, $values, $sizes, $timestamps, $expires) (,) ...
             )
-            $type = $node.type();
-            $value = $node.value($type);
+            $type   = $node.type();
+            $value  = $node.value($type);
+            $expire = $node.expires();
+            if($node.isObject() && ($node.isExpired($expire) || $node.isInvalid())) {
+                $node = $value = $node.expire();
+            }
         } while($node.isLink($type, $value));
         if($node == null) {
             while($refDepth <= $refHeight) {

@@ -77,7 +77,6 @@ describe("Invalidate", function() {
                     doneDone = true;
                     done(e);
                 }
-                debugger;
                 dataSourceCount++;
             }
         });

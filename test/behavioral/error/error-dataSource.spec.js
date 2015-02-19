@@ -53,7 +53,6 @@ describe("DataSource", function() {
                 count++;
                 testRunner.compare(expected, x);
             }, function(err) {
-                debugger;
                 expect(err.length).to.equal(4);
                 var expected = {
                     path: [],

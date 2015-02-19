@@ -98,13 +98,11 @@ describe("References", function() {
             var options = {
                 preCall: function(model, op, query, count) {
                     // TODO: Don't try this at home kids.  Guarantee you will be hurt.
-                    debugger;
                     model._cache.lists["future-expired-list"].$expires = Date.now() - 10;
                 },
                 modelCache: Cache(),
                 hardLink: true
             };
-            debugger;
             setTestRunner(SetExpected.Expired().futureExpiredReference, options);
         });
     });

@@ -1,6 +1,6 @@
 var ModelResponse = (function(falcor) {
     
-    var Observable  = jsong.Observable,
+    var Observable  = falcor.Observable,
         valuesMixin = { format: { value: "AsValues"  } },
         jsonMixin   = { format: { value: "AsPathMap" } },
         jsongMixin  = { format: { value: "AsJSONG"   } };
@@ -35,4 +35,4 @@ var ModelResponse = (function(falcor) {
         return mixin(this, jsongMixin);
     };
     return ModelResponse;
-}(jsong));
+}(falcor));

@@ -1,15 +1,15 @@
 
-jsong.Model = Model;
+falcor.Model = Model;
 
-Model.EXPIRES_NOW = jsong.EXPIRES_NOW;
-Model.EXPIRES_NEVER = jsong.EXPIRES_NEVER;
+Model.EXPIRES_NOW = falcor.EXPIRES_NOW;
+Model.EXPIRES_NEVER = falcor.EXPIRES_NEVER;
 
 function Model(options) {
     options || (options = {});
     this._dataSource = options.dataSource;
     this._maxSize = options.maxSize || Math.pow(2, 53) - 1;
     this._collectRatio = options.collectRatio || 0.75;
-    this._scheduler = new jsong.ImmediateScheduler();
+    this._scheduler = new falcor.ImmediateScheduler();
     this._request = new RequestQueue(this, this._scheduler);
     this._errorSelector = options.errorSelector || Model.prototype._errorSelector;
     this._cache = {};
@@ -29,83 +29,12 @@ Model.prototype = {
     _path: [],
     _boxed: false,
     _progressive: false,
-    _request: new jsong.RequestQueue(new jsong.ImmediateScheduler()),
+    _request: new falcor.RequestQueue(new falcor.ImmediateScheduler()),
     _errorSelector: function(x, y) { return y; },
     get: modelOperation("get"),
     set: modelOperation("set"),
     invalidate: modelOperation("inv"),
-    call: function(callPath, args, suffixes, paths, selector) {
-        
-        var model = this,
-            boundPath = model._path || [],
-            dataSource = model._dataSource,
-            localFn;
-        
-        callPath = boundPath.concat(callPath);
-        args && Array.isArray(args) && args.length > 0 || (args = []);
-        suffixes && Array.isArray(suffixes) && suffixes.length > 0 || (suffixes = []);
-        paths = Array.prototype.slice.call(arguments, 3);
-        
-        if(typeof (selector = paths[paths.length - 1]) !== "function") {
-            selector = undefined;
-        }
-        
-        localFn = getValueSync(model, callPath).value;
-        
-        if(typeof localFn !== "function" && dataSource == null) {
-            throw new Error("Model#call couldn't resolve a call source.");
-        }
-        
-        return ModelResponse.create(function(options) {
-            
-            var rootModel = model.clone(["_path", []]), disposable;
-            
-            if(typeof localFn === "function") {
-                rootModel._root.allowSync = true;
-                disposable = localFn.
-                    apply(rootModel, args).
-                    subscribe(function(envelope) {
-                        
-                        var envPaths = envelope.paths,
-                            envJSONG = envelope.jsong || envelope.values || envelope.value,
-                            
-                            pathsWithSuffixes = envPaths.reduce(function(paths, path) {
-                                return paths.concat(suffixes.map(function(suffix) {
-                                    return path.concat(suffix);
-                                }));
-                            }, []);
-                        
-                        rootModel["_setJSONGsAsValues"](rootModel, [{
-                            paths: pathsWithSuffixes,
-                            jsong: envJSONG
-                        }], undefined, model._errorSelector);
-                        
-                        var getPaths = pathsWithSuffixes.concat(paths.map(function(path) {
-                            return callPath.slice(0, -1).concat(path);
-                        }));
-                        if(selector) { getPaths.push(selector); }
-                        
-                        disposable = rootModel.get.apply(rootModel, getPaths).subscribe(options);
-                    });
-                rootModel._root.allowSync = false;
-            } else if(dataSource) {
-                disposable = dataSource.
-                    call(callPath, args, suffixes, paths).
-                    subscribe(function(envelope) {
-                        
-                        var getPaths = envelope.paths;
-                        if(selector) { getPaths.push(selector); }
-                        
-                        disposable = rootModel.get.apply(model, getPaths).subscribe(options);
-                    });
-            }
-            
-            return function() {
-                disposable && disposable.dispose();
-                disposable = undefined;
-            };
-        });
-    },
+    call: call,
     getValue: function(path) {
         return this.get(path, function(x) { return x });
     },
@@ -236,14 +165,14 @@ Model.prototype = {
     },
     batch: function(schedulerOrDelay) {
         if(typeof schedulerOrDelay === "number") {
-            schedulerOrDelay = new jsong.TimeoutScheduler(Math.round(Math.abs(schedulerOrDelay)));
+            schedulerOrDelay = new falcor.TimeoutScheduler(Math.round(Math.abs(schedulerOrDelay)));
         } else if(!schedulerOrDelay || !schedulerOrDelay.schedule) {
-            schedulerOrDelay = new jsong.ImmediateScheduler();
+            schedulerOrDelay = new falcor.ImmediateScheduler();
         }
-        return this.clone(["_request", new jsong.RequestQueue(this, schedulerOrDelay)]);
+        return this.clone(["_request", new falcor.RequestQueue(this, schedulerOrDelay)]);
     },
     unbatch: function() {
-        return this.clone(["_request", new jsong.RequestQueue(this, new ImmediateScheduler())]);
+        return this.clone(["_request", new falcor.RequestQueue(this, new ImmediateScheduler())]);
     },
     boxValues: function() {
         return this.clone(["_boxed", true]);
@@ -263,32 +192,47 @@ Model.prototype = {
     addVirtualPaths: function(pathsAndActions) {
         this._virtualPaths = addVirtualPaths(pathsAndActions, this);
     },
+    
     _getBoundContext         :       getBoundContext,
     _getBoundValue           :         getBoundValue,
+    
     _getValueSync            :          getValueSync,
     _setValueSync            :          setValueSync,
+    
     _getPathsAsValues        :      getPathsAsValues,
     _getPathsAsJSON          :        getPathsAsJSON,
     _getPathsAsPathMap       :     getPathsAsPathMap,
     _getPathsAsJSONG         :       getPathsAsJSONG,
+    
     _getPathMapsAsValues     :   getPathMapsAsValues,
     _getPathMapsAsJSON       :     getPathMapsAsJSON,
     _getPathMapsAsPathMap    :  getPathMapsAsPathMap,
     _getPathMapsAsJSONG      :    getPathMapsAsJSONG,
+    
     _setPathsAsValues        :      setPathsAsValues,
     _setPathsAsJSON          :        setPathsAsJSON,
     _setPathsAsPathMap       :     setPathsAsPathMap,
     _setPathsAsJSONG         :       setPathsAsJSONG,
+    
     _setPathMapsAsValues     :   setPathMapsAsValues,
     _setPathMapsAsJSON       :     setPathMapsAsJSON,
     _setPathMapsAsPathMap    :  setPathMapsAsPathMap,
     _setPathMapsAsJSONG      :    setPathMapsAsJSONG,
+    
     _setJSONGsAsValues       :     setJSONGsAsValues,
     _setJSONGsAsJSON         :       setJSONGsAsJSON,
     _setJSONGsAsPathMap      :    setJSONGsAsPathMap,
     _setJSONGsAsJSONG        :      setJSONGsAsJSONG,
+    
+    _invPathsAsValues        :       invalidatePaths,
+    _invPathsAsJSON          :       invalidatePaths,
     _invPathsAsPathMap       :       invalidatePaths,
-    _invPathMapsAsPathMap    :    invalidatePathMaps
+    _invPathsAsJSONG         :       invalidatePaths,
+    
+    _invPathMapsAsValues     :    invalidatePathMaps,
+    _invPathMapsAsJSON       :    invalidatePathMaps,
+    _invPathMapsAsPathMap    :    invalidatePathMaps,
+    _invPathMapsAsJSONG      :    invalidatePathMaps
 };
 
 function modelOperation(name) {
