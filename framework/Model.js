@@ -13,6 +13,7 @@ function Model(options) {
     this._request = new RequestQueue(this, this._scheduler);
     this._errorSelector = options.errorSelector || Model.prototype._errorSelector;
     this._cache = {};
+    this._router = options.router;
     if(options.cache && typeof options.cache === "object") {
         this.setCache(options.cache);
     }
@@ -321,6 +322,7 @@ function modelOperation(name) {
             var errorSelector = options.errorSelector || model._errorSelector;
             var atLeastOneValue = false;
             var shouldRequest = true;
+            var shouldRoute = true;
 
             // TODO: Should be defined on the model.
             var retryMax = model._retryCount;
@@ -386,103 +388,104 @@ function modelOperation(name) {
                 if (isProgressive && missingLength && !isValues) {
                     emitValues();
                 }
-
-                if (missingLength &&
-                    operationalName !== 'set' && // TODO: When we set externally
-                    shouldRequest && model._dataSource) {
-                    model._request.request(nextRequest, results.optimizedMissingPaths, {
-                        onNext: function(jsongEnvelop) {
-                            incomingValues = jsongEnvelop;
-                        },
-                        onError: function(err) {
-                            // When an error is thrown, all currently requested paths are
-                            // inserted as errors and the output format is not needed.
-                            // TODO: There must be a way to make this more efficient.
-                            var out = model._setPathsAsValues.apply(null, [model].concat(
-                                nextRequest.
-                                    reduce(function(acc, r) {
-                                        acc[0].push({
-                                            path: r,
-                                            value: err
-                                        });
-                                        return acc;
-                                    }, [[]]),
-                                undefined,
-                                model._errorSelector
-                            ));
-                            errors = errors.concat(out.errors);
-
-                            // there could still be values within the cache
-                            emitValues();
-                            executeOnErrorOrCompleted();
-                        },
-                        onCompleted: function() {
-                            // Note: processing the requested missing paths
-                            var newOperations = [];
-                            var previousIndices = indices;
-                            var newSelectorIndex = 0;
-                            indices = [];
-
-                            nextRequest.forEach(function (r) {
-                                var op = newOperations[newOperations.length - 1];
-                                var boundPath = r.boundPath;
-                                if (!op) {
-                                    op = newOperations[newOperations.length] = {jsong: incomingValues.jsong, paths: []};
-                                }
-                                if (hasSelector) {
-                                    if (typeof r.pathSetIndex !== 'undefined') {
-                                        var pathSetIndex = r.pathSetIndex;
-                                        var absoluteIndex = previousIndices[pathSetIndex];
-                                        var hasIndex = typeof absoluteIndex === 'number' && absoluteIndex < valuesCount;
-                                        if (op && op.pathSetIndex !== pathSetIndex && typeof op.pathSetIndex !== 'undefined') {
-                                            if (op && op.paths.length > 1) {
-                                                op.paths = fastCollapse(op.paths);
-                                            }
-                                            op = newOperations[newOperations.length] = {jsong: incomingValues.jsong, paths: []};
-                                            op.pathSetIndex = pathSetIndex;
-                                            hasIndex && (indices[indices.length] = absoluteIndex);
-                                        } else if (typeof op.pathSetIndex === 'undefined') {
-                                            hasIndex && (op.pathSetIndex = pathSetIndex);
-                                            hasIndex && (indices[indices.length] = absoluteIndex);
-                                        }
-                                    }
-                                } else if (seedRequired) {
-                                    // single seed white board
-                                } else {
-                                    // isValues
-                                }
-                                op.paths[op.paths.length] = r;
-                                op.boundPath = op.boundPath || boundPath.length && boundPath || undefined;
-                            });
-
-                            // Note: We fast collapse all hasSelector ops.
-                            if (hasSelector) {
-                                var op = newOperations[newOperations.length - 1];
-                                if (op && op.paths.length > 1) {
-                                    op.paths = fastCollapse(op.paths);
-                                }
-                            }
-                            operationalName = 'set';
-
-                            // Note: We do not request missing paths again.
-                            shouldRequest = false;
-                            if (hasSelector) {
-                                var arr = [];
-                                for (var i = 0; i < indices.length; i++) {
-                                    arr[arr.length] = relativePathSetValues[indices[i]];
-                                }
-                                recurse(newOperations, arr);
-                            } else if (seedRequired) {
-                                recurse(newOperations, pathSetValues);
-                            } else {
-                                recurse(newOperations, []);
-                            }
-                        }
-                    });
+                
+                // We access the router first before going off to the source.
+                if (missingLength && model._router && shouldRoute) {
+                    routerRecurse(nextRequest, results, relativePathSetValues);
+                } 
+                
+                // We contine looking into the modelSource if the router does not exist / shouldRoute
+                // is no longer true.
+                // TODO: When we set externally we will need to review this statement.
+                else if (missingLength && shouldRequest && model._dataSource &&
+                    operationalName !== 'set') { 
+                    modelSourceRecurse(nextRequest, results, relativePathSetValues);
                 } else {
                     emitValues();
                     executeOnErrorOrCompleted();
                 }
+            }
+            
+            
+            // TODO: This is not very performant to create these functions per 
+            // TODO: subscription to ModelResponse from a get/set
+            function routerRecurse(nextRequest, results, relativePathSetValues) {
+                // TODO: make a set version available.
+                var incomingValues;
+                debugger;
+                model._router.
+                    get(results.optimizedMissingPaths).
+                    subscribe(function(jsongEnv) {
+                        incomingValues = jsongEnv;
+                    }, function(err) {
+                        // TODO: Should this ever happen?
+                    }, function() {
+
+                        // Now this is where the recursing begins.
+                        debugger;
+                    });
+            }
+            
+            function modelSourceRecurse(nextRequest, results, relativePathSetValues) {
+                var incomingValues;
+                model._request.request(nextRequest, results.optimizedMissingPaths, {
+                    onNext: function(jsongEnvelop) {
+                        incomingValues = jsongEnvelop;
+                    },
+                    onError: function(err) {
+                        // When an error is thrown, all currently requested paths are
+                        // inserted as errors and the output format is not needed.
+                        // TODO: There must be a way to make this more efficient.
+                        var out = model._setPathsAsValues.apply(null, [model].concat(
+                            nextRequest.
+                                reduce(function(acc, r) {
+                                    acc[0].push({
+                                        path: r,
+                                        value: err
+                                    });
+                                    return acc;
+                                }, [[]]),
+                            undefined,
+                            model._errorSelector
+                        ));
+                        errors = errors.concat(out.errors);
+
+                        // there could still be values within the cache
+                        emitValues();
+                        executeOnErrorOrCompleted();
+                    },
+                    onCompleted: function() {
+                        // Note: processing the requested missing paths
+                        var previousIndices = indices;
+                        var out = getOperationsPartitionedByPathIndex(nextRequest, incomingValues, previousIndices, hasSelector, seedRequired, valuesCount);
+                        var newOperations = out.ops;
+                        indices = out.indices;
+
+                        // Note: We fast collapse all hasSelector ops.
+                        // TODO: shouldn't we be able to go through all the operations and fast collapse?
+                        if (hasSelector) {
+                            var op = newOperations[newOperations.length - 1];
+                            if (op && op.paths.length > 1) {
+                                op.paths = fastCollapse(op.paths);
+                            }
+                        }
+                        operationalName = 'set';
+
+                        // Note: We do not request missing paths again.
+                        shouldRequest = false;
+                        if (hasSelector) {
+                            var arr = [];
+                            for (var i = 0; i < indices.length; i++) {
+                                arr[arr.length] = relativePathSetValues[indices[i]];
+                            }
+                            recurse(newOperations, arr);
+                        } else if (seedRequired) {
+                            recurse(newOperations, pathSetValues);
+                        } else {
+                            recurse(newOperations, []);
+                        }
+                    }
+                });
             }
 
             try {
@@ -521,8 +524,8 @@ function modelOperation(name) {
                         }
                         onNext(pathSetValues[0]);
                     }
-                    root.allowSync = false;
                 }
+                root.allowSync = false;
             }
 
             function executeOnErrorOrCompleted() {
@@ -563,6 +566,44 @@ function fastCollapse(paths) {
         }
         return acc;
     }, []);
+}
+
+function getOperationsPartitionedByPathIndex(requestedPaths, incomingValues, previousIndices, hasSelector, seedRequired, valuesCount) {
+    var newOperations = [];
+    var indices = [];
+    requestedPaths.forEach(function (r) {
+        var op = newOperations[newOperations.length - 1];
+        var boundPath = r.boundPath;
+        if (!op) {
+            op = newOperations[newOperations.length] = {jsong: incomingValues.jsong, paths: []};
+        }
+        if (hasSelector) {
+            if (typeof r.pathSetIndex !== 'undefined') {
+                var pathSetIndex = r.pathSetIndex;
+                var absoluteIndex = previousIndices[pathSetIndex];
+                var hasIndex = typeof absoluteIndex === 'number' && absoluteIndex < valuesCount;
+                if (op && op.pathSetIndex !== pathSetIndex && typeof op.pathSetIndex !== 'undefined') {
+                    if (op && op.paths.length > 1) {
+                        op.paths = fastCollapse(op.paths);
+                    }
+                    op = newOperations[newOperations.length] = {jsong: incomingValues.jsong, paths: []};
+                    op.pathSetIndex = pathSetIndex;
+                    hasIndex && (indices[indices.length] = absoluteIndex);
+                } else if (typeof op.pathSetIndex === 'undefined') {
+                    hasIndex && (op.pathSetIndex = pathSetIndex);
+                    hasIndex && (indices[indices.length] = absoluteIndex);
+                }
+            }
+        } else if (seedRequired) {
+            // single seed white board
+        } else {
+            // isValues
+        }
+        op.paths[op.paths.length] = r;
+        op.boundPath = op.boundPath || boundPath.length && boundPath || undefined;
+    });
+    
+    return {ops: newOperations, indices: indices};
 }
 
 function getOperationArgGroups(ops, name, format, values, hasSelector, onNext, errorSelector) {

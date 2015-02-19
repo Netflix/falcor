@@ -34,7 +34,8 @@
     "gulp-concat": "~2.4.1",
     "xmlhttprequest": "~1.6.0",
     "gulp-bench": "~1.0.3",
-    "minimist": "~1.1.0"
+    "minimist": "~1.1.0",
+    "falcor-router": "git+ssh://git@github.com/Netflix/falcor-router.git#v0.0.5"
   },
   "dependencies": {
     "rx": "^2.3.25"

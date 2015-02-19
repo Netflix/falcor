@@ -70,7 +70,7 @@ gulp.task("build.support", ["build.macros"], function() {
             "./framework/ModelResponse.js",
             "./framework/request/Scheduler.js",
             "./framework/request/RequestQueue.js",
-            "./framework/Model.js",
+            "./framework/Model.js"
         ]).
         pipe(concat({path: "support.js"})).
         pipe(gulp.dest("tmp/framework"));
