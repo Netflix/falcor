@@ -1,4 +1,4 @@
-jsong.ImmediateScheduler = ImmediateScheduler;
+falcor.ImmediateScheduler = ImmediateScheduler;
 
 function ImmediateScheduler() {
 }
@@ -9,7 +9,7 @@ ImmediateScheduler.prototype = {
     }
 };
 
-jsong.TimeoutScheduler = TimeoutScheduler;
+falcor.TimeoutScheduler = TimeoutScheduler;
 
 function TimeoutScheduler(delay) {
     this.delay = delay;

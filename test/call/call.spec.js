@@ -19,7 +19,7 @@ function getModel(newModel, cache) {
     return newModel ? testRunner.getModel(null, cache || {}) : model;
 }
 
-describe.only("Call", function() {
+describe("Call", function() {
     it("executes a local function with the call args", function(done) {
         
         var model = getDataModel(new LocalDataSource(Cache()), ReducedCache());

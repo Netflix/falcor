@@ -7,10 +7,10 @@ var surround = require("./surround");
 var license = require("gulp-license");
 var concat = require("gulp-concat");
 var tvuiPrefix = "//@depend ../Rx.netflix.js\n" +
-    "//@depend netflix/jsong/Falcor.js\n" +
+    "//@depend netflix/falcor/Falcor.js\n" +
     "(function(exports) {";
 var tvuiPostfix = "exports.Model = Model;\n" +
-    "}(netflix.jsong));";
+    "}(netflix.falcor));";
 var licenseInfo = {
     organization: "Netflix, Inc",
     year: "2014"
@@ -94,7 +94,7 @@ gulp.task("build.akira", ["build.combine"], function() {
         return src.
             pipe(surround({
                 prefix: "import Rx from \"./rxUltraLite\";",
-                postfix: "export default jsong;"
+                postfix: "export default falcor;"
             }));
     });
 });
@@ -106,7 +106,7 @@ gulp.task("build.node", ["build.combine"], function() {
                 prefix: "\
 var Rx = require(\"rx\");\n\
 var Observable = Rx.Observable;\n",
-                postfix: "module.exports = jsong;"
+                postfix: "module.exports = falcor;"
             }));
     });
 });
@@ -126,10 +126,10 @@ gulp.task("build.browser", ["build.combine"], function() {
         return src.
             pipe(surround({
                 prefix: "var Rx = require(\"rx\");",
-                postfix: "module.exports = jsong;"
+                postfix: "module.exports = falcor;"
             })).
             pipe(browserify({
-                standalone: "jsong"
+                standalone: "falcor"
             }));
     });
 });
@@ -138,7 +138,7 @@ gulp.task("build.raw", ["build.combine"], function() {
     return build("Falcor.raw.js", "./bin", function(src) {
         return src.
             pipe(browserify({
-                standalone: "jsong"
+                standalone: "falcor"
             }));
     });
 });
@@ -156,7 +156,7 @@ gulp.task("prod.node", ["build.combine"], function() {
                 prefix: "\
 var Rx = require(\"rx\");\n\
 var Observable = Rx.Observable;\n",
-                postfix: "module.exports = jsong;"
+                postfix: "module.exports = falcor;"
             }));
     });
 });

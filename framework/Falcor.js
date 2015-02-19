@@ -1,4 +1,4 @@
-var jsong = {},
+var falcor = {},
     __GENERATION_GUID = 0,
     __GENERATION_VERSION = 0,
     __CONTAINER = "__reference_container",
@@ -41,7 +41,7 @@ function now() {
 
 function NOOP() {};
 
-jsong.__Internals = {};
-jsong.Observable = Rx.Observable;
-jsong.EXPIRES_NOW = 0;
-jsong.EXPIRES_NEVER = 1;
+falcor.__Internals = {};
+falcor.Observable = Rx.Observable;
+falcor.EXPIRES_NOW = 0;
+falcor.EXPIRES_NEVER = 1;

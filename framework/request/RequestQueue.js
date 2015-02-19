@@ -1,6 +1,6 @@
 // Ties the requestQueue to a jsongModel.
 // For dataSource purposes.
-var RequestQueue = jsong.RequestQueue = function(jsongModel, scheduler) {
+var RequestQueue = falcor.RequestQueue = function(jsongModel, scheduler) {
     this._scheduler = scheduler;
     this._jsongModel = jsongModel;
 
@@ -376,4 +376,4 @@ function createKey(list) {
     return JSON.stringify(sortLol(list));
 }
 // Note: For testing
-jsong.__Internals.buildQueries = buildQueries;
+falcor.__Internals.buildQueries = buildQueries;

@@ -1,15 +1,15 @@
 
-jsong.Model = Model;
+falcor.Model = Model;
 
-Model.EXPIRES_NOW = jsong.EXPIRES_NOW;
-Model.EXPIRES_NEVER = jsong.EXPIRES_NEVER;
+Model.EXPIRES_NOW = falcor.EXPIRES_NOW;
+Model.EXPIRES_NEVER = falcor.EXPIRES_NEVER;
 
 function Model(options) {
     options || (options = {});
     this._dataSource = options.dataSource;
     this._maxSize = options.maxSize || Math.pow(2, 53) - 1;
     this._collectRatio = options.collectRatio || 0.75;
-    this._scheduler = new jsong.ImmediateScheduler();
+    this._scheduler = new falcor.ImmediateScheduler();
     this._request = new RequestQueue(this, this._scheduler);
     this._errorSelector = options.errorSelector || Model.prototype._errorSelector;
     this._cache = {};
@@ -28,7 +28,7 @@ Model.prototype = {
     _path: [],
     _boxed: false,
     _progressive: false,
-    _request: new jsong.RequestQueue(new jsong.ImmediateScheduler()),
+    _request: new falcor.RequestQueue(new falcor.ImmediateScheduler()),
     _errorSelector: function(x, y) { return y; },
     get: modelOperation("get"),
     set: modelOperation("set"),
@@ -164,14 +164,14 @@ Model.prototype = {
     },
     batch: function(schedulerOrDelay) {
         if(typeof schedulerOrDelay === "number") {
-            schedulerOrDelay = new jsong.TimeoutScheduler(Math.round(Math.abs(schedulerOrDelay)));
+            schedulerOrDelay = new falcor.TimeoutScheduler(Math.round(Math.abs(schedulerOrDelay)));
         } else if(!schedulerOrDelay || !schedulerOrDelay.schedule) {
-            schedulerOrDelay = new jsong.ImmediateScheduler();
+            schedulerOrDelay = new falcor.ImmediateScheduler();
         }
-        return this.clone(["_request", new jsong.RequestQueue(this, schedulerOrDelay)]);
+        return this.clone(["_request", new falcor.RequestQueue(this, schedulerOrDelay)]);
     },
     unbatch: function() {
-        return this.clone(["_request", new jsong.RequestQueue(this, new ImmediateScheduler())]);
+        return this.clone(["_request", new falcor.RequestQueue(this, new ImmediateScheduler())]);
     },
     boxValues: function() {
         return this.clone(["_boxed", true]);
