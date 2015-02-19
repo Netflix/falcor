@@ -29,24 +29,24 @@ print(person[“location”][“address”]);
 // prints 344 Seaside
 
 ```
-If we take the same JSON object and load in into a Falcor Model we can retrieve data from it using the same series of keys. The only difference is that the API is Reactive (Push).
+If we load the same JSON in into a Falcor Model cache we can retrieve the data using the same series of keys. The only difference is that the API is Reactive (Push).
 
 ```JavaScript
 var person = new falcor.Model({
   cache: {
-	   name: “Steve McGuire”,
-	   occupation: “Developer”,
-	   location: {
-		    country: “US”,
-		    city: “Pacifica”,
-		    address: “344 Seaside”
-	   }
+    name: “Steve McGuire”,
+    occupation: “Developer”,
+    location: {
+    country: “US”,
+    city: “Pacifica”,
+    address: “344 Seaside”
   }
 });
 
-person.get([“location”, “address”],
-	 (address) => print(address)).
-    toPromise();
+person.
+  getValue([“location”, “address”]).
+  toPromise().
+  then(address => console.log(address));
 
 // prints 344 Seaside
 ```
