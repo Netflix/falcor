@@ -5,6 +5,13 @@
   "scripts": {
     "test": "./node_modules/mocha/bin/_mocha ./test/index"
   },
+  "files": [
+      "build",
+      "framework",
+      "macros",
+      "dist",
+      "test"
+  ],
   "devDependencies": {
     "colors": "~0.6.2",
     "diff": "~1.0.8",
