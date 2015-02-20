@@ -153,7 +153,7 @@ var server = app.listen(80);
 
 Now we've moved all of the data to the server without having to change the way in which we modify and retrieve data on the client. Now we can go one step further, and convert our server model to a virtual model so that we can store data in our backend data stores rather than in-memory on the Node server.
 
-## Building a simple issue tracking application with Falcor
+# A Simple Issue Tracking App with Falcor
 
 Let's imagine we are building a simple issue tracking system. The system has three types of entities:
 
@@ -165,22 +165,23 @@ When the application loads, the current user is presented with a list of issues.
 
 (Image)
 
-Once they select an issue, the issue detail view is displayed. 
+Once an issue is selected, the issue detail view is displayed. 
 
-When viewing details of an individual issue, the user may edit fields, add to comments and view comments left on the issue by other users.
+(Image)
 
+When viewing details of an individual issue, the user may edit fields, add comments, and view comments left on the issue by other users.
 
+## Designing a domain model for our tracking system
 
-
+Our issue tracking system is a graph. Any user could be be related to any other user via the comments they leave on each others issues. In order to avoid downloading the entire graph 
 
 
 ###  Building your first JSON Graph
 
-Our issue tracking system is a graph. Any user can be related to any other user through the comments they leave on the  
+
 
 
 Nearly every application's domain model is graph.  However most application servers use JSON to send domain model objects over the wire. Converting graph data into JSON is a hazard, because JSON is heirarchical format. When you expand a graph into a tree, you either get duplicates, or introduce unique identifiers.
-
 
 Let's imagine we are building a simple issue tracking system. The system has three types of entities:
 
@@ -190,7 +191,7 @@ Let's imagine we are building a simple issue tracking system. The system has thr
 
 Each user is presented with a list of issues assigned to them, and every issue can contain one or more comments from any user in the system.
 
-The client must display issues and allow comments from users.  Each user is displayed a set of issues assigned to them.
+The client must display issues and allow comments from users.  Each user is displayed a set of issues assigned to them. 
 
  When 
 
