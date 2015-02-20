@@ -11,15 +11,16 @@ var Values = Expected.Values;
 var References = Expected.References;
 var RouterTestRunner = require('../../routerTestRunner');
 
-describe("PathMap", function() {
+describe("PathValues", function() {
     it('should match a simple route in the virtual path.', function(done) {
         var r = new R(Routes().Videos.Integers.Summary);
         var model = new jsong.Model({router: r});
 
-        var expected = Values().direct.AsPathMap.values;
+        var expected = Values().direct.AsValues.values;
         var obs = model.
-            get(['videos', 1234, 'summary']);
-        
+            get(['videos', 1234, 'summary']).
+            toPathValues();
+
         RouterTestRunner.run(obs, expected).
             subscribe(noOp, done, done);
     });
@@ -42,7 +43,7 @@ describe("PathMap", function() {
         RouterTestRunner.run(obs, expected).
             subscribe(noOp, done, done);
     });
-    
+
     it('should match some values, but not other missing values.', function(done) {
         var routes = [].
             concat(

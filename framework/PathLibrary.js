@@ -17,6 +17,11 @@ function simplePathToMap(path, seed) {
     return seed;
 }
 
+// TODO: Paul, teach me how to macro
+function intersect(map, pathSet) {
+    
+}
+
 function pathToMap(path, seed, depth) {
     depth = depth || 0;
     var curr = path[depth];

@@ -6,5 +6,4 @@ bin/
 coverage
 .idea
 tmp/
-dist/
 *.tar.gz

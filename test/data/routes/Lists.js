@@ -14,15 +14,21 @@ module.exports = function() {
                             flatMap(function (idx) {
                                 var list = {};
                                 var cachedList = Cache().lists[listId];
-                                if (cachedList && cachedList[idx]) {
+                                if (cachedList && (cachedList[idx] || Array.isArray(cachedList))) {
                                     var jsong = {
                                         jsong: { lists: list },
                                         paths: [
                                             ['lists', listId, idx]
                                         ]
                                     };
-                                    list[listId] = {};
-                                    list[listId][idx] = cachedList[idx];
+                                    
+                                    // The reference case
+                                    if (Array.isArray(cachedList)) {
+                                        list[listId] = cachedList;
+                                    } else {
+                                        list[listId] = {};
+                                        list[listId][idx] = cachedList[idx];
+                                    }
                                     return Observable.return(jsong);
                                 }
                                 return Observable.empty();

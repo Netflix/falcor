@@ -369,6 +369,7 @@ function modelOperation(name) {
                 if (opts.length && opts.length !== optPaths.length) {
                     var optMap = opts.reduce(function(acc, o) { 
                         acc[o._routerIndex] = true;
+                        return acc;
                     }, {});
                     nextRequest = nextRequest.filter(function(r) { return optMap[r._routerIndex]; });
                 } else if (!opts.length) {
@@ -393,7 +394,7 @@ function modelOperation(name) {
                             shouldRoute = false;
                             incomingValues = {jsong: {}, paths: nextRequest}
                         }
-                        completeRecursion(nextRequest, incomingValues);
+                        completeRecursion(nextRequest, incomingValues, relativePathSetValues);
                     });
             }
             
@@ -427,12 +428,12 @@ function modelOperation(name) {
                     },
                     onCompleted: function() {
                         shouldRequest = false;
-                        completeRecursion(nextRequest, incomingValues);
+                        completeRecursion(nextRequest, incomingValues, relativePathSetValues);
                     }
                 });
             }
             
-            function completeRecursion(requestedPaths, incomingValues) {
+            function completeRecursion(requestedPaths, incomingValues, relativePathSetValues) {
                 var out = getOperationsPartitionedByPathIndex(requestedPaths, incomingValues, indices, hasSelector, seedRequired, valuesCount);
                 var newOperations = out.ops;
                 indices = out.indices;

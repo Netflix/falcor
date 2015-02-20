@@ -81,6 +81,9 @@ function execute(useNewModel) {
         describe("should get a reference from a reference", function() {
             runGetTests(getModel(useNewModel), References().referenceToReference, {useNewModel: useNewModel});
         });
+        describe("should get a reference from a reference to the value.", function() {
+            runGetTests(getModel(useNewModel), References().referenceToReferenceComplete, {useNewModel: useNewModel});
+        });
         describe("should get a value through references when the last key is null", function() {
             runGetTests(getModel(useNewModel), References().referenceLeafNode, {useNewModel: useNewModel});
         });

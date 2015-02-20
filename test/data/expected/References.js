@@ -628,16 +628,6 @@ module.exports = function() {
                 ]
             },
 
-//            setPaths: {
-//                query: [{
-//                    "path": ["genreList", "1", "0", "summary"],
-//                    "value": {
-//                        "title": "Running Man",
-//                        "url": "/movies/553"
-//                    }
-//                }]
-//            },
-
             getPathMaps: {
                 query: [{
                     genreList: {
@@ -684,6 +674,103 @@ module.exports = function() {
                                 0: ["videos", "553"]
                             },
                             "my-list": ["lists", "1x5x"]
+                        },
+                        videos: {
+                            553: {
+                                summary: {
+                                    "$type": "leaf",
+                                    "$size": 10,
+                                    "title": "Running Man",
+                                    "url": "/movies/553"
+                                }
+                            }
+                        }
+                    },
+                    paths: [
+                        ["genreList", "1", "0", "summary"]
+                    ]
+                }]
+            },
+
+            AsPathMap: {
+                values: [{
+                    json: {
+                        genreList: {
+                            __key: "genreList",
+                            __generation: 0,
+                            1: {
+                                __key: "1",
+                                __generation: 0,
+                                0: {
+                                    __key: "0",
+                                    __generation: 0,
+                                    summary: {
+                                        "$type": "leaf",
+                                        "title": "Running Man",
+                                        "url": "/movies/553"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }]
+            }
+        },
+        referenceToReferenceComplete: {
+            getPaths: {
+                query: [
+                    ["genreList", "1", "0", "summary"]
+                ]
+            },
+
+            getPathMaps: {
+                query: [{
+                    genreList: {
+                        1: {
+                            0: {
+                                summary: null
+                            }
+                        }
+                    }
+                }]
+            },
+
+            optimizedPaths: [
+                ["videos", "553", "summary"]
+            ],
+
+            AsValues: {
+                values: [
+                    {
+                        "path": ["genreList", "1", "0", "summary"],
+                        "value": {
+                            "title": "Running Man",
+                            "url": "/movies/553"
+                        }
+                    }
+                ]
+            },
+
+            AsJSON: {
+                values: [{
+                    json: {
+                        "title": "Running Man",
+                        "url": "/movies/553"
+                    }
+                }]
+            },
+
+            AsJSONG: {
+                values: [{
+                    jsong: {
+                        genreList: {
+                            1: ["lists", "my-list"]
+                        },
+                        lists: {
+                            "my-list": ["lists", "1x5x"],
+                            "1x5x": {
+                                0: ["videos", "553"]
+                            }
                         },
                         videos: {
                             553: {
