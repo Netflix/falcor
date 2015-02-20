@@ -72,7 +72,8 @@ gulp.task("build.support", ["build.macros"], function() {
             "./framework/ModelResponse.js",
             "./framework/request/Scheduler.js",
             "./framework/request/RequestQueue.js",
-            "./framework/Model.js"
+            "./framework/Model.js",
+            "./framework/PathLibrary.js"
         ]).
         pipe(concat({path: "support.js"})).
         pipe(gulp.dest("tmp/framework"));
@@ -95,6 +96,42 @@ gulp.task("build.akira", ["build.combine"], function() {
             pipe(surround({
                 prefix: "import Rx from \"./rxUltraLite\";",
                 postfix: "export default falcor;"
+            }));
+    });
+});
+
+gulp.task("build.support-only-compile", ['build.support-only-replace'], function() {
+    return gulp.src([
+            "./framework/Falcor.js",
+            "./tmp/framework/Model.js",
+            "./tmp/framework/support.js",
+            "./tmp/framework/operations.js"
+        ]).
+        pipe(concat({path: "Falcor.js"})).
+        pipe(gulp.dest("tmp"));
+});
+
+gulp.task('build.support-only-replace', function() {
+    return gulp.
+        src([
+            "./framework/ModelResponse.js",
+            "./framework/request/Scheduler.js",
+            "./framework/request/RequestQueue.js",
+            "./framework/Model.js",
+            "./framework/PathLibrary.js"
+        ]).
+        pipe(concat({path: "support.js"})).
+        pipe(gulp.dest("tmp/framework"));
+});
+
+gulp.task('build.support-only', ['build.support-only-replace', 'build.support-only-compile'], function() {
+    return build("Falcor.js", "./bin", function(src) {
+        return src.
+            pipe(surround({
+                prefix: "\
+var Rx = require(\"rx\");\n\
+var Observable = Rx.Observable;\n",
+                postfix: "module.exports = falcor;"
             }));
     });
 });

@@ -267,6 +267,8 @@ function modelOperation(name) {
             var atLeastOneValue = false;
             var shouldRequest = true;
             var shouldRoute = true;
+            var routeMisses = {};
+            var firstRecurse = true;
 
             // TODO: Should be defined on the model.
             var retryMax = model._retryCount;
@@ -325,6 +327,7 @@ function modelOperation(name) {
                     }
                 });
                 var nextRequest = results.requestedMissingPaths;
+                var optPaths = results.optimizedMissingPaths;
                 var missingLength = nextRequest.length;
                 var incomingValues;
 
@@ -356,17 +359,41 @@ function modelOperation(name) {
             function routerRecurse(nextRequest, results, relativePathSetValues) {
                 // TODO: make a set version available.
                 var incomingValues;
-                debugger;
-                model._router.
-                    get(results.optimizedMissingPaths).
+                var optPaths = results.optimizedMissingPaths;
+                for (var i = 0; i < nextRequest.length; i++) {
+                    nextRequest[i]._routerIndex = i;
+                    optPaths[i]._routerIndex = i;
+                }
+                firstRecurse = false;
+                var opts = optPaths.filter(function(p) { return !PathLibrary.simplePathInMap(p, routeMisses); });
+                if (opts.length && opts.length !== optPaths.length) {
+                    var optMap = opts.reduce(function(acc, o) { 
+                        acc[o._routerIndex] = true;
+                    }, {});
+                    nextRequest = nextRequest.filter(function(r) { return optMap[r._routerIndex]; });
+                } else if (!opts.length) {
+                    nextRequest = [];
+                }
+                model._router[name](opts).
                     subscribe(function(jsongEnv) {
+                        
+                        // For preservation of the structure, we copy the requested paths 
+                        // back into the incomingValues
                         incomingValues = jsongEnv;
+                        incomingValues.paths = nextRequest.concat();
+                        
+                        // TODO: Why cant the router report missing paths?
+                        // TODO: Then we can strip the paths from the next request
                     }, function(err) {
                         // TODO: Should this ever happen?
                     }, function() {
-
-                        // Now this is where the recursing begins.
-                        debugger;
+                        opts.forEach(function(p) { PathLibrary.pathToMap(p, routeMisses); });
+                        // onCompleted only
+                        if (!incomingValues) {
+                            shouldRoute = false;
+                            incomingValues = {jsong: {}, paths: nextRequest}
+                        }
+                        completeRecursion(nextRequest, incomingValues);
                     });
             }
             
@@ -399,37 +426,39 @@ function modelOperation(name) {
                         executeOnErrorOrCompleted();
                     },
                     onCompleted: function() {
-                        // Note: processing the requested missing paths
-                        var previousIndices = indices;
-                        var out = getOperationsPartitionedByPathIndex(nextRequest, incomingValues, previousIndices, hasSelector, seedRequired, valuesCount);
-                        var newOperations = out.ops;
-                        indices = out.indices;
-
-                        // Note: We fast collapse all hasSelector ops.
-                        // TODO: shouldn't we be able to go through all the operations and fast collapse?
-                        if (hasSelector) {
-                            var op = newOperations[newOperations.length - 1];
-                            if (op && op.paths.length > 1) {
-                                op.paths = fastCollapse(op.paths);
-                            }
-                        }
-                        operationalName = 'set';
-
-                        // Note: We do not request missing paths again.
                         shouldRequest = false;
-                        if (hasSelector) {
-                            var arr = [];
-                            for (var i = 0; i < indices.length; i++) {
-                                arr[arr.length] = relativePathSetValues[indices[i]];
-                            }
-                            recurse(newOperations, arr);
-                        } else if (seedRequired) {
-                            recurse(newOperations, pathSetValues);
-                        } else {
-                            recurse(newOperations, []);
-                        }
+                        completeRecursion(nextRequest, incomingValues);
                     }
                 });
+            }
+            
+            function completeRecursion(requestedPaths, incomingValues) {
+                var out = getOperationsPartitionedByPathIndex(requestedPaths, incomingValues, indices, hasSelector, seedRequired, valuesCount);
+                var newOperations = out.ops;
+                indices = out.indices;
+
+                // Note: We fast collapse all hasSelector ops.
+                // TODO: shouldn't we be able to go through all the operations and fast collapse?
+                if (hasSelector) {
+                    var op = newOperations[newOperations.length - 1];
+                    if (op && op.paths.length > 1) {
+                        op.paths = fastCollapse(op.paths);
+                    }
+                }
+                operationalName = 'set';
+
+                // Note: We do not request missing paths again.
+                if (hasSelector) {
+                    var arr = [];
+                    for (var i = 0; i < indices.length; i++) {
+                        arr[arr.length] = relativePathSetValues[indices[i]];
+                    }
+                    recurse(newOperations, arr);
+                } else if (seedRequired) {
+                    recurse(newOperations, pathSetValues);
+                } else {
+                    recurse(newOperations, []);
+                }
             }
 
             try {

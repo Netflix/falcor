@@ -65,6 +65,11 @@ if(Rx === undefined) {
                 });
             }
             
+            // NOTE: Required for Router
+            Observable.prototype.from;
+            Observable.prototype.materialize;
+            Observable.prototype.reduce;
+
             Observable.prototype.subscribe = function(n, e, c) {
                 return this.s(
                     (n != null && typeof n === 'object') ?
