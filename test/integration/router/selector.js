@@ -75,7 +75,7 @@ describe("Selector", function() {
             });
     });
 
-    it.only('should match a complex pathSet', function(done) {
+    it('should match a complex pathSet', function(done) {
         var routes = [].
             concat(
             Routes().Videos.Integers.Summary).
