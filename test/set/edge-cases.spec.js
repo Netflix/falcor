@@ -17,6 +17,8 @@ describe("Special Cases", function() {
                 jsong: {"lists": {"abcd": {"0": ["videos", 1234]}, "my-list": ["lists", "1x5x"]}},
                 paths: [["genreList", 1, 0, "summary"]]
             },
+            
+            // TODO: Paul, this is the one the makes _cache.lists = undefined
             {
                 jsong: {"lists": {"1x5x": {"0": ["videos", 553]}}},
                 paths: [["genreList", 1, 0, "summary"]]

@@ -8,18 +8,18 @@ var RouterTestRunner = {
             do(function(x) {
                 // Validates against all comparables
                 expected.forEach(function(c) {
-                    TestRunner.partialCompare(x, c);
+                    TestRunner.partialCompare(c, x);
                 });
                 count++;
             }, undefined, function() {
                 expect(count, 'The observable should of onNext one time').to.equal(1);
             });
-        
+
     },
     
     partialCompare: function(expectedPartials, returnMessage) {
         expectedPartials.forEach(function(expected) {
-            TestRunner.partialCompare(returnMessage, expected);
+            TestRunner.partialCompare(expected, returnMessage);
         });
     }
 };

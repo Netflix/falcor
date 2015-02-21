@@ -437,15 +437,6 @@ function modelOperation(name) {
                 var out = getOperationsPartitionedByPathIndex(requestedPaths, incomingValues, indices, hasSelector, seedRequired, valuesCount);
                 var newOperations = out.ops;
                 indices = out.indices;
-
-                // Note: We fast collapse all hasSelector ops.
-                // TODO: shouldn't we be able to go through all the operations and fast collapse?
-                if (hasSelector) {
-                    var op = newOperations[newOperations.length - 1];
-                    if (op && op.paths.length > 1) {
-                        op.paths = fastCollapse(op.paths);
-                    }
-                }
                 operationalName = 'set';
 
                 // Note: We do not request missing paths again.
@@ -534,13 +525,17 @@ function fastCollapse(paths) {
             p.forEach(function(v, i) {
                 // i think
                 if (typeof v === 'object') {
-                    curr[curr[i].length] = v[0];
+                    v.forEach(function(value) {
+                        curr[i][curr[i].length] = value;
+                    });
                 }
             });
         }
         return acc;
     }, []);
 }
+
+falcor.__Internals.fastCollapse = fastCollapse;
 
 function getOperationsPartitionedByPathIndex(requestedPaths, incomingValues, previousIndices, hasSelector, seedRequired, valuesCount) {
     var newOperations = [];
@@ -576,7 +571,16 @@ function getOperationsPartitionedByPathIndex(requestedPaths, incomingValues, pre
         op.paths[op.paths.length] = r;
         op.boundPath = op.boundPath || boundPath.length && boundPath || undefined;
     });
-    
+
+    // Note: We have fast collapsed all operations at their closing for the next operation.
+    // so the last one needs to be collapsed
+    if (hasSelector) {
+        var op = newOperations[newOperations.length - 1];
+        if (op && op.paths.length > 1) {
+            op.paths = fastCollapse(op.paths);
+        }
+    }
+
     return {ops: newOperations, indices: indices};
 }
 
