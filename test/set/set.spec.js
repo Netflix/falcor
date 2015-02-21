@@ -127,36 +127,3 @@ describe("Complex", function() {
         setTestRunner(SetExpected.Complex().fromAndToLeaf, {fillReferences: false});
     });
 });
-
-describe("Special Cases", function() {
-    it.only("set blows away the cache.", function() {
-        var model = new Model({
-            cache: {
-                genreList: {
-                    0: ['lists', 'abcd'],
-                    1: ['my-list']
-                },
-                lists: {
-                    abcd: {
-                        0: ['vidoes', 1234]
-                    },
-                    'my-list': ['lists', '1x5x']
-                }
-            }
-        });
-        var set = {
-            jsong: {
-                lists: {
-                    '1x5x': {
-                        '0': ['videos', 553]
-                    }
-                }
-            },
-            paths: [['genreList', 1, 0, 'summary']]
-        };
-        
-        var seed = [{}];
-        model._setJSONGsAsPathMap(model, [set], seed);
-        debugger;
-    });
-});
