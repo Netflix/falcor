@@ -31,11 +31,11 @@ describe("Selector", function() {
     it('should match a value and follow references.', function(done) {
         var routes = [].
             concat(
-            Routes().Videos.Integers.Summary).
+                Routes().Videos.Integers.Summary).
             concat(
-            Routes().Lists.byIdx).
+                Routes().Lists.byIdx).
             concat(
-            Routes().GenreList.Ranges);
+                Routes().GenreList.Ranges);
         var r = new R(routes);
         var model = new jsong.Model({router: r});
         var count = 0;
@@ -54,11 +54,11 @@ describe("Selector", function() {
     it('should match some values, but not other missing values.', function(done) {
         var routes = [].
             concat(
-            Routes().Videos.Integers.Summary).
+                Routes().Videos.Integers.Summary).
             concat(
-            Routes().Lists.byIdx).
+                Routes().Lists.byIdx).
             concat(
-            Routes().GenreList.Ranges);
+                Routes().GenreList.Ranges);
         var r = new R(routes);
         var model = new jsong.Model({router: r});
         var count = 0;
@@ -78,21 +78,21 @@ describe("Selector", function() {
     it('should match a complex pathSet', function(done) {
         var routes = [].
             concat(
-            Routes().Videos.Integers.Summary).
+                Routes().Videos.Integers.Summary).
             concat(
-            Routes().Lists.byIdx).
+                Routes().Lists.byIdx).
             concat(
-            Routes().GenreList.Ranges);
+                Routes().GenreList.Ranges);
         var r = new R(routes);
         var model = new jsong.Model({router: r});
         var count = 0;
-        var r0 = References().simpleReference0.AsJSON.values;
-        var r1 = References().simpleReference1.AsJSON.values;
-        var expected = r0.concat(r1);
+        var r0 = {0: References().simpleReference0.AsJSON.values[0].json};
+        var r1 = {1: References().simpleReference1.AsJSON.values[0].json};
+        var expected = [r0, r1];
         model.
             get(['genreList', {to:1}, 0, 'summary'], function(genreList) {
                 count++;
-                RouterTestRunner.partialCompare(expected.map(function(x) { return x.json; }), genreList);
+                RouterTestRunner.partialCompare(expected, genreList);
             }).
             subscribe(noOp, done, function() {
                 expect(count, 'expect the selector function to be called one time.').to.equal(1);

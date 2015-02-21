@@ -62,5 +62,32 @@ describe("PathValues", function() {
         RouterTestRunner.run(obs, expected).
             subscribe(noOp, done, done);
     });
+    
+    it.only('should match a complex pathSet', function(done) {
+        var routes = [].
+            concat(
+            Routes().Videos.Integers.Summary).
+            concat(
+            Routes().Lists.byIdx).
+            concat(
+            Routes().GenreList.Ranges);
+        debugger;
+        var r = new R(routes);
+        var model = new jsong.Model({router: r});
+        var count = 0;
+        var r0 = References().simpleReference0.AsValues.values[0];
+        var r1 = References().simpleReference1.AsValues.values[0];
+        var expected = [r0, r1];
+        model.
+            get(['genreList', {to:1}, 0, 'summary']).
+            toPathValues().
+            doOnCompleted(function() {
+                expect(count, 'expect the selector function to be called two times.').to.equal(2);
+            }).
+            subscribe(function(x) {
+                RouterTestRunner.partialCompare([expected[count]], x);
+                count++;
+            }, done, done);
+    });
 });
 

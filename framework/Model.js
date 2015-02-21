@@ -372,30 +372,29 @@ function modelOperation(name) {
                         return acc;
                     }, {});
                     nextRequest = nextRequest.filter(function(r) { return optMap[r._routerIndex]; });
-                } else if (!opts.length) {
-                    nextRequest = [];
                 }
-                model._router[name](opts).
-                    subscribe(function(jsongEnv) {
-                        
-                        // For preservation of the structure, we copy the requested paths 
-                        // back into the incomingValues
-                        incomingValues = jsongEnv;
-                        incomingValues.paths = nextRequest.concat();
-                        
-                        // TODO: Why cant the router report missing paths?
-                        // TODO: Then we can strip the paths from the next request
-                    }, function(err) {
-                        // TODO: Should this ever happen?
-                    }, function() {
-                        opts.forEach(function(p) { PathLibrary.pathToMap(p, routeMisses); });
-                        // onCompleted only
-                        if (!incomingValues) {
-                            shouldRoute = false;
-                            incomingValues = {jsong: {}, paths: nextRequest}
-                        }
-                        completeRecursion(nextRequest, incomingValues, relativePathSetValues);
-                    });
+                
+                if (opts.length) {
+                    model._router[name](opts).
+                        subscribe(function(jsongEnv) {
+
+                            // For preservation of the structure, we copy the requested paths
+                            // back into the incomingValues
+                            incomingValues = jsongEnv;
+                            incomingValues.paths = nextRequest.concat();
+
+                            // TODO: Why cant the router report missing paths?
+                            // TODO: Then we can strip the paths from the next request
+                        }, function(err) {
+                            // TODO: Should this ever happen?
+                        }, function() {
+                            opts.forEach(function(p) { PathLibrary.pathToMap(p, routeMisses); });
+                            completeRecursion(nextRequest, incomingValues, relativePathSetValues);
+                        });
+                } else {
+                    shouldRoute = false;
+                    completeRecursion([], {jsong: {}, paths: [[]]}, relativePathSetValues);
+                }
             }
             
             function modelSourceRecurse(nextRequest, results, relativePathSetValues) {
