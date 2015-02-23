@@ -1,6 +1,6 @@
 {
   "name": "falcor",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "main": "dist/Falcor.js",
   "scripts": {
     "test": "./node_modules/mocha/bin/_mocha ./test/index"
