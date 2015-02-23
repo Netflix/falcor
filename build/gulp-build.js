@@ -15,6 +15,20 @@ var licenseInfo = {
     organization: "Netflix, Inc",
     year: "2014"
 };
+var support = [
+    "./framework/ModelResponse.js",
+    "./framework/request/Scheduler.js",
+    "./framework/request/RequestQueue.js",
+    "./framework/modelOperation.js",
+    "./framework/Model.js",
+    "./framework/PathLibrary.js"
+];
+var compile = [
+    "./framework/Falcor.js",
+    "./tmp/framework/Model.js",
+    "./tmp/framework/support.js",
+    "./tmp/framework/operations.js"
+];
 
 // build.macros -> |
 // build.framework ->
@@ -68,24 +82,13 @@ gulp.task("build.sweet", ["build.operations"], function() {
 
 gulp.task("build.support", ["build.macros"], function() {
     return gulp.
-        src([
-            "./framework/ModelResponse.js",
-            "./framework/request/Scheduler.js",
-            "./framework/request/RequestQueue.js",
-            "./framework/Model.js",
-            "./framework/PathLibrary.js"
-        ]).
+        src(support).
         pipe(concat({path: "support.js"})).
         pipe(gulp.dest("tmp/framework"));
 });
 
 gulp.task("build.combine", ["build.compiled_operations", "build.support"], function() {
-    return gulp.src([
-            "./framework/Falcor.js",
-            "./tmp/framework/Model.js",
-            "./tmp/framework/support.js",
-            "./tmp/framework/operations.js"
-        ]).
+    return gulp.src(compile).
         pipe(concat({path: "Falcor.js"})).
         pipe(gulp.dest("tmp"));
 });
@@ -101,25 +104,14 @@ gulp.task("build.akira", ["build.combine"], function() {
 });
 
 gulp.task("build.support-only-compile", ['build.support-only-replace'], function() {
-    return gulp.src([
-            "./framework/Falcor.js",
-            "./tmp/framework/Model.js",
-            "./tmp/framework/support.js",
-            "./tmp/framework/operations.js"
-        ]).
+    return gulp.src(compile).
         pipe(concat({path: "Falcor.js"})).
         pipe(gulp.dest("tmp"));
 });
 
 gulp.task('build.support-only-replace', function() {
     return gulp.
-        src([
-            "./framework/ModelResponse.js",
-            "./framework/request/Scheduler.js",
-            "./framework/request/RequestQueue.js",
-            "./framework/Model.js",
-            "./framework/PathLibrary.js"
-        ]).
+        src(support).
         pipe(concat({path: "support.js"})).
         pipe(gulp.dest("tmp/framework"));
 });

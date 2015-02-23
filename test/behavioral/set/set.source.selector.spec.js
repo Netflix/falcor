@@ -14,7 +14,7 @@ var Bound = Expected.Bound;
 var noOp = function() {};
 
 describe('Selector', function() {
-    it.only('should set a value.', function(done) {
+    it('should set a value.', function(done) {
         var source = new LocalDataSource(Cache(), {
             onSet: function(source, jsongEnv) {
 
@@ -37,9 +37,7 @@ describe('Selector', function() {
         model.
             set({path: ['videos', 1234, 'rating'], value: 3.5}, function(video) {
                 count++;
-                testRunner.compare({
-                    rating: 5
-                }, video);
+                testRunner.compare(5, video);
             }).
             doOnCompleted(function() {
                 expect(count, 'expect onNext to be called one time.').to.equal(1);
@@ -57,29 +55,19 @@ describe('Selector', function() {
 
         model.
             set(
-            {path: ['videos', 1234, 'rating'], value: 3.5},
-            {
-                videos: {
-                    1234: {
-                        description: 'This is the description of a life-time.'
-                    }
-                }
-            }).
-            doOnNext(function(setResponse) {
-                count++;
-                testRunner.compare({
-                    json: {
-                        videos: {
-                            __key: 'videos',
-                            1234: {
-                                __key: '1234',
-                                rating: 3.5,
-                                description: 'This is the description of a life-time.'
-                            }
+                {path: ['videos', 1234, 'rating'], value: 3.5},
+                {
+                    videos: {
+                        1234: {
+                            description: 'This is the description of a life-time.'
                         }
                     }
-                }, setResponse);
-            }).
+                }, 
+                function(videoRating, videoDesc) {
+                    count++;
+                    testRunner.compare(3.5, videoRating);
+                    testRunner.compare('This is the description of a life-time.', videoDesc);
+                }).
             doOnCompleted(function() {
                 expect(count, 'expect onNext to be called one time.').to.equal(1);
             }).

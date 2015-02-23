@@ -343,7 +343,7 @@ function rangeCollapse(paths) {
 /* jshint forin: false */
 function buildQueries(root) {
 
-    if(root == null) {
+    if (root == null || typeof root !== 'object') {
         return [ [] ];
     }
 
