@@ -6,7 +6,7 @@ var testRunner = require("./testRunner");
 
 function toObservable(request, queue, onNext) {
     return Rx.Observable.create(function(observer) {
-        queue.request([request], [request], {
+        queue.get([request], [request], {
             onNext: function(x) {
                 observer.onNext(x);
                 onNext && onNext.call(this, x);

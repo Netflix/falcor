@@ -268,10 +268,8 @@ function modelOperation(name) {
             var shouldRequest = true;
             var shouldRoute = true;
             var routeMisses = {};
-            var firstRecurse = true;
-
-            // TODO: Should be defined on the model.
-            var retryMax = model._retryCount;
+            var isFirstSet = name === 'set';
+            var firstSetJSONGPaths;
 
             if (hasSelector) {
                 for (var i = 0; i < args.length; i++) {
@@ -287,15 +285,25 @@ function modelOperation(name) {
             }
 
             function recurse(requested, relativePathSetValues) {
-                var operations = getOperationArgGroups(requested, operationalName, format, relativePathSetValues, hasSelector, isValues && onNext, errorSelector);
+                if (disposed) { return; }
+                var setSeed = false;
+                
+                // Note: We have to swap seeds for the first set since we must enforce jsong.
+                // TODO: This does not consider setProgressively.
+                if (isFirstSet) {
+                    setSeed = [{}];
+                }
+                
+                var operations = getOperationArgGroups(requested, operationalName, format, setSeed || relativePathSetValues, hasSelector, !isFirstSet && isValues && onNext, errorSelector, isFirstSet);
                 var results = processOperations(model, operations);
+                isFirstSet && (firstSetJSONGPaths = []);
                 
                 errors = errors.concat(results.errors);
                 atLeastOneValue = atLeastOneValue || results.valuesReceived;
 
                 // from each of the operations, the results must be remerged back into the values array
                 operations.forEach(function(op) {
-                    if (hasSelector) {
+                    if (!isFirstSet && hasSelector) {
                         var absoluteIndex;
                         var hasIndex;
                         op.values.forEach(function(valueObject, i) {
@@ -314,12 +322,14 @@ function modelOperation(name) {
                                 }
                             }
                         });
-                    } else if (seedRequired) {
+                    } else if (seedRequired || isFirstSet) {
                         if (op.values[0]) {
                             pathSetValues = op.values;
                             undefineds[0] = false;
-                            if (isJSONG) {
+                            if (isJSONG && !isFirstSet) {
                                 jsongPaths = jsongPaths.concat(op.values[0].paths);
+                            } else if (isFirstSet) {
+                                firstSetJSONGPaths = firstSetJSONGPaths.concat(op.values[0].paths);
                             }
                         } else {
                             undefineds[0] = true;
@@ -327,9 +337,13 @@ function modelOperation(name) {
                     }
                 });
                 var nextRequest = results.requestedMissingPaths;
-                var optPaths = results.optimizedMissingPaths;
                 var missingLength = nextRequest.length;
-                var incomingValues;
+                
+                // There is never missing paths on a set since we set through values
+                if (isFirstSet) {
+                    missingLength = 1;
+                    nextRequest = {jsong: setSeed[0], paths: firstSetJSONGPaths};
+                }
 
                 // no need to inform the user of the current state if in value mode
                 if (isProgressive && missingLength && !isValues) {
@@ -343,28 +357,25 @@ function modelOperation(name) {
                 
                 // We contine looking into the modelSource if the router does not exist / shouldRoute
                 // is no longer true.
-                // TODO: When we set externally we will need to review this statement.
-                else if (missingLength && shouldRequest && model._dataSource &&
-                    operationalName !== 'set') { 
-                    modelSourceRecurse(nextRequest, results, relativePathSetValues);
-                } else {
+                else if (missingLength && shouldRequest && model._dataSource) {
+                    modelSourceRequest(nextRequest, results, relativePathSetValues);
+                } 
+                
+                // Once we have exhausted all external resources or found all data we
+                // emit values and complete.
+                else {
                     emitValues();
                     executeOnErrorOrCompleted();
                 }
             }
             
-            
-            // TODO: This is not very performant to create these functions per 
-            // TODO: subscription to ModelResponse from a get/set
             function routerRecurse(nextRequest, results, relativePathSetValues) {
-                // TODO: make a set version available.
                 var incomingValues;
                 var optPaths = results.optimizedMissingPaths;
                 for (var i = 0; i < nextRequest.length; i++) {
                     nextRequest[i]._routerIndex = i;
                     optPaths[i]._routerIndex = i;
                 }
-                firstRecurse = false;
                 var opts = optPaths.filter(function(p) { return !PathLibrary.simplePathInMap(p, routeMisses); });
                 if (opts.length && opts.length !== optPaths.length) {
                     var optMap = opts.reduce(function(acc, o) { 
@@ -377,14 +388,8 @@ function modelOperation(name) {
                 if (opts.length) {
                     model._router[name](opts).
                         subscribe(function(jsongEnv) {
-
-                            // For preservation of the structure, we copy the requested paths
-                            // back into the incomingValues
                             incomingValues = jsongEnv;
-                            incomingValues.paths = nextRequest.concat();
-
-                            // TODO: Why cant the router report missing paths?
-                            // TODO: Then we can strip the paths from the next request
+                            incomingValues.paths = nextRequest;
                         }, function(err) {
                             // TODO: Should this ever happen?
                         }, function() {
@@ -392,14 +397,18 @@ function modelOperation(name) {
                             completeRecursion(nextRequest, incomingValues, relativePathSetValues);
                         });
                 } else {
+                    
+                    // TODO: support both router and modelSource (note selector functions).
                     shouldRoute = false;
+                    shouldRequest = false;
                     completeRecursion([], {jsong: {}, paths: [[]]}, relativePathSetValues);
                 }
             }
             
-            function modelSourceRecurse(nextRequest, results, relativePathSetValues) {
+            function modelSourceRequest(nextRequest, results, relativePathSetValues) {
                 var incomingValues;
-                model._request.request(nextRequest, results.optimizedMissingPaths, {
+                var requestedPaths = isFirstSet ? nextRequest.paths : nextRequest;
+                var observer = {
                     onNext: function(jsongEnvelop) {
                         incomingValues = jsongEnvelop;
                     },
@@ -408,7 +417,7 @@ function modelOperation(name) {
                         // inserted as errors and the output format is not needed.
                         // TODO: There must be a way to make this more efficient.
                         var out = model._setPathsAsValues.apply(null, [model].concat(
-                            nextRequest.
+                            requestedPaths.
                                 reduce(function(acc, r) {
                                     acc[0].push({
                                         path: r,
@@ -427,16 +436,31 @@ function modelOperation(name) {
                     },
                     onCompleted: function() {
                         shouldRequest = false;
-                        completeRecursion(nextRequest, incomingValues, relativePathSetValues);
+                        completeRecursion(requestedPaths, incomingValues, relativePathSetValues);
                     }
-                });
+                };
+                
+                if (name === 'set') {
+                    model._request.set(nextRequest, observer);
+                } else {
+                    model._request.get(nextRequest, results.optimizedMissingPaths, observer);
+                }
             }
             
             function completeRecursion(requestedPaths, incomingValues, relativePathSetValues) {
-                var out = getOperationsPartitionedByPathIndex(requestedPaths, incomingValues, indices, hasSelector, seedRequired, valuesCount);
+                var out = getOperationsPartitionedByPathIndex(
+                    requestedPaths, 
+                    incomingValues, 
+                    indices, 
+                    !isFirstSet && hasSelector,
+                isFirstSet || seedRequired,
+                    valuesCount);
+                
                 var newOperations = out.ops;
                 indices = out.indices;
+                
                 operationalName = 'set';
+                isFirstSet = false;
 
                 // Note: We do not request missing paths again.
                 if (hasSelector) {
@@ -568,7 +592,7 @@ function getOperationsPartitionedByPathIndex(requestedPaths, incomingValues, pre
             // isValues
         }
         op.paths[op.paths.length] = r;
-        op.boundPath = op.boundPath || boundPath.length && boundPath || undefined;
+        op.boundPath = op.boundPath || boundPath && boundPath.length && boundPath || undefined;
     });
 
     // Note: We have fast collapsed all operations at their closing for the next operation.
@@ -583,8 +607,9 @@ function getOperationsPartitionedByPathIndex(requestedPaths, incomingValues, pre
     return {ops: newOperations, indices: indices};
 }
 
-function getOperationArgGroups(ops, name, format, values, hasSelector, onNext, errorSelector) {
-    var seedRequired = isSeedRequired(format);
+function getOperationArgGroups(ops, name, format, values, hasSelector, onNext, errorSelector, isFirstSet) {
+    var opFormat = (isFirstSet && 'AsJSONG' || format);
+    var seedRequired = isSeedRequired(opFormat);
     var isValues = !seedRequired;
     var valuesIndex = 0, valueEnvelope;
     return ops.
@@ -594,7 +619,11 @@ function getOperationArgGroups(ops, name, format, values, hasSelector, onNext, e
                 type  = isPathOrPathValue(argument) ? "Paths" :
                         isJSONG(argument) ? "JSONGs" : "PathMaps",
                 groupType = group && group.type,
-                op = Model.prototype['_' + name + type + format];
+                methodName = name + type + opFormat;
+
+                // Sets the operation to jsong if its the first set.
+                // We need this 
+                op = Model.prototype['_' + methodName];
 
             if (type !== groupType) {
                 group = groups[groups.length] = [];
@@ -603,8 +632,8 @@ function getOperationArgGroups(ops, name, format, values, hasSelector, onNext, e
             group.boundPath = type === "JSONGs" && argument.boundPath || undefined;
 
             if (groupType === null || type !== groupType) {
-                group.methodName = name + type + format;
-                group.format = format;
+                group.methodName = methodName;
+                group.format = opFormat;
                 group.type = type;
                 group.op = op;
                 group.isSeedRequired = seedRequired;

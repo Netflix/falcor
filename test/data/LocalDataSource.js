@@ -8,6 +8,7 @@ var LocalSource = module.exports = function(cache, options) {
     this._options = _.extend({
         miss: 0,
         onGet: noOp,
+        onSet: noOp,
         onResults: noOp,
         wait: false
     }, options);
@@ -45,10 +46,10 @@ LocalSource.prototype = {
                 // always output all the paths
                 var output = {
                     paths: paths,
-                    values: {}
+                    jsong: {}
                 };
                 if (values[0]) {
-                    output.values = values[0].jsong;
+                    output.jsong = values[0].jsong;
                 }
 
                 onResults(output);
@@ -56,6 +57,34 @@ LocalSource.prototype = {
                 observer.onCompleted();
             }
             
+            if (wait > 0) {
+                setTimeout(exec, wait);
+            } else {
+                exec();
+            }
+        });
+    },
+    set: function(jsongEnv) {
+        var self = this;
+        var options = this._options;
+        var miss = options.miss;
+        var onSet = options.onSet;
+        var onResults = options.onResults;
+        var wait = +options.wait;
+        var errorSelector = options.errorSelector;
+        return Rx.Observable.create(function(observer) {
+            function exec() {
+                var values = [{}];
+                onSet(self, jsongEnv);
+                self.model._setJSONGsAsJSONG(self.model, [jsongEnv], values, errorSelector);
+
+                // always output all the paths
+
+                onResults(values[0]);
+                observer.onNext(values[0]);
+                observer.onCompleted();
+            }
+
             if (wait > 0) {
                 setTimeout(exec, wait);
             } else {

@@ -13,11 +13,23 @@ RequestQueue.prototype = {
         var i = -1;
         var requests = this._requests;
         while (++i < requests.length) {
-            if (!requests[i].pending) {
+            if (!requests[i].pending && requests[i].isGet) {
                 return requests[i];
             }
         }
-        return requests[requests.length] = new Request2(this._jsongModel, this);
+        return requests[requests.length] = new GetRequest(this._jsongModel, this);
+    },
+    _set: function() {
+        var i = -1;
+        var requests = this._requests;
+        
+        // TODO: Set always sends off a request immediately, so there is no batching.
+        while (++i < requests.length) {
+            if (!requests[i].pending && requests[i].isSet) {
+                return requests[i];
+            }
+        }
+        return requests[requests.length] = new SetRequest(this._jsongModel, this);
     },
 
     remove: function(request) {
@@ -27,22 +39,33 @@ RequestQueue.prototype = {
             }
         }
     },
-
-    request: function(requestedPaths, optimizedPaths, observer) {
+    
+    set: function(jsongEnv, observer) {
         var self = this;
+        var disposable = self._set().batch(jsongEnv, observer).flush();
 
-        // TODO: A contains check.
+        return {
+            dispose: function() {
+                disposable.dispose();
+            }
+        };
+    },
+
+    get: function(requestedPaths, optimizedPaths, observer) {
+        var self = this;
+        var disposable = null;
+
+        // TODO: get does not batch across requests.
         self._get().batch(requestedPaths, optimizedPaths, observer);
 
         if (!self._scheduled) {
             self._scheduled = true;
-            self._scheduler.schedule(self._flush.bind(self));
+            disposable = self._scheduler.schedule(self._flush.bind(self));
         }
 
         return {
             dispose: function() {
-                // TODO: 2 things to dispose of.
-                // TODO: Current batched requests (if any).
+                disposable.dispose();
             }
         };
     },
@@ -60,7 +83,6 @@ RequestQueue.prototype = {
 
         return {
             dispose: function() {
-                // TODO: In-flight batched requests.  This is just a place holder.
                 disposables.forEach(function(d) { d.dispose(); });
             }
         }
@@ -69,7 +91,74 @@ RequestQueue.prototype = {
 
 var REQUEST_ID = 0;
 
-var Request2 = function(jsongModel, queue) {
+var SetRequest = function(model, queue) {
+    var self = this;
+    self._jsongModel = model;
+    self._queue = queue;
+    self.observers = [];
+    self.jsongEnvs = [];
+    self.pending = false;
+    self.id = ++REQUEST_ID;
+    self.isSet = true;
+};
+
+SetRequest.prototype = {
+    batch: function(jsongEnv, observer) {
+        var self = this;
+        observer.onNext = observer.onNext || NOOP;
+        observer.onError = observer.onError || NOOP;
+        observer.onCompleted = observer.onCompleted || NOOP;
+
+        if (!observer.__observerId) {
+            observer.__observerId = ++REQUEST_ID;
+        }
+        observer._requestId = self.id;
+
+        self.observers[self.observers.length] = observer;
+        self.jsongEnvs[self.jsongEnvs.length] = jsongEnv;
+
+        return self;
+    },
+    flush: function() {
+        var incomingValues, query, op, len;
+        var self = this;
+        var jsongs = self.jsongEnvs;
+        var observers = self.observers;
+        var model = self._jsongModel;
+        self.pending = true;
+
+        // TODO: Set does not batch.
+        return model._dataSource.
+            set(jsongs[0]).
+            subscribe(function(response) {
+                incomingValues = response;
+            }, function(err) {
+                var i = -1;
+                var n = observers.length;
+                while (++i < n) {
+                    obs = observers[i];
+                    obs.onError && obs.onError(err);
+                }
+            }, function() {
+                var i, n, obs;
+                self._queue.remove(self);
+                i = -1;
+                n = observers.length;
+                while (++i < n) {
+                    obs = observers[i];
+                    obs.onNext && obs.onNext({
+                        jsong: incomingValues.jsong || incomingValues.value,
+                        paths: incomingValues.paths
+                    });
+                    obs.onCompleted && obs.onCompleted();
+                }
+            });
+    }
+};
+
+
+
+var GetRequest = function(jsongModel, queue) {
     var self = this;
     self._jsongModel = jsongModel;
     self._queue = queue;
@@ -78,9 +167,10 @@ var Request2 = function(jsongModel, queue) {
     self.requestedPaths = [];
     self.pending = false;
     self.id = ++REQUEST_ID;
+    self.isGet = true;
 };
 
-Request2.prototype = {
+GetRequest.prototype = {
 
     batch: function(requestedPaths, optimizedPaths, observer) {
         // TODO: Do we need to gap fill?
@@ -88,12 +178,6 @@ Request2.prototype = {
         observer.onNext = observer.onNext || NOOP;
         observer.onError = observer.onError || NOOP;
         observer.onCompleted = observer.onCompleted || NOOP;
-        var onNext = observer.onNext.bind(observer);
-
-        observer.onNext = function(value) {
-            // TODO: Do we need to do any intercepting?
-            onNext(value);
-        };
 
         if (!observer.__observerId) {
             observer.__observerId = ++REQUEST_ID;
@@ -119,47 +203,43 @@ Request2.prototype = {
         self._scheduled = false;
         self.pending = true;
 
-        function recurseGet(requested, optimized) {
-            var optimizedMaps = {};
-            var requestedMaps = {};
-            var r, o, i, j, obs, resultIndex;
-            for (i = 0, len = requested.length; i < len; i++) {
-                r = requested[i];
-                o = optimized[i];
-                obs = observers[i];
-                for (j = 0; j < r.length; j++) {
-                    pathsToMapWithObservers(r[j], 0, readyNode(requestedMaps, null, obs), obs);
-                    pathsToMapWithObservers(o[j], 0, readyNode(optimizedMaps, null, obs), obs);
-                }
+        var optimizedMaps = {};
+        var requestedMaps = {};
+        var r, o, i, j, obs, resultIndex;
+        for (i = 0, len = requested.length; i < len; i++) {
+            r = requested[i];
+            o = optimized[i];
+            obs = observers[i];
+            for (j = 0; j < r.length; j++) {
+                pathsToMapWithObservers(r[j], 0, readyNode(requestedMaps, null, obs), obs);
+                pathsToMapWithObservers(o[j], 0, readyNode(optimizedMaps, null, obs), obs);
             }
-            return model._dataSource.
-                get(collapse(optimizedMaps)).
-                subscribe(function(response) {
-                    incomingValues = response;
-                }, function(err) {
-                    var i = -1;
-                    var n = observers.length;
-                    while (++i < n) {
-                        obs = observers[i];
-                        obs.onError && obs.onError(err);
-                    }
-                }, function() {
-                    var i, n, obs;
-                    self._queue.remove(self);
-                    i = -1;
-                    n = observers.length;
-                    while (++i < n) {
-                        obs = observers[i];
-                        obs.onNext && obs.onNext({
-                            jsong: incomingValues.jsong || incomingValues.values || incomingValues.value,
-                            paths: incomingValues.paths
-                        });
-                        obs.onCompleted && obs.onCompleted();
-                    }
-                });
         }
-
-        return recurseGet(requested, optimized);
+        return model._dataSource.
+            get(collapse(optimizedMaps)).
+            subscribe(function(response) {
+                incomingValues = response;
+            }, function(err) {
+                var i = -1;
+                var n = observers.length;
+                while (++i < n) {
+                    obs = observers[i];
+                    obs.onError && obs.onError(err);
+                }
+            }, function() {
+                var i, n, obs;
+                self._queue.remove(self);
+                i = -1;
+                n = observers.length;
+                while (++i < n) {
+                    obs = observers[i];
+                    obs.onNext && obs.onNext({
+                        jsong: incomingValues.jsong || incomingValues.value,
+                        paths: incomingValues.paths
+                    });
+                    obs.onCompleted && obs.onCompleted();
+                }
+            });
     },
     // Returns the paths that are contained within this request.
     contains: function(requestedPaths, optimizedPaths) {
