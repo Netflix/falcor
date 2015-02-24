@@ -2,9 +2,22 @@
 
 ## What is Falcor?
 
-Every user wants to believe the entire cloud is stored on their device. Falcor creates this illusion for the developer.
+Every user wants to believe the entire cloud is stored on their device. Falcor lets web developers code that way.
 
-Application servers use Falcor to represent all of their cloud data sources as one *Virtual JSON object.* Clients work with the *Virtual JSON object* in the cloud in a manner similar to local JSON objects. Falcor transparently and efficiently manages all of the network communication needed to keep model data on the client and the server in sync.
+Elephant lets you build *One Isomorphic JSON model* for your application. On the client, developers code against the Isomorphic model as if it was stored in memory. In reality the data in the model could be stored anywhere: the client, the app server, or in multiple back end data stores.
+
+*Falcor is not a replacement for your database, your application server, or your MVC framework.* Instead Falcor is a protocol for client server communication which can allow these parts of your architecture to communicate more efficiently and conveniently.
+
+On the server, Elephant lets you create a Virtual Model. A Virtual model is as a view of the data in your backend data stores. Instead of being stored in memory or on disk, You create a virtual JSON model by matching path requests to routes that create sections of the document.
+
+Three-dimensional flexibility
+
+Developers code against the isomorphic model using the same API they used to code against a normal JSON object. 
+
+
+
+On the client you code against the model as if it was stored in memory, but the data might be cached locally, stored in memory on the server, or retrieved lazily from multiple data sources. Falcor transparently and efficiently manages all of the network communication needed to keep model data on the client and the server in sync.
+
 
 ### Getting Started
 
@@ -97,6 +110,8 @@ app.get('/person.json', function (req, res) {
 var server = app.listen(80);
 ```
 
+Now we've moved all of the data to the server without having to change the way in which we modify and retrieve data on the client. Now we can go one step further, and convert our server model to a virtual model so that we can store data in our backend data stores rather than in-memory on the Node server.
+
 ```JavaScript
 // Browser
 var person = new falcor.Model({
@@ -151,7 +166,6 @@ app.get('/person.json', function (req, res) {
 var server = app.listen(80);
 ```
 
-Now we've moved all of the data to the server without having to change the way in which we modify and retrieve data on the client. Now we can go one step further, and convert our server model to a virtual model so that we can store data in our backend data stores rather than in-memory on the Node server.
 
 # A Simple Issue Tracking App with Falcor
 
