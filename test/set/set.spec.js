@@ -52,7 +52,7 @@ function execute(useCache, oneModel, fillInReferences, hardLink) {
     }
 
     describe("Values", function () {
-        describe.only("should set a value directly", function () {
+        describe("should set a value directly", function () {
             setTestRunner(Values().direct, getOptions());
         });
         describe("should set a reference directly", function () {
