@@ -91,6 +91,7 @@ function setTestRunner(data, options) {
         var clearModel = options.clearModel === undefined && true || options.clearModel;
         var modelCache = options.modelCache || {};
         var thisModel = options.oneModel;
+        var count;
         prefixesAndSuffixes[0].
             filter(function (prefix) {
                 return ~prefix.indexOf("set");
@@ -98,20 +99,22 @@ function setTestRunner(data, options) {
             map(function (prefix) {
                 prefixesAndSuffixes[1].map(function (suffix) {
                     var query = data[prefix].query;
-                    var count = data[prefix].count === undefined ? 1 : 0;
                     var op = "_" + prefix + suffix;
                     model = thisModel || getModel(clearModel, _.cloneDeep(modelCache));
 
-                    count = Array(count).join(",").split(",").map(function() { return {}; });
+                    count = getCountArray(data[prefix]);
 
                     // Primes the cache with the appropriate references.
-                    query.forEach(function(q) {
-                        var paths = q.path || q.paths || jsong.__Internals.buildQueries(removeLeafs(_.cloneDeep(q)));
-                        options.fillReferences && fillInReferences(model, paths);
-                        if (options.hardLink) {
-                            model._getPathsAsValues(model, [paths]);
-                        }
-                    });
+                    // Note: JSONG should have all the required references
+                    if (prefix !== 'setJSONGs') {
+                        query.forEach(function(q) {
+                            var paths = q.path || q.paths || jsong.__Internals.buildQueries(removeLeafs(_.cloneDeep(q)));
+                            options.fillReferences && fillInReferences(model, paths);
+                            if (options.hardLink) {
+                                model._getPathsAsValues(model, [paths]);
+                            }
+                        });
+                    }
                     expectedValues = data[suffix];
                     expected = _.assign({}, expectedValues, universalExpectedValues);
 
@@ -125,9 +128,26 @@ function setTestRunner(data, options) {
 
                     // validates against the expected vs actual
                     testRunner.validateOperation(op, expected, actual);
+                    
+                    // reperform the get request with the getPaths* if available.
+                    query = data['getPaths'];
+                    if (query) {
+                        var suffixMessage = 'Confirming that ' + op + ' has correctly taken place.';
+                        op = "_getPaths" + suffix;
+                        count = getCountArray(data[prefix]);
+                        actual = model[op](model, _.cloneDeep(query), count, model._errorSelector);
+
+                        testRunner.validateData(expected, actual);
+                        testRunner.validateOperation(op, expected, actual, suffixMessage);
+                    }
                 });
             });
-    });
+        });
+    }
+
+    function getCountArray(data) {
+    var count = data.count === undefined ? 1 : 0;
+    return Array(count).join(",").split(",").map(function() { return {}; });
 }
 
 module.exports = setTestRunner;

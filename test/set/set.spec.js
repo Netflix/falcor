@@ -24,7 +24,7 @@ describe("Use One Model For All Operations With Preset Cache.", function() {
     var cache = Cache();
     function run(cache) {
         execute(true, getModel(cache));
-        execute(true, getModel(cache));
+        execute(false);
         execute(true, getModel(cache), false, true);
     }
     run(cache);
@@ -45,11 +45,14 @@ function execute(useCache, oneModel, fillInReferences, hardLink) {
         if (fillInReferences === false) {
             options.fillReferences = false;
         }
+        if (hardLink === true) {
+            options.hardLink = hardLink;
+        }
         return options;
     }
 
     describe("Values", function () {
-        describe("should set a value directly", function () {
+        describe.only("should set a value directly", function () {
             setTestRunner(Values().direct, getOptions());
         });
         describe("should set a reference directly", function () {

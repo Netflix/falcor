@@ -5,7 +5,7 @@ var Cache = require('../../data/Cache');
 var falcor = require('../../../bin/Falcor');
 var Rx = require('rx');
 
-var serverModel = new falcor.Model({cache: Cache()}).boxValues();
+var serverModel = new falcor.Model({cache: Cache()});
 var server = new FalcorServer(serverModel);
 
 // Simple middleware to handle get/post

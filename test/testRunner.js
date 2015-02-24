@@ -41,7 +41,7 @@ module.exports = {
         dataSource = dataSource || dataSource !== null && new LocalDataSource(Cache(), {errorSelector: errorSelector});
         cache = cache || Cache();
         return new Model({
-            dataSource: dataSource,
+            source: dataSource,
             cache: cache || {},
             errorSelector: errorSelector
         });
@@ -62,7 +62,7 @@ function validateData(expected, actual) {
     expect(Object.keys(expected).length, "expected.keys.length > 0").to.be.ok;
 }
 
-function validateOperation(name, expected, actual) {
+function validateOperation(name, expected, actual, messageSuffix) {
     expected = _.cloneDeep(expected);
 
     // Removes all 5 !== "5" errors when it comes to pathValues.
@@ -73,23 +73,23 @@ function validateOperation(name, expected, actual) {
 
     try {
         if (expected.values) {
-            expect(actual.values, name + ".values").
+            expect(actual.values, name + ".values " + messageSuffix).
                 to.deep.equals(expected.values);
         }
         if (expected.errors) {
-            expect(actual.errors, name + ".errors").
+            expect(actual.errors, name + ".errors " + messageSuffix).
                 to.deep.equals(expected.errors);
         }
         if (expected.optimizedPaths) {
-            expect(actual.optimizedPaths, name + ".optimizedPaths").
+            expect(actual.optimizedPaths, name + ".optimizedPaths " + messageSuffix).
                 to.deep.equals(expected.optimizedPaths);
         }
         if (expected.requestedMissingPaths) {
-            expect(actual.requestedMissingPaths, name + ".requestedMissingPaths").
+            expect(actual.requestedMissingPaths, name + ".requestedMissingPaths " + messageSuffix).
                 to.deep.equals(expected.requestedMissingPaths);
         }
         if (expected.optimizedMissingPaths) {
-            expect(actual.optimizedMissingPaths, name + ".optimizedMissingPaths").
+            expect(actual.optimizedMissingPaths, name + ".optimizedMissingPaths " + messageSuffix).
                 to.deep.equals(expected.optimizedMissingPaths);
         }
     } catch(e) {
