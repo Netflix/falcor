@@ -12,6 +12,7 @@ var chai = require("chai");
 var expect = chai.expect;
 var noOp = function() {};
 var getDataModel = testRunner.getModel;
+var jsongException = 'It is not legal to use the JSON Graph format from a bound Model. JSON Graph format can only be used from a root model.';
 describe('Bind', function() {
     it('should bind to an undefined sentinel and onCompleted.', function(done) {
         var model = getDataModel(null, Cache());
@@ -60,11 +61,16 @@ describe("BindSync", function() {
                 do(function(x) {
                     done('onNext called with value' + x + ' on a bound model requesting toJSONG().');
                 }, function(errs) {
-                    expect(errs[0].message).to.equals('It is not legal to use the JSON Graph format from a bound Model. JSON Graph format can only be used from a root model.');
-                    done();
+                    try {
+                        expect(errs[0].message).to.equals(testRunner.jsongBindException);
+                        done();
+                    } catch(e) {
+                        done(e);
+                    }
                 }, function() {
                     done('onCompleted called on a bound model requesting toJSONG().');
-                });
+                }).
+                subscribe();
         });
     });
     
@@ -126,21 +132,23 @@ describe("BindSync", function() {
         });
     });
     
-    describe('Set', function() {
-        it("should bind and set the value.", function(done) {
-            var model = getDataModel(null, Cache());
-            var expected = Bound().directValue;
-            model = model.bindSync(["videos", 1234]);
-            debugger;
-            model.
-                set({path: ["summary"], value: "pie"}).
-                flatMap(function() {
-                    return model.get(["summary"]);
-                }).
-                doOnNext(function() {
-                    testRunner.compare({json:{summary:"pie"}}, x);
-                }).
-                subscribe(noOp, done, done);
+    describe.only('Set', function() {
+        describe('Cache Only', function() {
+            it("should bind and set the value.", function(done) {
+                var model = getDataModel(null, Cache());
+                var expected = Bound().directValue;
+                model = model.bindSync(["videos", 1234]);
+                model.
+                    set({path: ["summary"], value: "pie"}).
+                    flatMap(function() {
+                        return model.get(["summary"]);
+                    }).
+                    doOnNext(function(x) {
+                        testRunner.compare({json:{summary:"pie"}}, x);
+                    }).
+                    subscribe(noOp, done, done);
+            });
         });
+        require('./bind.modelSource.AsValues.spec');
     });
 });

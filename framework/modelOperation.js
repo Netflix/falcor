@@ -30,9 +30,12 @@ function modelOperation(name) {
             var atLeastOneValue = false;
             var shouldRequest = true;
             var shouldRoute = true;
+            var isSlave = !!(model._dataSource || model._router);
             var routeMisses = {};
-            var isFirstSet = name === 'set';
+            var isFirstSet = name === 'set' && isSlave;
             var firstSetJSONGPaths;
+            var firstSetModel = model;
+            var firstSetRequested = [];
 
             if (hasSelector) {
                 for (var i = 0; i < args.length; i++) {
@@ -55,10 +58,15 @@ function modelOperation(name) {
                 // TODO: This does not consider setProgressively.
                 if (isFirstSet) {
                     setSeed = [{}];
+                    
+                    // If there is a bound path then we have to do some real magik
+                    if (model._path && model._path.length) {
+                        firstSetModel = model.clone(['_path', []]);
+                    }
                 }
 
-                var operations = getOperationArgGroups(requested, operationalName, format, setSeed || relativePathSetValues, hasSelector, !isFirstSet && isValues && onNext, errorSelector, isFirstSet);
-                var results = processOperations(model, operations);
+                var operations = getOperationArgGroups(requested, operationalName, format, setSeed || relativePathSetValues, hasSelector, !isFirstSet && isValues && onNext, errorSelector, isFirstSet, model._path);
+                var results = processOperations(isFirstSet && firstSetModel || model, operations);
                 isFirstSet && (firstSetJSONGPaths = []);
 
                 errors = errors.concat(results.errors);
@@ -215,11 +223,12 @@ function modelOperation(name) {
                     requestedPaths,
                     incomingValues,
                     indices,
-                        !isFirstSet && hasSelector,
-                        isFirstSet || seedRequired,
+                    !isFirstSet && hasSelector,
+                    isFirstSet || seedRequired,
                     valuesCount,
                     isFirstSet,
-                    args
+                    args,
+                    model._path
                 );
 
                 var newOperations = out.ops;
@@ -328,7 +337,7 @@ falcor.__Internals.fastCollapse = fastCollapse;
 
 // TODO: There is a performance win.  If i request from the core the requested paths,
 // then i should not have to collapse the JSON paths.
-function convertArgumentsToFromJSONG(args, remoteMessage) {
+function convertArgumentsToFromJSONG(args, remoteMessage, boundPath) {
     var newArgs = [];
     for (var i = 0, len = args.length; i < len; i++) {
         var argI = args[i];
@@ -342,24 +351,25 @@ function convertArgumentsToFromJSONG(args, remoteMessage) {
         }
         newArgs[newArgs.length] = {
             jsong: remoteMessage.jsong,
-            paths: paths
+            paths: paths,
+            boundPath: boundPath && boundPath.length && boundPath || undefined
         };
     }
+    
 
     return newArgs;
 }
 
-function getOperationsPartitionedByPathIndex(requestedPaths, incomingValues, previousIndices, hasSelector, seedRequired, valuesCount, isFirstSet, originalArgs) {
+function getOperationsPartitionedByPathIndex(requestedPaths, incomingValues, previousIndices, hasSelector, seedRequired, valuesCount, isFirstSet, originalArgs, boundPath) {
     var newOperations = [];
     var indices = [];
 
     if (isFirstSet) {
         indices = previousIndices;
-        newOperations = convertArgumentsToFromJSONG(originalArgs, incomingValues);
+        newOperations = convertArgumentsToFromJSONG(originalArgs, incomingValues, boundPath);
     } else {
         requestedPaths.forEach(function (r) {
             var op = newOperations[newOperations.length - 1];
-            var boundPath = r.boundPath;
             if (!op) {
                 op = newOperations[newOperations.length] = {jsong: incomingValues.jsong, paths: []};
             }
@@ -402,7 +412,7 @@ function getOperationsPartitionedByPathIndex(requestedPaths, incomingValues, pre
     return {ops: newOperations, indices: indices};
 }
 
-function getOperationArgGroups(ops, name, format, values, hasSelector, onNext, errorSelector, isFirstSet) {
+function getOperationArgGroups(ops, name, format, values, hasSelector, onNext, errorSelector, isFirstSet, boundPath) {
     var opFormat = (isFirstSet && 'AsJSONG' || format);
     var seedRequired = isSeedRequired(opFormat);
     var isValues = !seedRequired;
@@ -418,7 +428,7 @@ function getOperationArgGroups(ops, name, format, values, hasSelector, onNext, e
 
             // Sets the operation to jsong if its the first set.
             // We need this
-            op = Model.prototype['_' + methodName];
+            var op = Model.prototype['_' + methodName];
 
             if (type !== groupType) {
                 group = groups[groups.length] = [];
@@ -438,7 +448,13 @@ function getOperationArgGroups(ops, name, format, values, hasSelector, onNext, e
                 group.valuesOffset = valuesIndex;
                 group.errorSelector = errorSelector;
             }
-            group[group.length] = argument;
+            
+            if (isFirstSet && boundPath) {
+                group[group.length] = appendBoundPathToArgument(boundPath, argument, type);
+            } else {
+                group[group.length] = argument;
+            }
+            
             valueEnvelope = values[valuesIndex];
             if (seedRequired && hasSelector && !isFirstSet && valuesIndex < values.length && valueEnvelope) {
                 // This is the relative offset into the values array
@@ -451,6 +467,35 @@ function getOperationArgGroups(ops, name, format, values, hasSelector, onNext, e
 
             return groups;
         }, []);
+}
+
+function appendBoundPathToArgument(boundPath, argument, type) {
+    // Clones on PathValues so we can mutate.
+    if (type === 'Paths') {
+        if (argument.path) {
+            argument.path = boundPath.concat(argument.path);
+            return argument;
+        }
+        return boundPath.concat(argument);
+    } 
+    
+    else if (type === 'PathMaps') {
+        var prefix = {};
+        var curr = prefix;
+        for (var i = 0, len = boundPath.length; i < len - 1; i++) {
+            curr[boundPath[i]] = {};
+            curr = curr[boundPath[i]];
+        }
+
+        prefix[boundPath[i]] = argument;
+        return prefix;
+    }
+
+    var paths = [];
+    for (var i = 0, len = argument.paths.length; i < len; i++) {
+        paths[paths.length] = boundPath.concat(argument.paths[i]);
+    }
+    return {jsong: argument.jsong, paths: paths};
 }
 
 function processOperations(model, operations) {
