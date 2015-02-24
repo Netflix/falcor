@@ -141,11 +141,23 @@ RequestQueue.prototype = {
         var i = -1;
         var requests = this._requests;
         while (++i < requests.length) {
-            if (!requests[i].pending) {
+            if (!requests[i].pending && requests[i].isGet) {
                 return requests[i];
             }
         }
-        return requests[requests.length] = new Request2(this._jsongModel, this);
+        return requests[requests.length] = new GetRequest(this._jsongModel, this);
+    },
+    _set: function() {
+        var i = -1;
+        var requests = this._requests;
+        
+        // TODO: Set always sends off a request immediately, so there is no batching.
+        while (++i < requests.length) {
+            if (!requests[i].pending && requests[i].isSet) {
+                return requests[i];
+            }
+        }
+        return requests[requests.length] = new SetRequest(this._jsongModel, this);
     },
 
     remove: function(request) {
@@ -155,22 +167,33 @@ RequestQueue.prototype = {
             }
         }
     },
-
-    request: function(requestedPaths, optimizedPaths, observer) {
+    
+    set: function(jsongEnv, observer) {
         var self = this;
+        var disposable = self._set().batch(jsongEnv, observer).flush();
 
-        // TODO: A contains check.
+        return {
+            dispose: function() {
+                disposable.dispose();
+            }
+        };
+    },
+
+    get: function(requestedPaths, optimizedPaths, observer) {
+        var self = this;
+        var disposable = null;
+
+        // TODO: get does not batch across requests.
         self._get().batch(requestedPaths, optimizedPaths, observer);
 
         if (!self._scheduled) {
             self._scheduled = true;
-            self._scheduler.schedule(self._flush.bind(self));
+            disposable = self._scheduler.schedule(self._flush.bind(self));
         }
 
         return {
             dispose: function() {
-                // TODO: 2 things to dispose of.
-                // TODO: Current batched requests (if any).
+                disposable.dispose();
             }
         };
     },
@@ -188,7 +211,6 @@ RequestQueue.prototype = {
 
         return {
             dispose: function() {
-                // TODO: In-flight batched requests.  This is just a place holder.
                 disposables.forEach(function(d) { d.dispose(); });
             }
         }
@@ -197,7 +219,74 @@ RequestQueue.prototype = {
 
 var REQUEST_ID = 0;
 
-var Request2 = function(jsongModel, queue) {
+var SetRequest = function(model, queue) {
+    var self = this;
+    self._jsongModel = model;
+    self._queue = queue;
+    self.observers = [];
+    self.jsongEnvs = [];
+    self.pending = false;
+    self.id = ++REQUEST_ID;
+    self.isSet = true;
+};
+
+SetRequest.prototype = {
+    batch: function(jsongEnv, observer) {
+        var self = this;
+        observer.onNext = observer.onNext || NOOP;
+        observer.onError = observer.onError || NOOP;
+        observer.onCompleted = observer.onCompleted || NOOP;
+
+        if (!observer.__observerId) {
+            observer.__observerId = ++REQUEST_ID;
+        }
+        observer._requestId = self.id;
+
+        self.observers[self.observers.length] = observer;
+        self.jsongEnvs[self.jsongEnvs.length] = jsongEnv;
+
+        return self;
+    },
+    flush: function() {
+        var incomingValues, query, op, len;
+        var self = this;
+        var jsongs = self.jsongEnvs;
+        var observers = self.observers;
+        var model = self._jsongModel;
+        self.pending = true;
+
+        // TODO: Set does not batch.
+        return model._dataSource.
+            set(jsongs[0]).
+            subscribe(function(response) {
+                incomingValues = response;
+            }, function(err) {
+                var i = -1;
+                var n = observers.length;
+                while (++i < n) {
+                    obs = observers[i];
+                    obs.onError && obs.onError(err);
+                }
+            }, function() {
+                var i, n, obs;
+                self._queue.remove(self);
+                i = -1;
+                n = observers.length;
+                while (++i < n) {
+                    obs = observers[i];
+                    obs.onNext && obs.onNext({
+                        jsong: incomingValues.jsong || incomingValues.value,
+                        paths: incomingValues.paths
+                    });
+                    obs.onCompleted && obs.onCompleted();
+                }
+            });
+    }
+};
+
+
+
+var GetRequest = function(jsongModel, queue) {
     var self = this;
     self._jsongModel = jsongModel;
     self._queue = queue;
@@ -206,9 +295,10 @@ var Request2 = function(jsongModel, queue) {
     self.requestedPaths = [];
     self.pending = false;
     self.id = ++REQUEST_ID;
+    self.isGet = true;
 };
 
-Request2.prototype = {
+GetRequest.prototype = {
 
     batch: function(requestedPaths, optimizedPaths, observer) {
         // TODO: Do we need to gap fill?
@@ -216,12 +306,6 @@ Request2.prototype = {
         observer.onNext = observer.onNext || NOOP;
         observer.onError = observer.onError || NOOP;
         observer.onCompleted = observer.onCompleted || NOOP;
-        var onNext = observer.onNext.bind(observer);
-
-        observer.onNext = function(value) {
-            // TODO: Do we need to do any intercepting?
-            onNext(value);
-        };
 
         if (!observer.__observerId) {
             observer.__observerId = ++REQUEST_ID;
@@ -247,47 +331,43 @@ Request2.prototype = {
         self._scheduled = false;
         self.pending = true;
 
-        function recurseGet(requested, optimized) {
-            var optimizedMaps = {};
-            var requestedMaps = {};
-            var r, o, i, j, obs, resultIndex;
-            for (i = 0, len = requested.length; i < len; i++) {
-                r = requested[i];
-                o = optimized[i];
-                obs = observers[i];
-                for (j = 0; j < r.length; j++) {
-                    pathsToMapWithObservers(r[j], 0, readyNode(requestedMaps, null, obs), obs);
-                    pathsToMapWithObservers(o[j], 0, readyNode(optimizedMaps, null, obs), obs);
-                }
+        var optimizedMaps = {};
+        var requestedMaps = {};
+        var r, o, i, j, obs, resultIndex;
+        for (i = 0, len = requested.length; i < len; i++) {
+            r = requested[i];
+            o = optimized[i];
+            obs = observers[i];
+            for (j = 0; j < r.length; j++) {
+                pathsToMapWithObservers(r[j], 0, readyNode(requestedMaps, null, obs), obs);
+                pathsToMapWithObservers(o[j], 0, readyNode(optimizedMaps, null, obs), obs);
             }
-            return model._dataSource.
-                get(collapse(optimizedMaps)).
-                subscribe(function(response) {
-                    incomingValues = response;
-                }, function(err) {
-                    var i = -1;
-                    var n = observers.length;
-                    while (++i < n) {
-                        obs = observers[i];
-                        obs.onError && obs.onError(err);
-                    }
-                }, function() {
-                    var i, n, obs;
-                    self._queue.remove(self);
-                    i = -1;
-                    n = observers.length;
-                    while (++i < n) {
-                        obs = observers[i];
-                        obs.onNext && obs.onNext({
-                            jsong: incomingValues.jsong || incomingValues.values || incomingValues.value,
-                            paths: incomingValues.paths
-                        });
-                        obs.onCompleted && obs.onCompleted();
-                    }
-                });
         }
-
-        return recurseGet(requested, optimized);
+        return model._dataSource.
+            get(collapse(optimizedMaps)).
+            subscribe(function(response) {
+                incomingValues = response;
+            }, function(err) {
+                var i = -1;
+                var n = observers.length;
+                while (++i < n) {
+                    obs = observers[i];
+                    obs.onError && obs.onError(err);
+                }
+            }, function() {
+                var i, n, obs;
+                self._queue.remove(self);
+                i = -1;
+                n = observers.length;
+                while (++i < n) {
+                    obs = observers[i];
+                    obs.onNext && obs.onNext({
+                        jsong: incomingValues.jsong || incomingValues.value,
+                        paths: incomingValues.paths
+                    });
+                    obs.onCompleted && obs.onCompleted();
+                }
+            });
     },
     // Returns the paths that are contained within this request.
     contains: function(requestedPaths, optimizedPaths) {
@@ -391,7 +471,7 @@ function rangeCollapse(paths) {
 /* jshint forin: false */
 function buildQueries(root) {
 
-    if(root == null) {
+    if (root == null || typeof root !== 'object') {
         return [ [] ];
     }
 
@@ -506,6 +586,527 @@ function createKey(list) {
 // Note: For testing
 falcor.__Internals.buildQueries = buildQueries;
 
+function modelOperation(name) {
+    return function() {
+
+        var model = this, root = model._root,
+            args = Array.prototype.slice.call(arguments),
+            selector = args[args.length - 1];
+
+        selector = typeof selector === "function" ? args.pop() : undefined;
+
+        return ModelResponse.create(function(options) {
+
+            var onNext = options.onNext.bind(options),
+                onError = options.onError.bind(options),
+                onCompleted = options.onCompleted.bind(options),
+                isProgressive = options.isProgressive,
+                valuesCount = selector && selector.length || 0;
+            var operationalName = name;
+            var disposed = false;
+            var hasSelector = !!selector;
+            var format = hasSelector && 'AsJSON' || options.format || 'AsPathMap';
+            var isJSONG = format === 'AsJSONG';
+            var seedRequired = isSeedRequired(format);
+            var isValues = format === 'AsValues';
+            var pathSetValues = [];
+            var errors = [];
+            var indices = [];
+            var undefineds = [];
+            var jsongPaths = [];
+            var errorSelector = options.errorSelector || model._errorSelector;
+            var atLeastOneValue = false;
+            var shouldRequest = true;
+            var shouldRoute = true;
+            var routeMisses = {};
+            var isFirstSet = name === 'set';
+            var firstSetJSONGPaths;
+
+            if (hasSelector) {
+                for (var i = 0; i < args.length; i++) {
+                    if (i < valuesCount) {
+                        pathSetValues[pathSetValues.length] = Object.create(null);
+                    }
+                    undefineds[undefineds.length] = false;
+                    indices[indices.length] = i;
+                }
+            } else if (seedRequired) {
+                pathSetValues[0] = Object.create(null);
+                undefineds[0] = true;
+            }
+
+            function recurse(requested, relativePathSetValues) {
+                if (disposed) { return; }
+                var setSeed = false;
+
+                // Note: We have to swap seeds for the first set since we must enforce jsong.
+                // TODO: This does not consider setProgressively.
+                if (isFirstSet) {
+                    setSeed = [{}];
+                }
+
+                var operations = getOperationArgGroups(requested, operationalName, format, setSeed || relativePathSetValues, hasSelector, !isFirstSet && isValues && onNext, errorSelector, isFirstSet);
+                var results = processOperations(model, operations);
+                isFirstSet && (firstSetJSONGPaths = []);
+
+                errors = errors.concat(results.errors);
+                atLeastOneValue = atLeastOneValue || results.valuesReceived;
+
+                // from each of the operations, the results must be remerged back into the values array
+                operations.forEach(function(op) {
+                    if (!isFirstSet && hasSelector) {
+                        var absoluteIndex;
+                        var hasIndex;
+                        op.values.forEach(function(valueObject, i) {
+                            absoluteIndex = indices[i + op.valuesOffset];
+                            hasIndex = typeof absoluteIndex === 'number';
+                            if (hasIndex) {
+                                if (valueObject) {
+                                    if (valueObject.json !== undefined) {
+                                        pathSetValues[absoluteIndex] = valueObject;
+                                    } else {
+                                        pathSetValues[absoluteIndex] = {json: valueObject};
+                                    }
+                                    undefineds[absoluteIndex] = false;
+                                } else {
+                                    undefineds[absoluteIndex] = undefineds[absoluteIndex] && true;
+                                }
+                            }
+                        });
+                    } else if (seedRequired && !isFirstSet) {
+                        if (op.values[0]) {
+                            pathSetValues = op.values;
+                            undefineds[0] = false;
+                            if (isJSONG && !isFirstSet) {
+                                jsongPaths = jsongPaths.concat(op.values[0].paths);
+                            }
+                        } else {
+                            undefineds[0] = true;
+                        }
+                    } else if (isFirstSet) {
+                        firstSetJSONGPaths = firstSetJSONGPaths.concat(op.values[0].paths);
+                    }
+                });
+                var nextRequest = results.requestedMissingPaths;
+                var missingLength = nextRequest.length;
+
+                // There is never missing paths on a set since we set through values
+                if (isFirstSet) {
+                    missingLength = 1;
+                    nextRequest = {jsong: setSeed[0], paths: firstSetJSONGPaths};
+                }
+
+                // no need to inform the user of the current state if in value mode
+                if (isProgressive && missingLength && !isValues) {
+                    emitValues();
+                }
+
+                // We access the router first before going off to the source.
+                if (missingLength && model._router && shouldRoute) {
+                    routerRecurse(nextRequest, results, relativePathSetValues);
+                }
+
+                // We contine looking into the modelSource if the router does not exist / shouldRoute
+                // is no longer true.
+                else if (missingLength && shouldRequest && model._dataSource) {
+                    modelSourceRequest(nextRequest, results, relativePathSetValues);
+                }
+
+                // Once we have exhausted all external resources or found all data we
+                // emit values and complete.
+                else {
+                    emitValues();
+                    executeOnErrorOrCompleted();
+                }
+            }
+
+            function routerRecurse(nextRequest, results, relativePathSetValues) {
+                var incomingValues;
+                var optPaths = results.optimizedMissingPaths;
+                for (var i = 0; i < nextRequest.length; i++) {
+                    nextRequest[i]._routerIndex = i;
+                    optPaths[i]._routerIndex = i;
+                }
+                var opts = optPaths.filter(function(p) { return !PathLibrary.simplePathInMap(p, routeMisses); });
+                if (opts.length && opts.length !== optPaths.length) {
+                    var optMap = opts.reduce(function(acc, o) {
+                        acc[o._routerIndex] = true;
+                        return acc;
+                    }, {});
+                    nextRequest = nextRequest.filter(function(r) { return optMap[r._routerIndex]; });
+                }
+
+                if (opts.length) {
+                    model._router[name](opts).
+                        subscribe(function(jsongEnv) {
+                            incomingValues = jsongEnv;
+                            incomingValues.paths = nextRequest;
+                        }, function(err) {
+                            // TODO: Should this ever happen?
+                        }, function() {
+                            opts.forEach(function(p) { PathLibrary.pathToMap(p, routeMisses); });
+                            completeRecursion(nextRequest, incomingValues, relativePathSetValues);
+                        });
+                } else {
+
+                    // TODO: support both router and modelSource (note selector functions).
+                    shouldRoute = false;
+                    shouldRequest = false;
+                    completeRecursion([], {jsong: {}, paths: [[]]}, relativePathSetValues);
+                }
+            }
+
+            function modelSourceRequest(nextRequest, results, relativePathSetValues) {
+                var incomingValues;
+                var requestedPaths = isFirstSet ? nextRequest.paths : nextRequest;
+                var observer = {
+                    onNext: function(jsongEnvelop) {
+                        incomingValues = jsongEnvelop;
+                    },
+                    onError: function(err) {
+                        // When an error is thrown, all currently requested paths are
+                        // inserted as errors and the output format is not needed.
+                        // TODO: There must be a way to make this more efficient.
+                        var out = model._setPathsAsValues.apply(null, [model].concat(
+                            requestedPaths.
+                                reduce(function(acc, r) {
+                                    acc[0].push({
+                                        path: r,
+                                        value: err
+                                    });
+                                    return acc;
+                                }, [[]]),
+                            undefined,
+                            model._errorSelector
+                        ));
+                        errors = errors.concat(out.errors);
+
+                        // there could still be values within the cache
+                        emitValues();
+                        executeOnErrorOrCompleted();
+                    },
+                    onCompleted: function() {
+                        shouldRequest = false;
+                        completeRecursion(requestedPaths, incomingValues, relativePathSetValues);
+                    }
+                };
+
+                if (name === 'set') {
+                    model._request.set(nextRequest, observer);
+                } else {
+                    model._request.get(nextRequest, results.optimizedMissingPaths, observer);
+                }
+            }
+
+            function completeRecursion(requestedPaths, incomingValues, relativePathSetValues) {
+                var out = getOperationsPartitionedByPathIndex(
+                    requestedPaths,
+                    incomingValues,
+                    indices,
+                        !isFirstSet && hasSelector,
+                        isFirstSet || seedRequired,
+                    valuesCount,
+                    isFirstSet,
+                    args
+                );
+
+                var newOperations = out.ops;
+                indices = out.indices;
+
+                operationalName = 'set';
+                isFirstSet = false;
+
+                // Note: We do not request missing paths again.
+                if (hasSelector) {
+                    var arr = [];
+                    for (var i = 0; i < indices.length; i++) {
+                        arr[arr.length] = relativePathSetValues[indices[i]];
+                    }
+                    recurse(newOperations, arr);
+                } else if (seedRequired) {
+                    recurse(newOperations, pathSetValues);
+                } else {
+                    recurse(newOperations, []);
+                }
+            }
+
+            try {
+                recurse(args, pathSetValues);
+            } catch(e) {
+                errors = [e];
+                executeOnErrorOrCompleted();
+            }
+
+            function emitValues() {
+                if (disposed) {
+                    return;
+                }
+
+                root.allowSync = true;
+                if (atLeastOneValue) {
+                    if (hasSelector) {
+                        if (valuesCount > 0) {
+                            // they should be wrapped in json items
+                            onNext(selector.apply(model, pathSetValues.map(function(x, i) {
+                                if (undefineds[i]) {
+                                    return undefined;
+                                }
+
+                                return x && x.json;
+                            })));
+                        } else {
+                            onNext(selector.call(model));
+                        }
+                    } else if (!isValues && !model._progressive) {
+                        // this means there is an onNext function that is not AsValues or progressive,
+                        // therefore there must only be one onNext call, which should only be the 0
+                        // index of the values of the array
+                        if (isJSONG) {
+                            pathSetValues[0].paths = jsongPaths;
+                        }
+                        onNext(pathSetValues[0]);
+                    }
+                }
+                root.allowSync = false;
+            }
+
+            function executeOnErrorOrCompleted() {
+                if (disposed) {
+                    return;
+                }
+
+                root.allowSync = true;
+                if (errors.length) {
+                    onError(errors);
+                } else {
+                    onCompleted();
+                }
+                root.allowSync = false;
+            }
+
+            return {
+                dispose: function() {
+                    disposed = true;
+                }
+            };
+        });
+    }
+}
+
+function fastCollapse(paths) {
+    return paths.reduce(function(acc, p) {
+        var curr = acc[0];
+        if (!curr) {
+            acc[0] = p;
+        } else {
+            p.forEach(function(v, i) {
+                // i think
+                if (typeof v === 'object') {
+                    v.forEach(function(value) {
+                        curr[i][curr[i].length] = value;
+                    });
+                }
+            });
+        }
+        return acc;
+    }, []);
+}
+
+falcor.__Internals.fastCollapse = fastCollapse;
+
+// TODO: There is a performance win.  If i request from the core the requested paths,
+// then i should not have to collapse the JSON paths.
+function convertArgumentsToFromJSONG(args, remoteMessage) {
+    var newArgs = [];
+    for (var i = 0, len = args.length; i < len; i++) {
+        var argI = args[i];
+        var paths;
+        if (isJSONG(argI)) {
+            paths = argI.paths;
+        } else if (isPathOrPathValue(argI)) {
+            paths = [argI.path || argI];
+        } else {
+            paths = collapse(argI);
+        }
+        newArgs[newArgs.length] = {
+            jsong: remoteMessage.jsong,
+            paths: paths
+        };
+    }
+
+    return newArgs;
+}
+
+function getOperationsPartitionedByPathIndex(requestedPaths, incomingValues, previousIndices, hasSelector, seedRequired, valuesCount, isFirstSet, originalArgs) {
+    var newOperations = [];
+    var indices = [];
+
+    if (isFirstSet) {
+        indices = previousIndices;
+        newOperations = convertArgumentsToFromJSONG(originalArgs, incomingValues);
+    } else {
+        requestedPaths.forEach(function (r) {
+            var op = newOperations[newOperations.length - 1];
+            var boundPath = r.boundPath;
+            if (!op) {
+                op = newOperations[newOperations.length] = {jsong: incomingValues.jsong, paths: []};
+            }
+            if (hasSelector) {
+                if (typeof r.pathSetIndex !== 'undefined') {
+                    var pathSetIndex = r.pathSetIndex;
+                    var absoluteIndex = previousIndices[pathSetIndex];
+                    var hasIndex = typeof absoluteIndex === 'number' && absoluteIndex < valuesCount;
+                    if (op && op.pathSetIndex !== pathSetIndex && typeof op.pathSetIndex !== 'undefined') {
+                        if (op && op.paths.length > 1) {
+                            op.paths = fastCollapse(op.paths);
+                        }
+                        op = newOperations[newOperations.length] = {jsong: incomingValues.jsong, paths: []};
+                        op.pathSetIndex = pathSetIndex;
+                        hasIndex && (indices[indices.length] = absoluteIndex);
+                    } else if (typeof op.pathSetIndex === 'undefined') {
+                        hasIndex && (op.pathSetIndex = pathSetIndex);
+                        hasIndex && (indices[indices.length] = absoluteIndex);
+                    }
+                }
+            } else if (seedRequired) {
+                // single seed white board
+            } else {
+                // isValues
+            }
+            op.paths[op.paths.length] = r;
+            op.boundPath = op.boundPath || boundPath && boundPath.length && boundPath || undefined;
+        });
+
+        // Note: We have fast collapsed all operations at their closing for the next operation.
+        // so the last one needs to be collapsed
+        if (hasSelector) {
+            var op = newOperations[newOperations.length - 1];
+            if (op && op.paths.length > 1) {
+                op.paths = fastCollapse(op.paths);
+            }
+        }
+    }
+
+    return {ops: newOperations, indices: indices};
+}
+
+function getOperationArgGroups(ops, name, format, values, hasSelector, onNext, errorSelector, isFirstSet) {
+    var opFormat = (isFirstSet && 'AsJSONG' || format);
+    var seedRequired = isSeedRequired(opFormat);
+    var isValues = !seedRequired;
+    var valuesIndex = 0, valueEnvelope;
+    return ops.
+        map(cloneIfPathOrPathValue).
+        reduce(function(groups, argument, index) {
+            var group = groups[groups.length - 1],
+                type  = isPathOrPathValue(argument) ? "Paths" :
+                    isJSONG(argument) ? "JSONGs" : "PathMaps",
+                groupType = group && group.type,
+                methodName = name + type + opFormat;
+
+            // Sets the operation to jsong if its the first set.
+            // We need this
+            op = Model.prototype['_' + methodName];
+
+            if (type !== groupType) {
+                group = groups[groups.length] = [];
+            }
+
+            group.boundPath = type === "JSONGs" && argument.boundPath || undefined;
+
+            if (groupType === null || type !== groupType) {
+                group.methodName = methodName;
+                group.format = opFormat;
+                group.type = type;
+                group.op = op;
+                group.isSeedRequired = seedRequired;
+                group.isValues = isValues;
+                group.values = [];
+                group.onNext = onNext;
+                group.valuesOffset = valuesIndex;
+                group.errorSelector = errorSelector;
+            }
+            group[group.length] = argument;
+            valueEnvelope = values[valuesIndex];
+            if (seedRequired && hasSelector && !isFirstSet && valuesIndex < values.length && valueEnvelope) {
+                // This is the relative offset into the values array
+                group.values[group.values.length] = valueEnvelope.json || valueEnvelope.jsong || valueEnvelope;
+                valuesIndex++;
+            } else if (((!hasSelector && seedRequired) || isFirstSet) && valueEnvelope) {
+                // no need to know the value index
+                group.values[group.values.length] = valueEnvelope.json || valueEnvelope.jsong || valueEnvelope;
+            }
+
+            return groups;
+        }, []);
+}
+
+function processOperations(model, operations) {
+    // no value has to be kept track of since its all in the 'values' array that is attached
+    // to each operation
+    return operations.reduce(function(memo, operation) {
+
+        var boundPath = model._path;
+
+        if(boundPath.length > 0 && operation.format === "AsJSONG") {
+            throw new Error("It is not legal to use the JSON Graph format from a bound Model. JSON Graph format can only be used from a root model.");
+        }
+
+        var results = operation.isValues ?
+            operation.op(model, operation, operation.onNext, operation.errorSelector, operation.boundPath) :
+            operation.op(model, operation, operation.values, operation.errorSelector, operation.boundPath);
+        var missing = results.requestedMissingPaths;
+        var offset = operation.valuesOffset;
+
+        for (var i = 0, len = missing.length; i < len; i++) {
+            missing[i].boundPath = boundPath;
+            missing[i].pathSetIndex += offset;
+        }
+
+        memo.requestedMissingPaths = memo.requestedMissingPaths.concat(missing);
+        memo.optimizedMissingPaths = memo.optimizedMissingPaths.concat(results.optimizedMissingPaths);
+        memo.errors = memo.errors.concat(results.errors);
+        memo.valuesReceived = memo.valuesReceived || results.requestedPaths.length > 0;
+
+        return memo;
+    }, {
+        errors: [],
+        requestedMissingPaths: [],
+        optimizedMissingPaths: [],
+        valuesReceived: false
+    });
+}
+
+function not() {
+    var fns = Array.prototype.slice.call(arguments);
+    return function() {
+        var args = arguments;
+        return !fns.every(function(fn) {
+            return fn.apply(null, args);
+        });
+    }
+}
+
+function isPathOrPathValue(x) {
+    return !!(Array.isArray(x)) || (
+        x.hasOwnProperty("path") && x.hasOwnProperty("value"));
+}
+
+function isJSONG(x) {
+    return x.hasOwnProperty("jsong");
+}
+
+function isSeedRequired(format) {
+    return format === 'AsJSON' || format === 'AsJSONG' || format === 'AsPathMap';
+}
+
+function cloneIfPathOrPathValue(x) {
+    return (Array.isArray(x) && x.concat()) || (
+        x.hasOwnProperty("path") && x.hasOwnProperty("value") && (
+        x.path = x.path.concat()) && x || x) || x;
+}
+
+
 
 falcor.Model = Model;
 
@@ -514,7 +1115,7 @@ Model.EXPIRES_NEVER = falcor.EXPIRES_NEVER;
 
 function Model(options) {
     options || (options = {});
-    this._dataSource = options.dataSource;
+    this._dataSource = options.source;
     this._maxSize = options.maxSize || Math.pow(2, 53) - 1;
     this._collectRatio = options.collectRatio || 0.75;
     this._scheduler = new falcor.ImmediateScheduler();
@@ -594,9 +1195,6 @@ Model.prototype = {
                 });
             }
         });
-    },
-    setRetryCount: function(x) {
-        return this.clone(["_retryMax", x]);
     },
     setCache: function(cache) {
         return this._setPathMapsAsValues(this, [cache], undefined, this._errorSelector, []);
@@ -697,10 +1295,7 @@ Model.prototype = {
         }
         return true;
     },
-    addVirtualPaths: function(pathsAndActions) {
-        this._virtualPaths = addVirtualPaths(pathsAndActions, this);
-    },
-    
+
     _getBoundContext         :       getBoundContext,
     _getBoundValue           :         getBoundValue,
     
@@ -743,461 +1338,6 @@ Model.prototype = {
     _invPathMapsAsJSONG      :    invalidatePathMaps
 };
 
-function modelOperation(name) {
-    return function() {
-        
-        var model = this, root = model._root,
-            args = Array.prototype.slice.call(arguments),
-            selector = args[args.length - 1];
-
-        selector = typeof selector === "function" ? args.pop() : undefined;
-        
-        return ModelResponse.create(function(options) {
-            
-            var onNext = options.onNext.bind(options),
-                onError = options.onError.bind(options),
-                onCompleted = options.onCompleted.bind(options),
-                isProgressive = options.isProgressive,
-                valuesCount = selector && selector.length || 0;
-            var operationalName = name;
-            var disposed = false;
-            var hasSelector = !!selector;
-            var format = hasSelector && 'AsJSON' || options.format || 'AsPathMap';
-            var isJSONG = format === 'AsJSONG';
-            var seedRequired = isSeedRequired(format);
-            var isValues = format === 'AsValues';
-            var pathSetValues = [];
-            var errors = [];
-            var indices = [];
-            var undefineds = [];
-            var jsongPaths = [];
-            var errorSelector = options.errorSelector || model._errorSelector;
-            var atLeastOneValue = false;
-            var shouldRequest = true;
-            var shouldRoute = true;
-            var routeMisses = {};
-            var firstRecurse = true;
-
-            // TODO: Should be defined on the model.
-            var retryMax = model._retryCount;
-
-            if (hasSelector) {
-                for (var i = 0; i < args.length; i++) {
-                    if (i < valuesCount) {
-                        pathSetValues[pathSetValues.length] = Object.create(null);
-                    }
-                    undefineds[undefineds.length] = false;
-                    indices[indices.length] = i;
-                }
-            } else if (seedRequired) {
-                pathSetValues[0] = Object.create(null);
-                undefineds[0] = true;
-            }
-
-            function recurse(requested, relativePathSetValues) {
-                var operations = getOperationArgGroups(requested, operationalName, format, relativePathSetValues, hasSelector, isValues && onNext, errorSelector);
-                var results = processOperations(model, operations);
-                
-                errors = errors.concat(results.errors);
-                atLeastOneValue = atLeastOneValue || results.valuesReceived;
-
-                // from each of the operations, the results must be remerged back into the values array
-                operations.forEach(function(op) {
-                    if (hasSelector) {
-                        var absoluteIndex;
-                        var hasIndex;
-                        op.values.forEach(function(valueObject, i) {
-                            absoluteIndex = indices[i + op.valuesOffset];
-                            hasIndex = typeof absoluteIndex === 'number';
-                            if (hasIndex) {
-                                if (valueObject) {
-                                    if (valueObject.json !== undefined) {
-                                        pathSetValues[absoluteIndex] = valueObject;
-                                    } else {
-                                        pathSetValues[absoluteIndex] = {json: valueObject};
-                                    }
-                                    undefineds[absoluteIndex] = false;
-                                } else {
-                                    undefineds[absoluteIndex] = undefineds[absoluteIndex] && true;
-                                }
-                            }
-                        });
-                    } else if (seedRequired) {
-                        if (op.values[0]) {
-                            pathSetValues = op.values;
-                            undefineds[0] = false;
-                            if (isJSONG) {
-                                jsongPaths = jsongPaths.concat(op.values[0].paths);
-                            }
-                        } else {
-                            undefineds[0] = true;
-                        }
-                    }
-                });
-                var nextRequest = results.requestedMissingPaths;
-                var optPaths = results.optimizedMissingPaths;
-                var missingLength = nextRequest.length;
-                var incomingValues;
-
-                // no need to inform the user of the current state if in value mode
-                if (isProgressive && missingLength && !isValues) {
-                    emitValues();
-                }
-                
-                // We access the router first before going off to the source.
-                if (missingLength && model._router && shouldRoute) {
-                    routerRecurse(nextRequest, results, relativePathSetValues);
-                } 
-                
-                // We contine looking into the modelSource if the router does not exist / shouldRoute
-                // is no longer true.
-                // TODO: When we set externally we will need to review this statement.
-                else if (missingLength && shouldRequest && model._dataSource &&
-                    operationalName !== 'set') { 
-                    modelSourceRecurse(nextRequest, results, relativePathSetValues);
-                } else {
-                    emitValues();
-                    executeOnErrorOrCompleted();
-                }
-            }
-            
-            
-            // TODO: This is not very performant to create these functions per 
-            // TODO: subscription to ModelResponse from a get/set
-            function routerRecurse(nextRequest, results, relativePathSetValues) {
-                // TODO: make a set version available.
-                var incomingValues;
-                var optPaths = results.optimizedMissingPaths;
-                for (var i = 0; i < nextRequest.length; i++) {
-                    nextRequest[i]._routerIndex = i;
-                    optPaths[i]._routerIndex = i;
-                }
-                firstRecurse = false;
-                var opts = optPaths.filter(function(p) { return !PathLibrary.simplePathInMap(p, routeMisses); });
-                if (opts.length && opts.length !== optPaths.length) {
-                    var optMap = opts.reduce(function(acc, o) { 
-                        acc[o._routerIndex] = true;
-                        return acc;
-                    }, {});
-                    nextRequest = nextRequest.filter(function(r) { return optMap[r._routerIndex]; });
-                } else if (!opts.length) {
-                    nextRequest = [];
-                }
-                model._router[name](opts).
-                    subscribe(function(jsongEnv) {
-                        
-                        // For preservation of the structure, we copy the requested paths 
-                        // back into the incomingValues
-                        incomingValues = jsongEnv;
-                        incomingValues.paths = nextRequest.concat();
-                        
-                        // TODO: Why cant the router report missing paths?
-                        // TODO: Then we can strip the paths from the next request
-                    }, function(err) {
-                        // TODO: Should this ever happen?
-                    }, function() {
-                        opts.forEach(function(p) { PathLibrary.pathToMap(p, routeMisses); });
-                        // onCompleted only
-                        if (!incomingValues) {
-                            shouldRoute = false;
-                            incomingValues = {jsong: {}, paths: nextRequest}
-                        }
-                        completeRecursion(nextRequest, incomingValues, relativePathSetValues);
-                    });
-            }
-            
-            function modelSourceRecurse(nextRequest, results, relativePathSetValues) {
-                var incomingValues;
-                model._request.request(nextRequest, results.optimizedMissingPaths, {
-                    onNext: function(jsongEnvelop) {
-                        incomingValues = jsongEnvelop;
-                    },
-                    onError: function(err) {
-                        // When an error is thrown, all currently requested paths are
-                        // inserted as errors and the output format is not needed.
-                        // TODO: There must be a way to make this more efficient.
-                        var out = model._setPathsAsValues.apply(null, [model].concat(
-                            nextRequest.
-                                reduce(function(acc, r) {
-                                    acc[0].push({
-                                        path: r,
-                                        value: err
-                                    });
-                                    return acc;
-                                }, [[]]),
-                            undefined,
-                            model._errorSelector
-                        ));
-                        errors = errors.concat(out.errors);
-
-                        // there could still be values within the cache
-                        emitValues();
-                        executeOnErrorOrCompleted();
-                    },
-                    onCompleted: function() {
-                        shouldRequest = false;
-                        completeRecursion(nextRequest, incomingValues, relativePathSetValues);
-                    }
-                });
-            }
-            
-            function completeRecursion(requestedPaths, incomingValues, relativePathSetValues) {
-                var out = getOperationsPartitionedByPathIndex(requestedPaths, incomingValues, indices, hasSelector, seedRequired, valuesCount);
-                var newOperations = out.ops;
-                indices = out.indices;
-
-                // Note: We fast collapse all hasSelector ops.
-                // TODO: shouldn't we be able to go through all the operations and fast collapse?
-                if (hasSelector) {
-                    var op = newOperations[newOperations.length - 1];
-                    if (op && op.paths.length > 1) {
-                        op.paths = fastCollapse(op.paths);
-                    }
-                }
-                operationalName = 'set';
-
-                // Note: We do not request missing paths again.
-                if (hasSelector) {
-                    var arr = [];
-                    for (var i = 0; i < indices.length; i++) {
-                        arr[arr.length] = relativePathSetValues[indices[i]];
-                    }
-                    recurse(newOperations, arr);
-                } else if (seedRequired) {
-                    recurse(newOperations, pathSetValues);
-                } else {
-                    recurse(newOperations, []);
-                }
-            }
-
-            try {
-                recurse(args, pathSetValues);
-            } catch(e) {
-                errors = [e];
-                executeOnErrorOrCompleted();
-            }
-
-            function emitValues() {
-                if (disposed) {
-                    return;
-                }
-
-                root.allowSync = true;
-                if (atLeastOneValue) {
-                    if (hasSelector) {
-                        if (valuesCount > 0) {
-                            // they should be wrapped in json items
-                            onNext(selector.apply(model, pathSetValues.map(function(x, i) {
-                                if (undefineds[i]) {
-                                    return undefined;
-                                }
-
-                                return x && x.json;
-                            })));
-                        } else {
-                            onNext(selector.call(model));
-                        }
-                    } else if (!isValues && !model._progressive) {
-                        // this means there is an onNext function that is not AsValues or progressive,
-                        // therefore there must only be one onNext call, which should only be the 0
-                        // index of the values of the array
-                        if (isJSONG) {
-                            pathSetValues[0].paths = jsongPaths;
-                        }
-                        onNext(pathSetValues[0]);
-                    }
-                }
-                root.allowSync = false;
-            }
-
-            function executeOnErrorOrCompleted() {
-                if (disposed) {
-                    return;
-                }
-
-                root.allowSync = true;
-                if (errors.length) {
-                    onError(errors);
-                } else {
-                    onCompleted();
-                }
-                root.allowSync = false;
-            }
-
-            return {
-                dispose: function() {
-                    disposed = true;
-                }
-            };
-        });
-    }
-}
-
-function fastCollapse(paths) {
-    return paths.reduce(function(acc, p) {
-        var curr = acc[0];
-        if (!curr) {
-            acc[0] = p;
-        } else {
-            p.forEach(function(v, i) {
-                // i think
-                if (typeof v === 'object') {
-                    curr[curr[i].length] = v[0];
-                }
-            });
-        }
-        return acc;
-    }, []);
-}
-
-function getOperationsPartitionedByPathIndex(requestedPaths, incomingValues, previousIndices, hasSelector, seedRequired, valuesCount) {
-    var newOperations = [];
-    var indices = [];
-    requestedPaths.forEach(function (r) {
-        var op = newOperations[newOperations.length - 1];
-        var boundPath = r.boundPath;
-        if (!op) {
-            op = newOperations[newOperations.length] = {jsong: incomingValues.jsong, paths: []};
-        }
-        if (hasSelector) {
-            if (typeof r.pathSetIndex !== 'undefined') {
-                var pathSetIndex = r.pathSetIndex;
-                var absoluteIndex = previousIndices[pathSetIndex];
-                var hasIndex = typeof absoluteIndex === 'number' && absoluteIndex < valuesCount;
-                if (op && op.pathSetIndex !== pathSetIndex && typeof op.pathSetIndex !== 'undefined') {
-                    if (op && op.paths.length > 1) {
-                        op.paths = fastCollapse(op.paths);
-                    }
-                    op = newOperations[newOperations.length] = {jsong: incomingValues.jsong, paths: []};
-                    op.pathSetIndex = pathSetIndex;
-                    hasIndex && (indices[indices.length] = absoluteIndex);
-                } else if (typeof op.pathSetIndex === 'undefined') {
-                    hasIndex && (op.pathSetIndex = pathSetIndex);
-                    hasIndex && (indices[indices.length] = absoluteIndex);
-                }
-            }
-        } else if (seedRequired) {
-            // single seed white board
-        } else {
-            // isValues
-        }
-        op.paths[op.paths.length] = r;
-        op.boundPath = op.boundPath || boundPath.length && boundPath || undefined;
-    });
-    
-    return {ops: newOperations, indices: indices};
-}
-
-function getOperationArgGroups(ops, name, format, values, hasSelector, onNext, errorSelector) {
-    var seedRequired = isSeedRequired(format);
-    var isValues = !seedRequired;
-    var valuesIndex = 0, valueEnvelope;
-    return ops.
-        map(cloneIfPathOrPathValue).
-        reduce(function(groups, argument, index) {
-            var group = groups[groups.length - 1],
-                type  = isPathOrPathValue(argument) ? "Paths" :
-                        isJSONG(argument) ? "JSONGs" : "PathMaps",
-                groupType = group && group.type,
-                op = Model.prototype['_' + name + type + format];
-
-            if (type !== groupType) {
-                group = groups[groups.length] = [];
-            }
-
-            group.boundPath = type === "JSONGs" && argument.boundPath || undefined;
-
-            if (groupType === null || type !== groupType) {
-                group.methodName = name + type + format;
-                group.format = format;
-                group.type = type;
-                group.op = op;
-                group.isSeedRequired = seedRequired;
-                group.isValues = isValues;
-                group.values = [];
-                group.onNext = onNext;
-                group.valuesOffset = valuesIndex;
-                group.errorSelector = errorSelector;
-            }
-            group[group.length] = argument;
-            valueEnvelope = values[valuesIndex];
-            if (seedRequired && hasSelector && valuesIndex < values.length && valueEnvelope) {
-                // This is the relative offset into the values array
-                group.values[group.values.length] = valueEnvelope.json || valueEnvelope.jsong || valueEnvelope;
-                valuesIndex++;
-            } else if (!hasSelector && seedRequired && valueEnvelope) {
-                // no need to know the value index
-                group.values[group.values.length] = valueEnvelope.json || valueEnvelope.jsong || valueEnvelope;
-            }
-
-            return groups;
-        }, []);
-}
-
-function processOperations(model, operations) {
-    // no value has to be kept track of since its all in the 'values' array that is attached
-    // to each operation
-    return operations.reduce(function(memo, operation) {
-        
-        var boundPath = model._path;
-        
-        if(boundPath.length > 0 && operation.format === "AsJSONG") {
-            throw new Error("It is not legal to use the JSON Graph format from a bound Model. JSON Graph format can only be used from a root model.");
-        }
-
-        var results = operation.isValues ?
-            operation.op(model, operation, operation.onNext, operation.errorSelector, operation.boundPath) :
-            operation.op(model, operation, operation.values, operation.errorSelector, operation.boundPath);
-        var missing = results.requestedMissingPaths;
-        var offset = operation.valuesOffset;
-
-        for (var i = 0, len = missing.length; i < len; i++) {
-            missing[i].boundPath = boundPath;
-            missing[i].pathSetIndex += offset;
-        }
-
-        memo.requestedMissingPaths = memo.requestedMissingPaths.concat(missing);
-        memo.optimizedMissingPaths = memo.optimizedMissingPaths.concat(results.optimizedMissingPaths);
-        memo.errors = memo.errors.concat(results.errors);
-        memo.valuesReceived = memo.valuesReceived || results.requestedPaths.length > 0;
-
-        return memo;
-    }, {
-        errors: [],
-        requestedMissingPaths: [],
-        optimizedMissingPaths: [],
-        valuesReceived: false
-    });
-}
-
-function not() {
-    var fns = Array.prototype.slice.call(arguments);
-    return function() {
-        var args = arguments;
-        return !fns.every(function(fn) {
-            return fn.apply(null, args);
-        });
-    }
-}
-
-function isPathOrPathValue(x) {
-    return !!(Array.isArray(x)) || (
-        x.hasOwnProperty("path") && x.hasOwnProperty("value"));
-}
-
-function isJSONG(x) {
-    return x.hasOwnProperty("jsong");
-}
-
-function isSeedRequired(format) {
-    return format === 'AsJSON' || format === 'AsJSONG' || format === 'AsPathMap';
-}
-
-function cloneIfPathOrPathValue(x) {
-    return (Array.isArray(x) && x.concat()) || (
-        x.hasOwnProperty("path") && x.hasOwnProperty("value") && (
-        x.path = x.path.concat()) && x || x) || x;
-}
 
 var PathLibrary = {
     simplePathToMap: simplePathToMap,
@@ -1476,7 +1616,7 @@ function getPathMapsAsJSON(model, pathMaps, values, errorSelector, boundPath) {
                 nodeParent = node = nodes[depth - 1];
                 jsonParent = jsonNode = jsons[depth - 1];
                 depth = depth;
-                follow_path_map_6336:
+                follow_path_map_6247:
                     do {
                         if ((pathMap = pathMapStack[offset = depth * 4]) != null && typeof pathMap === 'object' && (keys = pathMapStack[offset + 1] || (pathMapStack[offset + 1] = Object.keys(pathMap))) && ((index$2 = pathMapStack[offset + 2] || (pathMapStack[offset + 2] = 0)) || true) && ((key = pathMapStack[offset + 3]) || true) && ((isKeySet = keys.length > 1) || keys.length > 0)) {
                             key = keys[index$2];
@@ -1487,14 +1627,14 @@ function getPathMapsAsJSON(model, pathMaps, values, errorSelector, boundPath) {
                                 nodeParent = nodes[depth] = node;
                                 jsonParent = jsons[depth] = jsonNode;
                                 depth = depth + 1;
-                                continue follow_path_map_6336;
+                                continue follow_path_map_6247;
                             } else if (key === $SIZE || (!(key[0] !== '_' || key[1] !== '_') || (key === __SELF || key === __PARENT || key === __ROOT))) {
                                 nodeParent = node;
-                                break follow_path_map_6336;
+                                break follow_path_map_6247;
                             } else if (!(key[0] !== '_' || key[1] !== '_') || (key === __SELF || key === __PARENT || key === __ROOT) || key[0] === '$') {
                                 nodeParent[key] || (nodeParent[key] = pathMap[key]);
                                 nodeParent = node;
-                                break follow_path_map_6336;
+                                break follow_path_map_6247;
                             } else {
                                 depth >= boundLength && (requestedPath[requestedPath.length = depth - boundLength] = key);
                                 pathMapStack[offset = 4 * (depth + 1)] = pathMap = pathMap[key];
@@ -1557,7 +1697,7 @@ function getPathMapsAsJSON(model, pathMaps, values, errorSelector, boundPath) {
                                                     nodeParent = nodeRoot;
                                                     jsonParent = jsonRoot;
                                                     refDepth = refDepth;
-                                                    follow_path_6559:
+                                                    follow_path_6470:
                                                         do {
                                                             key$2 = reference[refDepth];
                                                             isKeySet$2 = false;
@@ -1574,12 +1714,12 @@ function getPathMapsAsJSON(model, pathMaps, values, errorSelector, boundPath) {
                                                                     }
                                                                     if (appendNullKey = node == null || nodeType !== void 0 || typeof node !== 'object' || Array.isArray(nodeValue)) {
                                                                         nodeParent = node;
-                                                                        break follow_path_6559;
+                                                                        break follow_path_6470;
                                                                     }
                                                                     nodeParent = node;
                                                                     jsonParent = jsonNode;
                                                                     refDepth = refDepth + 1;
-                                                                    continue follow_path_6559;
+                                                                    continue follow_path_6470;
                                                                 } else if (refDepth === refHeight) {
                                                                     optimizedPath[optimizedPath.length = refDepth] = key$2;
                                                                     node = nodeParent[key$2];
@@ -1608,16 +1748,16 @@ function getPathMapsAsJSON(model, pathMaps, values, errorSelector, boundPath) {
                                                                     }
                                                                     appendNullKey = node == null || nodeType !== void 0 || typeof node !== 'object' || Array.isArray(nodeValue);
                                                                     nodeParent = node;
-                                                                    break follow_path_6559;
+                                                                    break follow_path_6470;
                                                                 }
                                                             } else if (refDepth < refHeight) {
                                                                 nodeParent = node;
                                                                 jsonParent = jsonNode;
                                                                 refDepth = refDepth + 1;
-                                                                continue follow_path_6559;
+                                                                continue follow_path_6470;
                                                             }
                                                             nodeParent = node;
-                                                            break follow_path_6559;
+                                                            break follow_path_6470;
                                                         } while (true);
                                                     node = nodeParent;
                                                 }
@@ -1637,14 +1777,14 @@ function getPathMapsAsJSON(model, pathMaps, values, errorSelector, boundPath) {
                                     }
                                     if (node == null || nodeType !== void 0 || typeof node !== 'object' || Array.isArray(nodeValue)) {
                                         nodeParent = node;
-                                        break follow_path_map_6336;
+                                        break follow_path_map_6247;
                                     }
                                     pathMapStack[offset + 1] = keys;
                                     pathMapStack[offset + 3] = key;
                                     nodeParent = nodes[depth] = node;
                                     jsonParent = jsons[depth] = jsonNode;
                                     depth = depth + 1;
-                                    continue follow_path_map_6336;
+                                    continue follow_path_map_6247;
                                 }
                             }
                         }
@@ -1684,7 +1824,7 @@ function getPathMapsAsJSON(model, pathMaps, values, errorSelector, boundPath) {
                             appendNullKey = false;
                         }
                         nodeParent = node;
-                        break follow_path_map_6336;
+                        break follow_path_map_6247;
                     } while (true);
                 node = nodeParent;
             }

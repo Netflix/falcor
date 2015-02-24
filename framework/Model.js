@@ -6,7 +6,7 @@ Model.EXPIRES_NEVER = falcor.EXPIRES_NEVER;
 
 function Model(options) {
     options || (options = {});
-    this._dataSource = options.dataSource;
+    this._dataSource = options.source;
     this._maxSize = options.maxSize || Math.pow(2, 53) - 1;
     this._collectRatio = options.collectRatio || 0.75;
     this._scheduler = new falcor.ImmediateScheduler();
