@@ -25,7 +25,7 @@ describe("Invalidate", function() {
                 dataSourceCount++;
             }
         });
-        var model = getModel(dataSource, Cache()).setRetryCount(1);
+        var model = getModel(dataSource, Cache());
         var invalidate = model.
             invalidate(["videos", 3355, "summary"]).
             flatMap(function() {
@@ -80,7 +80,7 @@ describe("Invalidate", function() {
                 dataSourceCount++;
             }
         });
-        var model = getModel(dataSource, Cache()).setRetryCount(1);
+        var model = getModel(dataSource, Cache());
         var invalidate = model.
             invalidate(["videos", 3355]).
             flatMap(function() {
@@ -134,7 +134,7 @@ describe("Invalidate", function() {
                 dataSourceCount++;
             }
         });
-        var model = getModel(dataSource, Cache()).setRetryCount(1);
+        var model = getModel(dataSource, Cache());
         var invalidate = model.
             invalidate(["genreList", 0]).
             flatMap(function() {

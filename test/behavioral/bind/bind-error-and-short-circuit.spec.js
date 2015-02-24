@@ -106,13 +106,13 @@ describe("Bind", function() {
         });
         var obs = dataModel.
             bind(["genreList", 0, 0], ["summary"]).
-            flatMap(function(dataModel) {
-                return dataModel.get(["summary"]);
+            map(function(dataModel) {
+                return dataModel.getValueSync(["summary"]);
             });
-        
+
         // Should onError the error from the cache.
         getTestRunner.
-            async(obs, dataModel, {}, {
+            async(obs, dataModel, null, {
                 errors: [{
                     "path": ["genreList", "0", "0"],
                     "value": {"message": "emacs." }

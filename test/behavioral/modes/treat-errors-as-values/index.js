@@ -1,3 +1,3 @@
-describe("Treat Values As Errors", function() {
+xdescribe("Treat Values As Errors", function() {
     require("./bind.spec");
 });

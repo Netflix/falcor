@@ -76,39 +76,56 @@ function async(obs, model, data, options) {
     var errorThrown = false;
     var verify = options && options.verify === false ? false : true;
     return Rx.Observable.create(function(observer) {
-        obs.subscribe(function(x) {
-            try {
+        var n = observer.onNext.bind(observer);
+        var e = observer.onError.bind(observer);
+        var c = observer.onCompleted.bind(observer);
+        obs.
+            doOnNext(function(x) {
                 if (options.onNextExpected) {
                     var expected = options.onNextExpected.values[idx++];
                     testRunner.compare(expected, x);
                 }
-            } catch (e) {
-                observer.onError(e);
-            }
-            observer.onNext(x);
-        }, function(err) {
-            // TODO: This is odd behavior, but it makes done calls easier.
-            errorThrown = true;
-            if (options.errors) {
-                testRunner.compare(options.errors, err);
-                complete();
-            } else {
-                observer.onError(err);
-            }
-        }, complete);
+            }).
+            doOnError(function(err) {
+                errorThrown = true;
+                if (options.errors) {
+                    testRunner.compare(options.errors, err);
+                }
+            }).
+            doOnCompleted(function() {
+                if (options.onNextExpected) {
+                    expect(idx, "The amount of onNexts did not meet expected").to.equal(expectedCount);
+                }
+                if (verify && data && Object.keys(data).length) {
+                    getTestRunner(model, data, options);
+                }
+            }).
+            subscribe(n, function(err) {
+                var threw = false;
+                try {
+                    if (options.errors) {
+                        expect(errorThrown, "Expected an error to be thrown, and no error was.").to.be.ok;
+                    } else {
+                        if (err instanceof Error || toString.call(err) === "[object Error]") {
+                            e(err);
+                        } else {
+                            e({error: err});
+                        }
+                        threw = true;
+                    }
+                } catch(ex) {
+                    e(ex);
+                    threw = true;
+                }
+                if (!threw) {
+                    c();
+                }
+            }, c);
+        
         function complete() {
-            if (options.onNextExpected) {
-                expect(idx, "The amount of onNexts did not meet expected").to.equal(expectedCount);
-            }
-            if (options.errors) {
-                expect(errorThrown, "Expected an error to be thrown, and no error was.").to.be.ok;
-            }
-            if (verify) {
-                getTestRunner(model, data, options);
-            }
-            observer.onCompleted();
         }
     });
+    
 }
 
 

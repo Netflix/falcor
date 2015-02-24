@@ -57,15 +57,14 @@ describe("BindSync", function() {
                 bindSync(["genreList", 0]).
                 get([0, 'summary']).
                 toJSONG().
-                subscribe(function(x) {
+                do(function(x) {
                     done('onNext called with value' + x + ' on a bound model requesting toJSONG().');
                 }, function(errs) {
                     expect(errs[0].message).to.equals('It is not legal to use the JSON Graph format from a bound Model. JSON Graph format can only be used from a root model.');
                     done();
                 }, function() {
                     done('onCompleted called on a bound model requesting toJSONG().');
-                })
-            
+                });
         });
     });
     
@@ -120,10 +119,10 @@ describe("BindSync", function() {
                 get([{to:1}, "summary"], function(list) {
                     testRunner.compare(expected.AsJSON.values[0].json, list);
                 }).
-                subscribe(noOp, done, function() {
+                doOnCompleted(function() {
                     getTestRunner.runSync(model, expected, {useNewModel: false});
-                    done();
-                });
+                }).
+                subscribe(noOp, done, done);
         });
     });
     
@@ -132,14 +131,16 @@ describe("BindSync", function() {
             var model = getDataModel(null, Cache());
             var expected = Bound().directValue;
             model = model.bindSync(["videos", 1234]);
+            debugger;
             model.
                 set({path: ["summary"], value: "pie"}).
                 flatMap(function() {
                     return model.get(["summary"]);
                 }).
-                subscribe(function(x) {
+                doOnNext(function() {
                     testRunner.compare({json:{summary:"pie"}}, x);
-                }, done, done);
+                }).
+                subscribe(noOp, done, done);
         });
     });
 });

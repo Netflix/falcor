@@ -71,30 +71,25 @@ function validateOperation(name, expected, actual, messageSuffix) {
     strip(expected, "__generation");
     strip(actual, "__generation", "pathSetIndex");
 
-    try {
-        if (expected.values) {
-            expect(actual.values, name + ".values " + messageSuffix).
-                to.deep.equals(expected.values);
-        }
-        if (expected.errors) {
-            expect(actual.errors, name + ".errors " + messageSuffix).
-                to.deep.equals(expected.errors);
-        }
-        if (expected.optimizedPaths) {
-            expect(actual.optimizedPaths, name + ".optimizedPaths " + messageSuffix).
-                to.deep.equals(expected.optimizedPaths);
-        }
-        if (expected.requestedMissingPaths) {
-            expect(actual.requestedMissingPaths, name + ".requestedMissingPaths " + messageSuffix).
-                to.deep.equals(expected.requestedMissingPaths);
-        }
-        if (expected.optimizedMissingPaths) {
-            expect(actual.optimizedMissingPaths, name + ".optimizedMissingPaths " + messageSuffix).
-                to.deep.equals(expected.optimizedMissingPaths);
-        }
-    } catch(e) {
-        // console.log(inspect(actual, {depth: null}));
-        throw e;
+    if (expected.values) {
+        expect(actual.values, name + ".values " + messageSuffix).
+            to.deep.equals(expected.values);
+    }
+    if (expected.errors) {
+        expect(actual.errors, name + ".errors " + messageSuffix).
+            to.deep.equals(expected.errors);
+    }
+    if (expected.optimizedPaths) {
+        expect(actual.optimizedPaths, name + ".optimizedPaths " + messageSuffix).
+            to.deep.equals(expected.optimizedPaths);
+    }
+    if (expected.requestedMissingPaths) {
+        expect(actual.requestedMissingPaths, name + ".requestedMissingPaths " + messageSuffix).
+            to.deep.equals(expected.requestedMissingPaths);
+    }
+    if (expected.optimizedMissingPaths) {
+        expect(actual.optimizedMissingPaths, name + ".optimizedMissingPaths " + messageSuffix).
+            to.deep.equals(expected.optimizedMissingPaths);
     }
 }
 
