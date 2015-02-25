@@ -23,7 +23,7 @@ describe('AsPathValues', function() {
             }
         });
         var model = new Model({
-            dataSource: source,
+            source: source,
             cache: {
                 videos: {
                     1234: {
@@ -34,6 +34,7 @@ describe('AsPathValues', function() {
         });
         var count = 0;
         source.setModel(model);
+        
         model.
             set({path: ['videos', 1234, 'rating'], value: 3.5}).
             toPathValues().
@@ -59,7 +60,7 @@ describe('AsPathValues', function() {
     it('should set poly-input througth the modelSource.', function(done) {
         var source = new LocalDataSource(Cache(), { });
         var model = new Model({
-            dataSource: source
+            source: source
         });
         var count = 0;
         var expects = [{

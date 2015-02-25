@@ -23,7 +23,7 @@ describe('AsPathMap', function() {
             }
         });
         var model = new Model({
-            dataSource: source,
+            source: source,
             cache: {
                 videos: {
                     1234: {
@@ -59,7 +59,7 @@ describe('AsPathMap', function() {
     it('should set poly-input througth the modelSource.', function(done) {
         var source = new LocalDataSource(Cache(), { });
         var model = new Model({
-            dataSource: source
+            source: source
         });
         var count = 0;
         source.setModel(model);

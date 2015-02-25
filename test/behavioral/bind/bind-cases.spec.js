@@ -12,7 +12,7 @@ var chai = require("chai");
 var expect = chai.expect;
 var noOp = function() {};
 var getDataModel = testRunner.getModel;
-var jsongException = 'It is not legal to use the JSON Graph format from a bound Model. JSON Graph format can only be used from a root model.';
+var _ = require('lodash');
 describe('Bind', function() {
     it('should bind to an undefined sentinel and onCompleted.', function(done) {
         var model = getDataModel(null, Cache());
@@ -132,23 +132,92 @@ describe("BindSync", function() {
         });
     });
     
-    describe.only('Set', function() {
-        describe('Cache Only', function() {
-            it("should bind and set the value.", function(done) {
+    describe('Set', function() {
+        setCases('PathValues', {path: ['summary'], value: 'pie'});
+        setCases('JSON', {summary: 'pie'});
+    });
+});
+
+function setCases(name, setValue) {
+    describe(name, function() {
+        describe('Cache Only', function () {
+            it("should bind and set the value.", function (done) {
                 var model = getDataModel(null, Cache());
                 var expected = Bound().directValue;
                 model = model.bindSync(["videos", 1234]);
                 model.
-                    set({path: ["summary"], value: "pie"}).
-                    flatMap(function() {
+                    set(_.cloneDeep(setValue)).
+                    flatMap(function () {
                         return model.get(["summary"]);
                     }).
-                    doOnNext(function(x) {
-                        testRunner.compare({json:{summary:"pie"}}, x);
+                    doOnNext(function (x) {
+                        testRunner.compare({json: {summary: "pie"}}, x);
                     }).
                     subscribe(noOp, done, done);
             });
         });
-        require('./bind.modelSource.AsValues.spec');
+        describe('Model Source', function() {
+            it('should bind and set ' + name + ' as JSON.', function(done) {
+                var model = getDataModel(new LocalDataSource(Cache()));
+                model = model.bindSync(['videos', 1234]);
+                model.
+                    set(_.cloneDeep(setValue)).
+                    flatMap(function() {
+                        return model.get(['summary']);
+                    }).
+                    doOnNext(function(x) {
+                        testRunner.compare({json:{summary:'pie'}}, x);
+                    }).
+                    subscribe(noOp, done, done);
+            });
+
+            it('should bind and set ' + name + ' as JSONG.', function(done) {
+                var model = getDataModel(new LocalDataSource(Cache()));
+                var expected = Bound().directValue;
+                model = model.bindSync(['videos', 1234]);
+                model.
+                    set(_.cloneDeep(setValue)).
+                    toJSONG().
+                    flatMap(function() {
+                        return model.get(['summary']);
+                    }).
+                    do(function(x) {
+                        done('Should not of onNext with ' + x);
+                    },  function(x) {
+                        try {
+                            expect(x[0].message).to.equals(testRunner.jsongBindException);
+                            done();
+                        } catch(e) {
+                            done({error: e});
+                        }
+                    }, function() {
+                        done('Should not of onCompleted');
+                    }).
+                    subscribe(noOp, noOp);
+            });
+
+            it('should bind and set ' + name + ' as PathValues.', function(done) {
+                var model = getDataModel(new LocalDataSource(Cache()));
+                model = model.bindSync(['videos', 1234]);
+                model.
+                    set(_.cloneDeep(setValue)).
+                    toPathValues().
+                    doOnNext(function(x) {
+                        testRunner.compare({path: ['summary'], value: 'pie'}, x);
+                    }).
+                    subscribe(noOp, done, done);
+            });
+
+            it('should bind and set ' + name + ' w/ Selector.', function(done) {
+                var model = getDataModel(new LocalDataSource(Cache()));
+                var expected = Bound().directValue;
+                model = model.bindSync(['videos', 1234]);
+                model.
+                    set(_.cloneDeep(setValue), function(pie) {
+                        testRunner.compare('pie', pie);
+                    }).
+                    subscribe(noOp, done, done);
+            });
+        });
     });
-});
+}
