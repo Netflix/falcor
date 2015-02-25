@@ -34,7 +34,7 @@ if(Rx === undefined) {
             
             Disposable.create = function(a) {
                 return new Disposable(a);
-            }
+            };
             
             Disposable.empty = new Disposable(function(){});
             
@@ -42,7 +42,7 @@ if(Rx === undefined) {
                 if(typeof this.action === 'function') {
                     this.action();
                 }
-            }
+            };
             
             return Disposable;
         })(),
@@ -54,7 +54,7 @@ if(Rx === undefined) {
             
             Observable.create = Observable.createWithDisposable = function(s) {
                 return new Observable(s);
-            }
+            };
             
             Observable.fastCreateWithDisposable = Observable.create;
             
@@ -63,7 +63,7 @@ if(Rx === undefined) {
                     observer.onNext(value);
                     observer.onCompleted();
                 });
-            }
+            };
             
             // NOTE: Required for Router
             Observable.prototype.from;
@@ -76,7 +76,7 @@ if(Rx === undefined) {
                     n :
                     Rx.Observer.create(n, e, c)
                 );
-            }
+            };
             Observable.prototype.forEach = Observable.prototype.subscribe;
             
             Observable.prototype.catchException = function(next) {
@@ -92,7 +92,7 @@ if(Rx === undefined) {
                         },
                         function() { o.onCompleted(); });
                 });
-            }
+            };
             
             return Observable;
         })(),
@@ -106,7 +106,7 @@ if(Rx === undefined) {
             
             Observer.create = function(n, e, c) {
                 return new Observer(n, e, c);
-            }
+            };
             
             return Observer;
         })(),
