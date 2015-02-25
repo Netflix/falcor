@@ -449,7 +449,7 @@ function getOperationArgGroups(ops, name, format, values, hasSelector, onNext, e
                 group.errorSelector = errorSelector;
             }
             
-            if (isFirstSet && boundPath) {
+            if (isFirstSet && boundPath && boundPath.length) {
                 group[group.length] = appendBoundPathToArgument(boundPath, argument, type);
             } else {
                 group[group.length] = argument;
