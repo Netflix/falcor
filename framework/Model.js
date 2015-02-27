@@ -35,6 +35,7 @@ Model.prototype = {
     set: modelOperation("set"),
     invalidate: modelOperation("inv"),
     call: call,
+    callValues: call,
     getValue: function(path) {
         return this.get(path, function(x) { return x });
     },
