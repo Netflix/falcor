@@ -251,7 +251,7 @@ module.exports = function() {
         fromOnly: {
             getPaths: {
                 query: [
-                    ["genreList", "0", {from: 0}, "summary"]
+                    ["genreList", "0", {from: 0, to:0}, "summary"]
                 ]
             },
 
@@ -842,7 +842,7 @@ module.exports = function() {
         fromOnlyLeaf: {
             getPaths: {
                 query: [
-                    ["genreList", {from: 0}]
+                    ["genreList", {from: 0, to: 0}]
                 ]
             },
 
@@ -1114,7 +1114,7 @@ module.exports = function() {
             getPaths: {
                 count: 2,
                 query: [
-                    ["genreList", [{to: 0}, {from: 1}]]
+                    ["genreList", [{to: 0}, {from: 1, to: 1}]]
                 ]
             },
 
@@ -1177,7 +1177,7 @@ module.exports = function() {
             getPaths: {
                 count: 2,
                 query: [
-                    ["genreList", [{to: 0}, {from: 1}], "0", "summary"]
+                    ["genreList", [{to: 0}, {from: 1, to: 1}], "0", "summary"]
                 ]
             },
 

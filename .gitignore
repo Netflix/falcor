@@ -7,3 +7,5 @@ coverage
 .idea
 tmp/
 *.tar.gz
+cTestFinal.js
+bin2
