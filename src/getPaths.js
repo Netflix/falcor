@@ -1,32 +1,42 @@
 // TODO: Objectify?
-function walk(model, root, node, path, depth, seedOrFunction, generations, outerResults, optimizedPath, requestedPath, outputFormat) {
-    generations = generations || [];
-    
+function walk(model, root, node, path, depth, seedOrFunction, positionalInfo, outerResults, optimizedPath, requestedPath, outputFormat) {
+    positionalInfo = positionalInfo || [];
+
     var k = path[depth];
     var memo = {done: false};
     var first = true;
-    var permuteGenerations = generations;
+    var permutePosition = positionalInfo;
     var permuteRequested = requestedPath;
     var permuteOptimized = optimizedPath;
     var asPathMap = outputFormat === 'PathMap';
+    var asJSONG = outputFormat === 'JSONG';
+    var asJSON = outputFormat === 'JSON';
+    var isKeySet = false;
     depth++;
 
     var key;
     if (typeof k === 'object' && k) {
         memo.isArray = Array.isArray(k);
         memo.arrOffset = 0;
+        
         key = permuteKey(k, memo);
+        isKeySet = true;
     } else {
         key = k;
         memo.done = true;
     }
+    
+    if (asJSON && isKeySet) {
+        permutePosition.push(depth - 1);
+    }
+    
     while (!memo.done || first) {
         first = false;
         if (!memo.done) {
             permuteOptimized = fastCopy(optimizedPath);
             permuteRequested = fastCopy(requestedPath);
             if (asPathMap) {
-                permuteGenerations = fastCopy(generations);
+                permutePosition = fastCopy(positionalInfo);
             }
         }
 
@@ -43,12 +53,11 @@ function walk(model, root, node, path, depth, seedOrFunction, generations, outer
                 permuteRequested.push(key);
             }
             if (asPathMap) {
-                permuteGenerations.push(next.__generation);
+                permutePosition.push(next.__generation);
             }
 
             if (isExpired(next)) {
-                outerResults.requestedMissingPaths.push(fastCat(permuteRequested, fastCopy(path, depth)));
-                outerResults.optimizedMissingPaths.push(fastCatSkipNulls(permuteOptimized, fastCopy(path, depth)));
+                emitMissing(path, depth, permuteRequested, permuteOptimized, permutePosition, outerResults, outputFormat);
             }
 
             else if (depth < path.length) {
@@ -64,64 +73,81 @@ function walk(model, root, node, path, depth, seedOrFunction, generations, outer
 
                         // short circuit case
                         if (rType === 'leaf') {
-                            emitValues(model, refNode, path, depth, seedOrFunction, outerResults, permuteRequested, permuteOptimized, permuteGenerations, outputFormat);
+                            emitValues(model, refNode, path, depth, seedOrFunction, outerResults, permuteRequested, permuteOptimized, permutePosition, outputFormat);
                         }
 
                         else if (rType === 'error') {
-                            outerResults.errors.push({path: fastCopy(permuteRequested), value: copyCacheObject(rValue)});
-                            updateTrailingNullCase(path, depth, permuteRequested);
-                            lruPromote(model, refNode);
-                            outerResults.requestedPaths.push(permuteRequested);
-                            outerResults.optimizedPaths.push(permuteOptimized);
+                            emitError(model, path, depth, refNode, rValue, permuteRequested, permuteOptimized, outerResults);
                         }
 
                         else {
-                            walk(model, root, refNode, path, depth, seedOrFunction, permuteGenerations, outerResults, permuteOptimized, permuteRequested, outputFormat);
+                            walk(model, root, refNode, path, depth, seedOrFunction, permutePosition, outerResults, permuteOptimized, permuteRequested, outputFormat);
                         }
                     } else {
-                        outerResults.requestedMissingPaths.push(fastCat(permuteRequested, fastCopy(path, depth)));
-                        outerResults.optimizedMissingPaths.push(fastCatSkipNulls(permuteOptimized, fastCopy(path, depth)));
+                        emitMissing(path, depth, permuteRequested, permuteOptimized, permutePosition, outerResults, outputFormat);
                     }
                 }
 
                 else if (nType === 'error') {
-                    outerResults.errors.push({path: fastCopy(permuteRequested), value: copyCacheObject(value)});
-                    updateTrailingNullCase(path, depth, permuteRequested);
-                    lruPromote(model, next);
-                    outerResults.requestedPaths.push(permuteRequested);
-                    outerResults.optimizedPaths.push(permuteOptimized);
+                    emitError(model, path, depth, next, value, permuteRequested, permuteOptimized, outerResults);
                 }
 
                 else if (nType === 'leaf') {
-                    emitValues(model, next, path, depth, seedOrFunction, outerResults, permuteRequested, permuteOptimized, permuteGenerations, outputFormat);
+                    emitValues(model, next, path, depth, seedOrFunction, outerResults, permuteRequested, permuteOptimized, permutePosition, outputFormat);
                 }
 
                 else {
-                    walk(model, root, value, path, depth, seedOrFunction, permuteGenerations, outerResults, permuteOptimized, permuteRequested, outputFormat);
+                    walk(model, root, value, path, depth, seedOrFunction, permutePosition, outerResults, permuteOptimized, permuteRequested, outputFormat);
                 }
             }
 
             // we are the last depth.  This needs to be returned
             else {
                 if (nType || valueIsArray) {
-                    emitValues(model, next, path, depth, seedOrFunction, outerResults, permuteRequested, permuteOptimized, permuteGenerations, outputFormat);
+                    emitValues(model, next, path, depth, seedOrFunction, outerResults, permuteRequested, permuteOptimized, permutePosition, outputFormat);
                 } else {
-                    outerResults.requestedMissingPaths.push(fastCat(permuteRequested, fastCopy(path, depth)));
-                    outerResults.optimizedMissingPaths.push(fastCatSkipNulls(permuteOptimized, fastCopy(path, depth)));
+                    emitMissing(path, depth, permuteRequested, permuteOptimized, permutePosition, outerResults, outputFormat);
                 }
             }
         } else {
-            outerResults.requestedMissingPaths.push(fastCat(permuteRequested, fastCopy(path, depth - 1)));
-            outerResults.optimizedMissingPaths.push(fastCatSkipNulls(permuteOptimized, fastCopy(path, depth - 1)));
+            emitMissing(path, depth - 1, permuteRequested, permuteOptimized, permutePosition, outerResults, outputFormat);
         }
         key = permuteKey(k, memo);
     }
+}
+
+function emitError(model, path, depth, node, nodeValue, permuteRequested, permuteOptimized, outerResults) {
+    outerResults.errors.push({path: fastCopy(permuteRequested), value: copyCacheObject(nodeValue)});
+    updateTrailingNullCase(path, depth, permuteRequested);
+    lruPromote(model, node);
+    outerResults.requestedPaths.push(permuteRequested);
+    outerResults.optimizedPaths.push(permuteOptimized);
+}
+
+function emitMissing(path, depth, permuteRequested, permuteOptimized, permutePosition, results, type) {
+    var pathSlice;
+    if (depth < path.length) {
+        pathSlice = fastCopy(path, depth);
+    } else {
+        pathSlice = [];
+    }
     
-    if (depth === 0) {
-        // we need to log out the found pathMap
+    if (type === 'JSON') {
+        for (var i = 0, len = permutePosition.length; i < len; i++) {
+            if (permutePosition[i]) {
+                permuteRequested[i] = [permuteRequested[i]];
+            }
+        }
+        results.requestedMissingPaths.push(fastCat(permuteRequested, pathSlice));
+        results.optimizedMissingPaths.push(fastCatSkipNulls(permuteOptimized, pathSlice));
+    } else {
+        results.requestedMissingPaths.push(fastCat(permuteRequested, pathSlice));
+        results.optimizedMissingPaths.push(fastCatSkipNulls(permuteOptimized, pathSlice));
     }
 }
-function emitValues(model, node, path, depth, seedOrFunction, outerResults, permuteRequested, permuteOptimized, permuteGeneration, outputFormat) {
+function emitValues(model, node, path, depth, seedOrFunction, outerResults, permuteRequested, permuteOptimized, permutePosition, outputFormat) {
+    
+    var i, len, k, key, curr;
     updateTrailingNullCase(path, depth, permuteRequested);
     lruPromote(model, node);
 
@@ -140,14 +166,14 @@ function emitValues(model, node, path, depth, seedOrFunction, outerResults, perm
         
         case 'PathMap':
             if (seedOrFunction) {
-                var curr = seedOrFunction;
-                for (var i = 0, len = permuteRequested.length - 1; i < len; i++) {
-                    var k = permuteRequested[i];
+                curr = seedOrFunction;
+                for (i = 0, len = permuteRequested.length - 1; i < len; i++) {
+                    k = permuteRequested[i];
                     if (k === null) {
                         continue;
                     }
                     if (!curr[k]) {
-                        curr[k] = {__key: k, __generation: permuteGeneration[i]};
+                        curr[k] = {__key: k, __generation: permutePosition[i]};
                     }
                     curr = curr[k];
                 }
@@ -158,6 +184,34 @@ function emitValues(model, node, path, depth, seedOrFunction, outerResults, perm
                     curr = copyCacheObject(node, true, curr);
                     delete curr.__key;
                     delete curr.__generation;
+                }
+            }
+            break;
+        
+        case 'JSON': 
+            if (seedOrFunction) {
+
+                if (permutePosition.length) {
+                    if (!seedOrFunction.json) {
+                        seedOrFunction.json = {};
+                    }
+                    curr = seedOrFunction.json;
+                    for (i = 0, len = permutePosition.length - 1; i < len; i++) {
+                        k = permutePosition[i];
+                        key = permuteRequested[k];
+                        
+                        if (!curr[key]) {
+                            curr[key] = {};
+                        }
+                        curr = curr[key];
+                    }
+                    
+                    // assign the last 
+                    k = permutePosition[i];
+                    key = permuteRequested[k];
+                    curr[key] = copyCacheObject(node);
+                } else {
+                    seedOrFunction.json = copyCacheObject(node);
                 }
             }
             break;

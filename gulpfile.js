@@ -88,7 +88,7 @@ gulp.task('com', function() {
     return gulp.
         src([
             'bin2/Falcor2.js',
-            'Falcor.js',
+            'LimitedFalcor.js',
             'Cache.js',
             'comTest.js'
         ]).

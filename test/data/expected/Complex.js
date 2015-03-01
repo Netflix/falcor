@@ -2,14 +2,12 @@ module.exports = function() {
     return {
         toOnly: {
             getPaths: {
-                count: 2,
                 query: [
                     ["genreList", "0", {to: 1}, "summary"]
                 ]
             },
 
             getPathMaps: {
-                count: 2,
                 query: [{
                     "genreList": {
                         "0": {
@@ -136,7 +134,6 @@ module.exports = function() {
         },
         toOnlyMyList: {
             getPaths: {
-                count: 2,
                 query: [
                     ["genreList", "1", {to: 1}, "summary"]
                 ]
@@ -334,7 +331,6 @@ module.exports = function() {
         },
         fromAndToWithNegativePaths: {
             getPaths: {
-                count: 3,
                 query: [
                     ["genreList", "0", {from: -1, to: 1}, "summary"]
                 ]
@@ -483,7 +479,6 @@ module.exports = function() {
         },
         fromAndLength: {
             getPaths: {
-                count: 3,
                 query: [
                     ["genreList", "0", {from: -1, length: 3}, "summary"]
                 ]
@@ -632,14 +627,12 @@ module.exports = function() {
         },
         fromArray: {
             getPaths: {
-                count: 2,
                 query: [
                     ["genreList", "0", ["0", "1"], "summary"]
                 ]
             },
 
             getPathMaps: {
-                count: 2,
 
                 query: [{
                     "genreList": {
@@ -767,14 +760,12 @@ module.exports = function() {
         },
         toOnlyLeaf: {
             getPaths: {
-                count: 2,
                 query: [
                     ["genreList", {to: 1}]
                 ]
             },
 
             getPathMaps: {
-                count: 2,
 
                 query: [{
                     "genreList": {
@@ -894,7 +885,6 @@ module.exports = function() {
         },
         fromAndLengthLeaf: {
             getPaths: {
-                count: 3,
                 query: [
                     ["genreList", {from: -1, length: 3}]
                 ]
@@ -966,7 +956,6 @@ module.exports = function() {
         },
         fromAndToWithNegativePathsLeaf: {
             getPaths: {
-                count: 3,
                 query: [
                     ["genreList", {from: -1, to: 1}]
                 ]
@@ -1038,14 +1027,12 @@ module.exports = function() {
         },
         fromArrayLeaf: {
             getPaths: {
-                count: 2,
                 query: [
                     ["genreList", ["0", "1"]]
                 ]
             },
 
             getPathMaps: {
-                count: 2,
 
                 query: [{
                     "genreList": {
@@ -1112,7 +1099,6 @@ module.exports = function() {
         },
         arrayOfComplexPathsLeaf: {
             getPaths: {
-                count: 2,
                 query: [
                     ["genreList", [{to: 0}, {from: 1, to: 1}]]
                 ]
@@ -1175,7 +1161,6 @@ module.exports = function() {
         },
         arrayOfComplexPaths: {
             getPaths: {
-                count: 2,
                 query: [
                     ["genreList", [{to: 0}, {from: 1, to: 1}], "0", "summary"]
                 ]

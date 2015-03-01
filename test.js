@@ -12,50 +12,50 @@ model._getPathsAsValues(model, [['genreList', [0, 1], [0, 1], 'summary']]);
 module.exports = {
     name: 'Falcor',
     tests: {
-//        'falcor.Model simple path': function () {
-//            model._getPathsAsValues(model, [
-//                ['videos', 1234, 'summary']
-//            ]);
-//        },
-//
-//        'FTester2.Model simple path': function () {
-//            recModel._getPathsAsValues(recModel, [
-//                ['videos', 1234, 'summary']
-//            ]);
-//        },
-//        'falcor.Model reference in path': function () {
-//            model._getPathsAsValues(model, [
-//                ['genreList', 0, 0, 'summary']
-//            ]);
-//        },
-//
-//        'FTester2.Model reference in path': function () {
-//            recModel._getPathsAsValues(recModel, [
-//                ['genreList', 0, 0, 'summary']
-//            ]);
-//        },
-//        'falcor.Model complex in path': function () {
-//            model._getPathsAsValues(model, [
-//                ['genreList', [0, 1], 0, 'summary']
-//            ]);
-//        },
-//
-//        'FTester2.Model complex in path': function () {
-//            recModel._getPathsAsValues(recModel, [
-//                ['genreList', [0, 1], 0, 'summary']
-//            ]);
-//        },
-//        'falcor.Model two complex in path': function () {
-//            model._getPathsAsValues(model, [
-//                ['genreList', [0, 1], {to: 3}, 'summary']
-//            ]);
-//        },
-//
-//        'FTester2.Model two complex in path': function () {
-//            recModel._getPathsAsValues(recModel, [
-//                ['genreList', [0, 1], {to: 3}, 'summary']
-//            ]);
-//        },
+        'falcor.Model simple path': function () {
+            model._getPathsAsValues(model, [
+                ['videos', 1234, 'summary']
+            ]);
+        },
+
+        'FTester2.Model simple path': function () {
+            recModel._getPathsAsValues(recModel, [
+                ['videos', 1234, 'summary']
+            ]);
+        },
+        'falcor.Model reference in path': function () {
+            model._getPathsAsValues(model, [
+                ['genreList', 0, 0, 'summary']
+            ]);
+        },
+
+        'FTester2.Model reference in path': function () {
+            recModel._getPathsAsValues(recModel, [
+                ['genreList', 0, 0, 'summary']
+            ]);
+        },
+        'falcor.Model complex in path': function () {
+            model._getPathsAsValues(model, [
+                ['genreList', [0, 1], 0, 'summary']
+            ]);
+        },
+
+        'FTester2.Model complex in path': function () {
+            recModel._getPathsAsValues(recModel, [
+                ['genreList', [0, 1], 0, 'summary']
+            ]);
+        },
+        'falcor.Model two complex in path': function () {
+            model._getPathsAsValues(model, [
+                ['genreList', [0, 1], {to: 3}, 'summary']
+            ]);
+        },
+
+        'FTester2.Model two complex in path': function () {
+            recModel._getPathsAsValues(recModel, [
+                ['genreList', [0, 1], {to: 3}, 'summary']
+            ]);
+        },
         'falcor.Model simple path AsPathMap': function () {
             model._getPathsAsPathMap(model, [
                 ['videos', 1234, 'summary']
@@ -66,6 +66,39 @@ module.exports = {
             recModel._getPathsAsPathMap(recModel, [
                 ['videos', 1234, 'summary']
             ], [{}]);
+        },
+        'falcor.Model reference in path AsPathMap': function () {
+            model._getPathsAsPathMap(model, [
+                ['genreList', 0, 0, 'summary']
+            ]);
+        },
+
+        'FTester2.Model reference in path AsPathMap': function () {
+            recModel._getPathsAsPathMap(recModel, [
+                ['genreList', 0, 0, 'summary']
+            ]);
+        },
+        'falcor.Model complex in path AsPathMap': function () {
+            model._getPathsAsPathMap(model, [
+                ['genreList', [0, 1], 0, 'summary']
+            ]);
+        },
+
+        'FTester2.Model complex in path AsPathMap': function () {
+            recModel._getPathsAsPathMap(recModel, [
+                ['genreList', [0, 1], 0, 'summary']
+            ]);
+        },
+        'falcor.Model two complex in path AsPathMap': function () {
+            model._getPathsAsPathMap(model, [
+                ['genreList', [0, 1], {to: 3}, 'summary']
+            ]);
+        },
+
+        'FTester2.Model two complex in path AsPathMap': function () {
+            recModel._getPathsAsPathMap(recModel, [
+                ['genreList', [0, 1], {to: 3}, 'summary']
+            ]);
         }
     }
 };

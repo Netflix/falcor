@@ -6,17 +6,11 @@ var FModel = function(cache) {
 
 FModel.prototype = {
     _getPathsAsValues: F_getPathsAsValues,
-    _getPathsAsPathMap: F_getPathsAsPathMap
+    _getPathsAsPathMap: F_getPathsAsPathMap,
+    _getPathsAsJSON: F_getPathsAsJSON
 };
 function F_getPathsAsValues(model, paths, onNext) {
-    var result = {
-        values: [],
-        errors: [],
-        requestedPaths: [],
-        optimizedPaths: [],
-        requestedMissingPaths: [],
-        optimizedMissingPaths: []
-    };
+    var result = _output();
 
     paths.forEach(function(p) {
         walk(model, model._cache, model._cache, p, 0, onNext, null, result, [], [], 'Values');
@@ -26,14 +20,7 @@ function F_getPathsAsValues(model, paths, onNext) {
 }
 
 function F_getPathsAsPathMap(model, paths, values) {
-    var result = {
-        values: [],
-        errors: [],
-        requestedPaths: [],
-        optimizedPaths: [],
-        requestedMissingPaths: [],
-        optimizedMissingPaths: []
-    };
+    var result = _output();
     var valueNode;
     if (values && values.length === 1) {
         valueNode = {json: values[0]};
@@ -53,9 +40,41 @@ function F_getPathsAsPathMap(model, paths, values) {
     return result;
 }
 
+function F_getPathsAsJSON(model, paths, values) {
+    var result = _output();
+    if (values) {
+        result.values = values;
+    }
+
+    paths.forEach(function(p, i) {
+        var valueNode;
+        if (values[i]) {
+            valueNode = values[i];
+        }
+        walk(model, model._cache, model._cache, p, 0, valueNode, [], result, [], [], 'JSON');
+    });
+
+    if (result.requestedPaths.length === 0) {
+        result.values = [null];
+    }
+
+    return result;
+}
+
 
 function now() {
     return Date.now();
+}
+
+function _output() {
+    return {
+        values: [],
+        errors: [],
+        requestedPaths: [],
+        optimizedPaths: [],
+        requestedMissingPaths: [],
+        optimizedMissingPaths: []
+    };
 }
 
 if (typeof module !== 'undefined') {
