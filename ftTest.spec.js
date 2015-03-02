@@ -17,35 +17,40 @@ describe('Ready to Rumble.', function() {
             keys(Values()).
             forEach(function(k) {
                 var expected = Values()[k];
-                var query = expected.getPaths.query;
-                if (k === 'genreListErrorNull' || k === 'errorBranchSummary') {
-                    return;
-                }
+                
+                ['getPaths', 'getPathMaps'].forEach(function(q) {
+                    var query = expected[q].query;
+                    if (k === 'genreListErrorNull' || k === 'errorBranchSummary') {
+                        return;
+                    }
 
-                it('should test ' + JSON.stringify(query) + ' ' + k + ' AsValues', function() {
-                    var count = Array(expected.getPaths.count || 1).join(',').split(',').map(function() { return {}; });
-                    var expectedOutput = model._getPathsAsValues(model, _.cloneDeep(query), count);
-                    var actualOutput = recModel._getPathsAsValues(recModel, query);
-                    TestRunner.validateOperation('_getPathsAsValues', expectedOutput, actualOutput);
-                });
-
-                it('should test ' + JSON.stringify(query) + ' ' + k + ' AsPathMap', function() {
-                    var count = Array(expected.getPaths.count || 1).join(',').split(',').map(function() { return {}; });
-                    var expectedOutput = model._getPathsAsPathMap(model, _.cloneDeep(query), count);
-                    var out = [{}];
-                    var actualOutput = recModel._getPathsAsPathMap(recModel, query, out);
-                    TestRunner.validateOperation('_getPathsAsPathMap', expectedOutput, actualOutput);
-                });
-
-                if (expected.AsJSON) {
-                    it('should test ' + JSON.stringify(query) + ' ' + k + ' AsJSON', function() {
-                        var count = Array(expected.getPaths.count || 1).join(',').split(',').map(function() { return {}; });
-                        var expectedOutput = model._getPathsAsJSON(model, _.cloneDeep(query), count);
-                        var out = [{}];
-                        var actualOutput = recModel._getPathsAsJSON(recModel, query, out);
-                        TestRunner.validateOperation('_getPathsAsPathMap', expectedOutput, actualOutput);
+                    it('should test ' + JSON.stringify(query) + ' ' + k + ' AsValues', function() {
+                        var count = Array(q.count || 1).join(',').split(',').map(function() { return {}; });
+                        var expectedOutput = model['_' + q + 'AsValues'](model, _.cloneDeep(query), count);
+                        var actualOutput = recModel._getAsValues(recModel, query);
+                        TestRunner.validateOperation('_' + q + 'AsPathMap', expectedOutput, actualOutput);
                     });
-                }
+
+                    it('should test ' + JSON.stringify(query) + ' ' + k + ' AsPathMap', function() {
+                        var count = Array(q.count || 1).join(',').split(',').map(function() { return {}; });
+                        var expectedOutput = model['_' + q + 'AsPathMap'](model, _.cloneDeep(query), count);
+                        var out = [{}];
+                        var actualOutput = recModel._getAsPathMap(recModel, query, out);
+                        TestRunner.validateOperation('_' + q + 'AsPathMap', expectedOutput, actualOutput);
+                    });
+
+                    if (expected.AsJSON) {
+                        it('should test ' + JSON.stringify(query) + ' ' + k + ' AsJSON', function() {
+                            var count = Array(q.count || 1).join(',').split(',').map(function() { return {}; });
+                            var expectedOutput = model['_' + q + 'AsJSON'](model, _.cloneDeep(query), count);
+                            var out = [{}];
+                            var actualOutput = recModel._getAsJSON(recModel, query, out);
+                            TestRunner.validateOperation('_' + q + 'AsPathMap', expectedOutput, actualOutput);
+                        });
+                    }
+                });
+                
+                
             });
     });
 
@@ -54,50 +59,56 @@ describe('Ready to Rumble.', function() {
             keys(References()).
             forEach(function(k) {
                 var expected = References()[k];
-                var query = expected.getPaths.query;
                 if (k === 'futureExpiredReference' || k === 'toErrorReference' || k === 'errorReferenceInBranchKey' || k === 'errorReference') {
                     return;
                 }
-                it('should test ' + JSON.stringify(query) + ' ' + k, function() {
-                    var count = Array(expected.getPaths.count || 1).join(',').split(',').map(function() { return {}; });
-                    var expectedOutput = model._getPathsAsValues(model, _.cloneDeep(query), count);
-                    var actualOutput = recModel._getPathsAsValues(recModel, query);
-                    TestRunner.validateOperation('_getPathsAsValues', expectedOutput, actualOutput);
-                });
+                ['getPaths', 'getPathMaps'].forEach(function(q) {
+                    var query = expected[q].query;
+                    if (k === 'genreListErrorNull' || k === 'errorBranchSummary') {
+                        return;
+                    }
 
-                it('should test ' + JSON.stringify(query) + ' ' + k + ' AsPathMap', function() {
-                    var count = Array(expected.getPaths.count || 1).join(',').split(',').map(function() { return {}; });
-                    var expectedOutput = model._getPathsAsPathMap(model, _.cloneDeep(query), count);
-                    var out = [{}];
-                    var actualOutput = recModel._getPathsAsPathMap(recModel, query, out);
-                    TestRunner.validateOperation('_getPathsAsPathMap', expectedOutput, actualOutput);
-                });
-
-                if (expected.AsJSON) {
-                    it('should test ' + JSON.stringify(query) + ' ' + k + ' AsJSON', function() {
-                        var count = Array(expected.getPaths.count || 1).join(',').split(',').map(function() { return {}; });
-                        var expectedOutput = model._getPathsAsJSON(model, _.cloneDeep(query), count);
-                        var out = [{}];
-                        var actualOutput = recModel._getPathsAsJSON(recModel, query, out);
-                        TestRunner.validateOperation('_getPathsAsPathMap', expectedOutput, actualOutput);
+                    it('should test ' + JSON.stringify(query) + ' ' + k + ' AsValues', function() {
+                        var count = Array(q.count || 1).join(',').split(',').map(function() { return {}; });
+                        var expectedOutput = model['_' + q + 'AsValues'](model, _.cloneDeep(query), count);
+                        var actualOutput = recModel._getAsValues(recModel, query);
+                        TestRunner.validateOperation('_' + q + 'AsPathMap', expectedOutput, actualOutput);
                     });
-                }
+
+                    it('should test ' + JSON.stringify(query) + ' ' + k + ' AsPathMap', function() {
+                        var count = Array(q.count || 1).join(',').split(',').map(function() { return {}; });
+                        var expectedOutput = model['_' + q + 'AsPathMap'](model, _.cloneDeep(query), count);
+                        var out = [{}];
+                        var actualOutput = recModel._getAsPathMap(recModel, query, out);
+                        TestRunner.validateOperation('_' + q + 'AsPathMap', expectedOutput, actualOutput);
+                    });
+
+                    if (expected.AsJSON) {
+                        it('should test ' + JSON.stringify(query) + ' ' + k + ' AsJSON', function() {
+                            var count = Array(q.count || 1).join(',').split(',').map(function() { return {}; });
+                            var expectedOutput = model['_' + q + 'AsJSON'](model, _.cloneDeep(query), count);
+                            var out = [{}];
+                            var actualOutput = recModel._getAsJSON(recModel, query, out);
+                            TestRunner.validateOperation('_' + q + 'AsPathMap', expectedOutput, actualOutput);
+                        });
+                    }
+                });
             });
     });
 
-    describe('References', function() {
+    describe('Complex', function() {
         Object.
             keys(Complex()).
             forEach(function(k) {
                 var expected = Complex()[k];
                 var query = expected.getPaths.query;
                 it('should test ' + JSON.stringify(query) + ' ' + k, function() {
-                    var count = Array(expected.getPaths.count || 1).join(',').split(',').map(function() { return {}; });
+                    var count = [{}];
                     var expectedOutput = model._getPathsAsValues(model, _.cloneDeep(query), count);
                     if (k === 'toErrorReference' || k === 'errorReferenceInBranchKey' || k === 'errorReference') {
                         expectedOutput.values = [];
                     }
-                    var actualOutput = recModel._getPathsAsValues(recModel, query);
+                    var actualOutput = recModel._getAsValues(recModel, query);
                     TestRunner.validateOperation('_getPathsAsValues', expectedOutput, actualOutput);
                 });
                 
@@ -105,16 +116,16 @@ describe('Ready to Rumble.', function() {
                     var count = [{}];
                     var expectedOutput = model._getPathsAsPathMap(model, _.cloneDeep(query), count);
                     var out = [{}];
-                    var actualOutput = recModel._getPathsAsPathMap(recModel, query, out);
+                    var actualOutput = recModel._getAsPathMap(recModel, query, out);
                     TestRunner.validateOperation('_getPathsAsPathMap', expectedOutput, actualOutput);
                 });
                 
                 if (expected.AsJSON) {
                     it('should test ' + JSON.stringify(query) + ' ' + k + ' AsJSON', function() {
-                        var count = Array(expected.getPaths.count || 1).join(',').split(',').map(function() { return {}; });
+                        var count = [{}];
                         var expectedOutput = model._getPathsAsJSON(model, _.cloneDeep(query), count);
                         var out = [{}];
-                        var actualOutput = recModel._getPathsAsJSON(recModel, query, out);
+                        var actualOutput = recModel._getAsJSON(recModel, query, out);
                         TestRunner.validateOperation('_getPathsAsPathMap', expectedOutput, actualOutput);
                     });
                 }
@@ -122,12 +133,14 @@ describe('Ready to Rumble.', function() {
     });
 
     xit('should pass this test', function() {
-        var expected = Values().direct;
-        var query = expected.getPaths.query;
-        var count = [{}];
-        var expectedOutput = model._getPathsAsJSON(model, _.cloneDeep(query), count);
-        var out = [{}];
-        var actualOutput = recModel._getPathsAsJSON(recModel, query, out);
+        var expected = References().referenceBranchIsExpired;
+        var q = expected.getPathMaps;
+        var query = q.query;
+        var count = Array(q.count || 1).join(',').split(',').map(function() { return {}; });
+        var expectedOutput = model._getPathMapsAsValues(model, _.cloneDeep(query), count);
+        debugger
+        var actualOutput = recModel._getAsValues(recModel, query);
+        TestRunner.validateOperation('_getPathsAsValues', expectedOutput, actualOutput);
         TestRunner.validateOperation('_getPathsAsJSON', expectedOutput, actualOutput);
     });
 });

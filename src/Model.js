@@ -5,11 +5,11 @@ var FModel = function(cache) {
 };
 
 FModel.prototype = {
-    _getPathsAsValues: F_getPathsAsValues,
-    _getPathsAsPathMap: F_getPathsAsPathMap,
-    _getPathsAsJSON: F_getPathsAsJSON
+    _getAsValues: F_getAsValues,
+    _getAsPathMap: F_getAsPathMap,
+    _getAsJSON: F_getAsJSON
 };
-function F_getPathsAsValues(model, paths, onNext) {
+function F_getAsValues(model, paths, onNext) {
     var result = _output();
 
     paths.forEach(function(p) {
@@ -19,7 +19,7 @@ function F_getPathsAsValues(model, paths, onNext) {
     return result;
 }
 
-function F_getPathsAsPathMap(model, paths, values) {
+function F_getAsPathMap(model, paths, values) {
     var result = _output();
     var valueNode;
     if (values && values.length === 1) {
@@ -40,7 +40,7 @@ function F_getPathsAsPathMap(model, paths, values) {
     return result;
 }
 
-function F_getPathsAsJSON(model, paths, values) {
+function F_getAsJSON(model, paths, values) {
     var result = _output();
     if (values) {
         result.values = values;

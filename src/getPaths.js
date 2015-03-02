@@ -1,8 +1,17 @@
 // TODO: Objectify?
-function walk(model, root, node, path, depth, seedOrFunction, positionalInfo, outerResults, optimizedPath, requestedPath, outputFormat) {
+function walk(model, root, node, pathOrJSON, depth, seedOrFunction, positionalInfo, outerResults, optimizedPath, requestedPath, outputFormat) {
     positionalInfo = positionalInfo || [];
-
-    var k = path[depth];
+    var jsonQuery = false;
+    var k;
+    if (!Array.isArray(pathOrJSON)) {
+        jsonQuery = true;
+        k = Object.keys(pathOrJSON);
+        if (k.length === 1) {
+            k = k[0];
+        }
+    } else {
+        k = pathOrJSON[depth];
+    }
     var memo = {done: false};
     var first = true;
     var permutePosition = positionalInfo;
@@ -12,6 +21,8 @@ function walk(model, root, node, path, depth, seedOrFunction, positionalInfo, ou
     var asJSONG = outputFormat === 'JSONG';
     var asJSON = outputFormat === 'JSON';
     var isKeySet = false;
+    var nextPath;
+    var hasChildren = false;
     depth++;
 
     var key;
@@ -39,6 +50,10 @@ function walk(model, root, node, path, depth, seedOrFunction, positionalInfo, ou
                 permutePosition = fastCopy(positionalInfo);
             }
         }
+        nextPath = jsonQuery ? pathOrJSON[key] : pathOrJSON;
+        if (jsonQuery) {
+            hasChildren = nextPath !== null && Object.keys(nextPath).length > 0;
+        }
 
         var nodeIsSentinel = node.$type === 'sentinel';
         var next = nodeIsSentinel ? node.value[key] : node[key];
@@ -57,10 +72,10 @@ function walk(model, root, node, path, depth, seedOrFunction, positionalInfo, ou
             }
 
             if (isExpired(next)) {
-                emitMissing(path, depth, permuteRequested, permuteOptimized, permutePosition, outerResults, outputFormat);
+                emitMissing(nextPath, depth, permuteRequested, permuteOptimized, permutePosition, outerResults, outputFormat);
             }
 
-            else if (depth < path.length) {
+            else if (jsonQuery && hasChildren || !jsonQuery && depth < pathOrJSON.length) {
 
                 if (valueIsArray) {
                     var ref = followReference(model, root, root, value);
@@ -73,46 +88,50 @@ function walk(model, root, node, path, depth, seedOrFunction, positionalInfo, ou
 
                         // short circuit case
                         if (rType === 'leaf') {
-                            emitValues(model, refNode, path, depth, seedOrFunction, outerResults, permuteRequested, permuteOptimized, permutePosition, outputFormat);
+                            emitValues(model, refNode, nextPath, depth, seedOrFunction, outerResults, permuteRequested, permuteOptimized, permutePosition, outputFormat);
                         }
 
                         else if (rType === 'error') {
-                            emitError(model, path, depth, refNode, rValue, permuteRequested, permuteOptimized, outerResults);
+                            emitError(model, nextPath, depth, refNode, rValue, permuteRequested, permuteOptimized, outerResults);
                         }
 
                         else {
-                            walk(model, root, refNode, path, depth, seedOrFunction, permutePosition, outerResults, permuteOptimized, permuteRequested, outputFormat);
+                            walk(model, root, refNode, nextPath, depth, seedOrFunction, permutePosition, outerResults, permuteOptimized, permuteRequested, outputFormat);
                         }
                     } else {
-                        emitMissing(path, depth, permuteRequested, permuteOptimized, permutePosition, outerResults, outputFormat);
+                        emitMissing(nextPath, depth, permuteRequested, permuteOptimized, permutePosition, outerResults, outputFormat);
                     }
                 }
 
                 else if (nType === 'error') {
-                    emitError(model, path, depth, next, value, permuteRequested, permuteOptimized, outerResults);
+                    emitError(model, nextPath, depth, next, value, permuteRequested, permuteOptimized, outerResults);
                 }
 
                 else if (nType === 'leaf') {
-                    emitValues(model, next, path, depth, seedOrFunction, outerResults, permuteRequested, permuteOptimized, permutePosition, outputFormat);
+                    emitValues(model, next, nextPath, depth, seedOrFunction, outerResults, permuteRequested, permuteOptimized, permutePosition, outputFormat);
                 }
 
                 else {
-                    walk(model, root, value, path, depth, seedOrFunction, permutePosition, outerResults, permuteOptimized, permuteRequested, outputFormat);
+                    walk(model, root, value, nextPath, depth, seedOrFunction, permutePosition, outerResults, permuteOptimized, permuteRequested, outputFormat);
                 }
             }
 
             // we are the last depth.  This needs to be returned
             else {
                 if (nType || valueIsArray) {
-                    emitValues(model, next, path, depth, seedOrFunction, outerResults, permuteRequested, permuteOptimized, permutePosition, outputFormat);
+                    emitValues(model, next, nextPath, depth, seedOrFunction, outerResults, permuteRequested, permuteOptimized, permutePosition, outputFormat);
                 } else {
-                    emitMissing(path, depth, permuteRequested, permuteOptimized, permutePosition, outerResults, outputFormat);
+                    emitMissing(nextPath, depth, permuteRequested, permuteOptimized, permutePosition, outerResults, outputFormat);
                 }
             }
         } else {
-            emitMissing(path, depth - 1, permuteRequested, permuteOptimized, permutePosition, outerResults, outputFormat);
+            // We emit one step backwards.
+            emitMissing(pathOrJSON, depth - 1, permuteRequested, permuteOptimized, permutePosition, outerResults, outputFormat);
         }
-        key = permuteKey(k, memo);
+        
+        if (!memo.done) {
+            key = permuteKey(k, memo);
+        }
     }
 }
 
@@ -126,23 +145,48 @@ function emitError(model, path, depth, node, nodeValue, permuteRequested, permut
 
 function emitMissing(path, depth, permuteRequested, permuteOptimized, permutePosition, results, type) {
     var pathSlice;
-    if (depth < path.length) {
-        pathSlice = fastCopy(path, depth);
+    if (Array.isArray(path)) {
+        if (depth < path.length) {
+            pathSlice = fastCopy(path, depth);
+        } else {
+            pathSlice = [];
+        }
+
+        concatAndInsertMissing(pathSlice, results, permuteRequested, permuteOptimized, permutePosition, type);
     } else {
         pathSlice = [];
+        spreadJSON(path, pathSlice);
+        
+        if (pathSlice.length) {
+            for (var i = 0, len = pathSlice.length; i < len; i++) {
+                concatAndInsertMissing(pathSlice[i], results, permuteRequested, permuteOptimized, permutePosition, type, true);
+            }
+        } else {
+            concatAndInsertMissing(pathSlice, results, permuteRequested, permuteOptimized, permutePosition, type);
+        }
     }
     
+}
+function concatAndInsertMissing(remainingPath, results, permuteRequested, permuteOptimized, permutePosition, type, __null) {
+    var i = 0, len;
+    if (__null) {
+        for (i = 0, len = remainingPath.length; i < len; i++) {
+            if (remainingPath[i] === '__null') {
+                remainingPath[i] = null;
+            }
+        }
+    }
     if (type === 'JSON') {
-        for (var i = 0, len = permutePosition.length; i < len; i++) {
+        for (i = 0, len = permutePosition.length; i < len; i++) {
             if (permutePosition[i]) {
                 permuteRequested[i] = [permuteRequested[i]];
             }
         }
-        results.requestedMissingPaths.push(fastCat(permuteRequested, pathSlice));
-        results.optimizedMissingPaths.push(fastCatSkipNulls(permuteOptimized, pathSlice));
+        results.requestedMissingPaths.push(fastCat(permuteRequested, remainingPath));
+        results.optimizedMissingPaths.push(fastCatSkipNulls(permuteOptimized, remainingPath));
     } else {
-        results.requestedMissingPaths.push(fastCat(permuteRequested, pathSlice));
-        results.optimizedMissingPaths.push(fastCatSkipNulls(permuteOptimized, pathSlice));
+        results.requestedMissingPaths.push(fastCat(permuteRequested, remainingPath));
+        results.optimizedMissingPaths.push(fastCatSkipNulls(permuteOptimized, remainingPath));
     }
 }
 function emitValues(model, node, path, depth, seedOrFunction, outerResults, permuteRequested, permuteOptimized, permutePosition, outputFormat) {
