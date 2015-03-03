@@ -8,6 +8,12 @@ model._getPathsAsValues(model, [
     ['genreList', [0, 1], [0, 1], 'summary']
 ]);
 
+function fulfill() {
+    this.getValueSync(['videos', 1234, 'summary']);
+}
+function fulfill2(video) {
+}
+
 // When tests are ready to run, your script needs to invoke function onTestsLoaded (testObject){}
 onTestsLoaded({
     // Name your test
@@ -16,14 +22,14 @@ onTestsLoaded({
 
     // Define tests as 'name' : function(){test code}
     tests: {
-        'falcor.Model getValueSync': function () {
-            model.getValueSync(['videos', 1234, 'summary']);
+        'falcor.Model test selector empty': function () {
+            model._getPathsAsJSON(model, [['videos', 1234, 'summary']]);
+            model._getValueSync(model, ['videos', 1234, 'summary'])
         },
 
         'FTester2.Model simple path': function () {
-            recModel._getAsValues(recModel, [
-                ['videos', 1234, 'summary']
-            ]);
+            recModel._getAsJSON(recModel, [['videos', 1234, 'summary']]);
+            recModel._getAsValues(recModel, [['videos', 1234, 'summary']]);
         }
     }
 });

@@ -103,7 +103,7 @@ gulp.task('src', function() {
         src([
             'src/lru.js',
             'src/support.js',
-            'src/getPaths.js',
+            'src/get.js',
             'src/Model.js'
         ]).
         pipe(concat({path: 'Falcor2.js'})).

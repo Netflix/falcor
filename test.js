@@ -374,17 +374,23 @@ module.exports = {
 //                ['genreList', [0, 1], {to: 3}, 'summary']
 //            ], [{}]);
 //        }
-        'falcor.Model getValueSync': function () {
-            model.getValueSync(['videos', 1234, 'summary']);
+        'falcor.Model test selector empty': function () {
+            model._getPathsAsJSON(model, [['videos', 1234, 'summary']]);
+            model._getValueSync(model, ['videos', 1234, 'summary'])
         },
 
         'FTester2.Model simple path': function () {
-            recModel._getAsValues(recModel, [
-                ['videos', 1234, 'summary']
-            ]);
+            recModel._getAsJSON(recModel, [['videos', 1234, 'summary']]);
+            recModel._getAsValues(recModel, [['videos', 1234, 'summary']]);
         }
     }
 };
+
+function fulfill() {
+    this.getValueSync(['videos', 1234, 'summary']);
+}
+function fulfill(video) {
+}
 if (require.main === module) {
 //    var out = model._getPathsAsJSON(model, [
 //        {
