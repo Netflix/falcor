@@ -110,6 +110,13 @@ function fastCat(arr1, arr2) {
     return a;
 }
 
+function fastCatMutate(arr1, arr2) {
+    for (var j = 0, len = arr2.length, i = arr1.length; j < len; j++, i++) {
+        a[i] = arr2[j];
+    }
+    return a;
+}
+
 function permuteKey(key, memo) {
     if (memo.done) {
         return;

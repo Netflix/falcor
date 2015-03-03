@@ -1,9 +1,9 @@
 // TODO: Objectify?
-function walk(model, root, node, pathOrJSON, depth, seedOrFunction, positionalInfo, outerResults, optimizedPath, requestedPath, outputFormat) {
+function walk(model, root, node, pathOrJSON, depth, seedOrFunction, positionalInfo, outerResults, optimizedPath, requestedPath, inputFormat, outputFormat) {
     positionalInfo = positionalInfo || [];
     var jsonQuery = false;
-    var k;
-    if (!Array.isArray(pathOrJSON)) {
+    var k, i, len;
+    if (inputFormat === 'JSON') {
         jsonQuery = true;
         k = Object.keys(pathOrJSON);
         if (k.length === 1) {
@@ -44,9 +44,23 @@ function walk(model, root, node, pathOrJSON, depth, seedOrFunction, positionalIn
     while (!memo.done || first) {
         first = false;
         if (!memo.done) {
+//            permuteOptimized = [];
+//            permuteRequested = [];
+//            for (i = 0, len = requestedPath.length; i < len; i++) {
+//                permuteRequested[i] = requestedPath[i];
+//            }
+//            for (i = 0, len = optimizedPath.length; i < len; i++) {
+//                permuteOptimized[i] = optimizedPath[i];
+//            }
+//            if (asPathMap) {
+//                for (i = 0, len = permutePosition.length; i < len; i++) {
+//                    permutePosition[i] = permutePosition[i];
+//                }
+//            }
+
             permuteOptimized = fastCopy(optimizedPath);
             permuteRequested = fastCopy(requestedPath);
-            if (asPathMap) {
+            if (asPathMap || asJSON) {
                 permutePosition = fastCopy(positionalInfo);
             }
         }
@@ -96,7 +110,7 @@ function walk(model, root, node, pathOrJSON, depth, seedOrFunction, positionalIn
                         }
 
                         else {
-                            walk(model, root, refNode, nextPath, depth, seedOrFunction, permutePosition, outerResults, permuteOptimized, permuteRequested, outputFormat);
+                            walk(model, root, refNode, nextPath, depth, seedOrFunction, permutePosition, outerResults, permuteOptimized, permuteRequested, inputFormat, outputFormat);
                         }
                     } else {
                         emitMissing(nextPath, depth, permuteRequested, permuteOptimized, permutePosition, outerResults, outputFormat);
@@ -112,7 +126,7 @@ function walk(model, root, node, pathOrJSON, depth, seedOrFunction, positionalIn
                 }
 
                 else {
-                    walk(model, root, value, nextPath, depth, seedOrFunction, permutePosition, outerResults, permuteOptimized, permuteRequested, outputFormat);
+                    walk(model, root, value, nextPath, depth, seedOrFunction, permutePosition, outerResults, permuteOptimized, permuteRequested, inputFormat, outputFormat);
                 }
             }
 
@@ -121,12 +135,12 @@ function walk(model, root, node, pathOrJSON, depth, seedOrFunction, positionalIn
                 if (nType || valueIsArray) {
                     emitValues(model, next, nextPath, depth, seedOrFunction, outerResults, permuteRequested, permuteOptimized, permutePosition, outputFormat);
                 } else {
-                    emitMissing(nextPath, depth, permuteRequested, permuteOptimized, permutePosition, outerResults, outputFormat);
+                    emitMissing(nextPath, inputFormat === 'JSON' ? key : depth, permuteRequested, permuteOptimized, permutePosition, outerResults, outputFormat);
                 }
             }
         } else {
             // We emit one step backwards.
-            emitMissing(pathOrJSON, depth - 1, permuteRequested, permuteOptimized, permutePosition, outerResults, outputFormat);
+            emitMissing(nextPath, depth - 1, permuteRequested, permuteOptimized, permutePosition, outerResults, outputFormat);
         }
         
         if (!memo.done) {
@@ -143,11 +157,11 @@ function emitError(model, path, depth, node, nodeValue, permuteRequested, permut
     outerResults.optimizedPaths.push(permuteOptimized);
 }
 
-function emitMissing(path, depth, permuteRequested, permuteOptimized, permutePosition, results, type) {
+function emitMissing(path, depthOrMissingKey, permuteRequested, permuteOptimized, permutePosition, results, type) {
     var pathSlice;
     if (Array.isArray(path)) {
-        if (depth < path.length) {
-            pathSlice = fastCopy(path, depth);
+        if (depthOrMissingKey < path.length) {
+            pathSlice = fastCopy(path, depthOrMissingKey);
         } else {
             pathSlice = [];
         }
@@ -156,6 +170,9 @@ function emitMissing(path, depth, permuteRequested, permuteOptimized, permutePos
     } else {
         pathSlice = [];
         spreadJSON(path, pathSlice);
+
+        permuteRequested.push(depthOrMissingKey);
+        permuteOptimized.push(depthOrMissingKey);
         
         if (pathSlice.length) {
             for (var i = 0, len = pathSlice.length; i < len; i++) {
@@ -177,12 +194,16 @@ function concatAndInsertMissing(remainingPath, results, permuteRequested, permut
         }
     }
     if (type === 'JSON') {
+        permuteRequested = fastCat(permuteRequested, remainingPath);
         for (i = 0, len = permutePosition.length; i < len; i++) {
-            if (permutePosition[i]) {
-                permuteRequested[i] = [permuteRequested[i]];
+            var idx = permutePosition[i];
+            var r = permuteRequested[idx]
+            // TODO: i think the typeof operator is no needed if there is better management of permutePosition addition
+            if (typeof r !== 'object') {
+                permuteRequested[idx] = [r];
             }
         }
-        results.requestedMissingPaths.push(fastCat(permuteRequested, remainingPath));
+        results.requestedMissingPaths.push(permuteRequested);
         results.optimizedMissingPaths.push(fastCatSkipNulls(permuteOptimized, remainingPath));
     } else {
         results.requestedMissingPaths.push(fastCat(permuteRequested, remainingPath));

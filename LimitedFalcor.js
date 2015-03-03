@@ -94,8 +94,741 @@ Model.prototype = {
     _getPathsAsValues        :      getPathsAsValues,
     _getPathsAsPathMap:      getPathsAsPathMap,
     _getPathsAsJSON:      getPathsAsJSON,
-    _setPathMapsAsValues     :   setPathMapsAsValues
+    _getPathMapsAsJSON:      getPathMapsAsJSON,
+    _setPathMapsAsValues     :   setPathMapsAsValues,
+    _getValueSync: getValueSync,
+    syncCheck: function (name) {
+        if (this._root.allowSync === false && this._root.unsafeMode === false) {
+            throw new Error("Model#" + name + " may only be called within the context of a request selector.");
+        }
+        return true;
+    },
+
+    getValueSync: function (path) {
+        if (Array.isArray(path) === false) {
+            throw new Error("Model#getValueSync must be called with an Array path.");
+        }
+        var value = this.syncCheck("getValueSync") && this._getValueSync(this, this._path.concat(path)).value;
+        if (value[$TYPE] === ERROR) {
+            throw value;
+        }
+        return value;
+    }
 };
+function getPathMapsAsJSON(model, pathMaps, values, errorSelector, boundPath) {
+    var boundLength = 0, nodeRoot = model._cache || (model._cache = {}), nodeParent, node;
+    if (Array.isArray(boundPath)) {
+        nodeParent = nodeRoot;
+        boundLength = boundPath.length;
+    } else {
+        nodeParent = getBoundContext(model);
+        boundPath = model._path || [];
+    }
+    var root = model._root || model, boxed = model._boxed || false, expired = root.expired || (root.expired = []), refreshing = model._refreshing || false, appendNullKey = false;
+    typeof errorSelector === 'function' || (errorSelector = model._errorSelector) || (errorSelector = function (x$4, y$2) {
+        return y$2;
+    });
+    var pathMapStack = pathMaps.pathMapStack || (pathMaps.pathMapStack = []);
+    var jsonKeys = pathMaps.jsonKeys || (pathMaps.jsonKeys = []);
+    var nodes = pathMaps.nodes || (pathMaps.nodes = []);
+    var jsons = pathMaps.jsons || (pathMaps.jsons = []);
+    var errors = pathMaps.errors || (pathMaps.errors = []);
+    var refs = pathMaps.refs || (pathMaps.refs = []);
+    var depth = pathMaps.depth || (pathMaps.depth = 0);
+    var refIndex = pathMaps.refIndex || (pathMaps.refIndex = 0);
+    var refDepth = pathMaps.refDepth || (pathMaps.refDepth = 0);
+    var requestedPath = pathMaps.requestedPath || (pathMaps.requestedPath = []);
+    var optimizedPath = pathMaps.optimizedPath || (pathMaps.optimizedPath = []);
+    var requestedPaths = pathMaps.requestedPaths || (pathMaps.requestedPaths = []);
+    var optimizedPaths = pathMaps.optimizedPaths || (pathMaps.optimizedPaths = []);
+    var requestedMissingPaths = pathMaps.requestedMissingPaths || (pathMaps.requestedMissingPaths = []);
+    var optimizedMissingPaths = pathMaps.optimizedMissingPaths || (pathMaps.optimizedMissingPaths = []);
+    var hasValue = pathMaps.hasValue || (pathMaps.hasValue = false);
+    var jsonRoot = pathMaps.jsonRoot || (pathMaps.jsonRoot = values && values[0]);
+    var jsonParent = pathMaps.jsonParent || (pathMaps.jsonParent = jsonRoot);
+    var jsonNode = pathMaps.jsonNode || (pathMaps.jsonNode = jsonParent);
+    var pathMap, length = 0, height = 0, reference, refLength = 0, refHeight = 0, nodeType, nodeValue, nodeSize, nodeTimestamp, nodeExpires;
+    refs[-1] = boundPath;
+    nodes[-1] = nodeParent;
+    jsons[-2] = jsons;
+    jsonKeys[-1] = -1;
+    var index = -1, count = pathMaps.length;
+    while (++index < count) {
+        pathMap = pathMaps[index];
+        pathMapStack[0] = pathMap;
+        hasValue = false;
+        jsons.length = 0;
+        jsons[-1] = jsonRoot = values && values[index] || void 0;
+        jsonKeys.length = 0;
+        jsonKeys[-1] = -1;
+        depth = 0;
+        length = pathMap.length;
+        height = length - 1;
+        var ref;
+        refs.length = 0;
+        while (depth > -1) {
+            refIndex = depth;
+            while (--refIndex >= -1) {
+                if (!!(ref = refs[refIndex])) {
+                    refLength = ref.length;
+                    var i = -1, j = 0;
+                    while (++i < refLength) {
+                        optimizedPath[j++] = ref[i];
+                    }
+                    i = ++refIndex;
+                    while (i < depth) {
+                        optimizedPath[j++] = requestedPath[i++];
+                    }
+                    optimizedPath.length = j;
+                    break;
+                }
+            }
+            var offset, keys, index$2, key, isKeySet;
+            pathMap = pathMap;
+            height = (length = depth) - 1;
+            nodeParent = nodes[depth - 1];
+            nodeType = nodeParent && nodeParent[$TYPE] || void 0;
+            nodeValue = nodeType === SENTINEL ? nodeParent[VALUE] : nodeParent;
+            if (nodeParent == null || nodeType !== void 0 || typeof nodeParent !== 'object' || Array.isArray(nodeValue)) {
+                node = nodeParent;
+                nodeParent = nodes;
+                key = depth - 1;
+                isKeySet = false;
+                optimizedPath[optimizedPath.length = depth + (refLength - refIndex)] = key;
+                node = nodeParent[key];
+                nodeType = node && node[$TYPE] || void 0;
+                nodeValue = nodeType === SENTINEL ? node[VALUE] : node;
+                nodeTimestamp = node && node[$TIMESTAMP];
+                nodeExpires = node && node[$EXPIRES];
+                if (node != null && typeof node === 'object') {
+                    if (nodeExpires != null && nodeExpires !== 1 && (nodeExpires === 0 || nodeExpires < Date.now()) || node[__INVALIDATED] === true) {
+                        node = nodeValue = (expired[expired.length] = node) && (node[__INVALIDATED] = true) && void 0;
+                    } else {
+                        if (nodeExpires !== 1) {
+                            var root$2 = root, head = root$2.__head, tail = root$2.__tail, next = node.__next, prev = node.__prev;
+                            if (node !== head) {
+                                next && (next != null && typeof next === 'object') && (next.__prev = prev);
+                                prev && (prev != null && typeof prev === 'object') && (prev.__next = next);
+                                (next = head) && (head != null && typeof head === 'object') && (head.__prev = node);
+                                root$2.__head = root$2.__next = head = node;
+                                head.__next = next;
+                                head.__prev = void 0;
+                            }
+                            if (tail == null || node === tail) {
+                                root$2.__tail = root$2.__prev = tail = prev || node;
+                            }
+                            root$2 = head = tail = next = prev = void 0;
+                        }
+                    }
+                }
+                if (depth >= boundLength) {
+                    jsonKeys[depth] = isKeySet ? key : void 0;
+                } else {
+                    jsonKeys[depth] = void 0;
+                }
+                node = node;
+            } else {
+                nodeParent = node = nodes[depth - 1];
+                jsonParent = jsonNode = jsons[depth - 1];
+                depth = depth;
+                follow_path_map_6336:
+                    do {
+                        if ((pathMap = pathMapStack[offset = depth * 4]) != null && typeof pathMap === 'object' && (keys = pathMapStack[offset + 1] || (pathMapStack[offset + 1] = Object.keys(pathMap))) && ((index$2 = pathMapStack[offset + 2] || (pathMapStack[offset + 2] = 0)) || true) && ((key = pathMapStack[offset + 3]) || true) && ((isKeySet = keys.length > 1) || keys.length > 0)) {
+                            key = keys[index$2];
+                            if (key == __NULL) {
+                                pathMapStack[offset = 3 * (depth + 1)] = pathMap[__NULL];
+                                pathMapStack[offset + 1] = keys;
+                                pathMapStack[offset + 2] = 0;
+                                nodeParent = nodes[depth] = node;
+                                jsonParent = jsons[depth] = jsonNode;
+                                depth = depth + 1;
+                                continue follow_path_map_6336;
+                            } else if (key === $SIZE || (!(key[0] !== '_' || key[1] !== '_') || (key === __SELF || key === __PARENT || key === __ROOT))) {
+                                nodeParent = node;
+                                break follow_path_map_6336;
+                            } else if (!(key[0] !== '_' || key[1] !== '_') || (key === __SELF || key === __PARENT || key === __ROOT) || key[0] === '$') {
+                                nodeParent[key] || (nodeParent[key] = pathMap[key]);
+                                nodeParent = node;
+                                break follow_path_map_6336;
+                            } else {
+                                depth >= boundLength && (requestedPath[requestedPath.length = depth - boundLength] = key);
+                                pathMapStack[offset = 4 * (depth + 1)] = pathMap = pathMap[key];
+                                if (pathMap != null && typeof pathMap === 'object' && pathMap[$TYPE] === void 0 && Array.isArray(pathMap) === false && (keys = Object.keys(pathMap)) && keys.length > 0) {
+                                    optimizedPath[optimizedPath.length = depth + (refLength - refIndex)] = key;
+                                    node = nodeParent[key];
+                                    nodeType = node && node[$TYPE] || void 0;
+                                    nodeValue = nodeType === SENTINEL ? node[VALUE] : node;
+                                    nodeTimestamp = node && node[$TIMESTAMP];
+                                    nodeExpires = node && node[$EXPIRES];
+                                    if (node != null && typeof node === 'object' && (nodeExpires != null && nodeExpires !== 1 && (nodeExpires === 0 || nodeExpires < Date.now()) || node[__INVALIDATED] === true)) {
+                                        node = nodeValue = (expired[expired.length] = node) && (node[__INVALIDATED] = true) && void 0;
+                                    }
+                                    if (depth >= boundLength) {
+                                        jsonKeys[depth] = isKeySet ? key : void 0;
+                                        if (node != null && jsonParent != null && isKeySet && (!(jsonNode = jsonParent[key]) || !(jsonNode != null && typeof jsonNode === 'object'))) {
+                                            jsonNode = jsonParent[key] = Object.create(null);
+                                        }
+                                    } else {
+                                        jsonKeys[depth] = void 0;
+                                    }
+                                    if ((!nodeType || nodeType === SENTINEL) && Array.isArray(nodeValue)) {
+                                        do {
+                                            if (nodeExpires !== 1) {
+                                                var root$3 = root, head$2 = root$3.__head, tail$2 = root$3.__tail, next$2 = node.__next, prev$2 = node.__prev;
+                                                if (node !== head$2) {
+                                                    next$2 && (next$2 != null && typeof next$2 === 'object') && (next$2.__prev = prev$2);
+                                                    prev$2 && (prev$2 != null && typeof prev$2 === 'object') && (prev$2.__next = next$2);
+                                                    (next$2 = head$2) && (head$2 != null && typeof head$2 === 'object') && (head$2.__prev = node);
+                                                    root$3.__head = root$3.__next = head$2 = node;
+                                                    head$2.__next = next$2;
+                                                    head$2.__prev = void 0;
+                                                }
+                                                if (tail$2 == null || node === tail$2) {
+                                                    root$3.__tail = root$3.__prev = tail$2 = prev$2 || node;
+                                                }
+                                                root$3 = head$2 = tail$2 = next$2 = prev$2 = void 0;
+                                            }
+                                            refs[depth] = nodeValue;
+                                            refIndex = depth + 1;
+                                            refDepth = 0;
+                                            var location = (nodeValue[__CONTAINER] || nodeValue)[__CONTEXT];
+                                            if (location !== void 0) {
+                                                node = location;
+                                                refHeight = (refLength = nodeValue.length) - 1;
+                                                while (refDepth < refLength) {
+                                                    optimizedPath[refDepth] = nodeValue[refDepth++];
+                                                }
+                                                optimizedPath.length = refLength;
+                                            } else {
+                                                var key$2, isKeySet$2;
+                                                reference = nodeValue;
+                                                refHeight = (refLength = reference.length) - 1;
+                                                nodeParent = nodeRoot;
+                                                nodeType = nodeParent && nodeParent[$TYPE] || void 0;
+                                                nodeValue = nodeType === SENTINEL ? nodeParent[VALUE] : nodeParent;
+                                                if (nodeParent == null || nodeType !== void 0 || typeof nodeParent !== 'object' || Array.isArray(nodeValue)) {
+                                                    node = node = nodeParent;
+                                                } else {
+                                                    nodeParent = nodeRoot;
+                                                    jsonParent = jsonRoot;
+                                                    refDepth = refDepth;
+                                                    follow_path_6559:
+                                                        do {
+                                                            key$2 = reference[refDepth];
+                                                            isKeySet$2 = false;
+                                                            if (key$2 != null) {
+                                                                if (refDepth < refHeight) {
+                                                                    optimizedPath[optimizedPath.length = refDepth] = key$2;
+                                                                    node = nodeParent[key$2];
+                                                                    nodeType = node && node[$TYPE] || void 0;
+                                                                    nodeValue = nodeType === SENTINEL ? node[VALUE] : node;
+                                                                    nodeTimestamp = node && node[$TIMESTAMP];
+                                                                    nodeExpires = node && node[$EXPIRES];
+                                                                    if (node != null && typeof node === 'object' && (nodeExpires != null && nodeExpires !== 1 && (nodeExpires === 0 || nodeExpires < Date.now()) || node[__INVALIDATED] === true)) {
+                                                                        node = nodeValue = (expired[expired.length] = node) && (node[__INVALIDATED] = true) && void 0;
+                                                                    }
+                                                                    if (appendNullKey = node == null || nodeType !== void 0 || typeof node !== 'object' || Array.isArray(nodeValue)) {
+                                                                        nodeParent = node;
+                                                                        break follow_path_6559;
+                                                                    }
+                                                                    nodeParent = node;
+                                                                    jsonParent = jsonNode;
+                                                                    refDepth = refDepth + 1;
+                                                                    continue follow_path_6559;
+                                                                } else if (refDepth === refHeight) {
+                                                                    optimizedPath[optimizedPath.length = refDepth] = key$2;
+                                                                    node = nodeParent[key$2];
+                                                                    nodeType = node && node[$TYPE] || void 0;
+                                                                    nodeValue = nodeType === SENTINEL ? node[VALUE] : node;
+                                                                    nodeTimestamp = node && node[$TIMESTAMP];
+                                                                    nodeExpires = node && node[$EXPIRES];
+                                                                    if (node != null && typeof node === 'object' && (nodeExpires != null && nodeExpires !== 1 && (nodeExpires === 0 || nodeExpires < Date.now()) || node[__INVALIDATED] === true)) {
+                                                                        node = nodeValue = (expired[expired.length] = node) && (node[__INVALIDATED] = true) && void 0;
+                                                                    }
+                                                                    if (node != null) {
+                                                                        var refContainer = reference[__CONTAINER] || reference, refContext = refContainer[__CONTEXT];
+                                                                        // Set up the hard-link so we don't have to do all
+                                                                        // this work the next time we follow this reference.
+                                                                        if (refContext === void 0) {
+                                                                            // create a back reference
+                                                                            var backRefs = node[__REFS_LENGTH] || 0;
+                                                                            node[__REF + backRefs] = refContainer;
+                                                                            node[__REFS_LENGTH] = backRefs + 1;
+                                                                            // create a hard reference
+                                                                            refContainer[__REF_INDEX] = backRefs;
+                                                                            refContainer[__CONTEXT] = node;
+                                                                            refContainer = backRefs = void 0;
+                                                                        }
+                                                                        ;
+                                                                    }
+                                                                    appendNullKey = node == null || nodeType !== void 0 || typeof node !== 'object' || Array.isArray(nodeValue);
+                                                                    nodeParent = node;
+                                                                    break follow_path_6559;
+                                                                }
+                                                            } else if (refDepth < refHeight) {
+                                                                nodeParent = node;
+                                                                jsonParent = jsonNode;
+                                                                refDepth = refDepth + 1;
+                                                                continue follow_path_6559;
+                                                            }
+                                                            nodeParent = node;
+                                                            break follow_path_6559;
+                                                        } while (true);
+                                                    node = nodeParent;
+                                                }
+                                            }
+                                            nodeType = node && node[$TYPE] || void 0;
+                                            nodeValue = nodeType === SENTINEL ? node[VALUE] : node;
+                                            nodeExpires = node && node[$EXPIRES];
+                                            if (node != null && typeof node === 'object' && (nodeExpires != null && nodeExpires !== 1 && (nodeExpires === 0 || nodeExpires < Date.now()) || node[__INVALIDATED] === true)) {
+                                                node = nodeValue = (expired[expired.length] = node) && (node[__INVALIDATED] = true) && void 0;
+                                            }
+                                        } while ((!nodeType || nodeType === SENTINEL) && Array.isArray(nodeValue));
+                                        if (node == null) {
+                                            while (refDepth <= refHeight) {
+                                                optimizedPath[refDepth] = reference[refDepth++];
+                                            }
+                                        }
+                                    }
+                                    if (node == null || nodeType !== void 0 || typeof node !== 'object' || Array.isArray(nodeValue)) {
+                                        nodeParent = node;
+                                        break follow_path_map_6336;
+                                    }
+                                    pathMapStack[offset + 1] = keys;
+                                    pathMapStack[offset + 3] = key;
+                                    nodeParent = nodes[depth] = node;
+                                    jsonParent = jsons[depth] = jsonNode;
+                                    depth = depth + 1;
+                                    continue follow_path_map_6336;
+                                }
+                            }
+                        }
+                        if (key != null) {
+                            optimizedPath[optimizedPath.length = depth + (refLength - refIndex)] = key;
+                            node = nodeParent[key];
+                            nodeType = node && node[$TYPE] || void 0;
+                            nodeValue = nodeType === SENTINEL ? node[VALUE] : node;
+                            nodeTimestamp = node && node[$TIMESTAMP];
+                            nodeExpires = node && node[$EXPIRES];
+                            if (node != null && typeof node === 'object') {
+                                if (nodeExpires != null && nodeExpires !== 1 && (nodeExpires === 0 || nodeExpires < Date.now()) || node[__INVALIDATED] === true) {
+                                    node = nodeValue = (expired[expired.length] = node) && (node[__INVALIDATED] = true) && void 0;
+                                } else {
+                                    if (nodeExpires !== 1) {
+                                        var root$4 = root, head$3 = root$4.__head, tail$3 = root$4.__tail, next$3 = node.__next, prev$3 = node.__prev;
+                                        if (node !== head$3) {
+                                            next$3 && (next$3 != null && typeof next$3 === 'object') && (next$3.__prev = prev$3);
+                                            prev$3 && (prev$3 != null && typeof prev$3 === 'object') && (prev$3.__next = next$3);
+                                            (next$3 = head$3) && (head$3 != null && typeof head$3 === 'object') && (head$3.__prev = node);
+                                            root$4.__head = root$4.__next = head$3 = node;
+                                            head$3.__next = next$3;
+                                            head$3.__prev = void 0;
+                                        }
+                                        if (tail$3 == null || node === tail$3) {
+                                            root$4.__tail = root$4.__prev = tail$3 = prev$3 || node;
+                                        }
+                                        root$4 = head$3 = tail$3 = next$3 = prev$3 = void 0;
+                                    }
+                                }
+                            }
+                            if (depth >= boundLength) {
+                                jsonKeys[depth] = isKeySet ? key : void 0;
+                            } else {
+                                jsonKeys[depth] = void 0;
+                            }
+                            appendNullKey = false;
+                        }
+                        nodeParent = node;
+                        break follow_path_map_6336;
+                    } while (true);
+                node = nodeParent;
+            }
+            if (node != null || boxed === true) {
+                if (nodeType === ERROR) {
+                    if (nodeExpires !== 1) {
+                        var root$5 = root, head$4 = root$5.__head, tail$4 = root$5.__tail, next$4 = node.__next, prev$4 = node.__prev;
+                        if (node !== head$4) {
+                            next$4 && (next$4 != null && typeof next$4 === 'object') && (next$4.__prev = prev$4);
+                            prev$4 && (prev$4 != null && typeof prev$4 === 'object') && (prev$4.__next = next$4);
+                            (next$4 = head$4) && (head$4 != null && typeof head$4 === 'object') && (head$4.__prev = node);
+                            root$5.__head = root$5.__next = head$4 = node;
+                            head$4.__next = next$4;
+                            head$4.__prev = void 0;
+                        }
+                        if (tail$4 == null || node === tail$4) {
+                            root$5.__tail = root$5.__prev = tail$4 = prev$4 || node;
+                        }
+                        root$5 = head$4 = tail$4 = next$4 = prev$4 = void 0;
+                    }
+                    var nodeType$2 = node && node[$TYPE] || void 0;
+                    nodeValue = nodeType$2 === SENTINEL ? node[VALUE] : nodeType$2 === ERROR ? node = errorSelector(requestedPath, node) : node;
+                    var pbv = Object.create(null);
+                    var src = requestedPath, i$2 = -1, n = src.length, req = new Array(n);
+                    while (++i$2 < n) {
+                        req[i$2] = src[i$2];
+                    }
+                    if (appendNullKey === true) {
+                        req[req.length] = null;
+                    }
+                    pbv.path = req;
+                    if (boxed === true) {
+                        pbv.value = node;
+                    } else {
+                        var dest = nodeValue, src$2 = dest, x;
+                        if (dest != null && typeof dest === 'object') {
+                            dest = Array.isArray(src$2) && [] || Object.create(null);
+                            for (x in src$2) {
+                                !(!(x[0] !== '_' || x[1] !== '_') || (x === __SELF || x === __PARENT || x === __ROOT) || x[0] === '$') && (dest[x] = src$2[x]);
+                            }
+                        }
+                        pbv.value = dest;
+                    }
+                    errors[errors.length] = pbv;
+                }
+                if (jsonParent != null) {
+                    hasValue = true;
+                    var jsonKey, jsonDepth = depth;
+                    do {
+                        jsonKey = jsonKeys[jsonDepth];
+                        jsonParent = jsons[--jsonDepth];
+                    } while (jsonKey == null);
+                    if (boxed === true) {
+                        jsonParent[jsonKey] = node;
+                    } else {
+                        var dest$2 = nodeValue, src$3 = dest$2, x$2;
+                        if (dest$2 != null && typeof dest$2 === 'object') {
+                            dest$2 = Array.isArray(src$3) && [] || Object.create(null);
+                            for (x$2 in src$3) {
+                                !(!(x$2[0] !== '_' || x$2[1] !== '_') || (x$2 === __SELF || x$2 === __PARENT || x$2 === __ROOT) || x$2[0] === '$') && (dest$2[x$2] = src$3[x$2]);
+                            }
+                        }
+                        jsonParent[jsonKey] = dest$2;
+                    }
+                }
+                var src$4 = optimizedPath, i$3 = -1, n$2 = src$4.length, opt = new Array(n$2);
+                while (++i$3 < n$2) {
+                    opt[i$3] = src$4[i$3];
+                }
+                var src$5 = requestedPath, i$4 = -1, n$3 = src$5.length, req$2 = new Array(n$3);
+                while (++i$4 < n$3) {
+                    req$2[i$4] = src$5[i$4];
+                }
+                if (appendNullKey === true) {
+                    req$2[req$2.length] = null;
+                }
+                requestedPaths[requestedPaths.length] = req$2;
+                optimizedPaths[optimizedPaths.length] = opt;
+            }
+            if (boxed === false && node == null || refreshing === true) {
+                var src$6 = boundPath, i$5 = -1, n$4 = src$6.length, req$3 = new Array(n$4);
+                while (++i$5 < n$4) {
+                    req$3[i$5] = src$6[i$5];
+                }
+                var src$7 = optimizedPath, i$6 = -1, n$5 = src$7.length, opt$2 = new Array(n$5);
+                while (++i$6 < n$5) {
+                    opt$2[i$6] = src$7[i$6];
+                }
+                var reqLen = req$3.length - 1, optLen = opt$2.length - 1, i$7 = -1, n$6 = requestedPath.length, map, offset$2, keys$2, index$3, reqKeys, optKeys, optKeysLen, x$3, y, z;
+                while (++i$7 < n$6) {
+                    req$3[++reqLen] = (reqKeys = pathMapStack[offset$2 = (i$7 + boundLength) * 4 + 1]) && reqKeys.length > 1 && [requestedPath[i$7]] || requestedPath[i$7];
+                }
+                var j$2 = depth, k = reqLen, l = optLen;
+                i$7 = j$2++;
+                while (j$2 > i$7) {
+                    if ((map = pathMapStack[offset$2 = (j$2 + boundLength) * 4]) != null && typeof map === 'object' && map[$TYPE] === void 0 && Array.isArray(map) === false && (keys$2 = pathMapStack[offset$2 + 1] || (pathMapStack[offset$2 + 1] = Object.keys(map))) && ((index$3 = pathMapStack[offset$2 + 2] || (pathMapStack[offset$2 + 2] = 0)) || true) && keys$2.length > 0) {
+                        if ((pathMapStack[offset$2 + 2] = ++index$3) - 1 < keys$2.length) {
+                            if (reqLen - k < j$2 - i$7) {
+                                var src$8 = keys$2, i$8 = -1, n$7 = src$8.length, dest$3 = new Array(n$7);
+                                while (++i$8 < n$7) {
+                                    dest$3[i$8] = src$8[i$8];
+                                }
+                                reqKeys = dest$3;
+                                x$3 = -1;
+                                y = reqKeys.length;
+                                while (++x$3 < y) {
+                                    reqKeys[x$3] = (z = reqKeys[x$3]) == __NULL ? null : z;
+                                }
+                                req$3[++reqLen] = y === 1 ? reqKeys[0] : reqKeys;
+                            }
+                            if (optLen - l < j$2 - i$7) {
+                                var src$9 = keys$2, i$9 = -1, n$8 = src$9.length, dest$4 = new Array(n$8);
+                                while (++i$9 < n$8) {
+                                    dest$4[i$9] = src$9[i$9];
+                                }
+                                reqKeys = dest$4;
+                                optKeys = [];
+                                optKeysLen = 0;
+                                x$3 = -1;
+                                y = reqKeys.length;
+                                while (++x$3 < y) {
+                                    (z = reqKeys[x$3]) !== __NULL && (optKeys[optKeysLen++] = z);
+                                }
+                                if (optKeysLen > 0) {
+                                    opt$2[++optLen] = optKeysLen === 1 ? optKeys[0] : optKeys;
+                                }
+                            }
+                            pathMapStack[offset$2 = 4 * (++j$2 + boundLength)] = map[keys$2[index$3 - 1]];
+                            continue;
+                        }
+                    }
+                    delete pathMapStack[offset$2 = 4 * (j$2-- + boundLength)];
+                    delete pathMapStack[offset$2 + 1];
+                    delete pathMapStack[offset$2 + 2];
+                    delete pathMapStack[offset$2 + 3];
+                }
+                req$3.pathSetIndex = index;
+                requestedMissingPaths[requestedMissingPaths.length] = req$3;
+                optimizedMissingPaths[optimizedMissingPaths.length] = opt$2;
+            }
+            appendNullKey = false;
+            jsonRoot != null && (values[index] = hasValue && { json: jsons[-1] } || void 0);
+            var offset$3, keys$3, index$4;
+            while (depth > -1 && (keys$3 = pathMapStack[(offset$3 = 4 * depth) + 1]) && ((index$4 = pathMapStack[offset$3 + 2]) || true) && (pathMapStack[offset$3 + 2] = ++index$4) >= keys$3.length) {
+                delete pathMapStack[offset$3 + 0];
+                delete pathMapStack[offset$3 + 1];
+                delete pathMapStack[offset$3 + 2];
+                delete pathMapStack[offset$3 + 3];
+                --depth;
+            }
+        }
+    }
+    return {
+        'values': values,
+        'errors': errors,
+        'requestedPaths': requestedPaths,
+        'optimizedPaths': optimizedPaths,
+        'requestedMissingPaths': requestedMissingPaths,
+        'optimizedMissingPaths': optimizedMissingPaths
+    };
+}
+function getValueSync(model, path) {
+    var root = model._root || model, boxed = model._boxed || false, expired = root.expired || (root.expired = []), _cache = model._cache || {}, errorSelector = model._errorSelector || function (x$2, y) {
+        return y;
+    }, optimizedPath = [], appendNullKey = false, depth = 0, length = 0, height = 0, reference, refIndex = 0, refDepth = 0, refLength = 0, refHeight = 0, nodeRoot = _cache, nodeParent = nodeRoot, node = nodeParent, nodeType, nodeValue, nodeSize, nodeTimestamp, nodeExpires;
+    var key, isKeySet;
+    path = path;
+    height = (length = path.length) - 1;
+    nodeParent = nodeRoot;
+    nodeType = nodeParent && nodeParent[$TYPE] || void 0;
+    nodeValue = nodeType === SENTINEL ? nodeParent[VALUE] : nodeParent;
+    if (nodeParent == null || nodeType !== void 0 || typeof nodeParent !== 'object' || Array.isArray(nodeValue)) {
+        node = node = nodeParent;
+    } else {
+        nodeParent = nodeRoot;
+        depth = depth;
+        follow_path_11592:
+            do {
+                key = path[depth];
+                if (isKeySet = key != null && typeof key === 'object') {
+                    if (Array.isArray(key)) {
+                        if ((key = key[key.index || (key.index = 0)]) != null && typeof key === 'object') {
+                            key = key[__OFFSET] === void 0 && (key[__OFFSET] = key.from || (key.from = 0)) || key[__OFFSET];
+                        }
+                    } else {
+                        key = key[__OFFSET] === void 0 && (key[__OFFSET] = key.from || (key.from = 0)) || key[__OFFSET];
+                    }
+                }
+                if (key === __NULL) {
+                    key = null;
+                }
+                if (key != null) {
+                    if (depth < height) {
+                        optimizedPath[optimizedPath.length = depth + (refLength - refIndex)] = key;
+                        node = nodeParent[key];
+                        nodeType = node && node[$TYPE] || void 0;
+                        nodeValue = nodeType === SENTINEL ? node[VALUE] : node;
+                        nodeTimestamp = node && node[$TIMESTAMP];
+                        nodeExpires = node && node[$EXPIRES];
+                        if (node != null && typeof node === 'object' && (nodeExpires != null && nodeExpires !== 1 && (nodeExpires === 0 || nodeExpires < Date.now()) || node[__INVALIDATED] === true)) {
+                            node = nodeValue = (expired[expired.length] = node) && (node[__INVALIDATED] = true) && void 0;
+                        }
+                        if ((!nodeType || nodeType === SENTINEL) && Array.isArray(nodeValue)) {
+                            do {
+                                if (nodeExpires !== 1) {
+                                    var root$2 = root, head = root$2.__head, tail = root$2.__tail, next = node.__next, prev = node.__prev;
+                                    if (node !== head) {
+                                        next && (next != null && typeof next === 'object') && (next.__prev = prev);
+                                        prev && (prev != null && typeof prev === 'object') && (prev.__next = next);
+                                        (next = head) && (head != null && typeof head === 'object') && (head.__prev = node);
+                                        root$2.__head = root$2.__next = head = node;
+                                        head.__next = next;
+                                        head.__prev = void 0;
+                                    }
+                                    if (tail == null || node === tail) {
+                                        root$2.__tail = root$2.__prev = tail = prev || node;
+                                    }
+                                    root$2 = head = tail = next = prev = void 0;
+                                }
+                                refIndex = depth + 1;
+                                refDepth = 0;
+                                var location = (nodeValue[__CONTAINER] || nodeValue)[__CONTEXT];
+                                if (location !== void 0) {
+                                    node = location;
+                                    refHeight = (refLength = nodeValue.length) - 1;
+                                    while (refDepth < refLength) {
+                                        optimizedPath[refDepth] = nodeValue[refDepth++];
+                                    }
+                                    optimizedPath.length = refLength;
+                                } else {
+                                    var key$2, isKeySet$2;
+                                    reference = nodeValue;
+                                    refHeight = (refLength = reference.length) - 1;
+                                    nodeParent = nodeRoot;
+                                    nodeType = nodeParent && nodeParent[$TYPE] || void 0;
+                                    nodeValue = nodeType === SENTINEL ? nodeParent[VALUE] : nodeParent;
+                                    if (nodeParent == null || nodeType !== void 0 || typeof nodeParent !== 'object' || Array.isArray(nodeValue)) {
+                                        node = node = nodeParent;
+                                    } else {
+                                        nodeParent = nodeRoot;
+                                        refDepth = refDepth;
+                                        follow_path_11767:
+                                            do {
+                                                key$2 = reference[refDepth];
+                                                isKeySet$2 = false;
+                                                if (key$2 != null) {
+                                                    if (refDepth < refHeight) {
+                                                        optimizedPath[optimizedPath.length = refDepth] = key$2;
+                                                        node = nodeParent[key$2];
+                                                        nodeType = node && node[$TYPE] || void 0;
+                                                        nodeValue = nodeType === SENTINEL ? node[VALUE] : node;
+                                                        nodeTimestamp = node && node[$TIMESTAMP];
+                                                        nodeExpires = node && node[$EXPIRES];
+                                                        if (node != null && typeof node === 'object' && (nodeExpires != null && nodeExpires !== 1 && (nodeExpires === 0 || nodeExpires < Date.now()) || node[__INVALIDATED] === true)) {
+                                                            node = nodeValue = (expired[expired.length] = node) && (node[__INVALIDATED] = true) && void 0;
+                                                        }
+                                                        if (appendNullKey = node == null || nodeType !== void 0 || typeof node !== 'object' || Array.isArray(nodeValue)) {
+                                                            nodeParent = node;
+                                                            break follow_path_11767;
+                                                        }
+                                                        nodeParent = node;
+                                                        refDepth = refDepth + 1;
+                                                        continue follow_path_11767;
+                                                    } else if (refDepth === refHeight) {
+                                                        optimizedPath[optimizedPath.length = refDepth] = key$2;
+                                                        node = nodeParent[key$2];
+                                                        nodeType = node && node[$TYPE] || void 0;
+                                                        nodeValue = nodeType === SENTINEL ? node[VALUE] : node;
+                                                        nodeTimestamp = node && node[$TIMESTAMP];
+                                                        nodeExpires = node && node[$EXPIRES];
+                                                        if (node != null && typeof node === 'object' && (nodeExpires != null && nodeExpires !== 1 && (nodeExpires === 0 || nodeExpires < Date.now()) || node[__INVALIDATED] === true)) {
+                                                            node = nodeValue = (expired[expired.length] = node) && (node[__INVALIDATED] = true) && void 0;
+                                                        }
+                                                        if (node != null) {
+                                                            var refContainer = reference[__CONTAINER] || reference, refContext = refContainer[__CONTEXT];
+                                                            // Set up the hard-link so we don't have to do all
+                                                            // this work the next time we follow this reference.
+                                                            if (refContext === void 0) {
+                                                                // create a back reference
+                                                                var backRefs = node[__REFS_LENGTH] || 0;
+                                                                node[__REF + backRefs] = refContainer;
+                                                                node[__REFS_LENGTH] = backRefs + 1;
+                                                                // create a hard reference
+                                                                refContainer[__REF_INDEX] = backRefs;
+                                                                refContainer[__CONTEXT] = node;
+                                                                refContainer = backRefs = void 0;
+                                                            }
+                                                            ;
+                                                        }
+                                                        appendNullKey = node == null || nodeType !== void 0 || typeof node !== 'object' || Array.isArray(nodeValue);
+                                                        nodeParent = node;
+                                                        break follow_path_11767;
+                                                    }
+                                                } else if (refDepth < refHeight) {
+                                                    nodeParent = node;
+                                                    refDepth = refDepth + 1;
+                                                    continue follow_path_11767;
+                                                }
+                                                nodeParent = node;
+                                                break follow_path_11767;
+                                            } while (true);
+                                        node = nodeParent;
+                                    }
+                                }
+                                nodeType = node && node[$TYPE] || void 0;
+                                nodeValue = nodeType === SENTINEL ? node[VALUE] : node;
+                                nodeExpires = node && node[$EXPIRES];
+                                if (node != null && typeof node === 'object' && (nodeExpires != null && nodeExpires !== 1 && (nodeExpires === 0 || nodeExpires < Date.now()) || node[__INVALIDATED] === true)) {
+                                    node = nodeValue = (expired[expired.length] = node) && (node[__INVALIDATED] = true) && void 0;
+                                }
+                            } while ((!nodeType || nodeType === SENTINEL) && Array.isArray(nodeValue));
+                            if (node == null) {
+                                while (refDepth <= refHeight) {
+                                    optimizedPath[refDepth] = reference[refDepth++];
+                                }
+                            }
+                        }
+                        if (node == null || nodeType !== void 0 || typeof node !== 'object' || Array.isArray(nodeValue)) {
+                            nodeParent = node;
+                            break follow_path_11592;
+                        }
+                        nodeParent = node;
+                        depth = depth + 1;
+                        continue follow_path_11592;
+                    } else if (depth === height) {
+                        optimizedPath[optimizedPath.length = depth + (refLength - refIndex)] = key;
+                        node = nodeParent[key];
+                        nodeType = node && node[$TYPE] || void 0;
+                        nodeValue = nodeType === SENTINEL ? node[VALUE] : node;
+                        nodeTimestamp = node && node[$TIMESTAMP];
+                        nodeExpires = node && node[$EXPIRES];
+                        if (node != null && typeof node === 'object') {
+                            if (nodeExpires != null && nodeExpires !== 1 && (nodeExpires === 0 || nodeExpires < Date.now()) || node[__INVALIDATED] === true) {
+                                node = nodeValue = (expired[expired.length] = node) && (node[__INVALIDATED] = true) && void 0;
+                            } else {
+                                if (nodeExpires !== 1) {
+                                    var root$3 = root, head$2 = root$3.__head, tail$2 = root$3.__tail, next$2 = node.__next, prev$2 = node.__prev;
+                                    if (node !== head$2) {
+                                        next$2 && (next$2 != null && typeof next$2 === 'object') && (next$2.__prev = prev$2);
+                                        prev$2 && (prev$2 != null && typeof prev$2 === 'object') && (prev$2.__next = next$2);
+                                        (next$2 = head$2) && (head$2 != null && typeof head$2 === 'object') && (head$2.__prev = node);
+                                        root$3.__head = root$3.__next = head$2 = node;
+                                        head$2.__next = next$2;
+                                        head$2.__prev = void 0;
+                                    }
+                                    if (tail$2 == null || node === tail$2) {
+                                        root$3.__tail = root$3.__prev = tail$2 = prev$2 || node;
+                                    }
+                                    root$3 = head$2 = tail$2 = next$2 = prev$2 = void 0;
+                                }
+                            }
+                        }
+                        nodeParent = node;
+                        break follow_path_11592;
+                    }
+                } else if (depth < height) {
+                    nodeParent = node;
+                    depth = depth + 1;
+                    continue follow_path_11592;
+                }
+                nodeParent = node;
+                break follow_path_11592;
+            } while (true);
+        node = nodeParent;
+    }
+    optimizedPath.length = depth + (refLength - refIndex) + 1;
+    if (boxed === false) {
+        var dest = nodeValue, src = dest, x;
+        if (dest != null && typeof dest === 'object') {
+            dest = Array.isArray(src) && [] || Object.create(null);
+            for (x in src) {
+                !(!(x[0] !== '_' || x[1] !== '_') || (x === __SELF || x === __PARENT || x === __ROOT) || x[0] === '$') && (dest[x] = src[x]);
+            }
+        }
+        node = dest;
+    }
+    if (nodeType === ERROR) {
+        node[$TYPE] = ERROR;
+    }
+    var shorted = appendNullKey;
+    while (!shorted && ++depth <= height) {
+        shorted = path[depth] != null;
+    }
+    return {
+        value: node,
+        path: optimizedPath,
+        shorted: shorted
+    };
+}
 
 function getPathsAsJSON(model, pathSets, values, errorSelector, boundPath) {
     var boundLength = 0, nodeRoot = model._cache || (model._cache = {}), nodeParent, node;

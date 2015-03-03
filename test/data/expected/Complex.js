@@ -638,22 +638,6 @@ module.exports = function() {
                 ]
             },
 
-            getPathMaps: {
-                count: 2,
-
-                query: [{
-                    "genreList": {
-                        "0": {
-                            "0": {
-                                "summary": null
-                            },
-                            "1": {
-                                "summary": null
-                            }
-                        }
-                    }
-                }]
-            },
 
             optimizedPaths: [
                 ["videos", "1234", "summary"],
@@ -1042,17 +1026,6 @@ module.exports = function() {
                 query: [
                     ["genreList", ["0", "1"]]
                 ]
-            },
-
-            getPathMaps: {
-                count: 2,
-
-                query: [{
-                    "genreList": {
-                        "0": null,
-                        "1": null
-                    }
-                }]
             },
 
             optimizedPaths: [

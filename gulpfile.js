@@ -90,6 +90,8 @@ gulp.task('com', function() {
             'bin2/Falcor2.js',
             'LimitedFalcor.js',
             'Cache.js',
+            'Values.js',
+            'References.js',
             'comTest.js'
         ]).
         pipe(concat({path: 'cTestFinal.js'})).
