@@ -54,7 +54,7 @@ gulp.task('perf-build', ['cover'], function() {
         pipe(gulp.dest('.'));
 });
 gulp.task('perf', function() {
-    return gulp.src('test.js', {read: false}).
+    return gulp.src('test.js').
         pipe(benchmark()).
         pipe(gulp.dest('.'));
 });
@@ -92,6 +92,7 @@ gulp.task('com', function() {
             'Cache.js',
             'Values.js',
             'References.js',
+            'testConfig.js',
             'comTest.js'
         ]).
         pipe(concat({path: 'cTestFinal.js'})).

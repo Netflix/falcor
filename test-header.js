@@ -1,9 +1,4 @@
-var model = new falcor.Model({cache: Cache()});
-var recModel = new FModel(Cache());
-E_model = new falcor.Model();
-E_recModel = new FModel();
-model._root.allowSync = true;
-
+var Benchmark = require('benchmark');
 function runner(testCfg, count, done) {
     var testSuiteCount = 0;
     var names = Object.keys(testCfg.tests);
@@ -12,10 +7,11 @@ function runner(testCfg, count, done) {
             acc[n] = [];
             return acc;
         }, {});
-
+    
     function recurse() {
         _runner(testCfg, function(results) {
             testSuiteCount++;
+            console.warn('Test Count ' + testSuiteCount);
             results.forEach(function(r) {
                 totalResults[r.name].push(r);
             });
@@ -32,7 +28,7 @@ function runner(testCfg, count, done) {
                         return acc;
                     }, []);
                 var csv = [];
-
+                
                 for (var i = 0; i < count + 1; i++) {
                     var csvRow = [];
                     for (var j = 0; j < transform.length; j++) {
@@ -46,9 +42,9 @@ function runner(testCfg, count, done) {
             }
         });
     }
-
+    
     recurse();
-}
+};
 
 function _runner(testCfg, done) {
     var countDone = 0;
@@ -88,15 +84,5 @@ function _runner(testCfg, done) {
     }, 50);
 }
 
-// When tests are ready to run, your script needs to invoke function onTestsLoaded (testObject){}
-var config = startTesting(model, recModel, E_model, E_recModel);
+module.exports = runner;
 
-runner(config, 10, function(totalResults) {
-    console.error(totalResults.join('\n'));
-});
-
-var v = Object.keys(Values());
-var v1 = Values();
-var v2 = Values();
-var v3 = Values();
-var v4 = Values();

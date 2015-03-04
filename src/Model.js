@@ -1,5 +1,5 @@
 var FModel = function(cache) {
-    this._cache = cache;
+    this._cache = cache || {};
     this._boxed = false;
     this._root = {size: 0};
 };

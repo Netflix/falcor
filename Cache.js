@@ -33,7 +33,37 @@ var Cache = function() {
                 "0": ["videos", 1234],
                 "1": ["videos", 766],
                 "2": ["videos", 7531],
-                "3": ["videos", 6420]
+                "3": ["videos", 6420],
+                "4": ["videos", 0],
+                "5": ["videos", 1],
+                "6": ["videos", 2],
+                "7": ["videos", 3],
+                "8": ["videos", 4],
+                "9": ["videos", 5],
+                "10": ["videos", 6],
+                "11": ["videos", 7],
+                "12": ["videos", 8],
+                "13": ["videos", 9],
+                "14": ["videos", 10],
+                "15": ["videos", 11],
+                "16": ["videos", 12],
+                "17": ["videos", 13],
+                "18": ["videos", 14],
+                "19": ["videos", 15],
+                "20": ["videos", 16],
+                "21": ["videos", 17],
+                "22": ["videos", 18],
+                "23": ["videos", 19],
+                "24": ["videos", 20],
+                "25": ["videos", 21],
+                "26": ["videos", 22],
+                "27": ["videos", 23],
+                "28": ["videos", 24],
+                "29": ["videos", 25],
+                "30": ["videos", 26],
+                "31": ["videos", 27],
+                "32": ["videos", 28],
+                "33": ["videos", 29]
             },
             "def": {
                 "$size": 6,
@@ -115,6 +145,276 @@ var Cache = function() {
         },
         "videos": {
             "$size": 432,
+            "0": {
+                "$size": 10,
+                "summary": {
+                    "$size": 10,
+                    "$type": "leaf",
+                    "title": "Additional Title 0",
+                    "url": "/movies/0"
+                }
+            },
+            "1": {
+                "$size": 10,
+                "summary": {
+                    "$size": 10,
+                    "$type": "leaf",
+                    "title": "Additional Title 1",
+                    "url": "/movies/1"
+                }
+            },
+            "2": {
+                "$size": 10,
+                "summary": {
+                    "$size": 10,
+                    "$type": "leaf",
+                    "title": "Additional Title 2",
+                    "url": "/movies/2"
+                }
+            },
+            "3": {
+                "$size": 10,
+                "summary": {
+                    "$size": 10,
+                    "$type": "leaf",
+                    "title": "Additional Title 3",
+                    "url": "/movies/3"
+                }
+            },
+            "4": {
+                "$size": 10,
+                "summary": {
+                    "$size": 10,
+                    "$type": "leaf",
+                    "title": "Additional Title 4",
+                    "url": "/movies/4"
+                }
+            },
+            "5": {
+                "$size": 10,
+                "summary": {
+                    "$size": 10,
+                    "$type": "leaf",
+                    "title": "Additional Title 5",
+                    "url": "/movies/5"
+                }
+            },
+            "6": {
+                "$size": 10,
+                "summary": {
+                    "$size": 10,
+                    "$type": "leaf",
+                    "title": "Additional Title 6",
+                    "url": "/movies/6"
+                }
+            },
+            "7": {
+                "$size": 10,
+                "summary": {
+                    "$size": 10,
+                    "$type": "leaf",
+                    "title": "Additional Title 7",
+                    "url": "/movies/7"
+                }
+            },
+            "8": {
+                "$size": 10,
+                "summary": {
+                    "$size": 10,
+                    "$type": "leaf",
+                    "title": "Additional Title 8",
+                    "url": "/movies/8"
+                }
+            },
+            "9": {
+                "$size": 10,
+                "summary": {
+                    "$size": 10,
+                    "$type": "leaf",
+                    "title": "Additional Title 9",
+                    "url": "/movies/9"
+                }
+            },
+            "10": {
+                "$size": 10,
+                "summary": {
+                    "$size": 10,
+                    "$type": "leaf",
+                    "title": "Additional Title 10",
+                    "url": "/movies/10"
+                }
+            },
+            "11": {
+                "$size": 10,
+                "summary": {
+                    "$size": 10,
+                    "$type": "leaf",
+                    "title": "Additional Title 11",
+                    "url": "/movies/11"
+                }
+            },
+            "12": {
+                "$size": 10,
+                "summary": {
+                    "$size": 10,
+                    "$type": "leaf",
+                    "title": "Additional Title 12",
+                    "url": "/movies/12"
+                }
+            },
+            "13": {
+                "$size": 10,
+                "summary": {
+                    "$size": 10,
+                    "$type": "leaf",
+                    "title": "Additional Title 13",
+                    "url": "/movies/13"
+                }
+            },
+            "14": {
+                "$size": 10,
+                "summary": {
+                    "$size": 10,
+                    "$type": "leaf",
+                    "title": "Additional Title 14",
+                    "url": "/movies/14"
+                }
+            },
+            "15": {
+                "$size": 10,
+                "summary": {
+                    "$size": 10,
+                    "$type": "leaf",
+                    "title": "Additional Title 15",
+                    "url": "/movies/15"
+                }
+            },
+            "16": {
+                "$size": 10,
+                "summary": {
+                    "$size": 10,
+                    "$type": "leaf",
+                    "title": "Additional Title 16",
+                    "url": "/movies/16"
+                }
+            },
+            "17": {
+                "$size": 10,
+                "summary": {
+                    "$size": 10,
+                    "$type": "leaf",
+                    "title": "Additional Title 17",
+                    "url": "/movies/17"
+                }
+            },
+            "18": {
+                "$size": 10,
+                "summary": {
+                    "$size": 10,
+                    "$type": "leaf",
+                    "title": "Additional Title 18",
+                    "url": "/movies/18"
+                }
+            },
+            "19": {
+                "$size": 10,
+                "summary": {
+                    "$size": 10,
+                    "$type": "leaf",
+                    "title": "Additional Title 19",
+                    "url": "/movies/19"
+                }
+            },
+            "20": {
+                "$size": 10,
+                "summary": {
+                    "$size": 10,
+                    "$type": "leaf",
+                    "title": "Additional Title 20",
+                    "url": "/movies/20"
+                }
+            },
+            "21": {
+                "$size": 10,
+                "summary": {
+                    "$size": 10,
+                    "$type": "leaf",
+                    "title": "Additional Title 21",
+                    "url": "/movies/21"
+                }
+            },
+            "22": {
+                "$size": 10,
+                "summary": {
+                    "$size": 10,
+                    "$type": "leaf",
+                    "title": "Additional Title 22",
+                    "url": "/movies/22"
+                }
+            },
+            "23": {
+                "$size": 10,
+                "summary": {
+                    "$size": 10,
+                    "$type": "leaf",
+                    "title": "Additional Title 23",
+                    "url": "/movies/23"
+                }
+            },
+            "24": {
+                "$size": 10,
+                "summary": {
+                    "$size": 10,
+                    "$type": "leaf",
+                    "title": "Additional Title 24",
+                    "url": "/movies/24"
+                }
+            },
+            "25": {
+                "$size": 10,
+                "summary": {
+                    "$size": 10,
+                    "$type": "leaf",
+                    "title": "Additional Title 25",
+                    "url": "/movies/25"
+                }
+            },
+            "26": {
+                "$size": 10,
+                "summary": {
+                    "$size": 10,
+                    "$type": "leaf",
+                    "title": "Additional Title 26",
+                    "url": "/movies/26"
+                }
+            },
+            "27": {
+                "$size": 10,
+                "summary": {
+                    "$size": 10,
+                    "$type": "leaf",
+                    "title": "Additional Title 27",
+                    "url": "/movies/27"
+                }
+            },
+            "28": {
+                "$size": 10,
+                "summary": {
+                    "$size": 10,
+                    "$type": "leaf",
+                    "title": "Additional Title 28",
+                    "url": "/movies/28"
+                }
+            },
+            "29": {
+                "$size": 10,
+                "summary": {
+                    "$size": 10,
+                    "$type": "leaf",
+                    "title": "Additional Title 29",
+                    "url": "/movies/29"
+                }
+            },
             "1234": {
                 "$size": 10,
                 "summary": {
