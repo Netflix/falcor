@@ -95,14 +95,13 @@ function walk(model, root, node, pathOrJSON, depth, seedOrFunction, positionalIn
                     var ref = followReference(model, root, root, value);
                     var refNode = ref[0];
                     var refPath = ref[1];
-                    var refExpired = ref[2];
-                    
+
                     permuteOptimized = [];
                     for (i = 0, len = refPath.length; i < len; i++) {
                         permuteOptimized[i] = refPath[i];
                     }
 
-                    if (!refExpired && refNode) {
+                    if (refNode) {
                         var rType = refNode.$type;
                         var rValue = rType === 'sentinel' ? refNode.value : refNode;
 
@@ -393,5 +392,5 @@ function followReference(model, root, node, reference) {
         break;
     }
 
-    return [node, reference, expired];
+    return [expired ? undefined : node, reference];
 }
