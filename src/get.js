@@ -44,25 +44,25 @@ function walk(model, root, node, pathOrJSON, depth, seedOrFunction, positionalIn
     while (!memo.done || first) {
         first = false;
         if (!memo.done) {
-//            permuteOptimized = [];
-//            permuteRequested = [];
-//            for (i = 0, len = requestedPath.length; i < len; i++) {
-//                permuteRequested[i] = requestedPath[i];
-//            }
-//            for (i = 0, len = optimizedPath.length; i < len; i++) {
-//                permuteOptimized[i] = optimizedPath[i];
-//            }
-//            if (asPathMap) {
-//                for (i = 0, len = permutePosition.length; i < len; i++) {
-//                    permutePosition[i] = permutePosition[i];
-//                }
-//            }
-
-            permuteOptimized = fastCopy(optimizedPath);
-            permuteRequested = fastCopy(requestedPath);
-            if (asPathMap || asJSON) {
-                permutePosition = fastCopy(positionalInfo);
+            permuteOptimized = [];
+            permuteRequested = [];
+            for (i = 0, len = requestedPath.length; i < len; i++) {
+                permuteRequested[i] = requestedPath[i];
             }
+            for (i = 0, len = optimizedPath.length; i < len; i++) {
+                permuteOptimized[i] = optimizedPath[i];
+            }
+            if (asPathMap) {
+                for (i = 0, len = permutePosition.length; i < len; i++) {
+                    permutePosition[i] = permutePosition[i];
+                }
+            }
+
+//            permuteOptimized = fastCopy(optimizedPath);
+//            permuteRequested = fastCopy(requestedPath);
+//            if (asPathMap || asJSON) {
+//                permutePosition = fastCopy(positionalInfo);
+//            }
         }
         nextPath = jsonQuery ? pathOrJSON[key] : pathOrJSON;
         if (jsonQuery) {
@@ -86,7 +86,7 @@ function walk(model, root, node, pathOrJSON, depth, seedOrFunction, positionalIn
             }
 
             if (isExpired(next)) {
-                emitMissing(nextPath, depth, permuteRequested, permuteOptimized, permutePosition, outerResults, outputFormat);
+                emitMissing(nextPath, inputFormat === 'JSON' ? key : depth, permuteRequested, permuteOptimized, permutePosition, outerResults, outputFormat);
             }
 
             else if (jsonQuery && hasChildren || !jsonQuery && depth < pathOrJSON.length) {
@@ -94,9 +94,15 @@ function walk(model, root, node, pathOrJSON, depth, seedOrFunction, positionalIn
                 if (valueIsArray) {
                     var ref = followReference(model, root, root, value);
                     var refNode = ref[0];
-                    copyInto(permuteOptimized, ref[1]);
+                    var refPath = ref[1];
+                    var refExpired = ref[2];
+                    
+                    permuteOptimized = [];
+                    for (i = 0, len = refPath.length; i < len; i++) {
+                        permuteOptimized[i] = refPath[i];
+                    }
 
-                    if (refNode) {
+                    if (!refExpired && refNode) {
                         var rType = refNode.$type;
                         var rValue = rType === 'sentinel' ? refNode.value : refNode;
 
@@ -139,13 +145,70 @@ function walk(model, root, node, pathOrJSON, depth, seedOrFunction, positionalIn
                 }
             }
         } else {
-            // We emit one step backwards.
-            emitMissing(nextPath, depth - 1, permuteRequested, permuteOptimized, permutePosition, outerResults, outputFormat);
+            if (key === '__null') {
+                key = null;
+            }
+            permuteRequested.push(key);
+            permuteOptimized.push(key);
+            emitMissing(nextPath, depth, permuteRequested, permuteOptimized, permutePosition, outerResults, outputFormat);
         }
         
         if (!memo.done) {
             key = permuteKey(k, memo);
         }
+    }
+}
+
+function simpleWalk(model, root, node, path, depth, results) {
+    var key = path[depth++];
+    var nodeIsSentinel = node.$type === 'sentinel';
+    var next = nodeIsSentinel ? node.value[key] : node[key];
+    
+    if (next) {
+        var nType = next.$type;
+        var value = nType === 'sentinel' ? next.value : next;
+        var valueIsArray = Array.isArray(value);
+        if (isExpired(next)) {
+            // TODO: anything else?
+            return undefined;
+        }
+        else if (depth < path.length) {
+            if (valueIsArray) {
+                var ref = followReference(model, root, root, value);
+                var refNode = ref[0];
+
+                if (refNode) {
+                    var rType = refNode.$type;
+                    var rValue = rType === 'sentinel' ? refNode.value : refNode;
+                    
+                    // TODO: Treat errors as values
+                    if (rType === 'error') {
+                        throw rValue;
+                    }
+                    
+                    simpleWalk(model, root, refNode, path, depth, results);
+                } else {
+                    results.value = undefined;
+                }
+            }
+
+            else if (nType === 'error') {
+                throw value;
+            }
+
+            else {
+                simpleWalk(model, root, next, path, depth, results);
+            }
+        } else if (nType === 'leaf') {
+            results.value = copyCacheObject(value);
+        } else if (nType === 'error') {
+            throw value;
+        } else {
+            // TODO: Dont allow branch access
+            results.value = undefined;
+        }
+    } else {
+        results.value = undefined;
     }
 }
 
@@ -171,9 +234,6 @@ function emitMissing(path, depthOrMissingKey, permuteRequested, permuteOptimized
         pathSlice = [];
         spreadJSON(path, pathSlice);
 
-        permuteRequested.push(depthOrMissingKey);
-        permuteOptimized.push(depthOrMissingKey);
-        
         if (pathSlice.length) {
             for (var i = 0, len = pathSlice.length; i < len; i++) {
                 concatAndInsertMissing(pathSlice[i], results, permuteRequested, permuteOptimized, permutePosition, type, true);
@@ -221,10 +281,12 @@ function emitValues(model, node, path, depth, seedOrFunction, outerResults, perm
     switch (outputFormat) {
 
         case 'Values':
-            var pV = cloneToPathValue(model, node, permuteRequested);
-            outerResults.values.push(pV);
-
+            
+            if (model.__compatMode) {
+                outerResults.values.push(cloneToPathValue(model, node, permuteRequested));
+            }
             if (seedOrFunction) {
+                var pV = cloneToPathValue(model, node, permuteRequested);
                 seedOrFunction(pV);
             }
             break;
@@ -286,6 +348,7 @@ function emitValues(model, node, path, depth, seedOrFunction, outerResults, perm
 function followReference(model, root, node, reference) {
 
     var depth = 0;
+    var expired = false;
     while (true) {
         var k = reference[depth++];
         var next = node[k];
@@ -299,6 +362,7 @@ function followReference(model, root, node, reference) {
                     break;
                 }
                 if (isExpired(next)) {
+                    expired = true;
                     break;
                 }
 
@@ -310,6 +374,7 @@ function followReference(model, root, node, reference) {
 
                 // hit expired branch
                 if (isExpired(next)) {
+                    expired = true;
                     break;
                 }
 
@@ -328,5 +393,5 @@ function followReference(model, root, node, reference) {
         break;
     }
 
-    return [node, reference];
+    return [node, reference, expired];
 }

@@ -3,10 +3,14 @@ var recModel = new FModel(Cache());
 E_model = new falcor.Model();
 E_recModel = new FModel();
 model._root.allowSync = true;
+recModel._root.allowSync = true;
+E_model._root.allowSync = true;
+E_recModel._root.allowSync = true;
 
 function runner(testCfg, count, done) {
     var testSuiteCount = 0;
     var names = Object.keys(testCfg.tests);
+    var testLabel;
     var totalResults = names.
         reduce(function(acc, n) {
             acc[n] = [];
@@ -19,6 +23,7 @@ function runner(testCfg, count, done) {
             results.forEach(function(r) {
                 totalResults[r.name].push(r);
             });
+            console.error(testSuiteCount + ' out of ' + count + ' completed');
             if (testSuiteCount === count) {
                 var transform = Object.
                     keys(totalResults).
@@ -88,12 +93,13 @@ function _runner(testCfg, done) {
     }, 50);
 }
 
-// When tests are ready to run, your script needs to invoke function onTestsLoaded (testObject){}
 var config = startTesting(model, recModel, E_model, E_recModel);
 
-runner(config, 10, function(totalResults) {
-    console.error(totalResults.join('\n'));
-});
+onTestsLoaded(config);
+
+//runner(config, 30, function(totalResults) {
+//    console.error(totalResults.join('\n'));
+//});
 
 var v = Object.keys(Values());
 var v1 = Values();

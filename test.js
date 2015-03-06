@@ -11,6 +11,9 @@ model = new falcor.Model({cache: Cache()});
 recModel = new recF(Cache());
 
 model._root.allowSync = true;
+recModel._root.allowSync = true;
+
+recModel.getValueSync(['videos', 1234, 'summary']);
 var config = require('./testConfig.js')(model, recF, E_model, E_recModel);
 
 if (require.main === module) {

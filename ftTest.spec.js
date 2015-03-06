@@ -136,46 +136,15 @@ describe('Ready to Rumble.', function() {
             });
     });
 
-    xit('should pass this test', function() {
-        var expected = Complex().toOnly;
-        var q = expected.getPathMaps;
-        var query = [{
-            genreList: {
-                0: {
-                    0: {summary: null},
-                    1: {summary: null},
-                    2: {summary: null}
-                },
-                1: {
-                    0: {summary: null},
-                    1: {summary: null},
-                    2: {summary: null}
-                }
-            }
-        }];
+    it('should pass this test', function() {
+        var expected = References().referenceBranchIsExpired;
+        var q = expected.getPaths;
+        var query = q.query;
         var count = Array(q.count || 1).join(',').split(',').map(function() { return {}; });
-        var expectedOutput = model._getPathMapsAsJSON(model, _.cloneDeep(query), count);
+        var expectedOutput = model._getPathsAsJSON(model, _.cloneDeep(query), count);
         debugger;
         var actualOutput = recModel._getAsJSON(recModel, query);
         TestRunner.validateOperation('_' + q + 'AsPathMap', expectedOutput, actualOutput);
-    });
-    it.only('should pass this test', function() {
-        recModel._getAsJSON(recModel, [
-            {
-                genreList: {
-                    0: {
-                        0: {summary: null},
-                        1: {summary: null},
-                        2: {summary: null}
-                    },
-                    1: {
-                        0: {summary: null},
-                        1: {summary: null},
-                        2: {summary: null}
-                    }
-                }
-            }
-        ], [{}]);
     });
 });
 

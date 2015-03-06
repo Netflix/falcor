@@ -1,13 +1,20 @@
 var FModel = function(cache) {
     this._cache = cache || {};
     this._boxed = false;
-    this._root = {size: 0};
+    this.__compatMode = true;
+    this._root = {size: 0, unsafe: false, allowSync: false};
 };
 
 FModel.prototype = {
     _getAsValues: F_getAsValues,
     _getAsPathMap: F_getAsPathMap,
-    _getAsJSON: F_getAsJSON
+    _getAsJSON: F_getAsJSON,
+    getValueSync: function(path) {
+        var results = {};
+        simpleWalk(this, this._cache, this._cache, path, 0, results);
+        
+        return results.value;
+    }
 };
 function F_getAsValues(model, paths, onNext) {
     var result = _output();
