@@ -2,32 +2,13 @@
 
 ## What is Falcor?
 
-Every user wants to believe the entire cloud is stored on their device. Falcor lets web developers code that way.
+Every user wants to believe all the data in the cloud is stored on their device. Falcor lets web developers code that way.
 
-Elephant lets you build *One Isomorphic JSON model* for your application. On the client, developers code against the Isomorphic model as if it was stored in memory. In reality the data in the model could be stored anywhere: the client, the app server, or in multiple back end data stores.
+Falcor lets you represent all of your cloud data sources as *One Virtual JSON Model* on the server. On the client you code as if the entire JSON model is available locally, retrieving and setting values at keys. Falcor retrieves any data you request from the cloud on-demand, handling network communication transparently.
 
-*Falcor is not a replacement for your database, your application server, or your MVC framework.* Instead Falcor is a protocol for client server communication which can allow these parts of your architecture to communicate more efficiently and conveniently.
+## One Model Everywhere
 
-On the server, Elephant lets you create a Virtual Model. A Virtual model is as a view of the data in your backend data stores. Instead of being stored in memory or on disk, You create a virtual JSON model by matching path requests to routes that create sections of the document.
-
-Three-dimensional flexibility
-
-Developers code against the isomorphic model using the same API they used to code against a normal JSON object. 
-
-
-
-On the client you code against the model as if it was stored in memory, but the data might be cached locally, stored in memory on the server, or retrieved lazily from multiple data sources. Falcor transparently and efficiently manages all of the network communication needed to keep model data on the client and the server in sync.
-
-
-### Getting Started
-
-##  One Model, Available Everywhere
-
-*Falcor is not a replacement for your database, application server, or your MVC framework.* Falcor let's you take any number of cloud data sources and represent them as a *Virtual JSON object* on the server.  On the client you use this virtual JSON object as the *M in your MVC.*
-
-## The Data is the API
-
-When you work with JSON data on the client, you use simple operations like get and set to retrieves and mutate data within the object. 
+When you work with a JSON object on the client, you retrieve and set values at keys within the object.
 
 ```JavaScript
 var person = {
@@ -44,7 +25,7 @@ print(person[“location”][“address”]);
 // prints 344 Seaside
 
 ```
-If we load the same JSON in into a Falcor Model cache we can retrieve the data using the same series of keys. The only difference is that the API is Reactive (Push).
+In the example above, the sequence of keys "location" and "address" describe a *Path* to the person's street address value in the JSON object. To retrieve the same address value from a Falcor JSON Model, we pass the same sequence of keys to the Model's get method.
 
 ```JavaScript
 var person = new falcor.Model({
@@ -66,7 +47,9 @@ person.
 // prints 344 Seaside
 ```
 
-Using push APIs allows us to gives us the flexibility to move the data to the server without changing the way the client API.
+This example isn't very compelling. We've demonstrated that you can use the same path of keys to retrieve values from either a Falcor JSON Model or an in-memory JSON object, but so what?
+
+One important difference between an in-memory JSON object and a Falcor Model, is that the Falcor Model's API is *asynchronous.* Note that in the example above, the Falcor Model returns a Promise. This gives Falcor Models the flexibility to retrieve the data from a remote server.
 
 ```JavaScript
 // Browser
@@ -165,6 +148,41 @@ app.get('/person.json', function (req, res) {
 
 var server = app.listen(80);
 ```
+## How to use Falcor in your Application
+
+Falcor allows you to build a *Virtual JSON Model* on the server. A virtual model is a view of the data in your backend services that is ideal for the needs of your web application. The virtual model exposes all of the data that the client needs at a single URL on the server (ex. /model.json). On the client web developers retrieve data from the virtual model as if it was stored in memory, by looking up paths of keys.
+
+(Example of a client retrieving a path)
+
+When a client requests paths from the virtual model, the model attempts to retrieve the data from its local, in-memory cache. If the data at the requested paths can not be found in the local cache, a GET request is sent to the URL of the virtual model and the requested paths are passed in query string. 
+
+(Example URL)
+
+The virtual JSON model on the server responds with a JSON fragment containing only the requested values. 
+
+(Example Response including HTTP headers)
+
+The reason that the server model is called "virtual" is that the JSON Object typically does not exist in memory or on disk. The virtual model actually behaves like an *application server* hosted at a single URL. The virtual model matches routes against the paths requested from the virtual JSON model, and generates the requested JSON fragments on-demand by retrieving the data from one or more backend data stores. Instead of matching URL paths, the virtual model's router matches the multiple JSON paths passed in the query string to the JSON resource on the server.
+
+
+
+(Example of using express and example of building a virtual model)
+
+By exposing all of the data at a single URL instead of using a Web server to create a separate URL for each resource. The answer is that by exposing our entire model at a single endpoint, we can request as much of the graph as we want in a single HTTP request. 
+
+In an application server, routers are used to match URLs. A virtual model exposes all of its data at a single URL, 
+
+Virtual models are not general purpose server APIs. Instead they are optimized for use by one particular web application. 
+
+Three-dimensional flexibility
+
+Developers code against the isomorphic model using the same API they used to code against a normal JSON object. 
+
+
+
+On the client you code against the model as if it was stored in memory, but the data might be cached locally, stored in memory on the server, or retrieved lazily from multiple data sources. Falcor transparently and efficiently manages all of the network communication needed to keep model data on the client and the server in sync.
+
+
 
 
 # A Simple Issue Tracking App with Falcor
@@ -185,18 +203,19 @@ Once an issue is selected, the issue detail view is displayed.
 
 When viewing details of an individual issue, the user may edit fields, add comments, and view comments left on the issue by other users.
 
-## Building End points for our Issue Tracking System
+## Contrasting Falcor with other Alternatives
 
 The domain model of our issue tracking system is a graph. Any user could be related to any other user via the comments they leave on each others issues. That means downloading all of the data for a single user could result in downloading all of the users in the domain model!
 
 To avoid this problem, web applications generally have two choices:
 
-1. Build a restful API
+1. Build a RESTful API
 2. Build customized endpoints for each view, each of which contains just enough information about each entity the views purposes.
 
-### RESTful Solution
 
-A restful solution makes caching simple, because each entities data is kept separate from every other entities data. 
+# Why not REST?
+
+A restful solution would involve creating separate end points for each entities data. makes caching simple, because each entities data is kept separate from every other entities data. 
 
 
 However it may be necessary to make multiple sequential network request to retrieve enough information to display a single view. In practice this introduces too much latency for many web applications, particularly those intended to be used on mobile devices (ie most of them).
@@ -223,10 +242,7 @@ In order to avoid inadvertently downloading the entire graph whenever we downloa
 
 
 
-###  Building your first JSON Graph
-
-
-
+###  JSON Graph
 
 Nearly every application's domain model is graph.  However most application servers use JSON to send domain model objects over the wire. Converting graph data into JSON is a hazard, because JSON is heirarchical format. When you expand a graph into a tree, you either get duplicates, or introduce unique identifiers.
 
@@ -278,3 +294,21 @@ Mu*
 You can convert any JSON  object to a JSON Graph Object in three easy steps.
  
 1.  Move all types of objects with non-overlapping to a shared location in the JSON object.
+
+# Frequently Asked Questions
+
+1. How do I retrieve all the data in a collection in a single request.
+
+In general requesting the entire contents of a collection in a single request can be hazardous. While lists may start small, they can grow over time as the data in backend data store grows. If an application request the entire contents of a list that gradually grows over time, it can eventually result in unnecessarily long load times and even out-of-memory exceptions.
+
+*Falcor is designed for Applications that display information to human beings in real-time.* Rather than requesting the entire contents of a list, applications are encouraged to use paging to retrieve the first  based on the clients screen-size.
+
+
+
+An Array must be chosen if you would like to be able to retrieve the entire contents of the list in a single request, and none of the values within need to be paths. 
+
+
+
+2. How do I retrieve a branch node and all fonts children from a JSON Graph Model.
+
+
