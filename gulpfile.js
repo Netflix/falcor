@@ -84,29 +84,3 @@ gulp.task('devWatch.2', ['dev'], function() {
     gulp.watch('./framework/**/*.js', ['build.node', 'hint']);
 });
 
-gulp.task('com', function() {
-    return gulp.
-        src([
-            'bin2/Falcor2.js',
-            'LimitedFalcor.js',
-            'Cache.js',
-            'Values.js',
-            'References.js',
-            'testConfig.js',
-            'comTest.js'
-        ]).
-        pipe(concat({path: 'cTestFinal.js'})).
-        pipe(gulp.dest('.'));
-});
-
-gulp.task('src', function() {
-    return gulp.
-        src([
-            'src/lru.js',
-            'src/support.js',
-            'src/get.js',
-            'src/Model.js'
-        ]).
-        pipe(concat({path: 'Falcor2.js'})).
-        pipe(gulp.dest('./bin2'));
-});

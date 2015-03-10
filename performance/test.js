@@ -17,10 +17,8 @@ recModel.getValueSync(['videos', 1234, 'summary']);
 var config = require('./testConfig.js')(model, recF, E_model, E_recModel);
 
 if (require.main === module) {
-//    require('./test-header')(config, 10, function(totalResults) {
-//        var fs = require('fs');
-//        fs.writeFileSync('out.csv', totalResults.join('\n'))
-//    });
-    debugger;
-    var out = recModel._getAsPathMap(recModel, [['genreList', {to: 1}, 0, 'summary']], [{}]);
+    require('./test-header')(config, 10, function(totalResults) {
+        var fs = require('fs');
+        fs.writeFileSync('out.csv', totalResults.join('\n'))
+    });
 }

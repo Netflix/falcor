@@ -37,6 +37,28 @@ var compile = [
 gulp.task("build", ["clean.dev", "build.node", "build.tvui", "build.akira", "build.browser", "build.raw"]);
 gulp.task("build.dev", ["clean.dev", "build.node"]);
 
+gulp.task('build.perf', function() {
+    return gulp.
+        src([
+            'tmp/data/*.js',
+            'testConfig.js',
+            'comTest.js'
+        ]).
+        pipe(concat({path: 'perf-tests.js'})).
+        pipe(gulp.dest('bin'));
+});
+
+gulp.task('build.perf-data', ['build.perf-data'], function() {
+    return gulp.
+        src([
+            'test/data/Cache.js'
+        ]).
+        pipe(browserify({
+            standalone: "Cache"
+        })).
+        pipe(gulp.dest('tmp/data/Cache'));
+});
+
 gulp.task("build.macros", ["clean.dev"], function() {
     return gulp.src([
             "./macros/*.js",
@@ -46,13 +68,13 @@ gulp.task("build.macros", ["clean.dev"], function() {
             "./macros/keys/*.js",
             "./macros/nodes/*.js",
             "./macros/traversal/*.js",
-            "./macros/operations/*.js",
+            "./macros/operations/*.js"
         ]).
         pipe(concat({path: "macros.sjs.js"})).
         pipe(gulp.dest("tmp/framework"));
 });
 
-gulp.task('src', function() {
+gulp.task('build.get.ops', function() {
     return gulp.
         src([
             'src/lru.js',
@@ -81,7 +103,8 @@ gulp.task("build.operations", ["build.macros"], function() {
         ]).
         pipe(gulp.dest("tmp/framework/operations"));
 });
-gulp.task("build.compiled_operations", ["build.sweet"], function() {
+
+gulp.task("build.compiled_operations", ["build.sweet", 'build.get.ops'], function() {
     return gulp.
         src("./tmp/framework/compiled_operations/**.js").
         pipe(concat({path: "operations.js"})).
