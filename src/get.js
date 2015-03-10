@@ -80,11 +80,8 @@ function walk(model, root, node, pathOrJSON, depth, seedOrFunction, positionalIn
                 permutePosition.push(next.__generation);
             }
 
-            if (isExpired(next)) {
-                emitMissing(nextPath, inputFormat === 'JSON' ? key : depth, permuteRequested, permuteOptimized, permutePosition, outerResults, outputFormat);
-            }
 
-            else if (jsonQuery && hasChildren || !jsonQuery && depth < pathOrJSON.length) {
+            if (jsonQuery && hasChildren || !jsonQuery && depth < pathOrJSON.length) {
 
                 if (valueIsArray) {
                     var ref = followReference(model, root, root, value);
@@ -101,12 +98,15 @@ function walk(model, root, node, pathOrJSON, depth, seedOrFunction, positionalIn
                         var rValue = rType === 'sentinel' ? refNode.value : refNode;
 
                         // short circuit case
-                        if (rType === 'leaf') {
-                            emitValues(model, refNode, nextPath, depth, seedOrFunction, outerResults, permuteRequested, permuteOptimized, permutePosition, outputFormat);
-                        }
-
-                        else if (rType === 'error') {
-                            emitError(model, nextPath, depth, refNode, rValue, permuteRequested, permuteOptimized, outerResults);
+                        if (rType) {
+                            if (isExpired(next)) {
+                                emitMissing(nextPath, inputFormat === 'JSON' ? key : depth, permuteRequested, permuteOptimized, permutePosition, outerResults, outputFormat);
+                            }
+                            else if (rType === 'error') {
+                                emitError(model, refNode, rValue, permuteRequested, permuteOptimized, outerResults, true);
+                            } else {
+                                emitValues(model, refNode, nextPath, depth, seedOrFunction, outerResults, permuteRequested, permuteOptimized, permutePosition, outputFormat);
+                            }
                         }
 
                         else {
@@ -117,12 +117,15 @@ function walk(model, root, node, pathOrJSON, depth, seedOrFunction, positionalIn
                     }
                 }
 
-                else if (nType === 'error') {
-                    emitError(model, nextPath, depth, next, value, permuteRequested, permuteOptimized, outerResults);
-                }
-
                 else if (nType) {
-                    emitValues(model, next, nextPath, depth, seedOrFunction, outerResults, permuteRequested, permuteOptimized, permutePosition, outputFormat);
+                    if (isExpired(next)) {
+                        emitMissing(nextPath, inputFormat === 'JSON' ? key : depth, permuteRequested, permuteOptimized, permutePosition, outerResults, outputFormat);
+                    }
+                    else if (nType === 'error') {
+                        emitError(model, next, value, permuteRequested, permuteOptimized, outerResults);
+                    } else {
+                        emitValues(model, next, nextPath, depth, seedOrFunction, outerResults, permuteRequested, permuteOptimized, permutePosition, outputFormat);
+                    }
                 }
 
                 else {
@@ -133,8 +136,18 @@ function walk(model, root, node, pathOrJSON, depth, seedOrFunction, positionalIn
             // we are the last depth.  This needs to be returned
             else {
                 if (nType || valueIsArray) {
-                    emitValues(model, next, nextPath, depth, seedOrFunction, outerResults, permuteRequested, permuteOptimized, permutePosition, outputFormat);
-                } else {
+                    if (isExpired(next)) {
+                        emitMissing(nextPath, inputFormat === 'JSON' ? key : depth, permuteRequested, permuteOptimized, permutePosition, outerResults, outputFormat);
+                    }
+                    else if (nType === 'error') {
+                        emitError(model, next, value, permuteRequested, permuteOptimized, outerResults);
+                    } 
+                    else {
+                        emitValues(model, next, nextPath, depth, seedOrFunction, outerResults, permuteRequested, permuteOptimized, permutePosition, outputFormat);
+                    }
+                }
+                
+                else {
                     emitMissing(nextPath, inputFormat === 'JSON' ? key : depth, permuteRequested, permuteOptimized, permutePosition, outerResults, outputFormat);
                 }
             }
@@ -208,9 +221,12 @@ function simpleWalk(model, root, node, path, depth, results) {
     }
 }
 
-function emitError(model, path, depth, node, nodeValue, permuteRequested, permuteOptimized, outerResults) {
+function emitError(model, node, nodeValue, permuteRequested, permuteOptimized, outerResults, followedReference) {
+    if (followedReference) {
+        permuteRequested.push(null);
+    }
+    
     outerResults.errors.push({path: fastCopy(permuteRequested), value: copyCacheObject(nodeValue)});
-    updateTrailingNullCase(path, depth, permuteRequested);
     lruPromote(model, node);
     outerResults.requestedPaths.push(permuteRequested);
     outerResults.optimizedPaths.push(permuteOptimized);
@@ -278,8 +294,10 @@ function emitValues(model, node, path, depth, seedOrFunction, outerResults, perm
 
         case 'Values':
             if (seedOrFunction) {
-                var pV = cloneToPathValue(model, node, permuteRequested);
-                seedOrFunction(pV);
+                if (typeof seedOrFunction === 'function') {
+                    seedOrFunction(cloneToPathValue(model, node, permuteRequested));
+                } else {
+                }
             }
             break;
         
@@ -351,11 +369,9 @@ function followReference(model, root, node, reference) {
 
             if (depth < reference.length) {
                 if (type) {
-                    break;
-                }
-                // TODO: Cannot Expire!
-                if (isExpired(next)) {
-                    expired = true;
+                    if (isExpired(next)) {
+                        expired = true;
+                    }
                     break;
                 }
 
@@ -365,9 +381,7 @@ function followReference(model, root, node, reference) {
 
             else if (depth === reference.length) {
 
-                // TODO: Cannot Expire!
-                // hit expired branch
-                if (isExpired(next)) {
+                if (type && isExpired(next)) {
                     expired = true;
                     break;
                 }

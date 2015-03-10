@@ -27,7 +27,7 @@ function copyCacheObject(value, allowType, onto) {
             outValue = onto || {};
             for (var i = 0, len = keys.length; i < len; i++) {
                 var k = keys[i];
-                if (!(k.indexOf('__') === 0 || k.indexOf('$') === 0)) {
+                if (!(k.indexOf('__') === 0 || k.indexOf('$') === 0 || k === '/' || k === './' || k === '../')) {
                     outValue[k] = value[k];
                 }
             }

@@ -86,26 +86,20 @@ var Cache = function() {
                 "$size": 51,
                 "$type": "sentinel",
                 "$expires": expiredTimestamp,
-                "value": {
-                    "0": ["videos", 333],
-                    "1": ["videos", "sentinel"]
-                }
+                "value": ["videos", 333]
             },
             "to-error-list": ["lists", "error-list-2"],
             "to-missing-list": ["lists", "missing-list-2"],
             "to-expired-list": {
                 "$size": 52,
                 "$type": "sentinel",
-                "$expires": expiredTimestamp,
                 "value": ["lists", "expired-list"]
             },
             "future-expired-list": {
                 "$type": "sentinel",
                 "$expires": Date.now() + 100000,
                 "$size": 51,
-                "value": {
-                    "0": ["videos", 1234]
-                }
+                "value": ["videos", 1234]
             },
             "to-sentinel-list": {
                 "$size": 52,
@@ -214,6 +208,12 @@ var Cache = function() {
                     "url": "/movies/6420"
                 }
             },
+            "expiredBranchByTimestamp": {
+                $type: 'sentinel',
+                $expires: expiredTimestamp,
+                $size: 50,
+                value: {}
+            },
             "sentinel": {
                 "$size": 51,
                 "summary": {
@@ -244,28 +244,6 @@ var Cache = function() {
                     "$type": "sentinel",
                     "value": {
                         "sad": "tunafish"
-                    }
-                }
-            },
-            "expiredBranchByTimestamp": {
-                "$size": 51,
-                "$expires": expiredTimestamp,
-                "summary": {
-                    "$size": 51,
-                    "$type": "sentinel",
-                    "value": {
-                        "sad": "liger"
-                    }
-                }
-            },
-            "expiredBranchBy0": {
-                "$size": 51,
-                "$expires": 0,
-                "summary": {
-                    "$size": 51,
-                    "$type": "sentinel",
-                    "value": {
-                        "sad": "turtle"
                     }
                 }
             },

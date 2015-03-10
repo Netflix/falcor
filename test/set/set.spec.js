@@ -68,9 +68,6 @@ function execute(useCache, oneModel, fillInReferences, hardLink) {
             describe("should set a value on expired leaf node by 0.", function() {
                 setTestRunner(SetExpected.Expired().expiredLeafNode0, {modelCache: Cache()});
             });
-            describe("should set a value on expired branch by timestamp.", function() {
-                setTestRunner(SetExpected.Expired().expiredBranchByTimestamp, {modelCache: Cache()});
-            });
             describe("should set a value on expired branch by 0.", function() {
                 setTestRunner(SetExpected.Expired().expiredBranchBy0, {modelCache: Cache()});
             });

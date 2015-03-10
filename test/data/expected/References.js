@@ -1464,7 +1464,7 @@ module.exports = function() {
             ],
 
             optimizedMissingPaths: [
-                ["lists", "to-expired-list", "0", "summary"]
+                ["lists", "expired-list", "0", "summary"]
             ],
 
             AsValues: {

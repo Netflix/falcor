@@ -37,10 +37,10 @@ function getTestRunner(model, data, options) {
         forEach(function (prefix) {
             prefixesAndSuffixes[1].map(function (suffix) {
                 var query = data[prefix].query;
-                var count = data[prefix].count === undefined ? 1 : 0;
+                var countOrFunction = data[prefix].count === undefined ? 1 : 0;
                 var op = "_" + prefix + suffix;
                 
-                count = Array(count).join(",").split(",").map(function() { return {}; });
+                countOrFunction = Array(countOrFunction).join(",").split(",").map(function() { return {}; });
 
                 // If this prefix operation intentionally excludes then early return.
                 if (data[prefix].exclude && _.contains(data[prefix].exclude, suffix)) {
@@ -52,19 +52,53 @@ function getTestRunner(model, data, options) {
                 if (options.useNewModel) {
                     model = testRunner.getModel(null, Cache());
                 }
+                
+                // TODO: will verify the onNext values coming in for AsValues.
+                var expectedCount = expected.values && expected.values.length;
+                var actualCount = 0;
+                if (suffix === 'AsValues') {
+                    var vals = expected.values;
+                    expected.values = undefined;
+                    
+                    countOrFunction = function(pV) {
+                        debugger;
+                        if (vals && vals.length) {
+                            var tested = false;
+                            for (var i = 0; i < vals.length; i++) {
+                                if (_.isEqual(pV.path.map(toString), vals[i].path.map(toString))) {
+                                    actualCount++;
+                                    tested = true;
+                                    testRunner.compare(vals[i].path, pV.path);
+                                    break;
+                                }
+                            }
+                            if (!tested) {
+                                throw 'The path ' + pV.path + ' does not exist within ' + JSON.stringify(vals.map(function(x) { return x.path; }), null, 4);
+                            }
+                        } else {
+                            throw 'There are no more values to compare against AsValues onNext callback. ' + JSON.stringify(pV);
+                        }
+                    };
+                }
 
                 // For doing any preprocessing.
-                preCallFn(model, op, _.cloneDeep(query), count);
-
-                actual = model[op](model, _.cloneDeep(query), count, model._errorSelector);
+                preCallFn(model, op, _.cloneDeep(query), countOrFunction);
+                actual = model[op](model, _.cloneDeep(query), countOrFunction, model._errorSelector);
 
                 // validates that the results from the operation and the expected values are valid.
                 testRunner.validateData(expected, actual);
 
                 // validates against the expected vs actual
                 testRunner.validateOperation(op, expected, actual);
+
+                if (suffix === 'AsValues' && expectedCount > 0) {
+                    expect(expectedCount).to.equal(actualCount);
+                }
             });
         });
+}
+function toString(x) {
+    return x + '';
 }
 
 function async(obs, model, data, options) {

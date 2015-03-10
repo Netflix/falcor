@@ -33,8 +33,6 @@ function lruPromote(model, object) {
             prev.__next = undefined;
         }
         object.__next = undefined;
-    } else {
-        root.size++;
     }
 
     // Insert into head position
