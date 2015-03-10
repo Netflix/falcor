@@ -1,21 +1,3 @@
-var FModel = function(cache) {
-    this._cache = cache || {};
-    this._boxed = false;
-    this._path = [];
-    this._root = {size: 0, unsafe: false, allowSync: false};
-};
-
-FModel.prototype = {
-    _getAsValues: F_getAsValues,
-    _getAsPathMap: F_getAsPathMap,
-    _getAsJSON: F_getAsJSON,
-    getValueSync: function(path) {
-        var results = {};
-        simpleWalk(this, this._cache, this._cache, path, 0, results);
-        
-        return results.value;
-    }
-};
 function F_getAsValues(model, paths, onNext) {
     var result = _output();
     var inputFormat = Array.isArray(paths[0]) ? 'Paths' : 'JSON';
@@ -73,11 +55,6 @@ function F_getAsJSON(model, paths, values) {
     return result;
 }
 
-
-function now() {
-    return Date.now();
-}
-
 function _output() {
     return {
         values: [],
@@ -87,17 +64,4 @@ function _output() {
         requestedMissingPaths: [],
         optimizedMissingPaths: []
     };
-}
-
-if (typeof module !== 'undefined') {
-    module.exports = FModel;
-    if (require.main === module) {
-        var Cache = require('./test/data/Cache');
-        var model = new FModel(Cache());
-
-        var results = model._getPathsAsValues(model, [['genreList', 0, 0, 'summary']], function(x) {
-            debugger;
-        });
-        debugger;
-    }
 }
