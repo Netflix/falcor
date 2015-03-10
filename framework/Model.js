@@ -193,14 +193,14 @@ Model.prototype = {
     _getValueSync            :          getValueSync,
     _setValueSync            :          setValueSync,
     
-    _getPathsAsValues        :      getPathsAsValues,
-    _getPathsAsJSON          :        getPathsAsJSON,
-    _getPathsAsPathMap       :     getPathsAsPathMap,
+    _getPathsAsValues        :      F_getAsValues,
+    _getPathsAsJSON          :        F_getAsJSON,
+    _getPathsAsPathMap       :     F_getAsPathMap,
     _getPathsAsJSONG         :       getPathsAsJSONG,
     
-    _getPathMapsAsValues     :   getPathMapsAsValues,
-    _getPathMapsAsJSON       :     getPathMapsAsJSON,
-    _getPathMapsAsPathMap    :  getPathMapsAsPathMap,
+    _getPathMapsAsValues     :   F_getAsValues,
+    _getPathMapsAsJSON       :     F_getAsJSON,
+    _getPathMapsAsPathMap    :  F_getAsPathMap,
     _getPathMapsAsJSONG      :    getPathMapsAsJSONG,
     
     _setPathsAsValues        :      setPathsAsValues,
