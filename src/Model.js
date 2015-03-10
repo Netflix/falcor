@@ -1,7 +1,7 @@
 var FModel = function(cache) {
     this._cache = cache || {};
     this._boxed = false;
-    this.__compatMode = true;
+    this._path = [];
     this._root = {size: 0, unsafe: false, allowSync: false};
 };
 

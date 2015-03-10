@@ -128,7 +128,7 @@ function startTesting(model, recModel, E_model, E_recModel) {
         ]);
     }
 
-    function asJSONModelFilled() {
+    function asJSONScrollingGallery() {
         model._getPathsAsJSON(model, [
             ["lists", "abcd", {"from": 0, "to": 10}, "summary"],
             ["lists", "abcd", {"from": 11, "to": 20}, "summary"],
@@ -137,7 +137,7 @@ function startTesting(model, recModel, E_model, E_recModel) {
         ], [{},{},{},{}]);
     }
 
-    function asJSONRecModelFilled() {
+    function asJSONRecScrollingGallery() {
         recModel._getAsJSON(recModel, [
             ["lists", "abcd", {"from": 0, "to": 10}, "summary"],
             ["lists", "abcd", {"from": 11, "to": 20}, "summary"],
@@ -145,7 +145,7 @@ function startTesting(model, recModel, E_model, E_recModel) {
             ["lists", "abcd", {"from": 31, "to": 40}, "summary"]
         ], [{},{},{},{}]);
     }
-    function asPathMapModelFilled() {
+    function asPathMapScrollingGallery() {
         model._getPathsAsPathMap(model, [
             ["lists", "abcd", {"from": 0, "to": 10}, "summary"],
             ["lists", "abcd", {"from": 11, "to": 20}, "summary"],
@@ -154,7 +154,7 @@ function startTesting(model, recModel, E_model, E_recModel) {
         ], [{}]);
     }
 
-    function asPathMapRecModelFilled() {
+    function asPathMapRecScrollingGallery() {
         recModel._getAsPathMap(recModel, [
             ["lists", "abcd", {"from": 0, "to": 10}, "summary"],
             ["lists", "abcd", {"from": 11, "to": 20}, "summary"],
@@ -162,7 +162,7 @@ function startTesting(model, recModel, E_model, E_recModel) {
             ["lists", "abcd", {"from": 31, "to": 40}, "summary"]
         ], [{}]);
     }
-    function asValuesModelFilled() {
+    function asValuesScrollingGallery() {
         model._getPathsAsValues(model, [
             ["lists", "abcd", {"from": 0, "to": 10}, "summary"],
             ["lists", "abcd", {"from": 11, "to": 20}, "summary"],
@@ -219,43 +219,21 @@ function startTesting(model, recModel, E_model, E_recModel) {
     function getReferenceSync() {
         model.getValueSync(['genreList', 0, 0, 'summary']);
     }
-    return {
+    var config = {
         name: 'Falcor',
         async: false,
-        tests: {
-            'falcor.Model getValueSync simple 1': getValueSync,
-            'falcor.Model getValueSync simple 2': getValueSync,
-            'falcor.Model getValueSync simple 3': getValueSync,
-            'falcor.Model getValueSync simple 4': getValueSync,
-            'falcor.Model getValueSync simple 5': getValueSync,
-            'falcor.Model getValueSync simple 6': getValueSync,
-            'falcor.Model getValueSync simple 7': getValueSync,
-            'falcor.Model getValueSync simple 8': getValueSync,
-            'falcor.Model getValueSync simple 9': getValueSync,
-            'falcor.Model getValueSync simple 10': getValueSync
-//            'FTester2.Model getValueSync simple': getValueSyncRec,
-//            'falcor.Model getValueSync reference': getReferenceSync,
-//            'FTester2.Model getValueSync reference': getReferenceSyncRec
-//            'falcor.Model simple path AsValues': asValuesSimple,
-//            'FTester2.Model simple path AsValues': asValuesSimpleRec,
-//            'falcor.Model simple path AsJSON': asJSONSimple,
-//            'FTester2.Model simple path AsJSON': asJSONSimpleRec,
-//            'falcor.Model simple path AsPathMap': asPathMapSimple,
-//            'FTester2.Model simple path AsPathMap': asPathMapSimpleRec
-//            'falcor.Model startup request AsJSON': asJSONModel,
-//            'FTester2.Model startup request AsJSON': asJSONRecModel,
-//            'falcor.Model startup request AsPathMap': asPathMapModel,
-//            'FTester2.Model startup request AsPathMap': asPathMapRecModel,
-//            'falcor.Model startup request AsValues': asValuesModel,
-//            'FTester2.Model startup request AsValues': asValuesRecModel
-//            'falcor.Model scrolling the lolomo request pattern AsJSON': asJSONModelFilled,
-//            'FTester2.Model scrolling the lolomo request pattern AsJSON': asJSONRecModelFilled,
-//            'falcor.Model scrolling the lolomo request pattern AsPathMap': asPathMapModelFilled,
-//            'FTester2.Model scrolling the lolomo request pattern AsPathMap': asPathMapRecModelFilled,
-//            'falcor.Model scrolling the lolomo request pattern AsValues': asValuesModelFilled,
-//            'FTester2.Model scrolling the lolomo request pattern AsValues': asValuesRecModelFilled
-        }
+        tests: {}
     };
+    
+    repeatInConfig('falcor.Model scrolling lolomo', 15, asJSONScrollingGallery, config.tests);
+    
+    return config;
+}
+
+function repeatInConfig(name, count, test, config) {
+    for (var i = 0; i < count; i++) {
+        config[name + ' ' + i] = test;
+    }
 }
 
 if (typeof module !== 'undefined') {

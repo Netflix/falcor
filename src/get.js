@@ -26,7 +26,7 @@ function walk(model, root, node, pathOrJSON, depth, seedOrFunction, positionalIn
     depth++;
 
     var key;
-    if (typeof k === 'object' && k) {
+    if (k && typeof k === 'object') {
         memo.isArray = Array.isArray(k);
         memo.arrOffset = 0;
         
@@ -57,15 +57,10 @@ function walk(model, root, node, pathOrJSON, depth, seedOrFunction, positionalIn
                     permutePosition[i] = permutePosition[i];
                 }
             }
-
-//            permuteOptimized = fastCopy(optimizedPath);
-//            permuteRequested = fastCopy(requestedPath);
-//            if (asPathMap || asJSON) {
-//                permutePosition = fastCopy(positionalInfo);
-//            }
         }
         nextPath = jsonQuery ? pathOrJSON[key] : pathOrJSON;
         if (jsonQuery) {
+            // TODO: consider an array, types, and simple values.
             hasChildren = nextPath !== null && Object.keys(nextPath).length > 0;
         }
 
@@ -126,7 +121,7 @@ function walk(model, root, node, pathOrJSON, depth, seedOrFunction, positionalIn
                     emitError(model, nextPath, depth, next, value, permuteRequested, permuteOptimized, outerResults);
                 }
 
-                else if (nType === 'leaf') {
+                else if (nType) {
                     emitValues(model, next, nextPath, depth, seedOrFunction, outerResults, permuteRequested, permuteOptimized, permutePosition, outputFormat);
                 }
 
@@ -160,6 +155,8 @@ function walk(model, root, node, pathOrJSON, depth, seedOrFunction, positionalIn
 
 function simpleWalk(model, root, node, path, depth, results) {
     var key = path[depth++];
+    
+    // TODO: if sentinel, then there is no child, there is a short-circuit
     var nodeIsSentinel = node.$type === 'sentinel';
     var next = nodeIsSentinel ? node.value[key] : node[key];
     
@@ -280,10 +277,6 @@ function emitValues(model, node, path, depth, seedOrFunction, outerResults, perm
     switch (outputFormat) {
 
         case 'Values':
-            
-            if (model.__compatMode) {
-                outerResults.values.push(cloneToPathValue(model, node, permuteRequested));
-            }
             if (seedOrFunction) {
                 var pV = cloneToPathValue(model, node, permuteRequested);
                 seedOrFunction(pV);
@@ -360,6 +353,7 @@ function followReference(model, root, node, reference) {
                 if (type) {
                     break;
                 }
+                // TODO: Cannot Expire!
                 if (isExpired(next)) {
                     expired = true;
                     break;
@@ -371,6 +365,7 @@ function followReference(model, root, node, reference) {
 
             else if (depth === reference.length) {
 
+                // TODO: Cannot Expire!
                 // hit expired branch
                 if (isExpired(next)) {
                     expired = true;
