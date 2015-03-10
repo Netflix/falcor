@@ -26,6 +26,7 @@ var support = [
 var compile = [
     "./framework/Falcor.js",
     "./tmp/framework/Model.js",
+    "./tmp/framework/get.ops.js",
     "./tmp/framework/support.js",
     "./tmp/framework/operations.js"
 ];
@@ -51,12 +52,23 @@ gulp.task("build.macros", ["clean.dev"], function() {
         pipe(gulp.dest("tmp/framework"));
 });
 
+gulp.task('src', function() {
+    return gulp.
+        src([
+            'src/lru.js',
+            'src/support.js',
+            'src/get.js'
+        ]).
+        pipe(concat({path: 'get.ops.js'})).
+        pipe(gulp.dest('./tmp'));
+});
+
 gulp.task("build.operations", ["build.macros"], function() {
     return gulp.
         src([
             "./framework/get/*.js",
-            "./framework/get/paths/*.js",
-            "./framework/get/pathMaps/*.js",
+            "./framework/get/paths/getPathsAsJSONG.js",
+            "./framework/get/pathMaps/getPathMapsAsJSONG.js",
             
             "./framework/set/*.js",
             "./framework/set/paths/*.js",
@@ -65,7 +77,7 @@ gulp.task("build.operations", ["build.macros"], function() {
             
             "./framework/call/call.js",
             
-            "./framework/invalidate/*.js",
+            "./framework/invalidate/*.js"
         ]).
         pipe(gulp.dest("tmp/framework/operations"));
 });

@@ -29,7 +29,7 @@ describe("Use New Model", function() {
 
 function execute(useNewModel) {
     describe("Values", function() {
-        describe("should get a value directly", function() {
+        describe.only("should get a value directly", function() {
             runGetTests(getModel(useNewModel), Values().direct, {useNewModel: useNewModel});
         });
         describe("should get a value that is a references", function() {
