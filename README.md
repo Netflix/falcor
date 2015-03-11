@@ -150,7 +150,7 @@ var server = app.listen(80);
 ```
 ## How to use Falcor in your Application
 
-Falcor allows you to build a *Virtual JSON Model* on the server. A virtual model is a view of the data in your backend services that is ideal for the needs of your web application. The virtual model exposes all of the data that the client needs at a single URL on the server (ex. /model.json). On the client web developers retrieve data from the virtual model as if it was stored in memory, by looking up paths of keys.
+Falcor allows you to build a *Virtual JSON Model* on the server. The virtual model exposes all of the data that the client needs at a single URL on the server (ex. /model.json). On the client web developers retrieve data from the virtual model by setting and retrieving key, just as they would if the data were stored in memory.
 
 (Example of a client retrieving a path)
 
@@ -240,11 +240,9 @@ I latency makes a restful model a nonstarter for most mobile applications.
 
 In order to avoid inadvertently downloading the entire graph whenever we download an entity, most web applications either build customized endpoints for each view, or adopt a RESTful model.
 
+# JSON Graph
 
-
-###  JSON Graph
-
-Nearly every application's domain model is graph.  However most application servers use JSON to send domain model objects over the wire. Converting graph data into JSON is a hazard, because JSON is heirarchical format. When you expand a graph into a tree, you either get duplicates, or introduce unique identifiers.
+Nearly every application's domain model is graph.  However most application servers use JSON to send domain model objects over the wire. Converting graph data into JSON is a hazard, because JSON is heirarchical format. When you expand a graph into a tree, you either get duplicates, or introduce duplicates.
 
 Let's imagine we are building a simple issue tracking system. The system has three types of entities:
 
@@ -295,13 +293,19 @@ You can convert any JSON  object to a JSON Graph Object in three easy steps.
  
 1.  Move all types of objects with non-overlapping to a shared location in the JSON object.
 
+# Asynchronous MVC Pattern
+
+The Falcor Model has an asynchronous API.
+
 # Frequently Asked Questions
 
 1. How do I retrieve all the data in a collection in a single request.
 
-In general requesting the entire contents of a collection in a single request can be hazardous. While lists may start small, they can grow over time as the data in backend data store grows. If an application request the entire contents of a list that gradually grows over time, it can eventually result in unnecessarily long load times and even out-of-memory exceptions.
+In general requesting the entire contents of a collection in a single request can be hazardous. While lists may start small, they can grow over time. If an application requests the entire contents of a list that can grow over time, it can eventually result in unnecessarily long load times and even out-of-memory exceptions.
 
-*Falcor is designed for Applications that display information to human beings in real-time.* Rather than requesting the entire contents of a list, applications are encouraged to use paging to retrieve the first  based on the clients screen-size.
+*Falcor is designed for Applications that display information to human beings in real-time.* Rather than requesting the entire contents of a list, applications are encouraged to use paging to retrieve the first page as quickly as possible. Typically applications retrieve the first visible page of a list as well as the list length in one request to the Model (and consequently the server). At that point applications can choose whether to load the rest of the list as soon as the first page and length are displayed on screen, or simply lazily load pages as the user scrolls through the list.
+
+
 
 
 
@@ -309,6 +313,39 @@ An Array must be chosen if you would like to be able to retrieve the entire cont
 
 
 
-2. How do I retrieve a branch node and all fonts children from a JSON Graph Model.
+2. How do I retrieve an Object and all its descendants from a JSON Graph Model.
 
+Clients must explicitly specify the path to every value they want to retrieve from a JSON Grap object.  JSON Graph values include strings, numbers, boolean values, Arrays, or Atomic Maps. It is not possible to retrieve a value from Falcor unless you know its path.
+
+
+
+This should not be restrictive, because UIs know exactly what 
+
+3. How do I filter or sort lists on the client?
+
+Falcor clients do _not_ perform transformations on lists in the virtual model like filtering and sorting. Instead clients rely on the virtual model on the server to expose filtered or sorted versions of the lists for them. 
+
+model.get("titleList.byRating[0...10].name");
+
+In the example above, virtual model provides a "byRating" key on the titleList which is it sorted version of the same list. 
+
+(Example router code showing how to build a list sorted by by rating)
+
+It is rarely efficient to download all of the data on the server onto the client and perform transformations locally. Instead of trying to enable client-side transformations, Falcor clients rely on the virtual model to do all the data transformation. Falkor clients focus only on data retrieval.
+
+# Asynchronous MVC
+
+The Falkor model is asynchronous. This makes it possible for applications to use the Async MVC pattern (AMVC). The AMTC pattern can be used in any MVC framework. 
+
+## Local MVC
+
+The local NBC pattern involves downloading all of the data in the cloud to the client.
+The role of the controller is to interpret commands, select a model from the graph and a View to serve as it's visual representation. Views access any information in the model they require to render.
+
+
+It is possible to use the NBC fruit pattern in any popular embassy framework, whether it be written, Amber. The AMTC pattern is easy donor stand. Imagine how you would put your application if all of the data in the cloud or sitting in a Jason object and memory.
+
+, Because you have only one model. The controllers responsibility actions, 
+
+Imagine all of the data he required for you I'm application was available in memory.
 
