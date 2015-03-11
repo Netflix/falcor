@@ -1,169 +1,156 @@
 // TODO: Objectify?
-function walk(model, root, node, pathOrJSON, depth, seedOrFunction, positionalInfo, outerResults, optimizedPath, requestedPath, inputFormat, outputFormat) {
+function walk(model, root, curr, pathOrJSON, depth, seedOrFunction, positionalInfo, outerResults, optimizedPath, requestedPath, inputFormat, outputFormat, fromReference) {
+    // BaseCase: This position does not exist, emit missing.
+    if (!curr) {
+        emitMissing(pathOrJSON, depth, requestedPath, optimizedPath, positionalInfo, outerResults, outputFormat);
+        return;
+    }
+    
+    var currType = curr.type;
+    var currValue = currType === 'sentinel' ? curr.value : curr;
     positionalInfo = positionalInfo || [];
-    var jsonQuery = false;
-    var k, i, len;
-    if (inputFormat === 'JSON') {
-        jsonQuery = true;
-        k = Object.keys(pathOrJSON);
-        if (k.length === 1) {
-            k = k[0];
-        }
-    } else {
-        k = pathOrJSON[depth];
-    }
-    var memo = {done: false};
-    var first = true;
-    var permutePosition = positionalInfo;
-    var permuteRequested = requestedPath;
-    var permuteOptimized = optimizedPath;
-    var asPathMap = outputFormat === 'PathMap';
-    var asJSONG = outputFormat === 'JSONG';
-    var asJSON = outputFormat === 'JSON';
-    var isKeySet = false;
-    var nextPath;
-    var hasChildren = false;
-    depth++;
 
-    var key;
-    if (k && typeof k === 'object') {
-        memo.isArray = Array.isArray(k);
-        memo.arrOffset = 0;
+    // The Base Cases.  There is a type, therefore we have hit a 'leaf' node.
+    if (currType) {
         
-        key = permuteKey(k, memo);
-        isKeySet = true;
-    } else {
-        key = k;
-        memo.done = true;
-    }
-    
-    if (asJSON && isKeySet) {
-        permutePosition.push(depth - 1);
-    }
-    
-    while (!memo.done || first) {
-        first = false;
-        if (!memo.done) {
-            permuteOptimized = [];
-            permuteRequested = [];
-            for (i = 0, len = requestedPath.length; i < len; i++) {
-                permuteRequested[i] = requestedPath[i];
-            }
-            for (i = 0, len = optimizedPath.length; i < len; i++) {
-                permuteOptimized[i] = optimizedPath[i];
-            }
-            if (asPathMap) {
-                for (i = 0, len = permutePosition.length; i < len; i++) {
-                    permutePosition[i] = permutePosition[i];
-                }
-            }
+        // TODO: Expired
+        if (currType === 'error') {
+            emitError(model, curr, currValue, requestedPath, optimizedPath, outerResults, fromReference);
+        } 
+        
+        // Else we have found a value, emit the current position information.
+        else {
+            emitValues(model, curr, pathOrJSON, depth, seedOrFunction, outerResults, requestedPath, optimizedPath, positionalInfo, outputFormat);
         }
-        nextPath = jsonQuery ? pathOrJSON[key] : pathOrJSON;
+    }
+
+    // We continue the search to the end of the path/json structure.
+    else {
+        
+        // Base case of the searching:  Have we hit the end of the road?
+        // Paths
+        // 1) depth === path.length
+        // PathMaps (json input)
+        // 2) if its an object with no keys
+        // 3) its a non-object
+        var jsonQuery = inputFormat === 'JSON';
+        var atEndOfJSONQuery = false;
+        var k, i, len;
         if (jsonQuery) {
-            // TODO: consider an array, types, and simple values.
-            hasChildren = nextPath !== null && Object.keys(nextPath).length > 0;
-        }
-
-        var nodeIsSentinel = node.$type === 'sentinel';
-        var next = nodeIsSentinel ? node.value[key] : node[key];
-
-        if (next) {
-            var nType = next.$type;
-            var value = nType === 'sentinel' ? next.value : next;
-            var valueIsArray = Array.isArray(value);
-
-            if (key !== null) {
-                permuteOptimized.push(key);
-                permuteRequested.push(key);
-            }
-            if (asPathMap) {
-                permutePosition.push(next.__generation);
-            }
-
-
-            if (jsonQuery && hasChildren || !jsonQuery && depth < pathOrJSON.length) {
-
-                if (valueIsArray) {
-                    var ref = followReference(model, root, root, value);
-                    var refNode = ref[0];
-                    var refPath = ref[1];
-
-                    permuteOptimized = [];
-                    for (i = 0, len = refPath.length; i < len; i++) {
-                        permuteOptimized[i] = refPath[i];
-                    }
-
-                    if (refNode) {
-                        var rType = refNode.$type;
-                        var rValue = rType === 'sentinel' ? refNode.value : refNode;
-
-                        // short circuit case
-                        if (rType) {
-                            if (isExpired(next)) {
-                                emitMissing(nextPath, inputFormat === 'JSON' ? key : depth, permuteRequested, permuteOptimized, permutePosition, outerResults, outputFormat);
-                            }
-                            else if (rType === 'error') {
-                                emitError(model, refNode, rValue, permuteRequested, permuteOptimized, outerResults, true);
-                            } else {
-                                emitValues(model, refNode, nextPath, depth, seedOrFunction, outerResults, permuteRequested, permuteOptimized, permutePosition, outputFormat);
-                            }
-                        }
-
-                        else {
-                            walk(model, root, refNode, nextPath, depth, seedOrFunction, permutePosition, outerResults, permuteOptimized, permuteRequested, inputFormat, outputFormat);
-                        }
-                    } else {
-                        emitMissing(nextPath, depth, permuteRequested, permuteOptimized, permutePosition, outerResults, outputFormat);
+            if (pathOrJSON && typeof pathOrJSON === 'object') {
+                if (Array.isArray(pathOrJSON)) {
+                    atEndOfJSONQuery = true;
+                } else {
+                    k = Object.keys(pathOrJSON);
+                    if (k.length === 1) {
+                        k = k[0];
                     }
                 }
-
-                else if (nType) {
-                    if (isExpired(next)) {
-                        emitMissing(nextPath, inputFormat === 'JSON' ? key : depth, permuteRequested, permuteOptimized, permutePosition, outerResults, outputFormat);
-                    }
-                    else if (nType === 'error') {
-                        emitError(model, next, value, permuteRequested, permuteOptimized, outerResults);
-                    } else {
-                        emitValues(model, next, nextPath, depth, seedOrFunction, outerResults, permuteRequested, permuteOptimized, permutePosition, outputFormat);
-                    }
-                }
-
-                else {
-                    walk(model, root, value, nextPath, depth, seedOrFunction, permutePosition, outerResults, permuteOptimized, permuteRequested, inputFormat, outputFormat);
-                }
-            }
-
-            // we are the last depth.  This needs to be returned
-            else {
-                if (nType || valueIsArray) {
-                    if (isExpired(next)) {
-                        emitMissing(nextPath, inputFormat === 'JSON' ? key : depth, permuteRequested, permuteOptimized, permutePosition, outerResults, outputFormat);
-                    }
-                    else if (nType === 'error') {
-                        emitError(model, next, value, permuteRequested, permuteOptimized, outerResults);
-                    } 
-                    else {
-                        emitValues(model, next, nextPath, depth, seedOrFunction, outerResults, permuteRequested, permuteOptimized, permutePosition, outputFormat);
-                    }
-                }
-                
-                else {
-                    emitMissing(nextPath, inputFormat === 'JSON' ? key : depth, permuteRequested, permuteOptimized, permutePosition, outerResults, outputFormat);
-                }
+            } else {
+                atEndOfJSONQuery = true;
             }
         } else {
-            if (key === '__null') {
-                key = null;
-            }
-            permuteRequested.push(key);
-            permuteOptimized.push(key);
-            emitMissing(nextPath, depth, permuteRequested, permuteOptimized, permutePosition, outerResults, outputFormat);
+            k = pathOrJSON[depth];
         }
         
-        if (!memo.done) {
+        
+        // BaseCase: we have hit the end of our query without finding a 'leaf' node, therefore emit missing.
+        if (atEndOfJSONQuery || !jsonQuery && depth === pathOrJSON.length) {
+            emitMissing(pathOrJSON, depth, requestedPath, optimizedPath, positionalInfo, outerResults, outputFormat);
+            return;
+        }
+        
+        var memo = {done: false};
+        var first = true;
+        var permutePosition = positionalInfo;
+        var permuteRequested = requestedPath;
+        var permuteOptimized = optimizedPath;
+        var asPathMap = outputFormat === 'PathMap';
+        var asJSONG = outputFormat === 'JSONG';
+        var asJSON = outputFormat === 'JSON';
+        var isKeySet = false;
+        var hasChildren = false;
+        depth++;
+
+        var key;
+        if (k && typeof k === 'object') {
+            memo.isArray = Array.isArray(k);
+            memo.arrOffset = 0;
+
             key = permuteKey(k, memo);
+            isKeySet = true;
+        } else {
+            key = k;
+            memo.done = true;
+        }
+
+        if (asJSON && isKeySet) {
+            permutePosition.push(depth - 1);
+        }
+
+        while (!memo.done || first) {
+            first = false;
+            if (!memo.done) {
+                permuteOptimized = [];
+                permuteRequested = [];
+                for (i = 0, len = requestedPath.length; i < len; i++) {
+                    permuteRequested[i] = requestedPath[i];
+                }
+                for (i = 0, len = optimizedPath.length; i < len; i++) {
+                    permuteOptimized[i] = optimizedPath[i];
+                }
+                if (asPathMap) {
+                    for (i = 0, len = permutePosition.length; i < len; i++) {
+                        permutePosition[i] = permutePosition[i];
+                    }
+                }
+            }
+            
+            var nextPathOrPathMap = jsonQuery ? pathOrJSON[key] : pathOrJSON;
+            if (jsonQuery && nextPathOrPathMap) {
+                // TODO: consider an array, types, and simple values.
+                if (typeof nextPathOrPathMap === 'object' && !Array.isArray(nextPathOrPathMap)) {
+                    hasChildren = Object.keys(nextPathOrPathMap).length > 0;
+                }
+            }
+
+            var next = curr[key];
+            if (next) {
+                var nType = next.$type;
+                var value = nType === 'sentinel' ? next.value : next;
+                var valueIsArray = Array.isArray(value);
+
+                if (key !== null) {
+                    permuteOptimized.push(key);
+                    permuteRequested.push(key);
+                }
+                if (asPathMap) {
+                    permutePosition.push(next.__generation);
+                }
+
+
+                if (jsonQuery && hasChildren || !jsonQuery && depth < pathOrJSON.length) {
+
+                    if (valueIsArray) {
+                        var ref = followReference(model, root, root, value);
+                        next = ref[0];
+                        var refPath = ref[1];
+
+                        permuteOptimized = [];
+                        for (i = 0, len = refPath.length; i < len; i++) {
+                            permuteOptimized[i] = refPath[i];
+                        }
+                    }
+                }
+            }
+            walk(model, root, next, nextPathOrPathMap, depth, seedOrFunction, permutePosition, outerResults, permuteOptimized, permuteRequested, inputFormat, outputFormat);
+
+            if (!memo.done) {
+                key = permuteKey(k, memo);
+            }
         }
     }
+
 }
 
 function simpleWalk(model, root, node, path, depth, results) {
@@ -232,11 +219,11 @@ function emitError(model, node, nodeValue, permuteRequested, permuteOptimized, o
     outerResults.optimizedPaths.push(permuteOptimized);
 }
 
-function emitMissing(path, depthOrMissingKey, permuteRequested, permuteOptimized, permutePosition, results, type) {
+function emitMissing(path, depth, permuteRequested, permuteOptimized, permutePosition, results, type) {
     var pathSlice;
     if (Array.isArray(path)) {
-        if (depthOrMissingKey < path.length) {
-            pathSlice = fastCopy(path, depthOrMissingKey);
+        if (depth < path.length) {
+            pathSlice = fastCopy(path, depth);
         } else {
             pathSlice = [];
         }
