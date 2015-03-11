@@ -30,12 +30,35 @@ var compile = [
     './tmp/framework/support.js',
     './tmp/framework/operations.js'
 ];
+var macroCompileFull = [
+    './framework/get/*.js',
+    './framework/get/paths/*.js',
+    './framework/get/pathMaps/*.js',
+    './framework/set/*.js',
+    './framework/set/paths/*.js',
+    './framework/set/pathMaps/*.js',
+    './framework/set/jsong/*.js',
+    './framework/call/call.js',
+    './framework/invalidate/*.js'
+];
+var macroCompilePartial = [
+    './framework/get/*.js',
+    './framework/get/paths/getPathsAsJSONG.js',
+    './framework/get/pathMaps/getPathMapsAsJSONG.js',
+    './framework/set/*.js',
+    './framework/set/paths/*.js',
+    './framework/set/pathMaps/*.js',
+    './framework/set/jsong/*.js',
+    './framework/call/call.js',
+    './framework/invalidate/*.js'
+];
 
 // build.macros -> |
 // build.framework ->
 
 gulp.task('build', ['clean.dev', 'build.node', 'build.tvui', 'build.akira', 'build.browser', 'build.raw']);
 gulp.task('build.dev', ['clean.dev', 'build.node']);
+gulp.task('build.reduce', ['clean.dev', 'build.node-reduce']);
 
 gulp.task('build.perf', function() {
     return gulp.
@@ -80,28 +103,22 @@ gulp.task('build.get.ops', function() {
             'src/lru.js',
             'src/support.js',
             'src/get-header.js',
-            'src/get.js'
+            'src/get.js',
+            'src/bridge.js'
         ]).
         pipe(concat({path: 'get.ops.js'})).
         pipe(gulp.dest('./tmp'));
 });
 
+gulp.task('build.operations-reduce', ['build.macros'], function() {
+    return gulp.
+        src(macroCompilePartial).
+        pipe(gulp.dest('tmp/framework/operations'));
+});
+
 gulp.task('build.operations', ['build.macros'], function() {
     return gulp.
-        src([
-            './framework/get/*.js',
-            './framework/get/paths/getPathsAsJSONG.js',
-            './framework/get/pathMaps/getPathMapsAsJSONG.js',
-            
-            './framework/set/*.js',
-            './framework/set/paths/*.js',
-            './framework/set/pathMaps/*.js',
-            './framework/set/jsong/*.js',
-            
-            './framework/call/call.js',
-            
-            './framework/invalidate/*.js'
-        ]).
+        src(macroCompileFull).
         pipe(gulp.dest('tmp/framework/operations'));
 });
 
@@ -112,7 +129,18 @@ gulp.task('build.compiled_operations', ['build.sweet', 'build.get.ops'], functio
         pipe(gulp.dest('tmp/framework'));
 });
 
+gulp.task('build.compiled_operations-reduce', ['build.sweet-reduce', 'build.get.ops'], function() {
+    return gulp.
+        src('./tmp/framework/compiled_operations/**.js').
+        pipe(concat({path: 'operations.js'})).
+        pipe(gulp.dest('tmp/framework'));
+});
+
 gulp.task('build.sweet', ['build.operations'], function() {
+    return distributeSweetCompile();
+});
+
+gulp.task('build.sweet-reduce', ['build.operations-reduce'], function() {
     return distributeSweetCompile();
 });
 
@@ -124,6 +152,11 @@ gulp.task('build.support', ['build.macros'], function() {
 });
 
 gulp.task('build.combine', ['build.compiled_operations', 'build.support'], function() {
+    return gulp.src(compile).
+        pipe(concat({path: 'Falcor.js'})).
+        pipe(gulp.dest('tmp'));
+});
+gulp.task('build.combine-reduce', ['build.compiled_operations-reduce', 'build.support'], function() {
     return gulp.src(compile).
         pipe(concat({path: 'Falcor.js'})).
         pipe(gulp.dest('tmp'));
@@ -153,6 +186,18 @@ gulp.task('build.support-only-replace', function() {
 });
 
 gulp.task('build.support-only', ['build.support-only-replace', 'build.support-only-compile'], function() {
+    return build('Falcor.js', './bin', function(src) {
+        return src.
+            pipe(surround({
+                prefix: '\
+var Rx = require(\'rx\');\n\
+var Observable = Rx.Observable;\n',
+                postfix: 'module.exports = falcor;'
+            }));
+    });
+});
+
+gulp.task('build.node-reduce', ['build.combine-reduce'], function() {
     return build('Falcor.js', './bin', function(src) {
         return src.
             pipe(surround({
