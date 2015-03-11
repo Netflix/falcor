@@ -11,7 +11,7 @@ function Model(options) {
     this._collectRatio = options.collectRatio || 0.75;
     this._scheduler = new falcor.ImmediateScheduler();
     this._request = new RequestQueue(this, this._scheduler);
-    this._errorSelector = options.errorSelector || Model.prototype._errorSelector;
+    this._errorSelector = options.errorSelector || null;
     this._cache = {};
     this._router = options.router;
     if(options.cache && typeof options.cache === "object") {
@@ -190,18 +190,18 @@ Model.prototype = {
 
     _getBoundContext         :       getBoundContext,
     _getBoundValue           :         getBoundValue,
-    
+
     _getValueSync            :          getValueSync,
     _setValueSync            :          setValueSync,
-    
-    _getPathsAsValues        :      F_getAsValues,
-    _getPathsAsJSON          :        F_getAsJSON,
-    _getPathsAsPathMap       :     F_getAsPathMap,
+
+    _getPathsAsValues        :      get(getAsValues),
+    _getPathsAsJSON          :        get(getAsJSON),
+    _getPathsAsPathMap       :     get(getAsPathMap),
     _getPathsAsJSONG         :       getPathsAsJSONG,
-    
-    _getPathMapsAsValues     :   F_getAsValues,
-    _getPathMapsAsJSON       :     F_getAsJSON,
-    _getPathMapsAsPathMap    :  F_getAsPathMap,
+
+    _getPathMapsAsValues     :      get(getAsValues),
+    _getPathMapsAsJSON       :        get(getAsJSON),
+    _getPathMapsAsPathMap    :     get(getAsPathMap),
     _getPathMapsAsJSONG      :    getPathMapsAsJSONG,
     
     _setPathsAsValues        :      setPathsAsValues,

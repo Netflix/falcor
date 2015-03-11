@@ -1,41 +1,47 @@
-function F_getAsValues(model, paths, onNext) {
-    var result = _output();
-    var inputFormat = Array.isArray(paths[0]) ? 'Paths' : 'JSON';
-
+function get(getFlavor) {
+    return function innerGet(model, paths, valuesOrOnNext, errorSelector) {
+        var results = _output();
+        var inputFormat = Array.isArray(paths[0]) ? 'Paths' : 'JSON';
+        
+        getFlavor(model, paths, valuesOrOnNext, inputFormat, results);
+        
+        if (errorSelector && results.errors.length) {
+            var e, errors = results.errors;
+            for (var i = 0, len = errors.length; i < len; i++) {
+                e = errors[i];
+                e.value = errorSelector(e.path, e.value);
+            }
+        }
+        
+        return results;
+    };
+}
+function getAsValues(model, paths, onNext, inputFormat, results) {
     for (var i = 0, len = paths.length; i < len; i++) {
-        walk(model, model._cache, model._cache, paths[0], 0, onNext, null, result, [], [], inputFormat, 'Values');
+        walk(model, model._cache, model._cache, paths[0], 0, onNext, null, results, [], [], inputFormat, 'Values');
     }
-
-    return result;
 }
 
-function F_getAsPathMap(model, paths, values) {
-    var result = _output();
-    var inputFormat = Array.isArray(paths[0]) ? 'Paths' : 'JSON';
+function getAsPathMap(model, paths, values, inputFormat, results) {
     var valueNode;
     if (values && values.length === 1) {
         valueNode = {json: values[0]};
-        result.values = [valueNode];
+        results.values = [valueNode];
         valueNode = valueNode.json;
     }
 
     for (var i = 0, len = paths.length; i < len; i++) {
-        walk(model, model._cache, model._cache, paths[i], 0, valueNode, [], result, [], [], inputFormat, 'PathMap');
+        walk(model, model._cache, model._cache, paths[i], 0, valueNode, [], results, [], [], inputFormat, 'PathMap');
     }
 
-    // is this correct?
-    if (result.requestedPaths.length === 0) {
-        result.values = [null];
+    if (results.requestedPaths.length === 0) {
+        results.values = [null];
     }
-
-    return result;
 }
 
-function F_getAsJSON(model, paths, values) {
-    var result = _output();
-    var inputFormat = Array.isArray(paths[0]) ? 'Paths' : 'JSON';
+function getAsJSON(model, paths, values, inputFormat, results) {
     if (values) {
-        result.values = values;
+        results.values = values;
     } else {
         values = [];
     }
@@ -45,14 +51,14 @@ function F_getAsJSON(model, paths, values) {
         if (values[i]) {
             valueNode = values[i];
         }
-        walk(model, model._cache, model._cache, paths[i], 0, valueNode, [], result, [], [], inputFormat, 'JSON');
+        walk(model, model._cache, model._cache, paths[i], 0, valueNode, [], results, [], [], inputFormat, 'JSON');
     }
 
-    if (result.requestedPaths.length === 0) {
-        result.values = [null];
+    if (results.requestedPaths.length === 0) {
+        results.values = [null];
     }
 
-    return result;
+    return results;
 }
 
 function _output() {
