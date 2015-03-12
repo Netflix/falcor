@@ -54,6 +54,7 @@ function getTestRunner(model, data, options) {
                 }
                 
                 // TODO: will verify the onNext values coming in for AsValues.
+                debugger;
                 var expectedCount = expected.values && expected.values.length;
                 var actualCount = 0;
                 if (suffix === 'AsValues') {
@@ -92,7 +93,7 @@ function getTestRunner(model, data, options) {
                 testRunner.validateOperation(op, expected, actual);
 
                 if (suffix === 'AsValues' && expectedCount > 0) {
-                    expect(expectedCount).to.equal(actualCount);
+                    expect(actualCount).to.equal(expectedCount);
                 }
             });
         });

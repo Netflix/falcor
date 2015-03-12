@@ -24,6 +24,8 @@ describe("Behavioral", function() {
     require("./value");
     require("./modes");
     require('./set');
+    require('./lru');
+    require('./hardlink');
     require("./invalidate.spec");
     
     it('should have two separate models with two separate caches.', function() {

@@ -18,6 +18,7 @@ var Cache = function() {
             "10": ["videos", 1234, "summary"],
             "11": ["lists", "expired-video-branch"],
             "12": ["lists", "future-expired-list"],
+            "inner-reference": ["movies", 1234],
             "sentinel": {
                 "$size": 52,
                 "$type": "sentinel",
@@ -287,7 +288,8 @@ var Cache = function() {
                 "$type": "sentinel",
                 "value": undefined
             }
-        }
+        },
+        movies: ['videos']
     };
 };
 
