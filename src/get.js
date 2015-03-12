@@ -27,6 +27,9 @@ function walk(model, root, curr, pathOrJSON, depth, seedOrFunction, positionalIn
         // Else we have found a value, emit the current position information.
         else {
             if (isExpired(curr)) {
+                if (!curr[__INVALIDATED]) {
+                    lruSplice(model, curr);
+                }
                 emitMissing(pathOrJSON, depth, requestedPath, optimizedPath, positionalInfo, outerResults, outputFormat);
             } else {
                 emitValues(model, curr, pathOrJSON, depth, seedOrFunction, outerResults, requestedPath, optimizedPath, positionalInfo, outputFormat);

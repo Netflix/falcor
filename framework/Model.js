@@ -14,19 +14,18 @@ function Model(options) {
     this._errorSelector = options.errorSelector || Model.prototype._errorSelector;
     this._cache = {};
     this._router = options.router;
-    if(options.cache && typeof options.cache === "object") {
-        this.setCache(options.cache);
-    }
-    this._retryCount = 3;
-}
-
-Model.prototype = {
-    _root: {
+    this._root = options.root || {
         expired: [],
         allowSync: false,
         unsafeMode: true
-    },
-    _path: [],
+    };
+    if (options.cache && typeof options.cache === "object") {
+        this.setCache(options.cache);
+    }
+    this._path = [];
+}
+
+Model.prototype = {
     _boxed: false,
     _progressive: false,
     _request: new falcor.RequestQueue(new falcor.ImmediateScheduler()),
@@ -144,20 +143,19 @@ Model.prototype = {
         }
         return this.clone(["_path", boundValue.path]);
     },
+    // TODO: This seems like a great place for optimizations
     clone: function() {
-        var self = this,
-            clone =  Array.prototype.slice.call(arguments).reduce(function(model, tuple) {
-                return (model[tuple[0]] = tuple[1]) && model || model;
-            }, Object.keys(self).reduce(function(model, key) {
-                return (model[key] = self[key]) && model || model;
-            }, new Model(
-                self._dataSource,
-                self._maxSize,
-                self._collectRatio,
-                self._errorSelector,
-                self._cache
-            )));
-        clone._root = self._root;
+        var self = this;
+        var clone = new Model();
+        
+        Object.keys(self).forEach(function(key) {
+            clone[key] = self[key];
+        });
+        
+        Array.prototype.slice.call(arguments).forEach(function(tuple) {
+            model[tuple[0]] = tuple[1];
+        });
+        
         return clone;
     },
     batch: function(schedulerOrDelay) {

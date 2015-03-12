@@ -135,6 +135,7 @@ function spliceExpired(query, output) {
         }).
         do(function() {
         }, function() {}, function() {
+            debugger
             expect(model._root.__head).to.be.not.ok;
             expect(model._root.__tail).to.be.not.ok;
         });
