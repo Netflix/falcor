@@ -247,7 +247,7 @@ var querys = {
 
 function singleItem(query, output) {
     var model = new Model({cache: {}});
-    return execTypeOrSelector(model, querys[1][query], output).
+    return testRunner.set(model, querys[1][query], output).
         do(function () {
             expect(model._root.__head.value).to.equal('i am 1');
             expect(model._root.__head.__next).to.be.not.ok;
@@ -258,9 +258,9 @@ function singleItem(query, output) {
 
 function doubleItem(query, output) {
     var model = new Model({cache: {}});
-    return execTypeOrSelector(model, querys[1][query], output).
+    return testRunner.set(model, querys[1][query], output).
         flatMap(function() {
-            return execTypeOrSelector(model, querys[2][query], output);
+            return testRunner.set(model, querys[2][query], output);
         }).
         do(function () {
             expect(model._root.__head.value).to.equal('i am 2');
@@ -274,12 +274,12 @@ function doubleItem(query, output) {
 
 function tripleItem(query, output) {
     var model = new Model({cache: {}});
-    return execTypeOrSelector(model, querys[1][query], output).
+    return testRunner.set(model, querys[1][query], output).
         flatMap(function() {
-            return execTypeOrSelector(model, querys[2][query], output);
+            return testRunner.set(model, querys[2][query], output);
         }).
         flatMap(function() {
-            return execTypeOrSelector(model, querys[3][query], output);
+            return testRunner.set(model, querys[3][query], output);
         }).
         do(function () {
             expect(model._root.__head.value).to.equal('i am 3');
@@ -291,17 +291,4 @@ function tripleItem(query, output) {
             expect(model._root.__head.__prev).to.be.not.ok;
             expect(model._root.__tail.__next).to.be.not.ok;
         });
-}
-
-function execTypeOrSelector(model, query, output) {
-    var obs;
-    if (output === 'selector') {
-        obs = model.set(query, noOp);
-    } else {
-        obs = model.set(query)[output]();
-    }
-
-    return obs;
-
-    return obs;
 }

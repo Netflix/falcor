@@ -6,7 +6,6 @@ module.exports = function() {
                     ["genreList", "0", "0", "summary"]
                 ]
             },
-
             setPaths: {
                 query: [
                     {
