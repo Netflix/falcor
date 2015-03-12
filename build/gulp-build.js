@@ -41,7 +41,7 @@ var macroCompileFull = [
     './framework/call/call.js',
     './framework/invalidate/*.js'
 ];
-var macroCompilePartial = [
+var macroCompileWithRecursiveSubstitutes = [
     './framework/get/*.js',
     './framework/get/paths/getPathsAsJSONG.js',
     './framework/get/pathMaps/getPathMapsAsJSONG.js',
@@ -112,7 +112,7 @@ gulp.task('build.get.ops', function() {
 
 gulp.task('build.operations-reduce', ['build.macros'], function() {
     return gulp.
-        src(macroCompilePartial).
+        src(macroCompileWithRecursiveSubstitutes).
         pipe(gulp.dest('tmp/framework/operations'));
 });
 
@@ -122,7 +122,7 @@ gulp.task('build.operations', ['build.macros'], function() {
         pipe(gulp.dest('tmp/framework/operations'));
 });
 
-gulp.task('build.compiled_operations', ['build.sweet', 'build.get.ops'], function() {
+gulp.task('build.compiled_operations', ['build.sweet'], function() {
     return gulp.
         src('./tmp/framework/compiled_operations/**.js').
         pipe(concat({path: 'operations.js'})).
