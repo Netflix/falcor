@@ -56,7 +56,7 @@ function getTestRunner(model, data, options) {
                 // For doing any preprocessing.
                 preCallFn(model, op, _.cloneDeep(query), count);
 
-                actual = model[op](model, _.cloneDeep(query), count, model._errorSelector);
+                actual = model[op](model, _.cloneDeep(query), count);
 
                 // validates that the results from the operation and the expected values are valid.
                 testRunner.validateData(expected, actual);

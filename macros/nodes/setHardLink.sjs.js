@@ -24,7 +24,7 @@ macro setHardLink {
             $types, $values, $sizes, $timestamps, $expires) (,) ...
         )
         if($node.exists()) {
-            $node.link($reference);
+            $node.link($reference)
         }
     }; }
     rule { } => { $[setHardLink] }

@@ -1,7 +1,7 @@
 module.exports = function() {
     return {
         directValue: {
-            getPaths: {
+            getPathSets: {
                 count: 0,
                 query: [["summary"]]
             },
@@ -45,7 +45,7 @@ module.exports = function() {
             }
         },
         toOnly: {
-            getPaths: {
+            getPathSets: {
                 query: [
                     [{to: 1}, "summary"]
                 ]
@@ -127,13 +127,13 @@ module.exports = function() {
             }
         },
         onReference: {
-            getPaths: {
+            getPathSets: {
                 query: [
                     ["0", "summary"]
                 ]
             },
 
-            setPaths: {
+            setPathSets: {
                 query: [
                     {
                         "path": ["0", "summary"],

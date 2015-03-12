@@ -45,7 +45,7 @@ function execute(useNewModel) {
                 runGetTests(getModel(useNewModel), Values().errorBranchSummary, {useNewModel: useNewModel});
             });
             describe("should get an error directly with null", function () {
-                runGetTests(getModel(useNewModel), Values().errorBranchSummary, {useNewModel: useNewModel});
+                runGetTests(getModel(useNewModel), Values().genreListErrorNull, {useNewModel: useNewModel});
             });
         });
         describe("Missing", function() {
@@ -63,10 +63,10 @@ function execute(useNewModel) {
             describe("should report a leaf expired by 0 path.", function() {
                 runGetTests(getModel(useNewModel), Values().expiredLeafNode0, {useNewModel: useNewModel});
             });
-            describe("should report a branch expired by timestamp path.", function() {
+            xdescribe("should report a branch expired by timestamp path.", function() {
                 runGetTests(getModel(useNewModel), Values().expiredBranchNodeTimestamp, {useNewModel: useNewModel});
             });
-            describe("should report a branch expired by 0 path.", function() {
+            xdescribe("should report a branch expired by 0 path.", function() {
                 runGetTests(getModel(useNewModel), Values().expiredBranchNode0, {useNewModel: useNewModel});
             });
         });
@@ -118,7 +118,7 @@ function execute(useNewModel) {
             });
         });
         describe("Expired", function() {
-            describe("should report a missing requested path when branch of reference is expired.", function() {
+            xdescribe("should report a missing requested path when branch of reference is expired.", function() {
                 runGetTests(getModel(useNewModel), References().referenceBranchIsExpired, {useNewModel: useNewModel});
             });
             describe("should report a missing requested path when reference is expired.", function() {

@@ -37,7 +37,7 @@ describe("Special Cases", function() {
             }
         });
         
-        model._getPathsAsValues(model, get, function(x) {
+        model._getPathSetsAsValues(model, get, function(x) {
             expect(x).to.deep.equals({
                 value: {
                     "title": "Running Man",

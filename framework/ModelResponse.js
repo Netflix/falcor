@@ -1,7 +1,6 @@
 var ModelResponse = (function(falcor) {
     
-    var Observable  = falcor.Observable,
-        valuesMixin = { format: { value: "AsValues"  } },
+    var valuesMixin = { format: { value: "AsValues"  } },
         jsonMixin   = { format: { value: "AsPathMap" } },
         jsongMixin  = { format: { value: "AsJSONG"   } };
     
@@ -23,7 +22,7 @@ var ModelResponse = (function(falcor) {
         });
     };
     
-    ModelResponse.prototype = Observable.create(noop);
+    ModelResponse.prototype = falcor.Observable.create(noop);
     ModelResponse.prototype.format = "AsPathMap";
     ModelResponse.prototype.toPathValues = function() {
         return mixin(this, valuesMixin);

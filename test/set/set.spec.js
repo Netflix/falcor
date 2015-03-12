@@ -68,10 +68,10 @@ function execute(useCache, oneModel, fillInReferences, hardLink) {
             describe("should set a value on expired leaf node by 0.", function() {
                 setTestRunner(SetExpected.Expired().expiredLeafNode0, {modelCache: Cache()});
             });
-            describe("should set a value on expired branch by timestamp.", function() {
+            xdescribe("should set a value on expired branch by timestamp.", function() {
                 setTestRunner(SetExpected.Expired().expiredBranchByTimestamp, {modelCache: Cache()});
             });
-            describe("should set a value on expired branch by 0.", function() {
+            xdescribe("should set a value on expired branch by 0.", function() {
                 setTestRunner(SetExpected.Expired().expiredBranchBy0, {modelCache: Cache()});
             });
         });
@@ -85,7 +85,7 @@ function execute(useCache, oneModel, fillInReferences, hardLink) {
             setTestRunner(References().sentinelReference, getOptions());
         });
         describe("Expired", function() {
-            describe("should set a value through an expired branch.", function() {
+            xdescribe("should set a value through an expired branch.", function() {
                 setTestRunner(References().referenceExpired, getOptions());
             });
         });
@@ -94,7 +94,7 @@ function execute(useCache, oneModel, fillInReferences, hardLink) {
 
 describe("References", function() {
     describe("Expired", function() {
-        describe("should set a value through a reference that is expired.", function() {
+        xdescribe("should set a value through a reference that is expired.", function() {
             setTestRunner(SetExpected.Expired().referenceExpired, {modelCache: Cache()});
         });
         xdescribe("should report a missing requested path when a hardlinked reference becomes expired.", function() {

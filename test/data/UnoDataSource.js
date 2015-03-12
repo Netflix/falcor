@@ -13,7 +13,7 @@ UnoDataSource.prototype = {
             var out = [{}];
             var error;
             try {
-                results = self.model._getPathsAsJSONG(self.model, paths.slice(0, 1), out).values;
+                results = self.model._getPathSetsAsJSONG(self.model, paths.slice(0, 1), out).values;
             } catch(e) {
                 error = e;
                 results = null;

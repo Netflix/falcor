@@ -64,7 +64,7 @@ function fillInReferences(model, pathTo, prefix) {
 
                 // fills in reference if dne
                 // Also considers
-                !modelC && model._setPathsAsValues(model, [{path: prefix.concat(followed), value: value}]);
+                !modelC && model._setPathSetsAsValues(model, [{path: prefix.concat(followed), value: value}]);
                 fillInReferences(model, pathTo.slice(i + 1), c);
                 return;
             }
@@ -74,7 +74,7 @@ function fillInReferences(model, pathTo, prefix) {
     // Finally put in the final object into the cache so that we can set it while following references.
     // since a reference that points to an empty spot in the cache will be considered a "miss"
     // If something is there then it will put nothing there.
-    (followReference(cache, prefix.concat(followed)) === undefined) && model._setPathsAsValues(model, [{path: prefix.concat(followed), value: {$type: "sentinel", value: null}}]);
+    (followReference(cache, prefix.concat(followed)) === undefined) && model._setPathSetsAsValues(model, [{path: prefix.concat(followed), value: {$type: "sentinel", value: null}}]);
 }
 
 function setTestRunner(data, options) {
@@ -111,7 +111,7 @@ function setTestRunner(data, options) {
                             var paths = q.path || q.paths || jsong.__Internals.buildQueries(removeLeafs(_.cloneDeep(q)));
                             options.fillReferences && fillInReferences(model, paths);
                             if (options.hardLink) {
-                                model._getPathsAsValues(model, [paths]);
+                                model._getPathSetsAsValues(model, [paths]);
                             }
                         });
                     }
@@ -121,7 +121,7 @@ function setTestRunner(data, options) {
                     // For doing any preprocessing.
                     preCallFn(model, op, _.cloneDeep(query), count);
 
-                    actual = model[op](model, _.cloneDeep(query), count, model._errorSelector);
+                    actual = model[op](model, _.cloneDeep(query), count);
 
                     // validates that the results from the operation and the expected values are valid.
                     testRunner.validateData(expected, actual);
@@ -133,7 +133,7 @@ function setTestRunner(data, options) {
                     query = data['getPaths'];
                     if (query) {
                         var suffixMessage = 'Confirming that ' + op + ' has correctly taken place.';
-                        op = "_getPaths" + suffix;
+                        op = "_getPathSets" + suffix;
                         count = getCountArray(data[prefix]);
                         actual = model[op](model, _.cloneDeep(query), count, model._errorSelector);
 

@@ -1,3 +1,3 @@
 macro undefined {
-    rule { } => { void 0 }
+    rule { } => { void(0) }
 }

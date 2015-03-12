@@ -27,7 +27,7 @@ var compile = [
     "./framework/Falcor.js",
     "./tmp/framework/Model.js",
     "./tmp/framework/support.js",
-    "./tmp/framework/operations.js"
+    "./tmp/framework/compiled_operations.js"
 ];
 
 // build.macros -> |
@@ -38,14 +38,19 @@ gulp.task("build.dev", ["clean.dev", "build.node"]);
 
 gulp.task("build.macros", ["clean.dev"], function() {
     return gulp.src([
-            "./macros/*.js",
+            // "./macros/*.sjs.js",
             "./macros/values/*.sjs.js",
-            "./macros/mixins/*.js",
-            "./macros/paths/*.js",
-            "./macros/keys/*.js",
-            "./macros/nodes/*.js",
-            "./macros/traversal/*.js",
-            "./macros/operations/*.js",
+            // "./macros/mixins/*.js",
+            // "./macros/paths/*.js",
+            // "./macros/keys/*.js",
+            // "./macros/nodes/*.js",
+            // "./macros/traversal/*.js",
+            // "./macros/operations/*.js",
+            "./functional-macros/*.js",
+            "./functional-macros/keys/*.js",
+            "./functional-macros/mixins/*.js",
+            "./functional-macros/nodes/*.js",
+            "./functional-macros/traversal/*.js",
         ]).
         pipe(concat({path: "macros.sjs.js"})).
         pipe(gulp.dest("tmp/framework"));
@@ -54,25 +59,34 @@ gulp.task("build.macros", ["clean.dev"], function() {
 gulp.task("build.operations", ["build.macros"], function() {
     return gulp.
         src([
-            "./framework/get/*.js",
-            "./framework/get/paths/*.js",
-            "./framework/get/pathMaps/*.js",
+            "./functional-macros/operations/get/paths/*.js",
+            "./functional-macros/operations/get/pathMaps/*.js",
+            "./functional-macros/operations/set/paths/*.js",
+            "./functional-macros/operations/set/pathMaps/*.js",
+            "./functional-macros/operations/set/jsong/*.js",
             
-            "./framework/set/*.js",
-            "./framework/set/paths/*.js",
-            "./framework/set/pathMaps/*.js",
-            "./framework/set/jsong/*.js",
+            // "./framework/get/*.js",
+            // "./framework/get/paths/*.js",
+            // "./framework/get/pathMaps/*.js",
             
-            "./framework/call/call.js",
+            // "./framework/set/*.js",
+            // "./framework/set/paths/*.js",
+            // "./framework/set/pathMaps/*.js",
+            // "./framework/set/jsong/*.js",
             
-            "./framework/invalidate/*.js",
+            // "./framework/call/call.js",
+            
+            // "./framework/invalidate/*.js",
         ]).
-        pipe(gulp.dest("tmp/framework/operations"));
+        pipe(gulp.dest("tmp/framework/operations")).
+        pipe(concat({path: "operations.js"})).
+        pipe(gulp.dest("tmp/framework"));
 });
+
 gulp.task("build.compiled_operations", ["build.sweet"], function() {
     return gulp.
         src("./tmp/framework/compiled_operations/**.js").
-        pipe(concat({path: "operations.js"})).
+        pipe(concat({path: "compiled_operations.js"})).
         pipe(gulp.dest("tmp/framework"));
 });
 

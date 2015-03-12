@@ -1,7 +1,7 @@
 module.exports = function() {
     return {
         toOnly: {
-            setPaths: {
+            setPathSets: {
                 count: 2,
                 query: [{
                     "path": ["v", {to:1}, "s"],
@@ -91,16 +91,10 @@ module.exports = function() {
                 values: [{
                     json: {
                         "v": {
-                            __key: "v",
-                            __generation: 0,
                             "0": {
-                                __key: "0",
-                                __generation: 0,
                                 "s": "Arnold"
                             },
                             "1": {
-                                __key: "1",
-                                __generation: 0,
                                 "s": "Arnold"
                             }
                         }
@@ -109,7 +103,7 @@ module.exports = function() {
             }
         },
         fromOnly: {
-            setPaths: {
+            setPathSets: {
                 query: [{
                     "path": ["v", {from:0}, "s"],
                     "value": "Arnold"
@@ -156,11 +150,7 @@ module.exports = function() {
                 values: [{
                     json: {
                         "v": {
-                            __key: "v",
-                            __generation: 0,
                             "0": {
-                                __key: "0",
-                                __generation: 0,
                                 "s": "Arnold"
                             }
                         }
@@ -169,7 +159,7 @@ module.exports = function() {
             }
         },
         fromAndTo: {
-            setPaths: {
+            setPathSets: {
                 count: 3,
                 query: [{
                     "path": ["v", {from:-1, to:1}, "s"],
@@ -238,21 +228,13 @@ module.exports = function() {
                 values: [{
                     json: {
                         "v": {
-                            __key: "v",
-                            __generation: 0,
                             "-1": {
-                                __key: "-1",
-                                __generation: 0,
                                 "s": "Arnold"
                             },
                             "0": {
-                                __key: "0",
-                                __generation: 0,
                                 "s": "Arnold"
                             },
                             "1": {
-                                __key: "1",
-                                __generation: 0,
                                 "s": "Arnold"
                             }
                         }
@@ -261,7 +243,7 @@ module.exports = function() {
             }
         },
         fromAndLength: {
-            setPaths: {
+            setPathSets: {
                 query: [{
                     "path": ["v", {from:-1, length:3}, "s"],
                     "value": "Arnold"
@@ -329,21 +311,13 @@ module.exports = function() {
                 values: [{
                     json: {
                         "v": {
-                            __key: "v",
-                            __generation: 0,
                             "-1": {
-                                __key: "-1",
-                                __generation: 0,
                                 "s": "Arnold"
                             },
                             "0": {
-                                __key: "0",
-                                __generation: 0,
                                 "s": "Arnold"
                             },
                             "1": {
-                                __key: "1",
-                                __generation: 0,
                                 "s": "Arnold"
                             }
                         }
@@ -352,7 +326,7 @@ module.exports = function() {
             }
         },
         toOnlyLeaf: {
-            setPaths: {
+            setPathSets: {
                 count: 2,
                 query: [{
                     "path": ["v", {to:1}],
@@ -430,8 +404,6 @@ module.exports = function() {
                 values: [{
                     json: {
                         "v": {
-                            __key: "v",
-                            __generation: 0,
                             "0": "Arnold",
                             "1": "Arnold"
                         }
@@ -440,7 +412,7 @@ module.exports = function() {
             }
         },
         fromOnlyLeaf: {
-            setPaths: {
+            setPathSets: {
                 query: [{
                     "path": ["v", {from:0}],
                     "value": "Arnold"
@@ -485,8 +457,6 @@ module.exports = function() {
                 values: [{
                     json: {
                         "v": {
-                            __key: "v",
-                            __generation: 0,
                             "0": "Arnold"
                         }
                     }
@@ -494,7 +464,7 @@ module.exports = function() {
             }
         },
         fromAndToLeaf: {
-            setPaths: {
+            setPathSets: {
                 count: 3,
                 query: [{
                     "path": ["v", {from:-1, to:1}],
@@ -557,8 +527,6 @@ module.exports = function() {
                 values: [{
                     json: {
                         "v": {
-                            __key: "v",
-                            __generation: 0,
                             "-1": "Arnold",
                             "0": "Arnold",
                             "1": "Arnold"
@@ -568,7 +536,7 @@ module.exports = function() {
             }
         },
         fromAndLengthLeaf: {
-            setPaths: {
+            setPathSets: {
                 query: [{
                     "path": ["v", {from:-1, length:3}],
                     "value": "Arnold"
@@ -630,8 +598,6 @@ module.exports = function() {
                 values: [{
                     json: {
                         "v": {
-                            __key: "v",
-                            __generation: 0,
                             "-1": "Arnold",
                             "0": "Arnold",
                             "1": "Arnold"
