@@ -1236,6 +1236,68 @@ module.exports = function() {
                 }]
             }
         },
+        innerReference: {
+            getPathMaps: {
+                query: [{
+                    "genreList": {
+                        'inner-reference': {
+                            "summary": null
+                        }
+                    }
+                }]
+            },
+            optimizedPaths: [['movies']],
+            getPaths: {
+                query: [
+                    ["genreList", "inner-reference", 'summary']
+                ]
+            },
+
+            AsValues: {
+                values: [{
+                    "path": ["genreList", "inner-reference", null],
+                    "value": ['videos']
+                }]
+            },
+
+            AsJSON: {
+                values: [{
+                    genreList: {
+                        'inner-reference': {
+                            __null: ['videos']
+                        }
+                    }
+                }]
+            },
+
+            AsJSONG: {
+                values: [{
+                    jsong: {
+                        genreList: {
+                            'inner-reference': ['movies', 1234]
+                        },
+                        movies: ['videos']
+                    },
+                    paths: [["genreList", "inner-reference", null]]
+                }]
+            },
+
+            AsPathMap: {
+                values: [{
+                    json: {
+                        genreList: {
+                            __key: 'genreList',
+                            __generation: 0,
+                            'inner-reference': {
+                                __key: 'inner-reference',
+                                __generation: 0,
+                                __null: ['videos']
+                            }
+                        }
+                    }
+                }]
+            }
+        },
         errorReference: {
             optimizedPaths: [
                 ["lists", "error-list"]

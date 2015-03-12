@@ -87,6 +87,9 @@ function execute(useNewModel) {
         describe("should get a value through references when the last key is null", function() {
             runGetTests(getModel(useNewModel), References().referenceLeafNode, {useNewModel: useNewModel});
         });
+        describe("should never follow an inner reference, but short-circuit.", function() {
+            runGetTests(getModel(useNewModel), References().innerReference, {useNewModel: useNewModel});
+        });
         describe("Sentinels", function() {
             describe("should get a sentinel reference", function() {
                 runGetTests(getModel(useNewModel), References().sentinelReference, {useNewModel: useNewModel});

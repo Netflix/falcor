@@ -39,6 +39,7 @@ module.exports = function() {
     var obs = readDir(path.join(__dirname, "../tmp/framework/operations")).
         selectMany(function(files) {
             var outArray = files.
+                sort().
                 reduce(function(acc, command) {
                     var curr = acc[acc.length - 1];
                     if (curr.length > 3) {
