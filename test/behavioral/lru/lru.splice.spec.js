@@ -79,7 +79,7 @@ describe('Splice', function() {
             });
         });
         describe('AsJSON', function() {
-            it('should splice expired item.', function(done) {
+            it.only('should splice expired item.', function(done) {
                 spliceExpired({expired: null}, 'toJSON').
                     subscribe(noOp, done, done);
             });
@@ -102,22 +102,22 @@ describe('Splice', function() {
 });
 
 function get(model, query, output) {
-    var obs = model.
-        get(query, output === 'selector' ? noOp : undefined);
-
-    if (output !== 'selector') {
-        obs = obs[output]();
+    var obs;
+    if (output === 'selector') {
+        obs = model.get(query, noOp);
+    } else {
+        obs = model.get(query)[output]();
     }
 
     return obs;
 }
 
 function set(model, query, output) {
-    var obs = model.
-        set(query, output === 'selector' ? noOp : undefined);
-
-    if (output !== 'selector') {
-        obs = obs[output]();
+    var obs;
+    if (output === 'selector') {
+        obs = model.set(query, noOp);
+    } else {
+        obs = model.set(query)[output]();
     }
 
     return obs;
@@ -149,6 +149,7 @@ function spliceExpired(query, output) {
     }]);
     expect(model._root.__head.value).to.equal('hello');
 
+    debugger
     return Rx.Observable.
         return('').
         delay(100).
@@ -156,6 +157,9 @@ function spliceExpired(query, output) {
             return get(model, query, output);
         }).
         do(function() {
+            debugger
+        }, function() {}, function() {
+            debugger;
             expect(model._root.__head).to.be.not.ok;
             expect(model._root.__tail).to.be.not.ok;
         });

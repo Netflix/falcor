@@ -294,12 +294,14 @@ function tripleItem(query, output) {
 }
 
 function execTypeOrSelector(model, query, output) {
-    var obs = model.
-        set(query, output === 'selector' ? noOp : undefined);
-
-    if (output !== 'selector') {
-        obs = obs[output]();
+    var obs;
+    if (output === 'selector') {
+        obs = model.set(query, noOp);
+    } else {
+        obs = model.set(query)[output]();
     }
-    
+
+    return obs;
+
     return obs;
 }
