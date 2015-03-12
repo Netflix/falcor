@@ -308,9 +308,9 @@ gulp.task('prod.tvui', ['build.combine'], function() {
 function build(name, dest, addBuildStep, extraSrc) {
     extraSrc = extraSrc || [];
     var src = gulp.
-        src([
+        src(extraSrc.concat([
             './tmp/Falcor.js'
-        ].concat(extraSrc)).
+        ])).
         pipe(concat({path: 'Falcor.js'}));
     return addBuildStep(src).
         pipe(license('Apache', licenseInfo)).
