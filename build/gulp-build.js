@@ -26,6 +26,12 @@ var support = [
 var compile = [
     './framework/Falcor.js',
     './tmp/framework/Model.js',
+    './tmp/framework/support.js',
+    './tmp/framework/operations.js'
+];
+var compileWithGetOps = [
+    './framework/Falcor.js',
+    './tmp/framework/Model.js',
     './tmp/framework/get.ops.js',
     './tmp/framework/support.js',
     './tmp/framework/operations.js'
@@ -157,7 +163,7 @@ gulp.task('build.combine', ['build.compiled_operations', 'build.support'], funct
         pipe(gulp.dest('tmp'));
 });
 gulp.task('build.combine-reduce', ['build.compiled_operations-reduce', 'build.support'], function() {
-    return gulp.src(compile).
+    return gulp.src(compileWithGetOps).
         pipe(concat({path: 'Falcor.js'})).
         pipe(gulp.dest('tmp'));
 });
@@ -172,8 +178,14 @@ gulp.task('build.akira', ['build.combine'], function() {
     });
 });
 
-gulp.task('build.support-only-compile', ['build.get.ops', 'build.support-only-replace'], function() {
+gulp.task('build.support-only-compile', ['build.support-only-replace'], function() {
     return gulp.src(compile).
+        pipe(concat({path: 'Falcor.js'})).
+        pipe(gulp.dest('tmp'));
+});
+
+gulp.task('build.support-only-compile-reduce', ['build.get.ops', 'build.support-only-replace'], function() {
+    return gulp.src(compileWithGetOps).
         pipe(concat({path: 'Falcor.js'})).
         pipe(gulp.dest('tmp'));
 });
@@ -195,6 +207,18 @@ var Observable = Rx.Observable;\n',
                 postfix: 'module.exports = falcor;'
             }));
     });
+});
+
+gulp.task('build.support-only-reduce', ['build.support-only-replace', 'build.support-only-compile-reduce'], function() {
+    return build('Falcor.js', './bin', function(src) {
+        return src.
+            pipe(surround({
+                prefix: '\
+var Rx = require(\'rx\');\n\
+var Observable = Rx.Observable;\n',
+                postfix: 'module.exports = falcor;'
+            }));
+    }, ['./tmp/get.ops.js']);
 });
 
 gulp.task('build.node-reduce', ['build.combine-reduce'], function() {
@@ -281,12 +305,12 @@ gulp.task('prod.tvui', ['build.combine'], function() {
     });
 });
 
-function build(name, dest, addBuildStep) {
+function build(name, dest, addBuildStep, extraSrc) {
+    extraSrc = extraSrc || [];
     var src = gulp.
         src([
-            './tmp/Falcor.js',
-            './tmp/get.ops.js'
-        ]).
+            './tmp/Falcor.js'
+        ].concat(extraSrc)).
         pipe(concat({path: 'Falcor.js'}));
     return addBuildStep(src).
         pipe(license('Apache', licenseInfo)).
