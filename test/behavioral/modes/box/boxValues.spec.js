@@ -13,7 +13,7 @@ var expect = chai.expect;
 var noOp = function() {};
 var _ = require('lodash');
 
-describe.only('Box Only', function() {
+describe('Box Only', function() {
     var pathValue = ['videos', 1234, 'summary'];
     var jsonValue = {videos: {1234: {summary: null}}};
     var pathSentinel = ['videos', 'sentinel', 'summary'];
