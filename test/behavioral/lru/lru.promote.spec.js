@@ -247,7 +247,7 @@ var querys = {
 
 function singleItem(query, output) {
     var model = new Model({cache: {}});
-    return testRunner.set(model, querys[1][query], output).
+    return testRunner.set(model, _.cloneDeep(querys[1][query]), output).
         do(function () {
             expect(model._root.__head.value).to.equal('i am 1');
             expect(model._root.__head.__next).to.be.not.ok;
@@ -258,9 +258,9 @@ function singleItem(query, output) {
 
 function doubleItem(query, output) {
     var model = new Model({cache: {}});
-    return testRunner.set(model, querys[1][query], output).
+    return testRunner.set(model, _.cloneDeep(querys[1][query]), output).
         flatMap(function() {
-            return testRunner.set(model, querys[2][query], output);
+            return testRunner.set(model, _.cloneDeep(querys[2][query]), output);
         }).
         do(function () {
             expect(model._root.__head.value).to.equal('i am 2');
@@ -274,12 +274,12 @@ function doubleItem(query, output) {
 
 function tripleItem(query, output) {
     var model = new Model({cache: {}});
-    return testRunner.set(model, querys[1][query], output).
+    return testRunner.set(model, _.cloneDeep(querys[1][query]), output).
         flatMap(function() {
-            return testRunner.set(model, querys[2][query], output);
+            return testRunner.set(model, _.cloneDeep(querys[2][query]), output);
         }).
         flatMap(function() {
-            return testRunner.set(model, querys[3][query], output);
+            return testRunner.set(model, _.cloneDeep(querys[3][query]), output);
         }).
         do(function () {
             expect(model._root.__head.value).to.equal('i am 3');

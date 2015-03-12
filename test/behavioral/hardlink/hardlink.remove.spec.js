@@ -12,6 +12,7 @@ var Complex = Expected.Complex;
 var Values = Expected.Values;
 var Bound = Expected.Bound;
 var noOp = function() {};
+var _ = require('lodash');
 
 describe('Removing', function() {
     var getPath = ['genreList', 0, 0, 'summary'];
@@ -227,9 +228,9 @@ function setExpireyAndGet(query, output, get) {
         }).
         flatMap(function() {
             if (get) {
-                return testRunner.get(model, query, output);
+                return testRunner.get(model, _.cloneDeep(query), output);
             }
-            return testRunner.set(model, query, output);
+            return testRunner.set(model, _.cloneDeep(query), output);
         }).
         do(noOp, noOp, function() {
             var lhs = model._cache.genreList[0];
@@ -249,7 +250,7 @@ function getTest(query, output) {
     expect(rhs.__refs_length).to.not.be.ok;
     expect(lhs.__context).to.not.be.ok;
 
-    return testRunner.get(model, query, output).
+    return testRunner.get(model, _.cloneDeep(query), output).
         do(noOp, noOp, function() {
             debugger;
             expect(lhs.__ref_index).to.equal(0);
@@ -264,7 +265,7 @@ function setTest(query, output) {
     var lhs = model._cache.genreList[0];
     var rhs = model._cache.lists.abcd;
 
-    return testRunner.set(model, query, output).
+    return testRunner.set(model, _.cloneDeep(query), output).
         do(noOp, noOp, function() {
             debugger;
             expect(lhs.__ref_index).to.not.be.ok;

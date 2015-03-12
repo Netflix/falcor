@@ -106,7 +106,7 @@ function spliceOverwrite(query, output) {
     return model.
         set({ values: 'you are terminated' }).
         flatMap(function() {
-            return testRunner.set(model, query, output);
+            return testRunner.set(model, _.cloneDeep(query), output);
         }).
         do(function() {
             expect(model._root.__head.value).to.equal('overwrite');
@@ -131,7 +131,7 @@ function spliceExpired(query, output) {
         return('').
         delay(100).
         flatMap(function() {
-            return testRunner.get(model, query, output);
+            return testRunner.get(model, _.cloneDeep(query), output);
         }).
         do(function() {
         }, function() {}, function() {

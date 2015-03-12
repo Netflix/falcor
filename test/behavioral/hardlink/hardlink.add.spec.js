@@ -12,6 +12,7 @@ var Complex = Expected.Complex;
 var Values = Expected.Values;
 var Bound = Expected.Bound;
 var noOp = function() {};
+var _ = require('lodash');
 
 describe('Adding', function() {
     var getPath = ['genreList', 0, 0, 'summary'];
@@ -101,7 +102,7 @@ function getTest(query, output) {
     expect(rhs.__refs_length).to.not.be.ok;
     expect(lhs.__context).to.not.be.ok;
     
-    return testRunner.get(model, query, output).
+    return testRunner.get(model, _.cloneDeep(query), output).
         do(noOp, noOp, function() {
             debugger;
             expect(lhs.__ref_index).to.equal(0);
@@ -120,7 +121,7 @@ function setTest(query, output) {
     expect(rhs.__refs_length).to.not.be.ok;
     expect(lhs.__context).to.not.be.ok;
 
-    return testRunner.set(model, query, output).
+    return testRunner.set(model, _.cloneDeep(query), output).
         do(noOp, noOp, function() {
             debugger;
             expect(lhs.__ref_index).to.equal(0);
