@@ -1261,11 +1261,7 @@ module.exports = function() {
 
             AsJSON: {
                 values: [{
-                    genreList: {
-                        'inner-reference': {
-                            __null: ['videos']
-                        }
-                    }
+                    json: ['videos']
                 }]
             },
 

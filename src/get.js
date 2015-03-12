@@ -6,21 +6,31 @@ function walk(model, root, curr, pathOrJSON, depth, seedOrFunction, positionalIn
         return;
     }
     
-    var currType = curr.type;
-    var currValue = currType === 'sentinel' ? curr.value : curr;
+    var currType = curr[$TYPE];
+    var currValue = currType === SENTINEL ? curr.value : curr;
+    var atLeaf = currType || Array.isArray(currValue);
+    
     positionalInfo = positionalInfo || [];
 
     // The Base Cases.  There is a type, therefore we have hit a 'leaf' node.
-    if (currType) {
+    if (atLeaf) {
+
+        if (fromReference) {
+            requestedPath.push(null);
+        }
         
         // TODO: Expired
-        if (currType === 'error') {
-            emitError(model, curr, currValue, requestedPath, optimizedPath, outerResults, fromReference);
+        if (currType === ERROR) {
+            emitError(model, curr, currValue, requestedPath, optimizedPath, outerResults);
         } 
         
         // Else we have found a value, emit the current position information.
         else {
-            emitValues(model, curr, pathOrJSON, depth, seedOrFunction, outerResults, requestedPath, optimizedPath, positionalInfo, outputFormat);
+            if (isExpired(curr)) {
+                emitMissing(pathOrJSON, depth, requestedPath, optimizedPath, positionalInfo, outerResults, outputFormat);
+            } else {
+                emitValues(model, curr, pathOrJSON, depth, seedOrFunction, outerResults, requestedPath, optimizedPath, positionalInfo, outputFormat);
+            }
         }
     }
 
@@ -70,6 +80,7 @@ function walk(model, root, curr, pathOrJSON, depth, seedOrFunction, positionalIn
         var asJSON = outputFormat === 'JSON';
         var isKeySet = false;
         var hasChildren = false;
+        fromReference = false;
         depth++;
 
         var key;
@@ -115,24 +126,25 @@ function walk(model, root, curr, pathOrJSON, depth, seedOrFunction, positionalIn
             }
 
             var next = curr[key];
+
+            if (key !== null) {
+                permuteOptimized.push(key);
+                permuteRequested.push(key);
+            }
+            
             if (next) {
-                var nType = next.$type;
-                var value = nType === 'sentinel' ? next.value : next;
+                var nType = next[$TYPE];
+                var value = nType === SENTINEL ? next.value : next;
                 var valueIsArray = Array.isArray(value);
-
-                if (key !== null) {
-                    permuteOptimized.push(key);
-                    permuteRequested.push(key);
-                }
                 if (asPathMap) {
-                    permutePosition.push(next.__generation);
+                    permutePosition.push(next[__GENERATION]);
                 }
-
 
                 if (jsonQuery && hasChildren || !jsonQuery && depth < pathOrJSON.length) {
 
                     if (valueIsArray) {
                         var ref = followReference(model, root, root, value);
+                        fromReference = true;
                         next = ref[0];
                         var refPath = ref[1];
 
@@ -143,7 +155,7 @@ function walk(model, root, curr, pathOrJSON, depth, seedOrFunction, positionalIn
                     }
                 }
             }
-            walk(model, root, next, nextPathOrPathMap, depth, seedOrFunction, permutePosition, outerResults, permuteOptimized, permuteRequested, inputFormat, outputFormat);
+            walk(model, root, next, nextPathOrPathMap, depth, seedOrFunction, permutePosition, outerResults, permuteOptimized, permuteRequested, inputFormat, outputFormat, fromReference);
 
             if (!memo.done) {
                 key = permuteKey(k, memo);
@@ -208,10 +220,7 @@ function simpleWalk(model, root, node, path, depth, results) {
     }
 }
 
-function emitError(model, node, nodeValue, permuteRequested, permuteOptimized, outerResults, followedReference) {
-    if (followedReference) {
-        permuteRequested.push(null);
-    }
+function emitError(model, node, nodeValue, permuteRequested, permuteOptimized, outerResults) {
     
     outerResults.errors.push({path: fastCopy(permuteRequested), value: copyCacheObject(nodeValue)});
     lruPromote(model, node);
@@ -355,10 +364,11 @@ function followReference(model, root, node, reference) {
             var value = type === 'sentinel' ? next.value : next;
 
             if (depth < reference.length) {
-                if (type) {
+                if (type || Array.isArray(value)) {
                     if (isExpired(next)) {
                         expired = true;
                     }
+                    node = next;
                     break;
                 }
 
@@ -386,6 +396,14 @@ function followReference(model, root, node, reference) {
             }
         }
         break;
+    }
+    
+    if (depth < reference.length) {
+        var ref = [];
+        for (var i = 0; i < depth; i++) {
+            ref[i] = reference[i];
+        }
+        reference = ref;
     }
 
     return [expired ? undefined : node, reference];

@@ -65,8 +65,10 @@ function getTestRunner(model, data, options) {
                         debugger;
                         if (vals && vals.length) {
                             var tested = false;
+                            var path = pV.path.map(toString);
                             for (var i = 0; i < vals.length; i++) {
-                                if (_.isEqual(pV.path.map(toString), vals[i].path.map(toString))) {
+                                var val = vals[i].path.map(toString);
+                                if (_.isEqual(path, val)) {
                                     actualCount++;
                                     tested = true;
                                     testRunner.compare(vals[i].path, pV.path);
@@ -99,6 +101,9 @@ function getTestRunner(model, data, options) {
         });
 }
 function toString(x) {
+    if (x === null) {
+        return x;
+    }
     return x + '';
 }
 
