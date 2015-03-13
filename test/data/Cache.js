@@ -119,7 +119,7 @@ var Cache = function() {
                 "$size": 10,
                 "summary": {
                     "$size": 10,
-                    "$type": "leaf",
+                    "$type": "group",
                     "title": "House of Cards",
                     "url": "/movies/1234"
                 }
@@ -128,7 +128,7 @@ var Cache = function() {
                 "$size": 10,
                 "summary": {
                     "$size": 10,
-                    "$type": "leaf",
+                    "$type": "group",
                     "title": "Terminator 2",
                     "url": "/movies/333"
                 }
@@ -137,7 +137,7 @@ var Cache = function() {
                 "$size": 10,
                 "summary": {
                     "$size": 10,
-                    "$type": "leaf",
+                    "$type": "group",
                     "title": "Total Recall (Without Colin Farrell)",
                     "url": "/movies/733"
                 }
@@ -146,7 +146,7 @@ var Cache = function() {
                 "$size": 10,
                 "summary": {
                     "$size": 10,
-                    "$type": "leaf",
+                    "$type": "group",
                     "title": "Running Man",
                     "url": "/movies/553"
                 }
@@ -155,7 +155,7 @@ var Cache = function() {
                 "$size": 10,
                 "summary": {
                     "$size": 10,
-                    "$type": "leaf",
+                    "$type": "group",
                     "title": "Terminator 3",
                     "url": "/movies/766"
                 }
@@ -164,7 +164,7 @@ var Cache = function() {
                 "$size": 10,
                 "summary": {
                     "$size": 10,
-                    "$type": "leaf",
+                    "$type": "group",
                     "title": "Terminator Salvation",
                     "url": "/movies/888"
                 }
@@ -173,7 +173,7 @@ var Cache = function() {
                 "$size": 10,
                 "summary": {
                     "$size": 10,
-                    "$type": "leaf",
+                    "$type": "group",
                     "title": "Jingle All the Way",
                     "url": "/movies/999"
                 }
@@ -182,7 +182,7 @@ var Cache = function() {
                 "$size": 10,
                 "summary": {
                     "$size": 10,
-                    "$type": "leaf",
+                    "$type": "group",
                     "title": "Beverly Hills Ninja",
                     "url": "/movies/4422"
                 }
@@ -191,7 +191,7 @@ var Cache = function() {
                 "$size": 10,
                 "summary": {
                     "$size": 10,
-                    "$type": "leaf",
+                    "$type": "group",
                     "title": "Kindergarten Cop",
                     "url": "/movies/7531"
                 }
@@ -200,7 +200,7 @@ var Cache = function() {
                 "$size": 10,
                 "summary": {
                     "$size": 10,
-                    "$type": "leaf",
+                    "$type": "group",
                     "title": "Junior",
                     "url": "/movies/5522"
                 }
@@ -209,7 +209,7 @@ var Cache = function() {
                 "$size": 10,
                 "summary": {
                     "$size": 10,
-                    "$type": "leaf",
+                    "$type": "group",
                     "title": "Commando",
                     "url": "/movies/6420"
                 }
@@ -280,7 +280,7 @@ var Cache = function() {
                     "$size": 10,
                     "summary": {
                         "$size": 10,
-                        "$type": "leaf",
+                        "$type": "group",
                         "title": "Conan, The Barbarian",
                         "url": "/movies/6420"
                     }
@@ -290,13 +290,13 @@ var Cache = function() {
                 "$size": 26,
                 "summary": {
                     "$size": 10,
-                    "$type": "leaf",
+                    "$type": "group",
                     "title": "Conan, The Destroyer",
                     "url": "/movies/3355"
                 },
                 "art": {
                     "$size": 16,
-                    "$type": "leaf",
+                    "$type": "group",
                     "box-shot": "www.cdn.com/3355"
                 }
             },

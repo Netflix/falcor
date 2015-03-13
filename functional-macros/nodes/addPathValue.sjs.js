@@ -17,7 +17,7 @@ macro addPathValue {
             i = -1, n = $path.length,
             val, copy = new Array(n);
         while(++i < n) { copy[i] = $path[i]; }
-        val = $node.getJSONEdge($type, $value, $materialized, $boxed, $errorsAsValues)
+        val = $node.clone($value, internalKey);
         pbv.path = copy;
         pbv.value = val;
         if($array) {

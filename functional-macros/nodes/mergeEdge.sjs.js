@@ -63,11 +63,6 @@ macro mergeEdge {
                 $node = $node.graph($key, $nodeRoot, $nodeParent, $nodeType, $nodeValue);
                 
                 $nodeParent.update($node, sizeOffset, __GENERATION_VERSION)
-            } else {
-                $node = Object.defineProperties($node, __NODE_KEYS_PROPS);
-                if($node.isArray($nodeValue)) {
-                    $nodeValue = Object.defineProperties($nodeValue, __REFERENCE_KEYS_PROPS);
-                }
             }
         }
     }; }

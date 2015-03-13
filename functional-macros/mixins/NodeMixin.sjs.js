@@ -36,10 +36,21 @@ macro NodeMixin {
                 $this.isInvalid()                )    )
             }
             rule { .isInvalid() } => { ($node[__INVALIDATED] === true) }
-            rule { .createNode() } => { Object.defineProperties(Object.create(null), __NODE_KEYS_PROPS) }
-            rule { .createJSONNode() } => { Object.defineProperties(Object.create(null), __JSON_KEYS_PROPS) }
-            rule { .defineNode() } => { Object.defineProperties($node, __NODE_KEYS_PROPS) }
-            rule { .defineJSONNode() } => { Object.defineProperties($node, __JSON_KEYS_PROPS) }
+            rule infix { $dest = | .clone($value, $filter) } => {
+                var dest = $value, src = dest, i = -1, n, x;
+                if(obj_exists(dest)) {
+                    if(Array.isArray(src)) {
+                        dest = new Array(n = src.length);
+                        while(++i < n) { dest[i] = src[i]; }
+                    } else {
+                        dest = Object.create(null);
+                        for(x in src) { !($filter(x)) && (dest[x] = src[x]); }
+                    }
+                }
+                $dest = dest
+            }
+            rule { .createNode() } => { Object.create(null) }
+            rule { .createJSONNode() } => { Object.create(null) }
             rule { .expire() } => { ($expired[$expired.length] = $node) && ($node[__INVALIDATED] = true) && undefined }
             rule infix { $json = | .getJSONEdge($type, $value, $materialized, $boxed, $errorsAsValues) } => {
                 if($materialized === true) {
@@ -47,15 +58,21 @@ macro NodeMixin {
                         $json = Object.create(null);
                         $json[$TYPE] = SENTINEL;
                     } else if($value === undefined) {
-                        $json = $node;
+                        $json = $this.clone($node, internalKey);
                     } else {
-                        $json = $value;
+                        $json = $this.clone($value, internalKey);
+                        if(obj_exists($json) && !Array.isArray($json)) {
+                            $json[$TYPE] = GROUP;
+                        }
                     }
                 } else if($boxed === true) {
-                    $json = $node;
+                    $json = $this.clone($node, internalKey);
                 } else if($errorsAsValues === true || $type !== ERROR) {
                     if($node != null) {
-                        $json = $value;
+                        $json = $this.clone($value, internalKey);
+                        if(obj_exists($json) && !Array.isArray($json)) {
+                            $json[$TYPE] = GROUP;
+                        }
                     } else {
                         $json = undefined;
                     }
@@ -215,30 +232,16 @@ macro NodeMixin {
                 // this work the next time we follow this linkPath.
                 if(refContext === undefined) {
                     
-                    // $node[__REF + backRefs] = refContainer;
-                    // $node[__REFS_LENGTH] = backRefs + 1;
-                    // create a hard link path
-                    // refContainer[__REF_INDEX] = backRefs;
-                    // refContainer[__CONTEXT]  = $node;
-                    // refContainer = backRefs = undefined;
-                    
                     var backRefs = $node[__REFS_LENGTH] || 0;
                     
                     // create a back link
-                    __props[__REF + backRefs] = { writable: true, value: refContainer };
-                    __props[__REFS_LENGTH]    = { writable: true, value: backRefs + 1 };
-                    Object.defineProperties($node, __props);
-                    
-                    delete __props[__REF + backRefs];
-                    delete __props[__REFS_LENGTH];
+                    $node[__REF + backRefs] = refContainer;
+                    $node[__REFS_LENGTH] = backRefs + 1;
                     
                     // create a forward link
-                    __props[__REF_INDEX] = { writable: true, value: backRefs };
-                    __props[__CONTEXT]   = { writable: true, value: $node    };
-                    Object.defineProperties(refContainer, __props);
-                    
-                    delete __props[__REF_INDEX];
-                    delete __props[__CONTEXT];
+                    refContainer[__REF_INDEX] = backRefs;
+                    refContainer[__CONTEXT]  = $node;
+                    refContainer = backRefs = undefined;
                 }
             }
             rule { .unlink($value:expr) } => {
@@ -284,31 +287,25 @@ macro NodeMixin {
                 if($this.isLink($type, $value)) {
                     delete $value[$SIZE];
                     if($this.isSentinel($type)) {
-                        $dest = Object.defineProperties($dest, __REFERENCE_KEYS_PROPS);
                         $size = SENTINEL_SIZE + ($value.length || 1);
                     } else {
                         $size = $value.length || 1;
                     }
-                    $dest = Object.defineProperties($dest, __NODE_KEYS_PROPS);
-                    $value = Object.defineProperties($value, __REFERENCE_KEYS_PROPS);
                     $dest[$SIZE] = $size;
                     $value[__CONTAINER] = $dest;
                 } else if($this.isSentinel($type)) {
-                    $dest = Object.defineProperties($dest, __NODE_KEYS_PROPS);
                     $dest[$SIZE] = $size = SENTINEL_SIZE + ((typeof $value === "string") && $value.length || 1);
                 } else if($this.isError($type)) {
-                    $dest = Object.defineProperties($dest, __NODE_KEYS_PROPS);
                     $dest[$SIZE] = $size = $this.size() || (SENTINEL_SIZE + 1);
                 } else if($this.isPrimitive()) {
                     $size = SENTINEL_SIZE + ((typeof $value === "string") && $value.length || 1);
                     $type = "sentinel";
-                    $dest = Object.defineProperties(Object.create(null), __NODE_KEYS_PROPS);
+                    $dest = Object.create(null);
                     $dest[VALUE] = $value;
                     $dest[$TYPE] = $type;
                     $dest[$SIZE] = $size;
                 } else {
-                    $dest = Object.defineProperties($dest, __NODE_KEYS_PROPS);
-                    $type = $dest[$TYPE] = $type || "leaf";
+                    $type = $dest[$TYPE] = $type || GROUP;
                     $dest[$SIZE] = $size = $this.size() || (SENTINEL_SIZE + 1);
                 }
             }

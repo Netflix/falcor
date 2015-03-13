@@ -69,8 +69,8 @@ function validateOperation(name, expected, actual, messageSuffix) {
     // Removes all 5 !== "5" errors when it comes to pathValues.
     traverseAndConvert(actual);
     traverseAndConvert(expected);
-    strip(expected, "__generation");
-    strip(actual, "__generation", "pathSetIndex");
+    strip(expected, "$type", "__generation", "__key");
+    strip(actual, "$type", "__generation", "__key", "pathSetIndex");
 
     if (expected.values) {
         expect(actual.values, name + ".values " + messageSuffix).

@@ -21,9 +21,9 @@ macro addNodeJSONG {
             $value = $node.value($type);
             if($node.isLink($type, $value)) {
                 if($boxed === true) {
-                    $json = $node;
+                    $json = $node.clone($node, internalKey);
                 } else {
-                    $json = $value;
+                    $json = $node.clone($value, internalKey);
                 }
                 $jsonParent[$key] = $json;
             } else if($type === undefined && $node.isObject()) {

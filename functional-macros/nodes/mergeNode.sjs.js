@@ -41,7 +41,6 @@ macro mergeNode {
             if($node == null && $message == null) {
                 return $node;
             } else if($node === $message && $node.isBranch($nodeType, $nodeValue)) {
-                $node = $node.defineNode();
                 $node = $node.graph($key, $nodeRoot, $nodeParent, $nodeType, $nodeValue);
                 return $node;
             }
@@ -89,13 +88,10 @@ macro mergeNode {
                     }
                 }
             } else if($node === $message) {
-                if($node.isObject()) {
-                    $node = $node.defineNode();
-                }
                 return $node;
             } else if(!$nodeType && $node.isObject()) {
                 if($message == null || $message.isBranch($messageType, $messageValue)) {
-                    return $node.defineNode();
+                    return $node;
                 }
             }
             

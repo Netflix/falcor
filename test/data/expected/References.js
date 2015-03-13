@@ -13,7 +13,7 @@ module.exports = function() {
                         "path": ["genreList", "0", "0", "summary"],
                         "value": {
                             "$size": 10,
-                            "$type": "leaf",
+                            "$type": "group",
                             "title": "House of Cards",
                             "url": "/movies/1234"
                         }
@@ -34,7 +34,7 @@ module.exports = function() {
                         videos: {
                             1234: {
                                 summary: {
-                                    "$type": "leaf",
+                                    "$type": "group",
                                     "$size": 10,
                                     "title": "House of Cards",
                                     "url": "/movies/1234"
@@ -68,7 +68,7 @@ module.exports = function() {
                         "path": ["genreList", "0", "0", "summary"],
                         "value": {
                             "$size": 10,
-                            "$type": "leaf",
+                            "$type": "group",
                             "title": "House of Cards",
                             "url": "/movies/1234"
                         }
@@ -80,7 +80,7 @@ module.exports = function() {
                 values: [{
                     json: {
                         "$size": 10,
-                        "$type": "leaf",
+                        "$type": "group",
                         "title": "House of Cards",
                         "url": "/movies/1234"
                     }
@@ -102,7 +102,7 @@ module.exports = function() {
                             1234: {
                                 summary: {
                                     "$size": 10,
-                                    "$type": "leaf",
+                                    "$type": "group",
                                     "title": "House of Cards",
                                     "url": "/movies/1234"
                                 }
@@ -121,7 +121,7 @@ module.exports = function() {
                                 0: {
                                     summary: {
                                         "$size": 10,
-                                        "$type": "leaf",
+                                        "$type": "group",
                                         "title": "House of Cards",
                                         "url": "/movies/1234",
                                     }
@@ -145,7 +145,7 @@ module.exports = function() {
                         "path": ["genreList", "0", "1", "summary"],
                         "value": {
                             "$size": 10,
-                            "$type": "leaf",
+                            "$type": "group",
                             "title": "Terminator 3",
                             "url": "/movies/766"
                         }
@@ -166,7 +166,7 @@ module.exports = function() {
                         videos: {
                             766: {
                                 summary: {
-                                    "$type": "leaf",
+                                    "$type": "group",
                                     "$size": 10,
                                     "title": "Terminator 3",
                                     "url": "/movies/766"
@@ -200,7 +200,7 @@ module.exports = function() {
                         "path": ["genreList", "0", "1", "summary"],
                         "value": {
                             "$size": 10,
-                            "$type": "leaf",
+                            "$type": "group",
                             "title": "Terminator 3",
                             "url": "/movies/766"
                         }
@@ -212,7 +212,7 @@ module.exports = function() {
                 values: [{
                     json: {
                         "$size": 10,
-                        "$type": "leaf",
+                        "$type": "group",
                         "title": "Terminator 3",
                         "url": "/movies/766"
                     }
@@ -233,7 +233,7 @@ module.exports = function() {
                         videos: {
                             766: {
                                 summary: {
-                                    "$type": "leaf",
+                                    "$type": "group",
                                     "$size": 10,
                                     "title": "Terminator 3",
                                     "url": "/movies/766"
@@ -253,7 +253,7 @@ module.exports = function() {
                                 1: {
                                     summary: {
                                         "$size": 10,
-                                        "$type": "leaf",
+                                        "$type": "group",
                                         "title": "Terminator 3",
                                         "url": "/movies/766"
                                     }
@@ -277,7 +277,7 @@ module.exports = function() {
                         "path": ["genreList", "0", "2", "summary"],
                         "value": {
                             "$size": 10,
-                            "$type": "leaf",
+                            "$type": "group",
                             "title": "Kindergarten Cop",
                             "url": "/movies/7531"
                         }
@@ -298,7 +298,7 @@ module.exports = function() {
                         videos: {
                             7531: {
                                 summary: {
-                                    "$type": "leaf",
+                                    "$type": "group",
                                     "$size": 10,
                                     "title": "Kindergarten Cop",
                                     "url": "/movies/7531"
@@ -332,7 +332,7 @@ module.exports = function() {
                         "path": ["genreList", "0", "2", "summary"],
                         "value": {
                             "$size": 10,
-                            "$type": "leaf",
+                            "$type": "group",
                             "title": "Kindergarten Cop",
                             "url": "/movies/7531"
                         }
@@ -344,7 +344,7 @@ module.exports = function() {
                 values: [{
                     json: {
                         "$size": 10,
-                        "$type": "leaf",
+                        "$type": "group",
                         "title": "Kindergarten Cop",
                         "url": "/movies/7531"
                     }
@@ -365,7 +365,7 @@ module.exports = function() {
                         videos: {
                             7531: {
                                 summary: {
-                                    "$type": "leaf",
+                                    "$type": "group",
                                     "$size": 10,
                                     "title": "Kindergarten Cop",
                                     "url": "/movies/7531"
@@ -385,7 +385,7 @@ module.exports = function() {
                                 2: {
                                     summary: {
                                         "$size": 10,
-                                        "$type": "leaf",
+                                        "$type": "group",
                                         "title": "Kindergarten Cop",
                                         "url": "/movies/7531",
                                     }
@@ -409,7 +409,7 @@ module.exports = function() {
                         "path": ["genreList", "0", "3", "summary"],
                         "value": {
                             "$size": 10,
-                            "$type": "leaf",
+                            "$type": "group",
                             "title": "Commando",
                             "url": "/movies/6420"
                         }
@@ -430,7 +430,7 @@ module.exports = function() {
                         videos: {
                             6420: {
                                 summary: {
-                                    "$type": "leaf",
+                                    "$type": "group",
                                     "$size": 10,
                                     "title": "Commando",
                                     "url": "/movies/6420"
@@ -464,7 +464,7 @@ module.exports = function() {
                         "path": ["genreList", "0", "3", "summary"],
                         "value": {
                             "$size": 10,
-                            "$type": "leaf",
+                            "$type": "group",
                             "title": "Commando",
                             "url": "/movies/6420"
                         }
@@ -476,7 +476,7 @@ module.exports = function() {
                 values: [{
                     json: {
                         "$size": 10,
-                        "$type": "leaf",
+                        "$type": "group",
                         "title": "Commando",
                         "url": "/movies/6420"
                     }
@@ -497,7 +497,7 @@ module.exports = function() {
                         videos: {
                             6420: {
                                 summary: {
-                                    "$type": "leaf",
+                                    "$type": "group",
                                     "$size": 10,
                                     "title": "Commando",
                                     "url": "/movies/6420"
@@ -517,7 +517,7 @@ module.exports = function() {
                                 3: {
                                     summary: {
                                         "$size": 10,
-                                        "$type": "leaf",
+                                        "$type": "group",
                                         "title": "Commando",
                                         "url": "/movies/6420",
                                     }
@@ -567,7 +567,7 @@ module.exports = function() {
                         "path": ["genreList", "10", null],
                         "value": {
                             "$size": 10,
-                            "$type": "leaf",
+                            "$type": "group",
                             "title": "House of Cards",
                             "url": "/movies/1234"
                         }
@@ -579,7 +579,7 @@ module.exports = function() {
                 values: [{
                     json: {
                         "$size": 10,
-                        "$type": "leaf",
+                        "$type": "group",
                         "title": "House of Cards",
                         "url": "/movies/1234"
                     }
@@ -595,7 +595,7 @@ module.exports = function() {
                         videos: {
                             1234: {
                                 summary: {
-                                    "$type": "leaf",
+                                    "$type": "group",
                                     "$size": 10,
                                     "title": "House of Cards",
                                     "url": "/movies/1234"
@@ -615,7 +615,7 @@ module.exports = function() {
                         genreList: {
                             10: {
                                 "$size": 10,
-                                "$type": "leaf",
+                                "$type": "group",
                                 "title": "House of Cards",
                                 "url": "/movies/1234",
                             }
@@ -652,7 +652,7 @@ module.exports = function() {
                     "path": ["genreList", "1", "0", "summary"],
                     "value": {
                         "$size": 10,
-                        "$type": "leaf",
+                        "$type": "group",
                         "title": "Running Man",
                         "url": "/movies/553"
                     }
@@ -663,7 +663,7 @@ module.exports = function() {
                 values: [{
                     json: {
                         "$size": 10,
-                        "$type": "leaf",
+                        "$type": "group",
                         "title": "Running Man",
                         "url": "/movies/553"
                     }
@@ -685,7 +685,7 @@ module.exports = function() {
                         videos: {
                             553: {
                                 summary: {
-                                    "$type": "leaf",
+                                    "$type": "group",
                                     "$size": 10,
                                     "title": "Running Man",
                                     "url": "/movies/553"
@@ -707,7 +707,7 @@ module.exports = function() {
                                 0: {
                                     summary: {
                                         "$size": 10,
-                                        "$type": "leaf",
+                                        "$type": "group",
                                         "title": "Running Man",
                                         "url": "/movies/553",
                                     }
@@ -747,7 +747,7 @@ module.exports = function() {
                         "path": ["genreList", "1", "0", "summary"],
                         "value": {
                             "$size": 10,
-                            "$type": "leaf",
+                            "$type": "group",
                             "title": "Running Man",
                             "url": "/movies/553"
                         }
@@ -759,7 +759,7 @@ module.exports = function() {
                 values: [{
                     json: {
                         "$size": 10,
-                        "$type": "leaf",
+                        "$type": "group",
                         "title": "Running Man",
                         "url": "/movies/553"
                     }
@@ -781,7 +781,7 @@ module.exports = function() {
                         videos: {
                             553: {
                                 summary: {
-                                    "$type": "leaf",
+                                    "$type": "group",
                                     "$size": 10,
                                     "title": "Running Man",
                                     "url": "/movies/553"
@@ -803,7 +803,7 @@ module.exports = function() {
                                 0: {
                                     summary: {
                                         "$size": 10,
-                                        "$type": "leaf",
+                                        "$type": "group",
                                         "title": "Running Man",
                                         "url": "/movies/553",
                                     }
@@ -900,7 +900,7 @@ module.exports = function() {
                     "path": ["genreList", "3", "0", "summary"],
                     "value": {
                         "$size": 10,
-                        "$type": "leaf",
+                        "$type": "group",
                         "title": "Terminator 2",
                         "url": "/movies/333"
                     }
@@ -930,7 +930,7 @@ module.exports = function() {
                     "path": ["genreList", "3", "0", "summary"],
                     "value": {
                         "$size": 10,
-                        "$type": "leaf",
+                        "$type": "group",
                         "title": "Terminator 2",
                         "url": "/movies/333"
                     }
@@ -941,7 +941,7 @@ module.exports = function() {
                 values: [{
                     json: {
                         "$size": 10,
-                        "$type": "leaf",
+                        "$type": "group",
                         "title": "Terminator 2",
                         "url": "/movies/333"
                     }
@@ -963,7 +963,7 @@ module.exports = function() {
                             333: {
                                 summary: {
                                     "$size": 10,
-                                    "$type": "leaf",
+                                    "$type": "group",
                                     "title": "Terminator 2",
                                     "url": "/movies/333"
                                 }
@@ -984,7 +984,7 @@ module.exports = function() {
                                 0: {
                                     summary: {
                                         "$size": 10,
-                                        "$type": "leaf",
+                                        "$type": "group",
                                         "title": "Terminator 2",
                                         "url": "/movies/333",
                                     }
@@ -1031,7 +1031,7 @@ module.exports = function() {
                         "path": ["genreList", "7", "0", "summary"],
                         "value": {
                             "$size": 10,
-                            "$type": "leaf",
+                            "$type": "group",
                             "title": "Total Recall (Without Colin Farrell)",
                             "url": "/movies/733"
                         }
@@ -1043,7 +1043,7 @@ module.exports = function() {
                 values: [{
                     json: {
                         "$size": 10,
-                        "$type": "leaf",
+                        "$type": "group",
                         "title": "Total Recall (Without Colin Farrell)",
                         "url": "/movies/733"
                     }
@@ -1066,7 +1066,7 @@ module.exports = function() {
                             733: {
                                 summary: {
                                     "$size": 10,
-                                    "$type": "leaf",
+                                    "$type": "group",
                                     "title": "Total Recall (Without Colin Farrell)",
                                     "url": "/movies/733"
                                 }
@@ -1087,7 +1087,7 @@ module.exports = function() {
                                 0: {
                                     summary: {
                                         "$size": 10,
-                                        "$type": "leaf",
+                                        "$type": "group",
                                         "title": "Total Recall (Without Colin Farrell)",
                                         "url": "/movies/733",
                                     }

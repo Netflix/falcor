@@ -23,8 +23,8 @@ describe("Model", function() {
     //     require("./call/call.spec");
     // });
 
-    describe("--behavioral", function() {
-        require("./behavioral")
-    });
+    // describe("--behavioral", function() {
+    //     require("./behavioral")
+    // });
 });
 

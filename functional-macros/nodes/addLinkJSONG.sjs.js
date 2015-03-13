@@ -23,9 +23,9 @@ macro addLinkJSONG {
                 $value = $node.value();
                 if($node.isLink($type, $value)) {
                     if($boxed === true) {
-                        $json = $node;
+                        $json = $node.clone($node, internalKey);
                     } else {
-                        $json = $value;
+                        $json = $node.clone($value, internalKey);
                     }
                 } else if($type === undefined && $node.isObject()) {
                     if(($json = $jsonParent[$key]) == null) {
@@ -38,15 +38,15 @@ macro addLinkJSONG {
                         $json = Object.create(null);
                         $json[$TYPE] = SENTINEL;
                     } else if($value === undefined) {
-                        $json = $node;
+                        $json = $node.clone($node, internalKey);
                     } else {
-                        $json = $value;
+                        $json = $node.clone($value, internalKey);
                     }
                 } else if($boxed === true) {
                     $json = $node;
                 } else if($errorsAsValues === true || $type !== ERROR) {
                     if($node != null) {
-                        $json = $value;
+                        $json = $node.clone($value, internalKey);
                     } else {
                         $json = undefined;
                     }

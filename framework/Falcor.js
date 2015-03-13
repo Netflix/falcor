@@ -8,7 +8,7 @@ var SENTINEL = "sentinel",
     ERROR = "error",
     VALUE = "value",
     EXPIRED = "expired",
-    LEAF = "leaf";
+    GROUP = "group";
 
 var __GENERATION_GUID = 0,
     __GENERATION_VERSION = 0,
@@ -29,10 +29,7 @@ var __GENERATION_GUID = 0,
     __ROOT = "/",
     __OFFSET = "__offset",
     __FALKOR_EMPTY_OBJECT = '__FALKOR_EMPTY_OBJECT',
-    
     __REFERENCE_KEYS = [__CONTAINER, __CONTEXT, __REF_INDEX],
-    __REFERENCE_KEYS_PROPS = __REFERENCE_KEYS.reduce(buildKeysObject, Object.create(null)),
-    
     __NODE_KEYS = [
         "__next", "__prev",
         __GENERATION, __GENERATION_UPDATED,
@@ -40,10 +37,7 @@ var __GENERATION_GUID = 0,
         __KEY, __SELF, __PARENT, __ROOT,
         $TYPE, $SIZE, $EXPIRES, $TIMESTAMP
     ],
-    __NODE_KEYS_PROPS = __NODE_KEYS.reduce(buildKeysObject, Object.create(null)),
-    
     __JSON_KEYS = [__GENERATION, __KEY],
-    __JSON_KEYS_PROPS = __JSON_KEYS.reduce(buildKeysObject, Object.create(null)),
     __props     = Object.create(null);
 
 function now() {
@@ -51,10 +45,6 @@ function now() {
 }
 
 function NOOP() {};
-
-function buildKeysObject(props, key) {
-    return (props[key] = { writable: true }) && props;
-}
 
 falcor.__Internals = {};
 falcor.Observable = Rx.Observable;

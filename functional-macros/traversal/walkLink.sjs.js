@@ -26,6 +26,11 @@ macro walkLink {
             $value = $node.value($type);
             
             if($depth === $height || $node.isEdge($type, $value)) {
+                if($node.isExpiredOrInvalid($expire)) {
+                    $type  = undefined;
+                    $value = undefined;
+                    $node  = $node.expire();
+                }
                 /* Process Edge */
                 $node = $processEdge($depth, key, isKeySet, $(
                     $roots, $parents, $nodes    ) (,) ... , $(

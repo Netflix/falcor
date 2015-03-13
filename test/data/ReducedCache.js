@@ -24,7 +24,7 @@ var ReducedCache = function() {
                 "$size": 10,
                 "summary": {
                     "$size": 10,
-                    "$type": "leaf",
+                    "$type": "group",
                     "title": "House of Cards",
                     "url": "/movies/1234"
                 }
@@ -33,7 +33,7 @@ var ReducedCache = function() {
                 "$size": 10,
                 "summary": {
                     "$size": 10,
-                    "$type": "leaf",
+                    "$type": "group",
                     "title": "Junior",
                     "url": "/movies/5522"
                 }
@@ -61,7 +61,7 @@ var MinimalCache = function() {
                 "$size": 10,
                 "summary": {
                     "$size": 10,
-                    "$type": "leaf",
+                    "$type": "group",
                     "title": "House of Cards",
                     "url": "/movies/1234"
                 }

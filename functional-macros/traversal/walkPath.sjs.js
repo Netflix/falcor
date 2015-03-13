@@ -25,32 +25,34 @@ macro walkPath {
             $type = $node.type();
             $value = $node.value($type);
             
-            if($depth === $height || $node.isEdge($type, $value)) {
-                
+            if($depth < $height && $node.isLink($type, $value)) {
                 if($node.isExpiredOrInvalid($expire)) {
                     $type = undefined;
                     $value = undefined;
                     $node = $node.expire();
                 }
                 
-                if($depth < $height && $node.isLink($type, $value)) {
-                    /* Process Link */
-                    $node = $processLink($depth, key, isKeySet, $(
-                        $roots, $parents, $nodes    ) (,) ... , $(
-                        $types, $values, $sizes, $timestamps, $expires) (,) ...
-                    )
-                    if($node.isEdge($type, $value)) {
-                        key = null;
-                        return follow_path($nodes (,) ... , $depth);
-                    }
-                } else {
-                    /* Process Edge */
-                    $node = $processEdge($depth, key, isKeySet, $(
-                        $roots, $parents, $nodes    ) (,) ... , $(
-                        $types, $values, $sizes, $timestamps, $expires) (,) ...
-                    )
-                    return $node;
+                /* Process Link */
+                $node = $processLink($depth, key, isKeySet, $(
+                    $roots, $parents, $nodes    ) (,) ... , $(
+                    $types, $values, $sizes, $timestamps, $expires) (,) ...
+                )
+                if($node.isEdge($type, $value)) {
+                    key = null;
+                    return follow_path($nodes (,) ... , $depth);
                 }
+            } else if($depth === $height || !!$type || $node.isPrimitive()) {
+                if($node.isExpiredOrInvalid($expire)) {
+                    $type = undefined;
+                    $value = undefined;
+                    $node = $node.expire();
+                }
+                /* Process Edge */
+                $node = $processEdge($depth, key, isKeySet, $(
+                    $roots, $parents, $nodes    ) (,) ... , $(
+                    $types, $values, $sizes, $timestamps, $expires) (,) ...
+                )
+                return $node;
             }
             
             key = $path[$depth]; $(

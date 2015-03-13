@@ -12,8 +12,9 @@ macro addErrorValue {
             i = -1, n = $path.length,
             val, copy = new Array(n);
         while(++i < n) { copy[i] = $path[i]; }
+        val = $node.clone($node, internalKey);
         pbv.path = copy;
-        pbv.value = $node;
+        pbv.value = val;
         $array[$array.length] = pbv;
     }; }
     rule { } => { $[addErrorValue] }

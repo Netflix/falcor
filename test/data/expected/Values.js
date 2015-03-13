@@ -11,7 +11,7 @@ module.exports = function() {
                     "path": ["videos", "1234", "summary"],
                     "value": {
                         "$size": 10,
-                        "$type": "leaf",
+                        "$type": "group",
                         "title": "House of Cards",
                         "url": "/movies/1234"
                     }
@@ -23,7 +23,7 @@ module.exports = function() {
                         1234: {
                             summary: {
                                 "$size": 10,
-                                "$type": "leaf",
+                                "$type": "group",
                                 "title": "House of Cards",
                                 "url": "/movies/1234"
                             }
@@ -38,7 +38,7 @@ module.exports = function() {
                         videos: {
                             1234: {
                                 summary: {
-                                    "$type": "leaf",
+                                    "$type": "group",
                                     "$size": 10,
                                     "title": "House of Cards",
                                     "url": "/movies/1234"
@@ -61,7 +61,7 @@ module.exports = function() {
                 values: [{
                     "path": ["videos", "1234", "summary"],
                     "value": {
-                        "$type": "leaf",
+                        "$type": "group",
                         "$size": 10,
                         "title": "House of Cards",
                         "url": "/movies/1234",
@@ -71,7 +71,7 @@ module.exports = function() {
             AsJSON: {
                 values: [{
                     json: {
-                        "$type": "leaf",
+                        "$type": "group",
                         "$size": 10,
                         "title": "House of Cards",
                         "url": "/movies/1234"
@@ -84,7 +84,7 @@ module.exports = function() {
                         videos: {
                             1234: {
                                 summary: {
-                                    "$type": "leaf",
+                                    "$type": "group",
                                     "$size": 10,
                                     "title": "House of Cards",
                                     "url": "/movies/1234"
@@ -101,7 +101,7 @@ module.exports = function() {
                         videos: {
                             1234: {
                                 summary: {
-                                    "$type": "leaf",
+                                    "$type": "group",
                                     "$size": "10",
                                     "title": "House of Cards",
                                     "url": "/movies/1234",
@@ -123,7 +123,7 @@ module.exports = function() {
                     "path": ["videos", "553", "summary"],
                     "value": {
                         "$size": 10,
-                        "$type": "leaf",
+                        "$type": "group",
                         "title": "Running Man",
                         "url": "/movies/553"
                     }
@@ -135,7 +135,7 @@ module.exports = function() {
                         553: {
                             summary: {
                                 "$size": 10,
-                                "$type": "leaf",
+                                "$type": "group",
                                 "title": "Running Man",
                                 "url": "/movies/553"
                             }
@@ -150,7 +150,7 @@ module.exports = function() {
                         videos: {
                             553: {
                                 summary: {
-                                    "$type": "leaf",
+                                    "$type": "group",
                                     "$size": 10,
                                     "title": "Running Man",
                                     "url": "/movies/553"
@@ -173,7 +173,7 @@ module.exports = function() {
                 values: [{
                     "path": ["videos", "553", "summary"],
                     "value": {
-                        "$type": "leaf",
+                        "$type": "group",
                         "$size": 10,
                         "title": "Running Man",
                         "url": "/movies/553"
@@ -183,7 +183,7 @@ module.exports = function() {
             AsJSON: {
                 values: [{
                     json: {
-                        "$type": "leaf",
+                        "$type": "group",
                         "$size": 10,
                         "title": "Running Man",
                         "url": "/movies/553"
@@ -196,7 +196,7 @@ module.exports = function() {
                         videos: {
                             553: {
                                 summary: {
-                                    "$type": "leaf",
+                                    "$type": "group",
                                     "$size": 10,
                                     "title": "Running Man",
                                     "url": "/movies/553"
@@ -213,7 +213,7 @@ module.exports = function() {
                         videos: {
                             553: {
                                 summary: {
-                                    "$type": "leaf",
+                                    "$type": "group",
                                     "$size": 10,
                                     "title": "Running Man",
                                     "url": "/movies/553",
