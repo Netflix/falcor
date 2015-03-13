@@ -2,8 +2,6 @@ var gulp = require('gulp');
 var jshint = require('gulp-jshint');
 var jsdoc = require('gulp-jsdoc');
 var mocha = require('gulp-mocha');
-var istanbulEnforcer = require('gulp-istanbul-enforcer');
-var surround = require('./build/surround');
 var istanbul = require('gulp-istanbul');
 var concat = require('gulp-concat');
 var benchmark = require('gulp-bench');
@@ -11,6 +9,9 @@ var benchmark = require('gulp-bench');
 // Registers build tasks
 require('./build/gulp-clean');
 require('./build/gulp-build');
+require('./build/gulp-build-recursive');
+require('./build/gulp-build-support');
+
 function test(cb) {
     gulp.src(['bin/Falcor.js']).
         pipe(istanbul()).

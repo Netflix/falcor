@@ -1,6 +1,7 @@
 node_modules
 .DS_Store
 bin/
+performance/bin/
 !tasks/bin
 *.iml
 coverage

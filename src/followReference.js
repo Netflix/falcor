@@ -1,17 +1,17 @@
 function followReference(model, root, node, referenceContainer, reference) {
 
     var depth = 0;
-    var expired = false;
     var k, next;
+
     while (true) {
-        if (referenceContainer[__CONTEXT]) {
+        if (depth === 0 && referenceContainer[__CONTEXT]) {
             depth = reference.length;
             next = referenceContainer[__CONTEXT];
         } else {
             k = reference[depth++];
             next = node[k];
         }
-
+        
         if (next) {
             var type = next.$type;
             var value = type === 'sentinel' ? next.value : next;

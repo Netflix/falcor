@@ -1,92 +1,20 @@
 var gulp = require('gulp');
-var beautify = require('gulp-beautify');
 var distributeSweetCompile = require('./distribute-sweet-compile');
 var browserify = require('gulp-browserify');
-var rename = require('gulp-rename');
 var surround = require('./surround');
-var license = require('gulp-license');
 var concat = require('gulp-concat');
+var build = require('./build');
 var tvuiPrefix = '//@depend ../Rx.netflix.js\n' +
     '//@depend netflix/falcor/Falcor.js\n' +
     '(function(exports) {';
 var tvuiPostfix = 'exports.Model = Model;\n' +
     '}(netflix.falcor));';
-var licenseInfo = {
-    organization: 'Netflix, Inc',
-    year: '2014'
-};
-var support = [
-    './framework/ModelResponse.js',
-    './framework/request/Scheduler.js',
-    './framework/request/RequestQueue.js',
-    './framework/modelOperation.js',
-    './framework/Model.js',
-    './framework/PathLibrary.js'
-];
-var compile = [
-    './framework/Falcor.js',
-    './tmp/framework/Model.js',
-    './tmp/framework/support.js',
-    './tmp/framework/operations.js'
-];
-var compileWithGetOps = [
-    './framework/Falcor.js',
-    './tmp/framework/Model.js',
-    './tmp/framework/get.ops.js',
-    './tmp/framework/support.js',
-    './tmp/framework/operations.js'
-];
-var macroCompileFull = [
-    './framework/get/*.js',
-    './framework/get/paths/*.js',
-    './framework/get/pathMaps/*.js',
-    './framework/set/*.js',
-    './framework/set/paths/*.js',
-    './framework/set/pathMaps/*.js',
-    './framework/set/jsong/*.js',
-    './framework/call/call.js',
-    './framework/invalidate/*.js'
-];
-var macroCompileWithRecursiveSubstitutes = [
-    './framework/get/*.js',
-    './framework/get/paths/getPathsAsJSONG.js',
-    './framework/get/pathMaps/getPathMapsAsJSONG.js',
-    './framework/set/*.js',
-    './framework/set/paths/*.js',
-    './framework/set/pathMaps/*.js',
-    './framework/set/jsong/*.js',
-    './framework/call/call.js',
-    './framework/invalidate/*.js'
-];
 
 // build.macros -> |
 // build.framework ->
 
 gulp.task('build', ['clean.dev', 'build.node', 'build.tvui', 'build.akira', 'build.browser', 'build.raw']);
 gulp.task('build.dev', ['clean.dev', 'build.node']);
-gulp.task('build.reduce', ['clean.dev', 'build.node-reduce']);
-
-gulp.task('build.perf', function() {
-    return gulp.
-        src([
-            'tmp/data/*.js',
-            'testConfig.js',
-            'comTest.js'
-        ]).
-        pipe(concat({path: 'perf-tests.js'})).
-        pipe(gulp.dest('bin'));
-});
-
-gulp.task('build.perf-data', ['build.perf-data'], function() {
-    return gulp.
-        src([
-            'test/data/Cache.js'
-        ]).
-        pipe(browserify({
-            standalone: 'Cache'
-        })).
-        pipe(gulp.dest('tmp/data/Cache'));
-});
 
 gulp.task('build.macros', ['clean.dev'], function() {
     return gulp.src([
@@ -118,15 +46,9 @@ gulp.task('build.get.ops', function() {
         pipe(gulp.dest('./tmp'));
 });
 
-gulp.task('build.operations-reduce', ['build.macros'], function() {
-    return gulp.
-        src(macroCompileWithRecursiveSubstitutes).
-        pipe(gulp.dest('tmp/framework/operations'));
-});
-
 gulp.task('build.operations', ['build.macros'], function() {
     return gulp.
-        src(macroCompileFull).
+        src(build.macroCompileFull).
         pipe(gulp.dest('tmp/framework/operations'));
 });
 
@@ -137,35 +59,19 @@ gulp.task('build.compiled_operations', ['build.sweet'], function() {
         pipe(gulp.dest('tmp/framework'));
 });
 
-gulp.task('build.compiled_operations-reduce', ['build.sweet-reduce', 'build.get.ops'], function() {
-    return gulp.
-        src('./tmp/framework/compiled_operations/**.js').
-        pipe(concat({path: 'operations.js'})).
-        pipe(gulp.dest('tmp/framework'));
-});
-
 gulp.task('build.sweet', ['build.operations'], function() {
-    return distributeSweetCompile();
-});
-
-gulp.task('build.sweet-reduce', ['build.operations-reduce'], function() {
     return distributeSweetCompile();
 });
 
 gulp.task('build.support', ['build.macros'], function() {
     return gulp.
-        src(support).
+        src(build.support).
         pipe(concat({path: 'support.js'})).
         pipe(gulp.dest('tmp/framework'));
 });
 
 gulp.task('build.combine', ['build.compiled_operations', 'build.support'], function() {
-    return gulp.src(compile).
-        pipe(concat({path: 'Falcor.js'})).
-        pipe(gulp.dest('tmp'));
-});
-gulp.task('build.combine-reduce', ['build.compiled_operations-reduce', 'build.support'], function() {
-    return gulp.src(compileWithGetOps).
+    return gulp.src(build.compile).
         pipe(concat({path: 'Falcor.js'})).
         pipe(gulp.dest('tmp'));
 });
@@ -180,60 +86,6 @@ gulp.task('build.akira', ['build.combine'], function() {
     });
 });
 
-gulp.task('build.support-only-compile', ['build.support-only-replace'], function() {
-    return gulp.src(compile).
-        pipe(concat({path: 'Falcor.js'})).
-        pipe(gulp.dest('tmp'));
-});
-
-gulp.task('build.support-only-compile-reduce', ['build.get.ops', 'build.support-only-replace'], function() {
-    return gulp.src(compileWithGetOps).
-        pipe(concat({path: 'Falcor.js'})).
-        pipe(gulp.dest('tmp'));
-});
-
-gulp.task('build.support-only-replace', function() {
-    return gulp.
-        src(support).
-        pipe(concat({path: 'support.js'})).
-        pipe(gulp.dest('tmp/framework'));
-});
-
-gulp.task('build.support-only', ['build.support-only-replace', 'build.support-only-compile'], function() {
-    return build('Falcor.js', './bin', function(src) {
-        return src.
-            pipe(surround({
-                prefix: '\
-var Rx = require(\'rx\');\n\
-var Observable = Rx.Observable;\n',
-                postfix: 'module.exports = falcor;'
-            }));
-    });
-});
-
-gulp.task('build.support-only-reduce', ['build.support-only-replace', 'build.support-only-compile-reduce'], function() {
-    return build('Falcor.js', './bin', function(src) {
-        return src.
-            pipe(surround({
-                prefix: '\
-var Rx = require(\'rx\');\n\
-var Observable = Rx.Observable;\n',
-                postfix: 'module.exports = falcor;'
-            }));
-    }, ['./tmp/get.ops.js']);
-});
-
-gulp.task('build.node-reduce', ['build.combine-reduce'], function() {
-    return build('Falcor.js', './bin', function(src) {
-        return src.
-            pipe(surround({
-                prefix: '\
-var Rx = require(\'rx\');\n\
-var Observable = Rx.Observable;\n',
-                postfix: 'module.exports = falcor;'
-            }));
-    });
-});
 
 gulp.task('build.node', ['build.combine'], function() {
     return build('Falcor.js', './bin', function(src) {
@@ -307,20 +159,3 @@ gulp.task('prod.tvui', ['build.combine'], function() {
     });
 });
 
-function build(name, dest, addBuildStep, extraSrc) {
-    extraSrc = extraSrc || [];
-    var src = gulp.
-        src(extraSrc.concat([
-            './tmp/Falcor.js'
-        ])).
-        pipe(concat({path: 'Falcor.js'}));
-    return addBuildStep(src).
-        pipe(license('Apache', licenseInfo)).
-        pipe(rename(name)).
-        pipe(gulp.dest(dest));
-}
-
-module.exports = {
-    build: build
-};
-  
