@@ -1,6 +1,6 @@
 function get(getFlavor) {
     return function innerGet(model, paths, valuesOrOnNext, errorSelector) {
-        debugger;
+        debugger
         var results = _output();
         var inputFormat = Array.isArray(paths[0]) ? 'Paths' : 'JSON';
         

@@ -194,45 +194,46 @@ describe('Expired', function() {
 });
 
 function setExpireyAndGet(query, output, get) {
-    var model = new Model({cache: {}});
-    return model.
-        set({
-            jsong: {
-                genreList: {
-                    0: {
-                        $type: 'sentinel',
-                        $expires: Date.now() + 50,
-                        value: ['lists', 'abcd']
-                    }
-                },
-                lists: {
-                    abcd: {
-                        0: { 
-                            summary: {
-                                hello: 'world'
-                            }
-                        }
+    var model = new Model({cache: {
+        genreList: {
+            0: {
+                $type: 'sentinel',
+                $expires: Date.now() + 50,
+                value: ['lists', 'abcd']
+            }
+        },
+        lists: {
+            abcd: {
+                0: {
+                    summary: {
+                        $type: 'leaf',
+                        hello: 'world'
                     }
                 }
-            },
-            paths: [['genreList', 0, 0, 'summary']]
-        }).
+            }
+        }
+    }});
+    return model.
+        get(['genreList', 0, 0, 'summary']).
         delay(100).
         do(function() {
+            debugger
             var lhs = model._cache.genreList[0];
             var rhs = model._cache.lists.abcd;
             expect(lhs.__ref_index).to.equal(0);
             expect(rhs.__refs_length).to.equal(1);
             expect(rhs['__ref' + lhs.__ref_index]).to.equal(lhs);
             expect(lhs.__context).to.equal(rhs);
-        }).
+        }, noOp, noOp).
         flatMap(function() {
             if (get) {
+                debugger;
                 return testRunner.get(model, _.cloneDeep(query), output);
             }
             return testRunner.set(model, _.cloneDeep(query), output);
         }).
         do(noOp, noOp, function() {
+            debugger
             var lhs = model._cache.genreList[0];
             var rhs = model._cache.lists.abcd;
             expect(lhs.__ref_index).to.not.be.ok;

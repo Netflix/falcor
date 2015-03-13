@@ -108,6 +108,8 @@ gulp.task('build.get.ops', function() {
         src([
             'src/lru.js',
             'src/support.js',
+            'src/hardlink.js',
+            'src/followReference.js',
             'src/get-header.js',
             'src/get.js',
             'src/bridge.js'

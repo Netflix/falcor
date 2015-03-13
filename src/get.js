@@ -15,12 +15,10 @@ function walk(model, root, curr, pathOrJSON, depth, seedOrFunction, positionalIn
     // The Base Cases.  There is a type, therefore we have hit a 'leaf' node.
     if (atLeaf) {
 
-        if (fromReference) {
-            requestedPath.push(null);
-        }
-        
-        // TODO: Expired
         if (currType === ERROR) {
+            if (fromReference) {
+                requestedPath.push(null);
+            }
             emitError(model, curr, currValue, requestedPath, optimizedPath, outerResults);
         } 
         
@@ -29,6 +27,7 @@ function walk(model, root, curr, pathOrJSON, depth, seedOrFunction, positionalIn
             if (isExpired(curr)) {
                 if (!curr[__INVALIDATED]) {
                     lruSplice(model, curr);
+                    removeHardlink(curr);
                 }
                 emitMissing(pathOrJSON, depth, requestedPath, optimizedPath, positionalInfo, outerResults, outputFormat);
             } else {
@@ -137,7 +136,8 @@ function walk(model, root, curr, pathOrJSON, depth, seedOrFunction, positionalIn
             
             if (next) {
                 var nType = next[$TYPE];
-                var value = nType === SENTINEL ? next.value : next;
+                var nSentinel = nType === SENTINEL;
+                var value = nSentinel ? next.value : next;
                 var valueIsArray = Array.isArray(value);
                 if (asPathMap) {
                     permutePosition.push(next[__GENERATION]);
@@ -145,8 +145,8 @@ function walk(model, root, curr, pathOrJSON, depth, seedOrFunction, positionalIn
 
                 if (jsonQuery && hasChildren || !jsonQuery && depth < pathOrJSON.length) {
 
-                    if (valueIsArray) {
-                        var ref = followReference(model, root, root, value);
+                    if (valueIsArray && (!nSentinel || nSentinel && !isExpired(next))) {
+                        var ref = followReference(model, root, root, next, value);
                         fromReference = true;
                         next = ref[0];
                         var refPath = ref[1];
@@ -284,7 +284,9 @@ function concatAndInsertMissing(remainingPath, results, permuteRequested, permut
 function emitValues(model, node, path, depth, seedOrFunction, outerResults, permuteRequested, permuteOptimized, permutePosition, outputFormat) {
     
     var i, len, k, key, curr;
-    updateTrailingNullCase(path, depth, permuteRequested);
+    if (permuteRequested[permuteRequested.length - 1] !== null) {
+        updateTrailingNullCase(path, depth, permuteRequested);
+    }
     lruPromote(model, node);
 
     outerResults.requestedPaths.push(permuteRequested);
@@ -354,60 +356,3 @@ function emitValues(model, node, path, depth, seedOrFunction, outerResults, perm
     }
 }
 
-function followReference(model, root, node, reference) {
-
-    var depth = 0;
-    var expired = false;
-    while (true) {
-        var k = reference[depth++];
-        var next = node[k];
-
-        if (next) {
-            var type = next.$type;
-            var value = type === 'sentinel' ? next.value : next;
-
-            if (depth < reference.length) {
-                if (type || Array.isArray(value)) {
-                    if (isExpired(next)) {
-                        expired = true;
-                    }
-                    node = next;
-                    break;
-                }
-
-                node = next;
-                continue;
-            }
-
-            else if (depth === reference.length) {
-
-                if (type && isExpired(next)) {
-                    expired = true;
-                    break;
-                }
-
-                // Restart the reference follower.
-                if (Array.isArray(value)) {
-                    depth = 0;
-                    reference = value;
-                    node = root;
-                    continue;
-                }
-
-                node = next;
-                break;
-            }
-        }
-        break;
-    }
-    
-    if (depth < reference.length) {
-        var ref = [];
-        for (var i = 0; i < depth; i++) {
-            ref[i] = reference[i];
-        }
-        reference = ref;
-    }
-
-    return [expired ? undefined : node, reference];
-}
