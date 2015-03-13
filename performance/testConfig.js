@@ -204,6 +204,16 @@ function asJSONSimpleRec() {
         ['videos', 1234, 'summary']
     ], [{}]);
 }
+function asJSONReference() {
+    model._getPathsAsJSON(model, [
+        ['genreList', 0, 0, 'summary']
+    ], [{}]);
+}
+function asJSONReferenceRec() {
+    recModel._getPathsAsJSON(recModel, [
+        ['genreList', 0, 0, 'summary']
+    ], [{}]);
+}
 function asPathMapSimple() {
     model._getPathsAsPathMap(model, [
         ['videos', 1234, 'summary']
@@ -256,6 +266,8 @@ module.exports = function() {
         simplePathMap: asPathMapSimple,
         simplePathMapRec: asPathMapSimpleRec,
         simpleValues: asValuesSimple,
-        simpleValuesRec: asValuesSimpleRec
+        simpleValuesRec: asValuesSimpleRec,
+        referenceJSON: asJSONReference,
+        referenceJSONRec: asJSONReferenceRec
     };
 };

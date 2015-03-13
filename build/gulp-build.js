@@ -4,6 +4,7 @@ var browserify = require('gulp-browserify');
 var surround = require('./surround');
 var concat = require('gulp-concat');
 var build = require('./build');
+var support = require('./gulp-build-support');
 var tvuiPrefix = '//@depend ../Rx.netflix.js\n' +
     '//@depend netflix/falcor/Falcor.js\n' +
     '(function(exports) {';

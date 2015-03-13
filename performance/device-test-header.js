@@ -1,4 +1,4 @@
 var testConfig = window.testConfig();
 var config = testConfig.config;
-testConfig.repeatInConfig('falcor.Model test', 8, testConfig.simpleJSON, config.tests);
+testConfig.repeatInConfig('rec.Model AsJSON Reference', 8, testConfig.referenceJSONRec, config.tests);
 onTestsLoaded(config);
