@@ -1,5 +1,4 @@
-var Benchmark = require('benchmark');
-function runner(testCfg, count, done) {
+function runner(Benchmark, testCfg, count, done) {
     var testSuiteCount = 0;
     var names = Object.keys(testCfg.tests);
     var totalResults = names.
@@ -9,7 +8,7 @@ function runner(testCfg, count, done) {
         }, {});
     
     function recurse() {
-        _runner(testCfg, function(results) {
+        _runner(Benchmark, testCfg, function(results) {
             testSuiteCount++;
             console.warn('Test Count ' + testSuiteCount);
             results.forEach(function(r) {
@@ -46,7 +45,7 @@ function runner(testCfg, count, done) {
     recurse();
 };
 
-function _runner(testCfg, done) {
+function _runner(Benchmark, testCfg, done) {
     var countDone = 0;
     var suite = new Benchmark.Suite(testCfg.name);
     var results = [];

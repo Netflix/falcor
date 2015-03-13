@@ -6,6 +6,11 @@ gulp.task("clean.tmp", function() {
         pipe(clean());
 });
 
+gulp.task("clean.perf", function() {
+    return gulp.src(["./performance/bin"]).
+        pipe(clean());
+});
+
 gulp.task("clean.doc", function() {
     return gulp.src(["./doc"]).
         pipe(clean());

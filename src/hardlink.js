@@ -1,6 +1,5 @@
 function createHardlink(from, to) {
     
-    debugger
     // create a back reference
     var backRefs  = to[__REFS_LENGTH] || 0;
     to[__REF + backRefs] = from;

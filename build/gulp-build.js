@@ -53,10 +53,7 @@ gulp.task('build.operations', ['build.macros'], function() {
 });
 
 gulp.task('build.compiled_operations', ['build.sweet'], function() {
-    return gulp.
-        src('./tmp/framework/compiled_operations/**.js').
-        pipe(concat({path: 'operations.js'})).
-        pipe(gulp.dest('tmp/framework'));
+    return support.buildOperations();
 });
 
 gulp.task('build.sweet', ['build.operations'], function() {

@@ -11,6 +11,7 @@ require('./build/gulp-clean');
 require('./build/gulp-build');
 require('./build/gulp-build-recursive');
 require('./build/gulp-build-support');
+require('./build/performance/gulp-perf');
 
 function test(cb) {
     gulp.src(['bin/Falcor.js']).

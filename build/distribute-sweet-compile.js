@@ -6,7 +6,6 @@ var Rx = require("rx");
 var readDir = Rx.Observable.fromNodeCallback(fs.readdir);
 var readFile = Rx.Observable.fromNodeCallback(fs.readFile);
 var writeFile = Rx.Observable.fromNodeCallback(fs.writeFile);
-var mkdir = Rx.Observable.fromNodeCallback(fs.mkdir);
 var chmod = Rx.Observable.fromNodeCallback(fs.chmod);
 var execFn = require("child_process").exec;
 
@@ -87,6 +86,15 @@ module.exports = function() {
     );
     return outStream;
 };
+
+function mkdir(dir) {
+    return Rx.Observable.create(function(observer) {
+        fs.mkdir(dir, function(err) {
+            observer.onNext();
+            observer.onCompleted();
+        });
+    });
+}
 
 if (require.main === module) {
     var sweet = require("sweet.js");
