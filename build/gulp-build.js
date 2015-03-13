@@ -38,19 +38,12 @@ gulp.task("build.dev", ["clean.dev", "build.node"]);
 
 gulp.task("build.macros", ["clean.dev"], function() {
     return gulp.src([
-            // "./macros/*.sjs.js",
+            "./macros/*.sjs.js",
             "./macros/values/*.sjs.js",
-            // "./macros/mixins/*.js",
-            // "./macros/paths/*.js",
-            // "./macros/keys/*.js",
-            // "./macros/nodes/*.js",
-            // "./macros/traversal/*.js",
-            // "./macros/operations/*.js",
-            "./functional-macros/*.js",
-            "./functional-macros/keys/*.js",
-            "./functional-macros/mixins/*.js",
-            "./functional-macros/nodes/*.js",
-            "./functional-macros/traversal/*.js",
+            "./macros/keys/*.js",
+            "./macros/mixins/*.js",
+            "./macros/nodes/*.js",
+            "./macros/traversal/*.js",
         ]).
         pipe(concat({path: "macros.sjs.js"})).
         pipe(gulp.dest("tmp/framework"));
@@ -59,24 +52,18 @@ gulp.task("build.macros", ["clean.dev"], function() {
 gulp.task("build.operations", ["build.macros"], function() {
     return gulp.
         src([
-            "./functional-macros/operations/get/paths/*.js",
-            "./functional-macros/operations/get/pathMaps/*.js",
-            "./functional-macros/operations/set/paths/*.js",
-            "./functional-macros/operations/set/pathMaps/*.js",
-            "./functional-macros/operations/set/jsong/*.js",
+            "./framework/get/*.js",
+            "./framework/get/paths/*.js",
+            "./framework/get/pathMaps/*.js",
             
-            // "./framework/get/*.js",
-            // "./framework/get/paths/*.js",
-            // "./framework/get/pathMaps/*.js",
+            "./framework/set/*.js",
+            "./framework/set/paths/*.js",
+            "./framework/set/pathMaps/*.js",
+            "./framework/set/jsong/*.js",
             
-            // "./framework/set/*.js",
-            // "./framework/set/paths/*.js",
-            // "./framework/set/pathMaps/*.js",
-            // "./framework/set/jsong/*.js",
+            "./framework/call/call.js",
             
-            // "./framework/call/call.js",
-            
-            // "./framework/invalidate/*.js",
+            "./framework/invalidate/*.js",
         ]).
         pipe(gulp.dest("tmp/framework/operations")).
         pipe(concat({path: "operations.js"})).

@@ -24,7 +24,6 @@ describe("Behavioral", function() {
     require("./value");
     require("./modes");
     require('./set');
-    require("./invalidate.spec");
     
     it('should have two separate models with two separate caches.', function() {
         var model1 = getModel(null, Cache());

@@ -1,73 +1,72 @@
 macro walkPathSet {
-    case infix { $ret:ident = | $walk (
-        $stepKeySet, $stepNode, $stepEdge,
-        $appendNullKey,
-        $path, $depth, $height, $length,
-        $pathExpr:expr, $(
+    case infix { $retVal:ident = | _(
+        $processKey, $processNode, $processLink, $processEdge,
+        $path, $depth, $height,                    $(
         $stacks, $roots, $parents, $nodes) (,) ... $(
         $types, $values, $sizes, $timestamps, $expires) (,) ...
     ) } => {
     
-    var stacks  = #{ $stacks  ... };
-    var roots   = #{ $roots   ... };
-    var parents = #{ $parents ... };
     var nodes   = #{ $nodes   ... };
     var types   = #{ $types   ... };
     var values  = #{ $values  ... };
+    var expires = #{ $expires ... };
     
-    letstx $stack  = stacks .slice(0, 1);
-    letstx $root   = roots  .slice(0, 1);
-    letstx $parent = parents.slice(0, 1);
     letstx $node   = nodes  .slice(0, 1);
     letstx $type   = types  .slice(0, 1);
     letstx $value  = values .slice(0, 1);
+    letstx $expire = expires.slice(0, 1);
     
     return #{
-        var key, isKeySet;
-        $path = $pathExpr;
-        $height = ($length = $path.length) - 1;
-        
-        $parent = $stack[$depth - 1];
-        $type   = $parent.type();
-        $value  = $parent.value($type);
-        if($parent.isEdge($type, $value)) {
-            $node = $parent;
-            $parent = $stack;
-            key = $depth - 1;
-            isKeySet = false;
-            $node = $stepEdge(key, isKeySet, $depth, $(
-                $roots, $parents, $nodes) (,) ... , $(
+        /* Walk Path Set */
+        var key = undefined, isKeySet = false;
+        $height = $path.length;
+        $retVal = tailrec follow_path_set($nodes (,) ... , $depth) {
+            
+            $type  = $node.type();
+            $value = $node.value($type);
+            
+            if($depth < $height && $node.isLink($type, $value)) {
+                if($node.isExpiredOrInvalid($expire)) {
+                    $type  = undefined;
+                    $value = undefined;
+                    $node  = $node.expire();
+                }
+                
+                /* Process Link */
+                $node = $processLink($depth, key, isKeySet, $(
+                    $roots, $parents, $nodes    ) (,) ... , $(
+                    $types, $values, $sizes, $timestamps, $expires) (,) ...
+                )
+                if($node.isEdge($type, $value)) {
+                    key = null;
+                    return follow_path_set($nodes (,) ... , $depth);
+                }
+            } else if($depth === $height || !!$type || $node.isPrimitive()) {
+                if($node.isExpiredOrInvalid($expire)) {
+                    $type  = undefined;
+                    $value = undefined;
+                    $node  = $node.expire();
+                }
+                
+                /* Process Edge */
+                $node = $processEdge($depth, key, isKeySet, $(
+                    $roots, $parents, $nodes    ) (,) ... , $(
+                    $types, $values, $sizes, $timestamps, $expires) (,) ...
+                )
+                return $node;
+            }
+            
+            key = $path[$depth];
+            isKeySet = $processKey($path, $depth, key) $(
+            $stacks[$depth - 1] = $parents = $nodes;) ...
+            /* Process Node */
+            $node = $processNode($depth, key, isKeySet, $(
+                $roots, $parents, $nodes    ) (,) ... , $(
                 $types, $values, $sizes, $timestamps, $expires) (,) ...
             )
-            $ret = $node;
-        } else {
-            $ret = tailrec follow_path($parents (,) ... , $depth) {
-                key = $path[$depth];
-                isKeySet = $stepKeySet($path, $depth, key)
-                if(key != null) {
-                    if($depth < $height) {
-                        $node = $stepNode(key, isKeySet, $depth, $(
-                            $roots, $parents, $nodes) (,) ... , $(
-                            $types, $values, $sizes, $timestamps, $expires) (,) ...
-                        )
-                        if($node.isEdge($type, $value)) {
-                            return $node;
-                        }
-                        return follow_path($($stacks[$depth] = $nodes) (,) ... , $depth + 1);
-                    } else if($depth === $height) {
-                        $node = $stepEdge(key, isKeySet, $depth, $(
-                            $roots, $parents, $nodes) (,) ... , $(
-                            $types, $values, $sizes, $timestamps, $expires) (,) ...
-                        )
-                        $appendNullKey = false;
-                        return $node;
-                    }
-                } else if($depth < $height) {
-                    return follow_path($parents (,) ... , $depth + 1);
-                }
-                return $node;
-            }($($nodes = $stacks[$depth - 1]) (,) ... , $depth);
-        }
+            
+            return follow_path_set($nodes (,) ... , $depth + 1);
+        }($($parents = $stacks[$depth - 1]) (,) ... , $depth)
     }; }
     rule { } => { $[walkPathSet] }
 }

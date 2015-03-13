@@ -19,9 +19,13 @@ describe("Model", function() {
         require('./set/edge-cases.spec');
     });
 
-    // describe("#call", function() {
-    //     require("./call/call.spec");
-    // });
+    describe("#call", function() {
+        require("./call/call.spec");
+    });
+
+    describe("#invalidate", function() {
+        require("./invalidate/invalidate.spec");
+    })
 
     // describe("--behavioral", function() {
     //     require("./behavioral")

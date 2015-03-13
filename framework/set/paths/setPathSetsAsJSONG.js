@@ -1,4 +1,4 @@
-function setPathMapsAsJSONG(model, pathMaps, values, errorSelector, boundPath) {
+function setPathSetsAsJSONG(model, pathValues, values, errorSelector, boundPath) {
     
     ++__GENERATION_VERSION;
     
@@ -11,7 +11,7 @@ function setPathMapsAsJSONG(model, pathMaps, values, errorSelector, boundPath) {
     errorSelector = errorSelector || model._errorSelector;
     var errorsAsValues = true,
         
-        map, hasValue = false,
+        path, value, hasValue = false,
         depth  = 0, linkDepth  = 0,
         height = 0, linkHeight = 0,
         linkPath , linkIndex  = 0,
@@ -19,7 +19,7 @@ function setPathMapsAsJSONG(model, pathMaps, values, errorSelector, boundPath) {
         requestedPath = [], requestedPaths = [], requestedMissingPaths = [],
         optimizedPath = [], optimizedPaths = [], optimizedMissingPaths = [],
         
-        errors = [], refs = [], mapStack = [],
+        errors = [], refs = [],
         
         nodeLoc = getBoundPath(model),
         nodePath = nodeLoc.path,
@@ -35,9 +35,9 @@ function setPathMapsAsJSONG(model, pathMaps, values, errorSelector, boundPath) {
     
     curried errorSelector2 = errorSelector(requestedPath);
     
-    NodeMixin(root, expired, errorSelector2, map)
     NodeMixin(root, expired, errorSelector2, json)
     NodeMixin(root, expired, errorSelector2, node)
+    NodeMixin(root, expired, errorSelector2, value)
     NodeMixin(root, expired, errorSelector2, nodeValue)
     NodeMixin(root, expired, errorSelector2, nodeParent)
     
@@ -53,18 +53,15 @@ function setPathMapsAsJSONG(model, pathMaps, values, errorSelector, boundPath) {
              addRequestedPath = addSuccessPath(requestedPaths, requestedPath),
              addOptimizedPath = addSuccessPath(optimizedPaths, optimizedPath),
              
-             setMapBranch     = setNodeMap(map),
-             setEdgeValue     = setEdge(map),
+             setEdgeValue     = setEdge(value),
              addErrorValue2   = addErrorValue(errors, requestedPath),
              
-             addMissingPaths  = addMissingPathMaps(
-                 requestedMissingPaths, requestedPath,
-                 optimizedMissingPaths, optimizedPath,
-                 mapStack, nodePath, index
-             ),
+             addRequestedMiss = addRequestedMissingPath(requestedMissingPaths, requestedPath, path, height, nodePath, index),
+             addOptimizedMiss = addOptimizedMissingPath(optimizedMissingPaths, optimizedPath, path, height),
+             
              setupHardLink    = addHardLink(linkPath);
     
-    sequence visitRefNodeKey  = [setNode, addOptLinkKey, addJSONLink];
+    sequence visitRefNodeKey  = [addOptLinkKey, setNode, addJSONLink];
     
     curried  visitRefNodeKey2 = visitNode(visitRefNodeKey);
     
@@ -76,7 +73,7 @@ function setPathMapsAsJSONG(model, pathMaps, values, errorSelector, boundPath) {
     
     sequence visitNodeKey     = [addOptPathKey, setNode, addJSONNode],
              visitLeafKey     = [addRequestedPath, addOptimizedPath, addJSONEdge],
-             visitMissKey     = [addMissingPaths];
+             visitMissKey     = [addRequestedMiss, addOptimizedMiss];
     
     curried  visitNodeKey2    = visitNode(visitNodeKey),
              visitEdgeKey     = visitEdge(setEdgeValue),
@@ -88,24 +85,27 @@ function setPathMapsAsJSONG(model, pathMaps, values, errorSelector, boundPath) {
              visitPathLink    = [followReference],
              visitPathEdge    = [visitEdgeKey, visitEdgeLeaf, visitEdgeError, visitEdgeMiss];
     
-    for(var index = -1, count = pathMaps.length; ++index < count;) {
+    jsons[offset - 1] = jsonRoot = values && values[0];
+    
+    for(var index = -1, count = pathValues.length; ++index < count;) {
         
-        map = mapStack[0] = pathMaps[index];
+        path  = pathValues[index];
+        value = path.value;
+        path  = path.path;
         depth = 0;
         refs.length  = 0;
         jsons.length = 0;
-        jsons[offset - 1] = jsonRoot = jsonParent = json = values && values[0];
         
         while(depth > -1) {
             depth = hydrateKeysAtDepth(linkIndex, linkHeight, refs, requestedPath, optimizedPath, depth)
-            node  = walkPathMap(
+            node  = walkPathSet(
                 keyToKeySet, visitPathNode, visitPathLink, visitPathEdge,
-                mapStack, map, depth, height,
+                path, depth, height,
                 nodes, nodeRoot, nodeParent, node,
                 jsons, jsonRoot, jsonParent, json,
                 nodeType, nodeValue, nodeSize, nodeTimestamp, nodeExpires
             )
-            depth = depthToPathMap(mapStack, depth)
+            depth = depthToKeySet(path, depth)
         }
     }
     

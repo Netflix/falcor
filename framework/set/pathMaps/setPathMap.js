@@ -1,4 +1,4 @@
-function setPathMapsAsJSONG(model, pathMaps, values, errorSelector, boundPath) {
+function setPathMap(model, map, errorSelector, boundPath) {
     
     ++__GENERATION_VERSION;
     
@@ -9,29 +9,31 @@ function setPathMapsAsJSONG(model, pathMaps, values, errorSelector, boundPath) {
         refreshing = model._refreshing || false,
         materialized = model._materialized || false;
     errorSelector = errorSelector || model._errorSelector;
-    var errorsAsValues = true,
+    var errorsAsValues = model._errorsAsValues || false,
         
-        map, hasValue = false,
         depth  = 0, linkDepth  = 0,
         height = 0, linkHeight = 0,
-        linkPath , linkIndex  = 0,
+        linkPath  , linkIndex  = 0,
         
         requestedPath = [], requestedPaths = [], requestedMissingPaths = [],
         optimizedPath = [], optimizedPaths = [], optimizedMissingPaths = [],
         
-        errors = [], refs = [], mapStack = [],
+        errors = [], refs = [], keysets = [], mapStack = [],
         
         nodeLoc = getBoundPath(model),
         nodePath = nodeLoc.path,
         
         nodes = [], nodeRoot = model._cache, nodeParent = nodeLoc.value, node = nodeParent,
-        jsons = [], jsonRoot, jsonParent, json,
+        jsons = [], jsonRoot = Object.create(null), jsonParent = jsonRoot, json = jsonParent,
         
         nodeType, nodeValue, nodeSize, nodeTimestamp, nodeExpires;
     
     var offset = boundPath && boundPath.length || 0;
     refs[-1]  = nodePath;
     nodes[-1] = nodeParent;
+    jsons[offset - 1] = jsonRoot;
+    jsons[offset - 2] = jsons;
+    keysets[offset-1] = offset - 1;
     
     curried errorSelector2 = errorSelector(requestedPath);
     
@@ -41,9 +43,9 @@ function setPathMapsAsJSONG(model, pathMaps, values, errorSelector, boundPath) {
     NodeMixin(root, expired, errorSelector2, nodeValue)
     NodeMixin(root, expired, errorSelector2, nodeParent)
     
-    curried  addJSONNode      = addNodeJSONG(jsonRoot, jsonParent, json, boxed),
-             addJSONLink      = addLinkJSONG(jsonRoot, jsonParent, json, materialized, boxed, errorsAsValues),
-             addJSONEdge      = addEdgeJSONG(jsonRoot, jsonParent, json, materialized, boxed, errorsAsValues),
+    curried  addJSONKeySet    = addKeySetAtDepth(keysets),
+             addJSONLink      = addLinkJSON(offset, jsons, jsonRoot, jsonParent, json, keysets),
+             addJSONEdge      = addEdgeJSON(offset, jsons, jsonRoot, jsonParent, json, keysets, materialized, boxed, errorsAsValues),
              
              addReqPathKey    = addKeyAtDepth(requestedPath),
              addOptPathKey    = addKeyAtLinkDepth(optimizedPath, linkIndex, linkHeight),
@@ -60,59 +62,51 @@ function setPathMapsAsJSONG(model, pathMaps, values, errorSelector, boundPath) {
              addMissingPaths  = addMissingPathMaps(
                  requestedMissingPaths, requestedPath,
                  optimizedMissingPaths, optimizedPath,
-                 mapStack, nodePath, index
+                 mapStack, nodePath, 0
              ),
              setupHardLink    = addHardLink(linkPath);
     
-    sequence visitRefNodeKey  = [setNode, addOptLinkKey, addJSONLink];
-    
-    curried  visitRefNodeKey2 = visitNode(visitRefNodeKey);
-    
-    sequence visitRefNode     = [visitRefNodeKey2],
+    sequence visitRefNodeKey  = [setMapBranch, addOptLinkKey],
              visitRefEdge     = [addReqLeafKey, setupHardLink];
     
-    curried  walkReference    = walkLink(visitRefNode, visitRefEdge),
-             followReference  = followLink(walkReference, refs, optimizedPath, linkPath, linkIndex, linkDepth, linkHeight);
+    curried  visitRefNode     = visitNode(visitRefNodeKey),
+             walkReference    = walkLink(visitRefNode, visitRefEdge),
+             followReference  = followHardLink(walkReference, refs, optimizedPath, linkPath, linkIndex, linkDepth, linkHeight);
     
-    sequence visitNodeKey     = [addOptPathKey, setNode, addJSONNode],
+    sequence visitNodeKey     = [addOptPathKey, setMapBranch, addJSONLink],
              visitLeafKey     = [addRequestedPath, addOptimizedPath, addJSONEdge],
              visitMissKey     = [addMissingPaths];
     
     curried  visitNodeKey2    = visitNode(visitNodeKey),
              visitEdgeKey     = visitEdge(setEdgeValue),
-             visitEdgeLeaf    = visitLeaf(visitLeafKey, hasValue, materialized, errorsAsValues),
+             visitEdgeLeaf    = visitLeaf(visitLeafKey, noop, materialized, errorsAsValues),
              visitEdgeError   = visitError(addErrorValue2),
              visitEdgeMiss    = visitMiss(visitMissKey, refreshing);
     
-    sequence visitPathNode    = [addReqPathKey, visitNodeKey2],
+    sequence visitPathNode    = [addReqPathKey, addJSONKeySet, visitNodeKey2],
              visitPathLink    = [followReference],
              visitPathEdge    = [visitEdgeKey, visitEdgeLeaf, visitEdgeError, visitEdgeMiss];
     
-    for(var index = -1, count = pathMaps.length; ++index < count;) {
+    curried  hydratePaths     = hydrateKeysAtDepth(linkIndex, linkHeight, refs, requestedPath, optimizedPath);
+    
+    mapStack[0] = map;
+    
+    while(depth > -1) {
         
-        map = mapStack[0] = pathMaps[index];
-        depth = 0;
-        refs.length  = 0;
-        jsons.length = 0;
-        jsons[offset - 1] = jsonRoot = jsonParent = json = values && values[0];
+        depth = hydratePaths(depth)
         
-        while(depth > -1) {
-            depth = hydrateKeysAtDepth(linkIndex, linkHeight, refs, requestedPath, optimizedPath, depth)
-            node  = walkPathMap(
-                keyToKeySet, visitPathNode, visitPathLink, visitPathEdge,
-                mapStack, map, depth, height,
-                nodes, nodeRoot, nodeParent, node,
-                jsons, jsonRoot, jsonParent, json,
-                nodeType, nodeValue, nodeSize, nodeTimestamp, nodeExpires
-            )
-            depth = depthToPathMap(mapStack, depth)
-        }
+        node  = walkPathMap(
+            keyToKeySet, visitPathNode, visitPathLink, visitPathEdge,
+            mapStack, map, depth, height,
+            nodes, nodeRoot, nodeParent, node,
+            nodeType, nodeValue, nodeSize, nodeTimestamp, nodeExpires
+        )
+        
+        depth = depthToPathMap(mapStack, depth)
     }
     
-    values && (values[0] = !(hasValue = !hasValue) && { jsong: jsons[offset - 1], paths: requestedPaths } || undefined);
-    
     return {
-        "values": values,
+        "values": [{ json: jsons[offset - 1] }],
         "errors": errors,
         "requestedPaths": requestedPaths,
         "optimizedPaths": optimizedPaths,

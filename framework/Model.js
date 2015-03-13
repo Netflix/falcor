@@ -34,8 +34,8 @@ Model.prototype = {
     _errorSelector: function(x, y) { return y; },
     get: modelOperation("get"),
     set: modelOperation("set"),
-    // invalidate: modelOperation("inv"),
-    // call: call,
+    invalidate: modelOperation("inv"),
+    call: call,
     getValue: function(path) {
         return this.get(path, function(x) { return x });
     },
@@ -101,7 +101,7 @@ Model.prototype = {
         if(Array.isArray(path) === false) {
             throw new Error("Model#getValueSync must be called with an Array path.");
         }
-        var value = this.syncCheck("getValueSync") && this._getValueSync(this, this._path.concat(path)).value;
+        var value = this.syncCheck("getValueSync") && this._getValueSync(this, this._path.concat(path));
         if(value[$TYPE] === ERROR) {
             throw value;
         }
@@ -228,14 +228,14 @@ Model.prototype = {
     _setJSONGsAsPathMap      :      setJSONGsAsPathMap,
     _setJSONGsAsJSONG        :        setJSONGsAsJSONG,
     
-    // _invPathsAsValues        :       invalidatePaths,
-    // _invPathsAsJSON          :       invalidatePaths,
-    // _invPathsAsPathMap       :       invalidatePaths,
-    // _invPathsAsJSONG         :       invalidatePaths,
+    _invPathSetsAsValues     :      invalidatePathSets,
+    _invPathSetsAsJSON       :      invalidatePathSets,
+    _invPathSetsAsPathMap    :      invalidatePathSets,
+    _invPathSetsAsJSONG      :      invalidatePathSets,
     
-    // _invPathMapsAsValues     :    invalidatePathMaps,
-    // _invPathMapsAsJSON       :    invalidatePathMaps,
-    // _invPathMapsAsPathMap    :    invalidatePathMaps,
-    // _invPathMapsAsJSONG      :    invalidatePathMaps
+    _invPathMapsAsValues     :      invalidatePathMaps,
+    _invPathMapsAsJSON       :      invalidatePathMaps,
+    _invPathMapsAsPathMap    :      invalidatePathMaps,
+    _invPathMapsAsJSONG      :      invalidatePathMaps
 };
 

@@ -2,109 +2,129 @@ function setJSONGsAsJSON(model, envelopes, values, errorSelector, boundPath) {
     
     ++__GENERATION_VERSION;
     
-    var boundLength = 0,
-        nodeRoot = model._cache || (model._cache = {}),
-        nodeParent, node;
+    offset = 0;
     
-    if(Array.isArray(boundPath)) {
-        nodeParent  = nodeRoot;
-        boundLength = boundPath.length;
-    } else {
-        nodeParent  = getBoundContext(model);
-        boundPath   = model._path || [];
-    }
-    
-    var root       = model._root  || model,
-        boxed      = model._boxed || false,
-        expired    = root.expired || (root.expired = []),
+    var root = model._root,
+        expired = root.expired,
+        
+        boxed = model._boxed || false,
         refreshing = model._refreshing || false,
-        appendNullKey = false;
-    
-    (typeof errorSelector === "function") || (errorSelector = model._errorSelector) || (errorSelector = function(x, y){return y;});
-    
-    default var envelopes <-
-        jsonKeys: [],
-        nodes: [], messages: [], jsons: [],
-        errors: [], refs: [],
-        depth: 0, refIndex: 0, refDepth: 0,
-        requestedPath: [], optimizedPath: [],
-        requestedPaths: [], optimizedPaths: [],
-        requestedMissingPaths: [], optimizedMissingPaths: [],
-        hasValue: false,
-        jsonRoot: values && values[0], jsonParent: jsonRoot, jsonNode: jsonParent;
-    
-    var path, length = 0, height = 0, reference, refLength = 0, refHeight = 0,
-        jsonValueOffset = 0, messageRoot, messageParent, message,
+        materialized = model._materialized || false;
+    errorSelector = errorSelector || model._errorSelector;
+    var errorsAsValues = model._errorsAsValues || false,
+        
+        path, hasValue = false,
+        depth  = 0, linkDepth  = 0,
+        height = 0, linkHeight = 0,
+        linkPath  , linkIndex  = 0,
+        
+        requestedPath = [], requestedPaths = [], requestedMissingPaths = [],
+        optimizedPath = [], optimizedPaths = [], optimizedMissingPaths = [],
+        
+        errors = [], refs = [], keysets = [],
+        
+        nodePath = [],
+        nodes = [], nodeRoot = model._cache, nodeParent = nodeRoot, node = nodeParent,
+        messages = [], messageRoot, messageParent, message,
+        jsons = [], jsonRoot, jsonParent, json,
+        
         nodeType, nodeValue, nodeSize, nodeTimestamp, nodeExpires,
         messageType, messageValue, messageSize, messageTimestamp, messageExpires;
     
-    refs[-1]  = boundPath;
+    refs[-1]  = nodePath;
     nodes[-1] = nodeParent;
-    jsons[-1] = jsonParent;
-    jsons[-2] = jsons;
-    jsonKeys[-1] = -1;
+    jsons[offset - 2] = jsons;
+    keysets[offset-1] = offset - 1;
     
     curried errorSelector2 = errorSelector(requestedPath);
     
+    NodeMixin(root, expired, errorSelector2, json)
     NodeMixin(root, expired, errorSelector2, node)
-    NodeMixin(root, expired, errorSelector2, nodeParent)
     NodeMixin(root, expired, errorSelector2, message)
+    NodeMixin(root, expired, errorSelector2, nodeValue)
+    NodeMixin(root, expired, errorSelector2, nodeParent)
     NodeMixin(root, expired, errorSelector2, messageParent)
-    NodeMixin(root, expired, errorSelector2, jsonNode)
-    NodeMixin(root, expired, errorSelector2, jsonParent)
-    NodeMixin(root, expired, errorSelector2, jsonRoot)
     
-    curried getPathAsJSON    = pathAsJSON(noop, hasValue, values, jsons, jsonRoot, jsonKeys),
-            getPathAsJSONG   = jsongPathAsJSON(getPathAsJSON, jsonValueOffset),
-            unwindAsJSONG    = unwindJSONGPathAsJSON(unwindPath, hasValue, values, jsons, jsonRoot, jsonValueOffset),
-            checkNodeExpired = checkExpired(visit),
-            mergeMessageNode = mergeNode(checkNodeExpired),
-            mergeMessageEdge = mergeEdge(checkNodeExpired),
-            optimizeJSONRefN = addRequestedKey(mergeMessageNode, optimizedPath),
-            optimizeJSONRefE = setHardLink(optimizeJSONRefN, reference),
-            setReferenceNode = walkReference(keySetFalse, optimizeJSONRefN, optimizeJSONRefE, appendNullKey, reference),
-            
-            requestedJSONKey = getRequestedKeySet(getKeySet, requestedPath, boundLength),
-            optimizeJSONNode = addOptimizedKey(mergeMessageNode, optimizedPath, refIndex, refLength),
-            optimizeJSONEdge = addOptimizedKey(mergeMessageEdge, optimizedPath, refIndex, refLength),
-            
-            setJSONNode      = nodeAsJSON(optimizeJSONNode, jsonKeys, jsonParent, jsonNode, boundLength),
-            setJSONEdge      = edgeAsJSON(optimizeJSONEdge, jsonKeys, jsons, jsonParent, boundLength),
-            followJSONRef    = followPathSetRef(setReferenceNode, optimizedPath, reference, refs, refIndex, refDepth, refHeight, refLength),
-            setOptimizedNode = optimizeNode(setJSONNode, followJSONRef),
-            
-            onJSONNext       = onNext(requestedPath, optimizedPath, requestedPaths, optimizedPaths, appendNullKey),
-            onJSONNext2      = nextAsJSON(onJSONNext, hasValue, jsonKeys, jsons, jsonParent, boxed),
-            onJSONError      = onError(errors, boxed, requestedPath, appendNullKey),
-            onJSONMiss       = onPathSetMiss(boundPath, boundLength, requestedPath, optimizedPath, requestedMissingPaths, optimizedMissingPaths),
-            
-            setPathSetAsJSON = walkPathSet(requestedJSONKey, setOptimizedNode, setJSONEdge, appendNullKey, path),
-            setPathSetComboAsJSON = walkPathSetCombo(
-                setPathSetAsJSON, unwindAsJSONG,
-                onJSONNext2, onJSONError, onJSONMiss,
-                boxed, refreshing, appendNullKey,
-                refs, refIndex, refLength,
-                requestedPath, optimizedPath
-            );
+    curried  addJSONKeySet    = addKeySetAtDepth(keysets),
+             addJSONLink      = addLinkJSON(offset, jsons, jsonRoot, jsonParent, json, keysets),
+             addJSONEdge      = addEdgeJSON(offset, jsons, jsonRoot, jsonParent, json, keysets, materialized, boxed, errorsAsValues),
+             
+             addReqPathKey    = addKeyAtDepth(requestedPath),
+             addOptPathKey    = addKeyAtLinkDepth(optimizedPath, linkIndex, linkHeight),
+             addOptLinkKey    = addKeyAtDepth(optimizedPath),
+             addReqLeafKey    = addNullLeafKey(requestedPath),
+             
+             addRequestedPath = addSuccessPath(requestedPaths, requestedPath),
+             addOptimizedPath = addSuccessPath(optimizedPaths, optimizedPath),
+             
+             addErrorValue2   = addErrorValue(errors, requestedPath),
+             
+             addRequestedMiss = addRequestedMissingPath(requestedMissingPaths, requestedPath, path, height, nodePath, pathSetIndex),
+             addOptimizedMiss = addOptimizedMissingPath(optimizedMissingPaths, optimizedPath, path, height),
+             
+             setupHardLink    = addHardLink(linkPath);
+             
+    sequence visitRefNodeKey  = [addOptLinkKey, mergeNode],
+             visitRefEdge     = [addReqLeafKey, setupHardLink];
     
-    var envelope, pathSets, index = -1, count = envelopes.length;
+    curried  visitRefNode     = visitNode(visitRefNodeKey),
+             walkReference    = walkLink(visitRefNode, visitRefEdge),
+             followReference  = followLink(
+                 walkReference, refs, optimizedPath,
+                 linkPath, linkIndex, linkDepth, linkHeight
+             );
     
-    while(++index < count) {
-        envelope = envelopes[index];
+    sequence visitNodeKey     = [addOptPathKey, mergeNode, addJSONLink],
+             visitLeafKey     = [addRequestedPath, addOptimizedPath, addJSONEdge],
+             visitMissKey     = [addRequestedMiss, addOptimizedMiss];
+    
+    curried  visitNodeKey2    = visitNode(visitNodeKey),
+             visitEdgeKey     = visitEdge(mergeEdge),
+             visitEdgeLeaf    = visitLeaf(visitLeafKey, hasValue, materialized, errorsAsValues),
+             visitEdgeError   = visitError(addErrorValue2),
+             visitEdgeMiss    = visitMiss(visitMissKey, refreshing);
+    
+    sequence visitPathNode    = [addReqPathKey, addJSONKeySet, visitNodeKey2],
+             visitPathLink    = [followReference],
+             visitPathEdge    = [visitEdgeKey, visitEdgeLeaf, visitEdgeError, visitEdgeMiss];
+    
+    curried  hydratePaths     = hydrateKeysAtDepth(linkIndex, linkHeight, refs, requestedPath, optimizedPath);
+    
+    var envelope, pathSets, pathSetIndex = 0;
+    
+    for(var envelopeIndex = -1, envelopeCount = envelopes.length; ++envelopeIndex < envelopeCount;) {
+        
+        envelope = envelopes[envelopeIndex];
         pathSets = envelope.paths;
-        messages[-1] = messageRoot = envelope.jsong || envelope.values || envelope.value || Object.create(null);
+        messages[-1] = messageRoot = envelope.jsong || envelope.values || envelope.value;
         
-        values = walkPathSets(
-            getPathAsJSONG, setPathSetComboAsJSON, pathSets,
-            path, depth, length, height,
-            nodes, nodeRoot, nodeParent, node,
-            messages, messageRoot, messageParent, message,
-            jsons, jsonRoot, jsonParent, jsonNode,
-            nodeType, nodeValue, nodeSize, nodeTimestamp, nodeExpires,
-            messageType, messageValue, messageSize, messageTimestamp, messageExpires
-        )
-        
-        jsonValueOffset += pathSets.length;
+        for(var index = -1, count = pathSets.length; ++index < count;) {
+            
+            path = pathSets[index];
+            depth = 0;
+            refs.length = 0;
+            jsons.length = 0;
+            keysets.length = 0;
+            jsons[offset - 1] = jsonRoot = jsonParent = json = values && values[pathSetIndex];
+            
+            while(depth > -1) {
+                
+                depth = hydratePaths(depth)
+                
+                node  = walkPathSet(
+                    keyToKeySet, visitPathNode, visitPathLink, visitPathEdge,
+                    path, depth, height,
+                    nodes, nodeRoot, nodeParent, node,
+                    messages, messageRoot, messageParent, message,
+                    nodeType, nodeValue, nodeSize, nodeTimestamp, nodeExpires,
+                    messageType, messageValue, messageSize, messageTimestamp, messageExpires
+                )
+                
+                depth = depthToKeySet(path, depth)
+            }
+            
+            values && (values[pathSetIndex++] = !(hasValue = !hasValue) && { json: jsons[offset - 1] } || undefined);
+        }
     }
     
     return {
