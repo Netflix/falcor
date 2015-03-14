@@ -1239,6 +1239,64 @@ module.exports = function() {
                 }]
             }
         },
+        innerReference: {
+            getPathMaps: {
+                query: [{
+                    "genreList": {
+                        'inner-reference': {
+                            "summary": null
+                        }
+                    }
+                }]
+            },
+            optimizedPaths: [['movies']],
+            getPaths: {
+                query: [
+                    ["genreList", "inner-reference", 'summary']
+                ]
+            },
+
+            AsValues: {
+                values: [{
+                    "path": ["genreList", "inner-reference", null],
+                    "value": ['videos']
+                }]
+            },
+
+            AsJSON: {
+                values: [{
+                    json: ['videos']
+                }]
+            },
+
+            AsJSONG: {
+                values: [{
+                    jsong: {
+                        genreList: {
+                            'inner-reference': ['movies', 1234]
+                        },
+                        movies: ['videos']
+                    },
+                    paths: [["genreList", "inner-reference", null]]
+                }]
+            },
+
+            AsPathMap: {
+                values: [{
+                    json: {
+                        genreList: {
+                            __key: 'genreList',
+                            __generation: 0,
+                            'inner-reference': {
+                                __key: 'inner-reference',
+                                __generation: 0,
+                                __null: ['videos']
+                            }
+                        }
+                    }
+                }]
+            }
+        },
         errorReference: {
             getPathMaps: {
                 query: [{
@@ -1461,7 +1519,7 @@ module.exports = function() {
             ],
 
             optimizedMissingPaths: [
-                ["lists", "to-expired-list", "0", "summary"]
+                ["lists", "expired-list", "0", "summary"]
             ],
 
             AsValues: {

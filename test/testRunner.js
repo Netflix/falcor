@@ -6,6 +6,7 @@ var expect = chai.expect;
 var Cache = require("./data/Cache");
 var LocalDataSource = require("./data/LocalDataSource");
 var _ = require("lodash");
+var noOp = function() {};
 
 module.exports = {
     validateData: validateData,
@@ -46,6 +47,26 @@ module.exports = {
             errorSelector: errorSelector
         });
     },
+    get: function(model, query, output) {
+        var obs;
+        if (output === 'selector') {
+            obs = model.get(query, noOp);
+        } else {
+            obs = model.get(query)[output]();
+        }
+
+        return obs;
+    },
+    set: function(model, query, output) {
+        var obs;
+        if (output === 'selector') {
+            obs = model.set(query, noOp);
+        } else {
+            obs = model.set(query)[output]();
+        }
+
+        return obs;
+    },
     jsongBindException: 'It is not legal to use the JSON Graph format from a bound Model. JSON Graph format can only be used from a root model.'
 };
 function clean(item) {
@@ -56,7 +77,9 @@ function clean(item) {
 
 function validateData(expected, actual) {
     expect(actual, "actual").to.be.ok;
-    expect(actual.values, "actual.values").to.be.ok;
+    if(actual.values) {
+        expect(actual.values, "actual.values").to.be.ok;
+    }
     expect(actual.errors, "actual.errors").to.be.ok;
     expect(actual.requestedMissingPaths, "actual.requestedMissingPaths").to.be.ok;
     expect(actual.optimizedMissingPaths, "actual.optimizedMissingPaths").to.be.ok;

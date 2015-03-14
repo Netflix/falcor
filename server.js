@@ -3,8 +3,7 @@ var app = express();
 
 // Exports
 module.exports = {
-    coverage: coverage,
-    unitXhr: unitXhr
+    coverage: coverage
 };
 
 function listen(port, launchWindow, cb) {

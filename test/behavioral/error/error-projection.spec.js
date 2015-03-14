@@ -51,10 +51,12 @@ function test(getModel, expected, query, format) {
                 };
             }).
             get(query)[format === "toValues" ? "toPathValues" : format]().
-            subscribe(function() {
-            }, function(err) {
+            doAction(function() {}, function(err) {
                 testRunner.compare(newExpected.slice(errorFormatIndex, errorFormatIndex + 1), err);
                 testRunner.compare(calledSelector, true);
+            }).
+            subscribe(function() {
+            }, function() {
                 done();
             }, function() {
                 done("Done without erroring");

@@ -13,6 +13,7 @@ var References = Expected.References;
 var Complex = Expected.Complex;
 var Values = Expected.Values;
 var Bound = Expected.Bound;
+var expect = require('chai').expect;
 
 //describe("Construct Matching Skeleton Cache", function() {
 //    execute(false);
@@ -129,4 +130,17 @@ describe("Complex", function() {
     describe("should set complex values for leaf fromAndTo with negative.", function() {
         setTestRunner(SetExpected.Complex().fromAndToLeaf, {fillReferences: false});
     });
+});
+
+
+it("should increment the generation flag as we set.", function() {
+    var model = new Model({cache: {}});
+    var values = model._setPathSetsAsPathMap(model, [{path: ['hello', 'world'], value: 'teapot'}], [{}]);
+    
+    debugger;
+    var generation1 = values.values[0].json.hello.__generation;
+    values = model._setPathSetsAsPathMap(model, [{path: ['hello', 'world'], value: 'teapot2'}], [{}]);
+    var generation2 = values.values[0].json.hello.__generation;
+    
+    expect(generation2 - generation1 > 0).to.be.ok;
 });
