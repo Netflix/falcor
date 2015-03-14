@@ -4,6 +4,7 @@ var browserify = require('gulp-browserify');
 var surround = require('./surround');
 var concat = require('gulp-concat');
 var build = require('./build');
+var support = require('./gulp-build-support');
 var tvuiPrefix = '//@depend ../Rx.netflix.js\n' +
     '//@depend netflix/falcor/Falcor.js\n' +
     '(function(exports) {';
@@ -51,10 +52,7 @@ gulp.task('build.operations', ['build.macros'], function() {
 });
 
 gulp.task('build.compiled_operations', ['build.sweet'], function() {
-    return gulp.
-        src('./tmp/framework/compiled_operations/**.js').
-        pipe(concat({path: 'operations.js'})).
-        pipe(gulp.dest('tmp/framework'));
+    return support.buildOperations();
 });
 
 gulp.task('build.sweet', ['build.operations'], function() {
