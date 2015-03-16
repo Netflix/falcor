@@ -36,7 +36,7 @@ macro NodeMixin {
                 $this.isInvalid()                )    )
             }
             rule { .isInvalid() } => { ($node[__INVALIDATED] === true) }
-            rule infix { $dest = | .clone($value, $filter) } => {
+            rule infix { $dest:expr = | .clone($value, $filter) } => {
                 var dest = $value, src = dest, i = -1, n, x;
                 if(obj_exists(dest)) {
                     if(Array.isArray(src)) {
@@ -52,6 +52,25 @@ macro NodeMixin {
             rule { .createNode() } => { Object.create(null) }
             rule { .createJSONNode() } => { Object.create(null) }
             rule { .expire() } => { ($expired[$expired.length] = $node) && ($node[__INVALIDATED] = true) && undefined }
+            rule infix { $val  = | .getPathValue($type, $value, $materialized, $boxed) } => {
+                if($materialized === true) {
+                    if($node == null) {
+                        $val = Object.create(null);
+                        $val[$TYPE] = SENTINEL;
+                    } else if($value === undefined) {
+                        $val = $this.clone($node, internalKey);
+                    } else {
+                        $val = $this.clone($value, internalKey);
+                    }
+                } else if($boxed === true) {
+                    $val = $this.clone($node, internalKey);
+                    if($type === SENTINEL) {
+                        $val.value = $this.clone($value, internalKey);
+                    }
+                } else {
+                    $val = $this.clone($value, internalKey);
+                }
+            }
             rule infix { $json = | .getJSONEdge($type, $value, $materialized, $boxed, $errorsAsValues) } => {
                 if($materialized === true) {
                     if($node == null) {
@@ -67,6 +86,9 @@ macro NodeMixin {
                     }
                 } else if($boxed === true) {
                     $json = $this.clone($node, internalKey);
+                    if($type === SENTINEL) {
+                        $json.value = $this.clone($value, internalKey);
+                    }
                 } else if($errorsAsValues === true || $type !== ERROR) {
                     if($node != null) {
                         $json = $this.clone($value, internalKey);
@@ -311,7 +333,7 @@ macro NodeMixin {
             }
             /** LRU operations **/
             rule { .promote($expires:expr) } => {
-                if($expires !== EXPIRES_NEVER) {
+                if($node != null && ($expires !== EXPIRES_NEVER)) {
                     var root = $rootModel,
                         head = root.__head,
                         tail = root.__tail,

@@ -80,7 +80,7 @@ gulp.task('build', ['build', 'doc', 'hint', 'cover', 'perf-build']);
 gulp.task('dev', ['build.dev', 'hint']);
 gulp.task('prod', ['clean.dist', 'prod.tvui', 'prod.node']);
 gulp.task('devWatch', ['dev'], function() {
-    gulp.watch('./functional-macros/**/*.js', ['build.dev']);
+    gulp.watch('./macros/**/*.js', ['build.dev']);
 });
 gulp.task('devWatch.2', ['dev'], function() {
     gulp.watch('./framework/**/*.js', ['build.node', 'hint']);

@@ -13,6 +13,7 @@ function Model(options) {
     this._request = new RequestQueue(this, this._scheduler);
     this._errorSelector = options.errorSelector || Model.prototype._errorSelector;
     this._router = options.router;
+    this._materialized = options.materialized;
     this._root = options.root || {
         expired: [],
         allowSync: false,
