@@ -53,6 +53,18 @@ function getTestRunner(model, data, options) {
                     model = testRunner.getModel(null, Cache());
                 }
                 
+                if(options.materialized) {
+                    model._materialized = true;
+                }
+                
+                if(options.boxed) {
+                    model._boxed = true;
+                }
+                
+                if(options.errorsAsValues) {
+                    model._errorsAsValues = true;
+                }
+                
                 // TODO: will verify the onNext values coming in for AsValues.
                 var expectedCount = expected.values && expected.values.length;
                 var actualCount = 0;

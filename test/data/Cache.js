@@ -514,6 +514,9 @@ var Cache = function() {
                     "url": "/movies/6420"
                 }
             },
+            "9999": {
+                "summary": "video 9999 summary"
+            },
             "sentinel": {
                 "$size": 51,
                 "summary": {
