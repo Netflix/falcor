@@ -2,7 +2,6 @@ var gulp = require('gulp');
 var rename = require('gulp-rename');
 var license = require('gulp-license');
 var concat = require('gulp-concat');
-var build = require('./build');
 var licenseInfo = {
     organization: 'Netflix, Inc',
     year: '2014'
@@ -41,14 +40,21 @@ var macroCompileFull = [
 ];
 var macroCompileWithRecursiveSubstitutes = [
     './framework/get/*.js',
-    './framework/get/paths/getPathsAsJSONG.js',
-    './framework/get/pathMaps/getPathMapsAsJSONG.js',
     './framework/set/*.js',
     './framework/set/paths/*.js',
     './framework/set/pathMaps/*.js',
     './framework/set/jsong/*.js',
     './framework/call/call.js',
     './framework/invalidate/*.js'
+];
+var recursiveFiles = [
+    'src/lru.js',
+    'src/support.js',
+    'src/hardlink.js',
+    'src/followReference.js',
+    'src/get-header.js',
+    'src/get.js',
+    'src/bridge.js'
 ];
 var operations = [
     'tmp/framework/compiled_operations/call.js',
@@ -83,8 +89,6 @@ var recursiveOperations = [
     'tmp/framework/compiled_operations/call.js',
     'tmp/framework/compiled_operations/getBoundContext.js',
     'tmp/framework/compiled_operations/getBoundValue.js',
-    'tmp/framework/compiled_operations/getPathMapsAsJSONG.js',
-    'tmp/framework/compiled_operations/getPathsAsJSONG.js',
     'tmp/framework/compiled_operations/getValueSync.js',
     'tmp/framework/compiled_operations/setValueSync.js',
     'tmp/framework/compiled_operations/invaldiatePathMaps.js', // Nice name bro
@@ -114,7 +118,7 @@ var build = function(name, dest, addBuildStep, extraSrc) {
         pipe(license('Apache', licenseInfo)).
         pipe(rename(name)).
         pipe(gulp.dest(dest));
-}
+};
 build.macroCompileWithRecursiveSubstitutes = macroCompileWithRecursiveSubstitutes;
 build.macroCompileFull = macroCompileFull;
 build.compileWithGetOps = compileWithGetOps;
@@ -123,6 +127,6 @@ build.support = support;
 build.licenseInfo = licenseInfo;
 build.operations = operations;
 build.recursiveOperations = recursiveOperations;
-debugger;
+build.recursiveFiles = recursiveFiles;
 
 module.exports = build;

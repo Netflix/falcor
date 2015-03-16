@@ -54,7 +54,6 @@ function getTestRunner(model, data, options) {
                 }
                 
                 // TODO: will verify the onNext values coming in for AsValues.
-                debugger;
                 var expectedCount = expected.values && expected.values.length;
                 var actualCount = 0;
                 if (suffix === 'AsValues') {
@@ -62,7 +61,6 @@ function getTestRunner(model, data, options) {
                     expected.values = undefined;
                     
                     countOrFunction = function(pV) {
-                        debugger;
                         if (vals && vals.length) {
                             var tested = false;
                             var path = pV.path.map(toString);

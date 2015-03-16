@@ -19,7 +19,7 @@ var Complex = Expected.Complex;
 var Values = Expected.Values;
 var Bound = Expected.Bound;
 
-describe.only("Use New Model", function() {
+describe("Use New Model", function() {
     execute(true);
 });
 //describe("Use Same Model", function() {
@@ -40,7 +40,7 @@ function execute(useNewModel) {
                 runGetTests(getModel(useNewModel), Values().sentinelSummary, {useNewModel: useNewModel});
             });
         });
-        describe("Errors", function() {
+        describe.only("Errors", function() {
             describe("should get an error directly", function () {
                 runGetTests(getModel(useNewModel), Values().errorBranchSummary, {useNewModel: useNewModel});
             });
