@@ -2,6 +2,7 @@
 function walk(model, root, curr, pathOrJSON, depth, seedOrFunction, positionalInfo, outerResults, optimizedPath, requestedPath, inputFormat, outputFormat, fromReference) {
     // BaseCase: This position does not exist, emit missing.
     if (!curr) {
+        debugger;
         onMissing(pathOrJSON, depth, requestedPath, optimizedPath, positionalInfo, outerResults, outputFormat);
         return;
     }
@@ -19,13 +20,18 @@ function walk(model, root, curr, pathOrJSON, depth, seedOrFunction, positionalIn
             if (fromReference) {
                 requestedPath.push(null);
             }
-            debugger;
-            onError(model, curr, currValue, requestedPath, optimizedPath, outerResults);
+            if (outputFormat === 'JSONG') {
+                onValue(model, curr, pathOrJSON, depth, seedOrFunction, outerResults, requestedPath, optimizedPath, positionalInfo, outputFormat);
+                onError(model, curr, currValue, requestedPath, null, outerResults);
+            } else {
+                onError(model, curr, currValue, requestedPath, optimizedPath, outerResults);
+            }
         } 
         
         // Else we have found a value, emit the current position information.
         else {
             if (isExpired(curr)) {
+                debugger;
                 if (!curr[__INVALIDATED]) {
                     lruSplice(model, curr);
                     removeHardlink(curr);
@@ -141,7 +147,8 @@ function walk(model, root, curr, pathOrJSON, depth, seedOrFunction, positionalIn
                         if (asJSONG) {
                             onValue(model, next, nextPathOrPathMap, depth, seedOrFunction, outerResults, false, permuteOptimized, permutePosition, outputFormat);
                         }
-                        var ref = followReference(model, root, root, next, value);
+                        debugger;
+                        var ref = followReference(model, root, root, next, value, seedOrFunction, outputFormat);
                         fromReference = true;
                         next = ref[0];
                         var refPath = ref[1];

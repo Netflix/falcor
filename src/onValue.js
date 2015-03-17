@@ -1,13 +1,13 @@
 function onValue(model, node, path, depth, seedOrFunction, outerResults, permuteRequested, permuteOptimized, permutePosition, outputFormat) {
 
-    var i, len, k, key, curr;
-    if (permuteRequested[permuteRequested.length - 1] !== null) {
-        updateTrailingNullCase(path, depth, permuteRequested);
-    }
+    var i, len, k, key, curr, prev, prevK;
     lruPromote(model, node);
 
 
     if (permuteRequested) {
+        if (permuteRequested[permuteRequested.length - 1] !== null) {
+            updateTrailingNullCase(path, depth, permuteRequested);
+        }
         outerResults.requestedPaths.push(permuteRequested);
         outerResults.optimizedPaths.push(permuteOptimized);
     }
@@ -30,13 +30,15 @@ function onValue(model, node, path, depth, seedOrFunction, outerResults, permute
                     if (!curr[k]) {
                         curr[k] = {};
                     }
+                    prev = curr;
+                    prevK = k;
                     curr = curr[k];
                 }
                 k = permuteRequested[i];
                 if (k !== null) {
                     curr[k] = cloneAsValue(model, node);
                 } else {
-                    curr = cloneAsValue(model, node);
+                    prev[prevK] = cloneAsValue(model, node);
                 }
             }
             break;

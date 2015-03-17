@@ -11,6 +11,7 @@ module.exports = function() {
                     {
                         "path": ["genreList", "0", "0", "summary"],
                         "value": {
+                            "$type": "leaf",
                             "$size": 10,
                             "title": "House of Cards",
                             "url": "/movies/1234"
@@ -65,6 +66,8 @@ module.exports = function() {
                     {
                         "path": ["genreList", "0", "0", "summary"],
                         "value": {
+                            "$type": "leaf",
+                            "$size": 10,
                             "title": "House of Cards",
                             "url": "/movies/1234"
                         }
@@ -75,6 +78,8 @@ module.exports = function() {
             AsJSON: {
                 values: [{
                     json: {
+                        "$type": "leaf",
+                        "$size": 10,
                         "title": "House of Cards",
                         "url": "/movies/1234"
                     }
@@ -111,16 +116,11 @@ module.exports = function() {
                 values: [{
                     json: {
                         genreList: {
-                            __key: "genreList",
-                            __generation: 0,
                             0: {
-                                __key: "0",
-                                __generation: 0,
                                 0: {
-                                    __key: "0",
-                                    __generation: 0,
                                     summary: {
                                         "$type": "leaf",
+                                        "$size": 10,
                                         "title": "House of Cards",
                                         "url": "/movies/1234"
                                     }
@@ -143,6 +143,7 @@ module.exports = function() {
                     {
                         "path": ["genreList", "0", "1", "summary"],
                         "value": {
+                            "$type": "leaf",
                             "$size": 10,
                             "title": "Terminator 3",
                             "url": "/movies/766"
@@ -197,6 +198,8 @@ module.exports = function() {
                     {
                         "path": ["genreList", "0", "1", "summary"],
                         "value": {
+                            "$type": "leaf",
+                            "$size": 10,
                             "title": "Terminator 3",
                             "url": "/movies/766"
                         }
@@ -207,6 +210,8 @@ module.exports = function() {
             AsJSON: {
                 values: [{
                     json: {
+                        "$type": "leaf",
+                        "$size": 10,
                         "title": "Terminator 3",
                         "url": "/movies/766"
                     }
@@ -243,16 +248,11 @@ module.exports = function() {
                 values: [{
                     json: {
                         genreList: {
-                            __key: "genreList",
-                            __generation: 0,
                             0: {
-                                __key: "0",
-                                __generation: 0,
                                 1: {
-                                    __key: "1",
-                                    __generation: 0,
                                     summary: {
                                         "$type": "leaf",
+                                        "$size": 10,
                                         "title": "Terminator 3",
                                         "url": "/movies/766"
                                     }
@@ -275,6 +275,7 @@ module.exports = function() {
                     {
                         "path": ["genreList", "0", "2", "summary"],
                         "value": {
+                            "$type": "leaf",
                             "$size": 10,
                             "title": "Kindergarten Cop",
                             "url": "/movies/7531"
@@ -329,6 +330,8 @@ module.exports = function() {
                     {
                         "path": ["genreList", "0", "2", "summary"],
                         "value": {
+                            "$type": "leaf",
+                            "$size": 10,
                             "title": "Kindergarten Cop",
                             "url": "/movies/7531"
                         }
@@ -339,6 +342,8 @@ module.exports = function() {
             AsJSON: {
                 values: [{
                     json: {
+                        "$type": "leaf",
+                        "$size": 10,
                         "title": "Kindergarten Cop",
                         "url": "/movies/7531"
                     }
@@ -375,16 +380,11 @@ module.exports = function() {
                 values: [{
                     json: {
                         genreList: {
-                            __key: "genreList",
-                            __generation: 0,
                             0: {
-                                __key: "0",
-                                __generation: 0,
                                 2: {
-                                    __key: "2",
-                                    __generation: 0,
                                     summary: {
                                         "$type": "leaf",
+                                        "$size": 10,
                                         "title": "Kindergarten Cop",
                                         "url": "/movies/7531"
                                     }
@@ -407,6 +407,7 @@ module.exports = function() {
                     {
                         "path": ["genreList", "0", "3", "summary"],
                         "value": {
+                            "$type": "leaf",
                             "$size": 10,
                             "title": "Commando",
                             "url": "/movies/6420"
@@ -461,6 +462,8 @@ module.exports = function() {
                     {
                         "path": ["genreList", "0", "3", "summary"],
                         "value": {
+                            "$type": "leaf",
+                            "$size": 10,
                             "title": "Commando",
                             "url": "/movies/6420"
                         }
@@ -471,6 +474,8 @@ module.exports = function() {
             AsJSON: {
                 values: [{
                     json: {
+                        "$type": "leaf",
+                        "$size": 10,
                         "title": "Commando",
                         "url": "/movies/6420"
                     }
@@ -507,16 +512,11 @@ module.exports = function() {
                 values: [{
                     json: {
                         genreList: {
-                            __key: "genreList",
-                            __generation: 0,
                             0: {
-                                __key: "0",
-                                __generation: 0,
                                 3: {
-                                    __key: "3",
-                                    __generation: 0,
                                     summary: {
                                         "$type": "leaf",
+                                        "$size": 10,
                                         "title": "Commando",
                                         "url": "/movies/6420"
                                     }
@@ -565,6 +565,8 @@ module.exports = function() {
                     {
                         "path": ["genreList", "10", null],
                         "value": {
+                            "$type": "leaf",
+                            "$size": 10,
                             "title": "House of Cards",
                             "url": "/movies/1234"
                         }
@@ -575,6 +577,8 @@ module.exports = function() {
             AsJSON: {
                 values: [{
                     json: {
+                        "$type": "leaf",
+                        "$size": 10,
                         "title": "House of Cards",
                         "url": "/movies/1234"
                     }
@@ -608,10 +612,9 @@ module.exports = function() {
                 values: [{
                     json: {
                         genreList: {
-                            __key: "genreList",
-                            __generation: 0,
                             10: {
                                 "$type": "leaf",
+                                "$size": 10,
                                 "title": "House of Cards",
                                 "url": "/movies/1234"
                             }
@@ -647,6 +650,8 @@ module.exports = function() {
                 values: [{
                     "path": ["genreList", "1", "0", "summary"],
                     "value": {
+                        "$type": "leaf",
+                        "$size": 10,
                         "title": "Running Man",
                         "url": "/movies/553"
                     }
@@ -656,6 +661,8 @@ module.exports = function() {
             AsJSON: {
                 values: [{
                     json: {
+                        "$type": "leaf",
+                        "$size": 10,
                         "title": "Running Man",
                         "url": "/movies/553"
                     }
@@ -695,16 +702,11 @@ module.exports = function() {
                 values: [{
                     json: {
                         genreList: {
-                            __key: "genreList",
-                            __generation: 0,
                             1: {
-                                __key: "1",
-                                __generation: 0,
                                 0: {
-                                    __key: "0",
-                                    __generation: 0,
                                     summary: {
                                         "$type": "leaf",
+                                        "$size": 10,
                                         "title": "Running Man",
                                         "url": "/movies/553"
                                     }
@@ -743,6 +745,8 @@ module.exports = function() {
                     {
                         "path": ["genreList", "1", "0", "summary"],
                         "value": {
+                            "$type": "leaf",
+                            "$size": 10,
                             "title": "Running Man",
                             "url": "/movies/553"
                         }
@@ -753,6 +757,8 @@ module.exports = function() {
             AsJSON: {
                 values: [{
                     json: {
+                        "$type": "leaf",
+                        "$size": 10,
                         "title": "Running Man",
                         "url": "/movies/553"
                     }
@@ -792,16 +798,11 @@ module.exports = function() {
                 values: [{
                     json: {
                         genreList: {
-                            __key: "genreList",
-                            __generation: 0,
                             1: {
-                                __key: "1",
-                                __generation: 0,
                                 0: {
-                                    __key: "0",
-                                    __generation: 0,
                                     summary: {
                                         "$type": "leaf",
+                                        "$size": 10,
                                         "title": "Running Man",
                                         "url": "/movies/553"
                                     }
@@ -843,12 +844,10 @@ module.exports = function() {
             ],
 
             AsValues: {
-                values: [
-                    {
-                        "path": ["genreList", "1", "0"],
-                        "value": ["videos", "553"]
-                    }
-                ]
+                values: [{
+                    "path": ["genreList", "1", "0"],
+                    "value": ["videos", "553"]
+                }]
             },
 
             AsJSON: {
@@ -880,11 +879,7 @@ module.exports = function() {
                 values: [{
                     json: {
                         genreList: {
-                            __key: "genreList",
-                            __generation: 0,
                             1: {
-                                __key: "1",
-                                __generation: 0,
                                 0: ["videos", "553"]
                             }
                         }
@@ -901,6 +896,7 @@ module.exports = function() {
                 query: [{
                     "path": ["genreList", "3", "0", "summary"],
                     "value": {
+                        "$type": "leaf",
                         "$size": 10,
                         "title": "Terminator 2",
                         "url": "/movies/333"
@@ -930,6 +926,8 @@ module.exports = function() {
                 values: [{
                     "path": ["genreList", "3", "0", "summary"],
                     "value": {
+                        "$type": "leaf",
+                        "$size": 10,
                         "title": "Terminator 2",
                         "url": "/movies/333"
                     }
@@ -939,6 +937,8 @@ module.exports = function() {
             AsJSON: {
                 values: [{
                     json: {
+                        "$type": "leaf",
+                        "$size": 10,
                         "title": "Terminator 2",
                         "url": "/movies/333"
                     }
@@ -977,16 +977,11 @@ module.exports = function() {
                 values: [{
                     json: {
                         genreList: {
-                            __key: "genreList",
-                            __generation: 0,
                             3: {
-                                __key: "3",
-                                __generation: 0,
                                 0: {
-                                    __key: "0",
-                                    __generation: 0,
                                     summary: {
                                         "$type": "leaf",
+                                        "$size": 10,
                                         "title": "Terminator 2",
                                         "url": "/movies/333"
                                     }
@@ -1033,6 +1028,8 @@ module.exports = function() {
                     {
                         "path": ["genreList", "7", "0", "summary"],
                         "value": {
+                            "$type": "leaf",
+                            "$size": 10,
                             "title": "Total Recall (Without Colin Farrell)",
                             "url": "/movies/733"
                         }
@@ -1043,6 +1040,8 @@ module.exports = function() {
             AsJSON: {
                 values: [{
                     json: {
+                        "$type": "leaf",
+                        "$size": 10,
                         "title": "Total Recall (Without Colin Farrell)",
                         "url": "/movies/733"
                     }
@@ -1082,16 +1081,11 @@ module.exports = function() {
                 values: [{
                     json: {
                         genreList: {
-                            __key: "genreList",
-                            __generation: 0,
                             7: {
-                                __key: "7",
-                                __generation: 0,
                                 0: {
-                                    __key: "0",
-                                    __generation: 0,
                                     summary: {
                                         "$type": "leaf",
+                                        "$size": 10,
                                         "title": "Total Recall (Without Colin Farrell)",
                                         "url": "/movies/733"
                                     }
@@ -1123,6 +1117,8 @@ module.exports = function() {
                 errors: [{
                     "path": ["genreList", "5", null],
                     "value": {
+                        "$type": "error",
+                        "$size": 50,
                         "message": "House of Pain"
                     }
                 }]
@@ -1132,6 +1128,8 @@ module.exports = function() {
                 errors: [{
                     "path": ["genreList", "5", null],
                     "value": {
+                        "$type": "error",
+                        "$size": 50,
                         "message": "House of Pain"
                     }
                 }]
@@ -1152,6 +1150,8 @@ module.exports = function() {
                 errors: [{
                     "path": ["genreList", "5", null],
                     "value": {
+                        "$type": "error",
+                        "$size": 50,
                         "message": "House of Pain"
                     }
                 }]
@@ -1184,6 +1184,8 @@ module.exports = function() {
                 errors: [{
                     "path": ["genreList", "2", null],
                     "value": {
+                        "$type": "error",
+                        "$size": 50,
                         "message": "Red is the new Black"
                     }
                 }]
@@ -1193,6 +1195,8 @@ module.exports = function() {
                 errors: [{
                     "path": ["genreList", "2", null],
                     "value": {
+                        "$type": "error",
+                        "$size": 50,
                         "message": "Red is the new Black"
                     }
                 }]
@@ -1230,6 +1234,8 @@ module.exports = function() {
                 errors: [{
                     "path": ["genreList", "2", null],
                     "value": {
+                        "$type": "error",
+                        "$size": 50,
                         "message": "Red is the new Black"
                     }
                 }]
@@ -1281,11 +1287,7 @@ module.exports = function() {
                 values: [{
                     json: {
                         genreList: {
-                            __key: 'genreList',
-                            __generation: 0,
                             'inner-reference': {
-                                __key: 'inner-reference',
-                                __generation: 0,
                                 __null: ['videos']
                             }
                         }
@@ -1318,6 +1320,8 @@ module.exports = function() {
                 errors: [{
                     "path": ["genreList", "2", null],
                     "value": {
+                        "$type": "error",
+                        "$size": 50,
                         "message": "Red is the new Black"
                     }
                 }]
@@ -1327,6 +1331,8 @@ module.exports = function() {
                 errors: [{
                     "path": ["genreList", "2", null],
                     "value": {
+                        "$type": "error",
+                        "$size": 50,
                         "message": "Red is the new Black"
                     }
                 }]
@@ -1364,6 +1370,8 @@ module.exports = function() {
                 errors: [{
                     "path": ["genreList", "2", null],
                     "value": {
+                        "$type": "error",
+                        "$size": 50,
                         "message": "Red is the new Black"
                     }
                 }]
@@ -1455,10 +1463,10 @@ module.exports = function() {
                 values: [undefined]
             }
         },
-        referenceBranchIsExpired: {
+        referenceBranchIsMissing: {
             getPaths: {
                 query: [
-                    ["genreList", "11", "0", null]
+                    ["genreList", "11", null]
                 ]
             },
 
@@ -1466,20 +1474,18 @@ module.exports = function() {
                 query: [{
                     "genreList": {
                         11: {
-                            0: {
-                                "__null": null
-                            }
+                            "__null": null
                         }
                     }
                 }]
             },
 
             requestedMissingPaths: [
-                ["genreList", "11", "0", null]
+                ["genreList", "11", null]
             ],
 
             optimizedMissingPaths: [
-                ["videos", "expiredBranchByTimestamp", "summary"]
+                ["lists", "missing-branch-link", "summary"]
             ],
 
             AsValues: {
