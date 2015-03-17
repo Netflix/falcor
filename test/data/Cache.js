@@ -550,24 +550,14 @@ var Cache = function() {
             "expiredBranchByTimestamp": {
                 "$size": 51,
                 "$expires": expiredTimestamp,
-                "summary": {
-                    "$size": 51,
-                    "$type": "sentinel",
-                    "value": {
-                        "sad": "liger"
-                    }
-                }
+                "$type": "sentinel",
+                value: 'expired'
             },
             "expiredBranchBy0": {
                 "$size": 51,
                 "$expires": 0,
-                "summary": {
-                    "$size": 51,
-                    "$type": "sentinel",
-                    "value": {
-                        "sad": "turtle"
-                    }
-                }
+                "$type": "sentinel",
+                value: 'expired'
             },
             "errorBranch": {
                 "$size": 50,

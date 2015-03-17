@@ -60,6 +60,8 @@ module.exports = function() {
                 values: [{
                     "path": ["videos", "1234", "summary"],
                     "value": {
+                        "$type": "leaf",
+                        "$size": 10,
                         "title": "House of Cards",
                         "url": "/movies/1234"
                     }
@@ -68,6 +70,8 @@ module.exports = function() {
             AsJSON: {
                 values: [{
                     json: {
+                        "$type": "leaf",
+                        "$size": 10,
                         "title": "House of Cards",
                         "url": "/movies/1234"
                     }
@@ -95,16 +99,13 @@ module.exports = function() {
                     json: {
                         videos: {
                             1234: {
-                                __generation: 0,
-                                __key: "1234",
                                 summary: {
                                     "$type": "leaf",
+                                    "$size": 10,
                                     "title": "House of Cards",
                                     "url": "/movies/1234"
                                 }
-                            },
-                            __generation: 0,
-                            __key: "videos"
+                            }
                         }
                     }
                 }]
@@ -120,6 +121,7 @@ module.exports = function() {
                 query: [{
                     "path": ["videos", "553", "summary"],
                     "value": {
+                        "$type": "leaf",
                         "$size": 10,
                         "title": "Running Man",
                         "url": "/movies/553"
@@ -170,6 +172,8 @@ module.exports = function() {
                 values: [{
                     "path": ["videos", "553", "summary"],
                     "value": {
+                        "$type": "leaf",
+                        "$size": 10,
                         "title": "Running Man",
                         "url": "/movies/553"
                     }
@@ -178,6 +182,8 @@ module.exports = function() {
             AsJSON: {
                 values: [{
                     json: {
+                        "$type": "leaf",
+                        "$size": 10,
                         "title": "Running Man",
                         "url": "/movies/553"
                     }
@@ -205,16 +211,13 @@ module.exports = function() {
                     json: {
                         videos: {
                             553: {
-                                __generation: 0,
-                                __key: "553",
                                 summary: {
                                     "$type": "leaf",
+                                    "$size": 10,
                                     "title": "Running Man",
                                     "url": "/movies/553"
                                 }
-                            },
-                            __generation: 0,
-                            __key: "videos"
+                            }
                         }
                     }
                 }]
@@ -296,8 +299,6 @@ module.exports = function() {
                 values: [{
                     json: {
                         genreList: {
-                            __key: "genreList",
-                            __generation: 0,
                             0: ["lists", "abcd"]
                         }
                     }
@@ -412,13 +413,8 @@ module.exports = function() {
                 values: [{
                     json: {
                         videos: {
-                            __key: "videos",
-                            __generation: 0,
                             sentinel: {
-                                __key: "sentinel",
-                                __generation: 0,
                                 summary: {
-                                    "$type": "leaf",
                                     "title": "Marco Polo",
                                     "url": "/movies/sentinel"
                                 }
@@ -684,6 +680,8 @@ module.exports = function() {
                 errors: [{
                     "path": ["videos", "errorBranch"],
                     "value": {
+                        "$size": 50,
+                        "$type": "error",
                         "message": "I am yelling timber."
                     }
                 }]
@@ -692,6 +690,8 @@ module.exports = function() {
                 errors: [{
                     "path": ["videos", "errorBranch"],
                     "value": {
+                        "$size": 50,
+                        "$type": "error",
                         "message": "I am yelling timber."
                     }
                 }]
@@ -710,6 +710,8 @@ module.exports = function() {
                 errors: [{
                     "path": ["videos", "errorBranch"],
                     "value": {
+                        "$size": 50,
+                        "$type": "error",
                         "message": "I am yelling timber."
                     }
                 }]
@@ -734,6 +736,8 @@ module.exports = function() {
                 errors: [{
                     "path": ["genreList", "2"],
                     "value": {
+                        "$size": 50,
+                        "$type": "error",
                         "message": "I am yelling timber."
                     }
                 }]
@@ -742,6 +746,8 @@ module.exports = function() {
                 errors: [{
                     "path": ["genreList", "2"],
                     "value": {
+                        "$size": 50,
+                        "$type": "error",
                         "message": "I am yelling timber."
                     }
                 }]
@@ -760,6 +766,8 @@ module.exports = function() {
                 errors: [{
                     "path": ["genreList", "2"],
                     "value": {
+                        "$size": 50,
+                        "$type": "error",
                         "message": "I am yelling timber."
                     }
                 }]

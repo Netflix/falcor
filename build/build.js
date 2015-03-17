@@ -50,6 +50,10 @@ var macroCompileWithRecursiveSubstitutes = [
 var recursiveFiles = [
     'src/lru.js',
     'src/support.js',
+    'src/clone.js',
+    'src/onValue.js',
+    'src/onError.js',
+    'src/onMissing.js',
     'src/hardlink.js',
     'src/followReference.js',
     'src/get-header.js',

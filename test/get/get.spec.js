@@ -40,7 +40,7 @@ function execute(useNewModel) {
                 runGetTests(getModel(useNewModel), Values().sentinelSummary, {useNewModel: useNewModel});
             });
         });
-        describe.only("Errors", function() {
+        describe("Errors", function() {
             describe("should get an error directly", function () {
                 runGetTests(getModel(useNewModel), Values().errorBranchSummary, {useNewModel: useNewModel});
             });
