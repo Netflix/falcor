@@ -18,6 +18,9 @@ var References = Expected.References;
 var Complex = Expected.Complex;
 var Values = Expected.Values;
 var Bound = Expected.Bound;
+var Materialized = Expected.Materialized;
+var Boxed = Expected.Boxed;
+var Errors = Expected.Errors;
 
 describe("Use New Model", function() {
     execute(true);
@@ -177,6 +180,42 @@ function execute(useNewModel) {
         });
         describe("should use a complex path array with objects at leaf.", function() {
             runGetTests(getModel(useNewModel), Complex().arrayOfComplexPathsLeaf, {useNewModel: useNewModel});
+        });
+    });
+    describe("Materialized", function() {
+        describe("should get a value directly in materialized mode", function() {
+            runGetTests(getModel(useNewModel), Values().direct, { useNewModel: useNewModel, materialized: true });
+        });
+        describe("should report an undefined sentinel for a materialized missing branch node", function() {
+            runGetTests(getModel(useNewModel), Materialized().missingBranch, { useNewModel: useNewModel, materialized: true });
+        });
+        describe("should report an undefined sentinel for a materialized missing leaf node", function() {
+            runGetTests(getModel(useNewModel), Materialized().missingLeaf, { useNewModel: useNewModel, materialized: true });
+        });
+        describe("should report an undefined sentinel for a materialized undefined sentinel", function() {
+            runGetTests(getModel(useNewModel), Materialized().sentinelOfUndefined, { useNewModel: useNewModel, materialized: true });
+        });
+    });
+    describe("Boxed", function() {
+        describe("should get a primitive value directly as a sentinel in boxed mode", function() {
+            runGetTests(getModel(useNewModel), Boxed().primitiveValue, { useNewModel: useNewModel, boxed: true });
+        });
+        describe("should get a group value directly as a sentinel in boxed mode", function() {
+            runGetTests(getModel(useNewModel), Values().direct, { useNewModel: useNewModel, boxed: true });
+        });
+        describe("should get a reference value in boxed mode", function() {
+            runGetTests(getModel(useNewModel), Boxed().referenceValue, { useNewModel: useNewModel, boxed: true });
+        });
+        describe("should get a sentinel value in boxed mode", function() {
+            runGetTests(getModel(useNewModel), Boxed().sentinelValue, { useNewModel: useNewModel, boxed: true });
+        });
+    });
+    describe("Errors as Values", function() {
+        describe("should report an error as a value", function () {
+            runGetTests(getModel(useNewModel), Errors().errorBranchSummary, {useNewModel: useNewModel, errorsAsValues: true});
+        });
+        describe("should report an error as a value with null", function () {
+            runGetTests(getModel(useNewModel), Errors().genreListErrorNull, {useNewModel: useNewModel, errorsAsValues: true});
         });
     });
 }
