@@ -8,6 +8,7 @@ var support = require('./../gulp-build-support');
 
 gulp.task('build.perf', ['perf-assemble']);
 gulp.task('build.perf-update', runner);
+gulp.task('build.perf-assemble', assemble);
 gulp.task('build.perf-full', ['perf-compile']);
 
 gulp.task('perf-compile', ['perf-standalone-compile'], function() {

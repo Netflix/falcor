@@ -1,46 +1,7 @@
 // TODO: Objectify?
 function walk(model, root, curr, pathOrJSON, depth, seedOrFunction, positionalInfo, outerResults, optimizedPath, requestedPath, inputFormat, outputFormat, fromReference) {
-    // BaseCase: This position does not exist, emit missing.
-    if (!curr) {
-        debugger;
-        onMissing(pathOrJSON, depth, requestedPath, optimizedPath, positionalInfo, outerResults, outputFormat);
+    if (evaluateNode(model, curr, pathOrJSON, depth, seedOrFunction, requestedPath, optimizedPath, positionalInfo, outerResults, outputFormat, fromReference)) {
         return;
-    }
-    
-    var currType = curr[$TYPE];
-    var currValue = currType === SENTINEL ? curr.value : curr;
-    var atLeaf = currType || Array.isArray(currValue);
-    
-    positionalInfo = positionalInfo || [];
-
-    // The Base Cases.  There is a type, therefore we have hit a 'leaf' node.
-    if (atLeaf) {
-
-        if (currType === ERROR) {
-            if (fromReference) {
-                requestedPath.push(null);
-            }
-            if (outputFormat === 'JSONG') {
-                onValue(model, curr, pathOrJSON, depth, seedOrFunction, outerResults, requestedPath, optimizedPath, positionalInfo, outputFormat);
-                onError(model, curr, currValue, requestedPath, null, outerResults);
-            } else {
-                onError(model, curr, currValue, requestedPath, optimizedPath, outerResults);
-            }
-        } 
-        
-        // Else we have found a value, emit the current position information.
-        else {
-            if (isExpired(curr)) {
-                debugger;
-                if (!curr[__INVALIDATED]) {
-                    lruSplice(model, curr);
-                    removeHardlink(curr);
-                }
-                onMissing(pathOrJSON, depth, requestedPath, optimizedPath, positionalInfo, outerResults, outputFormat);
-            } else {
-                onValue(model, curr, pathOrJSON, depth, seedOrFunction, outerResults, requestedPath, optimizedPath, positionalInfo, outputFormat);
-            }
-        }
     }
 
     // We continue the search to the end of the path/json structure.
@@ -169,3 +130,47 @@ function walk(model, root, curr, pathOrJSON, depth, seedOrFunction, positionalIn
     }
 }
 
+function evaluateNode(model, curr, pathOrJSON, depth, seedOrFunction, requestedPath, optimizedPath, positionalInfo, outerResults, outputFormat, fromReference) {
+    // BaseCase: This position does not exist, emit missing.
+    if (!curr) {
+        onMissing(pathOrJSON, depth, requestedPath, optimizedPath, positionalInfo, outerResults, outputFormat);
+        return true;
+    }
+
+    var currType = curr[$TYPE];
+    var currValue = currType === SENTINEL ? curr.value : curr;
+    var atLeaf = currType || Array.isArray(currValue);
+
+    positionalInfo = positionalInfo || [];
+
+    // The Base Cases.  There is a type, therefore we have hit a 'leaf' node.
+    if (atLeaf) {
+        if (currType === ERROR) {
+            if (fromReference) {
+                requestedPath.push(null);
+            }
+            if (outputFormat === 'JSONG') {
+                onValue(model, curr, pathOrJSON, depth, seedOrFunction, outerResults, requestedPath, optimizedPath, positionalInfo, outputFormat);
+                onError(model, curr, currValue, requestedPath, null, outerResults);
+            } else {
+                onError(model, curr, currValue, requestedPath, optimizedPath, outerResults);
+            }
+        }
+
+        // Else we have found a value, emit the current position information.
+        else {
+            if (isExpired(curr)) {
+                if (!curr[__INVALIDATED]) {
+                    lruSplice(model, curr);
+                    removeHardlink(curr);
+                }
+                onMissing(pathOrJSON, depth, requestedPath, optimizedPath, positionalInfo, outerResults, outputFormat);
+            } else {
+                onValue(model, curr, pathOrJSON, depth, seedOrFunction, outerResults, requestedPath, optimizedPath, positionalInfo, outputFormat);
+            }
+        }
+
+        return true;
+    }
+    return false;
+}

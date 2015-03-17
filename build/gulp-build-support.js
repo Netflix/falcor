@@ -47,7 +47,7 @@ module.exports = {
     buildRecursiveOperations: function(name) {
         return gulp.
             src(build.recursiveOperations).
-            pipe(concat({path: name || 'operations.js'})).
+            pipe(concat({path: name || 'operations.rec.js'})).
             pipe(gulp.dest('tmp/framework'));
     }
 };

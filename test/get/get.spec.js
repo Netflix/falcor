@@ -22,7 +22,7 @@ var Materialized = Expected.Materialized;
 var Boxed = Expected.Boxed;
 var Errors = Expected.Errors;
 
-describe("Use New Model", function() {
+describe.only("Use New Model", function() {
     execute(true);
 });
 //describe("Use Same Model", function() {
@@ -179,7 +179,7 @@ function execute(useNewModel) {
             runGetTests(getModel(useNewModel), Complex().arrayOfComplexPathsLeaf, {useNewModel: useNewModel});
         });
     });
-    describe.only("Materialized", function() {
+    describe("Materialized", function() {
         describe("should get a value directly in materialized mode", function() {
             runGetTests(getModel(useNewModel), Values().direct, { useNewModel: useNewModel, materialized: true });
         });

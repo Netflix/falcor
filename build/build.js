@@ -25,7 +25,7 @@ var compileWithGetOps = [
     './tmp/get.ops.js',
     './tmp/framework/Model.js',
     './tmp/framework/support.js',
-    './tmp/framework/operations.js'
+    './tmp/framework/operations.rec.js'
 ];
 var macroCompileFull = [
     './framework/get/*.js',
