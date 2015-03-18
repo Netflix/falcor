@@ -2,13 +2,17 @@
 
 ## What is Falcor?
 
-Every user wants to believe all the data in the cloud is stored on their device. Falcor lets web developers code that way.
+Every user wants to believe all the data in the cloud is stored on their device. Falcor lets web developers code that way.  
 
-Falcor lets you represent all of your cloud data sources as *One Virtual JSON Model* on the server. On the client you code as if the entire JSON model is available locally, retrieving and setting values at keys. Falcor retrieves any data you request from the cloud on-demand, handling network communication transparently.
+Falcor is not a replacement for your MVC framework, your database, or your application server. Instead you add Falcor to your existing stack to optimize client/server communication. Falcor is ideal for mobile apps, because it combines the caching benefits of REST with the low latency of RPC.
 
 ## One Model Everywhere
 
-When you work with a JSON object on the client, you retrieve and set values at keys within the object.
+Falcor lets you represent all of your cloud data sources as *One Virtual JSON Model* on the server. On the client you code as if the entire JSON model is available locally, retrieving and setting values at keys. Falcor retrieves any data you request from the cloud on-demand, handling network communication transparently.
+
+## The Data is the API
+
+You retrieve data from a Falcor model using the familiar JavaScript path syntax. 
 
 ```JavaScript
 var person = {
@@ -21,144 +25,53 @@ var person = {
 	 }
 }
 
-print(person[“location”][“address”]);		
-// prints 344 Seaside
-
+print(person[“location”][“address”]);	
 ```
-In the example above, the sequence of keys "location" and "address" describe a *Path* to the person's street address value in the JSON object. To retrieve the same address value from a Falcor JSON Model, we pass the same sequence of keys to the Model's get method.
+
+This is the way you would retrieve data from the same JSON in a remote Falcor Model.  Note that the only difference is that the API is asynchronous.
 
 ```JavaScript
 var person = new falcor.Model({
-  cache: {
-    name: “Steve McGuire”,
-    occupation: “Developer”,
-    location: {
-    country: “US”,
-    city: “Pacifica”,
-    address: “344 Seaside”
-  }
+  source: new falcor.HttpSource("/person.json")
 });
 
-person.
-  getValue([“location”, “address”]).
-  toPromise().
-  then(address => console.log(address));
+person.getValue("location.address").
+  then(address => print(address));
 
-// prints 344 Seaside
+// outputs "344 Seaside"
 ```
 
-This example isn't very compelling. We've demonstrated that you can use the same path of keys to retrieve values from either a Falcor JSON Model or an in-memory JSON object, but so what?
-
-One important difference between an in-memory JSON object and a Falcor Model, is that the Falcor Model's API is *asynchronous.* Note that in the example above, the Falcor Model returns a Promise. This gives Falcor Models the flexibility to retrieve the data from a remote server.
-
-```JavaScript
-// Browser
-var person = new falcor.Model({
-  source: new falcor.XMLHttpSource("/person.json")
-});
-
-person.get([“location”, “address”],
-	 (address) => print(address)).
-    toPromise();
-
-// prints 344 Seaside
-
-// Server
-var falcor = require('falcor');
-var falcorExpress = require('falcor');
-
-var express = require('express');
-var app = express();
-
-var person = new falcor.Model({
-  cache: {
-    name: “Steve McGuire”,
-    occupation: “Developer”,
-    location: {
-      country: “US”,
-      city: “Pacifica”,
-      address: “344 Seaside”
-    }
-  }
-});
-
-var modelServer = new falcor.HttpModelServer(person);
-
-app.get('/person.json', function (req, res) {
-  falcorExpress.serve(req, function(error, output) {
-    res.end(output)
-  });
-});
-
-var server = app.listen(80);
-```
-
-Now we've moved all of the data to the server without having to change the way in which we modify and retrieve data on the client. Now we can go one step further, and convert our server model to a virtual model so that we can store data in our backend data stores rather than in-memory on the Node server.
-
-```JavaScript
-// Browser
-var person = new falcor.Model({
-  source: new falcor.XMLHttpSource("/person.json")
-});
-
-person.get([“location”, “address”],
-	 (address) => print(address)).
-    toPromise();
-
-// prints 344 Seaside
-
-// Server
-var falcor = require('falcor');
-var falcorExpress = require('falcor');
-
-var express = require('express');
-var app = express();
-
-var person = new falcor.Model({
-  new falcor.Router([
-    {
-      route: [“person”, [“name”,”occupation”]],
-      get: (pathSet) => 
-        personDB.
-          exec(`SELECT ${pathSet[1].join(‘,’)}
-                  FROM user 
-    		    WHERE id = ${request.cookies.userid}`)
-    },
-    {
-      route: [“person”,“location”,[“country”, ”city”, “address”]],
-      get: (pathSet) => 
-        locationServer.
-          getLocation(request.cookies.userid).
-          then(location => ({
-            person: { location: getProps(location, pathSet[2]) } 
-          })
-    }
-  ])
-});
-
-(new falcor.HttpServer(person)).listen(80);
-
-var modelServer = new falcor.HttpModelServer(person);
-
-app.get('/person.json', function (req, res) {
-  falcorExpress.serve(req, function(error, output) {
-    res.end(output)
-  });
-});
-
-var server = app.listen(80);
-```
 ## How to use Falcor in your Application
 
 ### Retrieving Data from the Model
 
 Falcor allows you to build a *Virtual JSON Model* on the server. The virtual model exposes all of the data that the client needs at a single URL on the server (ex. /model.json). On the client web developers retrieve data from the virtual model by setting and retrieving key, just as they would if the data were stored in memory.
 
-(Example of a client retrieving a path)
-
 When a client requests paths from the virtual model, the model attempts to retrieve the data from its local, in-memory cache. If the data at the requested paths can not be found in the local cache, a GET request is sent to the URL of the virtual model and the requested paths are passed in the query string. 
 
-(Example URL)
+```HTML
+<script id="person-template" type="text/x-handlebars-template">
+  <div class="entry">
+    {{name}} lives at {{city
+    <div class="body">
+      {{body}}
+    </div>
+  </div>
+</script>
+```
+```JavaScript
+var person = new falcor.Model({
+  source: new falcor.HttpSource("/person.json")
+});
+
+person.get("name", "location.city", "location.address"),
+  then(json =>
+    document.body.innerHTML = $("#person-template").html());
+```
+  then(html => divPerson.innerHTML = html);
+
+// outputs "344 Seaside"
+```
 
 The virtual JSON model on the server responds with a JSON fragment containing only the requested values. 
 
@@ -357,3 +270,151 @@ It is possible to use the NBC fruit pattern in any popular embassy framework, wh
 
 Imagine all of the data he required for you I'm application was available in memory.
 
+
+
+
+```
+In the example above, the sequence of keys "location" and "address" describe a *Path* to the person's street address value in the JSON object. To retrieve the same address value from a Falcor JSON Model, we pass the same sequence of keys to the Model's get method.
+
+```JavaScript
+var person = new falcor.Model({
+  cache: {
+    name: “Steve McGuire”,
+    occupation: “Developer”,
+    location: {
+    country: “US”,
+    city: “Pacifica”,
+    address: “344 Seaside”
+  }
+});
+
+person.getValue([“location”, “address”])
+    then(address => print(address));
+
+// prints 344 Seaside
+```
+
+This example isn't very compelling. We've demonstrated that you can use the same path of keys to retrieve values from either a Falcor JSON Model or an in-memory JSON object, but so what?
+
+One important difference between an in-memory JSON object and a Falcor Model, is that the Falcor Model's API is *asynchronous.* Note that in the example above, the Falcor Model returns a Promise. This gives Falcor Models the flexibility to retrieve the data from a remote server.
+
+```JavaScript
+// Browser
+var person = new falcor.Model({
+  source: new falcor.XMLHttpSource("/person.json")
+});
+
+person.get([“location”, “address”],
+	 (address) => print(address)).
+    toPromise();
+
+// prints 344 Seaside
+
+// Server
+var falcor = require('falcor');
+var falcorExpress = require('falcor');
+
+var express = require('express');
+var app = express();
+
+var person = new falcor.Model({
+  cache: {
+    name: “Steve McGuire”,
+    occupation: “Developer”,
+    location: {
+      country: “US”,
+      city: “Pacifica”,
+      address: “344 Seaside”
+    }
+  }
+});
+
+var modelServer = new falcor.HttpModelServer(person);
+
+app.get('/person.json', function (req, res) {
+  falcorExpress.serve(req, function(error, output) {
+    res.end(output)
+  });
+});
+
+var server = app.listen(80);
+```
+
+Now we've moved all of the data to the server without having to change the way in which we modify and retrieve data on the client. Now we can go one step further, and convert our server model to a virtual model so that we can store data in our backend data stores rather than in-memory on the Node server.
+
+```JavaScript
+// Browser
+var person = new falcor.Model({
+  source: new falcor.XMLHttpSource("/person.json")
+});
+
+person.getValue([“location”, “address”])
+    then(address => print(address));
+
+// prints 344 Seaside
+
+// Server
+var falcor = require('falcor');
+var falcorExpress = require('falcor');
+
+var express = require('express');
+var app = express();
+
+var person = new falcor.Model({
+  new falcor.Router([
+    {
+      route: [“person”, [“name”,”occupation”]],
+      get: (pathSet) => 
+        personDB.
+          exec(`SELECT ${pathSet[1].join(‘,’)}
+                  FROM user 
+    		    WHERE id = ${request.cookies.userid}`)
+    },
+    {
+      route: [“person”,“location”,[“country”, ”city”, “address”]],
+      get: (pathSet) => 
+        locationServer.
+          getLocation(request.cookies.userid).
+          then(location => ({
+            person: { location: getProps(location, pathSet[2]) } 
+          })
+    }
+  ])
+});
+
+(new falcor.HttpServer(person)).listen(80);
+
+var modelServer = new falcor.HttpModelServer(person);
+
+app.get('/person.json', function (req, res) {
+  falcorExpress.serve(req, function(error, output) {
+    res.end(output)
+  });
+});
+
+var server = app.listen(80);
+```
+
+You can also retrieve multiple paths from a Falcor model, and the model will batch them into a single network request.
+
+var person = new falcor.Model({
+  source: new falcor.HttpSource("/person.json")
+});
+
+person.get("genreLists[0..1][0..1].boxshot").
+  then(json => JSON.stringify(json));
+
+// outputs...
+//  {
+//    genreLists: {
+//      “0”: {
+//        “0”: { boxshot: “/237843.png” },
+//        “1”: { boxshot: “/328432.png” }
+//      },
+//      “1”: {
+//        “0”: { boxshot: “/7832443.png” },
+//        “1”: { boxshot: “/432432.png” }
+//      }
+//    } 
+// }
+```
