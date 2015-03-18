@@ -11,8 +11,8 @@ function Model(options) {
     this._scheduler = new falcor.ImmediateScheduler();
     this._request = new RequestQueue(this, this._scheduler);
     this._errorSelector = options.errorSelector || Model.prototype._errorSelector;
-    this._cache = {};
     this._router = options.router;
+    this._materialized = options.materialized;
     this._root = options.root || {
         expired: [],
         allowSync: false,
@@ -20,6 +20,8 @@ function Model(options) {
     };
     if (options.cache && typeof options.cache === "object") {
         this.setCache(options.cache);
+    } else {
+        this._cache = {};
     }
     this._path = [];
 }
@@ -41,6 +43,9 @@ Model.prototype = {
             {path: path, value: value} :
             path, function(x) { return x; });
     },
+    setCache: function(cache) {
+        return (this._cache = {}) && setCache(this, cache);
+    },
     bind: function(boundPath) {
         
         var model = this, root = model._root,
@@ -53,7 +58,7 @@ Model.prototype = {
         
         if(n === 0) { throw new Error("Model#bind requires at least one value path."); }
         
-        return Rx.Observable.create(function(observer) {
+        return falcor.Observable.create(function(observer) {
             
             var boundModel;
             
@@ -85,20 +90,17 @@ Model.prototype = {
             }
         });
     },
-    setCache: function(cache) {
-        return this._setPathMapsAsValues(this, [cache], undefined, this._errorSelector, []);
+    setRetryCount: function(x) {
+        return this.clone(["_retryMax", x]);
     },
-    getBoundValue: function() {
-        return this.syncCheck("getBoundValue") && this._getBoundValue(this);
-    },
-    getBoundContext: function() {
-        return this.syncCheck("getBoundContext") && this._getBoundContext(this);
+    getBoundPath: function() {
+        return this.syncCheck("getBoundPath") && this._getBoundPath(this);
     },
     getValueSync: function(path) {
         if(Array.isArray(path) === false) {
             throw new Error("Model#getValueSync must be called with an Array path.");
         }
-        var value = this.syncCheck("getValueSync") && this._getValueSync(this, this._path.concat(path)).value;
+        var value = this.syncCheck("getValueSync") && this._getValueSync(this, this._path.concat(path));
         if(value[$TYPE] === ERROR) {
             throw value;
         }
@@ -128,7 +130,7 @@ Model.prototype = {
         if(Array.isArray(path) === false) {
             throw new Error("Model#bindSync must be called with an Array path.");
         }
-        var boundValue = this.syncCheck("bindSync") && getBoundValue(this, this._path.concat(path));
+        var boundValue = this.syncCheck("bindSync") && getBoundPath(this, this._path.concat(path));
         if(boundValue.shorted) {
             if(boundValue = boundValue.value) {
                 if(boundValue[$TYPE] === ERROR) {
@@ -152,7 +154,7 @@ Model.prototype = {
         });
         
         Array.prototype.slice.call(arguments).forEach(function(tuple) {
-            model[tuple[0]] = tuple[1];
+            clone[tuple[0]] = tuple[1];
         });
         
         return clone;
@@ -183,46 +185,55 @@ Model.prototype = {
         }
         return true;
     },
-
-    _getBoundContext         :       getBoundContext,
-    _getBoundValue           :         getBoundValue,
-
-    _getValueSync            :          getValueSync,
-    _setValueSync            :          setValueSync,
-
-    _getPathsAsValues        :      getPathsAsValues,
-    _getPathsAsJSON          :        getPathsAsJSON,
-    _getPathsAsPathMap       :     getPathsAsPathMap,
-    _getPathsAsJSONG         :       getPathsAsJSONG,
-
-    _getPathMapsAsValues     :   getPathMapsAsValues,
-    _getPathMapsAsJSON       :     getPathMapsAsJSON,
-    _getPathMapsAsPathMap    :  getPathMapsAsPathMap,
-    _getPathMapsAsJSONG      :    getPathMapsAsJSONG,
+    addVirtualPaths: function(pathsAndActions) {
+        this._virtualPaths = addVirtualPaths(pathsAndActions, this);
+    },
     
-    _setPathsAsValues        :      setPathsAsValues,
-    _setPathsAsJSON          :        setPathsAsJSON,
-    _setPathsAsPathMap       :     setPathsAsPathMap,
-    _setPathsAsJSONG         :       setPathsAsJSONG,
+    _getBoundPath            :            getBoundPath,
     
-    _setPathMapsAsValues     :   setPathMapsAsValues,
-    _setPathMapsAsJSON       :     setPathMapsAsJSON,
-    _setPathMapsAsPathMap    :  setPathMapsAsPathMap,
-    _setPathMapsAsJSONG      :    setPathMapsAsJSONG,
+    _getValueSync            :              getPathSet,
+    _setValueSync            :              setPathSet,
     
-    _setJSONGsAsValues       :     setJSONGsAsValues,
-    _setJSONGsAsJSON         :       setJSONGsAsJSON,
-    _setJSONGsAsPathMap      :    setJSONGsAsPathMap,
-    _setJSONGsAsJSONG        :      setJSONGsAsJSONG,
+    _getPath                 :                 getPath,
+    _getPathSet              :              getPathSet,
+    _getPathSetsAsValues     :     getPathSetsAsValues,
+    _getPathSetsAsJSON       :       getPathSetsAsJSON,
+    _getPathSetsAsPathMap    :    getPathSetsAsPathMap,
+    _getPathSetsAsJSONG      :      getPathSetsAsJSONG,
     
-    _invPathsAsValues        :       invalidatePaths,
-    _invPathsAsJSON          :       invalidatePaths,
-    _invPathsAsPathMap       :       invalidatePaths,
-    _invPathsAsJSONG         :       invalidatePaths,
+    _getPathMap              :              getPathMap,
+    _getPathMapsAsValues     :     getPathMapsAsValues,
+    _getPathMapsAsJSON       :       getPathMapsAsJSON,
+    _getPathMapsAsPathMap    :    getPathMapsAsPathMap,
+    _getPathMapsAsJSONG      :      getPathMapsAsJSONG,
     
-    _invPathMapsAsValues     :    invalidatePathMaps,
-    _invPathMapsAsJSON       :    invalidatePathMaps,
-    _invPathMapsAsPathMap    :    invalidatePathMaps,
-    _invPathMapsAsJSONG      :    invalidatePathMaps
+    _setCache                :                setCache,
+    _setPath                 :                 setPath,
+    _setPathSet              :              setPathSet,
+    _setPathSetsAsValues     :     setPathSetsAsValues,
+    _setPathSetsAsJSON       :       setPathSetsAsJSON,
+    _setPathSetsAsPathMap    :    setPathSetsAsPathMap,
+    _setPathSetsAsJSONG      :      setPathSetsAsJSONG,
+    
+    _setPathMap              :              setPathMap,
+    _setPathMapsAsValues     :     setPathMapsAsValues,
+    _setPathMapsAsJSON       :       setPathMapsAsJSON,
+    _setPathMapsAsPathMap    :    setPathMapsAsPathMap,
+    _setPathMapsAsJSONG      :      setPathMapsAsJSONG,
+    
+    _setJSONGsAsValues       :       setJSONGsAsValues,
+    _setJSONGsAsJSON         :         setJSONGsAsJSON,
+    _setJSONGsAsPathMap      :      setJSONGsAsPathMap,
+    _setJSONGsAsJSONG        :        setJSONGsAsJSONG,
+    
+    _invPathSetsAsValues     :      invalidatePathSets,
+    _invPathSetsAsJSON       :      invalidatePathSets,
+    _invPathSetsAsPathMap    :      invalidatePathSets,
+    _invPathSetsAsJSONG      :      invalidatePathSets,
+    
+    _invPathMapsAsValues     :      invalidatePathMaps,
+    _invPathMapsAsJSON       :      invalidatePathMaps,
+    _invPathMapsAsPathMap    :      invalidatePathMaps,
+    _invPathMapsAsJSONG      :      invalidatePathMaps
 };
 

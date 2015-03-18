@@ -37,9 +37,11 @@ describe("Special Cases", function() {
             }
         });
         
-        model._getPathsAsValues(model, get, function(x) {
+        model._getPathSetsAsValues(model, get, function(x) {
             expect(x).to.deep.equals({
                 value: {
+                    "$size": 10,
+                    "$type": "leaf",
                     "title": "Running Man",
                     "url": "/movies/553"
                 }, 

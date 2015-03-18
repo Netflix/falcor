@@ -26,7 +26,6 @@ describe("Behavioral", function() {
     require('./set');
     require('./lru');
     require('./hardlink');
-    require("./invalidate.spec");
     
     it('should have two separate models with two separate caches.', function() {
         var model1 = getModel(null, Cache());
@@ -49,8 +48,8 @@ describe("Behavioral", function() {
 
         var res1 = [{}];
         var res2 = [{}];
-        model1._getPathsAsJSON(model1, [['videos', 1234, 'summary']], res1);
-        model2._getPathsAsJSON(model2, [['videos', 1234, 'summary']], res2);
+        model1._getPathSetsAsJSON(model1, [['videos', 1234, 'summary']], res1);
+        model2._getPathSetsAsJSON(model2, [['videos', 1234, 'summary']], res2);
         
         testRunner.compare(ex1, res1[0]);
         testRunner.compare(ex2, res2[0]);

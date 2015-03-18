@@ -77,7 +77,9 @@ function clean(item) {
 
 function validateData(expected, actual) {
     expect(actual, "actual").to.be.ok;
-    expect(actual.values, "actual.values").to.be.ok;
+    if(actual.values) {
+        expect(actual.values, "actual.values").to.be.ok;
+    }
     expect(actual.errors, "actual.errors").to.be.ok;
     expect(actual.requestedMissingPaths, "actual.requestedMissingPaths").to.be.ok;
     expect(actual.optimizedMissingPaths, "actual.optimizedMissingPaths").to.be.ok;
@@ -90,8 +92,8 @@ function validateOperation(name, expected, actual, messageSuffix) {
     // Removes all 5 !== "5" errors when it comes to pathValues.
     traverseAndConvert(actual);
     traverseAndConvert(expected);
-    strip(expected, "__generation");
-    strip(actual, "__generation", "pathSetIndex");
+    strip(expected, "$type", "__generation", "__key");
+    strip(actual, "$type", "__generation", "__key", "pathSetIndex");
 
     if (expected.values) {
         expect(actual.values, name + ".values " + messageSuffix).

@@ -9,24 +9,6 @@ var benchmark = require('gulp-bench');
 // Registers build tasks
 require('./build/gulp-clean');
 require('./build/gulp-build');
-require('./build/gulp-build-recursive');
-require('./build/gulp-build-support');
-require('./build/performance/gulp-perf');
-
-function test(cb) {
-    gulp.src(['bin/Falcor.js']).
-        pipe(istanbul()).
-        on('finish', function() {
-            gulp.src(['test/index.js']).
-                pipe(mocha()).
-                pipe(istanbul.writeReports(['coverage/'])).
-                on('end', cb);
-        });
-}
-
-gulp.task('cover', ['dev'], function(cb) {
-    test(cb);
-});
 
 gulp.task('hint', ['build.node'], function() {
     return gulp.src('bin/Model.js').
@@ -50,39 +32,5 @@ gulp.task('doc-d', ['clean.doc', 'doc-p'], function() {
         pipe(jsdoc.generator('doc'));
 });
 
-gulp.task('perf-build', ['cover'], function() {
-    return gulp.src('performance/index.js', {read: false}).
-        pipe(benchmark()).
-        pipe(gulp.dest('.'));
-});
-gulp.task('perf', function() {
-    return gulp.src('test.js').
-        pipe(benchmark()).
-        pipe(gulp.dest('.'));
-});
-gulp.task('perf-virtual', function() {
-    return gulp.src('performance/virtual/index.js', {read: false}).
-        pipe(benchmark()).
-        pipe(gulp.dest('.'));
-});
-
-gulp.task('test', function(cb) {
-    test(cb);
-});
-
-gulp.task('test-only', ['build.node'], function(cb) {
-    return gulp.src(['test/index.js', 'test/virtual/addVirtualPaths.spec.js']).
-        pipe(mocha());
-});
-
-gulp.task('default', ['dev']);
-gulp.task('build', ['build', 'doc', 'hint', 'cover', 'perf-build']);
-gulp.task('dev', ['build.dev', 'hint']);
-gulp.task('prod', ['clean.dist', 'prod.tvui', 'prod.node']);
-gulp.task('devWatch', ['dev'], function() {
-    gulp.watch('./functional-macros/**/*.js', ['build.dev']);
-});
-gulp.task('devWatch.2', ['dev'], function() {
-    gulp.watch('./framework/**/*.js', ['build.node', 'hint']);
-});
-
+gulp.task('default', ['build']);
+gulp.task('alt', ['build.alt']);

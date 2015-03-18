@@ -1,7 +1,7 @@
 module.exports = function() {
     return {
         directValue: {
-            getPaths: {
+            getPathSets: {
                 count: 0,
                 query: [["summary"]]
             },
@@ -36,7 +36,7 @@ module.exports = function() {
                 values: [{
                     json: {
                         summary: {
-                            "$type": "leaf",
+                            "$type": "group",
                             "title": "House of Cards",
                             "url": "/movies/1234"
                         }
@@ -45,7 +45,7 @@ module.exports = function() {
             }
         },
         toOnly: {
-            getPaths: {
+            getPathSets: {
                 query: [
                     [{to: 1}, "summary"]
                 ]
@@ -108,7 +108,7 @@ module.exports = function() {
                             __key: "0",
                             __generation: 0,
                             summary: {
-                                "$type": "leaf",
+                                "$type": "group",
                                 "title": "House of Cards",
                                 "url": "/movies/1234"
                             }
@@ -117,7 +117,7 @@ module.exports = function() {
                             __key: "1",
                             __generation: 0,
                             summary: {
-                                "$type": "leaf",
+                                "$type": "group",
                                 "title": "Terminator 3",
                                 "url": "/movies/766"
                             }
@@ -127,13 +127,13 @@ module.exports = function() {
             }
         },
         onReference: {
-            getPaths: {
+            getPathSets: {
                 query: [
                     ["0", "summary"]
                 ]
             },
 
-            setPaths: {
+            setPathSets: {
                 query: [
                     {
                         "path": ["0", "summary"],
@@ -185,7 +185,7 @@ module.exports = function() {
                             __key: "0",
                             __generation: 0,
                             summary: {
-                                "$type": "leaf",
+                                "$type": "group",
                                 "title": "House of Cards",
                                 "url": "/movies/1234"
                             }

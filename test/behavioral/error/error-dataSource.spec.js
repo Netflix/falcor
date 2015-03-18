@@ -16,6 +16,8 @@ describe("DataSource", function() {
                 var expected = {
                     path: [],
                     value: {
+                        "$size": 51,
+                        "$type": "error",
                         status: 503,
                         message: "Timeout"
                     }
@@ -57,6 +59,8 @@ describe("DataSource", function() {
                 var expected = {
                     path: [],
                     value: {
+                        "$size": 51,
+                        "$type": "error",
                         status: 503,
                         message: "Timeout"
                     }

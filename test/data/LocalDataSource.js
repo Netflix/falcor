@@ -38,7 +38,7 @@ LocalSource.prototype = {
                 var values = [{}];
                 if (self._missCount >= miss) {
                     onGet(self, paths);
-                    self.model._getPathsAsJSONG(self.model, paths, values, errorSelector);
+                    self.model._getPathSetsAsJSONG(self.model, paths, values, errorSelector);
                 } else {
                     self._missCount++;
                 }

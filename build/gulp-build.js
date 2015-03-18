@@ -1,5 +1,6 @@
 var gulp = require('gulp');
 var browserify = require('gulp-browserify');
+var license = require('gulp-license');
 var surround = require('./surround');
 var tvuiPrefix = '//@depend ../Rx.netflix.js\n' +
     '//@depend netflix/falcor/Falcor.js\n' +
@@ -11,7 +12,7 @@ var licenseInfo = {
     year: '2014'
 };
 
-gulp.task('build.alt', function() {
+gulp.task('build.alt', ['clean.dev'], function() {
     return gulp.
         src(['index.js']).
         pipe(browserify({

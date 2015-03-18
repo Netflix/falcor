@@ -2,7 +2,7 @@
 module.exports = function() {
     return {
         missingBranch: {
-            getPaths: {
+            getPathSets: {
                 query: [["videos", "missingBranch", "summary"]]
             },
             AsValues: {
@@ -29,7 +29,7 @@ module.exports = function() {
             }
         },
         missingLeaf: {
-            getPaths: {
+            getPathSets: {
                 query: [["videos", "1234", "missingLeaf"]]
             },
             AsValues: {
@@ -56,7 +56,7 @@ module.exports = function() {
             }
         },
         sentinelOfUndefined: {
-            getPaths: {
+            getPathSets: {
                 query: [["misc", "usentinel"]]
             },
             AsValues: {

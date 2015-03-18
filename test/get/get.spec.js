@@ -22,7 +22,7 @@ var Materialized = Expected.Materialized;
 var Boxed = Expected.Boxed;
 var Errors = Expected.Errors;
 
-describe.only("Use New Model", function() {
+describe("Use New Model", function() {
     execute(true);
 });
 //describe("Use Same Model", function() {
@@ -48,7 +48,7 @@ function execute(useNewModel) {
                 runGetTests(getModel(useNewModel), Values().errorBranchSummary, {useNewModel: useNewModel});
             });
             describe("should get an error directly with null", function () {
-                runGetTests(getModel(useNewModel), Values().errorBranchSummary, {useNewModel: useNewModel});
+                runGetTests(getModel(useNewModel), Values().genreListErrorNull, {useNewModel: useNewModel});
             });
         });
         describe("Missing", function() {

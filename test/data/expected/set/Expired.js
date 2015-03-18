@@ -1,7 +1,7 @@
 module.exports = function() {
     return {
         referenceExpired: {
-            setPaths: {
+            setPathSets: {
                 query: [{
                     "path": ["genreList", "9", "0", "summary"],
                     "value": "should be expired"
@@ -63,14 +63,8 @@ module.exports = function() {
                 values: [{
                     json: {
                         "genreList": {
-                            __key: "genreList",
-                            __generation: 0,
                             "9": {
-                                __key: 9,
-                                __generation: 0,
                                 "0": {
-                                    __key: 0,
-                                    __generation: 0,
                                     "summary": "should be expired"
                                 }
                             }
@@ -81,7 +75,7 @@ module.exports = function() {
         },
 
         expiredLeafNodeTimestamp: {
-            setPaths: {
+            setPathSets: {
                 query: [{
                     "path": ["videos", "expiredLeafByTimestamp", "summary"],
                     "value": "should be expired"
@@ -127,11 +121,7 @@ module.exports = function() {
                 values: [{
                     json: {
                         "videos": {
-                            __key: "videos",
-                            __generation: 0,
                             "expiredLeafByTimestamp": {
-                                __key: "expiredLeafByTimestamp",
-                                __generation: 0,
                                 "summary": "should be expired"
                             }
                         }
@@ -140,7 +130,7 @@ module.exports = function() {
             }
         },
         expiredLeafNode0: {
-            setPaths: {
+            setPathSets: {
                 query: [{
                     "path": ["videos", "expiredLeafBy0", "summary"],
                     "value": "should be expired"
@@ -186,11 +176,7 @@ module.exports = function() {
                 values: [{
                     json: {
                         "videos": {
-                            __key: "videos",
-                            __generation: 0,
                             "expiredLeafBy0": {
-                                __key: "expiredLeafBy0",
-                                __generation: 0,
                                 "summary": "should be expired"
                             }
                         }
@@ -199,7 +185,7 @@ module.exports = function() {
             }
         },
         expiredBranchByTimestamp: {
-            setPaths: {
+            setPathSets: {
                 query: [{
                     "path": ["videos", "expiredBranchByTimestamp", "summary"],
                     "value": "should be expired"
@@ -245,11 +231,7 @@ module.exports = function() {
                 values: [{
                     json: {
                         "videos": {
-                            __key: "videos",
-                            __generation: 0,
                             "expiredBranchByTimestamp": {
-                                __key: "expiredBranchByTimestamp",
-                                __generation: 0,
                                 "summary": "should be expired"
                             }
                         }
@@ -258,7 +240,7 @@ module.exports = function() {
             }
         },
         expiredBranchBy0: {
-            setPaths: {
+            setPathSets: {
                 query: [{
                     "path": ["videos", "expiredBranchBy0", "summary"],
                     "value": "should be expired"
@@ -304,11 +286,7 @@ module.exports = function() {
                 values: [{
                     json: {
                         "videos": {
-                            __key: "videos",
-                            __generation: 0,
                             "expiredBranchBy0": {
-                                __key: "expiredBranchBy0",
-                                __generation: 0,
                                 "summary": "should be expired"
                             }
                         }
@@ -317,7 +295,7 @@ module.exports = function() {
             }
         },
         futureExpiredReference: {
-            setPaths: {
+            setPathSets: {
                 query: [{
                     "path": ["genreList", "12", "0", "summary"],
                     "value": "should be expired"

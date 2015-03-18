@@ -187,7 +187,7 @@ function modelOperation(name) {
                         // When an error is thrown, all currently requested paths are
                         // inserted as errors and the output format is not needed.
                         // TODO: There must be a way to make this more efficient.
-                        var out = model._setPathsAsValues.apply(null, [model].concat(
+                        var out = model._setPathSetsAsValues.apply(null, [model].concat(
                             requestedPaths.
                                 reduce(function(acc, r) {
                                     acc[0].push({
@@ -421,7 +421,7 @@ function getOperationArgGroups(ops, name, format, values, hasSelector, onNext, e
         map(cloneIfPathOrPathValue).
         reduce(function(groups, argument, index) {
             var group = groups[groups.length - 1],
-                type  = isPathOrPathValue(argument) ? "Paths" :
+                type  = isPathOrPathValue(argument) ? "PathSets" :
                     isJSONG(argument) ? "JSONGs" : "PathMaps",
                 groupType = group && group.type,
                 methodName = name + type + opFormat;

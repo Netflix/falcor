@@ -7,8 +7,8 @@ describe("Model", function() {
     it("should construct a new Model", function() {
         new jsong.Model();
     });
-    require("./request/RequestQueue.spec");
-    require("./schedulers/schedulers.spec");
+    // require("./request/RequestQueue.spec");
+    // require("./schedulers/schedulers.spec");
 
     describe("#get", function() {
         require("./get/get.spec");
@@ -23,8 +23,12 @@ describe("Model", function() {
         require("./call/call.spec");
     });
 
-    describe("--behavioral", function() {
-        require("./behavioral")
-    });
+    describe("#invalidate", function() {
+        require("./invalidate/invalidate.spec");
+    })
+
+    // describe("--behavioral", function() {
+    //     require("./behavioral")
+    // });
 });
 

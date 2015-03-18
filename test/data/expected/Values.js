@@ -1,16 +1,17 @@
 module.exports = function() {
     return {
         direct: {
-            getPaths: {
+            getPathSets: {
                 query: [
                     ["videos", "1234", "summary"]
                 ]
             },
-            setPaths: {
+            setPathSets: {
                 query: [{
                     "path": ["videos", "1234", "summary"],
                     "value": {
                         "$size": 10,
+                        "$type": "group",
                         "title": "House of Cards",
                         "url": "/movies/1234"
                     }
@@ -22,7 +23,7 @@ module.exports = function() {
                         1234: {
                             summary: {
                                 "$size": 10,
-                                "$type": "leaf",
+                                "$type": "group",
                                 "title": "House of Cards",
                                 "url": "/movies/1234"
                             }
@@ -37,7 +38,7 @@ module.exports = function() {
                         videos: {
                             1234: {
                                 summary: {
-                                    "$type": "leaf",
+                                    "$type": "group",
                                     "$size": 10,
                                     "title": "House of Cards",
                                     "url": "/movies/1234"
@@ -60,17 +61,17 @@ module.exports = function() {
                 values: [{
                     "path": ["videos", "1234", "summary"],
                     "value": {
-                        "$type": "leaf",
+                        "$type": "group",
                         "$size": 10,
                         "title": "House of Cards",
-                        "url": "/movies/1234"
+                        "url": "/movies/1234",
                     }
                 }]
             },
             AsJSON: {
                 values: [{
                     json: {
-                        "$type": "leaf",
+                        "$type": "group",
                         "$size": 10,
                         "title": "House of Cards",
                         "url": "/movies/1234"
@@ -83,7 +84,7 @@ module.exports = function() {
                         videos: {
                             1234: {
                                 summary: {
-                                    "$type": "leaf",
+                                    "$type": "group",
                                     "$size": 10,
                                     "title": "House of Cards",
                                     "url": "/movies/1234"
@@ -100,10 +101,10 @@ module.exports = function() {
                         videos: {
                             1234: {
                                 summary: {
-                                    "$type": "leaf",
-                                    "$size": 10,
+                                    "$type": "group",
+                                    "$size": "10",
                                     "title": "House of Cards",
-                                    "url": "/movies/1234"
+                                    "url": "/movies/1234",
                                 }
                             }
                         }
@@ -112,17 +113,17 @@ module.exports = function() {
             }
         },
         direct553: {
-            getPaths: {
+            getPathSets: {
                 query: [
                     ["videos", "553", "summary"]
                 ]
             },
-            setPaths: {
+            setPathSets: {
                 query: [{
                     "path": ["videos", "553", "summary"],
                     "value": {
-                        "$type": "leaf",
                         "$size": 10,
+                        "$type": "group",
                         "title": "Running Man",
                         "url": "/movies/553"
                     }
@@ -134,7 +135,7 @@ module.exports = function() {
                         553: {
                             summary: {
                                 "$size": 10,
-                                "$type": "leaf",
+                                "$type": "group",
                                 "title": "Running Man",
                                 "url": "/movies/553"
                             }
@@ -149,7 +150,7 @@ module.exports = function() {
                         videos: {
                             553: {
                                 summary: {
-                                    "$type": "leaf",
+                                    "$type": "group",
                                     "$size": 10,
                                     "title": "Running Man",
                                     "url": "/movies/553"
@@ -172,7 +173,7 @@ module.exports = function() {
                 values: [{
                     "path": ["videos", "553", "summary"],
                     "value": {
-                        "$type": "leaf",
+                        "$type": "group",
                         "$size": 10,
                         "title": "Running Man",
                         "url": "/movies/553"
@@ -182,7 +183,7 @@ module.exports = function() {
             AsJSON: {
                 values: [{
                     json: {
-                        "$type": "leaf",
+                        "$type": "group",
                         "$size": 10,
                         "title": "Running Man",
                         "url": "/movies/553"
@@ -195,7 +196,7 @@ module.exports = function() {
                         videos: {
                             553: {
                                 summary: {
-                                    "$type": "leaf",
+                                    "$type": "group",
                                     "$size": 10,
                                     "title": "Running Man",
                                     "url": "/movies/553"
@@ -212,10 +213,10 @@ module.exports = function() {
                         videos: {
                             553: {
                                 summary: {
-                                    "$type": "leaf",
+                                    "$type": "group",
                                     "$size": 10,
                                     "title": "Running Man",
-                                    "url": "/movies/553"
+                                    "url": "/movies/553",
                                 }
                             }
                         }
@@ -228,7 +229,7 @@ module.exports = function() {
                 ["genreList", "0"]
             ],
 
-            setPaths: {
+            setPathSets: {
                 query: [
                     {
                         "path": ["genreList", "0"],
@@ -255,7 +256,7 @@ module.exports = function() {
                 }]
             },
 
-            getPaths: {
+            getPathSets: {
                 query: [
                     ["genreList", "0"]
                 ]
@@ -306,13 +307,13 @@ module.exports = function() {
             }
         },
         "sentinelSummary": {
-            getPaths: {
+            getPathSets: {
                 query: [
                     ["videos", "sentinel", "summary"]
                 ]
             },
 
-            setPaths: {
+            setPathSets: {
                 query: [
                     {
                         "path": ["videos", "sentinel", "summary"],
@@ -416,7 +417,7 @@ module.exports = function() {
                             sentinel: {
                                 summary: {
                                     "title": "Marco Polo",
-                                    "url": "/movies/sentinel"
+                                    "url": "/movies/sentinel",
                                 }
                             }
                         }
@@ -425,7 +426,7 @@ module.exports = function() {
             }
         },
         expiredLeafNodeTimestamp: {
-            getPaths: {
+            getPathSets: {
                 query: [["videos", "expiredLeafByTimestamp", "summary"]]
             },
 
@@ -439,7 +440,7 @@ module.exports = function() {
                 }]
             },
             
-            setPaths: {
+            setPathSets: {
                 query: [
                     {
                         "path": ["videos", "expiredLeafByTimestamp", "summary"],
@@ -511,7 +512,7 @@ module.exports = function() {
             }
         },
         expiredLeafNode0: {
-            getPaths: {
+            getPathSets: {
                 query: [["videos", "expiredLeafBy0", "summary"]]
             },
 
@@ -525,7 +526,7 @@ module.exports = function() {
                 }]
             },
 
-            setPaths: {
+            setPathSets: {
                 query: [
                     {
                         "path": ["videos", "expiredLeafBy0", "summary"],
@@ -596,7 +597,7 @@ module.exports = function() {
             }
         },
         expiredBranchNodeTimestamp: {
-            getPaths: {
+            getPathSets: {
                 query: [["videos", "expiredBranchByTimestamp", "summary"]]
             },
 
@@ -629,7 +630,7 @@ module.exports = function() {
             }
         },
         expiredBranchNode0: {
-            getPaths: {
+            getPathSets: {
                 query: [["videos", "expiredBranchBy0", "summary"]]
             },
 
@@ -662,7 +663,7 @@ module.exports = function() {
             }
         },
         errorBranchSummary: {
-            getPaths: {
+            getPathSets: {
                 query: [
                     ["videos", "errorBranch", "summary"]
                 ]
@@ -697,12 +698,16 @@ module.exports = function() {
                 }]
             },
             AsJSONG: {
-                errors: [{
-                    "path": ["videos", "errorBranch"],
-                    "value": {
-                        "$size": 50,
-                        "$type": "error",
-                        "message": "I am yelling timber."
+                values: [{
+                    paths: [["videos", "errorBranch"]],
+                    jsong: {
+                        "videos": {
+                            "errorBranch": {
+                                "$size": 50,
+                                "$type": "error",
+                                "message": "I am yelling timber."
+                            }
+                        }
                     }
                 }]
             },
@@ -718,7 +723,7 @@ module.exports = function() {
             }
         },
         genreListErrorNull: {
-            getPaths: {
+            getPathSets: {
                 query: [
                     ["genreList", 2, null]
                 ]
@@ -734,47 +739,54 @@ module.exports = function() {
             },
             AsValues: {
                 errors: [{
-                    "path": ["genreList", "2"],
+                    "path": ["genreList", "2", null],
                     "value": {
                         "$size": 50,
                         "$type": "error",
-                        "message": "I am yelling timber."
+                        "message": "Red is the new Black"
                     }
                 }]
             },
             AsJSON: {
                 errors: [{
-                    "path": ["genreList", "2"],
+                    "path": ["genreList", "2", null],
                     "value": {
                         "$size": 50,
                         "$type": "error",
-                        "message": "I am yelling timber."
+                        "message": "Red is the new Black"
                     }
                 }]
             },
             AsJSONG: {
-                errors: [{
-                    "path": ["genreList", "2"],
-                    "value": {
-                        "$size": 50,
-                        "$type": "error",
-                        "message": "I am yelling timber."
+                values: [{
+                    paths: [["genreList", "2", null]],
+                    jsong: {
+                        "genreList": {
+                            "2": ["lists", "error-list"]
+                        },
+                        "lists": {
+                            "error-list": {
+                                "$size": 50,
+                                "$type": "error",
+                                "message": "Red is the new Black"
+                            }
+                        }
                     }
                 }]
             },
             AsPathMap: {
                 errors: [{
-                    "path": ["genreList", "2"],
+                    "path": ["genreList", "2", null],
                     "value": {
                         "$size": 50,
                         "$type": "error",
-                        "message": "I am yelling timber."
+                        "message": "Red is the new Black"
                     }
                 }]
             }
         },
         missingBranchSummary: {
-            getPaths: {
+            getPathSets: {
                 query: [
                     ["videos", "missingBranch", "summary"]
                 ]
@@ -811,7 +823,7 @@ module.exports = function() {
             }
         },
         missingLeafSummary: {
-            getPaths: {
+            getPathSets: {
                 query: [
                     ["videos", "missingLeaf", "summary"]
                 ]

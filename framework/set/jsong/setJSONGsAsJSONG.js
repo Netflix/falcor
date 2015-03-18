@@ -2,103 +2,131 @@ function setJSONGsAsJSONG(model, envelopes, values, errorSelector, boundPath) {
     
     ++__GENERATION_VERSION;
     
-    var nodeRoot = model._cache || (model._cache = {}),
-        nodeParent = nodeRoot, node = nodeParent,
-        boundLength = 0;
+    offset = 0;
     
-    boundPath = model._path || [];
-    
-    var root       = model._root  || model,
-        boxed      = model._boxed || false,
-        expired    = root.expired || (root.expired = []),
+    var root = model._root,
+        expired = root.expired,
+        
+        boxed = model._boxed || false,
         refreshing = model._refreshing || false,
-        appendNullKey = false;
-    
-    (typeof errorSelector === "function") || (errorSelector = model._errorSelector) || (errorSelector = function(x, y){return y;});
-    
-    default var envelopes <-
-        nodes: [], messages: [], jsons: [],
-        errors: [], refs: [],
-        depth: 0, refIndex: 0, refDepth: 0,
-        requestedPath: [], optimizedPath: [],
-        requestedPaths: [], optimizedPaths: [],
-        requestedMissingPaths: [], optimizedMissingPaths: [],
-        hasValue: false,
-        jsonRoot: values && values[0], jsonParent: jsonRoot, jsonNode: jsonParent;
-    
-    var path, length = 0, height = 0, reference, refLength = 0, refHeight = 0,
-        messageRoot, messageParent, message,
+        materialized = model._materialized || false;
+    errorSelector = errorSelector || model._errorSelector;
+    var errorsAsValues = true,
+        
+        path, hasValue = false,
+        depth  = 0, linkDepth  = 0,
+        height = 0, linkHeight = 0,
+        linkPath  , linkIndex  = 0,
+        
+        requestedPath = [], requestedPaths = [], requestedMissingPaths = [],
+        optimizedPath = [], optimizedPaths = [], optimizedMissingPaths = [],
+        
+        errors = [], refs = [],
+        
+        nodePath = [],
+        nodes = [], nodeRoot = model._cache, nodeParent = nodeRoot, node = nodeParent,
+        messages = [], messageRoot, messageParent, message,
+        jsons = [], jsonRoot, jsonParent, json,
+        
         nodeType, nodeValue, nodeSize, nodeTimestamp, nodeExpires,
         messageType, messageValue, messageSize, messageTimestamp, messageExpires;
     
-    refs[-1]  = boundPath;
+    refs[-1]  = nodePath;
     nodes[-1] = nodeParent;
-    jsons[-1] = jsonParent;
-    jsons[-2] = jsons;
     
     curried errorSelector2 = errorSelector(requestedPath);
     
+    NodeMixin(root, expired, errorSelector2, json)
     NodeMixin(root, expired, errorSelector2, node)
-    NodeMixin(root, expired, errorSelector2, nodeParent)
     NodeMixin(root, expired, errorSelector2, message)
-    NodeMixin(root, expired, errorSelector2, messageParent)
-    NodeMixin(root, expired, errorSelector2, jsonNode)
+    NodeMixin(root, expired, errorSelector2, nodeValue)
+    NodeMixin(root, expired, errorSelector2, nodeParent)
     NodeMixin(root, expired, errorSelector2, jsonParent)
-    NodeMixin(root, expired, errorSelector2, jsonRoot)
+    NodeMixin(root, expired, errorSelector2, messageParent)
     
-    curried checkNodeExpired   = checkExpired(visit),
-            mergeMessageNode   = mergeNode(checkNodeExpired),
-            mergeMessageEdge   = mergeEdge(checkNodeExpired),
-            optimizeJSONGRefN  = addRequestedKey(mergeMessageNode, optimizedPath),
-            setJSONGRefNode    = nodeAsJSONG(optimizeJSONGRefN, jsonParent, jsonNode, boxed),
-            setJSONGRefEdge    = setHardLink(setJSONGRefNode, reference),
-            setReferenceNode   = walkReference(keySetFalse, setJSONGRefNode, setJSONGRefEdge, appendNullKey, reference),
-            
-            requestedJSONGKey  = getRequestedKeySet(getKeySet, requestedPath, boundLength),
-            optimizeJSONGNode  = addOptimizedKey(mergeMessageNode, optimizedPath, refIndex, refLength),
-            optimizeJSONGEdge  = addOptimizedKey(mergeMessageEdge, optimizedPath, refIndex, refLength),
-            
-            setJSONGNode       = nodeAsJSONG(optimizeJSONGNode, jsonParent, jsonNode, boxed),
-            setJSONGEdge       = edgeAsJSONG(optimizeJSONGEdge, jsons, jsonParent, boxed),
-            followJSONGRef     = followPathSetRef(setReferenceNode, optimizedPath, reference, refs, refIndex, refDepth, refHeight, refLength),
-            setOptimizedNode   = optimizeNode(setJSONGNode, followJSONGRef),
-            
-            onJSONGNext        = onNext(requestedPath, optimizedPath, requestedPaths, optimizedPaths, appendNullKey),
-            onJSONGNext2       = nextAsPathMap(onJSONGNext, hasValue, jsons, jsonParent, boxed),
-            onJSONGError       = onErrorAsJSONG(errors, boxed, requestedPath, appendNullKey),
-            onJSONGMiss        = onPathSetMiss(boundPath, boundLength, requestedPath, optimizedPath, requestedMissingPaths, optimizedMissingPaths),
-            
-            setPathSetAsJSONG  = walkPathSet(requestedJSONGKey, setOptimizedNode, setJSONGEdge, appendNullKey, path),
-            setPathSetComboAsJSONG = walkPathSetCombo(
-                setPathSetAsJSONG, unwindPath,
-                onJSONGNext2, onJSONGError, onJSONGMiss,
-                boxed, refreshing, appendNullKey,
-                refs, refIndex, refLength,
-                requestedPath, optimizedPath
-            );
+    curried  addJSONNode      = addNodeJSONG(jsonRoot, jsonParent, json, boxed),
+             addJSONLink      = addLinkJSONG(jsonRoot, jsonParent, json, materialized, boxed, errorsAsValues),
+             addJSONEdge      = addEdgeJSONG(jsonRoot, jsonParent, json, materialized, boxed, errorsAsValues),
+             
+             addReqPathKey    = addKeyAtDepth(requestedPath),
+             addOptPathKey    = addKeyAtLinkDepth(optimizedPath, linkIndex, linkHeight),
+             addOptLinkKey    = addKeyAtDepth(optimizedPath),
+             addReqLeafKey    = addNullLeafKey(requestedPath),
+             
+             addRequestedPath = addSuccessPath(requestedPaths, requestedPath),
+             addOptimizedPath = addSuccessPath(optimizedPaths, optimizedPath),
+             
+             addErrorValue2   = addErrorValue(errors, requestedPath),
+             
+             addRequestedMiss = addRequestedMissingPath(requestedMissingPaths, requestedPath, path, height, nodePath, pathSetIndex),
+             addOptimizedMiss = addOptimizedMissingPath(optimizedMissingPaths, optimizedPath, path, height),
+             
+             setupHardLink    = addHardLink(linkPath);
+             
+    sequence visitRefNodeKey  = [addOptLinkKey, mergeNode, addJSONLink];
     
-    var envelope, pathSets, index = -1, count = envelopes.length;
+    curried  visitRefNodeKey2 = visitNode(visitRefNodeKey);
     
-    while(++index < count) {
-        envelope = envelopes[index];
-        pathSets = envelope.paths;
-        messages[-1] = messageRoot = envelope.jsong || envelope.values || envelope.value || Object.create(null);
+    sequence visitRefNode     = [visitRefNodeKey2],
+             visitRefEdge     = [addReqLeafKey, setupHardLink];
+    
+    curried  walkReference    = walkLink(visitRefNode, visitRefEdge),
+             followReference  = followLink(walkReference, refs, optimizedPath, linkPath, linkIndex, linkDepth, linkHeight);
+    
+    sequence visitNodeKey     = [addOptPathKey, mergeNode, addJSONNode],
+             visitLeafKey     = [addRequestedPath, addOptimizedPath, addJSONEdge],
+             visitMissKey     = [addRequestedMiss, addOptimizedMiss];
+    
+    curried  visitNodeKey2    = visitNode(visitNodeKey),
+             visitEdgeKey     = visitEdge(mergeEdge),
+             visitEdgeLeaf    = visitLeaf(visitLeafKey, hasValue, materialized, errorsAsValues),
+             visitEdgeError   = visitError(addErrorValue2),
+             visitEdgeMiss    = visitMiss(visitMissKey, refreshing);
+    
+    sequence visitPathNode    = [addReqPathKey, visitNodeKey2],
+             visitPathLink    = [followReference],
+             visitPathEdge    = [visitEdgeKey, visitEdgeLeaf, visitEdgeError, visitEdgeMiss];
+    
+    curried  hydratePaths     = hydrateKeysAtDepth(linkIndex, linkHeight, refs, requestedPath, optimizedPath);
+    
+    var envelope, pathSets, pathSetIndex = -1;
+    
+    jsons[offset - 1] = jsonRoot = values && values[0];
+    
+    for(var envelopeIndex = -1, envelopeCount = envelopes.length; ++envelopeIndex < envelopeCount;) {
         
-        values = walkPathSets(
-            noop, setPathSetComboAsJSONG, pathSets,
-            path, depth, length, height,
-            nodes, nodeRoot, nodeParent, node,
-            messages, messageRoot, messageParent, message,
-            jsons, jsonRoot, jsonParent, jsonNode,
-            nodeType, nodeValue, nodeSize, nodeTimestamp, nodeExpires,
-            messageType, messageValue, messageSize, messageTimestamp, messageExpires
-        )
+        envelope = envelopes[envelopeIndex];
+        pathSets = envelope.paths;
+        messages[-1] = messageRoot = envelope.jsong || envelope.values || envelope.value;
+        
+        for(var index = -1, count = pathSets.length; ++index < count;) {
+            
+            pathSetIndex++;
+            path = pathSets[index];
+            depth = 0;
+            refs.length = 0;
+            jsons.length = 0;
+            
+            while(depth > -1) {
+                
+                depth = hydratePaths(depth)
+                
+                node  = walkPathSet(
+                    keyToKeySet, visitPathNode, visitPathLink, visitPathEdge,
+                    path, depth, height,
+                    nodes, nodeRoot, nodeParent, node,
+                    messages, messageRoot, messageParent, message,
+                    jsons, jsonRoot, jsonParent, json,
+                    nodeType, nodeValue, nodeSize, nodeTimestamp, nodeExpires,
+                    messageType, messageValue, messageSize, messageTimestamp, messageExpires
+                )
+                
+                depth = depthToKeySet(path, depth)
+            }
+        }
     }
     
-    values && (values[0] = hasValue && {
-        paths: requestedPaths,
-        jsong: jsons[-1]
-    } || undefined);
+    values && (values[0] = !(hasValue = !hasValue) && { jsong: jsons[offset - 1], paths: requestedPaths } || undefined);
     
     return {
         "values": values,

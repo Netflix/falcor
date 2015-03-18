@@ -23,11 +23,11 @@ function call(path, args, suffixes, paths, selector) {
                 getValue(path).
                 flatMap(function(localFn) {
                     if(typeof localFn === "function") {
-                        return Rx.Observable.return(localFn.
+                        return falcor.Observable.return(localFn.
                             apply(rootModel.bindSync(thisPath), args).
                             map(function(pathValue) {
                                 return {
-                                    path: thisPath.concat(pathValue.path),
+                                    path:  thisPath.concat(pathValue.path),
                                     value: pathValue.value
                                 };
                             }).
@@ -50,7 +50,7 @@ function call(path, args, suffixes, paths, selector) {
                                     toJSONG();
                             }));
                     }
-                    return Rx.Observable.empty();
+                    return falcor.Observable.empty();
                 }).
                 defaultIfEmpty(dataSource.call(path, args, suffixes, paths)).
                 mergeAll().
