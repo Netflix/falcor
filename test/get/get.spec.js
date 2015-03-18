@@ -18,6 +18,9 @@ var References = Expected.References;
 var Complex = Expected.Complex;
 var Values = Expected.Values;
 var Bound = Expected.Bound;
+var Materialized = Expected.Materialized;
+var Boxed = Expected.Boxed;
+var Errors = Expected.Errors;
 
 describe("Use New Model", function() {
     execute(true);
@@ -63,10 +66,10 @@ function execute(useNewModel) {
             describe("should report a leaf expired by 0 path.", function() {
                 runGetTests(getModel(useNewModel), Values().expiredLeafNode0, {useNewModel: useNewModel});
             });
-            xdescribe("should report a branch expired by timestamp path.", function() {
+            describe("should report a branch expired by timestamp path.", function() {
                 runGetTests(getModel(useNewModel), Values().expiredBranchNodeTimestamp, {useNewModel: useNewModel});
             });
-            xdescribe("should report a branch expired by 0 path.", function() {
+            describe("should report a branch expired by 0 path.", function() {
                 runGetTests(getModel(useNewModel), Values().expiredBranchNode0, {useNewModel: useNewModel});
             });
         });
@@ -87,7 +90,7 @@ function execute(useNewModel) {
         describe("should get a value through references when the last key is null", function() {
             runGetTests(getModel(useNewModel), References().referenceLeafNode, {useNewModel: useNewModel});
         });
-        describe.only("should never follow an inner reference, but short-circuit.", function() {
+        xdescribe("should never follow an inner reference, but short-circuit.", function() {
             runGetTests(getModel(useNewModel), References().innerReference, {useNewModel: useNewModel});
         });
         describe("Sentinels", function() {
@@ -117,13 +120,10 @@ function execute(useNewModel) {
                 runGetTests(getModel(useNewModel), References().toMissingReference, {useNewModel: useNewModel});
             });
             describe("should report a missing path in branch key position.", function() {
-                runGetTests(getModel(useNewModel), References().toMissingReference, {useNewModel: useNewModel});
+                runGetTests(getModel(useNewModel), References().referenceBranchIsMissing, {useNewModel: useNewModel});
             });
         });
         describe("Expired", function() {
-            xdescribe("should report a missing requested path when branch of reference is expired.", function() {
-                runGetTests(getModel(useNewModel), References().referenceBranchIsExpired, {useNewModel: useNewModel});
-            });
             describe("should report a missing requested path when reference is expired.", function() {
                 runGetTests(getModel(useNewModel), References().referenceExpired, {useNewModel: useNewModel});
             });
@@ -177,6 +177,42 @@ function execute(useNewModel) {
         });
         describe("should use a complex path array with objects at leaf.", function() {
             runGetTests(getModel(useNewModel), Complex().arrayOfComplexPathsLeaf, {useNewModel: useNewModel});
+        });
+    });
+    describe("Materialized", function() {
+        describe("should get a value directly in materialized mode", function() {
+            runGetTests(getModel(useNewModel), Values().direct, { useNewModel: useNewModel, materialized: true });
+        });
+        describe("should report an undefined sentinel for a materialized missing branch node", function() {
+            runGetTests(getModel(useNewModel), Materialized().missingBranch, { useNewModel: useNewModel, materialized: true });
+        });
+        describe("should report an undefined sentinel for a materialized missing leaf node", function() {
+            runGetTests(getModel(useNewModel), Materialized().missingLeaf, { useNewModel: useNewModel, materialized: true });
+        });
+        describe("should report an undefined sentinel for a materialized undefined sentinel", function() {
+            runGetTests(getModel(useNewModel), Materialized().sentinelOfUndefined, { useNewModel: useNewModel, materialized: true });
+        });
+    });
+    describe("Boxed", function() {
+        describe("should get a primitive value directly as a sentinel in boxed mode", function() {
+            runGetTests(getModel(useNewModel), Boxed().primitiveValue, { useNewModel: useNewModel, boxed: true });
+        });
+        describe("should get a group value directly as a sentinel in boxed mode", function() {
+            runGetTests(getModel(useNewModel), Values().direct, { useNewModel: useNewModel, boxed: true });
+        });
+        describe("should get a reference value in boxed mode", function() {
+            runGetTests(getModel(useNewModel), Boxed().referenceValue, { useNewModel: useNewModel, boxed: true });
+        });
+        describe("should get a sentinel value in boxed mode", function() {
+            runGetTests(getModel(useNewModel), Boxed().sentinelValue, { useNewModel: useNewModel, boxed: true });
+        });
+    });
+    describe("Errors as Values", function() {
+        describe("should report an error as a value", function () {
+            runGetTests(getModel(useNewModel), Errors().errorBranchSummary, {useNewModel: useNewModel, errorsAsValues: true});
+        });
+        describe("should report an error as a value with null", function () {
+            runGetTests(getModel(useNewModel), Errors().genreListErrorNull, {useNewModel: useNewModel, errorsAsValues: true});
         });
     });
 }

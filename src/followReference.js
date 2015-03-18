@@ -1,4 +1,4 @@
-function followReference(model, root, node, referenceContainer, reference) {
+function followReference(model, root, node, referenceContainer, reference, seed, outputFormat) {
 
     var depth = 0;
     var k, next;
@@ -40,6 +40,10 @@ function followReference(model, root, node, referenceContainer, reference) {
 
                 // Restart the reference follower.
                 if (Array.isArray(value)) {
+                    if (outputFormat === 'JSONG') {
+                        onValue(model, next, reference, depth, seed, null, null, reference, null, outputFormat);
+                    }
+
                     depth = 0;
                     reference = value;
                     referenceContainer = next;
@@ -49,6 +53,9 @@ function followReference(model, root, node, referenceContainer, reference) {
 
                 break;
             }
+        } else {
+            node = undefined;
+            depth = reference.length;
         }
         break;
     }

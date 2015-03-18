@@ -5,6 +5,9 @@ var concat = require('gulp-concat');
 var build = require('./build');
 var support = require('./gulp-build-support');
 
+gulp.task('build.recurse', ['clean.dev', 'build.node-recurse']);
+gulp.task('build.s.recurse', ['build.support-only-recurse']);
+
 gulp.task('build.operations-recurse', ['build.macros'], function() {
     return gulp.
         src(build.macroCompileWithRecursiveSubstitutes).
@@ -50,7 +53,5 @@ var Rx = require(\'rx\');\n\
 var Observable = Rx.Observable;\n',
                 postfix: 'module.exports = falcor;'
             }));
-    }, ['./tmp/get.ops.js']);
+    });
 });
-
-gulp.task('build.recurse', ['clean.dev', 'build.node-recurse']);

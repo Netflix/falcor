@@ -2,7 +2,6 @@ var gulp = require('gulp');
 var rename = require('gulp-rename');
 var license = require('gulp-license');
 var concat = require('gulp-concat');
-var build = require('./build');
 var licenseInfo = {
     organization: 'Netflix, Inc',
     year: '2014'
@@ -38,8 +37,8 @@ var macroCompileFull = [
     './framework/invalidate/*.js'
 ];
 var macroCompileWithRecursiveSubstitutes = [
-    './framework/get/paths/getPathSetsAsJSONG.js',
-    './framework/get/pathMaps/getPathMapsAsJSONG.js',
+    './framework/get/*.js',
+    './framework/set/*.js',
     './framework/set/paths/*.js',
     './framework/set/pathMaps/*.js',
     './framework/set/jsong/*.js',
@@ -64,7 +63,7 @@ var build = function(name, dest, addBuildStep, extraSrc) {
         pipe(license('Apache', licenseInfo)).
         pipe(rename(name)).
         pipe(gulp.dest(dest));
-}
+};
 build.macroCompileWithRecursiveSubstitutes = macroCompileWithRecursiveSubstitutes;
 build.macroCompileFull = macroCompileFull;
 build.compileWithGetOps = compileWithGetOps;

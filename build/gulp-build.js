@@ -32,15 +32,7 @@ gulp.task('build.macros', ['clean.dev'], function() {
 
 gulp.task('build.get.ops', function() {
     return gulp.
-        src([
-            'src/lru.js',
-            'src/support.js',
-            'src/hardlink.js',
-            'src/followReference.js',
-            'src/get-header.js',
-            'src/get.js',
-            'src/bridge.js'
-        ]).
+        src(build.recursiveFiles).
         pipe(concat({path: 'get.ops.js'})).
         pipe(gulp.dest('./tmp'));
 });

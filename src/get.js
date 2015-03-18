@@ -1,39 +1,7 @@
 // TODO: Objectify?
 function walk(model, root, curr, pathOrJSON, depth, seedOrFunction, positionalInfo, outerResults, optimizedPath, requestedPath, inputFormat, outputFormat, fromReference) {
-    // BaseCase: This position does not exist, emit missing.
-    if (!curr) {
-        emitMissing(pathOrJSON, depth, requestedPath, optimizedPath, positionalInfo, outerResults, outputFormat);
+    if (evaluateNode(model, curr, pathOrJSON, depth, seedOrFunction, requestedPath, optimizedPath, positionalInfo, outerResults, outputFormat, fromReference)) {
         return;
-    }
-    
-    var currType = curr[$TYPE];
-    var currValue = currType === SENTINEL ? curr.value : curr;
-    var atLeaf = currType || Array.isArray(currValue);
-    
-    positionalInfo = positionalInfo || [];
-
-    // The Base Cases.  There is a type, therefore we have hit a 'leaf' node.
-    if (atLeaf) {
-
-        if (currType === ERROR) {
-            if (fromReference) {
-                requestedPath.push(null);
-            }
-            emitError(model, curr, currValue, requestedPath, optimizedPath, outerResults);
-        } 
-        
-        // Else we have found a value, emit the current position information.
-        else {
-            if (isExpired(curr)) {
-                if (!curr[__INVALIDATED]) {
-                    lruSplice(model, curr);
-                    removeHardlink(curr);
-                }
-                emitMissing(pathOrJSON, depth, requestedPath, optimizedPath, positionalInfo, outerResults, outputFormat);
-            } else {
-                emitValues(model, curr, pathOrJSON, depth, seedOrFunction, outerResults, requestedPath, optimizedPath, positionalInfo, outputFormat);
-            }
-        }
     }
 
     // We continue the search to the end of the path/json structure.
@@ -68,7 +36,7 @@ function walk(model, root, curr, pathOrJSON, depth, seedOrFunction, positionalIn
         
         // BaseCase: we have hit the end of our query without finding a 'leaf' node, therefore emit missing.
         if (atEndOfJSONQuery || !jsonQuery && depth === pathOrJSON.length) {
-            emitMissing(pathOrJSON, depth, requestedPath, optimizedPath, positionalInfo, outerResults, outputFormat);
+            onMissing(pathOrJSON, depth, requestedPath, optimizedPath, positionalInfo, outerResults, outputFormat);
             return;
         }
         
@@ -77,7 +45,6 @@ function walk(model, root, curr, pathOrJSON, depth, seedOrFunction, positionalIn
         var permutePosition = positionalInfo;
         var permuteRequested = requestedPath;
         var permuteOptimized = optimizedPath;
-        var asPathMap = outputFormat === 'PathMap';
         var asJSONG = outputFormat === 'JSONG';
         var asJSON = outputFormat === 'JSON';
         var isKeySet = false;
@@ -112,11 +79,6 @@ function walk(model, root, curr, pathOrJSON, depth, seedOrFunction, positionalIn
                 for (i = 0, len = optimizedPath.length; i < len; i++) {
                     permuteOptimized[i] = optimizedPath[i];
                 }
-                if (asPathMap) {
-                    for (i = 0, len = permutePosition.length; i < len; i++) {
-                        permutePosition[i] = permutePosition[i];
-                    }
-                }
             }
             
             var nextPathOrPathMap = jsonQuery ? pathOrJSON[key] : pathOrJSON;
@@ -139,14 +101,15 @@ function walk(model, root, curr, pathOrJSON, depth, seedOrFunction, positionalIn
                 var nSentinel = nType === SENTINEL;
                 var value = nSentinel ? next.value : next;
                 var valueIsArray = Array.isArray(value);
-                if (asPathMap) {
-                    permutePosition.push(next[__GENERATION]);
-                }
 
                 if (jsonQuery && hasChildren || !jsonQuery && depth < pathOrJSON.length) {
 
                     if (valueIsArray && (!nSentinel || nSentinel && !isExpired(next))) {
-                        var ref = followReference(model, root, root, next, value);
+                        if (asJSONG) {
+                            onValue(model, next, nextPathOrPathMap, depth, seedOrFunction, outerResults, false, permuteOptimized, permutePosition, outputFormat);
+                        }
+                        debugger;
+                        var ref = followReference(model, root, root, next, value, seedOrFunction, outputFormat);
                         fromReference = true;
                         next = ref[0];
                         var refPath = ref[1];
@@ -165,194 +128,49 @@ function walk(model, root, curr, pathOrJSON, depth, seedOrFunction, positionalIn
             }
         }
     }
-
 }
 
-function simpleWalk(model, root, node, path, depth, results) {
-    var key = path[depth++];
-    
-    // TODO: if sentinel, then there is no child, there is a short-circuit
-    var nodeIsSentinel = node.$type === 'sentinel';
-    var next = nodeIsSentinel ? node.value[key] : node[key];
-    
-    if (next) {
-        var nType = next.$type;
-        var value = nType === 'sentinel' ? next.value : next;
-        var valueIsArray = Array.isArray(value);
-        if (isExpired(next)) {
-            // TODO: anything else?
-            return undefined;
-        }
-        else if (depth < path.length) {
-            if (valueIsArray) {
-                var ref = followReference(model, root, root, value);
-                var refNode = ref[0];
+function evaluateNode(model, curr, pathOrJSON, depth, seedOrFunction, requestedPath, optimizedPath, positionalInfo, outerResults, outputFormat, fromReference) {
+    // BaseCase: This position does not exist, emit missing.
+    if (!curr) {
+        onMissing(pathOrJSON, depth, requestedPath, optimizedPath, positionalInfo, outerResults, outputFormat);
+        return true;
+    }
 
-                if (refNode) {
-                    var rType = refNode.$type;
-                    var rValue = rType === 'sentinel' ? refNode.value : refNode;
-                    
-                    // TODO: Treat errors as values
-                    if (rType === 'error') {
-                        throw rValue;
-                    }
-                    
-                    simpleWalk(model, root, refNode, path, depth, results);
-                } else {
-                    results.value = undefined;
+    var currType = curr[$TYPE];
+    var currValue = currType === SENTINEL ? curr.value : curr;
+    var atLeaf = currType || Array.isArray(currValue);
+
+    positionalInfo = positionalInfo || [];
+
+    // The Base Cases.  There is a type, therefore we have hit a 'leaf' node.
+    if (atLeaf) {
+        if (currType === ERROR) {
+            if (fromReference) {
+                requestedPath.push(null);
+            }
+            if (outputFormat === 'JSONG') {
+                onValue(model, curr, pathOrJSON, depth, seedOrFunction, outerResults, requestedPath, optimizedPath, positionalInfo, outputFormat);
+                onError(model, curr, currValue, requestedPath, null, outerResults);
+            } else {
+                onError(model, curr, currValue, requestedPath, optimizedPath, outerResults);
+            }
+        }
+
+        // Else we have found a value, emit the current position information.
+        else {
+            if (isExpired(curr)) {
+                if (!curr[__INVALIDATED]) {
+                    lruSplice(model, curr);
+                    removeHardlink(curr);
                 }
-            }
-
-            else if (nType === 'error') {
-                throw value;
-            }
-
-            else {
-                simpleWalk(model, root, next, path, depth, results);
-            }
-        } else if (nType === 'leaf') {
-            results.value = copyCacheObject(value);
-        } else if (nType === 'error') {
-            throw value;
-        } else {
-            // TODO: Dont allow branch access
-            results.value = undefined;
-        }
-    } else {
-        results.value = undefined;
-    }
-}
-
-function emitError(model, node, nodeValue, permuteRequested, permuteOptimized, outerResults) {
-    
-    outerResults.errors.push({path: fastCopy(permuteRequested), value: copyCacheObject(nodeValue)});
-    lruPromote(model, node);
-    outerResults.requestedPaths.push(permuteRequested);
-    outerResults.optimizedPaths.push(permuteOptimized);
-}
-
-function emitMissing(path, depth, permuteRequested, permuteOptimized, permutePosition, results, type) {
-    var pathSlice;
-    if (Array.isArray(path)) {
-        if (depth < path.length) {
-            pathSlice = fastCopy(path, depth);
-        } else {
-            pathSlice = [];
-        }
-
-        concatAndInsertMissing(pathSlice, results, permuteRequested, permuteOptimized, permutePosition, type);
-    } else {
-        pathSlice = [];
-        spreadJSON(path, pathSlice);
-
-        if (pathSlice.length) {
-            for (var i = 0, len = pathSlice.length; i < len; i++) {
-                concatAndInsertMissing(pathSlice[i], results, permuteRequested, permuteOptimized, permutePosition, type, true);
-            }
-        } else {
-            concatAndInsertMissing(pathSlice, results, permuteRequested, permuteOptimized, permutePosition, type);
-        }
-    }
-    
-}
-function concatAndInsertMissing(remainingPath, results, permuteRequested, permuteOptimized, permutePosition, type, __null) {
-    var i = 0, len;
-    if (__null) {
-        for (i = 0, len = remainingPath.length; i < len; i++) {
-            if (remainingPath[i] === '__null') {
-                remainingPath[i] = null;
+                onMissing(pathOrJSON, depth, requestedPath, optimizedPath, positionalInfo, outerResults, outputFormat);
+            } else {
+                onValue(model, curr, pathOrJSON, depth, seedOrFunction, outerResults, requestedPath, optimizedPath, positionalInfo, outputFormat);
             }
         }
+
+        return true;
     }
-    if (type === 'JSON') {
-        permuteRequested = fastCat(permuteRequested, remainingPath);
-        for (i = 0, len = permutePosition.length; i < len; i++) {
-            var idx = permutePosition[i];
-            var r = permuteRequested[idx]
-            // TODO: i think the typeof operator is no needed if there is better management of permutePosition addition
-            if (typeof r !== 'object') {
-                permuteRequested[idx] = [r];
-            }
-        }
-        results.requestedMissingPaths.push(permuteRequested);
-        results.optimizedMissingPaths.push(fastCatSkipNulls(permuteOptimized, remainingPath));
-    } else {
-        results.requestedMissingPaths.push(fastCat(permuteRequested, remainingPath));
-        results.optimizedMissingPaths.push(fastCatSkipNulls(permuteOptimized, remainingPath));
-    }
+    return false;
 }
-function emitValues(model, node, path, depth, seedOrFunction, outerResults, permuteRequested, permuteOptimized, permutePosition, outputFormat) {
-    
-    var i, len, k, key, curr;
-    if (permuteRequested[permuteRequested.length - 1] !== null) {
-        updateTrailingNullCase(path, depth, permuteRequested);
-    }
-    lruPromote(model, node);
-
-    outerResults.requestedPaths.push(permuteRequested);
-    outerResults.optimizedPaths.push(permuteOptimized);
-    switch (outputFormat) {
-
-        case 'Values':
-            if (seedOrFunction) {
-                if (typeof seedOrFunction === 'function') {
-                    seedOrFunction(cloneToPathValue(model, node, permuteRequested));
-                } else {
-                }
-            }
-            break;
-        
-        case 'PathMap':
-            if (seedOrFunction) {
-                curr = seedOrFunction;
-                for (i = 0, len = permuteRequested.length - 1; i < len; i++) {
-                    k = permuteRequested[i];
-                    if (k === null) {
-                        continue;
-                    }
-                    if (!curr[k]) {
-                        curr[k] = {__key: k, __generation: permutePosition[i]};
-                    }
-                    curr = curr[k];
-                }
-                k = permuteRequested[i];
-                if (k !== null) {
-                    curr[k] = copyCacheObject(node, true);
-                } else {
-                    curr = copyCacheObject(node, true, curr);
-                    delete curr.__key;
-                    delete curr.__generation;
-                }
-            }
-            break;
-        
-        case 'JSON': 
-            if (seedOrFunction) {
-
-                if (permutePosition.length) {
-                    if (!seedOrFunction.json) {
-                        seedOrFunction.json = {};
-                    }
-                    curr = seedOrFunction.json;
-                    for (i = 0, len = permutePosition.length - 1; i < len; i++) {
-                        k = permutePosition[i];
-                        key = permuteRequested[k];
-                        
-                        if (!curr[key]) {
-                            curr[key] = {};
-                        }
-                        curr = curr[key];
-                    }
-                    
-                    // assign the last 
-                    k = permutePosition[i];
-                    key = permuteRequested[k];
-                    curr[key] = copyCacheObject(node);
-                } else {
-                    seedOrFunction.json = copyCacheObject(node);
-                }
-            }
-            break;
-    }
-}
-

@@ -1250,7 +1250,7 @@ module.exports = function() {
                 }]
             },
             optimizedPaths: [['movies']],
-            getPaths: {
+            getPathSets: {
                 query: [
                     ["genreList", "inner-reference", 'summary']
                 ]

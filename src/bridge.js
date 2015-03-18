@@ -4,3 +4,5 @@ var getPathsAsJSON = get(getAsJSON);
 var getPathMapsAsJSON = get(getAsJSON);
 var getPathsAsPathMap = get(getAsPathMap);
 var getPathMapsAsPathMap = get(getAsPathMap);
+var getPathsAsJSONG = get(getAsJSONG);
+var getPathMapsAsJSONG = get(getAsJSONG);

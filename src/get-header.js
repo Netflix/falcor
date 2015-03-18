@@ -61,6 +61,26 @@ function getAsJSON(model, paths, values, inputFormat, results) {
     return results;
 }
 
+function getAsJSONG(model, paths, values, inputFormat, results) {
+    var valueNode, jsong;
+    if (values && values.length === 1 && !values[0].jsong) {
+        jsong = {jsong: values[0], paths: []};
+        results.values = [jsong];
+        valueNode = jsong.jsong;
+    } else {
+        jsong = values[0];
+        valueNode = jsong.jsong;
+    }
+
+    for (var i = 0, len = paths.length; i < len; i++) {
+        walk(model, model._cache, model._cache, paths[i], 0, jsong, [], results, [], [], inputFormat, 'JSONG');
+    }
+
+    if (results.requestedPaths.length === 0) {
+        results.values = [null];
+    }
+}
+
 function _output() {
     return {
         values: [],

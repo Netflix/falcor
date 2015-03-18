@@ -16,7 +16,7 @@ var Cache = function() {
             "8": ["lists", "expired-list"],
             "9": ["lists", "to-expired-list"],
             "10": ["videos", 1234, "summary"],
-            "11": ["lists", "expired-video-branch"],
+            "11": ["lists", "missing-branch-link", "summary"],
             "12": ["lists", "future-expired-list"],
             "sentinel": {
                 "$size": 52,
@@ -91,10 +91,6 @@ var Cache = function() {
                     "$type": "sentinel",
                     "value": ["videos", 733]
                 }
-            },
-            "expired-video-branch": {
-                "$size": 3,
-                "0": ["videos", "expiredBranchByTimestamp", "summary"]
             },
             "1x5x": {
                 "$size": 4,
@@ -514,6 +510,9 @@ var Cache = function() {
                     "url": "/movies/6420"
                 }
             },
+            "9999": {
+                "summary": "video 9999 summary"
+            },
             "sentinel": {
                 "$size": 51,
                 "summary": {
@@ -550,24 +549,14 @@ var Cache = function() {
             "expiredBranchByTimestamp": {
                 "$size": 51,
                 "$expires": expiredTimestamp,
-                "summary": {
-                    "$size": 51,
-                    "$type": "sentinel",
-                    "value": {
-                        "sad": "liger"
-                    }
-                }
+                "$type": "sentinel",
+                value: 'expired'
             },
             "expiredBranchBy0": {
                 "$size": 51,
                 "$expires": 0,
-                "summary": {
-                    "$size": 51,
-                    "$type": "sentinel",
-                    "value": {
-                        "sad": "turtle"
-                    }
-                }
+                "$type": "sentinel",
+                value: 'expired'
             },
             "errorBranch": {
                 "$size": 50,
