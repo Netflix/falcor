@@ -39,17 +39,19 @@ person.getValue("location.address").
 
 ## Why use Falcor?
 
-Four years ago, Netflix attempted to build a RESTful API. The goal was to get two desirable properties of RESTful architectures: Cache Coherence and Loose Coupling.
+Falcor uses an architecture which is ideal for web applications that retrieve all or most of their data from a single domain and have a data model that changes infrequently (more reads than writes). For these types of applications, Falcor can be a better choice than either REST or RPC.
+
+Four years ago, Netflix attempted to build a RESTful API. The goal was to get two desirable properties of RESTful architectures: Cache Coherence and Loose Coupling. Gradually the impracticality of rest became clear. Latency was much too high And message sizes were much too large, particularly for mobile
 
 ### Cache Coherence
 
 The **Netflix UI is primarily a browsing problem.** Although we frequently add new titles for our members to enjoy, the catalog is unlikely to change substantially within the period of a single user's session (1-3 hours). That means that the average user session is spent browsing through a large, static catalog. It is precisely these types of problems that benefit greatly from caching.
 
-When you maintain a cache, it is important for the cache to be coherent. Cache coherence means that the data in the local cache is up-to-date with the changes on the server. Failure to ensure cache coherence can cause stale data to be displayed to the user. Imagine rating "House of Cards" in the "Recently Watched" list only to find that your rating is not reflected in the same title when it appears in "New Releases."
+When you maintain a cache, it is important for the cache to remain coherent. Cache coherence means that the data in the local cache is up-to-date with the changes on the server. Failure to ensure cache coherence can cause stale data to be displayed to the user. Imagine rating "House of Cards" in the "Recently Watched" list only to find that your rating is not reflected in the same title when it appears in "New Releases."
 
 ![alt text](http://netflix.github.io/falcor/staledata.png "Stale Data")
 
-RESTful systems achieve Cache Coherence by ensuring that data at only one resource. This makes it possible to update the data in the client cache and server using a single PUT. For Netflix this meant creating a separate resource for each individual title.
+RESTful systems achieve Cache Coherence by ensuring that data appears in only one resource. For Netflix this meant creating a separate resource for each individual title.
 
 http://netflix.com/title/23432
 
@@ -62,9 +64,15 @@ http://netflix.com/title/23432
   // more fields
 }
 
+This made it possible to update the rating of the title with a single PUT.
+
 ### Loose Coupling
 
-RESTful APIs Are loosely coupled and can be used by many different applications.This was important to Netflix as we are he had several different applications, including a Tablet, Phone, and TV app.
+RESTful APIs Are loosely coupled and can be used by many different applications. This was important to Netflix as we already had several different applications, including a Tablet, Phone, and TV app. Rather than have the EDGE team build and maintain APIs for each of these applications, the decision was made to build-loosely coupled API that could be used by all UIs.
+
+### The Trouble with REST
+
+The impracticality of using REST became clear overtime.
 
 Another reason for building a loosely coupled API for applications is that Netflix already had several different applications that had different needs. 
 
