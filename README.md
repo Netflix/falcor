@@ -4,11 +4,9 @@
 
 Every user wants to believe all the data in the cloud is stored on their device. Falcor lets web developers code that way.  
 
+Falcor lets you represent all of your cloud data sources as *One Virtual JSON Model* on the server. On the client you code as if the entire JSON model is available locally, retrieving and setting values at keys. Falcor retrieves any data you request from the cloud on-demand, handling network communication transparently. Netflix uses Falcor to efficiently download and cache catalog data.
+
 Falcor is not a replacement for your MVC framework, your database, or your application server. Instead you add Falcor to your existing stack to optimize client/server communication. Falcor is ideal for mobile apps, because it combines the caching benefits of REST with the low latency of RPC.
-
-## One Model Everywhere
-
-Falcor lets you represent all of your cloud data sources as *One Virtual JSON Model* on the server. On the client you code as if the entire JSON model is available locally, retrieving and setting values at keys. Falcor retrieves any data you request from the cloud on-demand, handling network communication transparently.
 
 ## The Data is the API
 
@@ -16,16 +14,16 @@ You retrieve data from a Falcor model using the familiar JavaScript path syntax.
 
 ```JavaScript
 var person = {
- 	name: “Steve McGuire”,
- 	occupation: “Developer”,
- 	location: {
-  		country: “US”,
-	  	city: “Pacifica”,
-		  address: “344 Seaside”
-	 }
+    name: “Steve McGuire”,
+    occupation: “Developer”,
+    location: {
+      country: “US”,
+      city: “Pacifica”,
+      address: “344 Seaside”
+    }
 }
 
-print(person[“location”][“address”]);	
+print(person.location.address);
 ```
 
 This is the way you would retrieve data from the same JSON in a remote Falcor Model.  Note that the only difference is that the API is asynchronous.
@@ -47,41 +45,90 @@ person.getValue("location.address").
 
 Falcor allows you to build a *Virtual JSON Model* on the server. The virtual model exposes all of the data that the client needs at a single URL on the server (ex. /model.json). On the client web developers retrieve data from the virtual model by setting and retrieving key, just as they would if the data were stored in memory.
 
-When a client requests paths from the virtual model, the model attempts to retrieve the data from its local, in-memory cache. If the data at the requested paths can not be found in the local cache, a GET request is sent to the URL of the virtual model and the requested paths are passed in the query string. 
+In this example the client requests several values from the virtual model on the server and then displays them on-screen.
 
-```HTML
-<script id="person-template" type="text/x-handlebars-template">
-  <div class="entry">
-    {{name}} lives at {{city
-    <div class="body">
-      {{body}}
-    </div>
-  </div>
-</script>
-```
 ```JavaScript
 var person = new falcor.Model({
   source: new falcor.HttpSource("/person.json")
 });
 
-person.get("name", "location.city", "location.address"),
-  then(json =>
-    document.body.innerHTML = $("#person-template").html());
-```
-  then(html => divPerson.innerHTML = html);
-
-// outputs "344 Seaside"
+person.get("name", "location.city", "location.address").
+  then(json => display(json));
 ```
 
-The virtual JSON model on the server responds with a JSON fragment containing only the requested values. 
+When a client requests paths from the model, the model attempts to retrieve the data from its in-memory cache. If the data is not found in the local cache, it is requested from the virtual model on the server. When the code above executes, the following GET request is sent to the server.
+```
+http://{yourdomain}/person.json?paths=[["name"], ["location", "city"], ["location", "address"]]
+```
 
-(Example Response including HTTP headers)
+Note that all of the data in the virtual model is exposed as single JSON resource, and the requested paths within the JSON object are passed in the query string. The virtual JSON model on the server responds with a fragment of the virtual JSON model containing only the requested values. 
 
-The JSON fragment from the server is added to the Falcor Model's local cache, which is just a fragment of the virtual JSON model on the server. 
+```
+HTTP/1.1 200 OK
+Content-Length: length
+Content-Type: application/json; charset=utf-8
+Content-Control: no-cache
 
-(Example of Falcor cache)
+{
+  paths: [["name"], ["location", "city"], ["location", "address"]],
+  value: {
+    name: “Steve McGuire”,
+    occupation: “Developer”,
+    location: {
+      city: “Pacifica”,
+      address: “344 Seaside”
+    }
+  }
+}
+```
 
-Future requests for the same path will be served from the cache rather than the server.
+Upon receiving the requested data, the client merges the JSON fragment with a template and displays it. 
+
+
+```HTML
+<script id="person-template" type="text/x-handlebars-template">
+  <span{{name}} lives at {{location.address}}, {{location.city}}</span>
+</script>
+```
+
+```JavaScript
+var source   = $("#entry-template").html();
+var template = Handlebars.compile(source);
+
+function display(json) {
+  // json is...
+  // {
+  //   name: “Steve McGuire”,
+  //   location: {
+  //     city: “Pacifica”,
+  //     address: “344 Seaside”
+  //   }
+  // }
+
+  document.body.innerHTML = template(json);
+}
+```
+
+Each JSON fragment returned from the server is added to the local cache. Subsequent queries for the same paths do not result in a network request.
+
+```JavaScript
+
+print(JSON.stringify(person.getCache(), null, 2));
+// prints
+// {
+//   name: “Steve McGuire”,
+//   location: {
+//     city: “Pacifica”,
+//     address: “344 Seaside”
+//   }
+// }
+
+// prints the name without making a network request.
+person.
+  getValue("name").
+  then(print));
+
+```
 
 ### Building the Virtual Model on the Server
 
@@ -192,7 +239,7 @@ The client must display issues and allow comments from users.  Each user is disp
       text: "This is a serious issue, it could lead to stale caches",
       user: {
         id: 512,
-      	name: "Satyen Desai",
+        name: "Satyen Desai",
         image: "/headshots/512.png"
       }
     },
@@ -200,7 +247,7 @@ The client must display issues and allow comments from users.  Each user is disp
       text: "It also bloats the size of the message!",
       user: {
         id: 234352,
-      	name: "Steve McGuire",
+        name: "Steve McGuire",
         image: "/headshots/234352.png"
       }
     }
@@ -305,7 +352,7 @@ var person = new falcor.Model({
 });
 
 person.get([“location”, “address”],
-	 (address) => print(address)).
+     (address) => print(address)).
     toPromise();
 
 // prints 344 Seaside
@@ -368,7 +415,7 @@ var person = new falcor.Model({
         personDB.
           exec(`SELECT ${pathSet[1].join(‘,’)}
                   FROM user 
-    		    WHERE id = ${request.cookies.userid}`)
+                WHERE id = ${request.cookies.userid}`)
     },
     {
       route: [“person”,“location”,[“country”, ”city”, “address”]],
