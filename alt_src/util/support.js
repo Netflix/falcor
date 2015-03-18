@@ -119,3 +119,13 @@ function spreadJSON(root, bins, bin) {
         }
     }
 }
+
+module.exports = {
+    spreadJSON: spreadJSON,
+    permuteKey: permuteKey,
+    fastCat: fastCat,
+    fastCatSkipNulls: fastCatSkipNulls,
+    fastCopy: fastCopy,
+    isExpired: isExpired,
+    updateTrailingNullCase: updateTrailingNullCase
+};

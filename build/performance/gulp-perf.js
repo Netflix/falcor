@@ -68,7 +68,7 @@ function assemble() {
 
 function runner() {
     return gulp.
-        src(['performance/bin/assembledPerf.js', 'performance/device-test-header.js']).
+        src(['performance/next_falcor.js', 'performance/bin/assembledPerf.js', 'performance/device-test-header.js']).
         pipe(concat({path: 'deviceRunner.js'})).
         pipe(gulp.dest('performance/bin'));
 }

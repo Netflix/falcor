@@ -1,10 +1,14 @@
 var Rx = require('rx');
 global.Rx = Rx;
+var nextFalcor = require('./next_falcor');
+global.window = {falcor: nextFalcor};
 var testConfig = require('./testConfig')();
 var config = testConfig.config;
-testConfig.repeatInConfig('falcor.Model test', 8, testConfig.simpleJSON, config.tests);
+testConfig.repeatInConfig('next.Model test', 1, testConfig.simpleJSON, config.tests);
+testConfig.repeatInConfig('rec.Model test', 1, testConfig.simpleJSON, config.tests);
 
-require('./test-header')(require('benchmark'), config, 3, function(totalResults) {
+debugger;
+require('./test-header')(require('benchmark'), config, 8, function(totalResults) {
     var fs = require('fs');
     fs.writeFileSync('out.csv', totalResults.join('\n'))
 });

@@ -1,7 +1,7 @@
 // Copies the node
-function cloneAsValue(model, node) {
+module.exports = function cloneAsValue(model, node) {
     var type = node.$type;
-    var value = type === SENTINEL ? node.value : node;
+    var value = type === 'sentinel' ? node.value : node;
     var outValue, i, len;
     if (typeof value === 'object') {
         if (Array.isArray(value)) {

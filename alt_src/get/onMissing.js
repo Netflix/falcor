@@ -1,4 +1,12 @@
-function onMissing(path, depth, permuteRequested, permuteOptimized, permutePosition, results, type) {
+var support = require('../util/support');
+var spreadJSON = support.spreadJSON,
+    fastCat = support.fastCat,
+    fastCatSkipNulls = support.fastCatSkipNulls,
+    fastCopy = support.fastCopy,
+    isExpired = support.isExpired;
+var clone = require('./../util/clone');
+
+module.exports = function onMissing(path, depth, permuteRequested, permuteOptimized, permutePosition, results, type) {
     var pathSlice;
     if (Array.isArray(path)) {
         if (depth < path.length) {

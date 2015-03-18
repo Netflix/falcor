@@ -61,7 +61,7 @@ function lruSplice(model, object) {
     if (object === root.__tail) {
         root.__tail = undefined;
     }
-    object[__INVALIDATED] = true;
+    object.__invalidated = true;
     root.expired.push(object);
 }
 
@@ -70,3 +70,8 @@ function lruSplice(model, object) {
 function lruPop(model) {
     
 }
+
+module.exports = {
+    promote: lruPromote,
+    splice: lruSplice
+};

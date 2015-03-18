@@ -1,10 +1,23 @@
-var falcor = require('./bin/falcor.s.js');
+var f2 = require('./bin/falcor.s.js');
+
+debugger
+if (typeof window !== 'undefined' && window.falcor) {
+    f2.Model.prototype._getPathsAsJSON = window.falcor.getPathSetsAsJSON;
+    f2.Model.prototype._getPathsAsJSONG = window.falcor.getPathSetsAsJSONG;
+    f2.Model.prototype._getPathsAsPathMap = window.falcor.getPathSetsAsPathMap;
+    f2.Model.prototype._getPathsAsValues = window.falcor.getPathSetsAsValues;
+}
+
 var recF = require('./bin/falcor.r.js');
 var Cache = require('./../test/data/Cache');
-E_model = new falcor.Model();
+E_model = new f2.Model();
 E_recModel = new recF.Model();
-model = new falcor.Model({cache: Cache()});
+model = new f2.Model({cache: Cache()});
 recModel = new recF.Model({cache: Cache()});
+
+var results = model._getPathsAsJSON(model, [['videos', 1234, 'summary']], [{}]);
+var results2 = model._getPathsAsJSON(model, [['genreList', 0, {to:10}, 'summary']], [{}]);
+debugger;
 
 function startupJSONModel() {
     E_model._getPathsAsJSON(E_model, [

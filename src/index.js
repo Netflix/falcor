@@ -1,3 +1,12 @@
+var falcor = require('./Falcor');
+var Constants = require('./Constants');
+var RequestQueue = require('./request/RequestQueue');
+var Schedulers = require('./Scheduler');
+var $TYPE = Constants.$TYPE;
+var ERROR = Constants.$TYPE;
+var modelOperations = require('./modelOperations');
+var call = require('./call/call');
+
 falcor.Model = Model;
 
 Model.EXPIRES_NOW = falcor.EXPIRES_NOW;
@@ -8,7 +17,7 @@ function Model(options) {
     this._dataSource = options.source;
     this._maxSize = options.maxSize || Math.pow(2, 53) - 1;
     this._collectRatio = options.collectRatio || 0.75;
-    this._scheduler = new falcor.ImmediateScheduler();
+    this._scheduler = new Schedulers.ImmediateScheduler();
     this._request = new RequestQueue(this, this._scheduler);
     this._errorSelector = options.errorSelector || Model.prototype._errorSelector;
     this._cache = {};
@@ -27,7 +36,6 @@ function Model(options) {
 Model.prototype = {
     _boxed: false,
     _progressive: false,
-    _request: new falcor.RequestQueue(new falcor.ImmediateScheduler()),
     _errorSelector: function(x, y) { return y; },
     get: modelOperation("get"),
     set: modelOperation("set"),
@@ -38,25 +46,25 @@ Model.prototype = {
     },
     setValue: function(path, value) {
         return this.set(Array.isArray(path) ?
-            {path: path, value: value} :
+        {path: path, value: value} :
             path, function(x) { return x; });
     },
     bind: function(boundPath) {
-        
+
         var model = this, root = model._root,
             paths = new Array(arguments.length - 1),
             i = -1, n = arguments.length - 1;
-        
+
         while(++i < n) {
             paths[i] = arguments[i + 1];
         }
-        
+
         if(n === 0) { throw new Error("Model#bind requires at least one value path."); }
-        
+
         return Rx.Observable.create(function(observer) {
-            
+
             var boundModel;
-            
+
             try {
                 root.allowSync = true;
                 if(!(boundModel = model.bindSync(model._path.concat(boundPath)))) {
@@ -81,7 +89,7 @@ Model.prototype = {
                         } catch(e) {
                             observer.onError(e);
                         }
-                });
+                    });
             }
         });
     },
@@ -146,27 +154,27 @@ Model.prototype = {
     clone: function() {
         var self = this;
         var clone = new Model();
-        
+
         Object.keys(self).forEach(function(key) {
             clone[key] = self[key];
         });
-        
+
         Array.prototype.slice.call(arguments).forEach(function(tuple) {
             model[tuple[0]] = tuple[1];
         });
-        
+
         return clone;
     },
     batch: function(schedulerOrDelay) {
         if(typeof schedulerOrDelay === "number") {
-            schedulerOrDelay = new falcor.TimeoutScheduler(Math.round(Math.abs(schedulerOrDelay)));
+            schedulerOrDelay = new Schedulers.TimeoutScheduler(Math.round(Math.abs(schedulerOrDelay)));
         } else if(!schedulerOrDelay || !schedulerOrDelay.schedule) {
-            schedulerOrDelay = new falcor.ImmediateScheduler();
+            schedulerOrDelay = new Schedulers.ImmediateScheduler();
         }
-        return this.clone(["_request", new falcor.RequestQueue(this, schedulerOrDelay)]);
+        return this.clone(["_request", new RequestQueue(this, schedulerOrDelay)]);
     },
     unbatch: function() {
-        return this.clone(["_request", new falcor.RequestQueue(this, new ImmediateScheduler())]);
+        return this.clone(["_request", new RequestQueue(this, new Schedulers.ImmediateScheduler())]);
     },
     boxValues: function() {
         return this.clone(["_boxed", true]);
@@ -184,45 +192,21 @@ Model.prototype = {
         return true;
     },
 
-    _getBoundContext         :       getBoundContext,
-    _getBoundValue           :         getBoundValue,
+    _getBoundContext         : null,
+    _getBoundValue           : null,
 
-    _getValueSync            :          getValueSync,
-    _setValueSync            :          setValueSync,
+    _getValueSync            : null,
 
-    _getPathsAsValues        :      getPathsAsValues,
-    _getPathsAsJSON          :        getPathsAsJSON,
-    _getPathsAsPathMap       :     getPathsAsPathMap,
-    _getPathsAsJSONG         :       getPathsAsJSONG,
+    _getPathsAsValues        : null,
+    _getPathsAsJSON          : null,
+    _getPathsAsPathMap       : null,
+    _getPathsAsJSONG         : null,
 
-    _getPathMapsAsValues     :   getPathMapsAsValues,
-    _getPathMapsAsJSON       :     getPathMapsAsJSON,
-    _getPathMapsAsPathMap    :  getPathMapsAsPathMap,
-    _getPathMapsAsJSONG      :    getPathMapsAsJSONG,
-    
-    _setPathsAsValues        :      setPathsAsValues,
-    _setPathsAsJSON          :        setPathsAsJSON,
-    _setPathsAsPathMap       :     setPathsAsPathMap,
-    _setPathsAsJSONG         :       setPathsAsJSONG,
-    
-    _setPathMapsAsValues     :   setPathMapsAsValues,
-    _setPathMapsAsJSON       :     setPathMapsAsJSON,
-    _setPathMapsAsPathMap    :  setPathMapsAsPathMap,
-    _setPathMapsAsJSONG      :    setPathMapsAsJSONG,
-    
-    _setJSONGsAsValues       :     setJSONGsAsValues,
-    _setJSONGsAsJSON         :       setJSONGsAsJSON,
-    _setJSONGsAsPathMap      :    setJSONGsAsPathMap,
-    _setJSONGsAsJSONG        :      setJSONGsAsJSONG,
-    
-    _invPathsAsValues        :       invalidatePaths,
-    _invPathsAsJSON          :       invalidatePaths,
-    _invPathsAsPathMap       :       invalidatePaths,
-    _invPathsAsJSONG         :       invalidatePaths,
-    
-    _invPathMapsAsValues     :    invalidatePathMaps,
-    _invPathMapsAsJSON       :    invalidatePathMaps,
-    _invPathMapsAsPathMap    :    invalidatePathMaps,
-    _invPathMapsAsJSONG      :    invalidatePathMaps
+    _getPathMapsAsValues     : null,
+    _getPathMapsAsJSON       : null,
+    _getPathMapsAsPathMap    : null,
+    _getPathMapsAsJSONG      : null,
+
+    _setPathMapsAsValues     :   setPathMapsAsValues
 };
 

@@ -1,3 +1,7 @@
+var hardLink = require('./../util/hardlink');
+var createHardlink = hardLink.create;
+var onValue = require('./onValue');
+
 function followReference(model, root, node, referenceContainer, reference, seed, outputFormat) {
 
     var depth = 0;
@@ -71,3 +75,4 @@ function followReference(model, root, node, referenceContainer, reference, seed,
     return [node, reference];
 }
 
+module.exports = followReference;

@@ -1,5 +1,7 @@
-var falcor = {},
-    __GENERATION_GUID = 0,
+if (typeof falcor === 'undefined') {
+    var falcor = {};
+}
+var __GENERATION_GUID = 0,
     __GENERATION_VERSION = 0,
     __CONTAINER = "__reference_container",
     __CONTEXT = "__context",

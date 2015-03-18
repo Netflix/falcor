@@ -26,3 +26,8 @@ function removeHardlink(cacheObject) {
         cacheObject[__REF_INDEX] = undefined;
     }
 }
+
+module.exports = {
+    create: createHardlink,
+    remove: removeHardlink
+};

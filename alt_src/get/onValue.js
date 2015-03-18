@@ -1,7 +1,11 @@
-function onValue(model, node, path, depth, seedOrFunction, outerResults, permuteRequested, permuteOptimized, permutePosition, outputFormat) {
-
+var lru = require('./../util/lru');
+var clone = require('./../util/clone');
+var promote = lru.promote;
+var support = require('../util/support');
+var updateTrailingNullCase = support.updateTrailingNullCase;
+module.exports = function onValue(model, node, path, depth, seedOrFunction, outerResults, permuteRequested, permuteOptimized, permutePosition, outputFormat) {
     var i, len, k, key, curr, prev, prevK;
-    lruPromote(model, node);
+    promote(model, node);
 
 
     if (permuteRequested) {
@@ -15,7 +19,7 @@ function onValue(model, node, path, depth, seedOrFunction, outerResults, permute
 
         case 'Values':
             if (typeof seedOrFunction === 'function') {
-                seedOrFunction({path: permuteRequested, value: cloneAsValue(model, node)});
+                seedOrFunction({path: permuteRequested, value: clone(model, node)});
             }
             break;
 
@@ -36,9 +40,9 @@ function onValue(model, node, path, depth, seedOrFunction, outerResults, permute
                 }
                 k = permuteRequested[i];
                 if (k !== null) {
-                    curr[k] = cloneAsValue(model, node);
+                    curr[k] = clone(model, node);
                 } else {
-                    prev[prevK] = cloneAsValue(model, node);
+                    prev[prevK] = clone(model, node);
                 }
             }
             break;
@@ -64,9 +68,9 @@ function onValue(model, node, path, depth, seedOrFunction, outerResults, permute
                     // assign the last
                     k = permutePosition[i];
                     key = permuteRequested[k];
-                    curr[key] = cloneAsValue(model, node);
+                    curr[key] = clone(model, node);
                 } else {
-                    seedOrFunction.json = cloneAsValue(model, node);
+                    seedOrFunction.json = clone(model, node);
                 }
             }
             break;
@@ -85,7 +89,7 @@ function onValue(model, node, path, depth, seedOrFunction, outerResults, permute
 
                 // assign the last
                 key = permuteOptimized[i];
-                curr[key] = cloneAsValue(model, node);
+                curr[key] = clone(model, node);
                 if (permuteRequested) {
                     seedOrFunction.paths.push(permuteRequested);
                 }

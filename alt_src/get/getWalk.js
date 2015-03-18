@@ -1,3 +1,14 @@
+var followReference = require('./followReference');
+var onError = require('./onError');
+var onMissing = require('./onMissing');
+var onValue = require('./onValue');
+var lru = require('./../util/lru');
+var hardLink = require('./../util/hardlink');
+var removeHardlink = hardLink.remove;
+var splice = lru.splice;
+var support = require('./../util/support');
+var isExpired = support.isExpired;
+
 // TODO: Objectify?
 function walk(model, root, curr, pathOrJSON, depth, seedOrFunction, positionalInfo, outerResults, optimizedPath, requestedPath, inputFormat, outputFormat, fromReference) {
     if (evaluateNode(model, curr, pathOrJSON, depth, seedOrFunction, requestedPath, optimizedPath, positionalInfo, outerResults, outputFormat, fromReference)) {
@@ -6,7 +17,7 @@ function walk(model, root, curr, pathOrJSON, depth, seedOrFunction, positionalIn
 
     // We continue the search to the end of the path/json structure.
     else {
-        
+
         // Base case of the searching:  Have we hit the end of the road?
         // Paths
         // 1) depth === path.length
@@ -32,14 +43,14 @@ function walk(model, root, curr, pathOrJSON, depth, seedOrFunction, positionalIn
         } else {
             k = pathOrJSON[depth];
         }
-        
-        
+
+
         // BaseCase: we have hit the end of our query without finding a 'leaf' node, therefore emit missing.
         if (atEndOfJSONQuery || !jsonQuery && depth === pathOrJSON.length) {
             onMissing(pathOrJSON, depth, requestedPath, optimizedPath, positionalInfo, outerResults, outputFormat);
             return;
         }
-        
+
         var memo = {done: false};
         var first = true;
         var permutePosition = positionalInfo;
@@ -80,7 +91,7 @@ function walk(model, root, curr, pathOrJSON, depth, seedOrFunction, positionalIn
                     permuteOptimized[i] = optimizedPath[i];
                 }
             }
-            
+
             var nextPathOrPathMap = jsonQuery ? pathOrJSON[key] : pathOrJSON;
             if (jsonQuery && nextPathOrPathMap) {
                 // TODO: consider an array, types, and simple values.
@@ -95,10 +106,10 @@ function walk(model, root, curr, pathOrJSON, depth, seedOrFunction, positionalIn
                 permuteOptimized.push(key);
                 permuteRequested.push(key);
             }
-            
+
             if (next) {
-                var nType = next[$TYPE];
-                var nSentinel = nType === SENTINEL;
+                var nType = next.$type;
+                var nSentinel = nType === 'sentinel';
                 var value = nSentinel ? next.value : next;
                 var valueIsArray = Array.isArray(value);
 
@@ -133,19 +144,19 @@ function walk(model, root, curr, pathOrJSON, depth, seedOrFunction, positionalIn
 function evaluateNode(model, curr, pathOrJSON, depth, seedOrFunction, requestedPath, optimizedPath, positionalInfo, outerResults, outputFormat, fromReference) {
     // BaseCase: This position does not exist, emit missing.
     if (!curr) {
-        onMissing(pathOrJSON, depth, requestedPath, optimizedPath, positionalInfo, outerResults, outputFormat);
+        onMissing(pathOrJSON, depth, requestedPath, optimizedPath, positionalInfo, outerResults);
         return true;
     }
 
-    var currType = curr[$TYPE];
-    var currValue = currType === SENTINEL ? curr.value : curr;
+    var currType = curr.$type;
+    var currValue = currType === 'sentinel' ? curr.value : curr;
     var atLeaf = currType || Array.isArray(currValue);
 
     positionalInfo = positionalInfo || [];
 
     // The Base Cases.  There is a type, therefore we have hit a 'leaf' node.
     if (atLeaf) {
-        if (currType === ERROR) {
+        if (currType === 'error') {
             if (fromReference) {
                 requestedPath.push(null);
             }
@@ -160,8 +171,8 @@ function evaluateNode(model, curr, pathOrJSON, depth, seedOrFunction, requestedP
         // Else we have found a value, emit the current position information.
         else {
             if (isExpired(curr)) {
-                if (!curr[__INVALIDATED]) {
-                    lruSplice(model, curr);
+                if (!curr.__invalidated) {
+                    splice(model, curr);
                     removeHardlink(curr);
                 }
                 onMissing(pathOrJSON, depth, requestedPath, optimizedPath, positionalInfo, outerResults, outputFormat);
@@ -174,3 +185,6 @@ function evaluateNode(model, curr, pathOrJSON, depth, seedOrFunction, requestedP
     }
     return false;
 }
+
+// TODO:
+module.exports = walk;
