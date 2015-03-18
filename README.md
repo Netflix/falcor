@@ -8,8 +8,6 @@ Falcor lets you represent all of your cloud data sources as *One Virtual JSON Mo
 
 Falcor is not a replacement for your MVC framework, your database, or your application server. Instead you add Falcor to your existing stack to optimize client/server communication. Falcor is ideal for mobile apps, because it combines the caching benefits of REST with the low latency of RPC.
 
-## The Data is the API
-
 You retrieve data from a Falcor model using the familiar JavaScript path syntax. 
 
 ```JavaScript
@@ -39,11 +37,61 @@ person.getValue("location.address").
 // outputs "344 Seaside"
 ```
 
-## How to use Falcor in your Application
+## Why use Falcor?
+
+Four years ago, Netflix attempted to build a RESTful API. The goal was to get two desirable properties of RESTful architectures: Cache Coherence and Loose Coupling.
+
+### Cache Coherence
+
+The **Netflix UI is primarily a browsing problem.** Although we frequently add new titles for our members to enjoy, the catalog is unlikely to change substantially within the period of a single user's session (1-3 hours). That means that the average user session is spent browsing through a large, static catalog. It is precisely these types of problems that benefit greatly from caching.
+
+When you maintain a cache, it is important for the cache to be coherent. Cache coherence means that the data in the local cache is up-to-date with the changes on the server. Failure to ensure cache coherence can cause stale data to be displayed to the user. Imagine rating "House of Cards" in the "Recently Watched" list only to find that your rating is not reflected in the same title when it appears in "New Releases."
+
+![alt text](http://netflix.github.io/falcor/staledata.png "Stale Data")
+
+RESTful systems achieve Cache Coherence by ensuring that data at only one resource. This makes it possible to update the data in the client cache and server using a single PUT. For Netflix this meant creating a separate resource for each individual title.
+
+http://netflix.com/title/23432
+
+{
+  id: 23432,
+  name: "House of Cards",
+  rating: 5,
+  description: "This Emmy-winning original thriller series stars Golden Globe winner Kevin Spacey as ruthless, cunning Congressman Francis Underwood, who will stop at nothing to conquer the halls of power in Washington D.C. His secret weapon: his gorgeous, ambitious, and equally conniving wife Claire (Golden Globe winner Robin Wright).",
+  boxshotURL: "http://cdn6.nflximg.net/webp/8266/13038266.webp",
+  // more fields
+}
+
+### Loose Coupling
+
+RESTful APIs Are loosely coupled and can be used by many different applications.This was important to Netflix as we are he had several different applications, including a Tablet, Phone, and TV app.
+
+Another reason for building a loosely coupled API for applications is that Netflix already had several different applications that had different needs. 
+
+Reflecting the different media sizes different applications would display more or less fields on certain screens. 
+The World Wide Web is easy for browsers to cache because each individual resource is found a separate URL. When you visit a site the contents of that site are placed in the browser cache and the URL is used as the key. If the same resource needs to be made available at two different URLs, one URL can redirect to the other. As a result no website need ever appear twice in the browser cache. Eliminating duplicate resources from the browser cache reduces the risk of stale data being displayed to the user. 
+
+In addition to a resource being available at two different locations callAnother source of stale dataIs went to the data into resources overlap. For example Let's say the following URL
+
+http://netflix.com/genreLists?rowOffset=5&rowPageSize=5&colOffset=5&colPageSize=10
+
+
+
+Rather than duplicate a resource in multiple a URL Can redirect to another location. Resources are found in a single location, and it is possible to create a reference to a resource in another location using a HTTP redirect. 
+
+Netflix created resources for each of its domain model entities. 
+```
+http://netflix.com/titles/23432
+
+```
+These resources Did not overlap at first,MakingIt easy to cash them individually
+
+
+## How does Falcor work?
 
 ### Retrieving Data from the Model
 
-Falcor allows you to build a *Virtual JSON Model* on the server. The virtual model exposes all of the data that the client needs at a single URL on the server (ex. /model.json). On the client web developers retrieve data from the virtual model by setting and retrieving key, just as they would if the data were stored in memory.
+Falcor allows you to build a *Virtual JSON Model* on the server. The virtual model exposes all of the data that the client needs at a single URL on the server (ex. /model.json). On the client you can retrieve data from the virtual model by setting and retrieving keys, just as you would from any JSON object stored in memory.
 
 In this example the client requests several values from the virtual model on the server and then displays them on-screen.
 
@@ -56,12 +104,16 @@ person.get("name", "location.city", "location.address").
   then(json => display(json));
 ```
 
-When a client requests paths from the model, the model attempts to retrieve the data from its in-memory cache. If the data is not found in the local cache, it is requested from the virtual model on the server. When the code above executes, the following GET request is sent to the server.
+When a client requests paths from the model, the model attempts to retrieve the data from its in-memory cache. If the data is not found in the local cache, the following GET request is sent to the virtual model on the server.
 ```
 http://{yourdomain}/person.json?paths=[["name"], ["location", "city"], ["location", "address"]]
 ```
 
-Note that all of the data in the virtual model is exposed as single JSON resource, and the requested paths within the JSON object are passed in the query string. The virtual JSON model on the server responds with a fragment of the virtual JSON model containing only the requested values. 
+Note that rather than retrieve data from multiple endpoints, all of the data in the virtual model is exposed as single JSON resource. This means that the client can retrieve as much or as little of the graphAs is required in a single HDP request. Furthermore each resource
+
+ and the requested paths within the JSON object are passed in the query string. Disallows the
+
+The virtual JSON model on the server responds with a fragment of the virtual JSON model containing only the requested values. 
 
 ```
 HTTP/1.1 200 OK
@@ -132,15 +184,53 @@ person.
 
 ### Building the Virtual Model on the Server
 
-The reason that the server model is called "virtual" is that the JSON Object typically does not exist in memory or on disk. *A Falcor virtual model is like a little application server hosted at a single URL.* Instead of matching URL paths, the virtual model router matches one or more paths through a one JSON model. The virtual model generates the requested subset of the JSON model on-demand by loading the data from one or more backend data stores. 
+The reason that the server model is called "virtual" is that the server JSON Object typically does not exist in memory or on disk. *A Falcor virtual model is like a little application server hosted at a single URL.* Instead of matching URL paths, the virtual model router matches one or more paths through a a single JSON model. The virtual model generates the requested subset of the JSON model on-demand by loading the data from one or more backend data stores.
 
-(Example of using express and example of building a virtual model)
+The following virtual model simulates a person
+
+// Server
+var falcor = require('falcor');
+var falcorExpress = require('falcor');
+
+var express = require('express');
+var app = express();
+
+var person = new falcor.Model({
+  router: new falcor.Router([
+    {
+      route: [“name”,”occupation”],
+      get: (pathSet) => 
+        personDB.
+          exec(`SELECT ${pathSet[1].join(‘,’)}
+                  FROM user 
+           WHERE id = ${request.cookies.userid}`)
+    },
+    {
+      route: [“location”,[“country”, ”city”, “address”]],
+      get: (pathSet) => 
+        locationServer.
+          getLocation(request.cookies.userid).
+          then(location => ({
+            person: { location: getProps(location, pathSet[2]) } 
+          })
+    }
+  ])
+});
+
+var modelServer = new falcor.HttpModelServer(person);
+
+app.get('/person.json', function (req, res) {
+  falcorExpress.serve(req, function(error, output) {
+    res.end(output)
+  });
+});
+
+var server = app.listen(80);
+
 
 The virtual model exposes the entire JSON model at a single URL and accepts one or more paths in the query string. This allows the client to request as much of the graph as it needs within in a single HTTP request. 
 
 ### asynchronous model view controller
-
-
 
 Three-dimensional flexibility
 
