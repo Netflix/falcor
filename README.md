@@ -150,11 +150,13 @@ var server = app.listen(80);
 ```
 ## How to use Falcor in your Application
 
+### Retrieving Data from the Model
+
 Falcor allows you to build a *Virtual JSON Model* on the server. The virtual model exposes all of the data that the client needs at a single URL on the server (ex. /model.json). On the client web developers retrieve data from the virtual model by setting and retrieving key, just as they would if the data were stored in memory.
 
 (Example of a client retrieving a path)
 
-When a client requests paths from the virtual model, the model attempts to retrieve the data from its local, in-memory cache. If the data at the requested paths can not be found in the local cache, a GET request is sent to the URL of the virtual model and the requested paths are passed in query string. 
+When a client requests paths from the virtual model, the model attempts to retrieve the data from its local, in-memory cache. If the data at the requested paths can not be found in the local cache, a GET request is sent to the URL of the virtual model and the requested paths are passed in the query string. 
 
 (Example URL)
 
@@ -162,17 +164,23 @@ The virtual JSON model on the server responds with a JSON fragment containing on
 
 (Example Response including HTTP headers)
 
-The reason that the server model is called "virtual" is that the JSON Object typically does not exist in memory or on disk. The virtual model actually behaves like an *application server* hosted at a single URL. The virtual model matches routes against the paths requested from the virtual JSON model, and generates the requested JSON fragments on-demand by retrieving the data from one or more backend data stores. Instead of matching URL paths, the virtual model's router matches the multiple JSON paths passed in the query string to the JSON resource on the server.
+The JSON fragment from the server is added to the Falcor Model's local cache, which is just a fragment of the virtual JSON model on the server. 
 
+(Example of Falcor cache)
 
+Future requests for the same path will be served from the cache rather than the server.
+
+### Building the Virtual Model on the Server
+
+The reason that the server model is called "virtual" is that the JSON Object typically does not exist in memory or on disk. *A Falcor virtual model is like a little application server hosted at a single URL.* Instead of matching URL paths, the virtual model router matches one or more paths through a one JSON model. The virtual model generates the requested subset of the JSON model on-demand by loading the data from one or more backend data stores. 
 
 (Example of using express and example of building a virtual model)
 
-By exposing all of the data at a single URL instead of using a Web server to create a separate URL for each resource. The answer is that by exposing our entire model at a single endpoint, we can request as much of the graph as we want in a single HTTP request. 
+The virtual model exposes the entire JSON model at a single URL and accepts one or more paths in the query string. This allows the client to request as much of the graph as it needs within in a single HTTP request. 
 
-In an application server, routers are used to match URLs. A virtual model exposes all of its data at a single URL, 
+### asynchronous model view controller
 
-Virtual models are not general purpose server APIs. Instead they are optimized for use by one particular web application. 
+
 
 Three-dimensional flexibility
 
