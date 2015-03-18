@@ -1,6 +1,7 @@
 if (typeof falcor === 'undefined') {
     var falcor = {};
 }
+var Rx = require('./rx.ultralite');
 
 falcor.__Internals = {};
 falcor.Observable = Rx.Observable;

@@ -1,3 +1,4 @@
+var falcor = require('./Falcor');
 falcor.ImmediateScheduler = ImmediateScheduler;
 
 function ImmediateScheduler() {

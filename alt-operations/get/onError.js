@@ -11,5 +11,5 @@ module.exports = function onError(model, node, nodeValue, permuteRequested, perm
         outerResults.requestedPaths.push(permuteRequested);
         outerResults.optimizedPaths.push(permuteOptimized);
     }
-}
+};
 

@@ -19,11 +19,6 @@ var Constants = {
     __ROOT: "/",
     __OFFSET: "__offset",
     __FALKOR_EMPTY_OBJECT: '__FALKOR_EMPTY_OBJECT',
-    __INTERNAL_KEYS: [
-        __CONTAINER, __CONTEXT, __GENERATION, __GENERATION_UPDATED,
-        __INVALIDATED, __KEY, __KEYS, __IS_KEY_SET, __NULL, __SELF,
-        __PARENT, __REF, __REF_INDEX, __REFS_LENGTH, __OFFSET, __ROOT
-    ],
 
     $TYPE: "$type",
     $SIZE: "$size",
@@ -36,5 +31,11 @@ var Constants = {
     EXPIRED: "expired",
     LEAF: "leaf"
 };
+
+Constants.__INTERNAL_KEYS = [
+    Constants.__CONTAINER, Constants.__CONTEXT, Constants.__GENERATION, Constants.__GENERATION_UPDATED,
+    Constants.__INVALIDATED, Constants.__KEY, Constants.__KEYS, Constants.__IS_KEY_SET, Constants.__NULL, Constants.__SELF,
+    Constants.__PARENT, Constants.__REF, Constants.__REF_INDEX, Constants.__REFS_LENGTH, Constants.__OFFSET, Constants.__ROOT
+];
 
 module.exports = Constants;

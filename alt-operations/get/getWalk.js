@@ -8,6 +8,7 @@ var removeHardlink = hardLink.remove;
 var splice = lru.splice;
 var support = require('./../util/support');
 var isExpired = support.isExpired;
+var permuteKey = support.permuteKey;
 
 // TODO: Objectify?
 function walk(model, root, curr, pathOrJSON, depth, seedOrFunction, positionalInfo, outerResults, optimizedPath, requestedPath, inputFormat, outputFormat, fromReference) {

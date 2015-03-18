@@ -4,7 +4,7 @@ var RequestQueue = require('./request/RequestQueue');
 var Schedulers = require('./Scheduler');
 var $TYPE = Constants.$TYPE;
 var ERROR = Constants.$TYPE;
-var modelOperations = require('./modelOperations');
+var modelOperation = require('./modelOperation');
 var call = require('./call/call');
 
 falcor.Model = Model;
@@ -192,5 +192,5 @@ Model.prototype = {
         return true;
     }
 };
-model.exports = Model;
+module.exports = Model;
 

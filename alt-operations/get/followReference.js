@@ -1,6 +1,7 @@
 var hardLink = require('./../util/hardlink');
 var createHardlink = hardLink.create;
 var onValue = require('./onValue');
+var isExpired = require('./../util/support').isExpired;
 
 function followReference(model, root, node, referenceContainer, reference, seed, outputFormat) {
 
@@ -8,9 +9,9 @@ function followReference(model, root, node, referenceContainer, reference, seed,
     var k, next;
 
     while (true) {
-        if (depth === 0 && referenceContainer[__CONTEXT]) {
+        if (depth === 0 && referenceContainer.__context) {
             depth = reference.length;
-            next = referenceContainer[__CONTEXT];
+            next = referenceContainer.__context;
         } else {
             k = reference[depth++];
             next = node[k];
@@ -38,7 +39,7 @@ function followReference(model, root, node, referenceContainer, reference, seed,
                     break;
                 }
 
-                if (!referenceContainer[__CONTEXT]) {
+                if (!referenceContainer.__context) {
                     createHardlink(referenceContainer, next);
                 }
 

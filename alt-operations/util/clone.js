@@ -24,5 +24,5 @@ module.exports = function cloneAsValue(model, node) {
         outValue = value;
     }
     return outValue;
-}
+};
 
