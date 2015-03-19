@@ -13,17 +13,21 @@
     "test"
   ],
   "perf": {
-      "dest": "performance/bin",
-      "files": {
-          "sentinel.js": {
-              "out": "sentinel.js",
-              "standalone": "sentinel"
-          },
-          "alt.js": {
-              "out": "alt.js",
-              "standalone": "alt"
-          }
+    "dest": "performance/bin",
+    "files": {
+      "sentinel.js": {
+        "out": "sentinel.js",
+        "standalone": "sentinel"
+      },
+      "alt.js": {
+        "out": "alt.js",
+        "standalone": "alt"
+      },
+      "index-node.js": {
+        "out": "index-node.js",
+        "standalone": "falcor-node"
       }
+    }
   },
   "devDependencies": {
     "benchmark": "^1.0.0",
@@ -62,6 +66,8 @@
     "xmlhttprequest": "~1.7.0"
   },
   "dependencies": {
-    "rx": "^2.3.25"
+    "linklocal": "^2.5.1",
+    "rx": "^2.3.25",
+    "operations": "file:./lib/operations"
   }
 }

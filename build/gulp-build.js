@@ -12,10 +12,14 @@ var licenseInfo = {
     organization: 'Netflix, Inc',
     year: '2014'
 };
-gulp.task('build.all', ['build.alt', 'build.sentinel']);
+gulp.task('build.all', ['build.alt', 'build.sentinel', 'build.node']);
 
 gulp.task('build.alt', ['clean.dev'], function() {
     return build(['alt.js']);
+});
+
+gulp.task('build.node', ['clean.dev'], function() {
+    return build(['index-node.js']);
 });
 
 gulp.task('build.sentinel', ['clean.dev'], function() {
