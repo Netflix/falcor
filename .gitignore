@@ -10,3 +10,4 @@ tmp/
 *.tar.gz
 cTestFinal.js
 bin2
+out.csv
