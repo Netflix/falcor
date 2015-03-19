@@ -1,5 +1,5 @@
 var falcor = require('./src');
-var alternateGet = require('./alt-operations');
+var alternateGet = require('./operations/alt');
 var prototype = falcor.Model.prototype;
 prototype._getBoundContext = null;
 prototype._getBoundValue = null;
