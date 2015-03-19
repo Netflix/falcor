@@ -1,60 +1,26 @@
 var gulp = require('gulp');
-var browserify = require('gulp-browserify');
-var concat = require('gulp-concat');
+var build = require('./../gulp-build');
 var rename = require('gulp-rename');
-var surround = require('./../surround');
-var build = require('./../build');
-var support = require('./../gulp-build-support');
+var concat = require('gulp-concat');
+var browserify = require('gulp-browserify');
+var Transform = require("stream").Transform;
+var Rx = require('rx');
+var Observable = Rx.Observable;
+var fs = require('fs');
+var path = require('path');
 
-gulp.task('build.perf', ['perf-assemble']);
-gulp.task('build.perf-update', runner);
-gulp.task('build.perf-assemble', assemble);
-gulp.task('build.perf-full', ['perf-compile']);
+gulp.task('perf', ['perf-runner']);
+gulp.task('perf-update', function() { return runner(); }); 
+gulp.task('perf-construct', ['clean.perf'], function() { return constructPerfFalcors(); });
+gulp.task('perf-assemble', ['perf-construct', 'perf-next-falcor'], function() { return assemble(); });
+gulp.task('perf-runner', ['perf-assemble'], function() { return runner(); });
 
-gulp.task('perf-compile', ['perf-standalone-compile'], function() {
-    return runner();
-});
-gulp.task('perf-assemble', ['perf-standalone-assemble'], function() {
-    return runner();
-});
-
-gulp.task('perf-standalone-compile', ['perf-sweet-compile', 'perf-recurse-compile'], function() {
-    return assemble();
-});
-gulp.task('perf-standalone-assemble', ['perf-sweet-assemble', 'perf-recurse-assemble'], function() {
-    return assemble();
-});
-
-gulp.task('perf-sweet-compile', ['build.combine'], function() {
-    return compile(build.compile, 'falcor.s.js');
-});
-gulp.task('perf-sweet-assemble', ['build.support-only-replace', 'perf-ops'], function() {
-    return compile(build.compile, 'falcor.s.js');
-});
-
-gulp.task('perf-recurse-compile', ['build.combine', 'build.get.ops'], function() {
-    return compile(build.compileWithGetOps, 'falcor.r.js');
-});
-gulp.task('perf-recurse-assemble', ['build.get.ops', 'build.support-only-replace', 'perf-recurse-ops'], function() {
-    return compile(build.compileWithGetOps, 'falcor.r.js');
-});
-
-gulp.task('perf-recurse-ops', ['build.support-only-replace', 'clean.perf'], function() {
-    return support.buildRecursiveOperations();
-});
-gulp.task('perf-ops', ['build.support-only-replace', 'clean.perf'], function() {
-    return support.buildOperations();
-});
-
-function compile(src, name) {
-    return gulp.src(src).
-        pipe(concat({path: name})).
-        pipe(surround({
-            prefix: '',
-            postfix: 'module.exports = falcor;'
-        })).
+gulp.task('perf-next-falcor', ['clean.perf'], function() {
+    return gulp.
+        src(['./performance/next_falcor.js']).
+        pipe(rename('next.js')).
         pipe(gulp.dest('performance/bin'));
-}
+});
 
 function assemble() {
     return gulp.
@@ -71,4 +37,48 @@ function runner() {
         src(['performance/next_falcor.js', 'performance/bin/assembledPerf.js', 'performance/device-test-header.js']).
         pipe(concat({path: 'deviceRunner.js'})).
         pipe(gulp.dest('performance/bin'));
+}
+
+function constructPerfFalcors() {
+    var root = path.join(__dirname, '../..');
+    var packageJSON = path.join(root, 'package.json');
+    var readFile = Observable.fromNodeCallback(fs.readFile);
+    var obs = readFile(packageJSON).
+        map(JSON.parse).
+        map(pluckPerf).
+        flatMap(function(perf) {
+            var dest = perf.dest;
+            var files = Object.
+                keys(perf.files).
+                map(function(name) {
+                    return [dest, name, perf.files[name]];
+                });
+            return Observable.
+                fromArray(files).
+                flatMap(runBuild);
+        }).
+        takeLast();
+    
+    var stream = new Transform();
+    obs.subscribe(
+        stream.emit.bind(stream, "data"),
+        function(err) {
+            console.log("err: ", err)
+        },
+        stream.emit.bind(stream, "end"));
+    return stream;
+}
+
+function pluckPerf(x) {
+    return x.perf;
+}
+
+function runBuild(destNameAndConfigTuple) {
+    var root = path.join(__dirname, '../..');
+    var dest = path.join(root, destNameAndConfigTuple[0]);
+    var name = destNameAndConfigTuple[1];
+    var config = destNameAndConfigTuple[2];
+    var file = [path.join(root, name)];
+
+    return Rx.Node.fromStream(build(file, config.standalone, config.out, dest));
 }

@@ -1,7 +1,8 @@
+var walk = require('./get/getWalk');
 module.exports = {
-    getAsJSON: require('./get/getAsJSON'),
-    getAsJSONG: require('./get/getAsJSONG'),
-    getAsValues: require('./get/getAsValues'),
-    getAsPathMap: require('./get/getAsPathMap'),
+    getAsJSON: require('./get/getAsJSON')(walk),
+    getAsJSONG: require('./get/getAsJSONG')(walk),
+    getAsValues: require('./get/getAsValues')(walk),
+    getAsPathMap: require('./get/getAsPathMap')(walk),
     setPathMapsAsValues: require('./legacy_setPathMapsAsValues')
 };

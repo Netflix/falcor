@@ -1,253 +1,131 @@
-var f2 = require('./bin/falcor.s.js');
+var alt = require('./bin/alt');
 
-debugger
-if (typeof window !== 'undefined' && window.falcor) {
-    f2.Model.prototype._getPathsAsJSON = window.falcor.getPathSetsAsJSON;
-    f2.Model.prototype._getPathsAsJSONG = window.falcor.getPathSetsAsJSONG;
-    f2.Model.prototype._getPathsAsPathMap = window.falcor.getPathSetsAsPathMap;
-    f2.Model.prototype._getPathsAsValues = window.falcor.getPathSetsAsValues;
-}
-
-var recF = require('./bin/falcor.r.js');
+var sentinel = require('./bin/sentinel');
 var Cache = require('./../test/data/Cache');
-E_model = new f2.Model();
-E_recModel = new recF.Model();
-model = new f2.Model({cache: Cache()});
-recModel = new recF.Model({cache: Cache()});
+var CacheSentinel = require('./../test/data/CacheAlternative');
+var E_altModel = new alt.Model();
+var E_sentinelModel = new sentinel.Model();
+var altModel = new alt.Model({cache: Cache()});
+var sentinelModel = new sentinel.Model({cache: CacheSentinel()});
+var noOp = function() {};
 
-var results = model._getPathsAsJSON(model, [['videos', 1234, 'summary']], [{}]);
-var results2 = model._getPathsAsJSON(model, [['genreList', 0, {to:10}, 'summary']], [{}]);
-debugger;
 
-function startupJSONModel() {
-    E_model._getPathSetsAsJSON(E_model, [
-        ["startup"],
-        ["appconfig"],
-        ["languages"],
-        ["geolocation"],
-        ["user"],
-        ["uiexperience"],
-        ["lolomo", "summary"],
-        ["lolomo", {"to": 60}, "summary"],
-        ["lolomo", 0, "billboardData"],
-        ["lolomo", 0, 0, "postcard"],
-        ["profilesList", {"to": 4}, "avatar", "images", "byWidth", [32, 64, 80, 100, 112, 160, 200, 320]],
-        ["profilesList", {"to": 4}, "summary"],
-        ["profilesList", "summary"],
-        ["profilesList", "availableAvatarsList", {"to": 18}, "images", "byWidth", [32, 64, 80, 100, 112, 160, 200, 320]],
-        ["profilesList", "availableAvatarsList", {"to": 18}, "summary"],
-        ["profilesList", "availableAvatarsList", "summary"],
-        ["profiles", "hasSeenPromoGate"],
-        ["lolomo", "maxExperience"],
-        ["lolomo", 0, 0, "evidence"],
-        ["lolomo", 0, 0, "item", ["info", "summary", "outline", "rating", "heroImages"]]
-    ], [{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{}]);
+function startup(model, format) {
+    var startupRequest = [ ["startup"], ["appconfig"], ["languages"], ["geolocation"], ["user"], ["uiexperience"], ["lolomo", "summary"], ["lolomo", {"to": 60}, "summary"], ["lolomo", 0, "billboardData"], ["lolomo", 0, 0, "postcard"], ["profilesList", {"to": 4}, "avatar", "images", "byWidth", [32, 64, 80, 100, 112, 160, 200, 320]], ["profilesList", {"to": 4}, "summary"], ["profilesList", "summary"], ["profilesList", "availableAvatarsList", {"to": 18}, "images", "byWidth", [32, 64, 80, 100, 112, 160, 200, 320]], ["profilesList", "availableAvatarsList", {"to": 18}, "summary"], ["profilesList", "availableAvatarsList", "summary"], ["profiles", "hasSeenPromoGate"], ["lolomo", "maxExperience"], ["lolomo", 0, 0, "evidence"], ["lolomo", 0, 0, "item", ["info", "summary", "outline", "rating", "heroImages"]] ];
+    switch (format) {
+        case 'JSON':
+            return function() {
+                model._getPathSetsAsJSON(model, startupRequest, [{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{}]);
+            };
+        case 'JSONG':
+            return function() {
+                model._getPathSetsAsJSONG(model, startupRequest, [{}]);
+            };
+        case 'PathMap':
+            return function() {
+                model._getPathSetsAsPathMap(model, startupRequest, [{}]);
+            };
+        case 'Value':
+            return function() {
+                model._getPathSetsAsValues(model, startupRequest, noOp);
+            };
+    }
 }
-
-function startupJSONRecModel() {
-    E_recModel._getAsJSON(E_recModel, [
-        ["startup"],
-        ["appconfig"],
-        ["languages"],
-        ["geolocation"],
-        ["user"],
-        ["uiexperience"],
-        ["lolomo", "summary"],
-        ["lolomo", {"to": 60}, "summary"],
-        ["lolomo", 0, "billboardData"],
-        ["lolomo", 0, 0, "postcard"],
-        ["profilesList", {"to": 4}, "avatar", "images", "byWidth", [32, 64, 80, 100, 112, 160, 200, 320]],
-        ["profilesList", {"to": 4}, "summary"],
-        ["profilesList", "summary"],
-        ["profilesList", "availableAvatarsList", {"to": 18}, "images", "byWidth", [32, 64, 80, 100, 112, 160, 200, 320]],
-        ["profilesList", "availableAvatarsList", {"to": 18}, "summary"],
-        ["profilesList", "availableAvatarsList", "summary"],
-        ["profiles", "hasSeenPromoGate"],
-        ["lolomo", "maxExperience"],
-        ["lolomo", 0, 0, "evidence"],
-        ["lolomo", 0, 0, "item", ["info", "summary", "outline", "rating", "heroImages"]]
-    ], [{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{}]);
-}
-function startupPathMapModel() {
-    E_model._getPathSetsAsPathMap(E_model, [
-        ["startup"],
-        ["appconfig"],
-        ["languages"],
-        ["geolocation"],
-        ["user"],
-        ["uiexperience"],
-        ["lolomo", "summary"],
-        ["lolomo", {"to": 60}, "summary"],
-        ["lolomo", 0, "billboardData"],
-        ["lolomo", 0, 0, "postcard"],
-        ["profilesList", {"to": 4}, "avatar", "images", "byWidth", [32, 64, 80, 100, 112, 160, 200, 320]],
-        ["profilesList", {"to": 4}, "summary"],
-        ["profilesList", "summary"],
-        ["profilesList", "availableAvatarsList", {"to": 18}, "images", "byWidth", [32, 64, 80, 100, 112, 160, 200, 320]],
-        ["profilesList", "availableAvatarsList", {"to": 18}, "summary"],
-        ["profilesList", "availableAvatarsList", "summary"],
-        ["profiles", "hasSeenPromoGate"],
-        ["lolomo", "maxExperience"],
-        ["lolomo", 0, 0, "evidence"],
-        ["lolomo", 0, 0, "item", ["info", "summary", "outline", "rating", "heroImages"]]
-    ], [{}]);
-}
-
-function startupPathMapRecModel() {
-    E_recModel._getAsPathMap(E_recModel, [
-        ["startup"],
-        ["appconfig"],
-        ["languages"],
-        ["geolocation"],
-        ["user"],
-        ["uiexperience"],
-        ["lolomo", "summary"],
-        ["lolomo", {"to": 60}, "summary"],
-        ["lolomo", 0, "billboardData"],
-        ["lolomo", 0, 0, "postcard"],
-        ["profilesList", {"to": 4}, "avatar", "images", "byWidth", [32, 64, 80, 100, 112, 160, 200, 320]],
-        ["profilesList", {"to": 4}, "summary"],
-        ["profilesList", "summary"],
-        ["profilesList", "availableAvatarsList", {"to": 18}, "images", "byWidth", [32, 64, 80, 100, 112, 160, 200, 320]],
-        ["profilesList", "availableAvatarsList", {"to": 18}, "summary"],
-        ["profilesList", "availableAvatarsList", "summary"],
-        ["profiles", "hasSeenPromoGate"],
-        ["lolomo", "maxExperience"],
-        ["lolomo", 0, 0, "evidence"],
-        ["lolomo", 0, 0, "item", ["info", "summary", "outline", "rating", "heroImages"]]
-    ], [{}]);
-}
-function startupValuesModel() {
-    E_model._getPathSetsAsValues(E_model, [
-        ["startup"],
-        ["appconfig"],
-        ["languages"],
-        ["geolocation"],
-        ["user"],
-        ["uiexperience"],
-        ["lolomo", "summary"],
-        ["lolomo", {"to": 60}, "summary"],
-        ["lolomo", 0, "billboardData"],
-        ["lolomo", 0, 0, "postcard"],
-        ["profilesList", {"to": 4}, "avatar", "images", "byWidth", [32, 64, 80, 100, 112, 160, 200, 320]],
-        ["profilesList", {"to": 4}, "summary"],
-        ["profilesList", "summary"],
-        ["profilesList", "availableAvatarsList", {"to": 18}, "images", "byWidth", [32, 64, 80, 100, 112, 160, 200, 320]],
-        ["profilesList", "availableAvatarsList", {"to": 18}, "summary"],
-        ["profilesList", "availableAvatarsList", "summary"],
-        ["profiles", "hasSeenPromoGate"],
-        ["lolomo", "maxExperience"],
-        ["lolomo", 0, 0, "evidence"],
-        ["lolomo", 0, 0, "item", ["info", "summary", "outline", "rating", "heroImages"]]
-    ]);
-}
-
-function startupValuesRecModel() {
-    E_recModel._getPathSetsAsValues(E_recModel, [
-        ["startup"], ["appconfig"], ["languages"], ["geolocation"], ["user"], ["uiexperience"], ["lolomo", "summary"], ["lolomo", {"to": 60}, "summary"], ["lolomo", 0, "billboardData"], ["lolomo", 0, 0, "postcard"], ["profilesList", {"to": 4}, "avatar", "images", "byWidth", [32, 64, 80, 100, 112, 160, 200, 320]], ["profilesList", {"to": 4}, "summary"], ["profilesList", "summary"], ["profilesList", "availableAvatarsList", {"to": 18}, "images", "byWidth", [32, 64, 80, 100, 112, 160, 200, 320]], ["profilesList", "availableAvatarsList", {"to": 18}, "summary"], ["profilesList", "availableAvatarsList", "summary"], ["profiles", "hasSeenPromoGate"], ["lolomo", "maxExperience"], ["lolomo", 0, 0, "evidence"], ["lolomo", 0, 0, "item", ["info", "summary", "outline", "rating", "heroImages"]]
-    ]);
-}
-
-function asJSONScrollingGallery() {
-    model._getPathSetsAsJSON(model, [
+function scrollGallery(model, format) {
+    var scollingRequest = [
         ["lists", "abcd", {"from": 0, "to": 10}, "summary"],
         ["lists", "abcd", {"from": 11, "to": 20}, "summary"],
         ["lists", "abcd", {"from": 21, "to": 30}, "summary"],
         ["lists", "abcd", {"from": 31, "to": 40}, "summary"]
-    ], [{},{},{},{}]);
+    ];
+    switch (format) {
+        case 'JSON':
+            return function() {
+                model._getPathSetsAsJSON(model, scollingRequest, [{},{},{},{}]);
+            };
+        case 'JSONG':
+            return function() {
+                model._getPathSetsAsJSONG(model, scollingRequest, [{}]);
+            };
+        case 'PathMap':
+            return function() {
+                model._getPathSetsAsPathMap(model, scollingRequest, [{}]);
+            };
+        case 'Value':
+            return function() {
+                model._getPathSetsAsValues(model, scollingRequest, noOp);
+            };
+    }
 }
 
-function asJSONRecScrollingGallery() {
-    recModel._getPathSetsAsJSON(recModel, [
-        ["lists", "abcd", {"from": 0, "to": 10}, "summary"],
-        ["lists", "abcd", {"from": 11, "to": 20}, "summary"],
-        ["lists", "abcd", {"from": 21, "to": 30}, "summary"],
-        ["lists", "abcd", {"from": 31, "to": 40}, "summary"]
-    ], [{},{},{},{}]);
-}
-function asPathMapScrollingGallery() {
-    model._getPathSetsAsPathMap(model, [
-        ["lists", "abcd", {"from": 0, "to": 10}, "summary"],
-        ["lists", "abcd", {"from": 11, "to": 20}, "summary"],
-        ["lists", "abcd", {"from": 21, "to": 30}, "summary"],
-        ["lists", "abcd", {"from": 31, "to": 40}, "summary"]
-    ], [{}]);
-}
-
-function asPathMapRecScrollingGallery() {
-    recModel._getPathSetsAsPathMap(recModel, [
-        ["lists", "abcd", {"from": 0, "to": 10}, "summary"],
-        ["lists", "abcd", {"from": 11, "to": 20}, "summary"],
-        ["lists", "abcd", {"from": 21, "to": 30}, "summary"],
-        ["lists", "abcd", {"from": 31, "to": 40}, "summary"]
-    ], [{}]);
-}
-function asValuesScrollingGallery() {
-    model._getPathSetsAsValues(model, [
-        ["lists", "abcd", {"from": 0, "to": 10}, "summary"],
-        ["lists", "abcd", {"from": 11, "to": 20}, "summary"],
-        ["lists", "abcd", {"from": 21, "to": 30}, "summary"],
-        ["lists", "abcd", {"from": 31, "to": 40}, "summary"]
-    ]);
-}
-
-function asValuesRecModelFilled() {
-    recModel._getPathSetsAsValues(recModel, [
-        ["lists", "abcd", {"from": 0, "to": 10}, "summary"], ["lists", "abcd", {"from": 11, "to": 20}, "summary"], ["lists", "abcd", {"from": 21, "to": 30}, "summary"], ["lists", "abcd", {"from": 31, "to": 40}, "summary"]
-    ]);
-}
-
-function asValuesSimple() {
-    model._getPathSetsAsValues(model, [
+function simple(model, format) {
+    var simpleRequest = [
         ['videos', 1234, 'summary']
-    ]);
+    ];
+    switch (format) {
+        case 'JSON':
+            return function() {
+                model._getPathSetsAsJSON(model, simpleRequest, [{}]);
+            };
+        case 'JSONG':
+            return function() {
+                model._getPathSetsAsJSONG(model, simpleRequest, [{}]);
+            };
+        case 'PathMap':
+            return function() {
+                model._getPathSetsAsPathMap(model, simpleRequest, [{}]);
+            };
+        case 'Value':
+            return function() {
+                model._getPathSetsAsValues(model, simpleRequest, noOp);
+            };
+    }
 }
-function asValuesSimpleRec() {
-    recModel._getPathSetsAsValues(recModel, [
-        ['videos', 1234, 'summary']
-    ]);
-}
-function asJSONSimple() {
-    model._getPathSetsAsJSON(model, [
-        ['videos', 1234, 'summary']
-    ], [{}]);
-}
-function asJSONSimpleRec() {
-    recModel._getPathSetsAsJSON(recModel, [
-        ['videos', 1234, 'summary']
-    ], [{}]);
-}
-function asJSONReference() {
-    model._getPathSetsAsJSON(model, [
+function reference(model, format) {
+    var referenceRequest = [
         ['genreList', 0, 0, 'summary']
-    ], [{}]);
+    ];
+    switch (format) {
+        case 'JSON':
+            return function() {
+                model._getPathSetsAsJSON(model, referenceRequest, [{}]);
+            };
+        case 'JSONG':
+            return function() {
+                model._getPathSetsAsJSONG(model, referenceRequest, [{}]);
+            };
+        case 'PathMap':
+            return function() {
+                model._getPathSetsAsPathMap(model, referenceRequest, [{}]);
+            };
+        case 'Value':
+            return function() {
+                model._getPathSetsAsValues(model, referenceRequest, noOp);
+            };
+    }
 }
-function asJSONReferenceRec() {
-    recModel._getPathSetsAsJSON(recModel, [
-        ['genreList', 0, 0, 'summary']
-    ], [{}]);
-}
-function asPathMapSimple() {
-    model._getPathSetsAsPathMap(model, [
-        ['videos', 1234, 'summary']
-    ], [{}]);
-}
-function asPathMapSimpleRec() {
-    recModel._getPathSetsAsPathMap(recModel, [
-        ['videos', 1234, 'summary']
-    ], [{}]);
-}
-function getValueSyncRec() {
-    recModel.getValueSync(['videos', 1234, 'summary']);
-}
-function getValueSync() {
-    model.getValueSync(['videos', 1234, 'summary']);
-}
-function getReferenceSyncRec() {
-    recModel.getValueSync(['genreList', 0, 0, 'summary']);
-}
-function getReferenceSync() {
-    model.getValueSync(['genreList', 0, 0, 'summary']);
+function complex(model, format) {
+    var complexRequest = [
+        ['genreList', 0, {to:9}, 'summary']
+    ];
+    switch (format) {
+        case 'JSON':
+            return function() {
+                model._getPathSetsAsJSON(model, complexRequest, [{}]);
+            };
+        case 'JSONG':
+            return function() {
+                model._getPathSetsAsJSONG(model, complexRequest, [{}]);
+            };
+        case 'PathMap':
+            return function() {
+                model._getPathSetsAsPathMap(model, complexRequest, [{}]);
+            };
+        case 'Value':
+            return function() {
+                model._getPathSetsAsValues(model, complexRequest, noOp);
+            };
+    }
 }
 function repeatInConfig(name, count, test, config) {
     for (var i = 0; i < count; i++) {
@@ -263,24 +141,17 @@ module.exports = function() {
     };
     return {
         config: config,
+        models: {
+            sentinel: sentinelModel,
+            alt: altModel,
+            emptySentinel: E_sentinelModel,
+            emptyAlt: E_altModel
+        },
         repeatInConfig: repeatInConfig,
-        startupJSONModel: startupJSONModel,
-        startupJSONRecModel: startupJSONRecModel,
-        startupPathMapModel: startupPathMapModel,
-        startupPathMapRecModel: startupPathMapRecModel,
-        startupValuesModel: startupValuesModel,
-        startupValuesRecModel: startupValuesRecModel,
-        galleryJSON: asJSONScrollingGallery,
-        galleryJSONRec: asJSONRecScrollingGallery,
-        galleryPathMap: asPathMapScrollingGallery,
-        galleryPathMapRec: asPathMapRecScrollingGallery,
-        simpleJSON: asJSONSimple,
-        simpleJSONRec: asJSONSimpleRec,
-        simplePathMap: asPathMapSimple,
-        simplePathMapRec: asPathMapSimpleRec,
-        simpleValues: asValuesSimple,
-        simpleValuesRec: asValuesSimpleRec,
-        referenceJSON: asJSONReference,
-        referenceJSONRec: asJSONReferenceRec
+        simple: simple,
+        reference: reference,
+        complex: complex,
+        scrollGallery: scrollGallery,
+        startup: startup
     };
 };

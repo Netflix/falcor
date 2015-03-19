@@ -9,6 +9,7 @@ var benchmark = require('gulp-bench');
 // Registers build tasks
 require('./build/gulp-clean');
 require('./build/gulp-build');
+require('./build/performance/gulp-perf');
 
 gulp.task('hint', ['build.node'], function() {
     return gulp.src('bin/Model.js').

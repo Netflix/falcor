@@ -12,14 +12,25 @@ var licenseInfo = {
     organization: 'Netflix, Inc',
     year: '2014'
 };
+gulp.task('build.all', ['build.alt', 'build.sentinel']);
 
 gulp.task('build.alt', ['clean.dev'], function() {
+    return build(['alt.js']);
+});
+
+gulp.task('build.sentinel', ['clean.dev'], function() {
+    return build(['sentinel.js']);
+});
+
+function build(file, standAloneName, outName, dest) {
     return gulp.
-        src(['index.js']).
+        src(file).
         pipe(browserify({
-            standalone: 'falcor'
+            standalone: standAloneName || 'falcor'
         })).
         pipe(license('Apache', licenseInfo)).
-        pipe(rename('Falcor.js')).
-        pipe(gulp.dest('bin'));
-});
+        pipe(rename(outName || 'Falcor.js')).
+        pipe(gulp.dest(dest || 'bin'));
+}
+
+module.exports = build;

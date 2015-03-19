@@ -1,4 +1,4 @@
-var now = require('../../src/Falcor').now;
+var now = require('../../../src/Falcor').now;
 function updateTrailingNullCase(path, depth, requested) {
     if (Array.isArray(path)) {
         if (path[depth] === null && depth === path.length - 1) {

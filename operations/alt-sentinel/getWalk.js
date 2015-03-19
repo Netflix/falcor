@@ -1,12 +1,12 @@
 var followReference = require('./followReference');
-var onError = require('./onError');
-var onMissing = require('./onMissing');
+var onError = require('../alt/get/onError');
+var onMissing = require('../alt/get/onMissing');
 var onValue = require('./onValue');
-var lru = require('./../util/lru');
-var hardLink = require('./../util/hardlink');
+var lru = require('../alt/util/lru');
+var hardLink = require('../alt/util/hardlink');
 var removeHardlink = hardLink.remove;
 var splice = lru.splice;
-var support = require('./../util/support');
+var support = require('../alt/util/support');
 var isExpired = support.isExpired;
 var permuteKey = support.permuteKey;
 
@@ -97,7 +97,6 @@ function walk(model, root, curr, pathOrJSON, depth, seedOrFunction, positionalIn
 
             var nextPathOrPathMap = jsonQuery ? pathOrJSON[key] : pathOrJSON;
             if (jsonQuery && nextPathOrPathMap) {
-                // TODO: consider an array, types, and simple values.
                 if (typeof nextPathOrPathMap === 'object' && !Array.isArray(nextPathOrPathMap)) {
                     hasChildren = Object.keys(nextPathOrPathMap).length > 0;
                 }
@@ -112,13 +111,11 @@ function walk(model, root, curr, pathOrJSON, depth, seedOrFunction, positionalIn
 
             if (next) {
                 var nType = next.$type;
-                var nSentinel = nType === 'sentinel';
-                var value = nSentinel ? next.value : next;
-                var valueIsArray = Array.isArray(value);
+                var value = nType && next.value || next;
 
                 if (jsonQuery && hasChildren || !jsonQuery && depth < pathOrJSON.length) {
 
-                    if (valueIsArray && (!nSentinel || nSentinel && !isExpired(next))) {
+                    if (nType && nType === 'reference' && !isExpired(next)) {
                         if (asJSONG) {
                             onValue(model, next, nextPathOrPathMap, depth, seedOrFunction, outerResults, false, permuteOptimized, permutePosition, outputFormat);
                         }
@@ -146,20 +143,19 @@ function walk(model, root, curr, pathOrJSON, depth, seedOrFunction, positionalIn
 function evaluateNode(model, curr, pathOrJSON, depth, seedOrFunction, requestedPath, optimizedPath, positionalInfo, outerResults, outputFormat, fromReference) {
     // BaseCase: This position does not exist, emit missing.
     if (!curr) {
-        model._materialized ? 
+        model._materialized ?
             onValue(model, curr, pathOrJSON, depth, seedOrFunction, outerResults, requestedPath, optimizedPath, positionalInfo, outputFormat) :
             onMissing(model, curr, pathOrJSON, depth, seedOrFunction, outerResults, requestedPath, optimizedPath, positionalInfo, outputFormat);
         return true;
     }
 
     var currType = curr.$type;
-    var currValue = currType === 'sentinel' ? curr.value : curr;
-    var atLeaf = currType || Array.isArray(currValue);
+    var currValue = currType && curr.value || curr;
 
     positionalInfo = positionalInfo || [];
 
     // The Base Cases.  There is a type, therefore we have hit a 'leaf' node.
-    if (atLeaf) {
+    if (currType) {
         if (currType === 'error') {
             if (fromReference) {
                 requestedPath.push(null);
@@ -192,5 +188,4 @@ function evaluateNode(model, curr, pathOrJSON, depth, seedOrFunction, requestedP
     return false;
 }
 
-// TODO:
 module.exports = walk;
