@@ -5,38 +5,33 @@ var spreadJSON = support.spreadJSON,
     fastCopy = support.fastCopy,
     isExpired = support.isExpired;
 var clone = require('./../util/clone');
+var onValue = require('./onValue');
 
-module.exports = function onMissing(model, path, depth, permuteRequested, permuteOptimized, permutePosition, results, type) {
+module.exports = function onMissing(model, node, path, depth, seedOrFunction, outerResults, permuteRequested, permuteOptimized, permutePosition, outputFormat) {
     var pathSlice;
-    
-    if (model.materialized) {
-        
-        
-    } else {
-        if (Array.isArray(path)) {
-            if (depth < path.length) {
-                pathSlice = fastCopy(path, depth);
-            } else {
-                pathSlice = [];
-            }
-
-            concatAndInsertMissing(pathSlice, results, permuteRequested, permuteOptimized, permutePosition, type);
+    if (Array.isArray(path)) {
+        if (depth < path.length) {
+            pathSlice = fastCopy(path, depth);
         } else {
             pathSlice = [];
-            spreadJSON(path, pathSlice);
+        }
 
-            if (pathSlice.length) {
-                for (var i = 0, len = pathSlice.length; i < len; i++) {
-                    concatAndInsertMissing(pathSlice[i], results, permuteRequested, permuteOptimized, permutePosition, type, true);
-                }
-            } else {
-                concatAndInsertMissing(pathSlice, results, permuteRequested, permuteOptimized, permutePosition, type);
+        concatAndInsertMissing(pathSlice, outerResults, permuteRequested, permuteOptimized, permutePosition, outputFormat);
+    } else {
+        pathSlice = [];
+        spreadJSON(path, pathSlice);
+
+        if (pathSlice.length) {
+            for (var i = 0, len = pathSlice.length; i < len; i++) {
+                concatAndInsertMissing(pathSlice[i], outerResults, permuteRequested, permuteOptimized, permutePosition, outputFormat, true);
             }
+        } else {
+            concatAndInsertMissing(pathSlice, outerResults, permuteRequested, permuteOptimized, permutePosition, outputFormat);
         }
     }
 };
 
-function concatAndInsertMissing(remainingPath, results, permuteRequested, permuteOptimized, permutePosition, type, __null) {
+function concatAndInsertMissing(remainingPath, results, permuteRequested, permuteOptimized, permutePosition, outputFormat, __null) {
     var i = 0, len;
     if (__null) {
         for (i = 0, len = remainingPath.length; i < len; i++) {
@@ -45,12 +40,11 @@ function concatAndInsertMissing(remainingPath, results, permuteRequested, permut
             }
         }
     }
-    if (type === 'JSON') {
+    if (outputFormat === 'JSON') {
         permuteRequested = fastCat(permuteRequested, remainingPath);
         for (i = 0, len = permutePosition.length; i < len; i++) {
             var idx = permutePosition[i];
             var r = permuteRequested[idx];
-            // TODO: i think the typeof operator is no needed if there is better management of permutePosition addition
             if (typeof r !== 'object') {
                 permuteRequested[idx] = [r];
             }

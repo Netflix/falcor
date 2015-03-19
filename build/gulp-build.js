@@ -1,6 +1,7 @@
 var gulp = require('gulp');
 var browserify = require('gulp-browserify');
 var license = require('gulp-license');
+var rename = require('gulp-rename');
 var surround = require('./surround');
 var tvuiPrefix = '//@depend ../Rx.netflix.js\n' +
     '//@depend netflix/falcor/Falcor.js\n' +
@@ -18,5 +19,7 @@ gulp.task('build.alt', ['clean.dev'], function() {
         pipe(browserify({
             standalone: 'falcor'
         })).
-        pipe(license('Apache', licenseInfo));
+        pipe(license('Apache', licenseInfo)).
+        pipe(rename('Falcor.js')).
+        pipe(gulp.dest('bin'));
 });

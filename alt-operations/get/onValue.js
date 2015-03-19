@@ -5,7 +5,9 @@ var support = require('../util/support');
 var updateTrailingNullCase = support.updateTrailingNullCase;
 module.exports = function onValue(model, node, path, depth, seedOrFunction, outerResults, permuteRequested, permuteOptimized, permutePosition, outputFormat) {
     var i, len, k, key, curr, prev, prevK;
-    promote(model, node);
+    if (node) {
+        promote(model, node);
+    }
 
 
     if (permuteRequested) {
@@ -96,6 +98,6 @@ module.exports = function onValue(model, node, path, depth, seedOrFunction, oute
             }
             break;
     }
-}
+};
 
 

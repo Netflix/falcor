@@ -179,7 +179,7 @@ function execute(useNewModel) {
             runGetTests(getModel(useNewModel), Complex().arrayOfComplexPathsLeaf, {useNewModel: useNewModel});
         });
     });
-    describe("Materialized", function() {
+    describe.only("Materialized", function() {
         describe("should get a value directly in materialized mode", function() {
             runGetTests(getModel(useNewModel), Values().direct, { useNewModel: useNewModel, materialized: true });
         });
