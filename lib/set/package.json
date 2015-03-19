@@ -1,0 +1,16 @@
+{
+  "name": "set",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "BSD-2-Clause",
+  "dependencies": {
+    "lru": "file:../lru",
+    "walk": "file:../walk",
+    "support": "file:../support"
+  }
+}
