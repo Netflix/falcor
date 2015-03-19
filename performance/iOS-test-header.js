@@ -1,6 +1,8 @@
 var Rx = require('rx');
 global.Rx = Rx;
-var testConfig = require('./testConfig')();
+var testConfig = require('./testConfig');
+var testRunner = require('./testRunner');
+var benchmark = require('benchmark');
 var config = testConfig.config;
 var models = testConfig.models;
 
@@ -13,7 +15,9 @@ testConfig.repeatInConfig('alt-complex', 1, testConfig.complex(models.alt, 'JSON
 testConfig.repeatInConfig('paulcor-scroll', 1, testConfig.scrollGallery(models.paulcor, 'JSON'), config.tests);
 testConfig.repeatInConfig('alt-scroll', 1, testConfig.scrollGallery(models.alt, 'JSON'), config.tests);
 
-require('./testRunner')(require('benchmark'), config, 10, function(totalResults) {
-    var fs = require('fs');
-    fs.writeFileSync('out.csv', totalResults.join('\n'))
+console.log('Starting test');
+testRunner(benchmark, config, 10, function(totalResults) {
+    console.log(totalResults.join('\n'));
 });
+
+
