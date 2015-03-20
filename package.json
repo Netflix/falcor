@@ -12,6 +12,19 @@
     "dist",
     "test"
   ],
+  "perf": {
+    "dest": "performance/bin",
+    "files": {
+      "sentinel.js": {
+        "out": "sentinel.js",
+        "standalone": "sentinel"
+      },
+      "alt.js": {
+        "out": "alt.js",
+        "standalone": "alt"
+      }
+    }
+  },
   "devDependencies": {
     "benchmark": "^1.0.0",
     "benchmarks": "^0.1.2",

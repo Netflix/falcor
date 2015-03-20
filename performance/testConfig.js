@@ -1,5 +1,5 @@
-var alt = require('./../alt');
-var sentinel = require('./../sentinel');
+var alt = require('./bin/alt');
+var sentinel = require('./bin/sentinel');
 var paulcor = require('./../index-node');
 var Cache = require('./../test/data/Cache');
 var CacheSentinel = require('./../test/data/CacheAlternative');

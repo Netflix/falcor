@@ -1,6 +1,6 @@
 var Rx = require('rx');
 global.Rx = Rx;
-var testConfig = require('./testConfig');
+var testConfig = require('./testConfig')();
 var testRunner = require('./testRunner');
 var benchmark = require('benchmark');
 var config = testConfig.config;
