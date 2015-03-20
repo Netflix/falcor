@@ -2,6 +2,7 @@ language: node_js
 
 node_js:
     - "0.12"
+    - "0.10"
 
 branches:
     only:
@@ -16,4 +17,4 @@ before_script: linklocal -r; npm run dist;
 
 notifications:
     email:
-        satyend@netflix.com
+        falcor@netflix.com
