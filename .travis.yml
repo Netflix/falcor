@@ -7,11 +7,11 @@ branches:
     only:
         - master
 
-before_install: npm install -g linklocal; npm install -g gulp;
-# travic runs 'npm install' by default, as the install step
+before_install: npm install -g linklocal;
+# travis runs 'npm install' by default, as the install step
 
-before_script: linklocal -r; gulp build.node;
-# travic runs 'npm test' by default, as the script step
+before_script: linklocal -r; npm run dist;
+# travis runs 'npm test' by default, as the script step
 
 
 notifications:

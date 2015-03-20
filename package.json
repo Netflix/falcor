@@ -3,7 +3,8 @@
   "version": "0.0.3",
   "main": "dist/Falcor.js",
   "scripts": {
-    "test": "./node_modules/mocha/bin/_mocha ./test/index"
+    "test": "./node_modules/mocha/bin/_mocha ./test/index",
+    "dist": "./node_modules/gulp/bin/gulp.js default"
   },
   "files": [
     "build",

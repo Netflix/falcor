@@ -34,4 +34,5 @@ gulp.task('doc-d', ['clean.doc', 'doc-p'], function() {
 });
 
 gulp.task('default', ['build']);
+gulp.task('build', ['build.all']);
 gulp.task('alt', ['build.alt']);
