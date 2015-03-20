@@ -9,11 +9,17 @@ branches:
         - master
 
 before_install: npm install -g linklocal;
-# travis runs 'npm install' by default, as the install step
+# travis runs 'npm install' by default, as the 'install' step
 
 before_script: linklocal -r; npm run dist;
-# travis runs 'npm test' by default, as the script step
+# travis runs 'npm test' by default, as the 'script' step
 
+# PLACEHOLDER FOR COVERAGE REPORTS ON GITHUB, IF WE WANT THEM.
+# ALSO NEED TO ADD .coveralls.yml, IF WE WANT TO USE IT ON THE PRIVATE 
+# REPO.
+
+# after_script:
+#  - cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js
 
 notifications:
     email:
