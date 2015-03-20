@@ -18,7 +18,7 @@ var getModel = testRunner.getModel;
 describe("Projection", function() {
     var query = ["videos", "errorBranch", "summary"];
     var expected = Values().errorBranchSummary;
-    describe.only("should capture the error through the errorSelector - Local Cache.", function(done) {
+    describe("should capture the error through the errorSelector - Local Cache.", function(done) {
         ["toJSON", "toValues"].forEach(function(format) {
             test(getModel.bind(null, undefined, Cache()), expected, query, format);
         });
