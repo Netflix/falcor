@@ -31,6 +31,7 @@
     "benchmarks": "^0.1.2",
     "chai": "~1.9.1",
     "colors": "~0.6.2",
+    "coveralls": "^2.11.2",
     "diff": "~1.0.8",
     "express": "~4.9.0",
     "falcor-browser": "git+ssh://git@github.com/Netflix/falcor-browser.git#v0.0.1",
