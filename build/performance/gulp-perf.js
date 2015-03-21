@@ -9,18 +9,18 @@ var Observable = Rx.Observable;
 var fs = require('fs');
 var path = require('path');
 
-gulp.task('perf', ['perf-runner']);
-gulp.task('perf-update', function() { return runner(); }); 
-gulp.task('perf-construct', ['clean.perf'], function() { return constructPerfFalcors(); });
-gulp.task('perf-assemble', ['perf-construct', 'perf-next-falcor'], function() { return assemble(); });
-gulp.task('perf-runner', ['perf-assemble'], function() { return runner(); });
+gulp.task('perf', ['perf-device']);
+gulp.task('perf-update', runner);
+gulp.task('perf-construct', ['clean.perf'], constructPerfFalcors);
+gulp.task('perf-assemble', ['perf-construct'], assemble);
+gulp.task('perf-device', ['perf-assemble'], runner);
 
-gulp.task('perf-next-falcor', ['clean.perf'], function() {
-    return gulp.
-        src(['./performance/next_falcor.js']).
-        pipe(rename('next.js')).
-        pipe(gulp.dest('performance/bin'));
-});
+gulp.task('perf-b', ['perf-assemble-browser-no-construct'], runner);
+gulp.task('perf-browser', ['perf-assemble-browser'], runner);
+gulp.task('perf-assemble-browser', ['perf-construct'], browser);
+gulp.task('perf-assemble-browser-no-construct', browser);
+
+gulp.task('perf-all', ['perf-device', 'perf-browser']);
 
 function assemble() {
     return gulp.
@@ -32,9 +32,19 @@ function assemble() {
         pipe(gulp.dest('performance/bin'));
 }
 
+function browser() {
+    return gulp.
+        src(['./performance/browser.js']).
+        pipe(browserify({
+            standalone: 'browser'
+        })).
+        pipe(rename('browser.js')).
+        pipe(gulp.dest('performance/bin'));
+}
+
 function runner() {
     return gulp.
-        src(['performance/next_falcor.js', 'performance/bin/assembledPerf.js', 'performance/device-test-header.js']).
+        src(['performance/bin/assembledPerf.js', 'performance/device.js']).
         pipe(concat({path: 'deviceRunner.js'})).
         pipe(gulp.dest('performance/bin'));
 }
@@ -58,7 +68,7 @@ function constructPerfFalcors() {
                 flatMap(runBuild);
         }).
         takeLast();
-    
+
     var stream = new Transform();
     obs.subscribe(
         stream.emit.bind(stream, "data"),

@@ -3,7 +3,8 @@
   "version": "0.0.3",
   "main": "index-node",
   "scripts": {
-    "test": "./node_modules/mocha/bin/_mocha ./test/index"
+    "test": "./node_modules/mocha/bin/_mocha ./test/index",
+    "dist": "./node_modules/gulp/bin/gulp.js default"
   },
   "files": [
     "build",
@@ -22,10 +23,6 @@
       "alt.js": {
         "out": "alt.js",
         "standalone": "alt"
-      },
-      "index-node.js": {
-        "out": "index-node.js",
-        "standalone": "falcor-node"
       }
     }
   },
@@ -34,6 +31,7 @@
     "benchmarks": "^0.1.2",
     "chai": "~1.9.1",
     "colors": "~0.6.2",
+    "coveralls": "^2.11.2",
     "diff": "~1.0.8",
     "express": "~4.9.0",
     "falcor-browser": "git+ssh://git@github.com/Netflix/falcor-browser.git#v0.0.1",
@@ -46,6 +44,7 @@
     "gulp-clean": "~0.3.1",
     "gulp-concat": "~2.4.1",
     "gulp-istanbul": "~0.3.1",
+    "gulp-eslint": "^0.7.0",
     "gulp-istanbul-enforcer": "~1.0.3",
     "gulp-jsdoc": "~0.1.4",
     "gulp-jshint": "~1.8.4",
