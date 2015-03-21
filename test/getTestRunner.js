@@ -32,7 +32,7 @@ function getTestRunner(model, data, options) {
 
     prefixesAndSuffixes[0].
         filter(function (prefix) {
-            return ~prefix.indexOf("get");
+            return ~prefix.indexOf("getPathSets");
         }).
         forEach(function (prefix) {
             prefixesAndSuffixes[1].map(function (suffix) {
@@ -97,7 +97,12 @@ function getTestRunner(model, data, options) {
                 // For doing any preprocessing.
                 preCallFn(model, op, _.cloneDeep(query), countOrFunction);
                 actual = model[op](model, _.cloneDeep(query), countOrFunction, model._errorSelector);
-
+                
+                actual = Object.keys(expected).reduce(function(memo, key) {
+                    memo[key] = actual[key];
+                    return memo;
+                }, {});
+                
                 // validates that the results from the operation and the expected values are valid.
                 testRunner.validateData(expected, actual);
 

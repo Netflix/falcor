@@ -18,20 +18,12 @@ module.exports = function() {
             AsValues: {
                 values: [{
                     "path": ["videos", "errorBranch"],
-                    "value": {
-                        "$size": 50,
-                        "$type": "error",
-                        "message": "I am yelling timber."
-                    }
+                    "value": "I am yelling timber."
                 }]
             },
             AsJSON: {
                 values: [{
-                    json: {
-                        "$size": 50,
-                        "$type": "error",
-                        "message": "I am yelling timber."
-                    }
+                    json: "I am yelling timber."
                 }]
             },
             AsPathMap: {
@@ -39,9 +31,9 @@ module.exports = function() {
                     json: {
                         "videos": {
                             "errorBranch": {
-                                "$size": 50,
+                                "$size": "51",
                                 "$type": "error",
-                                "message": "I am yelling timber."
+                                "value": "I am yelling timber."
                             }
                         }
                     }
@@ -53,9 +45,9 @@ module.exports = function() {
                     jsong: {
                         "videos": {
                             "errorBranch": {
-                                "$size": 50,
+                                "$size": "51",
                                 "$type": "error",
-                                "message": "I am yelling timber."
+                                "value": "I am yelling timber."
                             }
                         }
                     }
@@ -80,20 +72,12 @@ module.exports = function() {
             AsValues: {
                 values: [{
                     "path": ["genreList", "2", null],
-                    "value": {
-                        "$size": 50,
-                        "$type": "error",
-                        "message": "Red is the new Black"
-                    }
+                    "value": "Red is the new Black"
                 }]
             },
             AsJSON: {
                 values: [{
-                    json: {
-                        "$size": 50,
-                        "$type": "error",
-                        "message": "Red is the new Black"
-                    }
+                    json: "Red is the new Black"
                 }]
             },
             AsPathMap: {
@@ -101,9 +85,9 @@ module.exports = function() {
                     json: {
                         "genreList": {
                             "2": {
-                                "$size": 50,
+                                "$size": "51",
                                 "$type": "error",
-                                "message": "Red is the new Black"
+                                "value": "Red is the new Black"
                             }
                         }
                     }
@@ -114,13 +98,17 @@ module.exports = function() {
                     paths: [["genreList", "2", null]],
                     jsong: {
                         "genreList": {
-                            "2": ["lists", "error-list"]
+                            "2": {
+                                "$size": 51,
+                                "$type": "reference",
+                                "value": ["lists", "error-list"]
+                            }
                         },
                         "lists": {
                             "error-list": {
-                                "$size": 50,
+                                "$size": "51",
                                 "$type": "error",
-                                "message": "Red is the new Black"
+                                "value": "Red is the new Black"
                             }
                         }
                     }

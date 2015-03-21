@@ -10,8 +10,6 @@ module.exports = function() {
                 query: [{
                     "path": ["videos", "1234", "summary"],
                     "value": {
-                        "$size": 10,
-                        "$type": "group",
                         "title": "House of Cards",
                         "url": "/movies/1234"
                     }
@@ -22,8 +20,6 @@ module.exports = function() {
                     videos: {
                         1234: {
                             summary: {
-                                "$size": 10,
-                                "$type": "group",
                                 "title": "House of Cards",
                                 "url": "/movies/1234"
                             }
@@ -38,8 +34,6 @@ module.exports = function() {
                         videos: {
                             1234: {
                                 summary: {
-                                    "$type": "group",
-                                    "$size": 10,
                                     "title": "House of Cards",
                                     "url": "/movies/1234"
                                 }
@@ -61,8 +55,6 @@ module.exports = function() {
                 values: [{
                     "path": ["videos", "1234", "summary"],
                     "value": {
-                        "$type": "group",
-                        "$size": 10,
                         "title": "House of Cards",
                         "url": "/movies/1234",
                     }
@@ -71,8 +63,6 @@ module.exports = function() {
             AsJSON: {
                 values: [{
                     json: {
-                        "$type": "group",
-                        "$size": 10,
                         "title": "House of Cards",
                         "url": "/movies/1234"
                     }
@@ -84,10 +74,12 @@ module.exports = function() {
                         videos: {
                             1234: {
                                 summary: {
-                                    "$type": "group",
-                                    "$size": 10,
-                                    "title": "House of Cards",
-                                    "url": "/movies/1234"
+                                    "$size": 51,
+                                    "$type": "sentinel",
+                                    "value": {
+                                        "title": "House of Cards",
+                                        "url": "/movies/1234"
+                                    }
                                 }
                             }
                         }
@@ -100,9 +92,7 @@ module.exports = function() {
                     json: {
                         videos: {
                             1234: {
-                                summary: {
-                                    "$type": "group",
-                                    "$size": "10",
+                                "summary": {
                                     "title": "House of Cards",
                                     "url": "/movies/1234",
                                 }
@@ -122,8 +112,6 @@ module.exports = function() {
                 query: [{
                     "path": ["videos", "553", "summary"],
                     "value": {
-                        "$size": 10,
-                        "$type": "group",
                         "title": "Running Man",
                         "url": "/movies/553"
                     }
@@ -134,8 +122,6 @@ module.exports = function() {
                     videos: {
                         553: {
                             summary: {
-                                "$size": 10,
-                                "$type": "group",
                                 "title": "Running Man",
                                 "url": "/movies/553"
                             }
@@ -150,8 +136,6 @@ module.exports = function() {
                         videos: {
                             553: {
                                 summary: {
-                                    "$type": "group",
-                                    "$size": 10,
                                     "title": "Running Man",
                                     "url": "/movies/553"
                                 }
@@ -173,8 +157,6 @@ module.exports = function() {
                 values: [{
                     "path": ["videos", "553", "summary"],
                     "value": {
-                        "$type": "group",
-                        "$size": 10,
                         "title": "Running Man",
                         "url": "/movies/553"
                     }
@@ -183,8 +165,6 @@ module.exports = function() {
             AsJSON: {
                 values: [{
                     json: {
-                        "$type": "group",
-                        "$size": 10,
                         "title": "Running Man",
                         "url": "/movies/553"
                     }
@@ -196,10 +176,12 @@ module.exports = function() {
                         videos: {
                             553: {
                                 summary: {
-                                    "$type": "group",
-                                    "$size": 10,
-                                    "title": "Running Man",
-                                    "url": "/movies/553"
+                                    "$size": 51,
+                                    "$type": "sentinel",
+                                    "value": {
+                                        "title": "Running Man",
+                                        "url": "/movies/553"
+                                    }
                                 }
                             }
                         }
@@ -213,8 +195,6 @@ module.exports = function() {
                         videos: {
                             553: {
                                 summary: {
-                                    "$type": "group",
-                                    "$size": 10,
                                     "title": "Running Man",
                                     "url": "/movies/553",
                                 }
@@ -285,24 +265,32 @@ module.exports = function() {
                 }]
             },
 
-            AsJSONG: {
-                values: [{
-                    jsong: {
-                        genreList: {
-                            0: ["lists", "abcd"]
-                        }
-                    },
-                    paths: [["genreList", "0"]]
-                }]
-            },
-
             AsPathMap: {
                 values: [{
                     json: {
                         genreList: {
-                            0: ["lists", "abcd"]
+                            0: {
+                                "$size": 51,
+                                "$type": "reference",
+                                "value": ["lists", "abcd"]
+                            }
                         }
                     }
+                }]
+            },
+
+            AsJSONG: {
+                values: [{
+                    jsong: {
+                        genreList: {
+                            0: {
+                                "$size": 51,
+                                "$type": "reference",
+                                "value": ["lists", "abcd"]
+                            }
+                        }
+                    },
+                    paths: [["genreList", "0"]]
                 }]
             }
         },
@@ -400,8 +388,12 @@ module.exports = function() {
                         videos: {
                             sentinel: {
                                 summary: {
-                                    "title": "Marco Polo",
-                                    "url": "/movies/sentinel"
+                                    "$size": 51,
+                                    "$type": "sentinel",
+                                    "value": {
+                                        "title": "Marco Polo",
+                                        "url": "/movies/sentinel"
+                                    }
                                 }
                             }
                         }
@@ -664,9 +656,7 @@ module.exports = function() {
         },
         errorBranchSummary: {
             getPathSets: {
-                query: [
-                    ["videos", "errorBranch", "summary"]
-                ]
+                query: [["videos", "errorBranch", "summary"]]
             },
             getPathMaps: {
                 query: [{
@@ -680,21 +670,13 @@ module.exports = function() {
             AsValues: {
                 errors: [{
                     "path": ["videos", "errorBranch"],
-                    "value": {
-                        "$size": 50,
-                        "$type": "error",
-                        "message": "I am yelling timber."
-                    }
+                    "value": "I am yelling timber."
                 }]
             },
             AsJSON: {
                 errors: [{
                     "path": ["videos", "errorBranch"],
-                    "value": {
-                        "$size": 50,
-                        "$type": "error",
-                        "message": "I am yelling timber."
-                    }
+                    "value": "I am yelling timber."
                 }]
             },
             AsJSONG: {
@@ -703,9 +685,9 @@ module.exports = function() {
                     jsong: {
                         "videos": {
                             "errorBranch": {
-                                "$size": 50,
+                                "$size": 51,
                                 "$type": "error",
-                                "message": "I am yelling timber."
+                                "value": "I am yelling timber."
                             }
                         }
                     }
@@ -714,11 +696,7 @@ module.exports = function() {
             AsPathMap: {
                 errors: [{
                     "path": ["videos", "errorBranch"],
-                    "value": {
-                        "$size": 50,
-                        "$type": "error",
-                        "message": "I am yelling timber."
-                    }
+                    "value": "I am yelling timber."
                 }]
             }
         },
@@ -740,21 +718,13 @@ module.exports = function() {
             AsValues: {
                 errors: [{
                     "path": ["genreList", "2", null],
-                    "value": {
-                        "$size": 50,
-                        "$type": "error",
-                        "message": "Red is the new Black"
-                    }
+                    "value": "Red is the new Black"
                 }]
             },
             AsJSON: {
                 errors: [{
                     "path": ["genreList", "2", null],
-                    "value": {
-                        "$size": 50,
-                        "$type": "error",
-                        "message": "Red is the new Black"
-                    }
+                    "value": "Red is the new Black"
                 }]
             },
             AsJSONG: {
@@ -762,13 +732,17 @@ module.exports = function() {
                     paths: [["genreList", "2", null]],
                     jsong: {
                         "genreList": {
-                            "2": ["lists", "error-list"]
+                            "2": {
+                                "$size": 51,
+                                "$type": "reference",
+                                "value": ["lists", "error-list"]
+                            }
                         },
                         "lists": {
                             "error-list": {
-                                "$size": 50,
+                                "$size": 51,
                                 "$type": "error",
-                                "message": "Red is the new Black"
+                                "value": "Red is the new Black"
                             }
                         }
                     }
@@ -777,11 +751,7 @@ module.exports = function() {
             AsPathMap: {
                 errors: [{
                     "path": ["genreList", "2", null],
-                    "value": {
-                        "$size": 50,
-                        "$type": "error",
-                        "message": "Red is the new Black"
-                    }
+                    "value": "Red is the new Black"
                 }]
             }
         },

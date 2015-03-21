@@ -25,6 +25,7 @@ var Errors = Expected.Errors;
 describe("Use New Model", function() {
     execute(true);
 });
+
 //describe("Use Same Model", function() {
 //     execute(false);
 //     execute(false);
@@ -120,7 +121,7 @@ function execute(useNewModel) {
                 runGetTests(getModel(useNewModel), References().toMissingReference, {useNewModel: useNewModel});
             });
             describe("should report a missing path in branch key position.", function() {
-                runGetTests(getModel(useNewModel), References().referenceBranchIsMissing, {useNewModel: useNewModel});
+                runGetTests(getModel(useNewModel), References().referenceBranchIsExpired, {useNewModel: useNewModel});
             });
         });
         describe("Expired", function() {
@@ -179,7 +180,7 @@ function execute(useNewModel) {
             runGetTests(getModel(useNewModel), Complex().arrayOfComplexPathsLeaf, {useNewModel: useNewModel});
         });
     });
-    describe.only("Materialized", function() {
+    describe("Materialized", function() {
         describe("should get a value directly in materialized mode", function() {
             runGetTests(getModel(useNewModel), Values().direct, { useNewModel: useNewModel, materialized: true });
         });
@@ -197,14 +198,11 @@ function execute(useNewModel) {
         describe("should get a primitive value directly as a sentinel in boxed mode", function() {
             runGetTests(getModel(useNewModel), Boxed().primitiveValue, { useNewModel: useNewModel, boxed: true });
         });
-        describe("should get a group value directly as a sentinel in boxed mode", function() {
-            runGetTests(getModel(useNewModel), Values().direct, { useNewModel: useNewModel, boxed: true });
-        });
-        describe("should get a reference value in boxed mode", function() {
-            runGetTests(getModel(useNewModel), Boxed().referenceValue, { useNewModel: useNewModel, boxed: true });
-        });
-        describe("should get a sentinel value in boxed mode", function() {
+        describe("should get an Object value directly as a sentinel in boxed mode", function() {
             runGetTests(getModel(useNewModel), Boxed().sentinelValue, { useNewModel: useNewModel, boxed: true });
+        });
+        describe("should get a reference value directly as a reference in boxed mode", function() {
+            runGetTests(getModel(useNewModel), Boxed().referenceValue, { useNewModel: useNewModel, boxed: true });
         });
     });
     describe("Errors as Values", function() {

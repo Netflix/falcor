@@ -36,7 +36,6 @@ module.exports = function() {
                 values: [{
                     json: {
                         summary: {
-                            "$type": "group",
                             "title": "House of Cards",
                             "url": "/movies/1234"
                         }
@@ -108,7 +107,6 @@ module.exports = function() {
                             __key: "0",
                             __generation: 0,
                             summary: {
-                                "$type": "group",
                                 "title": "House of Cards",
                                 "url": "/movies/1234"
                             }
@@ -117,7 +115,6 @@ module.exports = function() {
                             __key: "1",
                             __generation: 0,
                             summary: {
-                                "$type": "group",
                                 "title": "Terminator 3",
                                 "url": "/movies/766"
                             }
@@ -185,7 +182,6 @@ module.exports = function() {
                             __key: "0",
                             __generation: 0,
                             summary: {
-                                "$type": "group",
                                 "title": "House of Cards",
                                 "url": "/movies/1234"
                             }

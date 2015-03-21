@@ -12,8 +12,6 @@ module.exports = function() {
                     {
                         "path": ["genreList", "0", "0", "summary"],
                         "value": {
-                            "$size": 10,
-                            "$type": "group",
                             "title": "House of Cards",
                             "url": "/movies/1234"
                         }
@@ -34,8 +32,6 @@ module.exports = function() {
                         videos: {
                             1234: {
                                 summary: {
-                                    "$type": "group",
-                                    "$size": 10,
                                     "title": "House of Cards",
                                     "url": "/movies/1234"
                                 }
@@ -67,8 +63,6 @@ module.exports = function() {
                     {
                         "path": ["genreList", "0", "0", "summary"],
                         "value": {
-                            "$size": 10,
-                            "$type": "group",
                             "title": "House of Cards",
                             "url": "/movies/1234"
                         }
@@ -79,8 +73,6 @@ module.exports = function() {
             AsJSON: {
                 values: [{
                     json: {
-                        "$size": 10,
-                        "$type": "group",
                         "title": "House of Cards",
                         "url": "/movies/1234"
                     }
@@ -91,20 +83,30 @@ module.exports = function() {
                 values: [{
                     jsong: {
                         genreList: {
-                            0: ["lists", "abcd"]
+                            0: {
+                                "$size": "51",
+                                "$type": "reference",
+                                "value": ["lists", "abcd"]
+                            }
                         },
                         lists: {
                             abcd: {
-                                0: ["videos", "1234"]
+                                0: {
+                                    "$size": "51",
+                                    "$type": "reference",
+                                    "value": ["videos", "1234"]
+                                }
                             }
                         },
                         videos: {
                             1234: {
                                 summary: {
-                                    "$size": 10,
-                                    "$type": "group",
-                                    "title": "House of Cards",
-                                    "url": "/movies/1234"
+                                    "$size": 51,
+                                    "$type": "sentinel",
+                                    "value": {
+                                        "title": "House of Cards",
+                                        "url": "/movies/1234"
+                                    }
                                 }
                             }
                         }
@@ -120,8 +122,6 @@ module.exports = function() {
                             0: {
                                 0: {
                                     summary: {
-                                        "$size": 10,
-                                        "$type": "group",
                                         "title": "House of Cards",
                                         "url": "/movies/1234",
                                     }
@@ -144,8 +144,6 @@ module.exports = function() {
                     {
                         "path": ["genreList", "0", "1", "summary"],
                         "value": {
-                            "$size": 10,
-                            "$type": "group",
                             "title": "Terminator 3",
                             "url": "/movies/766"
                         }
@@ -166,8 +164,6 @@ module.exports = function() {
                         videos: {
                             766: {
                                 summary: {
-                                    "$type": "group",
-                                    "$size": 10,
                                     "title": "Terminator 3",
                                     "url": "/movies/766"
                                 }
@@ -199,8 +195,6 @@ module.exports = function() {
                     {
                         "path": ["genreList", "0", "1", "summary"],
                         "value": {
-                            "$size": 10,
-                            "$type": "group",
                             "title": "Terminator 3",
                             "url": "/movies/766"
                         }
@@ -211,8 +205,6 @@ module.exports = function() {
             AsJSON: {
                 values: [{
                     json: {
-                        "$size": 10,
-                        "$type": "group",
                         "title": "Terminator 3",
                         "url": "/movies/766"
                     }
@@ -223,20 +215,30 @@ module.exports = function() {
                 values: [{
                     jsong: {
                         genreList: {
-                            0: ["lists", "abcd"]
+                            0: {
+                                "$size": "51",
+                                "$type": "reference",
+                                "value": ["lists", "abcd"]
+                            }
                         },
                         lists: {
                             abcd: {
-                                1: ["videos", "766"]
+                                1: {
+                                    "$size": "51",
+                                    "$type": "reference",
+                                    "value": ["videos", "766"]
+                                }
                             }
                         },
                         videos: {
                             766: {
                                 summary: {
-                                    "$type": "group",
-                                    "$size": 10,
-                                    "title": "Terminator 3",
-                                    "url": "/movies/766"
+                                    "$size": 51,
+                                    "$type": "sentinel",
+                                    "value": {
+                                        "title": "Terminator 3",
+                                        "url": "/movies/766"
+                                    }
                                 }
                             }
                         }
@@ -252,8 +254,6 @@ module.exports = function() {
                             0: {
                                 1: {
                                     summary: {
-                                        "$size": 10,
-                                        "$type": "group",
                                         "title": "Terminator 3",
                                         "url": "/movies/766"
                                     }
@@ -276,8 +276,6 @@ module.exports = function() {
                     {
                         "path": ["genreList", "0", "2", "summary"],
                         "value": {
-                            "$size": 10,
-                            "$type": "group",
                             "title": "Kindergarten Cop",
                             "url": "/movies/7531"
                         }
@@ -288,18 +286,24 @@ module.exports = function() {
                 query: [{
                     jsong: {
                         genreList: {
-                            0: ["lists", "abcd"]
+                            0: {
+                                "$size": "51",
+                                "$type": "reference",
+                                "value": ["lists", "abcd"]
+                            }
                         },
                         lists: {
                             abcd: {
-                                2: ["videos", "7531"]
+                                2: {
+                                    "$size": "51",
+                                    "$type": "reference",
+                                    "value": ["videos", "7531"]
+                                }
                             }
                         },
                         videos: {
                             7531: {
                                 summary: {
-                                    "$type": "group",
-                                    "$size": 10,
                                     "title": "Kindergarten Cop",
                                     "url": "/movies/7531"
                                 }
@@ -331,8 +335,6 @@ module.exports = function() {
                     {
                         "path": ["genreList", "0", "2", "summary"],
                         "value": {
-                            "$size": 10,
-                            "$type": "group",
                             "title": "Kindergarten Cop",
                             "url": "/movies/7531"
                         }
@@ -343,8 +345,6 @@ module.exports = function() {
             AsJSON: {
                 values: [{
                     json: {
-                        "$size": 10,
-                        "$type": "group",
                         "title": "Kindergarten Cop",
                         "url": "/movies/7531"
                     }
@@ -355,20 +355,30 @@ module.exports = function() {
                 values: [{
                     jsong: {
                         genreList: {
-                            0: ["lists", "abcd"]
+                            0: {
+                                "$size": "51",
+                                "$type": "reference",
+                                "value": ["lists", "abcd"]
+                            }
                         },
                         lists: {
                             abcd: {
-                                2: ["videos", "7531"]
+                                2: {
+                                    "$size": "51",
+                                    "$type": "reference",
+                                    "value": ["videos", "7531"]
+                                }
                             }
                         },
                         videos: {
                             7531: {
                                 summary: {
-                                    "$type": "group",
-                                    "$size": 10,
-                                    "title": "Kindergarten Cop",
-                                    "url": "/movies/7531"
+                                    "$size": 51,
+                                    "$type": "sentinel",
+                                    "value": {
+                                        "title": "Kindergarten Cop",
+                                        "url": "/movies/7531"
+                                    }
                                 }
                             }
                         }
@@ -384,8 +394,6 @@ module.exports = function() {
                             0: {
                                 2: {
                                     summary: {
-                                        "$size": 10,
-                                        "$type": "group",
                                         "title": "Kindergarten Cop",
                                         "url": "/movies/7531",
                                     }
@@ -408,8 +416,6 @@ module.exports = function() {
                     {
                         "path": ["genreList", "0", "3", "summary"],
                         "value": {
-                            "$size": 10,
-                            "$type": "group",
                             "title": "Commando",
                             "url": "/movies/6420"
                         }
@@ -420,18 +426,24 @@ module.exports = function() {
                 query: [{
                     jsong: {
                         genreList: {
-                            0: ["lists", "abcd"]
+                            0: {
+                                "$size": "51",
+                                "$type": "reference",
+                                "value": ["lists", "abcd"]
+                            }
                         },
                         lists: {
                             abcd: {
-                                3: ["videos", "6420"]
+                                3: {
+                                    "$size": "51",
+                                    "$type": "reference",
+                                    "value": ["videos", "6420"]
+                                }
                             }
                         },
                         videos: {
                             6420: {
                                 summary: {
-                                    "$type": "group",
-                                    "$size": 10,
                                     "title": "Commando",
                                     "url": "/movies/6420"
                                 }
@@ -463,8 +475,6 @@ module.exports = function() {
                     {
                         "path": ["genreList", "0", "3", "summary"],
                         "value": {
-                            "$size": 10,
-                            "$type": "group",
                             "title": "Commando",
                             "url": "/movies/6420"
                         }
@@ -475,8 +485,6 @@ module.exports = function() {
             AsJSON: {
                 values: [{
                     json: {
-                        "$size": 10,
-                        "$type": "group",
                         "title": "Commando",
                         "url": "/movies/6420"
                     }
@@ -487,20 +495,30 @@ module.exports = function() {
                 values: [{
                     jsong: {
                         genreList: {
-                            0: ["lists", "abcd"]
+                            0: {
+                                "$size": "51",
+                                "$type": "reference",
+                                "value": ["lists", "abcd"]
+                            }
                         },
                         lists: {
                             abcd: {
-                                3: ["videos", "6420"]
+                                3: {
+                                    "$size": "51",
+                                    "$type": "reference",
+                                    "value": ["videos", "6420"]
+                                }
                             }
                         },
                         videos: {
                             6420: {
                                 summary: {
-                                    "$type": "group",
-                                    "$size": 10,
-                                    "title": "Commando",
-                                    "url": "/movies/6420"
+                                    "$size": 51,
+                                    "$type": "sentinel",
+                                    "value": {
+                                        "title": "Commando",
+                                        "url": "/movies/6420"
+                                    }
                                 }
                             }
                         }
@@ -516,8 +534,6 @@ module.exports = function() {
                             0: {
                                 3: {
                                     summary: {
-                                        "$size": 10,
-                                        "$type": "group",
                                         "title": "Commando",
                                         "url": "/movies/6420",
                                     }
@@ -566,8 +582,6 @@ module.exports = function() {
                     {
                         "path": ["genreList", "10", null],
                         "value": {
-                            "$size": 10,
-                            "$type": "group",
                             "title": "House of Cards",
                             "url": "/movies/1234"
                         }
@@ -578,8 +592,6 @@ module.exports = function() {
             AsJSON: {
                 values: [{
                     json: {
-                        "$size": 10,
-                        "$type": "group",
                         "title": "House of Cards",
                         "url": "/movies/1234"
                     }
@@ -590,15 +602,21 @@ module.exports = function() {
                 values: [{
                     jsong: {
                         genreList: {
-                            10: ["videos", "1234", "summary"]
+                            10: {
+                                "$size": "51",
+                                "$type": "reference",
+                                "value": ["videos", "1234", "summary"]
+                            }
                         },
                         videos: {
                             1234: {
                                 summary: {
-                                    "$type": "group",
-                                    "$size": 10,
-                                    "title": "House of Cards",
-                                    "url": "/movies/1234"
+                                    "$size": 51,
+                                    "$type": "sentinel",
+                                    "value": {
+                                        "title": "House of Cards",
+                                        "url": "/movies/1234"
+                                    }
                                 }
                             }
                         }
@@ -614,8 +632,6 @@ module.exports = function() {
                     json: {
                         genreList: {
                             10: {
-                                "$size": 10,
-                                "$type": "group",
                                 "title": "House of Cards",
                                 "url": "/movies/1234",
                             }
@@ -651,8 +667,6 @@ module.exports = function() {
                 values: [{
                     "path": ["genreList", "1", "0", "summary"],
                     "value": {
-                        "$size": 10,
-                        "$type": "group",
                         "title": "Running Man",
                         "url": "/movies/553"
                     }
@@ -662,8 +676,6 @@ module.exports = function() {
             AsJSON: {
                 values: [{
                     json: {
-                        "$size": 10,
-                        "$type": "group",
                         "title": "Running Man",
                         "url": "/movies/553"
                     }
@@ -674,21 +686,35 @@ module.exports = function() {
                 values: [{
                     jsong: {
                         genreList: {
-                            1: ["lists", "my-list"]
+                            1: {
+                                "$size": "51",
+                                "$type": "reference",
+                                "value": ["lists", "my-list"]
+                            }
                         },
                         lists: {
                             "1x5x": {
-                                0: ["videos", "553"]
+                                0: {
+                                    "$size": "51",
+                                    "$type": "reference",
+                                    "value": ["videos", "553"]
+                                }
                             },
-                            "my-list": ["lists", "1x5x"]
+                            "my-list": {
+                                "$size": "51",
+                                "$type": "reference",
+                                "value": ["lists", "1x5x"]
+                            }
                         },
                         videos: {
                             553: {
                                 summary: {
-                                    "$type": "group",
-                                    "$size": 10,
-                                    "title": "Running Man",
-                                    "url": "/movies/553"
+                                    "$size": 51,
+                                    "$type": "sentinel",
+                                    "value": {
+                                        "title": "Running Man",
+                                        "url": "/movies/553"
+                                    }
                                 }
                             }
                         }
@@ -706,8 +732,6 @@ module.exports = function() {
                             1: {
                                 0: {
                                     summary: {
-                                        "$size": 10,
-                                        "$type": "group",
                                         "title": "Running Man",
                                         "url": "/movies/553",
                                     }
@@ -746,8 +770,6 @@ module.exports = function() {
                     {
                         "path": ["genreList", "1", "0", "summary"],
                         "value": {
-                            "$size": 10,
-                            "$type": "group",
                             "title": "Running Man",
                             "url": "/movies/553"
                         }
@@ -758,8 +780,6 @@ module.exports = function() {
             AsJSON: {
                 values: [{
                     json: {
-                        "$size": 10,
-                        "$type": "group",
                         "title": "Running Man",
                         "url": "/movies/553"
                     }
@@ -770,21 +790,35 @@ module.exports = function() {
                 values: [{
                     jsong: {
                         genreList: {
-                            1: ["lists", "my-list"]
+                            1: {
+                                "$size": "51",
+                                "$type": "reference",
+                                "value": ["lists", "my-list"]
+                            }
                         },
                         lists: {
-                            "my-list": ["lists", "1x5x"],
+                            "my-list": {
+                                "$size": "51",
+                                "$type": "reference",
+                                "value": ["lists", "1x5x"]
+                            },
                             "1x5x": {
-                                0: ["videos", "553"]
+                                0: {
+                                    "$size": "51",
+                                    "$type": "reference",
+                                    "value": ["videos", "553"]
+                                }
                             }
                         },
                         videos: {
                             553: {
                                 summary: {
-                                    "$type": "group",
-                                    "$size": 10,
-                                    "title": "Running Man",
-                                    "url": "/movies/553"
+                                    "$size": 51,
+                                    "$type": "sentinel",
+                                    "value": {
+                                        "title": "Running Man",
+                                        "url": "/movies/553"
+                                    }
                                 }
                             }
                         }
@@ -802,8 +836,6 @@ module.exports = function() {
                             1: {
                                 0: {
                                     summary: {
-                                        "$size": 10,
-                                        "$type": "group",
                                         "title": "Running Man",
                                         "url": "/movies/553",
                                     }
@@ -863,12 +895,24 @@ module.exports = function() {
                 values: [{
                     jsong: {
                         genreList: {
-                            1: ["lists", "my-list"]
+                            1: {
+                                "$size": "51",
+                                "$type": "reference",
+                                "value": ["lists", "my-list"]
+                            }
                         },
                         lists: {
-                            "my-list": ["lists", "1x5x"],
+                            "my-list": {
+                                "$size": "51",
+                                "$type": "reference",
+                                "value": ["lists", "1x5x"]
+                            },
                             "1x5x": {
-                                0: ["videos", "553"]
+                                0: {
+                                    "$size": "51",
+                                    "$type": "reference",
+                                    "value": ["videos", "553"]
+                                }
                             }
                         }
                     },
@@ -883,7 +927,11 @@ module.exports = function() {
                     json: {
                         genreList: {
                             1: {
-                                0: ["videos", "553"]
+                                0: {
+                                    "$size": "51",
+                                    "$type": "reference",
+                                    "value": ["videos", "553"]
+                                }
                             }
                         }
                     }
@@ -899,8 +947,6 @@ module.exports = function() {
                 query: [{
                     "path": ["genreList", "3", "0", "summary"],
                     "value": {
-                        "$size": 10,
-                        "$type": "group",
                         "title": "Terminator 2",
                         "url": "/movies/333"
                     }
@@ -929,8 +975,6 @@ module.exports = function() {
                 values: [{
                     "path": ["genreList", "3", "0", "summary"],
                     "value": {
-                        "$size": 10,
-                        "$type": "group",
                         "title": "Terminator 2",
                         "url": "/movies/333"
                     }
@@ -940,8 +984,6 @@ module.exports = function() {
             AsJSON: {
                 values: [{
                     json: {
-                        "$size": 10,
-                        "$type": "group",
                         "title": "Terminator 2",
                         "url": "/movies/333"
                     }
@@ -952,20 +994,30 @@ module.exports = function() {
                 values: [{
                     jsong: {
                         genreList: {
-                            3: ["lists", "sentinel-list"]
+                            3: {
+                                "$size": "51",
+                                "$type": "reference",
+                                "value": ["lists", "sentinel-list"]
+                            }
                         },
                         lists: {
                             "sentinel-list": {
-                                "0": ["videos", "333"]
+                                "0": {
+                                    "$size": 52,
+                                    "$type": "reference",
+                                    "value": ["videos", "333"]
+                                }
                             }
                         },
                         videos: {
                             333: {
                                 summary: {
-                                    "$size": 10,
-                                    "$type": "group",
-                                    "title": "Terminator 2",
-                                    "url": "/movies/333"
+                                    "$size": 51,
+                                    "$type": "sentinel",
+                                    "value": {
+                                        "title": "Terminator 2",
+                                        "url": "/movies/333"
+                                    }
                                 }
                             }
                         }
@@ -983,8 +1035,6 @@ module.exports = function() {
                             3: {
                                 0: {
                                     summary: {
-                                        "$size": 10,
-                                        "$type": "group",
                                         "title": "Terminator 2",
                                         "url": "/movies/333",
                                     }
@@ -1030,8 +1080,6 @@ module.exports = function() {
                 values: [{
                         "path": ["genreList", "7", "0", "summary"],
                         "value": {
-                            "$size": 10,
-                            "$type": "group",
                             "title": "Total Recall (Without Colin Farrell)",
                             "url": "/movies/733"
                         }
@@ -1042,8 +1090,6 @@ module.exports = function() {
             AsJSON: {
                 values: [{
                     json: {
-                        "$size": 10,
-                        "$type": "group",
                         "title": "Total Recall (Without Colin Farrell)",
                         "url": "/movies/733"
                     }
@@ -1054,21 +1100,35 @@ module.exports = function() {
                 values: [{
                     jsong: {
                         genreList: {
-                            7: ["lists", "to-sentinel-list"]
+                            7: {
+                                "$size": "51",
+                                "$type": "reference",
+                                "value": ["lists", "to-sentinel-list"]
+                            }
                         },
                         lists: {
                             "sentinel-list-2": {
-                                0: ["videos", "733"]
+                                0: {
+                                    "$size": 52,
+                                    "$type": "reference",
+                                    "value": ["videos", "733"]
+                                }
                             },
-                            "to-sentinel-list": ["lists", "sentinel-list-2"]
+                            "to-sentinel-list": {
+                                "$size": 52,
+                                "$type": "reference",
+                                "value": ["lists", "sentinel-list-2"]
+                            }
                         },
                         videos: {
                             733: {
                                 summary: {
-                                    "$size": 10,
-                                    "$type": "group",
-                                    "title": "Total Recall (Without Colin Farrell)",
-                                    "url": "/movies/733"
+                                    "$size": 51,
+                                    "$type": "sentinel",
+                                    "value": {
+                                        "title": "Total Recall (Without Colin Farrell)",
+                                        "url": "/movies/733"
+                                    }
                                 }
                             }
                         }
@@ -1086,8 +1146,6 @@ module.exports = function() {
                             7: {
                                 0: {
                                     summary: {
-                                        "$size": 10,
-                                        "$type": "group",
                                         "title": "Total Recall (Without Colin Farrell)",
                                         "url": "/movies/733",
                                     }
@@ -1118,22 +1176,14 @@ module.exports = function() {
             AsValues: {
                 errors: [{
                     "path": ["genreList", "5", null],
-                    "value": {
-                        "$size": 50,
-                        "$type": "error",
-                        "message": "House of Pain"
-                    }
+                    "value": "House of Pain"
                 }]
             },
 
             AsJSON: {
                 errors: [{
                     "path": ["genreList", "5", null],
-                    "value": {
-                        "$size": 50,
-                        "$type": "error",
-                        "message": "House of Pain"
-                    }
+                    "value": "House of Pain"
                 }]
             },
 
@@ -1142,15 +1192,23 @@ module.exports = function() {
                     paths: [["genreList", "5", null]],
                     jsong: {
                         "genreList": {
-                            "5": ["lists", "to-error-list"]
+                            "5": {
+                                "$size": "51",
+                                "$type": "reference",
+                                "value": ["lists", "to-error-list"]
+                            }
                         },
                         "lists": {
                             "error-list-2": {
-                                "$size": 50,
+                                "$size": 51,
                                 "$type": "error",
-                                "message": "House of Pain"
+                                "value": "House of Pain"
                             },
-                            "to-error-list": ["lists", "error-list-2"]
+                            "to-error-list": {
+                                "$size": "51",
+                                "$type": "reference",
+                                "value": ["lists", "error-list-2"]
+                            }
                         }
                     }
                 }]
@@ -1159,11 +1217,7 @@ module.exports = function() {
             AsPathMap: {
                 errors: [{
                     "path": ["genreList", "5", null],
-                    "value": {
-                        "$size": 50,
-                        "$type": "error",
-                        "message": "House of Pain"
-                    }
+                    "value": "House of Pain"
                 }]
             }
         },
@@ -1189,22 +1243,14 @@ module.exports = function() {
             AsValues: {
                 errors: [{
                     "path": ["genreList", "2", null],
-                    "value": {
-                        "$size": 50,
-                        "$type": "error",
-                        "message": "Red is the new Black"
-                    }
+                    "value": "Red is the new Black"
                 }]
             },
 
             AsJSON: {
                 errors: [{
                     "path": ["genreList", "2", null],
-                    "value": {
-                        "$size": 50,
-                        "$type": "error",
-                        "message": "Red is the new Black"
-                    }
+                    "value": "Red is the new Black"
                 }]
             },
 
@@ -1212,13 +1258,17 @@ module.exports = function() {
                 values: [{
                     jsong: {
                         "genreList": {
-                            "2": ["lists", "error-list"]
+                            "2": {
+                                "$size": "51",
+                                "$type": "reference",
+                                "value": ["lists", "error-list"]
+                            }
                         },
                         "lists": {
                             "error-list": {
-                                "$size": 50,
+                                "$size": 51,
                                 "$type": "error",
-                                "message": "Red is the new Black"
+                                "value": "Red is the new Black"
                             }
                         }
                     },
@@ -1231,11 +1281,7 @@ module.exports = function() {
             AsPathMap: {
                 errors: [{
                     "path": ["genreList", "2", null],
-                    "value": {
-                        "$size": 50,
-                        "$type": "error",
-                        "message": "Red is the new Black"
-                    }
+                    "value": "Red is the new Black"
                 }]
             }
         },
@@ -1273,7 +1319,11 @@ module.exports = function() {
                 values: [{
                     jsong: {
                         genreList: {
-                            'inner-reference': ['movies', 1234]
+                            'inner-reference': {
+                                "$size": "51",
+                                "$type": "reference",
+                                "value": ['movies', 1234]
+                            }
                         },
                         movies: ['videos']
                     },
@@ -1317,22 +1367,14 @@ module.exports = function() {
             AsValues: {
                 errors: [{
                     "path": ["genreList", "2", null],
-                    "value": {
-                        "$size": 50,
-                        "$type": "error",
-                        "message": "Red is the new Black"
-                    }
+                    "value": "Red is the new Black"
                 }]
             },
 
             AsJSON: {
                 errors: [{
                     "path": ["genreList", "2", null],
-                    "value": {
-                        "$size": 50,
-                        "$type": "error",
-                        "message": "Red is the new Black"
-                    }
+                    "value": "Red is the new Black"
                 }]
             },
 
@@ -1340,13 +1382,17 @@ module.exports = function() {
                 values: [{
                     jsong: {
                         "genreList": {
-                            "2": ["lists", "error-list"]
+                            "2": {
+                                "$size": "51",
+                                "$type": "reference",
+                                "value": ["lists", "error-list"]
+                            }
                         },
                         "lists": {
                             "error-list": {
-                                "$size": 50,
+                                "$size": 51,
                                 "$type": "error",
-                                "message": "Red is the new Black"
+                                "value": "Red is the new Black"
                             }
                         }
                     },
@@ -1359,11 +1405,7 @@ module.exports = function() {
             AsPathMap: {
                 errors: [{
                     "path": ["genreList", "2", null],
-                    "value": {
-                        "$size": 50,
-                        "$type": "error",
-                        "message": "Red is the new Black"
-                    }
+                    "value": "Red is the new Black"
                 }]
             }
         },
@@ -1477,7 +1519,7 @@ module.exports = function() {
             ],
 
             optimizedMissingPaths: [
-                ["videos", "expiredBranchByTimestamp", "summary"]
+                ["lists", "missing-branch-link", "0"]
             ],
 
             AsValues: {

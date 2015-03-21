@@ -1,7 +1,7 @@
 {
   "name": "falcor",
   "version": "0.0.3",
-  "main": "dist/Falcor.js",
+  "main": "index-node",
   "scripts": {
     "test": "./node_modules/mocha/bin/_mocha ./test/index"
   },
@@ -68,6 +68,6 @@
   "dependencies": {
     "linklocal": "^2.5.1",
     "rx": "^2.3.25",
-    "operations": "file:./lib/operations"
+    "node-test": "file:./node-test"
   }
 }

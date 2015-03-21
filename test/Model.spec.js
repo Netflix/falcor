@@ -7,10 +7,11 @@ describe("Model", function() {
     it("should construct a new Model", function() {
         new jsong.Model();
     });
+
     // require("./request/RequestQueue.spec");
     // require("./schedulers/schedulers.spec");
 
-    describe("#get", function() {
+    describe.only("#get", function() {
         require("./get/get.spec");
     });
     

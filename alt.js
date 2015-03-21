@@ -12,7 +12,8 @@ prototype._getPathMapsAsValues = alternativeGet.getAsValues;
 prototype._getPathMapsAsJSON = alternativeGet.getAsJSON;
 prototype._getPathMapsAsPathMap = alternativeGet.getAsPathMap;
 prototype._getPathMapsAsJSONG = alternativeGet.getAsJSONG;
-prototype._setPathMapsAsValues = alternativeGet.setPathMapsAsValues;
+// prototype._setPathMapsAsValues = alternativeGet.setPathMapsAsValues;
+prototype._setCache = alternativeGet.setCache;
 
 module.exports = falcor;
 

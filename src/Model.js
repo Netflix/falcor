@@ -20,7 +20,6 @@ function Model(options) {
     this._scheduler = new Schedulers.ImmediateScheduler();
     this._request = new RequestQueue(this, this._scheduler);
     this._errorSelector = options.errorSelector || Model.prototype._errorSelector;
-    this._cache = {};
     this._router = options.router;
     this._root = options.root || {
         expired: [],
@@ -29,6 +28,8 @@ function Model(options) {
     };
     if (options.cache && typeof options.cache === "object") {
         this.setCache(options.cache);
+    } else {
+        this._cache = {};
     }
     this._path = [];
 }
@@ -94,7 +95,7 @@ Model.prototype = {
         });
     },
     setCache: function(cache) {
-        return this._setPathMapsAsValues(this, [cache], undefined, this._errorSelector, []);
+        return (this._cache = {}) && this._setCache(this, cache);
     },
     getBoundValue: function() {
         return this.syncCheck("getBoundValue") && this._getBoundValue(this);

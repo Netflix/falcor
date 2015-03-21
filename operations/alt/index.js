@@ -4,5 +4,6 @@ module.exports = {
     getAsJSONG: require('./get/getAsJSONG')(walk),
     getAsValues: require('./get/getAsValues')(walk),
     getAsPathMap: require('./get/getAsPathMap')(walk),
-    setPathMapsAsValues: require('./legacy_setPathMapsAsValues')
+    setPathMapsAsValues: require('./legacy_setPathMapsAsValues'),
+    setCache: require('./legacy_setCache')
 };
