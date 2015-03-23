@@ -1,9 +1,9 @@
-var walk = require('./getWalk');
+var walk = require('./get/getWalk');
 module.exports = {
-    getAsJSON: require('./../alt/get/getAsJSON')(walk),
-    getAsJSONG: require('./../alt/get/getAsJSONG')(walk),
-    getAsValues: require('./../alt/get/getAsValues')(walk),
-    getAsPathMap: require('./../alt/get/getAsPathMap')(walk),
-    setPathMapsAsValues: require('./../alt/legacy_setPathMapsAsValues')
+    getAsJSON: require('./get/getAsJSON')(walk),
+    getAsJSONG: require('./get/getAsJSONG')(walk),
+    getAsValues: require('./get/getAsValues')(walk),
+    getAsPathMap: require('./get/getAsPathMap')(walk),
+    setCache: require('./legacy_setCache')
 };
 

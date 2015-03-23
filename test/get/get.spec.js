@@ -120,12 +120,12 @@ function execute(useNewModel) {
             describe("should report a missing double reference.", function() {
                 runGetTests(getModel(useNewModel), References().toMissingReference, {useNewModel: useNewModel});
             });
-            describe("should report a missing path in branch key position.", function() {
+            describe.only("should report a missing path in branch key position.", function() {
                 runGetTests(getModel(useNewModel), References().referenceBranchIsExpired, {useNewModel: useNewModel});
             });
         });
         describe("Expired", function() {
-            describe("should report a missing requested path when reference is expired.", function() {
+            describe.only("should report a missing requested path when reference is expired.", function() {
                 runGetTests(getModel(useNewModel), References().referenceExpired, {useNewModel: useNewModel});
             });
             xdescribe("should report a missing requested path when a hardlinked reference becomes expired.", function() {

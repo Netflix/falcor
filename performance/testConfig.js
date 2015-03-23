@@ -1,13 +1,10 @@
-var alt = require('./bin/alt');
 var sentinel = require('./bin/sentinel');
-var paulcor = require('./../index-node');
+var paulcor = require('./bin/node');
 var Cache = require('./../test/data/Cache');
 var CacheSentinel = require('./../test/data/CacheAlternative');
 
-var E_altModel = new alt.Model();
 var E_sentinelModel = new sentinel.Model();
 var E_paulcorModel = new paulcor.Model();
-var altModel = new alt.Model({cache: Cache()});
 var sentinelModel = new sentinel.Model({cache: CacheSentinel()});
 var paulcorModel = new paulcor.Model({cache: Cache()});
 var noOp = function() {};
@@ -146,10 +143,8 @@ module.exports = function() {
         config: config,
         models: {
             sentinel: sentinelModel,
-            alt: altModel,
             paulcor: paulcorModel,
             emptySentinel: E_sentinelModel,
-            emptyAlt: E_altModel,
             emptyPaulcor: E_paulcorModel
         },
         repeatInConfig: repeatInConfig,

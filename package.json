@@ -20,9 +20,9 @@
         "out": "sentinel.js",
         "standalone": "sentinel"
       },
-      "alt.js": {
-        "out": "alt.js",
-        "standalone": "alt"
+      "index-node.js": {
+          "out": "node.js",
+          "standalone": "node"
       }
     }
   },

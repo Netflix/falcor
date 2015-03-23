@@ -122,7 +122,6 @@ var Cache = function() {
             "to-expired-list": {
                 "$size": 52,
                 "$type": "reference",
-                "$expires": expiredTimestamp,
                 "value": ["lists", "expired-list"]
             },
             "future-expired-list": {

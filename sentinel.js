@@ -7,11 +7,11 @@ prototype._getValueSync = null;
 prototype._getPathSetsAsValues = sentinelGet.getAsValues;
 prototype._getPathSetsAsJSON = sentinelGet.getAsJSON;
 prototype._getPathSetsAsPathMap = sentinelGet.getAsPathMap;
-prototype._getPathSetsAsJSONG = sentinelGet.getAsJSONG;
+prototype._getPathSetsAsJSONG = require("./lib/operations/get-pathsets-json-graph");
 prototype._getPathMapsAsValues = sentinelGet.getAsValues;
 prototype._getPathMapsAsJSON = sentinelGet.getAsJSON;
 prototype._getPathMapsAsPathMap = sentinelGet.getAsPathMap;
 prototype._getPathMapsAsJSONG = sentinelGet.getAsJSONG;
-prototype._setPathMapsAsValues = sentinelGet.setPathMapsAsValues;
+prototype._setCache = sentinelGet.setCache;
 
 module.exports = falcor;

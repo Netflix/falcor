@@ -1,12 +1,12 @@
 var followReference = require('./followReference');
-var onError = require('../alt/get/onError');
-var onMissing = require('../alt/get/onMissing');
+var onError = require('./onError');
+var onMissing = require('./onMissing');
 var onValue = require('./onValue');
-var lru = require('../alt/util/lru');
-var hardLink = require('../alt/util/hardlink');
+var lru = require('../util/lru');
+var hardLink = require('../util/hardlink');
+var support = require('../util/support');
 var removeHardlink = hardLink.remove;
 var splice = lru.splice;
-var support = require('../alt/util/support');
 var isExpired = support.isExpired;
 var permuteKey = support.permuteKey;
 
@@ -162,9 +162,9 @@ function evaluateNode(model, curr, pathOrJSON, depth, seedOrFunction, requestedP
             }
             if (outputFormat === 'JSONG') {
                 onValue(model, curr, pathOrJSON, depth, seedOrFunction, outerResults, requestedPath, optimizedPath, positionalInfo, outputFormat);
-                onError(model, curr, currValue, requestedPath, null, outerResults);
+                onError(model, curr, requestedPath, null, outerResults);
             } else {
-                onError(model, curr, currValue, requestedPath, optimizedPath, outerResults);
+                onError(model, curr, requestedPath, optimizedPath, outerResults);
             }
         }
 

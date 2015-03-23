@@ -41,10 +41,11 @@ module.exports = function onValue(model, node, path, depth, seedOrFunction, oute
                     curr = curr[k];
                 }
                 k = permuteRequested[i];
+                var value = node.$type === 'reference' ? clone(model, node) : node.value;
                 if (k !== null) {
-                    curr[k] = node.value;
+                    curr[k] = value;
                 } else {
-                    prev[prevK] = node.value;
+                    prev[prevK] = value;
                 }
             }
             break;

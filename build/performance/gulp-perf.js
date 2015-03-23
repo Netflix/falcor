@@ -45,7 +45,7 @@ function browser() {
 function runner() {
     return gulp.
         src(['performance/bin/assembledPerf.js', 'performance/device.js']).
-        pipe(concat({path: 'deviceRunner.js'})).
+        pipe(concat({path: 'device.js'})).
         pipe(gulp.dest('performance/bin'));
 }
 

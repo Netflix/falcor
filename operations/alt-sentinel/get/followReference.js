@@ -1,7 +1,7 @@
-var hardLink = require('./../alt/util/hardlink');
+var hardLink = require('./../util/hardlink');
 var createHardlink = hardLink.create;
 var onValue = require('./onValue');
-var isExpired = require('./../alt/util/support').isExpired;
+var isExpired = require('./../util/support').isExpired;
 
 function followReference(model, root, node, referenceContainer, reference, seed, outputFormat) {
 
