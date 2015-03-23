@@ -1,4 +1,4 @@
-var jsong = require("../../../bin/Falcor");
+var jsong = require("../../../index");
 var R = require('falcor-router');
 var Routes = require('../../data/routes');
 var Rx = require("rx");

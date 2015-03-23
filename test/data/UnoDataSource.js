@@ -1,6 +1,6 @@
 var Rx = require("rx");
 var Observable = Rx.Observable;
-var jsong = require("../../bin/Falcor.js");
+var jsong = require("../../index.js");
 var UnoDataSource = module.exports = function(cache) {
     this.model = new jsong.Model({cache: cache});
 };

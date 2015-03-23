@@ -1,4 +1,4 @@
-var jsong = require("../../bin/Falcor");
+var jsong = require("../../index");
 var Model = jsong.Model;
 var Rx = require("rx");
 var LocalDataSource = require("../data/LocalDataSource");

@@ -1,5 +1,5 @@
 var Rx = require("rx");
-var jsong = require("../bin/Falcor");
+var jsong = require("./../index");
 var chai = require("chai");
 var expect = chai.expect;
 

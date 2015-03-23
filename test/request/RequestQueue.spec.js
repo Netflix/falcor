@@ -1,4 +1,4 @@
-var jsong = require("../../bin/Falcor");
+var jsong = require("../../index");
 var ImmediateScheduler = jsong.ImmediateScheduler;
 var TimeoutScheduler = jsong.TimeoutScheduler;
 var RequestQueue = jsong.RequestQueue;

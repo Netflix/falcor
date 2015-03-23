@@ -1,4 +1,4 @@
-var jsong = require("../bin/Falcor");
+var jsong = require("./../index");
 var Model = jsong.Model;
 var inspect = require("util").inspect;
 var chai = require("chai");

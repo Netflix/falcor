@@ -1,6 +1,6 @@
 var Rx = require("rx");
 var Observable = Rx.Observable;
-var jsong = require("../../bin/Falcor.js");
+var jsong = require("../../index.js");
 var _ = require("lodash");
 var noOp = function() {};
 

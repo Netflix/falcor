@@ -1,4 +1,4 @@
-var jsong = require("../bin/Falcor");
+var jsong = require("./../index");
 var _ = require("lodash");
 var Rx = require("rx");
 var testRunner = require("./testRunner");

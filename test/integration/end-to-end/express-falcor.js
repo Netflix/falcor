@@ -2,7 +2,7 @@ var express = require('express');
 var app = express();
 var FalcorServer = require('falcor-server');
 var Cache = require('../../data/Cache');
-var falcor = require('../../../bin/Falcor');
+var falcor = require('../../../index');
 var Rx = require('rx');
 
 var serverModel = new falcor.Model({cache: Cache()});

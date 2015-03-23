@@ -1,6 +1,6 @@
 var chai = require("chai");
 var expect = chai.expect;
-var jsong = require("../../bin/Falcor");
+var jsong = require("../../index");
 var ImmediateScheduler = jsong.ImmediateScheduler;
 var TimeoutScheduler = jsong.TimeoutScheduler;
 

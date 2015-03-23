@@ -2,7 +2,7 @@ var XMLHttpRequest = require('xmlhttprequest').XMLHttpRequest;
 global.XMLHttpRequest = XMLHttpRequest;
 var XMLHttpSource = require('falcor-browser');
 var source = new XMLHttpSource('http://localhost:1337/falcor');
-var falcor = require('../../../bin/Falcor');
+var falcor = require('../../../index');
 var noOp = function() {};
 
 describe("End-to-End", function() {

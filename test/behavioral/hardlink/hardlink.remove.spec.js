@@ -1,4 +1,4 @@
-var jsong = require("../../../bin/Falcor");
+var jsong = require("../../../index");
 var Model = jsong.Model;
 var expect = require('chai').expect;
 var Cache = require("../../data/Cache");
