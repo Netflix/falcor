@@ -7,6 +7,7 @@ var Cache = require("./data/Cache");
 var LocalDataSource = require("./data/LocalDataSource");
 var _ = require("lodash");
 var noOp = function() {};
+var Rx = require('rx');
 
 module.exports = {
     validateData: validateData,
@@ -66,6 +67,14 @@ module.exports = {
         }
 
         return obs;
+    },
+    toRxObs: function(fObs) {
+        return Rx.Observable.create(function(observer) {
+            return fObs.subscribe(
+                observer.onNext.bind(observer),
+                observer.onError.bind(observer),
+                observer.onCompleted.bind(observer));
+        });
     },
     jsongBindException: 'It is not legal to use the JSON Graph format from a bound Model. JSON Graph format can only be used from a root model.'
 };

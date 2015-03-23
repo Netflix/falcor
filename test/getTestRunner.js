@@ -69,8 +69,10 @@ function getTestRunner(model, data, options) {
                     case 'AsPathMap':
                         break;
                     case 'AsJSON':
+                        debugger
                         break;
                     case 'AsJSONG':
+                        debugger
                         break;
                     case 'AsValues':
                         break;
@@ -144,20 +146,26 @@ function async(obs, model, data, options) {
         var n = observer.onNext.bind(observer);
         var e = observer.onError.bind(observer);
         var c = observer.onCompleted.bind(observer);
-        obs.
+        debugger
+
+        // Converting a falcor obs to an rx obs.
+        testRunner.toRxObs(obs).
             doOnNext(function(x) {
+                debugger
                 if (options.onNextExpected) {
                     var expected = options.onNextExpected.values[idx++];
                     testRunner.compare(expected, x);
                 }
             }).
             doOnError(function(err) {
+                debugger
                 errorThrown = true;
                 if (options.errors) {
                     testRunner.compare(options.errors, err);
                 }
             }).
             doOnCompleted(function() {
+                debugger
                 if (options.onNextExpected) {
                     expect(idx, "The amount of onNexts did not meet expected").to.equal(expectedCount);
                 }
@@ -186,9 +194,7 @@ function async(obs, model, data, options) {
                     c();
                 }
             }, c);
-        
-        function complete() {
-        }
+
     });
     
 }
@@ -210,3 +216,5 @@ var GetTestRunner = module.exports = {
     },
     async: async
 };
+
+

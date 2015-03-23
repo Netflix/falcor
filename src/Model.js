@@ -4,15 +4,12 @@ var RequestQueue = require('./request/RequestQueue');
 var Schedulers = require('./Scheduler');
 var $TYPE = Constants.$TYPE;
 var ERROR = Constants.$TYPE;
-var modelOperation = require('./modelOperation');
+var ModelResponse = require('./ModelResponse');
 var call = require('./call/call');
+var modelOperation = require('./modelOperation');
 
-falcor.Model = Model;
 
-Model.EXPIRES_NOW = falcor.EXPIRES_NOW;
-Model.EXPIRES_NEVER = falcor.EXPIRES_NEVER;
-
-function Model(options) {
+var Model = module.exports = falcor.Model = function Model(options) {
     options || (options = {});
     this._dataSource = options.source;
     this._maxSize = options.maxSize || Math.pow(2, 53) - 1;
@@ -32,15 +29,18 @@ function Model(options) {
         this._cache = {};
     }
     this._path = [];
-}
+};
+
+Model.EXPIRES_NOW = falcor.EXPIRES_NOW;
+Model.EXPIRES_NEVER = falcor.EXPIRES_NEVER;
 
 Model.prototype = {
     _boxed: false,
     _progressive: false,
     _errorSelector: function(x, y) { return y; },
-    get: modelOperation("get"),
-    set: modelOperation("set"),
-    invalidate: modelOperation("inv"),
+    get: modelOperation("get", Model),
+    set: modelOperation("set", Model),
+    invalidate: modelOperation("inv", Model),
     call: call,
     getValue: function(path) {
         return this.get(path, function(x) { return x });
@@ -193,5 +193,3 @@ Model.prototype = {
         return true;
     }
 };
-module.exports = Model;
-

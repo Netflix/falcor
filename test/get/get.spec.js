@@ -22,7 +22,7 @@ var Materialized = Expected.Materialized;
 var Boxed = Expected.Boxed;
 var Errors = Expected.Errors;
 
-describe.only("Use New Model", function() {
+describe("Use New Model", function() {
     execute(true);
 });
 

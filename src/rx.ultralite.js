@@ -9,17 +9,16 @@ var Rx;
 if (typeof window !== "undefined" && typeof window["Rx"] !== "undefined") {
     // Browser environment
     Rx = window["Rx"];
-} else if(typeof global !== "undefined" && typeof global["Rx"] !== "undefined") {
+} else if (typeof global !== "undefined" && typeof global["Rx"] !== "undefined") {
     // Node.js environment
     Rx = global["Rx"];
-} else {
-    if(typeof global !== "undefined" && typeof global.require === "function") {
-        try {
-            // Node.js environment with rx module
-            Rx = global["require"]("rx");
-        } catch(e) {
-            Rx = undefined;
-        }
+} else if (typeof require !== 'undefined' || typeof window !== 'undefined' && window.require) {
+    var r = typeof require !== 'undefined' && require || window.require;
+    try {
+        // CommonJS environment with rx module
+        Rx = r("rx");
+    } catch(e) {
+        Rx = undefined;
     }
 }
 

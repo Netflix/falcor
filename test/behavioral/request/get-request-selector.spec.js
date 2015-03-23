@@ -19,7 +19,7 @@ function getDataModel(cache) {
     return testRunner.getModel(new LocalDataSource(Cache()), cache || {});
 }
 
-describe("Selector", function() {
+describe.only("Selector", function() {
     it("should get a value from the dataSource", function(done) {
         debugger;
         var expected = References().simpleReference0;

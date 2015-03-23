@@ -1,4 +1,5 @@
 var falcor = require('./Falcor');
+var ModelResponse = require('./ModelResponse');
 module.exports = function modelOperation(name) {
     return function() {
 
@@ -66,7 +67,7 @@ module.exports = function modelOperation(name) {
                     }
                 }
 
-                var operations = getOperationArgGroups(requested, operationalName, format, setSeed || relativePathSetValues, hasSelector, !isFirstSet && isValues && onNext, errorSelector, isFirstSet, model._path);
+                var operations = getOperationArgGroups(model, requested, operationalName, format, setSeed || relativePathSetValues, hasSelector, !isFirstSet && isValues && onNext, errorSelector, isFirstSet, model._path);
                 var results = processOperations(isFirstSet && firstSetModel || model, operations);
                 isFirstSet && (firstSetJSONGPaths = []);
 
@@ -413,7 +414,7 @@ function getOperationsPartitionedByPathIndex(requestedPaths, incomingValues, pre
     return {ops: newOperations, indices: indices};
 }
 
-function getOperationArgGroups(ops, name, format, values, hasSelector, onNext, errorSelector, isFirstSet, boundPath) {
+function getOperationArgGroups(model, ops, name, format, values, hasSelector, onNext, errorSelector, isFirstSet, boundPath) {
     var opFormat = (isFirstSet && 'AsJSONG' || format);
     var seedRequired = isSeedRequired(opFormat);
     var isValues = !seedRequired;
@@ -422,14 +423,12 @@ function getOperationArgGroups(ops, name, format, values, hasSelector, onNext, e
         map(cloneIfPathOrPathValue).
         reduce(function(groups, argument, index) {
             var group = groups[groups.length - 1],
-                type  = isPathOrPathValue(argument) ? "Paths" :
+                type  = isPathOrPathValue(argument) ? "PathSets" :
                     isJSONG(argument) ? "JSONGs" : "PathMaps",
                 groupType = group && group.type,
                 methodName = name + type + opFormat;
 
-            // Sets the operation to jsong if its the first set.
-            // We need this
-            var op = Model.prototype['_' + methodName];
+            var op = model['_' + methodName];
 
             if (type !== groupType) {
                 group = groups[groups.length] = [];
