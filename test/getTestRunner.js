@@ -149,7 +149,7 @@ function async(obs, model, data, options) {
         debugger
 
         // Converting a falcor obs to an rx obs.
-        testRunner.toRxObs(obs).
+        obs.
             doOnNext(function(x) {
                 debugger
                 if (options.onNextExpected) {
