@@ -8,6 +8,7 @@ function followReference(model, root, node, referenceContainer, reference, seed,
     var depth = 0;
     var k, next;
 
+    debugger
     while (true) {
         if (depth === 0 && referenceContainer.__context) {
             depth = reference.length;
@@ -60,12 +61,12 @@ function followReference(model, root, node, referenceContainer, reference, seed,
             }
         } else {
             node = undefined;
-            depth = reference.length;
         }
         break;
     }
 
     if (depth < reference.length) {
+        debugger
         var ref = [];
         for (var i = 0; i < depth; i++) {
             ref[i] = reference[i];

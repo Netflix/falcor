@@ -3,10 +3,40 @@ var clone = require('./../util/clone');
 var promote = lru.promote;
 var support = require('../util/support');
 var updateTrailingNullCase = support.updateTrailingNullCase;
+var materializeNode = {$type: 'sentinel'};
 module.exports = function onValue(model, node, path, depth, seedOrFunction, outerResults, permuteRequested, permuteOptimized, permutePosition, outputFormat) {
     var i, len, k, key, curr, prev, prevK;
+    var materialized = false, valueNode;
     if (node) {
         promote(model, node);
+        
+    } else {
+        materialized = model._materialized;
+    }
+    
+    // materialized
+    if (materialized) {
+        valueNode = materializeNode;
+    } 
+    
+    // Boxed Mode & Reference Node & Error node (only happens when model is in treat errors as values).
+    else if (model._boxed) {
+        valueNode = clone(node);
+    }
+    
+    else if (node.$type === 'reference' || node.$type === 'error') {
+        if (outputFormat === 'Values' || outputFormat === 'JSON') {
+            valueNode = node.value;
+        } else {
+            valueNode = clone(node);
+        }
+    }
+
+    else {
+        valueNode = node.value;
+        if (valueNode === undefined && model._materialized) {
+            valueNode = clone(node);
+        }
     }
 
 
@@ -21,7 +51,7 @@ module.exports = function onValue(model, node, path, depth, seedOrFunction, oute
 
         case 'Values':
             if (typeof seedOrFunction === 'function') {
-                seedOrFunction({path: permuteRequested, value: node.value});
+                seedOrFunction({path: permuteRequested, value: valueNode});
             }
             break;
 
@@ -41,11 +71,10 @@ module.exports = function onValue(model, node, path, depth, seedOrFunction, oute
                     curr = curr[k];
                 }
                 k = permuteRequested[i];
-                var value = node.$type === 'reference' ? clone(model, node) : node.value;
                 if (k !== null) {
-                    curr[k] = value;
+                    curr[k] = valueNode;
                 } else {
-                    prev[prevK] = value;
+                    prev[prevK] = valueNode;
                 }
             }
             break;
@@ -71,9 +100,9 @@ module.exports = function onValue(model, node, path, depth, seedOrFunction, oute
                     // assign the last
                     k = permutePosition[i];
                     key = permuteRequested[k];
-                    curr[key] = node.value;
+                    curr[key] = valueNode;
                 } else {
-                    seedOrFunction.json = node.value;
+                    seedOrFunction.json = valueNode;
                 }
             }
             break;
@@ -92,7 +121,9 @@ module.exports = function onValue(model, node, path, depth, seedOrFunction, oute
 
                 // assign the last
                 key = permuteOptimized[i];
-                curr[key] = clone(model, node);
+                
+                // TODO: Special case? do string comparisons make big difference?
+                curr[key] = materialized ? materializeNode : clone(node);
                 if (permuteRequested) {
                     seedOrFunction.paths.push(permuteRequested);
                 }

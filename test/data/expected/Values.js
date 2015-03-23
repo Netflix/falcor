@@ -56,7 +56,7 @@ module.exports = function() {
                     "path": ["videos", "1234", "summary"],
                     "value": {
                         "title": "House of Cards",
-                        "url": "/movies/1234",
+                        "url": "/movies/1234"
                     }
                 }]
             },
@@ -94,7 +94,7 @@ module.exports = function() {
                             1234: {
                                 "summary": {
                                     "title": "House of Cards",
-                                    "url": "/movies/1234",
+                                    "url": "/movies/1234"
                                 }
                             }
                         }
@@ -196,7 +196,7 @@ module.exports = function() {
                             553: {
                                 summary: {
                                     "title": "Running Man",
-                                    "url": "/movies/553",
+                                    "url": "/movies/553"
                                 }
                             }
                         }
@@ -409,7 +409,7 @@ module.exports = function() {
                             sentinel: {
                                 summary: {
                                     "title": "Marco Polo",
-                                    "url": "/movies/sentinel",
+                                    "url": "/movies/sentinel"
                                 }
                             }
                         }

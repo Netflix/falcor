@@ -251,7 +251,7 @@ module.exports = function() {
                                 1: {
                                     summary: {
                                         "title": "Junior",
-                                        "url": "/movies/5522",
+                                        "url": "/movies/5522"
                                     }
                                 }
                             }
@@ -484,13 +484,13 @@ module.exports = function() {
                                 "-1": {
                                     summary: {
                                         "title": "Beverly Hills Ninja",
-                                        "url": "/movies/4422",
+                                        "url": "/movies/4422"
                                     }
                                 },
                                 0: {
                                     summary: {
                                         "title": "House of Cards",
-                                        "url": "/movies/1234",
+                                        "url": "/movies/1234"
                                     }
                                 },
                                 "1": {
@@ -642,13 +642,13 @@ module.exports = function() {
                                 "-1": {
                                     summary: {
                                         "title": "Beverly Hills Ninja",
-                                        "url": "/movies/4422",
+                                        "url": "/movies/4422"
                                     }
                                 },
                                 0: {
                                     summary: {
                                         "title": "House of Cards",
-                                        "url": "/movies/1234",
+                                        "url": "/movies/1234"
                                     }
                                 },
                                 "1": {
@@ -773,13 +773,13 @@ module.exports = function() {
                                 0: {
                                     summary: {
                                         "title": "House of Cards",
-                                        "url": "/movies/1234",
+                                        "url": "/movies/1234"
                                     }
                                 },
                                 "1": {
                                     summary: {
                                         "title": "Terminator 3",
-                                        "url": "/movies/766",
+                                        "url": "/movies/766"
                                     }
                                 }
                             }
@@ -1398,7 +1398,7 @@ module.exports = function() {
                                 0: {
                                     summary: {
                                         "title": "House of Cards",
-                                        "url": "/movies/1234",
+                                        "url": "/movies/1234"
                                     }
                                 }
                             },
@@ -1406,7 +1406,7 @@ module.exports = function() {
                                 0: {
                                     summary: {
                                         "title": "Running Man",
-                                        "url": "/movies/553",
+                                        "url": "/movies/553"
                                     }
                                 }
                             }

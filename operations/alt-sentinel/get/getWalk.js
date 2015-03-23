@@ -150,7 +150,6 @@ function evaluateNode(model, curr, pathOrJSON, depth, seedOrFunction, requestedP
     }
 
     var currType = curr.$type;
-    var currValue = currType && curr.value || curr;
 
     positionalInfo = positionalInfo || [];
 
@@ -162,9 +161,15 @@ function evaluateNode(model, curr, pathOrJSON, depth, seedOrFunction, requestedP
             }
             if (outputFormat === 'JSONG') {
                 onValue(model, curr, pathOrJSON, depth, seedOrFunction, outerResults, requestedPath, optimizedPath, positionalInfo, outputFormat);
-                onError(model, curr, requestedPath, null, outerResults);
+                if (!model._errorsAsValues) {
+                    onError(model, curr, requestedPath, null, outerResults);
+                }
             } else {
-                onError(model, curr, requestedPath, optimizedPath, outerResults);
+                if (model._errorsAsValues) {
+                    onValue(model, curr, pathOrJSON, depth, seedOrFunction, outerResults, requestedPath, optimizedPath, positionalInfo, outputFormat);
+                } else {
+                    onError(model, curr, requestedPath, optimizedPath, outerResults);
+                }
             }
         }
 

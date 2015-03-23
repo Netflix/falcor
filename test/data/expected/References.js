@@ -123,7 +123,7 @@ module.exports = function() {
                                 0: {
                                     summary: {
                                         "title": "House of Cards",
-                                        "url": "/movies/1234",
+                                        "url": "/movies/1234"
                                     }
                                 }
                             }
@@ -395,7 +395,7 @@ module.exports = function() {
                                 2: {
                                     summary: {
                                         "title": "Kindergarten Cop",
-                                        "url": "/movies/7531",
+                                        "url": "/movies/7531"
                                     }
                                 }
                             }
@@ -535,7 +535,7 @@ module.exports = function() {
                                 3: {
                                     summary: {
                                         "title": "Commando",
-                                        "url": "/movies/6420",
+                                        "url": "/movies/6420"
                                     }
                                 }
                             }
@@ -633,7 +633,7 @@ module.exports = function() {
                         genreList: {
                             10: {
                                 "title": "House of Cards",
-                                "url": "/movies/1234",
+                                "url": "/movies/1234"
                             }
                         }
                     }
@@ -733,7 +733,7 @@ module.exports = function() {
                                 0: {
                                     summary: {
                                         "title": "Running Man",
-                                        "url": "/movies/553",
+                                        "url": "/movies/553"
                                     }
                                 }
                             }
@@ -837,7 +837,7 @@ module.exports = function() {
                                 0: {
                                     summary: {
                                         "title": "Running Man",
-                                        "url": "/movies/553",
+                                        "url": "/movies/553"
                                     }
                                 }
                             }
@@ -1036,7 +1036,7 @@ module.exports = function() {
                                 0: {
                                     summary: {
                                         "title": "Terminator 2",
-                                        "url": "/movies/333",
+                                        "url": "/movies/333"
                                     }
                                 }
                             }
@@ -1147,7 +1147,7 @@ module.exports = function() {
                                 0: {
                                     summary: {
                                         "title": "Total Recall (Without Colin Farrell)",
-                                        "url": "/movies/733",
+                                        "url": "/movies/733"
                                     }
                                 }
                             }

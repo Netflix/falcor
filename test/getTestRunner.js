@@ -65,14 +65,13 @@ function getTestRunner(model, data, options) {
                     model._errorsAsValues = true;
                 }
                 
+                // TODO: quick debug
                 switch (suffix) {
                     case 'AsPathMap':
                         break;
                     case 'AsJSON':
-                        debugger
                         break;
                     case 'AsJSONG':
-                        debugger
                         break;
                     case 'AsValues':
                         break;
