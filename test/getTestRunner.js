@@ -65,6 +65,16 @@ function getTestRunner(model, data, options) {
                     model._errorsAsValues = true;
                 }
                 
+                switch (suffix) {
+                    case 'AsPathMap':
+                        break;
+                    case 'AsJSON':
+                        break;
+                    case 'AsJSONG':
+                        break;
+                    case 'AsValues':
+                        break;
+                }
                 // TODO: will verify the onNext values coming in for AsValues.
                 var expectedCount = expected.values && expected.values.length;
                 var actualCount = 0;

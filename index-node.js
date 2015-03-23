@@ -15,6 +15,6 @@ prototype._setPathSetsAsPathMap = require("./lib/operations/set-pathsets-json-sp
 prototype._setPathSetsAsValues = require("./lib/operations/set-pathsets-json-values");
 
 // prototype._setPathMapsAsValues = require("./operations/alt/legacy_setPathMapsAsValues");
-prototype._setCache = require("./operations/alt/legacy_setCache");
+prototype._setCache = require("./operations/alt-sentinel/legacy_setCache");
 
 module.exports = falcor;

@@ -4,6 +4,7 @@ module.exports = {
     getAsJSONG: require('./get/getAsJSONG')(walk),
     getAsValues: require('./get/getAsValues')(walk),
     getAsPathMap: require('./get/getAsPathMap')(walk),
+    getValueSync: require('./get/getValueSync'),
     setCache: require('./legacy_setCache')
 };
 

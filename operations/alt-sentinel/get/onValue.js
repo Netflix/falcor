@@ -21,7 +21,7 @@ module.exports = function onValue(model, node, path, depth, seedOrFunction, oute
 
         case 'Values':
             if (typeof seedOrFunction === 'function') {
-                seedOrFunction({path: permuteRequested, value: clone(model, node)});
+                seedOrFunction({path: permuteRequested, value: node.value});
             }
             break;
 
@@ -41,10 +41,11 @@ module.exports = function onValue(model, node, path, depth, seedOrFunction, oute
                     curr = curr[k];
                 }
                 k = permuteRequested[i];
+                var value = node.$type === 'reference' ? clone(model, node) : node.value;
                 if (k !== null) {
-                    curr[k] = clone(model, node);
+                    curr[k] = value;
                 } else {
-                    prev[prevK] = clone(model, node);
+                    prev[prevK] = value;
                 }
             }
             break;
@@ -70,9 +71,9 @@ module.exports = function onValue(model, node, path, depth, seedOrFunction, oute
                     // assign the last
                     k = permutePosition[i];
                     key = permuteRequested[k];
-                    curr[key] = clone(model, node);
+                    curr[key] = node.value;
                 } else {
-                    seedOrFunction.json = clone(model, node);
+                    seedOrFunction.json = node.value;
                 }
             }
             break;
