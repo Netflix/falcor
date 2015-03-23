@@ -146,26 +146,22 @@ function async(obs, model, data, options) {
         var n = observer.onNext.bind(observer);
         var e = observer.onError.bind(observer);
         var c = observer.onCompleted.bind(observer);
-        debugger
 
         // Converting a falcor obs to an rx obs.
         obs.
             doOnNext(function(x) {
-                debugger
                 if (options.onNextExpected) {
                     var expected = options.onNextExpected.values[idx++];
                     testRunner.compare(expected, x);
                 }
             }).
             doOnError(function(err) {
-                debugger
                 errorThrown = true;
                 if (options.errors) {
                     testRunner.compare(options.errors, err);
                 }
             }).
             doOnCompleted(function() {
-                debugger
                 if (options.onNextExpected) {
                     expect(idx, "The amount of onNexts did not meet expected").to.equal(expectedCount);
                 }
