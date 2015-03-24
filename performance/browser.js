@@ -6,10 +6,15 @@ var benchmark = require('benchmark');
 var config = testConfig.config;
 var models = testConfig.models;
 
-testConfig.repeatInConfig('sentinel-scroll', 10, testConfig.scrollGallery(models.sentinel, 'JSON'), config.tests);
-
-console.log('Starting test');
-testRunner(benchmark, config, 1, function(totalResults) {
+testConfig.repeatInConfig('legacy-simple', 1, testConfig.simple(models.legacy, 'Value'), config.tests);
+testConfig.repeatInConfig('model-simple', 1, testConfig.simple(models.model, 'Value'), config.tests);
+testConfig.repeatInConfig('legacy-reference', 1, testConfig.reference(models.legacy, 'Value'), config.tests);
+testConfig.repeatInConfig('model-reference', 1, testConfig.reference(models.model, 'Value'), config.tests);
+testConfig.repeatInConfig('legacy-complex', 1, testConfig.complex(models.legacy, 'Value'), config.tests);
+testConfig.repeatInConfig('model-complex', 1, testConfig.complex(models.model, 'Value'), config.tests);
+testConfig.repeatInConfig('legacy-scroll', 1, testConfig.scrollGallery(models.legacy, 'Value'), config.tests);
+testConfig.repeatInConfig('model-scroll', 1, testConfig.scrollGallery(models.model, 'Value'), config.tests);
+testRunner(benchmark, config, 10, function(totalResults) {
     console.log(totalResults.join('\n'));
 });
 
