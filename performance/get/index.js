@@ -33,6 +33,7 @@ function scrollGallery(model, format) {
         ["lists", "abcd", {"from": 21, "to": 30}, "summary"],
         ["lists", "abcd", {"from": 31, "to": 40}, "summary"]
     ];
+    for (var i = 0; i < 40;)
     switch (format) {
         case 'JSON':
             return function() {

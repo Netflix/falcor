@@ -2,7 +2,7 @@
 module.exports = {
     startup: startup,
     scrollingGallery: scrollingGallery
-}
+};
 
 function startup(model, format) {
     var envelopes = [startupRequest()];
@@ -1633,3 +1633,4 @@ function startupRequest() {
         ]
     }
 }
+

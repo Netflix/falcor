@@ -2,7 +2,8 @@ var falcor = require('./../index');
 var Cache = require('./../test/data/Cache');
 var _Legacy = require('./legacy');
 var getOps = require('./get');
-var setOps = require('./get');
+var setOps = require('./set');
+var mergeOps = require('./merge');
 var E_model = new falcor.Model();
 var model = new falcor.Model({cache: Cache()});
 var macro = _Legacy.getMacroModel();
@@ -29,6 +30,7 @@ module.exports = function() {
         },
         repeatInConfig: repeatInConfig,
         get: getOps,
-        set: setOps
+        set: setOps,
+        merge: mergeOps
     };
 };
