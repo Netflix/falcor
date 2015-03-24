@@ -3,21 +3,17 @@ global.Rx = Rx;
 var testConfig = require('./testConfig')();
 var config = testConfig.config;
 var models = testConfig.models;
-var macroSimple = testConfig.set.simple(models.macro, 'JSON');
-var modelSimple = testConfig.set.simple(models.model, 'JSON');
-var macroReference = testConfig.set.reference(models.macro, 'JSON');
-var modelReference = testConfig.set.reference(models.model, 'JSON');
+var macroSimple = testConfig.set.simple(models.macro, 'PathMap');
+var modelSimple = testConfig.set.simple(models.model, 'PathMap');
+var macroReference = testConfig.set.reference(models.macro, 'PathMap');
+var modelReference = testConfig.set.reference(models.model, 'PathMap');
 
-//testConfig.repeatInConfig('macro-simple', 1, macroSimple, config.tests);
-//testConfig.repeatInConfig('model-simple', 1, testConfig.simple(models.model, 'Value'), config.tests);
-//testConfig.repeatInConfig('macro-reference', 1, testConfig.reference(models.macro, 'Value'), config.tests);
-//testConfig.repeatInConfig('model-reference', 1, testConfig.reference(models.model, 'Value'), config.tests);
-//testConfig.repeatInConfig('macro-complex', 1, testConfig.complex(models.macro, 'Value'), config.tests);
-//testConfig.repeatInConfig('model-complex', 1, testConfig.complex(models.model, 'Value'), config.tests);
-//testConfig.repeatInConfig('macro-scroll', 1, testConfig.scrollGallery(models.macro, 'Value'), config.tests);
-testConfig.repeatInConfig('model-scroll', 1, testConfig.get.scrollGallery(models.model, 'PathMap'), config.tests);
+testConfig.repeatInConfig('macro-simple', 3, macroSimple, config.tests);
+testConfig.repeatInConfig('model-simple', 3, modelSimple, config.tests);
+testConfig.repeatInConfig('macro-reference', 3, macroReference, config.tests);
+testConfig.repeatInConfig('model-reference', 3, modelReference, config.tests);
 
-require('./testRunner')(require('benchmark'), config, 2, function(totalResults) {
+require('./testRunner')(require('benchmark'), config, 1, function(totalResults) {
     var fs = require('fs');
     fs.writeFileSync('out.csv', totalResults.join('\n'))
 });
