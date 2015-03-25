@@ -13,6 +13,7 @@ describe("Model", function() {
 
     describe("#get", function() {
         require("./get/get.spec");
+        require("./get/get.sync.spec");
     });
     
     describe("#set", function() {

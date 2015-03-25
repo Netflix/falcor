@@ -62,7 +62,7 @@ function getTestRunner(model, data, options) {
                 }
                 
                 if(options.errorsAsValues) {
-                    model._errorsAsValues = true;
+                    model._treatErrorsAsValues = true;
                 }
                 
                 // TODO: quick debug

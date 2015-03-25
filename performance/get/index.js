@@ -3,8 +3,22 @@ module.exports = {
     scrollGallery: scrollGallery,
     simple: simple,
     reference: reference,
-    complex: complex
+    complex: complex,
+    syncSimple: syncSimple,
+    syncReference: syncReference
 };
+var noOp = function() {};
+function syncSimple(model) {
+    return function() {
+        model.getValueSync(['videos', 1234, 'summary'])
+    }
+}
+function syncReference(model) {
+    return function() {
+        model.getValueSync(['videos', 1234, 'summary'])
+    }
+}
+
 function startup(model, format) {
     var startupRequest = [ ["startup"], ["appconfig"], ["languages"], ["geolocation"], ["user"], ["uiexperience"], ["lolomo", "summary"], ["lolomo", {"to": 60}, "summary"], ["lolomo", 0, "billboardData"], ["lolomo", 0, 0, "postcard"], ["profilesList", {"to": 4}, "avatar", "images", "byWidth", [32, 64, 80, 100, 112, 160, 200, 320]], ["profilesList", {"to": 4}, "summary"], ["profilesList", "summary"], ["profilesList", "availableAvatarsList", {"to": 18}, "images", "byWidth", [32, 64, 80, 100, 112, 160, 200, 320]], ["profilesList", "availableAvatarsList", {"to": 18}, "summary"], ["profilesList", "availableAvatarsList", "summary"], ["profiles", "hasSeenPromoGate"], ["lolomo", "maxExperience"], ["lolomo", 0, 0, "evidence"], ["lolomo", 0, 0, "item", ["info", "summary", "outline", "rating", "heroImages"]] ];
     switch (format) {

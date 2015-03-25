@@ -195,9 +195,6 @@ function execute(useNewModel) {
         });
     });
     describe("Boxed", function() {
-        describe("should get a primitive value directly as a sentinel in boxed mode", function() {
-            runGetTests(getModel(useNewModel), Boxed().primitiveValue, { useNewModel: useNewModel, boxed: true });
-        });
         describe("should get an Object value directly as a sentinel in boxed mode", function() {
             runGetTests(getModel(useNewModel), Boxed().sentinelValue, { useNewModel: useNewModel, boxed: true });
         });

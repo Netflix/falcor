@@ -1,6 +1,7 @@
 var Cache = require('./_Cache');
-//var _Model = require('./_');
+var _Model = require('./_');
 var _Falcor = require('./macro/_Falcor');
+
 module.exports = {
     getMdpModel: function() {
         var model = new _Model(
