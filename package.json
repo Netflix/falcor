@@ -52,8 +52,6 @@
     "xmlhttprequest": "~1.7.0"
   },
   "dependencies": {
-    "linklocal": "^2.5.1",
-    "rx": "^2.3.25",
-    "node-test": "file:./node-test"
+    "rx": "^2.3.25"
   }
 }
