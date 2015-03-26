@@ -10,7 +10,9 @@ module.exports = function onValue(model, node, path, depth, seedOrFunction, oute
     if (node) {
         promote(model, node);
         
-    } else {
+    } 
+    
+    if (!node || node.value === undefined) {
         materialized = model._materialized;
     }
     

@@ -2,5 +2,5 @@
 describe('Get', function() {
     require('./get.core.spec');
     require('./get.sync.spec');
-    require('./edge-cases.spec');
+    require('./get.public.spec');
 });
