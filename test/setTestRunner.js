@@ -91,18 +91,16 @@ function setTestRunner(data, options) {
         var clearModel = options.clearModel === undefined && true || options.clearModel;
         var modelCache = options.modelCache || {};
         var thisModel = options.oneModel;
-        var count;
+        var countOrFunction;
         prefixesAndSuffixes[0].
             filter(function (prefix) {
-                return ~prefix.indexOf("set");
+                return ~prefix.indexOf("setPathSets");
             }).
             map(function (prefix) {
                 prefixesAndSuffixes[1].map(function (suffix) {
                     var query = data[prefix].query;
                     var op = "_" + prefix + suffix;
                     model = thisModel || getModel(clearModel, _.cloneDeep(modelCache));
-
-                    count = getCountArray(data[prefix]);
 
                     // Primes the cache with the appropriate references.
                     // Note: JSONG should have all the required references
@@ -118,10 +116,12 @@ function setTestRunner(data, options) {
                     expectedValues = data[suffix];
                     expected = _.assign({}, expectedValues, universalExpectedValues);
 
-                    // For doing any preprocessing.
-                    preCallFn(model, op, _.cloneDeep(query), count);
+                    countOrFunction = getCountArrayOrFunction(data[prefix], suffix, expected, testRunner);
 
-                    actual = model[op](model, _.cloneDeep(query), count);
+                    // For doing any preprocessing.
+                    preCallFn(model, op, _.cloneDeep(query), countOrFunction);
+
+                    actual = model[op](model, _.cloneDeep(query), countOrFunction);
 
                     // validates that the results from the operation and the expected values are valid.
                     testRunner.validateData(expected, actual);
@@ -134,18 +134,44 @@ function setTestRunner(data, options) {
                     if (query) {
                         var suffixMessage = 'Confirming that ' + op + ' has correctly taken place.';
                         op = "_getPathSets" + suffix;
-                        count = getCountArray(data[prefix]);
-                        actual = model[op](model, _.cloneDeep(query), count, model._errorSelector);
+                        countOrFunction = getCountArrayOrFunction(data[prefix], suffix, expected, testRunner);
+                        actual = model[op](model, _.cloneDeep(query), countOrFunction, model._errorSelector);
 
                         testRunner.validateData(expected, actual);
                         testRunner.validateOperation(op, expected, actual, suffixMessage);
                     }
                 });
             });
-        });
-    }
+    });
+}
 
-    function getCountArray(data) {
+function getCountArrayOrFunction(data, suffix, expected, testRunner) {
+    if (suffix === 'AsValues') {
+        var actualCount = 0;
+        var vals = expected.values;
+        expected.values = undefined;
+        
+        return function(pV) {
+            if (vals && vals.length) {
+                var tested = false;
+                var path = pV.path.map(toString);
+                for (var i = 0; i < vals.length; i++) {
+                    var val = vals[i].path.map(toString);
+                    if (_.isEqual(path, val)) {
+                        actualCount++;
+                        tested = true;
+                        testRunner.compare(vals[i], pV);
+                        break;
+                    }
+                }
+                if (!tested) {
+                    throw 'The path ' + pV.path + ' does not exist within ' + JSON.stringify(vals.map(function(x) { return x.path; }), null, 4);
+                }
+            } else {
+                throw 'There are no more values to compare against AsValues onNext callback. ' + JSON.stringify(pV);
+            }
+        };
+    }
     var count = data.count === undefined ? 1 : 0;
     return Array(count).join(",").split(",").map(function() { return {}; });
 }

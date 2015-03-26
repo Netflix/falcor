@@ -18,7 +18,8 @@ var expect = require('chai').expect;
 //describe("Construct Matching Skeleton Cache", function() {
 //    execute(false);
 //});
-describe.only("Use Cache Model", function() {
+describe("Use Cache Model", function() {
+// describe("Use Cache Model", function() {
     execute(true);
 });
 describe("Use One Model For All Operations With Preset Cache.", function() {
@@ -60,7 +61,7 @@ function execute(useCache, oneModel, fillInReferences, hardLink) {
             setTestRunner(Values().reference, getOptions());
         });
         describe("should set a sentinel directly", function () {
-            setTestRunner(Values().sentinelSummary, getOptions());
+            setTestRunner(Values().sentinelDirect, getOptions());
         });
         describe("Expired", function() {
             describe("should set a value on expired leaf node by timestamp.", function() {
@@ -79,11 +80,8 @@ function execute(useCache, oneModel, fillInReferences, hardLink) {
     });
 
     describe("References", function() {
-        describe("should set a value through references", function () {
+        describe.only("should set a value through references", function () {
             setTestRunner(References().simpleReference0, getOptions());
-        });
-        describe("should set a value through sentinel references", function () {
-            setTestRunner(References().sentinelReference, getOptions());
         });
         describe("Expired", function() {
             xdescribe("should set a value through an expired branch.", function() {
