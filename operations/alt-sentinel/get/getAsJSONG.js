@@ -1,3 +1,4 @@
+var getBoundValue = require('./getBoundValue');
 module.exports = function(walk) {
     return function getAsJSONG(model, paths, values) {
         var results = {
@@ -13,12 +14,18 @@ module.exports = function(walk) {
             values[0].jsong = {};
             values[0].paths = [];
             results.values = values;
+        }
+        var cache = model._cache;
+        var boundPath = model._path;
+        var currentCachePosition;
+        if (boundPath.length) {
+            currentCachePosition = getBoundValue(model, boundPath).value;
         } else {
-            jsong = values[0];
+            currentCachePosition = cache;
         }
 
         for (var i = 0, len = paths.length; i < len; i++) {
-            walk(model, model._cache, model._cache, paths[i], 0, values[0], [], results, [], [], inputFormat, 'JSONG');
+            walk(model, cache, currentCachePosition, paths[i], 0, values[0], [], results, [], [], inputFormat, 'JSONG');
         }
 
         if (results.requestedPaths.length === 0) {

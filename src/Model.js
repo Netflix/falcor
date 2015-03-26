@@ -7,7 +7,8 @@ var ERROR = Constants.$TYPE;
 var ModelResponse = require('./ModelResponse');
 var call = require('./call/call');
 var modelOperation = require('./modelOperation');
-
+var getBoundValue = require('./../operations/alt-sentinel/get/getBoundValue');
+var getBoundContext = require('./../operations/alt-sentinel/get/getBoundContext');
 
 var Model = module.exports = falcor.Model = function Model(options) {
     options || (options = {});

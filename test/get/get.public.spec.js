@@ -34,7 +34,7 @@ describe('Public', function() {
     describe('toJSON', function() {
         it('should get a value from falcor.', function(done) {
             var model = new Model({cache: Cache()});
-            var expected = Expected.Values().direct.AsPathMap.values[0].json;
+            var expected = Expected.Values().direct.AsPathMap.values[0];
             var next = false;
             model.
                 get(['videos', 1234, 'summary']).

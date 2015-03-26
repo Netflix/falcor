@@ -186,4 +186,15 @@ describe('Core', function() {
         });
     });
 
+    describe('Bind', function() {
+        it('should get a value directly.', function () {
+            var model = new Model({cache: Cache()}).bindSync(['videos', 1234]);
+            getTestRunner(Bound().directValue, {model: model});
+        });
+        
+        it('should bind to a value.', function () {
+            var model = new Model({cache: Cache()}).bindSync(['genreList', 10]);
+            getTestRunner(Bound().toLeafNode, {model: model});
+        });
+    });
 });
