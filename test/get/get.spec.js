@@ -22,7 +22,8 @@ var Materialized = Expected.Materialized;
 var Boxed = Expected.Boxed;
 var Errors = Expected.Errors;
 
-describe.only("Use New Model", function() {
+// describe.only("Use New Model", function() {
+describe("Use New Model", function() {
     execute(true);
 });
 
@@ -48,7 +49,7 @@ function execute(useNewModel) {
             describe("should get an error directly", function () {
                 runGetTests(getModel(useNewModel), Values().errorBranchSummary, {useNewModel: useNewModel});
             });
-            describe("should get an error directly with null", function () {
+            describe.only("should get an error directly with null", function () {
                 runGetTests(getModel(useNewModel), Values().genreListErrorNull, {useNewModel: useNewModel});
             });
         });
