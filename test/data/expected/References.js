@@ -84,7 +84,7 @@ module.exports = function() {
                     jsong: {
                         genreList: {
                             0: {
-                                "$size": "51",
+                                "$size": 51,
                                 "$type": "path",
                                 "value": ["lists", "abcd"]
                             }
@@ -92,7 +92,7 @@ module.exports = function() {
                         lists: {
                             abcd: {
                                 0: {
-                                    "$size": "51",
+                                    "$size": 51,
                                     "$type": "path",
                                     "value": ["videos", "1234"]
                                 }
