@@ -53,16 +53,13 @@ describe('Public', function() {
             var model = new Model({cache: Cache()});
             var expected = Expected.Values().direct.AsJSONG.values[0];
             var next = false;
-            debugger
             model.
                 get(['videos', 1234, 'summary']).
                 toJSONG().
                 doAction(function(x) {
-                    debugger
                     testRunner.compare(expected, x);
                     next = true;
                 }, noOp, function() {
-                    debugger
                     testRunner.compare(true, next, 'Expect to be onNext at least 1 time.');
                 }).
                 subscribe(noOp, done, done);
