@@ -4,7 +4,7 @@
   "main": "index-node",
   "scripts": {
     "test": "./node_modules/mocha/bin/_mocha ./test/index",
-    "dist": "./node_modules/gulp/bin/gulp.js default"
+    "dist": "./node_modules/gulp/bin/gulp.js build"
   },
   "files": [
     "build",
