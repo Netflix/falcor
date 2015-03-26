@@ -4,7 +4,7 @@ var promote = lru.promote;
 var support = require('../util/support');
 var updateTrailingNullCase = support.updateTrailingNullCase;
 var materializeNode = {$type: 'sentinel'};
-module.exports = function onValue(model, node, path, depth, seedOrFunction, outerResults, permuteRequested, permuteOptimized, permutePosition, outputFormat) {
+module.exports = function onValue(model, node, path, depth, seedOrFunction, outerResults, permuteRequested, permuteOptimized, permutePosition, outputFormat, followedAReference) {
     var i, len, k, key, curr, prev, prevK;
     var materialized = false, valueNode;
     if (node) {
@@ -47,7 +47,11 @@ module.exports = function onValue(model, node, path, depth, seedOrFunction, oute
             updateTrailingNullCase(path, depth, permuteRequested);
         }
         outerResults.requestedPaths.push(permuteRequested);
-        outerResults.optimizedPaths.push(permuteOptimized);
+        if (!followedAReference && model._path) {
+            outerResults.optimizedPaths.push(model._path.concat(permuteOptimized));
+        } else {
+            outerResults.optimizedPaths.push(permuteOptimized);
+        }
     }
     switch (outputFormat) {
 
@@ -59,24 +63,29 @@ module.exports = function onValue(model, node, path, depth, seedOrFunction, oute
 
         case 'PathMap':
             if (seedOrFunction) {
-                curr = seedOrFunction;
-                for (i = 0, len = permuteRequested.length - 1; i < len; i++) {
-                    k = permuteRequested[i];
-                    if (k === null) {
-                        continue;
-                    }
-                    if (!curr[k]) {
-                        curr[k] = {};
-                    }
-                    prev = curr;
-                    prevK = k;
-                    curr = curr[k];
-                }
-                k = permuteRequested[i];
-                if (k !== null) {
-                    curr[k] = valueNode;
+                len = permuteRequested.length - 1;
+                if (len === -1) {
+                    seedOrFunction.json = valueNode;
                 } else {
-                    prev[prevK] = valueNode;
+                    curr = seedOrFunction.json;
+                    for (i = 0; i < len; i++) {
+                        k = permuteRequested[i];
+                        if (k === null) {
+                            continue;
+                        }
+                        if (!curr[k]) {
+                            curr[k] = {};
+                        }
+                        prev = curr;
+                        prevK = k;
+                        curr = curr[k];
+                    }
+                    k = permuteRequested[i];
+                    if (k !== null) {
+                        curr[k] = valueNode;
+                    } else {
+                        prev[prevK] = valueNode;
+                    }
                 }
             }
             break;

@@ -5,6 +5,8 @@ module.exports = {
     getAsValues: require('./get/getAsValues')(walk),
     getAsPathMap: require('./get/getAsPathMap')(walk),
     getValueSync: require('./get/getValueSync'),
+    getBoundValue: require('./get/getBoundValue'),
+    getBoundContext: require('./get/getBoundContext'),
     setCache: require('./legacy_setCache')
 };
 
