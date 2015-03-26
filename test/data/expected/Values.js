@@ -269,7 +269,11 @@ module.exports = function() {
                 values: [{
                     json: {
                         genreList: {
-                            0: ["lists", "abcd"]
+                            0: {
+                                value: ["lists", "abcd"],
+                                $type: 'path',
+                                $size: 51
+                            }
                         }
                     }
                 }]
@@ -287,129 +291,6 @@ module.exports = function() {
                         }
                     },
                     paths: [["genreList", "0"]]
-                }]
-            }
-        },
-        "sentinelSummary": {
-            getPathSets: {
-                query: [
-                    ["videos", "sentinel", "summary"]
-                ]
-            },
-
-            setPathSets: {
-                query: [
-                    {
-                        "path": ["videos", "sentinel", "summary"],
-                        "value": {
-                            "$type": "sentinel",
-                            "value": {
-                                "title": "Marco Polo",
-                                "url": "/movies/sentinel"
-                            }
-                        }
-                    }
-                ]
-            },
-
-            setPathMaps: {
-                query: [{
-                    videos: {
-                        sentinel: {
-                            summary: {
-                                "$type": "sentinel",
-                                "value": {
-                                    "title": "Marco Polo",
-                                    "url": "/movies/sentinel"
-                                }
-                            }
-                        }
-                    }
-                }]
-            },
-            setJSONGs: {
-                query: [{
-                    paths: [["videos", "sentinel", "summary"]],
-                    jsong: {
-                        videos: {
-                            sentinel: {
-                                summary: {
-                                    "$size": 51,
-                                    "$type": "sentinel",
-                                    "value": {
-                                        "title": "Marco Polo",
-                                        "url": "/movies/sentinel"
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }]
-            },
-
-            getPathMaps: {
-                query: [{
-                    videos: {
-                        sentinel: {
-                            summary: null
-                        }
-                    }
-                }]
-            },
-
-            AsValues: {
-                values: [
-                    {
-                        "path": ["videos", "sentinel", "summary"],
-                        "value": {
-                            "title": "Marco Polo",
-                            "url": "/movies/sentinel"
-                        }
-                    }
-                ]
-            },
-
-            AsJSON: {
-                values: [{
-                    json: {
-                        "title": "Marco Polo",
-                        "url": "/movies/sentinel"
-                    }
-                }]
-            },
-
-            AsJSONG: {
-                values: [{
-                    jsong: {
-                        videos: {
-                            sentinel: {
-                                summary: {
-                                    "$size": 51,
-                                    "$type": "sentinel",
-                                    "value": {
-                                        "title": "Marco Polo",
-                                        "url": "/movies/sentinel"
-                                    }
-                                }
-                            }
-                        }
-                    },
-                    paths: [["videos", "sentinel", "summary"]]
-                }]
-            },
-
-            AsPathMap: {
-                values: [{
-                    json: {
-                        videos: {
-                            sentinel: {
-                                summary: {
-                                    "title": "Marco Polo",
-                                    "url": "/movies/sentinel"
-                                }
-                            }
-                        }
-                    }
                 }]
             }
         },

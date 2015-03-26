@@ -115,7 +115,7 @@ function walk(model, root, curr, pathOrJSON, depth, seedOrFunction, positionalIn
 
                 if (jsonQuery && hasChildren || !jsonQuery && depth < pathOrJSON.length) {
 
-                    if (nType && nType === 'reference' && !isExpired(next)) {
+                    if (nType && nType === 'path' && !isExpired(next)) {
                         if (asJSONG) {
                             onValue(model, next, nextPathOrPathMap, depth, seedOrFunction, outerResults, false, permuteOptimized, permutePosition, outputFormat);
                         }
