@@ -4,83 +4,83 @@ var Cache = function() {
         "$size": 1353,
         "genreList": {
             "$size": 81,
-            "-1": { "$type": "path", "value": ["lists", "def"] },
-            "0":  { "$type": "path", "value": ["lists", "abcd"] },
-            "1":  { "$type": "path", "value": ["lists", "my-list"] },
-            "2":  { "$type": "path", "value": ["lists", "error-list"] },
-            "3":  { "$type": "path", "value": ["lists", "sentinel-list"] },
-            "4":  { "$type": "path", "value": ["lists", "missing-list"] },
-            "5":  { "$type": "path", "value": ["lists", "to-error-list"] },
-            "6":  { "$type": "path", "value": ["lists", "to-missing-list"] },
-            "7":  { "$type": "path", "value": ["lists", "to-sentinel-list"] },
-            "8":  { "$type": "path", "value": ["lists", "expired-list"] },
-            "9":  { "$type": "path", "value": ["lists", "to-expired-list"] },
-            "10": { "$type": "path", "value": ["videos", 1234, "summary"] },
-            "11": { "$type": "path", "value": ["lists", "missing-branch-link", "summary"] },
-            "12": { "$type": "path", "value": ["lists", "future-expired-list"] },
+            "-1": { "$type": "reference", "value": ["lists", "def"] },
+            "0":  { "$type": "reference", "value": ["lists", "abcd"] },
+            "1":  { "$type": "reference", "value": ["lists", "my-list"] },
+            "2":  { "$type": "reference", "value": ["lists", "error-list"] },
+            "3":  { "$type": "reference", "value": ["lists", "sentinel-list"] },
+            "4":  { "$type": "reference", "value": ["lists", "missing-list"] },
+            "5":  { "$type": "reference", "value": ["lists", "to-error-list"] },
+            "6":  { "$type": "reference", "value": ["lists", "to-missing-list"] },
+            "7":  { "$type": "reference", "value": ["lists", "to-sentinel-list"] },
+            "8":  { "$type": "reference", "value": ["lists", "expired-list"] },
+            "9":  { "$type": "reference", "value": ["lists", "to-expired-list"] },
+            "10": { "$type": "reference", "value": ["videos", 1234, "summary"] },
+            "11": { "$type": "reference", "value": ["lists", "missing-branch-link", "summary"] },
+            "12": { "$type": "reference", "value": ["lists", "future-expired-list"] },
             "sentinel": {
                 "$size": 52,
-                "$type": "path",
+                "$type": "reference",
                 "value": ["lists", "to-sentinel-list"]
             },
-            "branch-miss": { "$type": "path", "value": ["does", "not", "exist"] }
+            "branch-miss": { "$type": "reference", "value": ["does", "not", "exist"] }
         },
         "lists": {
             "$size": 489,
             "abcd": {
                 "$size": 8,
-                "-1": { "$type": "path", "value": ["videos", 4422] },
-                "0":  { "$type": "path", "value": ["videos", 1234] },
-                "1":  { "$type": "path", "value": ["videos", 766] },
-                "2":  { "$type": "path", "value": ["videos", 7531] },
-                "3":  { "$type": "path", "value": ["videos", 6420] },
-                "4":  { "$type": "path", "value": ["videos", 0] },
-                "5":  { "$type": "path", "value": ["videos", 1] },
-                "6":  { "$type": "path", "value": ["videos", 2] },
-                "7":  { "$type": "path", "value": ["videos", 3] },
-                "8":  { "$type": "path", "value": ["videos", 4] },
-                "9":  { "$type": "path", "value": ["videos", 5] },
-                "10": { "$type": "path", "value": ["videos", 6] },
-                "11": { "$type": "path", "value": ["videos", 7] },
-                "12": { "$type": "path", "value": ["videos", 8] },
-                "13": { "$type": "path", "value": ["videos", 9] },
-                "14": { "$type": "path", "value": ["videos", 10] },
-                "15": { "$type": "path", "value": ["videos", 11] },
-                "16": { "$type": "path", "value": ["videos", 12] },
-                "17": { "$type": "path", "value": ["videos", 13] },
-                "18": { "$type": "path", "value": ["videos", 14] },
-                "19": { "$type": "path", "value": ["videos", 15] },
-                "20": { "$type": "path", "value": ["videos", 16] },
-                "21": { "$type": "path", "value": ["videos", 17] },
-                "22": { "$type": "path", "value": ["videos", 18] },
-                "23": { "$type": "path", "value": ["videos", 19] },
-                "24": { "$type": "path", "value": ["videos", 20] },
-                "25": { "$type": "path", "value": ["videos", 21] },
-                "26": { "$type": "path", "value": ["videos", 22] },
-                "27": { "$type": "path", "value": ["videos", 23] },
-                "28": { "$type": "path", "value": ["videos", 24] },
-                "29": { "$type": "path", "value": ["videos", 25] },
-                "30": { "$type": "path", "value": ["videos", 26] },
-                "31": { "$type": "path", "value": ["videos", 27] },
-                "32": { "$type": "path", "value": ["videos", 28] },
-                "33": { "$type": "path", "value": ["videos", 29] }
+                "-1": { "$type": "reference", "value": ["videos", 4422] },
+                "0":  { "$type": "reference", "value": ["videos", 1234] },
+                "1":  { "$type": "reference", "value": ["videos", 766] },
+                "2":  { "$type": "reference", "value": ["videos", 7531] },
+                "3":  { "$type": "reference", "value": ["videos", 6420] },
+                "4":  { "$type": "reference", "value": ["videos", 0] },
+                "5":  { "$type": "reference", "value": ["videos", 1] },
+                "6":  { "$type": "reference", "value": ["videos", 2] },
+                "7":  { "$type": "reference", "value": ["videos", 3] },
+                "8":  { "$type": "reference", "value": ["videos", 4] },
+                "9":  { "$type": "reference", "value": ["videos", 5] },
+                "10": { "$type": "reference", "value": ["videos", 6] },
+                "11": { "$type": "reference", "value": ["videos", 7] },
+                "12": { "$type": "reference", "value": ["videos", 8] },
+                "13": { "$type": "reference", "value": ["videos", 9] },
+                "14": { "$type": "reference", "value": ["videos", 10] },
+                "15": { "$type": "reference", "value": ["videos", 11] },
+                "16": { "$type": "reference", "value": ["videos", 12] },
+                "17": { "$type": "reference", "value": ["videos", 13] },
+                "18": { "$type": "reference", "value": ["videos", 14] },
+                "19": { "$type": "reference", "value": ["videos", 15] },
+                "20": { "$type": "reference", "value": ["videos", 16] },
+                "21": { "$type": "reference", "value": ["videos", 17] },
+                "22": { "$type": "reference", "value": ["videos", 18] },
+                "23": { "$type": "reference", "value": ["videos", 19] },
+                "24": { "$type": "reference", "value": ["videos", 20] },
+                "25": { "$type": "reference", "value": ["videos", 21] },
+                "26": { "$type": "reference", "value": ["videos", 22] },
+                "27": { "$type": "reference", "value": ["videos", 23] },
+                "28": { "$type": "reference", "value": ["videos", 24] },
+                "29": { "$type": "reference", "value": ["videos", 25] },
+                "30": { "$type": "reference", "value": ["videos", 26] },
+                "31": { "$type": "reference", "value": ["videos", 27] },
+                "32": { "$type": "reference", "value": ["videos", 28] },
+                "33": { "$type": "reference", "value": ["videos", 29] }
             },
             "def": {
                 "$size": 6,
-                "0": { "$type": "path", "value": ["videos", 888] },
-                "1": { "$type": "path", "value": ["videos", 999] },
-                "2": { "$type": "path", "value": ["videos", 542] }
+                "0": { "$type": "reference", "value": ["videos", 888] },
+                "1": { "$type": "reference", "value": ["videos", 999] },
+                "2": { "$type": "reference", "value": ["videos", 542] }
             },
             "sentinel-list": {
                 "$size": 104,
                 "0": {
                     "$size": 52,
-                    "$type": "path",
+                    "$type": "reference",
                     "value": ["videos", 333]
                 },
                 "1": {
                     "$size": 52,
-                    "$type": "path",
+                    "$type": "reference",
                     "value": ["videos", "sentinel"]
                 }
             },
@@ -88,16 +88,16 @@ var Cache = function() {
                 "$size": 52,
                 "0": {
                     "$size": 52,
-                    "$type": "path",
+                    "$type": "reference",
                     "value": ["videos", 733]
                 }
             },
             "1x5x": {
                 "$size": 4,
-                "0": { "$type": "path", "value": ["videos", 553] },
-                "1": { "$type": "path", "value": ["videos", 5522] }
+                "0": { "$type": "reference", "value": ["videos", 553] },
+                "1": { "$type": "reference", "value": ["videos", 5522] }
             },
-            "my-list": { "$type": "path", "value": ["lists", "1x5x"] },
+            "my-list": { "$type": "reference", "value": ["lists", "1x5x"] },
             "error-list": {
                 "$size": 51,
                 "$type": "error",
@@ -113,15 +113,15 @@ var Cache = function() {
                 "$type": "sentinel",
                 "$expires": expiredTimestamp,
                 "value": {
-                    "0": { "$type": "path", "value": ["videos", 333] },
-                    "1": { "$type": "path", "value": ["videos", "sentinel"] }
+                    "0": { "$type": "reference", "value": ["videos", 333] },
+                    "1": { "$type": "reference", "value": ["videos", "sentinel"] }
                 }
             },
-            "to-error-list": { "$type": "path", "value": ["lists", "error-list-2"] },
-            "to-missing-list": { "$type": "path", "value": ["lists", "missing-list-2"] },
+            "to-error-list": { "$type": "reference", "value": ["lists", "error-list-2"] },
+            "to-missing-list": { "$type": "reference", "value": ["lists", "missing-list-2"] },
             "to-expired-list": {
                 "$size": 52,
-                "$type": "path",
+                "$type": "reference",
                 "value": ["lists", "expired-list"]
             },
             "future-expired-list": {
@@ -129,12 +129,12 @@ var Cache = function() {
                 "$expires": Date.now() + 100000,
                 "$size": 51,
                 "value": {
-                    "0": { "$type": "path", "value": ["videos", 1234] }
+                    "0": { "$type": "reference", "value": ["videos", 1234] }
                 }
             },
             "to-sentinel-list": {
                 "$size": 52,
-                "$type": "path",
+                "$type": "reference",
                 "value": ["lists", "sentinel-list-2"]
             }
         },

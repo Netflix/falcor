@@ -85,7 +85,7 @@ module.exports = function() {
                         genreList: {
                             0: {
                                 "$size": "51",
-                                "$type": "path",
+                                "$type": "reference",
                                 "value": ["lists", "abcd"]
                             }
                         },
@@ -93,7 +93,7 @@ module.exports = function() {
                             abcd: {
                                 0: {
                                     "$size": "51",
-                                    "$type": "path",
+                                    "$type": "reference",
                                     "value": ["videos", "1234"]
                                 }
                             }
@@ -217,7 +217,7 @@ module.exports = function() {
                         genreList: {
                             0: {
                                 "$size": "51",
-                                "$type": "path",
+                                "$type": "reference",
                                 "value": ["lists", "abcd"]
                             }
                         },
@@ -225,7 +225,7 @@ module.exports = function() {
                             abcd: {
                                 1: {
                                     "$size": "51",
-                                    "$type": "path",
+                                    "$type": "reference",
                                     "value": ["videos", "766"]
                                 }
                             }
@@ -288,7 +288,7 @@ module.exports = function() {
                         genreList: {
                             0: {
                                 "$size": "51",
-                                "$type": "path",
+                                "$type": "reference",
                                 "value": ["lists", "abcd"]
                             }
                         },
@@ -296,7 +296,7 @@ module.exports = function() {
                             abcd: {
                                 2: {
                                     "$size": "51",
-                                    "$type": "path",
+                                    "$type": "reference",
                                     "value": ["videos", "7531"]
                                 }
                             }
@@ -357,7 +357,7 @@ module.exports = function() {
                         genreList: {
                             0: {
                                 "$size": "51",
-                                "$type": "path",
+                                "$type": "reference",
                                 "value": ["lists", "abcd"]
                             }
                         },
@@ -365,7 +365,7 @@ module.exports = function() {
                             abcd: {
                                 2: {
                                     "$size": "51",
-                                    "$type": "path",
+                                    "$type": "reference",
                                     "value": ["videos", "7531"]
                                 }
                             }
@@ -428,7 +428,7 @@ module.exports = function() {
                         genreList: {
                             0: {
                                 "$size": "51",
-                                "$type": "path",
+                                "$type": "reference",
                                 "value": ["lists", "abcd"]
                             }
                         },
@@ -436,7 +436,7 @@ module.exports = function() {
                             abcd: {
                                 3: {
                                     "$size": "51",
-                                    "$type": "path",
+                                    "$type": "reference",
                                     "value": ["videos", "6420"]
                                 }
                             }
@@ -497,7 +497,7 @@ module.exports = function() {
                         genreList: {
                             0: {
                                 "$size": "51",
-                                "$type": "path",
+                                "$type": "reference",
                                 "value": ["lists", "abcd"]
                             }
                         },
@@ -505,7 +505,7 @@ module.exports = function() {
                             abcd: {
                                 3: {
                                     "$size": "51",
-                                    "$type": "path",
+                                    "$type": "reference",
                                     "value": ["videos", "6420"]
                                 }
                             }
@@ -604,7 +604,7 @@ module.exports = function() {
                         genreList: {
                             10: {
                                 "$size": "51",
-                                "$type": "path",
+                                "$type": "reference",
                                 "value": ["videos", "1234", "summary"]
                             }
                         },
@@ -688,7 +688,7 @@ module.exports = function() {
                         genreList: {
                             1: {
                                 "$size": "51",
-                                "$type": "path",
+                                "$type": "reference",
                                 "value": ["lists", "my-list"]
                             }
                         },
@@ -696,13 +696,13 @@ module.exports = function() {
                             "1x5x": {
                                 0: {
                                     "$size": "51",
-                                    "$type": "path",
+                                    "$type": "reference",
                                     "value": ["videos", "553"]
                                 }
                             },
                             "my-list": {
                                 "$size": "51",
-                                "$type": "path",
+                                "$type": "reference",
                                 "value": ["lists", "1x5x"]
                             }
                         },
@@ -792,20 +792,20 @@ module.exports = function() {
                         genreList: {
                             1: {
                                 "$size": "51",
-                                "$type": "path",
+                                "$type": "reference",
                                 "value": ["lists", "my-list"]
                             }
                         },
                         lists: {
                             "my-list": {
                                 "$size": "51",
-                                "$type": "path",
+                                "$type": "reference",
                                 "value": ["lists", "1x5x"]
                             },
                             "1x5x": {
                                 0: {
                                     "$size": "51",
-                                    "$type": "path",
+                                    "$type": "reference",
                                     "value": ["videos", "553"]
                                 }
                             }
@@ -897,20 +897,20 @@ module.exports = function() {
                         genreList: {
                             1: {
                                 "$size": "51",
-                                "$type": "path",
+                                "$type": "reference",
                                 "value": ["lists", "my-list"]
                             }
                         },
                         lists: {
                             "my-list": {
                                 "$size": "51",
-                                "$type": "path",
+                                "$type": "reference",
                                 "value": ["lists", "1x5x"]
                             },
                             "1x5x": {
                                 0: {
                                     "$size": "51",
-                                    "$type": "path",
+                                    "$type": "reference",
                                     "value": ["videos", "553"]
                                 }
                             }
@@ -929,7 +929,7 @@ module.exports = function() {
                             1: {
                                 0: {
                                     "$size": "51",
-                                    "$type": "path",
+                                    "$type": "reference",
                                     "value": ["videos", "553"]
                                 }
                             }
@@ -996,7 +996,7 @@ module.exports = function() {
                         genreList: {
                             3: {
                                 "$size": "51",
-                                "$type": "path",
+                                "$type": "reference",
                                 "value": ["lists", "sentinel-list"]
                             }
                         },
@@ -1004,7 +1004,7 @@ module.exports = function() {
                             "sentinel-list": {
                                 "0": {
                                     "$size": 52,
-                                    "$type": "path",
+                                    "$type": "reference",
                                     "value": ["videos", "333"]
                                 }
                             }
@@ -1102,7 +1102,7 @@ module.exports = function() {
                         genreList: {
                             7: {
                                 "$size": "51",
-                                "$type": "path",
+                                "$type": "reference",
                                 "value": ["lists", "to-sentinel-list"]
                             }
                         },
@@ -1110,13 +1110,13 @@ module.exports = function() {
                             "sentinel-list-2": {
                                 0: {
                                     "$size": 52,
-                                    "$type": "path",
+                                    "$type": "reference",
                                     "value": ["videos", "733"]
                                 }
                             },
                             "to-sentinel-list": {
                                 "$size": 52,
-                                "$type": "path",
+                                "$type": "reference",
                                 "value": ["lists", "sentinel-list-2"]
                             }
                         },
@@ -1194,7 +1194,7 @@ module.exports = function() {
                         "genreList": {
                             "5": {
                                 "$size": "51",
-                                "$type": "path",
+                                "$type": "reference",
                                 "value": ["lists", "to-error-list"]
                             }
                         },
@@ -1206,7 +1206,7 @@ module.exports = function() {
                             },
                             "to-error-list": {
                                 "$size": "51",
-                                "$type": "path",
+                                "$type": "reference",
                                 "value": ["lists", "error-list-2"]
                             }
                         }
@@ -1260,7 +1260,7 @@ module.exports = function() {
                         "genreList": {
                             "2": {
                                 "$size": "51",
-                                "$type": "path",
+                                "$type": "reference",
                                 "value": ["lists", "error-list"]
                             }
                         },
@@ -1321,7 +1321,7 @@ module.exports = function() {
                         genreList: {
                             'inner-reference': {
                                 "$size": "51",
-                                "$type": "path",
+                                "$type": "reference",
                                 "value": ['movies', 1234]
                             }
                         },
@@ -1384,7 +1384,7 @@ module.exports = function() {
                         "genreList": {
                             "2": {
                                 "$size": "51",
-                                "$type": "path",
+                                "$type": "reference",
                                 "value": ["lists", "error-list"]
                             }
                         },

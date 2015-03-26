@@ -271,7 +271,7 @@ module.exports = function() {
                         genreList: {
                             0: {
                                 "$size": 51,
-                                "$type": "path",
+                                "$type": "reference",
                                 "value": ["lists", "abcd"]
                             }
                         }
@@ -285,7 +285,7 @@ module.exports = function() {
                         genreList: {
                             0: {
                                 "$size": 51,
-                                "$type": "path",
+                                "$type": "reference",
                                 "value": ["lists", "abcd"]
                             }
                         }
@@ -734,7 +734,7 @@ module.exports = function() {
                         "genreList": {
                             "2": {
                                 "$size": 51,
-                                "$type": "path",
+                                "$type": "reference",
                                 "value": ["lists", "error-list"]
                             }
                         },
