@@ -24,7 +24,7 @@ function simple(model, format) {
             };
         case 'Value':
             return function() {
-                model._setPathSetsAsValues(model, simpleRequest, noOp);
+                model._setPathSetsAsValues(model, simpleRequest, []);
             };
     }
 }
@@ -48,7 +48,7 @@ function reference(model, format) {
             };
         case 'Value':
             return function() {
-                model._setPathSetsAsValues(model, referenceRequest, noOp);
+                model._setPathSetsAsValues(model, referenceRequest, []);
             };
     }
 }
