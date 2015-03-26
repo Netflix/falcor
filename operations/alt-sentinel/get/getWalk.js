@@ -165,7 +165,7 @@ function evaluateNode(model, curr, pathOrJSON, depth, seedOrFunction, requestedP
                     onError(model, curr, requestedPath, null, outerResults);
                 }
             } else {
-                if (model._errorsAsValues) {
+                if (model._treatErrorsAsValues) {
                     onValue(model, curr, pathOrJSON, depth, seedOrFunction, outerResults, requestedPath, optimizedPath, positionalInfo, outputFormat);
                 } else {
                     onError(model, curr, requestedPath, optimizedPath, outerResults);

@@ -9,16 +9,16 @@ module.exports = function(walk) {
             optimizedMissingPaths: []
         };
         var inputFormat = Array.isArray(paths[0]) ? 'Paths' : 'JSON';
-        var jsong;
         if (values && values.length === 1 && !values[0].jsong) {
-            jsong = {jsong: values[0], paths: []};
-            results.values = [jsong];
+            values[0].jsong = {};
+            values[0].paths = [];
+            results.values = values;
         } else {
             jsong = values[0];
         }
 
         for (var i = 0, len = paths.length; i < len; i++) {
-            walk(model, model._cache, model._cache, paths[i], 0, jsong, [], results, [], [], inputFormat, 'JSONG');
+            walk(model, model._cache, model._cache, paths[i], 0, values[0], [], results, [], [], inputFormat, 'JSONG');
         }
 
         if (results.requestedPaths.length === 0) {

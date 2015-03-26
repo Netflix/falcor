@@ -18,7 +18,7 @@ var expect = require('chai').expect;
 //describe("Construct Matching Skeleton Cache", function() {
 //    execute(false);
 //});
-describe.only("Use Cache Model", function() {
+describe("Use Cache Model", function() {
     execute(true);
 });
 describe("Use One Model For All Operations With Preset Cache.", function() {

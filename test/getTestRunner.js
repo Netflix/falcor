@@ -85,7 +85,7 @@ function getTestRunner(data, options) {
                                 if (_.isEqual(path, val)) {
                                     actualCount++;
                                     tested = true;
-                                    testRunner.compare(vals[i].path, pV.path);
+                                    testRunner.compare(vals[i], pV);
                                     break;
                                 }
                             }
