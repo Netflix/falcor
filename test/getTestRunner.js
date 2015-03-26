@@ -7,17 +7,7 @@ var chai = require("chai");
 var expect = chai.expect;
 var Model = jsong.Model;
 var Cache = require("./data/Cache");
-
-function getTestRunnerHeader(model, data, options) {
-    if (!(model instanceof Rx.Observable)) {
-        var m = model;
-        model = Rx.Observable.returnValue(m);
-    }
-    return model.doAction(function(dataModel) {
-        getTestRunner(dataModel, data, options);
-    });
-}
-function getTestRunner(model, data, options) {
+function getTestRunner(data, options) {
     options = _.extend({
         useNewModel: true,
         preCall: noOp
@@ -49,8 +39,11 @@ function getTestRunner(model, data, options) {
                 expectedValues = data[suffix];
                 expected = _.assign({}, expectedValues, universalExpectedValues);
 
+                var model;
                 if (options.useNewModel) {
                     model = testRunner.getModel(null, Cache());
+                } else {
+                    model = options.model;
                 }
                 
                 if(options.materialized) {
@@ -133,83 +126,4 @@ function toString(x) {
     return x + '';
 }
 
-function async(obs, model, data, options) {
-    var idx = 0;
-    options = options || {};
-    var expectedCount = options.onNextExpected &&
-        options.onNextExpected.values &&
-        options.onNextExpected.values.length || 0;
-    var errorThrown = false;
-    var verify = options && options.verify === false ? false : true;
-    return Rx.Observable.create(function(observer) {
-        var n = observer.onNext.bind(observer);
-        var e = observer.onError.bind(observer);
-        var c = observer.onCompleted.bind(observer);
-
-        // Converting a falcor obs to an rx obs.
-        obs.
-            doOnNext(function(x) {
-                if (options.onNextExpected) {
-                    var expected = options.onNextExpected.values[idx++];
-                    testRunner.compare(expected, x);
-                }
-            }).
-            doOnError(function(err) {
-                errorThrown = true;
-                if (options.errors) {
-                    testRunner.compare(options.errors, err);
-                }
-            }).
-            doOnCompleted(function() {
-                if (options.onNextExpected) {
-                    expect(idx, "The amount of onNexts did not meet expected").to.equal(expectedCount);
-                }
-                if (verify && data && Object.keys(data).length) {
-                    getTestRunner(model, data, options);
-                }
-            }).
-            subscribe(n, function(err) {
-                var threw = false;
-                try {
-                    if (options.errors) {
-                        expect(errorThrown, "Expected an error to be thrown, and no error was.").to.be.ok;
-                    } else {
-                        if (err instanceof Error || toString.call(err) === "[object Error]") {
-                            e(err);
-                        } else {
-                            e({error: err});
-                        }
-                        threw = true;
-                    }
-                } catch(ex) {
-                    e(ex);
-                    threw = true;
-                }
-                if (!threw) {
-                    c();
-                }
-            }, c);
-
-    });
-    
-}
-
-
-var GetTestRunner = module.exports = {
-    run: function() {
-        var args = arguments;
-        if (args[2] && args[2].it === false) {
-            return getTestRunnerHeader.apply(null, args);
-        } else {
-            it("perform _get*", function(done) {
-                getTestRunnerHeader.apply(null, args).subscribe(noOp, done, done);
-            });
-        }
-    },
-    runSync: function() {
-        getTestRunner.apply(null, arguments);
-    },
-    async: async
-};
-
-
+module.exports = getTestRunner;
