@@ -62,23 +62,23 @@ module.exports = function() {
             AsValues: {
                 values: [{
                     "path": ["misc", "usentinel"],
-                    "value": { "$type": "sentinel", "$size": 51, "value": undefined }
+                    "value": { "$type": "sentinel" }
                 }]
             },
             AsJSON: {
                 values: [{
-                    json: { "$type": "sentinel", "$size": 51, "value": undefined }
+                    json: { "$type": "sentinel" }
                 }]
             },
             AsPathMap: {
                 values: [{
-                    json: { misc: { usentinel: { "$type": "sentinel", "$size": 51, "value": undefined } } } 
+                    json: { misc: { usentinel: { "$type": "sentinel" } } } 
                 }]
             },
             AsJSONG: {
                 values: [{
                     paths: [["misc", "usentinel"]],
-                    jsong: { misc: { usentinel: { "$type": "sentinel", "$size": 51, "value": undefined } } } 
+                    jsong: { misc: { usentinel: { "$type": "sentinel" } } } 
                 }]
             }
         }

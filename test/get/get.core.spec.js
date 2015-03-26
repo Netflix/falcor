@@ -26,7 +26,7 @@ describe("Values", function() {
     it("should get a value directly", function() {
         getTestRunner(Values().direct);
     });
-    it("should get a value that is a references", function() {
+    it("should get a value that is a reference", function() {
         getTestRunner(Values().reference);
     });
     describe("Errors", function() {
@@ -99,7 +99,7 @@ describe("References", function() {
         });
     });
     describe("Expired", function() {
-        it("should report a missing requested path when reference is expired.", function() {
+        xit("should report a missing requested path when reference is expired.", function() {
             getTestRunner(References().referenceExpired);
         });
         xit("should report a missing requested path when a hardlinked reference becomes expired.", function() {
