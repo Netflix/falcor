@@ -12,8 +12,7 @@ describe("Model", function() {
     // require("./schedulers/schedulers.spec");
 
     describe("#get", function() {
-        require("./get/get.spec");
-        require("./get/get.sync.spec");
+        require("./get");
     });
     
     describe("#set", function() {

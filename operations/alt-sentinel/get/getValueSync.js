@@ -25,7 +25,7 @@ module.exports = function getValueSync(model, simplePath) {
 
         // Up to the last key we follow references
         if (depth < len) {
-            if (type === 'reference') {
+            if (type === 'path') {
                 ref = followReference(model, root, root, next, next.value);
                 refNode = ref[0];
 

@@ -44,7 +44,7 @@ function followReference(model, root, node, referenceContainer, reference, seed,
                 }
 
                 // Restart the reference follower.
-                if (type === 'reference') {
+                if (type === 'path') {
                     if (outputFormat === 'JSONG') {
                         onValue(model, next, reference, depth, seed, null, null, reference, null, outputFormat);
                     }

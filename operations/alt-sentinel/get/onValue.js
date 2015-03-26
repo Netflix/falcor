@@ -24,7 +24,7 @@ module.exports = function onValue(model, node, path, depth, seedOrFunction, oute
         valueNode = clone(node);
     }
     
-    else if (node.$type === 'reference' || node.$type === 'error') {
+    else if (node.$type === 'path' || node.$type === 'error') {
         if (outputFormat === 'Values' || outputFormat === 'JSON') {
             valueNode = node.value;
         } else {

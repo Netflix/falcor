@@ -14,10 +14,10 @@ prototype._getPathMapsAsJSON = sentinelGet.getAsJSON;
 prototype._getPathMapsAsPathMap = sentinelGet.getAsPathMap;
 prototype._getPathMapsAsJSONG = sentinelGet.getAsJSONG;
 
-prototype._setPathSetsAsJSON = require("./lib/operations/set-pathsets-json-dense");
-prototype._setPathSetsAsJSONG = require("./lib/operations/set-pathsets-json-graph");
-prototype._setPathSetsAsPathMap = require("./lib/operations/set-pathsets-json-sparse");
-prototype._setPathSetsAsValues = require("./lib/operations/set-pathsets-json-values");
+//prototype._setPathSetsAsJSON = require("./lib/operations/set-pathsets-json-dense");
+//prototype._setPathSetsAsJSONG = require("./lib/operations/set-pathsets-json-graph");
+//prototype._setPathSetsAsPathMap = require("./lib/operations/set-pathsets-json-sparse");
+//prototype._setPathSetsAsValues = require("./lib/operations/set-pathsets-json-values");
 
 // prototype._setPathMapsAsValues = require("./operations/alt/legacy_setPathMapsAsValues");
 prototype._setCache = require("./operations/alt-sentinel/legacy_setCache");
