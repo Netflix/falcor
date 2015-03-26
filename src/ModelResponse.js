@@ -1,4 +1,4 @@
-var falcor = require('./falcor');
+var falcor = require('./Falcor');
 
 var Observable  = falcor.Observable,
     valuesMixin = { format: { value: "AsValues"  } },
