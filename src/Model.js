@@ -104,14 +104,13 @@ Model.prototype = {
         return this.syncCheck("getBoundContext") && this._getBoundContext(this);
     },
     getValueSync: function(path) {
-        if(Array.isArray(path) === false) {
+        if (Array.isArray(path) === false) {
             throw new Error("Model#getValueSync must be called with an Array path.");
         }
-        var value = this.syncCheck("getValueSync") && this._getValueSync(this, this._path.concat(path)).value;
-        if(value[$TYPE] === ERROR) {
-            throw value;
+        if (this._path.length) {
+            path = this._path.concat(path);
         }
-        return value;
+        return this.syncCheck("getValueSync") && this._getValueSync(this, path).value;
     },
     setValueSync: function(path, value, errorSelector) {
         if(Array.isArray(path) === false) {
@@ -128,7 +127,8 @@ Model.prototype = {
             throw new Error("Model#setValueSync can not be invoked on a Model with a DataSource. Please use the withoutDataSource() method followed by setValueSync if you would like to modify only the local cache.");
         }
         var value = this.syncCheck("setValueSync") && this._setValueSync(this, this._path.concat(path), value, errorSelector);
-        if(value[$TYPE] === ERROR) {
+        
+        if (value[$TYPE] === ERROR && !this._treatErrorsAsValues) {
             throw value;
         }
         return value;
@@ -161,7 +161,7 @@ Model.prototype = {
         });
 
         Array.prototype.slice.call(arguments).forEach(function(tuple) {
-            model[tuple[0]] = tuple[1];
+            clone[tuple[0]] = tuple[1];
         });
 
         return clone;
@@ -177,6 +177,12 @@ Model.prototype = {
     unbatch: function() {
         return this.clone(["_request", new RequestQueue(this, new Schedulers.ImmediateScheduler())]);
     },
+    treatErrorsAsValues: function() {
+        return this.clone(["_treatErrorsAsValues", true]);
+    },
+    materialize: function() {
+        return this.clone(["_materialized", true]);
+    },
     boxValues: function() {
         return this.clone(["_boxed", true]);
     },
@@ -187,7 +193,7 @@ Model.prototype = {
         return this.clone(["_dataSource", null]);
     },
     syncCheck: function(name) {
-        if(this._root.allowSync === false && this._root.unsafeMode === false) {
+        if (this._root.allowSync === false && this._root.unsafeMode === false) {
             throw new Error("Model#" + name + " may only be called within the context of a request selector.");
         }
         return true;

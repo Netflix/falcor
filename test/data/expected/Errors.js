@@ -100,7 +100,7 @@ module.exports = function() {
                         "genreList": {
                             "2": {
                                 "$size": 51,
-                                "$type": "reference",
+                                "$type": "path",
                                 "value": ["lists", "error-list"]
                             }
                         },

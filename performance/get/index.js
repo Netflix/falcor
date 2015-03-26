@@ -3,8 +3,22 @@ module.exports = {
     scrollGallery: scrollGallery,
     simple: simple,
     reference: reference,
-    complex: complex
+    complex: complex,
+    syncSimple: syncSimple,
+    syncReference: syncReference
 };
+var noOp = function() {};
+function syncSimple(model) {
+    return function() {
+        model.getValueSync(['videos', 1234, 'summary'])
+    }
+}
+function syncReference(model) {
+    return function() {
+        model.getValueSync(['videos', 1234, 'summary'])
+    }
+}
+
 function startup(model, format) {
     var startupRequest = [ ["startup"], ["appconfig"], ["languages"], ["geolocation"], ["user"], ["uiexperience"], ["lolomo", "summary"], ["lolomo", {"to": 60}, "summary"], ["lolomo", 0, "billboardData"], ["lolomo", 0, 0, "postcard"], ["profilesList", {"to": 4}, "avatar", "images", "byWidth", [32, 64, 80, 100, 112, 160, 200, 320]], ["profilesList", {"to": 4}, "summary"], ["profilesList", "summary"], ["profilesList", "availableAvatarsList", {"to": 18}, "images", "byWidth", [32, 64, 80, 100, 112, 160, 200, 320]], ["profilesList", "availableAvatarsList", {"to": 18}, "summary"], ["profilesList", "availableAvatarsList", "summary"], ["profiles", "hasSeenPromoGate"], ["lolomo", "maxExperience"], ["lolomo", 0, 0, "evidence"], ["lolomo", 0, 0, "item", ["info", "summary", "outline", "rating", "heroImages"]] ];
     switch (format) {
@@ -22,7 +36,7 @@ function startup(model, format) {
             };
         case 'Value':
             return function() {
-                model._getPathSetsAsValues(model, startupRequest, noOp);
+                model._getPathSetsAsValues(model, startupRequest, []);
             };
     }
 }
@@ -33,7 +47,7 @@ function scrollGallery(model, format) {
         ["lists", "abcd", {"from": 21, "to": 30}, "summary"],
         ["lists", "abcd", {"from": 31, "to": 40}, "summary"]
     ];
-    for (var i = 0; i < 40;)
+    // for (var i = 0; i < 40;)
     switch (format) {
         case 'JSON':
             return function() {
@@ -49,7 +63,7 @@ function scrollGallery(model, format) {
             };
         case 'Value':
             return function() {
-                model._getPathSetsAsValues(model, scollingRequest, noOp);
+                model._getPathSetsAsValues(model, scollingRequest, []);
             };
     }
 }
@@ -73,7 +87,7 @@ function simple(model, format) {
             };
         case 'Value':
             return function() {
-                model._getPathSetsAsValues(model, simpleRequest, noOp);
+                model._getPathSetsAsValues(model, simpleRequest, []);
             };
     }
 }
@@ -96,7 +110,7 @@ function reference(model, format) {
             };
         case 'Value':
             return function() {
-                model._getPathSetsAsValues(model, referenceRequest, noOp);
+                model._getPathSetsAsValues(model, referenceRequest, []);
             };
     }
 }
@@ -119,7 +133,7 @@ function complex(model, format) {
             };
         case 'Value':
             return function() {
-                model._getPathSetsAsValues(model, complexRequest, noOp);
+                model._getPathSetsAsValues(model, complexRequest, []);
             };
     }
 }

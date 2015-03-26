@@ -8,10 +8,9 @@ branches:
     only:
         - master
 
-before_install: npm install -g linklocal;
 # travis runs 'npm install' by default, as the 'install' step
 
-before_script: linklocal -r; npm run dist;
+before_script: npm run dist;
 # travis runs 'npm test' by default, as the 'script' step
 
 # PLACEHOLDER FOR COVERAGE REPORTS ON GITHUB, IF WE WANT THEM.

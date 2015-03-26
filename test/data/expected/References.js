@@ -85,7 +85,7 @@ module.exports = function() {
                         genreList: {
                             0: {
                                 "$size": "51",
-                                "$type": "reference",
+                                "$type": "path",
                                 "value": ["lists", "abcd"]
                             }
                         },
@@ -93,7 +93,7 @@ module.exports = function() {
                             abcd: {
                                 0: {
                                     "$size": "51",
-                                    "$type": "reference",
+                                    "$type": "path",
                                     "value": ["videos", "1234"]
                                 }
                             }
@@ -217,7 +217,7 @@ module.exports = function() {
                         genreList: {
                             0: {
                                 "$size": "51",
-                                "$type": "reference",
+                                "$type": "path",
                                 "value": ["lists", "abcd"]
                             }
                         },
@@ -225,7 +225,7 @@ module.exports = function() {
                             abcd: {
                                 1: {
                                     "$size": "51",
-                                    "$type": "reference",
+                                    "$type": "path",
                                     "value": ["videos", "766"]
                                 }
                             }
@@ -288,7 +288,7 @@ module.exports = function() {
                         genreList: {
                             0: {
                                 "$size": "51",
-                                "$type": "reference",
+                                "$type": "path",
                                 "value": ["lists", "abcd"]
                             }
                         },
@@ -296,7 +296,7 @@ module.exports = function() {
                             abcd: {
                                 2: {
                                     "$size": "51",
-                                    "$type": "reference",
+                                    "$type": "path",
                                     "value": ["videos", "7531"]
                                 }
                             }
@@ -357,7 +357,7 @@ module.exports = function() {
                         genreList: {
                             0: {
                                 "$size": "51",
-                                "$type": "reference",
+                                "$type": "path",
                                 "value": ["lists", "abcd"]
                             }
                         },
@@ -365,7 +365,7 @@ module.exports = function() {
                             abcd: {
                                 2: {
                                     "$size": "51",
-                                    "$type": "reference",
+                                    "$type": "path",
                                     "value": ["videos", "7531"]
                                 }
                             }
@@ -428,7 +428,7 @@ module.exports = function() {
                         genreList: {
                             0: {
                                 "$size": "51",
-                                "$type": "reference",
+                                "$type": "path",
                                 "value": ["lists", "abcd"]
                             }
                         },
@@ -436,7 +436,7 @@ module.exports = function() {
                             abcd: {
                                 3: {
                                     "$size": "51",
-                                    "$type": "reference",
+                                    "$type": "path",
                                     "value": ["videos", "6420"]
                                 }
                             }
@@ -497,7 +497,7 @@ module.exports = function() {
                         genreList: {
                             0: {
                                 "$size": "51",
-                                "$type": "reference",
+                                "$type": "path",
                                 "value": ["lists", "abcd"]
                             }
                         },
@@ -505,7 +505,7 @@ module.exports = function() {
                             abcd: {
                                 3: {
                                     "$size": "51",
-                                    "$type": "reference",
+                                    "$type": "path",
                                     "value": ["videos", "6420"]
                                 }
                             }
@@ -604,7 +604,7 @@ module.exports = function() {
                         genreList: {
                             10: {
                                 "$size": "51",
-                                "$type": "reference",
+                                "$type": "path",
                                 "value": ["videos", "1234", "summary"]
                             }
                         },
@@ -688,7 +688,7 @@ module.exports = function() {
                         genreList: {
                             1: {
                                 "$size": "51",
-                                "$type": "reference",
+                                "$type": "path",
                                 "value": ["lists", "my-list"]
                             }
                         },
@@ -696,13 +696,13 @@ module.exports = function() {
                             "1x5x": {
                                 0: {
                                     "$size": "51",
-                                    "$type": "reference",
+                                    "$type": "path",
                                     "value": ["videos", "553"]
                                 }
                             },
                             "my-list": {
                                 "$size": "51",
-                                "$type": "reference",
+                                "$type": "path",
                                 "value": ["lists", "1x5x"]
                             }
                         },
@@ -792,20 +792,20 @@ module.exports = function() {
                         genreList: {
                             1: {
                                 "$size": "51",
-                                "$type": "reference",
+                                "$type": "path",
                                 "value": ["lists", "my-list"]
                             }
                         },
                         lists: {
                             "my-list": {
                                 "$size": "51",
-                                "$type": "reference",
+                                "$type": "path",
                                 "value": ["lists", "1x5x"]
                             },
                             "1x5x": {
                                 0: {
                                     "$size": "51",
-                                    "$type": "reference",
+                                    "$type": "path",
                                     "value": ["videos", "553"]
                                 }
                             }
@@ -897,20 +897,20 @@ module.exports = function() {
                         genreList: {
                             1: {
                                 "$size": "51",
-                                "$type": "reference",
+                                "$type": "path",
                                 "value": ["lists", "my-list"]
                             }
                         },
                         lists: {
                             "my-list": {
                                 "$size": "51",
-                                "$type": "reference",
+                                "$type": "path",
                                 "value": ["lists", "1x5x"]
                             },
                             "1x5x": {
                                 0: {
                                     "$size": "51",
-                                    "$type": "reference",
+                                    "$type": "path",
                                     "value": ["videos", "553"]
                                 }
                             }
@@ -929,226 +929,8 @@ module.exports = function() {
                             1: {
                                 0: {
                                     "$size": "51",
-                                    "$type": "reference",
+                                    "$type": "path",
                                     "value": ["videos", "553"]
-                                }
-                            }
-                        }
-                    }
-                }]
-            }
-        },
-        sentinelReference: {
-            optimizedPaths: [
-                ["videos", "333", "summary"]
-            ],
-
-            setPathSets: {
-                query: [{
-                    "path": ["genreList", "3", "0", "summary"],
-                    "value": {
-                        "title": "Terminator 2",
-                        "url": "/movies/333"
-                    }
-                }]
-            },
-
-            getPathMaps: {
-                query: [{
-                    "genreList": {
-                        3: {
-                            0: {
-                                "summary": null
-                            }
-                        }
-                    }
-                }]
-            },
-
-            getPathSets: {
-                query: [
-                    ["genreList", "3", "0", "summary"]
-                ]
-            },
-
-            AsValues: {
-                values: [{
-                    "path": ["genreList", "3", "0", "summary"],
-                    "value": {
-                        "title": "Terminator 2",
-                        "url": "/movies/333"
-                    }
-                }]
-            },
-
-            AsJSON: {
-                values: [{
-                    json: {
-                        "title": "Terminator 2",
-                        "url": "/movies/333"
-                    }
-                }]
-            },
-
-            AsJSONG: {
-                values: [{
-                    jsong: {
-                        genreList: {
-                            3: {
-                                "$size": "51",
-                                "$type": "reference",
-                                "value": ["lists", "sentinel-list"]
-                            }
-                        },
-                        lists: {
-                            "sentinel-list": {
-                                "0": {
-                                    "$size": 52,
-                                    "$type": "reference",
-                                    "value": ["videos", "333"]
-                                }
-                            }
-                        },
-                        videos: {
-                            333: {
-                                summary: {
-                                    "$size": 51,
-                                    "$type": "sentinel",
-                                    "value": {
-                                        "title": "Terminator 2",
-                                        "url": "/movies/333"
-                                    }
-                                }
-                            }
-                        }
-                    },
-                    paths: [
-                        ["genreList", "3", "0", "summary"]
-                    ]
-                }]
-            },
-
-            AsPathMap: {
-                values: [{
-                    json: {
-                        genreList: {
-                            3: {
-                                0: {
-                                    summary: {
-                                        "title": "Terminator 2",
-                                        "url": "/movies/333"
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }]
-            }
-        },
-        toSentinelReference: {
-            getPathSets: {
-                query: [
-                    ["genreList", "7", "0", "summary"]
-                ]
-            },
-//
-//            setPathSets: {
-//                query: [
-//                    {
-//                        "path": ["genreList", "7", "0", "summary"],
-//                        "value": {
-//                            "title": "Total Recall (Without Colin Farrell)",
-//                            "url": "/movies/733"
-//                        }
-//                    }
-//                ]
-//            },
-
-            getPathMaps: {
-                query: [{
-                    "genreList": {
-                        7: {
-                            0: {
-                                "summary": null
-                            }
-                        }
-                    }
-                }]
-            },
-
-            AsValues: {
-                values: [{
-                        "path": ["genreList", "7", "0", "summary"],
-                        "value": {
-                            "title": "Total Recall (Without Colin Farrell)",
-                            "url": "/movies/733"
-                        }
-                    }
-                ]
-            },
-
-            AsJSON: {
-                values: [{
-                    json: {
-                        "title": "Total Recall (Without Colin Farrell)",
-                        "url": "/movies/733"
-                    }
-                }]
-            },
-
-            AsJSONG: {
-                values: [{
-                    jsong: {
-                        genreList: {
-                            7: {
-                                "$size": "51",
-                                "$type": "reference",
-                                "value": ["lists", "to-sentinel-list"]
-                            }
-                        },
-                        lists: {
-                            "sentinel-list-2": {
-                                0: {
-                                    "$size": 52,
-                                    "$type": "reference",
-                                    "value": ["videos", "733"]
-                                }
-                            },
-                            "to-sentinel-list": {
-                                "$size": 52,
-                                "$type": "reference",
-                                "value": ["lists", "sentinel-list-2"]
-                            }
-                        },
-                        videos: {
-                            733: {
-                                summary: {
-                                    "$size": 51,
-                                    "$type": "sentinel",
-                                    "value": {
-                                        "title": "Total Recall (Without Colin Farrell)",
-                                        "url": "/movies/733"
-                                    }
-                                }
-                            }
-                        }
-                    },
-                    paths: [
-                        ["genreList", "7", "0", "summary"]
-                    ]
-                }]
-            },
-
-            AsPathMap: {
-                values: [{
-                    json: {
-                        genreList: {
-                            7: {
-                                0: {
-                                    summary: {
-                                        "title": "Total Recall (Without Colin Farrell)",
-                                        "url": "/movies/733"
-                                    }
                                 }
                             }
                         }
@@ -1194,7 +976,7 @@ module.exports = function() {
                         "genreList": {
                             "5": {
                                 "$size": "51",
-                                "$type": "reference",
+                                "$type": "path",
                                 "value": ["lists", "to-error-list"]
                             }
                         },
@@ -1206,7 +988,7 @@ module.exports = function() {
                             },
                             "to-error-list": {
                                 "$size": "51",
-                                "$type": "reference",
+                                "$type": "path",
                                 "value": ["lists", "error-list-2"]
                             }
                         }
@@ -1260,7 +1042,7 @@ module.exports = function() {
                         "genreList": {
                             "2": {
                                 "$size": "51",
-                                "$type": "reference",
+                                "$type": "path",
                                 "value": ["lists", "error-list"]
                             }
                         },
@@ -1321,7 +1103,7 @@ module.exports = function() {
                         genreList: {
                             'inner-reference': {
                                 "$size": "51",
-                                "$type": "reference",
+                                "$type": "path",
                                 "value": ['movies', 1234]
                             }
                         },
@@ -1384,7 +1166,7 @@ module.exports = function() {
                         "genreList": {
                             "2": {
                                 "$size": "51",
-                                "$type": "reference",
+                                "$type": "path",
                                 "value": ["lists", "error-list"]
                             }
                         },

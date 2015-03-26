@@ -69,7 +69,7 @@ module.exports = function() {
                         genreList: {
                             0: {
                                 "$size": 51,
-                                "$type": "reference",
+                                "$type": "path",
                                 "value": ["lists", "abcd"]
                             }
                         },
@@ -77,12 +77,12 @@ module.exports = function() {
                             abcd: {
                                 0: {
                                     "$size": 51,
-                                    "$type": "reference",
+                                    "$type": "path",
                                     "value": ["videos", "1234"]
                                 },
                                 1: {
                                     "$size": 51,
-                                    "$type": "reference",
+                                    "$type": "path",
                                     "value": ["videos", "766"]
                                 }
                             }
@@ -188,7 +188,7 @@ module.exports = function() {
                         genreList: {
                             1: {
                                 "$size": 51,
-                                "$type": "reference",
+                                "$type": "path",
                                 "value": ["lists", "my-list"]
                             }
                         },
@@ -196,12 +196,12 @@ module.exports = function() {
                             "1x5x": {
                                 0: {
                                     "$size": 51,
-                                    "$type": "reference",
+                                    "$type": "path",
                                     "value": ["videos", "553"]
                                 },
                                 1: {
                                     "$size": 51,
-                                    "$type": "reference",
+                                    "$type": "path",
                                     "value": ["videos", "5522"]
                                 }
                             },
@@ -298,7 +298,7 @@ module.exports = function() {
                         genreList: {
                             0: {
                                 "$size": 51,
-                                "$type": "reference",
+                                "$type": "path",
                                 "value": ["lists", "abcd"]
                             }
                         },
@@ -306,7 +306,7 @@ module.exports = function() {
                             abcd: {
                                 0: {
                                     "$size": 51,
-                                    "$type": "reference",
+                                    "$type": "path",
                                     "value": ["videos", "1234"]
                                 }
                             }
@@ -412,7 +412,7 @@ module.exports = function() {
                         genreList: {
                             0: {
                                 "$size": 51,
-                                "$type": "reference",
+                                "$type": "path",
                                 "value": ["lists", "abcd"]
                             }
                         },
@@ -420,17 +420,17 @@ module.exports = function() {
                             abcd: {
                                 "-1": {
                                     "$size": 51,
-                                    "$type": "reference",
+                                    "$type": "path",
                                     "value": ["videos", "4422"]
                                 },
                                 0: {
                                     "$size": 51,
-                                    "$type": "reference",
+                                    "$type": "path",
                                     "value": ["videos", "1234"]
                                 },
                                 1: {
                                     "$size": 51,
-                                    "$type": "reference",
+                                    "$type": "path",
                                     "value": ["videos", "766"]
                                 }
                             }
@@ -570,7 +570,7 @@ module.exports = function() {
                         genreList: {
                             0: {
                                 "$size": 51,
-                                "$type": "reference",
+                                "$type": "path",
                                 "value": ["lists", "abcd"]
                             }
                         },
@@ -578,17 +578,17 @@ module.exports = function() {
                             abcd: {
                                 "-1": {
                                     "$size": 51,
-                                    "$type": "reference",
+                                    "$type": "path",
                                     "value": ["videos", "4422"]
                                 },
                                 0: {
                                     "$size": 51,
-                                    "$type": "reference",
+                                    "$type": "path",
                                     "value": ["videos", "1234"]
                                 },
                                 1: {
                                     "$size": 51,
-                                    "$type": "reference",
+                                    "$type": "path",
                                     "value": ["videos", "766"]
                                 }
                             }
@@ -717,7 +717,7 @@ module.exports = function() {
                         genreList: {
                             0: {
                                 "$size": 51,
-                                "$type": "reference",
+                                "$type": "path",
                                 "value": ["lists", "abcd"]
                             }
                         },
@@ -725,12 +725,12 @@ module.exports = function() {
                             abcd: {
                                 0: {
                                     "$size": 51,
-                                    "$type": "reference",
+                                    "$type": "path",
                                     "value": ["videos", "1234"]
                                 },
                                 1: {
                                     "$size": 51,
-                                    "$type": "reference",
+                                    "$type": "path",
                                     "value": ["videos", "766"]
                                 }
                             }
@@ -840,12 +840,12 @@ module.exports = function() {
                         genreList: {
                             0: {
                                 "$size": 51,
-                                "$type": "reference",
+                                "$type": "path",
                                 "value": ["lists", "abcd"]
                             },
                             1: {
                                 "$size": 51,
-                                "$type": "reference",
+                                "$type": "path",
                                 "value": ["lists", "my-list"]
                             }
                         }
@@ -863,12 +863,12 @@ module.exports = function() {
                         genreList: {
                             0: {
                                 "$size": 51,
-                                "$type": "reference",
+                                "$type": "path",
                                 "value": ["lists", "abcd"]
                             },
                             1: {
                                 "$size": 51,
-                                "$type": "reference",
+                                "$type": "path",
                                 "value": ["lists", "my-list"]
                             }
                         }
@@ -910,7 +910,7 @@ module.exports = function() {
                         genreList: {
                             0: {
                                 "$size": 51,
-                                "$type": "reference",
+                                "$type": "path",
                                 "value": ["lists", "abcd"]
                             }
                         }
@@ -927,7 +927,7 @@ module.exports = function() {
                         genreList: {
                             0: {
                                 "$size": 51,
-                                "$type": "reference",
+                                "$type": "path",
                                 "value": ["lists", "abcd"]
                             }
                         }
@@ -982,17 +982,17 @@ module.exports = function() {
                         genreList: {
                             "-1": {
                                 "$size": 51,
-                                "$type": "reference",
+                                "$type": "path",
                                 "value": ["lists", "def"]
                             },
                             0: {
                                 "$size": 51,
-                                "$type": "reference",
+                                "$type": "path",
                                 "value": ["lists", "abcd"]
                             },
                             1: {
                                 "$size": 51,
-                                "$type": "reference",
+                                "$type": "path",
                                 "value": ["lists", "my-list"]
                             }
                         }
@@ -1011,17 +1011,17 @@ module.exports = function() {
                         genreList: {
                             "-1": {
                                 "$size": 51,
-                                "$type": "reference",
+                                "$type": "path",
                                 "value": ["lists", "def"]
                             },
                             0: {
                                 "$size": 51,
-                                "$type": "reference",
+                                "$type": "path",
                                 "value": ["lists", "abcd"]
                             },
                             1: {
                                 "$size": 51,
-                                "$type": "reference",
+                                "$type": "path",
                                 "value": ["lists", "my-list"]
                             }
                         }
@@ -1076,17 +1076,17 @@ module.exports = function() {
                         genreList: {
                             "-1": {
                                 "$size": 51,
-                                "$type": "reference",
+                                "$type": "path",
                                 "value": ["lists", "def"]
                             },
                             0: {
                                 "$size": 51,
-                                "$type": "reference",
+                                "$type": "path",
                                 "value": ["lists", "abcd"]
                             },
                             1: {
                                 "$size": 51,
-                                "$type": "reference",
+                                "$type": "path",
                                 "value": ["lists", "my-list"]
                             }
                         }
@@ -1105,17 +1105,17 @@ module.exports = function() {
                         genreList: {
                             "-1": {
                                 "$size": 51,
-                                "$type": "reference",
+                                "$type": "path",
                                 "value": ["lists", "def"]
                             },
                             0: {
                                 "$size": 51,
-                                "$type": "reference",
+                                "$type": "path",
                                 "value": ["lists", "abcd"]
                             },
                             1: {
                                 "$size": 51,
-                                "$type": "reference",
+                                "$type": "path",
                                 "value": ["lists", "my-list"]
                             }
                         }
@@ -1164,12 +1164,12 @@ module.exports = function() {
                         genreList: {
                             0: {
                                 "$size": 51,
-                                "$type": "reference",
+                                "$type": "path",
                                 "value": ["lists", "abcd"]
                             },
                             1: {
                                 "$size": 51,
-                                "$type": "reference",
+                                "$type": "path",
                                 "value": ["lists", "my-list"]
                             }
                         }
@@ -1187,12 +1187,12 @@ module.exports = function() {
                         genreList: {
                             0: {
                                 "$size": 51,
-                                "$type": "reference",
+                                "$type": "path",
                                 "value": ["lists", "abcd"]
                             },
                             1: {
                                 "$size": 51,
-                                "$type": "reference",
+                                "$type": "path",
                                 "value": ["lists", "my-list"]
                             }
                         }
@@ -1241,12 +1241,12 @@ module.exports = function() {
                         genreList: {
                             0: {
                                 "$size": 51,
-                                "$type": "reference",
+                                "$type": "path",
                                 "value": ["lists", "abcd"]
                             },
                             1: {
                                 "$size": 51,
-                                "$type": "reference",
+                                "$type": "path",
                                 "value": ["lists", "my-list"]
                             }
                         }
@@ -1264,12 +1264,12 @@ module.exports = function() {
                         genreList: {
                             0: {
                                 "$size": 51,
-                                "$type": "reference",
+                                "$type": "path",
                                 "value": ["lists", "abcd"]
                             },
                             1: {
                                 "$size": 51,
-                                "$type": "reference",
+                                "$type": "path",
                                 "value": ["lists", "my-list"]
                             }
                         }
@@ -1330,12 +1330,12 @@ module.exports = function() {
                         genreList: {
                             0: {
                                 "$size": 51,
-                                "$type": "reference",
+                                "$type": "path",
                                 "value": ["lists", "abcd"]
                             },
                             1: {
                                 "$size": 51,
-                                "$type": "reference",
+                                "$type": "path",
                                 "value": ["lists", "my-list"]
                             }
                         },
@@ -1343,20 +1343,20 @@ module.exports = function() {
                             abcd: {
                                 0: {
                                     "$size": 51,
-                                    "$type": "reference",
+                                    "$type": "path",
                                     "value": ["videos", "1234"]
                                 }
                             },
                             "1x5x": {
                                 0: {
                                     "$size": 51,
-                                    "$type": "reference",
+                                    "$type": "path",
                                     "value": ["videos", "553"]
                                 }
                             },
                             "my-list": {
                                 "$size": 51,
-                                "$type": "reference",
+                                "$type": "path",
                                 "value": ["lists", "1x5x"]
                             }
                         },

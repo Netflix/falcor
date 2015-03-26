@@ -26,11 +26,11 @@ function fastCopy(arr, i) {
 }
 
 function fastCatSkipNulls(arr1, arr2) {
-    var a = [];
-    for (var i = 0, len = arr1.length; i < len; i++) {
+    var a = [], i, len, j;
+    for (i = 0, len = arr1.length; i < len; i++) {
         a[i] = arr1[i];
     }
-    for (var j = 0, len = arr2.length; j < len; j++) {
+    for (j = 0, len = arr2.length; j < len; j++) {
         if (arr2[j]) {
             a[i++] = arr2[j];
         }
@@ -39,11 +39,11 @@ function fastCatSkipNulls(arr1, arr2) {
 }
 
 function fastCat(arr1, arr2) {
-    var a = [];
-    for (var i = 0, len = arr1.length; i < len; i++) {
+    var a = [], i, len, j;
+    for (i = 0, len = arr1.length; i < len; i++) {
         a[i] = arr1[i];
     }
-    for (var j = 0, len = arr2.length; j < len; j++) {
+    for (j = 0, len = arr2.length; j < len; j++) {
         a[i++] = arr2[j];
     }
     return a;

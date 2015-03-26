@@ -15,7 +15,7 @@ var licenseInfo = {
 gulp.task('build.all', ['build.sentinel', 'build.node']);
 
 gulp.task('build.node', ['clean.dev'], function() {
-    return build(['index-node.js']);
+    return build(['index.js']);
 });
 
 gulp.task('build.sentinel', ['clean.dev'], function() {
