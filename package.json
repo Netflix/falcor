@@ -4,7 +4,7 @@
   "main": "index-node",
   "scripts": {
     "test": "./node_modules/mocha/bin/_mocha ./test/index",
-    "dist": "./node_modules/gulp/bin/gulp.js default"
+    "dist": "./node_modules/gulp/bin/gulp.js build"
   },
   "files": [
     "build",
@@ -52,8 +52,6 @@
     "xmlhttprequest": "~1.7.0"
   },
   "dependencies": {
-    "linklocal": "^2.5.1",
-    "rx": "^2.3.25",
-    "node-test": "file:./node-test"
+    "rx": "^2.3.25"
   }
 }
