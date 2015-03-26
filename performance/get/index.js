@@ -36,7 +36,7 @@ function startup(model, format) {
             };
         case 'Value':
             return function() {
-                model._getPathSetsAsValues(model, startupRequest, noOp);
+                model._getPathSetsAsValues(model, startupRequest, []);
             };
     }
 }
@@ -47,7 +47,7 @@ function scrollGallery(model, format) {
         ["lists", "abcd", {"from": 21, "to": 30}, "summary"],
         ["lists", "abcd", {"from": 31, "to": 40}, "summary"]
     ];
-    for (var i = 0; i < 40;)
+    // for (var i = 0; i < 40;)
     switch (format) {
         case 'JSON':
             return function() {
@@ -63,7 +63,7 @@ function scrollGallery(model, format) {
             };
         case 'Value':
             return function() {
-                model._getPathSetsAsValues(model, scollingRequest, noOp);
+                model._getPathSetsAsValues(model, scollingRequest, []);
             };
     }
 }
@@ -87,7 +87,7 @@ function simple(model, format) {
             };
         case 'Value':
             return function() {
-                model._getPathSetsAsValues(model, simpleRequest, noOp);
+                model._getPathSetsAsValues(model, simpleRequest, []);
             };
     }
 }
@@ -110,7 +110,7 @@ function reference(model, format) {
             };
         case 'Value':
             return function() {
-                model._getPathSetsAsValues(model, referenceRequest, noOp);
+                model._getPathSetsAsValues(model, referenceRequest, []);
             };
     }
 }
@@ -133,7 +133,7 @@ function complex(model, format) {
             };
         case 'Value':
             return function() {
-                model._getPathSetsAsValues(model, complexRequest, noOp);
+                model._getPathSetsAsValues(model, complexRequest, []);
             };
     }
 }
