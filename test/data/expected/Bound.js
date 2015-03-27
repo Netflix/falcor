@@ -43,7 +43,7 @@ module.exports = function() {
                 }]
             }
         },
-        missingValue: {
+        missingValueWithReference: {
             getPathSets: {
                 query: [[4, 'summary']]
             },
@@ -53,6 +53,30 @@ module.exports = function() {
 
             optimizedMissingPaths: [
                 ['lists', 'missing-list', 'summary']
+            ],
+
+            AsValues: {
+                values: []
+            },
+
+            AsJSON: {
+                values: [{}]
+            },
+
+            AsPathMap: {
+                values: [{}]
+            }
+        },
+        missingValue: {
+            getPathSets: {
+                query: [['summary']]
+            },
+            getPathMaps: {
+                query: [{summary: null}]
+            },
+
+            optimizedMissingPaths: [
+                ['videos', 'missingSummary', 'summary']
             ],
 
             AsValues: {

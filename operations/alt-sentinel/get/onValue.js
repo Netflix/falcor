@@ -49,39 +49,37 @@ module.exports = function onValue(model, node, seedOrFunction, outerResults, per
     switch (outputFormat) {
 
         case 'Values':
-            if (typeof seedOrFunction === 'function') {
+            if (seedOrFunction) {
                 seedOrFunction({path: permuteRequested, value: valueNode});
             }
             break;
 
         case 'PathMap':
-            if (seedOrFunction) {
-                len = permuteRequested.length - 1;
-                if (len === -1) {
-                    seedOrFunction.json = valueNode;
-                } else {
-                    curr = seedOrFunction.json;
-                    if (!curr) {
-                        curr = seedOrFunction.json = {};
-                    }
-                    for (i = 0; i < len; i++) {
-                        k = permuteRequested[i];
-                        if (k === null) {
-                            continue;
-                        }
-                        if (!curr[k]) {
-                            curr[k] = {};
-                        }
-                        prev = curr;
-                        prevK = k;
-                        curr = curr[k];
-                    }
+            len = permuteRequested.length - 1;
+            if (len === -1) {
+                seedOrFunction.json = valueNode;
+            } else {
+                curr = seedOrFunction.json;
+                if (!curr) {
+                    curr = seedOrFunction.json = {};
+                }
+                for (i = 0; i < len; i++) {
                     k = permuteRequested[i];
-                    if (k !== null) {
-                        curr[k] = valueNode;
-                    } else {
-                        prev[prevK] = valueNode;
+                    if (k === null) {
+                        continue;
                     }
+                    if (!curr[k]) {
+                        curr[k] = {};
+                    }
+                    prev = curr;
+                    prevK = k;
+                    curr = curr[k];
+                }
+                k = permuteRequested[i];
+                if (k !== null) {
+                    curr[k] = valueNode;
+                } else {
+                    prev[prevK] = valueNode;
                 }
             }
             break;

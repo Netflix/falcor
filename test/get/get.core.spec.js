@@ -186,10 +186,13 @@ describe('Core', function() {
         });
         it('should bind and request a missing path through a reference so the optimized path gets reset.', function () {
             var model = new Model({cache: Cache()}).bindSync(['genreList']);
-            debugger
+            getTestRunner(Bound().missingValueWithReference, {model: model});
+        });
+        it('should bind and request a missing path.', function () {
+            var model = new Model({cache: Cache()}).bindSync(['videos', 'missingSummary']);
             getTestRunner(Bound().missingValue, {model: model});
         });
-        
+
         it('should throw an error when bound and calling jsong.', function() {
             var model = new Model({cache: Cache()}).bindSync(['genreList', 10]);
             var threw = false;
@@ -357,7 +360,8 @@ describe('Core', function() {
         it('should follow hardlinks.', function() {
             var model = new Model({cache: Cache()});
             var seed = [{}];
-            model._getPathSetsAsJSON(model, [['genreList', 0, 0, 'summary']], [{}]);
+            debugger
+            model._getPathSetsAsJSON(model, [['genreList', 0, 0, 'summary']]);
             model._getPathSetsAsJSON(model, [['genreList', 0, 0, 'summary']], seed);
 
             testRunner.compare({

@@ -1397,7 +1397,25 @@ module.exports = function() {
             },
 
             AsJSONG: {
-                values: [{}]
+                values: [{
+                    jsong: {
+                        genreList: {
+                            9: {
+                                $size: 51,
+                                $type: 'path',
+                                value: ['lists', 'to-expired-list']
+                            }
+                        },
+                        lists: {
+                            'to-expired-list': {
+                                $size: 52,
+                                $type: 'path',
+                                value: ['lists', 'expired-list']
+                            }
+                        }
+                    },
+                    paths: []
+                }]
             },
 
             AsPathMap: {

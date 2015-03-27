@@ -18,6 +18,9 @@ module.exports = function(walk) {
         var optimizedPath;
         
         results.values = values;
+        if (!values) {
+            values = [];
+        }
         if (boundPath.length) {
             var boundValue = getBoundValue(model, boundPath);
             currentCachePosition = boundValue.value;
