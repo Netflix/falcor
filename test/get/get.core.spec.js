@@ -100,7 +100,7 @@ describe('Core', function() {
             });
         });
         describe('Expired', function() {
-            xit('should report a missing requested path when reference is expired.', function() {
+            it('should report a missing requested path when reference is expired.', function() {
                 getTestRunner(References().referenceExpired);
             });
         });
@@ -313,6 +313,43 @@ describe('Core', function() {
                 "title": "Additional Title 3",
                 "url": "/movies/3"
             }, seed[1].json[3]);
+        });
+        it('should fill double permute complex paths.', function () {
+            var model = new Model({cache: Cache()}).withoutDataSource();
+            var seed = [{}];
+            model._getPathSetsAsJSON(model, [
+                ['genreList', [0], [0], 'summary']
+            ], seed);
+
+            testRunner.compare({
+                "title": "House of Cards",
+                "url": "/movies/1234"
+            }, seed[0].json[0][0]);
+        });
+        it('should fill double permute complex paths with partially filled seed.', function () {
+            var model = new Model({cache: Cache()}).withoutDataSource();
+            var seed = [{
+                json: {
+                    0: {
+                        0: {
+                            "title": "House of Cards",
+                            "url": "/movies/1234"
+                        }
+                    }
+                }
+            }];
+            model._getPathSetsAsJSON(model, [
+                ['genreList', [0], [1], 'summary']
+            ], seed);
+
+            testRunner.compare({
+                "title": "House of Cards",
+                "url": "/movies/1234"
+            }, seed[0].json[0][0]);
+            testRunner.compare({
+                "title": "Terminator 3",
+                "url": "/movies/766"
+            }, seed[0].json[0][1]);
         });
     });
     
