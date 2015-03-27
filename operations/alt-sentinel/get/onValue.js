@@ -36,9 +36,6 @@ module.exports = function onValue(model, node, seedOrFunction, outerResults, per
 
     else {
         valueNode = node.value;
-        if (valueNode === undefined && model._materialized) {
-            valueNode = clone(node);
-        }
     }
 
 
