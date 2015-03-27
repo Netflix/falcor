@@ -8,17 +8,17 @@ describe("Model", function() {
         new jsong.Model();
     });
 
-    // require("./request/RequestQueue.spec");
-    // require("./schedulers/schedulers.spec");
+    require("./request/RequestQueue.spec");
+    require("./schedulers/schedulers.spec");
 
-    describe.only("#get", function() {
+    describe("#get", function() {
         require("./get");
     });
     
-    describe("#set", function() {
-        require("./set/set.spec");
-        require('./set/edge-cases.spec');
-    });
+//    describe("#set", function() {
+//        require("./set/set.spec");
+//        require('./set/edge-cases.spec');
+//    });
 
 //    describe("#call", function() {
 //        require("./call/call.spec");
