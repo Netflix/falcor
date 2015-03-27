@@ -8,7 +8,6 @@ var ModelResponse = require('./ModelResponse');
 var call = require('./call/call');
 var modelOperation = require('./modelOperation');
 var getBoundValue = require('./../operations/alt-sentinel/get/getBoundValue');
-var getBoundContext = require('./../operations/alt-sentinel/get/getBoundContext');
 
 var Model = module.exports = falcor.Model = function Model(options) {
     options || (options = {});
@@ -97,12 +96,6 @@ Model.prototype = {
     },
     setCache: function(cache) {
         return (this._cache = {}) && this._setCache(this, cache);
-    },
-    getBoundValue: function() {
-        return this.syncCheck("getBoundValue") && this._getBoundValue(this);
-    },
-    getBoundContext: function() {
-        return this.syncCheck("getBoundContext") && this._getBoundContext(this);
     },
     getValueSync: function(path) {
         if (Array.isArray(path) === false) {

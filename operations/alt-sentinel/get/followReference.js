@@ -31,7 +31,8 @@ function followReference(model, root, node, referenceContainer, reference, seed,
                 continue;
             }
 
-            else if (depth === reference.length) {
+            // We need to report a value or follow another reference.
+            else {
 
                 node = next;
 

@@ -22,7 +22,7 @@ var Materialized = Expected.Materialized;
 var Boxed = Expected.Boxed;
 var Errors = Expected.Errors;
 
-describe('Core', function() {
+describe.only('Core', function() {
     describe('Values', function() {
         it('should get a value directly', function() {
             getTestRunner(Values().direct);
@@ -77,7 +77,7 @@ describe('Core', function() {
         it('should get a value through references when the last key is null', function() {
             getTestRunner(References().referenceLeafNode);
         });
-        xit('should never follow an inner reference, but short-circuit.', function() {
+        it('should never follow an inner reference, but short-circuit.', function() {
             getTestRunner(References().innerReference);
         });
         describe('Errors', function() {
@@ -308,6 +308,20 @@ describe('Core', function() {
                 "title": "Additional Title 3",
                 "url": "/movies/3"
             }, seed[1].json[3]);
+        });
+    });
+    
+    describe('Hardlink', function() {
+        it('should follow hardlinks.', function() {
+            var model = new Model({cache: Cache()});
+            var seed = [{}];
+            model._getPathSetsAsJSON(model, [['genreList', 0, 0, 'summary']]);
+            model._getPathSetsAsJSON(model, [['genreList', 0, 0, 'summary']], seed);
+
+            testRunner.compare({
+                "title": "House of Cards",
+                "url": "/movies/1234"
+            }, seed[0].json);
         });
     });
 });

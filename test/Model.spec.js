@@ -11,7 +11,7 @@ describe("Model", function() {
     // require("./request/RequestQueue.spec");
     // require("./schedulers/schedulers.spec");
 
-    describe.only("#get", function() {
+    describe("#get", function() {
         require("./get");
     });
     

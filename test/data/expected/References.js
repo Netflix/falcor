@@ -1107,7 +1107,11 @@ module.exports = function() {
                                 "value": ['movies', 1234]
                             }
                         },
-                        movies: ['videos']
+                        movies: {
+                            "$size": "51",
+                            "$type": "path",
+                            value: ['videos']
+                        }
                     },
                     paths: [["genreList", "inner-reference", null]]
                 }]
@@ -1117,12 +1121,10 @@ module.exports = function() {
                 values: [{
                     json: {
                         genreList: {
-                            __key: 'genreList',
-                            __generation: 0,
                             'inner-reference': {
-                                __key: 'inner-reference',
-                                __generation: 0,
-                                __null: ['videos']
+                                "$size": "51",
+                                "$type": "path",
+                                value: ['videos']
                             }
                         }
                     }
