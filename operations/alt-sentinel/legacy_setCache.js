@@ -1,3 +1,4 @@
+/* istanbul ignore next */
 var NOOP = function NOOP() {},
     __GENERATION_GUID = 0,
     __GENERATION_VERSION = 0,
@@ -35,6 +36,7 @@ var NOOP = function NOOP() {},
     EXPIRED = "expired",
     LEAF = "leaf";
 
+/* istanbul ignore next */
 module.exports = function setCache(model, map) {
     var root = model._root, expired = root.expired, depth = 0, height = 0, mapStack = [], nodes = [], nodeRoot = model._cache, nodeParent = nodeRoot, node = nodeParent, nodeType, nodeValue, nodeSize, nodeTimestamp, nodeExpires;
     mapStack[0] = map;

@@ -49,7 +49,7 @@ function walk(model, root, curr, pathOrJSON, depth, seedOrFunction, positionalIn
         // BaseCase: we have hit the end of our query without finding a 'leaf' node, therefore emit missing.
         if (atEndOfJSONQuery || !jsonQuery && depth === pathOrJSON.length) {
             model._materialized ?
-                onValue(model, curr, pathOrJSON, depth, seedOrFunction, outerResults, requestedPath, optimizedPath, positionalInfo, outputFormat, followedAReference) :
+                onValue(model, curr, seedOrFunction, outerResults, requestedPath, optimizedPath, positionalInfo, outputFormat, fromReference, followedAReference) :
                 onMissing(model, curr, pathOrJSON, depth, seedOrFunction, outerResults, requestedPath, optimizedPath, positionalInfo, outputFormat);
             return;
         }
@@ -117,7 +117,7 @@ function walk(model, root, curr, pathOrJSON, depth, seedOrFunction, positionalIn
 
                     if (nType && nType === 'path' && !isExpired(next)) {
                         if (asJSONG) {
-                            onValue(model, next, nextPathOrPathMap, depth, seedOrFunction, outerResults, false, permuteOptimized, permutePosition, outputFormat);
+                            onValue(model, next, seedOrFunction, outerResults, false, permuteOptimized, permutePosition, outputFormat);
                         }
                         var ref = followReference(model, root, root, next, value, seedOrFunction, outputFormat);
                         fromReference = followedAReference = true;
@@ -144,7 +144,7 @@ function evaluateNode(model, curr, pathOrJSON, depth, seedOrFunction, requestedP
     // BaseCase: This position does not exist, emit missing.
     if (!curr) {
         model._materialized ?
-            onValue(model, curr, pathOrJSON, depth, seedOrFunction, outerResults, requestedPath, optimizedPath, positionalInfo, outputFormat, followedAReference) :
+            onValue(model, curr, seedOrFunction, outerResults, requestedPath, optimizedPath, positionalInfo, outputFormat, fromReference, followedAReference) :
             onMissing(model, curr, pathOrJSON, depth, seedOrFunction, outerResults, requestedPath, optimizedPath, positionalInfo, outputFormat);
         return true;
     }
@@ -160,13 +160,13 @@ function evaluateNode(model, curr, pathOrJSON, depth, seedOrFunction, requestedP
                 requestedPath.push(null);
             }
             if (outputFormat === 'JSONG') {
-                onValue(model, curr, pathOrJSON, depth, seedOrFunction, outerResults, requestedPath, optimizedPath, positionalInfo, outputFormat, followedAReference);
-                if (!model._errorsAsValues) {
+                onValue(model, curr, seedOrFunction, outerResults, requestedPath, optimizedPath, positionalInfo, outputFormat, fromReference, followedAReference);
+                if (!model._treatErrorsAsValues) {
                     onError(model, curr, requestedPath, null, outerResults);
                 }
             } else {
                 if (model._treatErrorsAsValues) {
-                    onValue(model, curr, pathOrJSON, depth, seedOrFunction, outerResults, requestedPath, optimizedPath, positionalInfo, outputFormat, followedAReference);
+                    onValue(model, curr, seedOrFunction, outerResults, requestedPath, optimizedPath, positionalInfo, outputFormat, fromReference, followedAReference);
                 } else {
                     onError(model, curr, requestedPath, optimizedPath, outerResults);
                 }
@@ -181,10 +181,10 @@ function evaluateNode(model, curr, pathOrJSON, depth, seedOrFunction, requestedP
                     removeHardlink(curr);
                 }
                 model._materialized ?
-                    onValue(model, curr, pathOrJSON, depth, seedOrFunction, outerResults, requestedPath, optimizedPath, positionalInfo, outputFormat, followedAReference) :
+                    onValue(model, curr, seedOrFunction, outerResults, requestedPath, optimizedPath, positionalInfo, outputFormat, fromReference, followedAReference) :
                     onMissing(model, curr, pathOrJSON, depth, seedOrFunction, outerResults, requestedPath, optimizedPath, positionalInfo, outputFormat);
             } else {
-                onValue(model, curr, pathOrJSON, depth, seedOrFunction, outerResults, requestedPath, optimizedPath, positionalInfo, outputFormat, followedAReference);
+                onValue(model, curr, seedOrFunction, outerResults, requestedPath, optimizedPath, positionalInfo, outputFormat, fromReference, followedAReference);
             }
         }
 

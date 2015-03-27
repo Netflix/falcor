@@ -21,7 +21,7 @@ function getTestRunner(data, options) {
 
     prefixesAndSuffixes[0].
         filter(function (prefix) {
-            return ~prefix.indexOf("getPathSets");
+            return ~prefix.indexOf("get");
         }).
         forEach(function (prefix) {
             prefixesAndSuffixes[1].map(function (suffix) {
