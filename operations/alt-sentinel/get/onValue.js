@@ -4,7 +4,7 @@ var promote = lru.promote;
 var support = require('../util/support');
 var updateTrailingNullCase = support.updateTrailingNullCase;
 var materializeNode = {$type: 'sentinel'};
-module.exports = function onValue(model, node, seedOrFunction, outerResults, permuteRequested, permuteOptimized, permutePosition, outputFormat, fromReference, followedAReference) {
+module.exports = function onValue(model, node, seedOrFunction, outerResults, permuteRequested, permuteOptimized, permutePosition, outputFormat, fromReference) {
     var i, len, k, key, curr, prev, prevK;
     var materialized = false, valueNode;
     if (node) {
@@ -47,11 +47,7 @@ module.exports = function onValue(model, node, seedOrFunction, outerResults, per
             permuteRequested.push(null);
         }
         outerResults.requestedPaths.push(permuteRequested);
-        if (!followedAReference && model._path) {
-            outerResults.optimizedPaths.push(model._path.concat(permuteOptimized));
-        } else {
-            outerResults.optimizedPaths.push(permuteOptimized);
-        }
+        outerResults.optimizedPaths.push(permuteOptimized);
     }
     switch (outputFormat) {
 
@@ -68,6 +64,9 @@ module.exports = function onValue(model, node, seedOrFunction, outerResults, per
                     seedOrFunction.json = valueNode;
                 } else {
                     curr = seedOrFunction.json;
+                    if (!curr) {
+                        curr = seedOrFunction.json = {};
+                    }
                     for (i = 0; i < len; i++) {
                         k = permuteRequested[i];
                         if (k === null) {
@@ -121,6 +120,10 @@ module.exports = function onValue(model, node, seedOrFunction, outerResults, per
         case 'JSONG':
             if (seedOrFunction) {
                 curr = seedOrFunction.jsong;
+                if (!curr) {
+                    curr = seedOrFunction.jsong = {};
+                    seedOrFunction.paths = [];
+                }
                 for (i = 0, len = permuteOptimized.length - 1; i < len; i++) {
                     key = permuteOptimized[i];
 

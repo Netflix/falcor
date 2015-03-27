@@ -11,8 +11,8 @@ var isExpired = support.isExpired;
 var permuteKey = support.permuteKey;
 
 // TODO: Objectify?
-function walk(model, root, curr, pathOrJSON, depth, seedOrFunction, positionalInfo, outerResults, optimizedPath, requestedPath, inputFormat, outputFormat, fromReference, followedAReference) {
-    if (evaluateNode(model, curr, pathOrJSON, depth, seedOrFunction, requestedPath, optimizedPath, positionalInfo, outerResults, outputFormat, fromReference, followedAReference)) {
+function walk(model, root, curr, pathOrJSON, depth, seedOrFunction, positionalInfo, outerResults, optimizedPath, requestedPath, inputFormat, outputFormat, fromReference) {
+    if (evaluateNode(model, curr, pathOrJSON, depth, seedOrFunction, requestedPath, optimizedPath, positionalInfo, outerResults, outputFormat, fromReference)) {
         return;
     }
 
@@ -49,7 +49,7 @@ function walk(model, root, curr, pathOrJSON, depth, seedOrFunction, positionalIn
         // BaseCase: we have hit the end of our query without finding a 'leaf' node, therefore emit missing.
         if (atEndOfJSONQuery || !jsonQuery && depth === pathOrJSON.length) {
             model._materialized ?
-                onValue(model, curr, seedOrFunction, outerResults, requestedPath, optimizedPath, positionalInfo, outputFormat, fromReference, followedAReference) :
+                onValue(model, curr, seedOrFunction, outerResults, requestedPath, optimizedPath, positionalInfo, outputFormat, fromReference) :
                 onMissing(model, curr, pathOrJSON, depth, seedOrFunction, outerResults, requestedPath, optimizedPath, positionalInfo, outputFormat);
             return;
         }
@@ -120,7 +120,7 @@ function walk(model, root, curr, pathOrJSON, depth, seedOrFunction, positionalIn
                             onValue(model, next, seedOrFunction, outerResults, false, permuteOptimized, permutePosition, outputFormat);
                         }
                         var ref = followReference(model, root, root, next, value, seedOrFunction, outputFormat);
-                        fromReference = followedAReference = true;
+                        fromReference = true;
                         next = ref[0];
                         var refPath = ref[1];
 
@@ -131,7 +131,7 @@ function walk(model, root, curr, pathOrJSON, depth, seedOrFunction, positionalIn
                     }
                 }
             }
-            walk(model, root, next, nextPathOrPathMap, depth, seedOrFunction, permutePosition, outerResults, permuteOptimized, permuteRequested, inputFormat, outputFormat, fromReference, followedAReference);
+            walk(model, root, next, nextPathOrPathMap, depth, seedOrFunction, permutePosition, outerResults, permuteOptimized, permuteRequested, inputFormat, outputFormat, fromReference);
 
             if (!memo.done) {
                 key = permuteKey(k, memo);
@@ -140,11 +140,11 @@ function walk(model, root, curr, pathOrJSON, depth, seedOrFunction, positionalIn
     }
 }
 
-function evaluateNode(model, curr, pathOrJSON, depth, seedOrFunction, requestedPath, optimizedPath, positionalInfo, outerResults, outputFormat, fromReference, followedAReference) {
+function evaluateNode(model, curr, pathOrJSON, depth, seedOrFunction, requestedPath, optimizedPath, positionalInfo, outerResults, outputFormat, fromReference) {
     // BaseCase: This position does not exist, emit missing.
     if (!curr) {
         model._materialized ?
-            onValue(model, curr, seedOrFunction, outerResults, requestedPath, optimizedPath, positionalInfo, outputFormat, fromReference, followedAReference) :
+            onValue(model, curr, seedOrFunction, outerResults, requestedPath, optimizedPath, positionalInfo, outputFormat, fromReference) :
             onMissing(model, curr, pathOrJSON, depth, seedOrFunction, outerResults, requestedPath, optimizedPath, positionalInfo, outputFormat);
         return true;
     }
@@ -160,13 +160,13 @@ function evaluateNode(model, curr, pathOrJSON, depth, seedOrFunction, requestedP
                 requestedPath.push(null);
             }
             if (outputFormat === 'JSONG') {
-                onValue(model, curr, seedOrFunction, outerResults, requestedPath, optimizedPath, positionalInfo, outputFormat, fromReference, followedAReference);
+                onValue(model, curr, seedOrFunction, outerResults, requestedPath, optimizedPath, positionalInfo, outputFormat, fromReference);
                 if (!model._treatErrorsAsValues) {
                     onError(model, curr, requestedPath, null, outerResults);
                 }
             } else {
                 if (model._treatErrorsAsValues) {
-                    onValue(model, curr, seedOrFunction, outerResults, requestedPath, optimizedPath, positionalInfo, outputFormat, fromReference, followedAReference);
+                    onValue(model, curr, seedOrFunction, outerResults, requestedPath, optimizedPath, positionalInfo, outputFormat, fromReference);
                 } else {
                     onError(model, curr, requestedPath, optimizedPath, outerResults);
                 }
@@ -181,10 +181,10 @@ function evaluateNode(model, curr, pathOrJSON, depth, seedOrFunction, requestedP
                     removeHardlink(curr);
                 }
                 model._materialized ?
-                    onValue(model, curr, seedOrFunction, outerResults, requestedPath, optimizedPath, positionalInfo, outputFormat, fromReference, followedAReference) :
+                    onValue(model, curr, seedOrFunction, outerResults, requestedPath, optimizedPath, positionalInfo, outputFormat, fromReference) :
                     onMissing(model, curr, pathOrJSON, depth, seedOrFunction, outerResults, requestedPath, optimizedPath, positionalInfo, outputFormat);
             } else {
-                onValue(model, curr, seedOrFunction, outerResults, requestedPath, optimizedPath, positionalInfo, outputFormat, fromReference, followedAReference);
+                onValue(model, curr, seedOrFunction, outerResults, requestedPath, optimizedPath, positionalInfo, outputFormat, fromReference);
             }
         }
 

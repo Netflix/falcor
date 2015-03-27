@@ -82,9 +82,7 @@ function validateData(expected, actual) {
     expect(expected, "expected").to.be.ok;
     
     var keys = Object.keys(expected);
-    
-    expect(keys.length, "expected.keys.length > 0").to.be.ok;
-    
+
     keys.forEach(function(key) {
         if(key == "values" && !actual[key]) {
             return;
