@@ -14,8 +14,11 @@ module.exports = function(walk) {
         if (values && values.length === 1 && !values[0].json) {
             values[0].json = {};
             valueNode = values[0];
-            results.values = values;
+        } else {
+            valueNode = values[0];
         }
+        results.values = values;
+
         var cache = model._cache;
         var boundPath = model._path;
         var currentCachePosition;

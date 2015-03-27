@@ -9,6 +9,7 @@ module.exports = function(walk) {
             requestedMissingPaths: [],
             optimizedMissingPaths: []
         };
+        var requestedMissingPaths = results.requestedMissingPaths;
         var inputFormat = Array.isArray(paths[0]) ? 'Paths' : 'JSON';
         if (values) {
             results.values = values;
@@ -18,6 +19,7 @@ module.exports = function(walk) {
         var cache = model._cache;
         var boundPath = model._path;
         var currentCachePosition;
+        var missingIdx = 0;
         if (boundPath.length) {
             currentCachePosition = getBoundValue(model, boundPath).value;
         } else {
@@ -30,6 +32,12 @@ module.exports = function(walk) {
                 valueNode = values[i];
             }
             walk(model, cache, currentCachePosition, paths[i], 0, valueNode, [], results, [], [], inputFormat, 'JSON');
+            if (missingIdx < requestedMissingPaths.length) {
+                for (var j = missingIdx, length = requestedMissingPaths.length; j < length; j++) {
+                    requestedMissingPaths[j].pathSetIndex = i;
+                }
+                missingIdx = length;
+            }
         }
 
         if (results.requestedPaths.length === 0) {
