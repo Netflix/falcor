@@ -18,7 +18,7 @@ function toObservable(request, queue, onNext) {
 }
 
 module.exports = function(expected, queue, onNext) {
-    return toObservable(expected.getPaths.query[0], queue, onNext).
+    return toObservable(expected.getPathSets.query[0], queue, onNext).
         doAction(function(x) {
             var expects = testRunner.clean(expected.AsJSONG.values[0]);
             x = testRunner.clean(x.jsong && {jsong: x.jsong, paths: x.paths.slice()} || x);

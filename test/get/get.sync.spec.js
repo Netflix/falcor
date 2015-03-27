@@ -41,6 +41,12 @@ describe('GetValueSync', function() {
         var value = model.getValueSync(['genreList', 10, null]);
         testRunner.compare(Values().direct.AsJSON.values[0].json, value);
     });
+    it('should use the bound path to get the path.', function() {
+        var model = new Model({cache: Cache()}).bindSync(['videos', 1234]);
+        model._root.unsafeMode = true;
+        var value = model.getValueSync(['summary']);
+        testRunner.compare(Values().direct.AsJSON.values[0].json, value);
+    });
     it('should throw an error when it encounters one.', function() {
         var model = new Model({cache: Cache()});
         model._root.unsafeMode = true;
