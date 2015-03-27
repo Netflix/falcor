@@ -73,7 +73,7 @@ function getTestRunner(data, options) {
                 var actualCount = 0;
                 if (suffix === 'AsValues') {
                     var vals = expected.values;
-                    expected.values = undefined;
+                    delete expected.values;
                     
                     countOrFunction = function(pV) {
                         if (vals && vals.length) {

@@ -675,7 +675,16 @@ var Cache = function() {
                     }
                 }
             },
-            "missingValue": { "$type": "sentinel" }
+            "missingValue": { "$type": "sentinel" },
+            "missingSummary": {
+                "art": {
+                    "$size": 16,
+                    "$type": "sentinel",
+                    "value": {
+                        "box-shot": "www.cdn.com/missing-summary"
+                    }
+                }
+            }
         },
         "misc": {
             "$size": 51,

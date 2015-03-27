@@ -10,22 +10,18 @@ module.exports = function(walk) {
             optimizedMissingPaths: []
         };
         var inputFormat = Array.isArray(paths[0]) ? 'Paths' : 'JSON';
-        if (values && values.length === 1 && !values[0].jsong) {
-            values[0].jsong = {};
-            values[0].paths = [];
-            results.values = values;
-        }
+        results.values = values;
         var cache = model._cache;
-        if (model._path.length) {
-            throw 'Cannot get JSONG while bound to a path.';
+        var boundPath = model._path;
+        var currentCachePosition;
+        if (boundPath.length) {
+            throw 'It is not legal to use the JSON Graph format from a bound Model. JSON Graph format can only be used from a root model.';
+        } else {
+            currentCachePosition = cache;
         }
 
         for (var i = 0, len = paths.length; i < len; i++) {
-            walk(model, cache, cache, paths[i], 0, values[0], [], results, [], [], inputFormat, 'JSONG');
-        }
-
-        if (results.requestedPaths.length === 0) {
-            results.values = [null];
+            walk(model, cache, currentCachePosition, paths[i], 0, values[0], [], results, [], [], inputFormat, 'JSONG');
         }
         return results;
     };

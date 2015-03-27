@@ -3,22 +3,22 @@ module.exports = function() {
         directValue: {
             getPathSets: {
                 count: 0,
-                query: [["summary"]]
+                query: [['summary']]
             },
             getPathMaps: {
                 query: [{summary: null}]
             },
 
             optimizedPaths: [
-                ["videos", "1234", "summary"]
+                ['videos', '1234', 'summary']
             ],
 
             AsValues: {
                 values: [{
-                    "path": ["summary"],
-                    "value": {
-                        "title": "House of Cards",
-                        "url": "/movies/1234"
+                    'path': ['summary'],
+                    'value': {
+                        'title': 'House of Cards',
+                        'url': '/movies/1234'
                     }
                 }]
             },
@@ -26,8 +26,8 @@ module.exports = function() {
             AsJSON: {
                 values: [{
                     json: {
-                        "title": "House of Cards",
-                        "url": "/movies/1234"
+                        'title': 'House of Cards',
+                        'url': '/movies/1234'
                     }
                 }]
             },
@@ -36,11 +36,59 @@ module.exports = function() {
                 values: [{
                     json: {
                         summary: {
-                            "title": "House of Cards",
-                            "url": "/movies/1234"
+                            'title': 'House of Cards',
+                            'url': '/movies/1234'
                         }
                     }
                 }]
+            }
+        },
+        missingValueWithReference: {
+            getPathSets: {
+                query: [[4, 'summary']]
+            },
+            getPathMaps: {
+                query: [{4: {summary: null}}]
+            },
+
+            optimizedMissingPaths: [
+                ['lists', 'missing-list', 'summary']
+            ],
+
+            AsValues: {
+                values: []
+            },
+
+            AsJSON: {
+                values: [{}]
+            },
+
+            AsPathMap: {
+                values: [{}]
+            }
+        },
+        missingValue: {
+            getPathSets: {
+                query: [['summary']]
+            },
+            getPathMaps: {
+                query: [{summary: null}]
+            },
+
+            optimizedMissingPaths: [
+                ['videos', 'missingSummary', 'summary']
+            ],
+
+            AsValues: {
+                values: []
+            },
+
+            AsJSON: {
+                values: [{}]
+            },
+
+            AsPathMap: {
+                values: [{}]
             }
         },
         toLeafNode: {
@@ -52,15 +100,15 @@ module.exports = function() {
             },
 
             optimizedPaths: [
-                ["videos", "1234", "summary"]
+                ['videos', '1234', 'summary']
             ],
 
             AsValues: {
                 values: [{
-                    "path": [],
-                    "value": {
-                        "title": "House of Cards",
-                        "url": "/movies/1234"
+                    'path': [],
+                    'value': {
+                        'title': 'House of Cards',
+                        'url': '/movies/1234'
                     }
                 }]
             },
@@ -68,8 +116,8 @@ module.exports = function() {
             AsJSON: {
                 values: [{
                     json: {
-                        "title": "House of Cards",
-                        "url": "/movies/1234"
+                        'title': 'House of Cards',
+                        'url': '/movies/1234'
                     }
                 }]
             },
@@ -77,8 +125,8 @@ module.exports = function() {
             AsPathMap: {
                 values: [{
                     json: {
-                        "title": "House of Cards",
-                        "url": "/movies/1234"
+                        'title': 'House of Cards',
+                        'url': '/movies/1234'
                     }
                 }]
             }
@@ -86,40 +134,40 @@ module.exports = function() {
         toOnly: {
             getPathSets: {
                 query: [
-                    [{to: 1}, "summary"]
+                    [{to: 1}, 'summary']
                 ]
             },
 
             getPathMaps: {
                 query: [{
-                    "0": {
-                        "summary": null
+                    '0': {
+                        'summary': null
                     },
-                    "1": {
-                        "summary": null
+                    '1': {
+                        'summary': null
                     }
                 }]
             },
 
             optimizedPaths: [
-                ["videos", "1234", "summary"],
-                ["videos", "766", "summary"]
+                ['videos', '1234', 'summary'],
+                ['videos', '766', 'summary']
             ],
 
             AsValues: {
                 values: [
                     {
-                        "path": ["0", "summary"],
-                        "value": {
-                            "title": "House of Cards",
-                            "url": "/movies/1234"
+                        'path': ['0', 'summary'],
+                        'value': {
+                            'title': 'House of Cards',
+                            'url': '/movies/1234'
                         }
                     },
                     {
-                        "path": ["1", "summary"],
-                        "value": {
-                            "title": "Terminator 3",
-                            "url": "/movies/766"
+                        'path': ['1', 'summary'],
+                        'value': {
+                            'title': 'Terminator 3',
+                            'url': '/movies/766'
                         }
                     }
                 ]
@@ -129,12 +177,12 @@ module.exports = function() {
                 values: [{
                     json: {
                         0: {
-                            "title": "House of Cards",
-                            "url": "/movies/1234"
+                            'title': 'House of Cards',
+                            'url': '/movies/1234'
                         },
                         1: {
-                            "title": "Terminator 3",
-                            "url": "/movies/766"
+                            'title': 'Terminator 3',
+                            'url': '/movies/766'
                         }
                     }
                 }]
@@ -144,19 +192,19 @@ module.exports = function() {
                 values: [{
                     json: {
                         0: {
-                            __key: "0",
+                            __key: '0',
                             __generation: 0,
                             summary: {
-                                "title": "House of Cards",
-                                "url": "/movies/1234"
+                                'title': 'House of Cards',
+                                'url': '/movies/1234'
                             }
                         },
                         1: {
-                            __key: "1",
+                            __key: '1',
                             __generation: 0,
                             summary: {
-                                "title": "Terminator 3",
-                                "url": "/movies/766"
+                                'title': 'Terminator 3',
+                                'url': '/movies/766'
                             }
                         }
                     }
@@ -166,18 +214,18 @@ module.exports = function() {
         onReference: {
             getPathSets: {
                 query: [
-                    ["0", "summary"]
+                    ['0', 'summary']
                 ]
             },
 
             setPathSets: {
                 query: [
                     {
-                        "path": ["0", "summary"],
-                        "value": {
-                            "$size": 10,
-                            "title": "House of Cards",
-                            "url": "/movies/1234"
+                        'path': ['0', 'summary'],
+                        'value': {
+                            '$size': 10,
+                            'title': 'House of Cards',
+                            'url': '/movies/1234'
                         }
                     }
                 ]
@@ -191,16 +239,16 @@ module.exports = function() {
             },
 
             optimizedPaths: [
-                ["videos", "1234", "summary"]
+                ['videos', '1234', 'summary']
             ],
 
             AsValues: {
                 values: [
                     {
-                        "path": ["0", "summary"],
-                        "value": {
-                            "title": "House of Cards",
-                            "url": "/movies/1234"
+                        'path': ['0', 'summary'],
+                        'value': {
+                            'title': 'House of Cards',
+                            'url': '/movies/1234'
                         }
                     }
                 ]
@@ -209,8 +257,8 @@ module.exports = function() {
             AsJSON: {
                 values: [{
                     json: {
-                        "title": "House of Cards",
-                        "url": "/movies/1234"
+                        'title': 'House of Cards',
+                        'url': '/movies/1234'
                     }
                 }]
             },
@@ -219,11 +267,11 @@ module.exports = function() {
                 values: [{
                     json: {
                         0: {
-                            __key: "0",
+                            __key: '0',
                             __generation: 0,
                             summary: {
-                                "title": "House of Cards",
-                                "url": "/movies/1234"
+                                'title': 'House of Cards',
+                                'url': '/movies/1234'
                             }
                         }
                     }
