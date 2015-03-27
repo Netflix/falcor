@@ -2,8 +2,7 @@ var falcor = require('./src');
 var sentinelGet = require('./operations/alt-sentinel');
 var prototype = falcor.Model.prototype;
 
-prototype._getBoundContext = null;
-prototype._getBoundValue = null;
+prototype._getBoundValue = sentinelGet.getBoundValue;
 prototype._getValueSync = sentinelGet.getValueSync;
 prototype._getPathSetsAsValues = sentinelGet.getAsValues;
 prototype._getPathSetsAsJSON = sentinelGet.getAsJSON;

@@ -2,14 +2,13 @@ var gulp = require('gulp');
 var jshint = require('gulp-jshint');
 var eslint = require('gulp-eslint');
 var jsdoc = require('gulp-jsdoc');
-var mocha = require('gulp-mocha');
-var istanbul = require('gulp-istanbul');
 var concat = require('gulp-concat');
 var benchmark = require('gulp-bench');
 
 // Registers build tasks
 require('./build/gulp-clean');
 require('./build/gulp-build');
+require('./build/gulp-test');
 require('./build/performance/gulp-perf');
 
 var buildDir = 'bin';

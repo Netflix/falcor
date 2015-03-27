@@ -31,7 +31,8 @@ function followReference(model, root, node, referenceContainer, reference, seed,
                 continue;
             }
 
-            else if (depth === reference.length) {
+            // We need to report a value or follow another reference.
+            else {
 
                 node = next;
 
@@ -46,7 +47,7 @@ function followReference(model, root, node, referenceContainer, reference, seed,
                 // Restart the reference follower.
                 if (type === 'path') {
                     if (outputFormat === 'JSONG') {
-                        onValue(model, next, reference, depth, seed, null, null, reference, null, outputFormat);
+                        onValue(model, next, seed, null, null, reference, null, outputFormat);
                     }
 
                     depth = 0;

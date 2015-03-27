@@ -43,6 +43,46 @@ module.exports = function() {
                 }]
             }
         },
+        toLeafNode: {
+            getPathSets: {
+                query: [[]]
+            },
+            getPathMaps: {
+                query: [{}]
+            },
+
+            optimizedPaths: [
+                ["videos", "1234", "summary"]
+            ],
+
+            AsValues: {
+                values: [{
+                    "path": [],
+                    "value": {
+                        "title": "House of Cards",
+                        "url": "/movies/1234"
+                    }
+                }]
+            },
+
+            AsJSON: {
+                values: [{
+                    json: {
+                        "title": "House of Cards",
+                        "url": "/movies/1234"
+                    }
+                }]
+            },
+
+            AsPathMap: {
+                values: [{
+                    json: {
+                        "title": "House of Cards",
+                        "url": "/movies/1234"
+                    }
+                }]
+            }
+        },
         toOnly: {
             getPathSets: {
                 query: [

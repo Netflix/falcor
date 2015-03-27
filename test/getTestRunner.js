@@ -9,7 +9,6 @@ var Model = jsong.Model;
 var Cache = require("./data/Cache");
 function getTestRunner(data, options) {
     options = _.extend({
-        useNewModel: true,
         preCall: noOp
     }, options);
 
@@ -22,7 +21,7 @@ function getTestRunner(data, options) {
 
     prefixesAndSuffixes[0].
         filter(function (prefix) {
-            return ~prefix.indexOf("getPathSets");
+            return ~prefix.indexOf("get");
         }).
         forEach(function (prefix) {
             prefixesAndSuffixes[1].map(function (suffix) {
@@ -40,10 +39,10 @@ function getTestRunner(data, options) {
                 expected = _.assign({}, expectedValues, universalExpectedValues);
 
                 var model;
-                if (options.useNewModel) {
-                    model = testRunner.getModel(null, Cache());
-                } else {
+                if (options.model) {
                     model = options.model;
+                } else {
+                    model = new jsong.Model({cache: Cache()});
                 }
                 
                 if(options.materialized) {

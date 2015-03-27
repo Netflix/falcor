@@ -1,20 +1,21 @@
 var falcor = require('./Falcor');
 var Constants = require('./Constants');
 var RequestQueue = require('./request/RequestQueue');
-var Schedulers = require('./Scheduler');
+var ImmediateScheduler = require('./scheduler/ImmediateScheduler');
+var TimeoutScheduler = require('./scheduler/TimeoutScheduler');
 var $TYPE = Constants.$TYPE;
 var ERROR = Constants.$TYPE;
 var ModelResponse = require('./ModelResponse');
 var call = require('./call/call');
 var modelOperation = require('./modelOperation');
-
+var getBoundValue = require('./../operations/alt-sentinel/get/getBoundValue');
 
 var Model = module.exports = falcor.Model = function Model(options) {
     options || (options = {});
     this._dataSource = options.source;
     this._maxSize = options.maxSize || Math.pow(2, 53) - 1;
     this._collectRatio = options.collectRatio || 0.75;
-    this._scheduler = new Schedulers.ImmediateScheduler();
+    this._scheduler = new ImmediateScheduler();
     this._request = new RequestQueue(this, this._scheduler);
     this._errorSelector = options.errorSelector || Model.prototype._errorSelector;
     this._router = options.router;
@@ -97,12 +98,6 @@ Model.prototype = {
     setCache: function(cache) {
         return (this._cache = {}) && this._setCache(this, cache);
     },
-    getBoundValue: function() {
-        return this.syncCheck("getBoundValue") && this._getBoundValue(this);
-    },
-    getBoundContext: function() {
-        return this.syncCheck("getBoundContext") && this._getBoundContext(this);
-    },
     getValueSync: function(path) {
         if (Array.isArray(path) === false) {
             throw new Error("Model#getValueSync must be called with an Array path.");
@@ -168,14 +163,14 @@ Model.prototype = {
     },
     batch: function(schedulerOrDelay) {
         if(typeof schedulerOrDelay === "number") {
-            schedulerOrDelay = new Schedulers.TimeoutScheduler(Math.round(Math.abs(schedulerOrDelay)));
+            schedulerOrDelay = new TimeoutScheduler(Math.round(Math.abs(schedulerOrDelay)));
         } else if(!schedulerOrDelay || !schedulerOrDelay.schedule) {
-            schedulerOrDelay = new Schedulers.ImmediateScheduler();
+            schedulerOrDelay = new ImmediateScheduler();
         }
         return this.clone(["_request", new RequestQueue(this, schedulerOrDelay)]);
     },
     unbatch: function() {
-        return this.clone(["_request", new RequestQueue(this, new Schedulers.ImmediateScheduler())]);
+        return this.clone(["_request", new RequestQueue(this, new ImmediateScheduler())]);
     },
     treatErrorsAsValues: function() {
         return this.clone(["_treatErrorsAsValues", true]);

@@ -8,8 +8,8 @@ describe("Model", function() {
         new jsong.Model();
     });
 
-    // require("./request/RequestQueue.spec");
-    // require("./schedulers/schedulers.spec");
+    require("./request/RequestQueue.spec");
+    require("./schedulers/schedulers.spec");
 
     describe("#get", function() {
         require("./get");
