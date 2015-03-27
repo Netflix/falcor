@@ -4,7 +4,7 @@ var promote = lru.promote;
 var support = require('../util/support');
 var updateTrailingNullCase = support.updateTrailingNullCase;
 var materializeNode = {$type: 'sentinel'};
-module.exports = function onValue(model, node, path, depth, seedOrFunction, outerResults, permuteRequested, permuteOptimized, permutePosition, outputFormat, fromReference, followedAReference) {
+module.exports = function onValue(model, node, seedOrFunction, outerResults, permuteRequested, permuteOptimized, permutePosition, outputFormat, fromReference, followedAReference) {
     var i, len, k, key, curr, prev, prevK;
     var materialized = false, valueNode;
     if (node) {
@@ -43,15 +43,6 @@ module.exports = function onValue(model, node, path, depth, seedOrFunction, oute
 
 
     if (permuteRequested) {
-//        if (permuteRequested[permuteRequested.length - 1] !== null) {
-//            updateTrailingNullCase(path, depth, permuteRequested);
-//        }
-//        
-//        // If we are from a reference and have not reached the end of our path 
-//        // (if we are from reference, then that is true).
-//        if (fromReference && permuteRequested[permuteRequested.length - 1] !== null) {
-//            permuteRequested.push(null);
-//        }
         if (fromReference && permuteRequested[permuteRequested.length - 1] !== null) {
             permuteRequested.push(null);
         }

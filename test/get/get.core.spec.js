@@ -22,7 +22,7 @@ var Materialized = Expected.Materialized;
 var Boxed = Expected.Boxed;
 var Errors = Expected.Errors;
 
-describe.only('Core', function() {
+describe('Core', function() {
     describe('Values', function() {
         it('should get a value directly', function() {
             getTestRunner(Values().direct);
