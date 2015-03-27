@@ -16,16 +16,12 @@ module.exports = function(walk) {
             results.values = values;
         }
         var cache = model._cache;
-        var boundPath = model._path;
-        var currentCachePosition;
-        if (boundPath.length) {
-            currentCachePosition = getBoundValue(model, boundPath).value;
-        } else {
-            currentCachePosition = cache;
+        if (model._path.length) {
+            throw 'Cannot get JSONG while bound to a path.';
         }
 
         for (var i = 0, len = paths.length; i < len; i++) {
-            walk(model, cache, currentCachePosition, paths[i], 0, values[0], [], results, [], [], inputFormat, 'JSONG');
+            walk(model, cache, cache, paths[i], 0, values[0], [], results, [], [], inputFormat, 'JSONG');
         }
 
         if (results.requestedPaths.length === 0) {

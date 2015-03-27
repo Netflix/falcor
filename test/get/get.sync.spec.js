@@ -86,6 +86,12 @@ describe('GetValueSync', function() {
             var value = model.getValueSync(['videos', 'errorBranch', 'summary']);
             testRunner.compare(undefined, value);
         });
+        it('should report undefined on a reference that does not exist.', function() {
+            var model = new Model({cache: Cache()});
+            model._root.unsafeMode = true;
+            var value = model.getValueSync(['genreList', 11, 0, 'summary']);
+            testRunner.compare(undefined, value);
+        });
     });
 
     describe('BoxValues', function() {
