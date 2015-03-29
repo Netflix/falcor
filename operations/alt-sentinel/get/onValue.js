@@ -2,7 +2,6 @@ var lru = require('./../util/lru');
 var clone = require('./../util/clone');
 var promote = lru.promote;
 var support = require('../util/support');
-var updateTrailingNullCase = support.updateTrailingNullCase;
 var materializeNode = {$type: 'sentinel'};
 module.exports = function onValue(model, node, seedOrFunction, outerResults, permuteRequested, permuteOptimized, permutePosition, outputFormat, fromReference) {
     var i, len, k, key, curr, prev, prevK;

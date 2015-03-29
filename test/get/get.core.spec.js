@@ -360,7 +360,6 @@ describe('Core', function() {
         it('should follow hardlinks.', function() {
             var model = new Model({cache: Cache()});
             var seed = [{}];
-            debugger
             model._getPathSetsAsJSON(model, [['genreList', 0, 0, 'summary']]);
             model._getPathSetsAsJSON(model, [['genreList', 0, 0, 'summary']], seed);
 
