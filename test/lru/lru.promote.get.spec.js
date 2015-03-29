@@ -1,12 +1,12 @@
-var jsong = require("../../../index");
+var jsong = require("../../index");
 var Model = jsong.Model;
 var Rx = require("rx");
-var LocalDataSource = require("../../data/LocalDataSource");
-var Cache = require("../../data/Cache");
-var ReducedCache = require("../../data/ReducedCache");
-var Expected = require("../../data/expected");
-var getTestRunner = require("../../getTestRunner");
-var testRunner = require("../../testRunner");
+var LocalDataSource = require("../data/LocalDataSource");
+var Cache = require("../data/Cache");
+var ReducedCache = require("../data/ReducedCache");
+var Expected = require("../data/expected");
+var getTestRunner = require("../getTestRunner");
+var testRunner = require("../testRunner");
 var Bound = Expected.Bound;
 var chai = require("chai");
 var expect = chai.expect;
@@ -17,7 +17,6 @@ var _ = require('lodash');
 describe('Get', function () {
     describe('getPaths', function () {
         it('should promote the get item to the head toPathValues.', function (done) {
-            debugger
             testPaths('toPathValues').
                 subscribe(noOp, done, done)
         });
@@ -93,9 +92,18 @@ describe('Multiple Gets', function () {
 });
 
 var cache = {
-    1: 'i am 1',
-    2: 'i am 2',
-    3: 'i am 3'
+    1: {
+        $type: 'sentinel',
+        value: 'i am 1'
+    },
+    2: {
+        $type: 'sentinel',
+        value: 'i am 2'
+    },
+    3: {
+        $type: 'sentinel',
+        value: 'i am 3'
+    }
 };
 var getPaths1 = ['1'];
 var getPaths2 = ['2'];
@@ -109,7 +117,6 @@ function testPaths(output, model, q) {
     return testRunner.
         get(model, q, output).
         do(noOp, noOp, function() {
-            debugger
             expect(model._root.__head.value).to.equal(cache[q[0]]);
         });
 }

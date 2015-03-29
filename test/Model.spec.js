@@ -10,6 +10,7 @@ describe("Model", function() {
 
     require("./request/RequestQueue.spec");
     require("./schedulers/schedulers.spec");
+//    require("./lru");
 
     describe("#get", function() {
         require("./get");

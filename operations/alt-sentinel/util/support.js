@@ -1,16 +1,4 @@
 var now = require('../../../src/Falcor').now;
-function updateTrailingNullCase(path, depth, requested) {
-    if (Array.isArray(path)) {
-        if (path[depth] === null && depth === path.length - 1) {
-            requested.push(null);
-        }
-    } else if (path !== null) {
-        var keys = Object.keys(path);
-        if (keys[0] === '__null' && keys.length === 1) {
-            requested.push(null);
-        }
-    }
-}
 
 function isExpired(node) {
     var $expires = node.$expires === undefined && -1 || node.$expires;
@@ -127,6 +115,5 @@ module.exports = {
     fastCat: fastCat,
     fastCatSkipNulls: fastCatSkipNulls,
     fastCopy: fastCopy,
-    isExpired: isExpired,
-    updateTrailingNullCase: updateTrailingNullCase
+    isExpired: isExpired
 };
