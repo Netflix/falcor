@@ -14,7 +14,77 @@ Array.prototype.flatMap = function(selector) {
     }, []);
 }
 
-function cache() {
+function whole_cache() {
+    return {
+        "grid": { $type: $path, value: ["grids", "grid-1234"] },
+        "grids": {
+            "grid-1234": {
+                "0": { $type: $path, value: ["rows", "row-0"] },
+                "1": { $type: $path, value: ["rows", "row-1"] },
+            }
+        },
+        "rows": {
+            "row-0": {
+                "0": { $type: $path, value: ["movies", "pulp-fiction"] },
+                "1": { $type: $path, value: ["movies", "kill-bill-1"] },
+                "2": { $type: $path, value: ["movies", "reservior-dogs"] },
+                "3": { $type: $path, value: ["movies", "django-unchained"] }
+            }
+        },
+        "movies": {
+            "pulp-fiction": {
+                "movie-id": { $type: $sentinel, value: "pulp-fiction" },
+                "title": { $type: $sentinel, value: "Pulp Fiction" },
+                "director": { $type: $sentinel, value: "Quentin Tarantino" },
+                "genres": {
+                    $type: $sentinel,
+                    value: ["Crime", "Drama", "Thriller"]
+                },
+                "summary": {
+                    $type: $sentinel,
+                    value: {
+                        title: "Pulp Fiction",
+                        url: "/movies/id/pulp-fiction"
+                    }
+                }
+            },
+            "kill-bill-1": {
+                "movie-id": { $type: $sentinel, value: "kill-bill-1" },
+                "title": { $type: $sentinel, value: "Kill Bill: Vol. 1" },
+                "director": { $type: $sentinel, value: "Quentin Tarantino" },
+                "genres": {
+                    $type: $sentinel,
+                    value: ["Crime", "Drama", "Thriller"]
+                },
+                "summary": {
+                    $type: $sentinel,
+                    value: {
+                        title: "Kill Bill: Vol. 1",
+                        url: "/movies/id/kill-bill-1"
+                    }
+                }
+            },
+            "reservior-dogs": {
+                "movie-id": { $type: $sentinel, value: "reservior-dogs" },
+                "title": { $type: $sentinel, value: "Reservior Dogs" },
+                "director": { $type: $sentinel, value: "Quentin Tarantino" },
+                "genres": {
+                    $type: $sentinel,
+                    value: ["Crime", "Drama", "Thriller"]
+                },
+                "summary": {
+                    $type: $sentinel,
+                    value: {
+                        title: "Reservior Dogs",
+                        url: "/movies/id/reservior-dogs"
+                    }
+                }
+            }
+        }
+    }
+}
+
+function partial_cache() {
     return {
         "grid": { $type: $path, value: ["grids", "grid-1234"] },
         "grids": {
@@ -375,6 +445,7 @@ describe("Build dense JSON", function() {
             
         });
         describe("a $sentinel", function() {
+            
             describe("PathValue", function() {
                 describe("in one place", function() {
                     it("directly", function() {
@@ -487,25 +558,385 @@ describe("Build dense JSON", function() {
                     });
                 });
             });
+            
+            describe("JSON-Graph Envelope", function() {
+                describe("in one place", function() {
+                    it("directly", function() {
+                        set_and_verify_json_graph(this.test, [{
+                            paths: [["movies", "pulp-fiction", "summary"]],
+                            jsong: {
+                                "movies": {
+                                    "pulp-fiction": {
+                                        "summary": {
+                                            $type: $sentinel,
+                                            value: {
+                                                title: "Pulp Fiction",
+                                                url: "/movies/id/pulp-fiction"
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }]);
+                    });
+                    it("through a reference", function() {
+                        set_and_verify_json_graph(this.test, [{
+                            paths: [["grid", 0, 0, "summary"]],
+                            jsong: {
+                                "grid": { $type: $path, value: ["grids", "grid-1234"] },
+                                "grids": {
+                                    "grid-1234": {
+                                        "0": { $type: $path, value: ["rows", "row-0"] },
+                                    }
+                                },
+                                "rows": {
+                                    "row-0": {
+                                        "0": { $type: $path, value: ["movies", "pulp-fiction"] }
+                                    }
+                                },
+                                "movies": {
+                                    "pulp-fiction": {
+                                        "summary": {
+                                            $type: $sentinel,
+                                            value: {
+                                                title: "Pulp Fiction",
+                                                url: "/movies/id/pulp-fiction"
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }]);
+                    });
+                    it("through a reference that lands on a sentinel", function() {
+                        set_and_verify_json_graph(this.test, [{
+                            paths: [["grid", 0, 1, "summary"]],
+                            jsong: {
+                                "grid": { $type: $path, value: ["grids", "grid-1234"] },
+                                "grids": {
+                                    "grid-1234": {
+                                        "0": { $type: $path, value: ["rows", "row-0"] },
+                                    }
+                                },
+                                "rows": {
+                                    "row-0": {
+                                        "1": { $type: $path, value: ["movies", "kill-bill-1"] }
+                                    }
+                                },
+                                "movies": {
+                                    "kill-bill-1": {
+                                        "summary": {
+                                            $type: $sentinel,
+                                            value: {
+                                                title: "Kill Bill: Vol. 1",
+                                                url: "/movies/id/kill-bill-1"
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }]);
+                    });
+                    it("through a broken reference", function() {
+                        set_and_verify_json_graph(this.test, [{
+                            paths: [["grid", 0, 2, "summary"]],
+                            jsong: {
+                                "grid": { $type: $path, value: ["grids", "grid-1234"] },
+                                "grids": {
+                                    "grid-1234": {
+                                        "0": { $type: $path, value: ["rows", "row-0"] },
+                                    }
+                                },
+                                "rows": {
+                                    "row-0": {
+                                        "2": { $type: $path, value: ["movies", "reservior-dogs"] }
+                                    }
+                                },
+                                "movies": {
+                                    "reservior-dogs": {
+                                        "summary": {
+                                            $type: $sentinel,
+                                            value: {
+                                                title: "Reservior Dogs",
+                                                url: "/movies/id/reservior-dogs"
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }]);
+                    });
+                });
+                describe("in multiple places", function() {
+                    describe("via keyset", function() {
+                        it("directly", function() {
+                            set_and_verify_json_graph(this.test, [{
+                                paths: [["movies", ["pulp-fiction", "kill-bill-1", "reservior-dogs"], "genres"]],
+                                jsong: {
+                                    "movies": {
+                                        "pulp-fiction": {
+                                            "genres": {
+                                                $type: $sentinel,
+                                                value: ["Crime", "Drama", "Thriller"]
+                                            }
+                                        },
+                                        "kill-bill-1": {
+                                            "genres": {
+                                                $type: $sentinel,
+                                                value: ["Crime", "Drama", "Thriller"]
+                                            }
+                                        },
+                                        "reservior-dogs": {
+                                            "genres": {
+                                                $type: $sentinel,
+                                                value: ["Crime", "Drama", "Thriller"]
+                                            }
+                                        }
+                                    }
+                                }
+                            }]);
+                        });
+                        it("through through successful, short-circuit, and broken references", function() {
+                            set_and_verify_json_graph(this.test, [{
+                                paths: [["grid", 0, [0, 1, 2], "genres"]],
+                                jsong: {
+                                    "grid": { $type: $path, value: ["grids", "grid-1234"] },
+                                    "grids": {
+                                        "grid-1234": {
+                                            "0": { $type: $path, value: ["rows", "row-0"] },
+                                        }
+                                    },
+                                    "rows": {
+                                        "row-0": {
+                                            "0": { $type: $path, value: ["movies", "pulp-fiction"] },
+                                            "1": { $type: $path, value: ["movies", "kill-bill-1"] },
+                                            "2": { $type: $path, value: ["movies", "reservior-dogs"] }
+                                        }
+                                    },
+                                    "movies": {
+                                        "pulp-fiction": {
+                                            "genres": {
+                                                $type: $sentinel,
+                                                value: ["Crime", "Drama", "Thriller"]
+                                            }
+                                        },
+                                        "kill-bill-1": {
+                                            "genres": {
+                                                $type: $sentinel,
+                                                value: ["Crime", "Drama", "Thriller"]
+                                            }
+                                        },
+                                        "reservior-dogs": {
+                                            "genres": {
+                                                $type: $sentinel,
+                                                value: ["Crime", "Drama", "Thriller"]
+                                            }
+                                        }
+                                    }
+                                }
+                            }]);
+                        });
+                    });
+                    describe("via range", function() {
+                        it("to:2", function() {
+                            set_and_verify_json_graph(this.test, [{
+                                paths: [["grid", 0, {to:2}, "genres"]],
+                                jsong: {
+                                    "grid": { $type: $path, value: ["grids", "grid-1234"] },
+                                    "grids": {
+                                        "grid-1234": {
+                                            "0": { $type: $path, value: ["rows", "row-0"] },
+                                        }
+                                    },
+                                    "rows": {
+                                        "row-0": {
+                                            "0": { $type: $path, value: ["movies", "pulp-fiction"] },
+                                            "1": { $type: $path, value: ["movies", "kill-bill-1"] },
+                                            "2": { $type: $path, value: ["movies", "reservior-dogs"] }
+                                        }
+                                    },
+                                    "movies": {
+                                        "pulp-fiction": {
+                                            "genres": {
+                                                $type: $sentinel,
+                                                value: ["Crime", "Drama", "Thriller"]
+                                            }
+                                        },
+                                        "kill-bill-1": {
+                                            "genres": {
+                                                $type: $sentinel,
+                                                value: ["Crime", "Drama", "Thriller"]
+                                            }
+                                        },
+                                        "reservior-dogs": {
+                                            "genres": {
+                                                $type: $sentinel,
+                                                value: ["Crime", "Drama", "Thriller"]
+                                            }
+                                        }
+                                    }
+                                }
+                            }]);
+                        });
+                        it("from:1, to:2", function() {
+                            set_and_verify_json_graph(this.test, [{
+                                paths: [["grid", 0, {from:1, to:2}, "genres"]],
+                                jsong: {
+                                    "grid": { $type: $path, value: ["grids", "grid-1234"] },
+                                    "grids": {
+                                        "grid-1234": {
+                                            "0": { $type: $path, value: ["rows", "row-0"] },
+                                        }
+                                    },
+                                    "rows": {
+                                        "row-0": {
+                                            "1": { $type: $path, value: ["movies", "kill-bill-1"] },
+                                            "2": { $type: $path, value: ["movies", "reservior-dogs"] }
+                                        }
+                                    },
+                                    "movies": {
+                                        "kill-bill-1": {
+                                            "genres": {
+                                                $type: $sentinel,
+                                                value: ["Crime", "Drama", "Thriller"]
+                                            }
+                                        },
+                                        "reservior-dogs": {
+                                            "genres": {
+                                                $type: $sentinel,
+                                                value: ["Crime", "Drama", "Thriller"]
+                                            }
+                                        }
+                                    }
+                                }
+                            }]);
+                        });
+                        it("length:3", function() {
+                            set_and_verify_json_graph(this.test, [{
+                                paths: [["grid", 0, {length:3}, "genres"]],
+                                jsong: {
+                                    "grid": { $type: $path, value: ["grids", "grid-1234"] },
+                                    "grids": {
+                                        "grid-1234": {
+                                            "0": { $type: $path, value: ["rows", "row-0"] },
+                                        }
+                                    },
+                                    "rows": {
+                                        "row-0": {
+                                            "0": { $type: $path, value: ["movies", "pulp-fiction"] },
+                                            "1": { $type: $path, value: ["movies", "kill-bill-1"] },
+                                            "2": { $type: $path, value: ["movies", "reservior-dogs"] }
+                                        }
+                                    },
+                                    "movies": {
+                                        "pulp-fiction": {
+                                            "genres": {
+                                                $type: $sentinel,
+                                                value: ["Crime", "Drama", "Thriller"]
+                                            }
+                                        },
+                                        "kill-bill-1": {
+                                            "genres": {
+                                                $type: $sentinel,
+                                                value: ["Crime", "Drama", "Thriller"]
+                                            }
+                                        },
+                                        "reservior-dogs": {
+                                            "genres": {
+                                                $type: $sentinel,
+                                                value: ["Crime", "Drama", "Thriller"]
+                                            }
+                                        }
+                                    }
+                                }
+                            }]);
+                        });
+                        it("from:1, length:2", function() {
+                            set_and_verify_json_graph(this.test, [{
+                                paths: [["grid", 0, {from:1, length:2}, "genres"]],
+                                jsong: {
+                                    "grid": { $type: $path, value: ["grids", "grid-1234"] },
+                                    "grids": {
+                                        "grid-1234": {
+                                            "0": { $type: $path, value: ["rows", "row-0"] },
+                                        }
+                                    },
+                                    "rows": {
+                                        "row-0": {
+                                            "1": { $type: $path, value: ["movies", "kill-bill-1"] },
+                                            "2": { $type: $path, value: ["movies", "reservior-dogs"] }
+                                        }
+                                    },
+                                    "movies": {
+                                        "kill-bill-1": {
+                                            "genres": {
+                                                $type: $sentinel,
+                                                value: ["Crime", "Drama", "Thriller"]
+                                            }
+                                        },
+                                        "reservior-dogs": {
+                                            "genres": {
+                                                $type: $sentinel,
+                                                value: ["Crime", "Drama", "Thriller"]
+                                            }
+                                        }
+                                    }
+                                }
+                            }]);
+                        });
+                    });
+                });
+            });
+            
         });
         describe("a $path", function() {
+            
             describe("PathValue", function() {
                 describe("in one place", function() {
                     it("directly", function() {
                         set_and_verify_path_values(this.test, [{
                             path: ["rows", "row-0", "3"],
-                            value: {
-                                $type: $path,
-                                value: ["movies", "django-unchained"]
-                            }
+                            value: { $type: $path, value: ["movies", "django-unchained"] }
                         }]);
                     });
                     it("through a reference", function() {
                         set_and_verify_path_values(this.test, [{
                             path: ["grid", 0, 3],
-                            value: {
-                                $type: $path,
-                                value: ["movies", "django-unchained"]
+                            value: { $type: $path, value: ["movies", "django-unchained"] }
+                        }]);
+                    });
+                });
+            });
+            
+            describe("JSON-Graph Envelope", function() {
+                describe("in one place", function() {
+                    it("directly", function() {
+                        set_and_verify_json_graph(this.test, [{
+                            paths: [["rows", "row-0", "3"]],
+                            jsong: {
+                                "rows": {
+                                    "row-0": {
+                                        "3": { $type: $path, value: ["movies", "django-unchained"] }
+                                    }
+                                }
+                            }
+                        }]);
+                    });
+                    it("through a reference", function() {
+                        set_and_verify_json_graph(this.test, [{
+                            paths: [["grid", 0, 3]],
+                            jsong: {
+                                "grid": { $type: $path, value: ["grids", "grid-1234"] },
+                                "grids": {
+                                    "grid-1234": {
+                                        "0": { $type: $path, value: ["rows", "row-0"] },
+                                    }
+                                },
+                                "rows": {
+                                    "row-0": {
+                                        "3": { $type: $path, value: ["movies", "django-unchained"] }
+                                    }
+                                }
                             }
                         }]);
                     });
@@ -515,6 +946,7 @@ describe("Build dense JSON", function() {
     });
     describe("by replacing", function() {
         describe("a $sentinel with a primitive", function() {
+            
             describe("PathValue", function() {
                 it("directly", function() {
                     set_and_verify_path_values(this.test, [{
@@ -526,6 +958,79 @@ describe("Build dense JSON", function() {
                     set_and_verify_path_values(this.test, [{
                         path: ["grid", 0, 0, "movie-id"],
                         value: "pulp-fiction-2"
+                    }]);
+                });
+            });
+            
+            describe("JSON-Graph Envelope", function() {
+                it("directly", function() {
+                    set_and_verify_json_graph(this.test, [{
+                        paths: [["movies", "pulp-fiction", "movie-id"]],
+                        jsong: {
+                            "movies": {
+                                "pulp-fiction": {
+                                    "movie-id": "pulp-fiction-2"
+                                }
+                            }
+                        }
+                    }]);
+                });
+                it("through a reference", function() {
+                    set_and_verify_json_graph(this.test, [{
+                        paths: [["grid", 0, 0, "movie-id"]],
+                        jsong: {
+                            "grid": { $type: $path, value: ["grids", "grid-1234"] },
+                            "grids": {
+                                "grid-1234": {
+                                    "0": { $type: $path, value: ["rows", "row-0"] },
+                                }
+                            },
+                            "rows": {
+                                "row-0": {
+                                    "0": { $type: $path, value: ["movies", "pulp-fiction"] }
+                                }
+                            },
+                            "movies": {
+                                "pulp-fiction": {
+                                    "movie-id": "pulp-fiction-2"
+                                }
+                            }
+                        }
+                    }]);
+                });
+            });
+        });
+        
+        describe("a $path with a different $path", function() {
+            describe("JSON-Graph Envelope", function() {
+                it("directly", function() {
+                    set_and_verify_json_graph(this.test, [{
+                        paths: [["rows", "row-0", 0]],
+                        jsong: {
+                            "rows": {
+                                "row-0": {
+                                    "0": { $type: $path, value: ["movies", "pulp-fiction-2"] }
+                                }
+                            }
+                        }
+                    }])
+                });
+                it("through a reference", function() {
+                    set_and_verify_json_graph(this.test, [{
+                        paths: [["grid", 0, 0]],
+                        jsong: {
+                            "grid": { $type: $path, value: ["grids", "grid-1234"] },
+                            "grids": {
+                                "grid-1234": {
+                                    "0": { $type: $path, value: ["rows", "row-0"] },
+                                }
+                            },
+                            "rows": {
+                                "row-0": {
+                                    "0": { $type: $path, value: ["movies", "pulp-fiction-2"] }
+                                }
+                            }
+                        }
                     }]);
                 });
             });
@@ -575,14 +1080,14 @@ function get_seeds(pathvalues) {
 }
 
 function set_path_values(pathvalues, options) {
-    var model   = new Model(_.extend({ cache: cache() }, options || {}));
+    var model   = new Model(_.extend({ cache: partial_cache() }, options || {}));
     var seeds   = get_seeds(pathvalues);
     var results = model._setPathSetsAsJSON(model, pathvalues, seeds);
     return [model, results];
 }
 
 function set_envelopes(envelopes, options) {
-    var model   = new Model(_.extend({ cache: cache() }, options || {}));
+    var model   = new Model(_.extend({ cache: partial_cache() }, options || {}));
     var seeds   = get_seeds(envelopes.flatMap(get_paths));
     var results = model._setJSONGsAsJSON(model, envelopes, seeds);
     return [model, results];
@@ -610,7 +1115,6 @@ function verify(model, input) {
     function check(name, prop) {
         var fn;
         return function(output) {
-            debugger;
             expect(input[prop], message + " - " + name).to.deep.equals(output[prop]);
             if(fn = checks.shift()) {
                 return fn.call(this, output);
