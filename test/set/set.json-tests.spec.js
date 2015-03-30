@@ -20,7 +20,7 @@ function whole_cache() {
         "grids": {
             "grid-1234": {
                 "0": { $type: $path, value: ["rows", "row-0"] },
-                "1": { $type: $path, value: ["rows", "row-1"] },
+                "1": { $type: $path, value: ["rows", "row-1"] }
             }
         },
         "rows": {
@@ -90,7 +90,7 @@ function partial_cache() {
         "grids": {
             "grid-1234": {
                 "0": { $type: $path, value: ["rows", "row-0"] },
-                "1": { $type: $path, value: ["rows", "row-1"] },
+                "1": { $type: $path, value: ["rows", "row-1"] }
             }
         },
         "rows": {
