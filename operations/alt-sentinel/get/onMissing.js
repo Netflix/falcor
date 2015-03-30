@@ -1,11 +1,10 @@
 var support = require('../util/support');
-var spreadJSON = support.spreadJSON,
-    fastCat = support.fastCat,
+var fastCat = support.fastCat,
     fastCatSkipNulls = support.fastCatSkipNulls,
-    fastCopy = support.fastCopy,
-    isExpired = support.isExpired;
+    fastCopy = support.fastCopy;
+var isExpired = require('./../util/isExpired');
+var spreadJSON = require('./../util/spreadJSON');
 var clone = require('./../util/clone');
-var onValue = require('./onValue');
 
 module.exports = function onMissing(model, node, path, depth, seedOrFunction, outerResults, permuteRequested, permuteOptimized, permutePosition, outputFormat) {
     var pathSlice;
@@ -21,12 +20,8 @@ module.exports = function onMissing(model, node, path, depth, seedOrFunction, ou
         pathSlice = [];
         spreadJSON(path, pathSlice);
 
-        if (pathSlice.length) {
-            for (var i = 0, len = pathSlice.length; i < len; i++) {
-                concatAndInsertMissing(pathSlice[i], outerResults, permuteRequested, permuteOptimized, permutePosition, outputFormat, true);
-            }
-        } else {
-            concatAndInsertMissing(pathSlice, outerResults, permuteRequested, permuteOptimized, permutePosition, outputFormat);
+        for (var i = 0, len = pathSlice.length; i < len; i++) {
+            concatAndInsertMissing(pathSlice[i], outerResults, permuteRequested, permuteOptimized, permutePosition, outputFormat, true);
         }
     }
 };
@@ -45,9 +40,7 @@ function concatAndInsertMissing(remainingPath, results, permuteRequested, permut
         for (i = 0, len = permutePosition.length; i < len; i++) {
             var idx = permutePosition[i];
             var r = permuteRequested[idx];
-            if (typeof r !== 'object') {
-                permuteRequested[idx] = [r];
-            }
+            permuteRequested[idx] = [r];
         }
         results.requestedMissingPaths.push(permuteRequested);
         results.optimizedMissingPaths.push(fastCatSkipNulls(permuteOptimized, remainingPath));

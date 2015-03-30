@@ -1,8 +1,7 @@
 var chai = require("chai");
 var expect = chai.expect;
-var jsong = require("../../index");
-var ImmediateScheduler = jsong.ImmediateScheduler;
-var TimeoutScheduler = jsong.TimeoutScheduler;
+var ImmediateScheduler = require('./../../src/scheduler/ImmediateScheduler');
+var TimeoutScheduler = require('./../../src/scheduler/TimeoutScheduler');
 
 describe("Schedulers", function() {
     var nextTick = new TimeoutScheduler(0);

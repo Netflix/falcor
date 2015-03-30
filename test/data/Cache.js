@@ -2,6 +2,7 @@ var expiredTimestamp = Date.now() - 100;
 var Cache = function() {
     return {
         "$size": 1353,
+        "movies": { "$type": "path", "value": ['videos'] },
         "genreList": {
             "$size": 81,
             "-1": { "$type": "path", "value": ["lists", "def"] },
@@ -18,6 +19,7 @@ var Cache = function() {
             "10": { "$type": "path", "value": ["videos", 1234, "summary"] },
             "11": { "$type": "path", "value": ["lists", "missing-branch-link", "summary"] },
             "12": { "$type": "path", "value": ["lists", "future-expired-list"] },
+            "inner-reference": { "$type": "path", "value": ['movies', 1234] },
             "sentinel": {
                 "$size": 52,
                 "$type": "path",
@@ -673,7 +675,16 @@ var Cache = function() {
                     }
                 }
             },
-            "missingValue": { "$type": "sentinel" }
+            "missingValue": { "$type": "sentinel" },
+            "missingSummary": {
+                "art": {
+                    "$size": 16,
+                    "$type": "sentinel",
+                    "value": {
+                        "box-shot": "www.cdn.com/missing-summary"
+                    }
+                }
+            }
         },
         "misc": {
             "$size": 51,

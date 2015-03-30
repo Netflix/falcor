@@ -1,3 +1,4 @@
+var getBoundValue = require('./getBoundValue');
 module.exports = function(walk) {
     return function getAsJSON(model, paths, values) {
         var results = {
@@ -8,11 +9,25 @@ module.exports = function(walk) {
             requestedMissingPaths: [],
             optimizedMissingPaths: []
         };
+        var requestedMissingPaths = results.requestedMissingPaths;
         var inputFormat = Array.isArray(paths[0]) ? 'Paths' : 'JSON';
-        if (values) {
-            results.values = values;
-        } else {
+        var cache = model._cache;
+        var boundPath = model._path;
+        var currentCachePosition;
+        var missingIdx = 0;
+        var optimizedPath;
+        
+        results.values = values;
+        if (!values) {
             values = [];
+        }
+        if (boundPath.length) {
+            var boundValue = getBoundValue(model, boundPath);
+            currentCachePosition = boundValue.value;
+            optimizedPath = boundValue.path;
+        } else {
+            currentCachePosition = cache;
+            optimizedPath = [];
         }
 
         for (var i = 0, len = paths.length; i < len; i++) {
@@ -20,12 +35,15 @@ module.exports = function(walk) {
             if (values[i]) {
                 valueNode = values[i];
             }
-            walk(model, model._cache, model._cache, paths[i], 0, valueNode, [], results, [], [], inputFormat, 'JSON');
+            walk(model, cache, currentCachePosition, paths[i], 0, valueNode, [], results, optimizedPath, [], inputFormat, 'JSON');
+            if (missingIdx < requestedMissingPaths.length) {
+                for (var j = missingIdx, length = requestedMissingPaths.length; j < length; j++) {
+                    requestedMissingPaths[j].pathSetIndex = i;
+                }
+                missingIdx = length;
+            }
         }
 
-        if (results.requestedPaths.length === 0) {
-            results.values = [null];
-        }
         return results;
     };
 };

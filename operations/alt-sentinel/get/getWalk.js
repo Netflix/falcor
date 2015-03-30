@@ -4,11 +4,10 @@ var onMissing = require('./onMissing');
 var onValue = require('./onValue');
 var lru = require('../util/lru');
 var hardLink = require('../util/hardlink');
-var support = require('../util/support');
 var removeHardlink = hardLink.remove;
 var splice = lru.splice;
-var isExpired = support.isExpired;
-var permuteKey = support.permuteKey;
+var isExpired = require('../util/isExpired');
+var permuteKey = require('../util/permuteKey');
 
 // TODO: Objectify?
 function walk(model, root, curr, pathOrJSON, depth, seedOrFunction, positionalInfo, outerResults, optimizedPath, requestedPath, inputFormat, outputFormat, fromReference) {
@@ -49,13 +48,12 @@ function walk(model, root, curr, pathOrJSON, depth, seedOrFunction, positionalIn
         // BaseCase: we have hit the end of our query without finding a 'leaf' node, therefore emit missing.
         if (atEndOfJSONQuery || !jsonQuery && depth === pathOrJSON.length) {
             model._materialized ?
-                onValue(model, curr, pathOrJSON, depth, seedOrFunction, outerResults, requestedPath, optimizedPath, positionalInfo, outputFormat) :
+                onValue(model, curr, seedOrFunction, outerResults, requestedPath, optimizedPath, positionalInfo, outputFormat, fromReference) :
                 onMissing(model, curr, pathOrJSON, depth, seedOrFunction, outerResults, requestedPath, optimizedPath, positionalInfo, outputFormat);
             return;
         }
 
         var memo = {done: false};
-        var first = true;
         var permutePosition = positionalInfo;
         var permuteRequested = requestedPath;
         var permuteOptimized = optimizedPath;
@@ -82,8 +80,7 @@ function walk(model, root, curr, pathOrJSON, depth, seedOrFunction, positionalIn
             permutePosition.push(depth - 1);
         }
 
-        while (!memo.done || first) {
-            first = false;
+        do {
             if (!memo.done) {
                 permuteOptimized = [];
                 permuteRequested = [];
@@ -102,9 +99,11 @@ function walk(model, root, curr, pathOrJSON, depth, seedOrFunction, positionalIn
                 }
             }
 
-            var next = curr[key];
-
-            if (key !== null) {
+            var next;
+            if (key === null || jsonQuery && key === '__null') {
+                next = curr;
+            } else {
+                next = curr[key];
                 permuteOptimized.push(key);
                 permuteRequested.push(key);
             }
@@ -117,7 +116,7 @@ function walk(model, root, curr, pathOrJSON, depth, seedOrFunction, positionalIn
 
                     if (nType && nType === 'path' && !isExpired(next)) {
                         if (asJSONG) {
-                            onValue(model, next, nextPathOrPathMap, depth, seedOrFunction, outerResults, false, permuteOptimized, permutePosition, outputFormat);
+                            onValue(model, next, seedOrFunction, outerResults, false, permuteOptimized, permutePosition, outputFormat);
                         }
                         var ref = followReference(model, root, root, next, value, seedOrFunction, outputFormat);
                         fromReference = true;
@@ -136,7 +135,8 @@ function walk(model, root, curr, pathOrJSON, depth, seedOrFunction, positionalIn
             if (!memo.done) {
                 key = permuteKey(k, memo);
             }
-        }
+            
+        } while (!memo.done);
     }
 }
 
@@ -144,7 +144,7 @@ function evaluateNode(model, curr, pathOrJSON, depth, seedOrFunction, requestedP
     // BaseCase: This position does not exist, emit missing.
     if (!curr) {
         model._materialized ?
-            onValue(model, curr, pathOrJSON, depth, seedOrFunction, outerResults, requestedPath, optimizedPath, positionalInfo, outputFormat) :
+            onValue(model, curr, seedOrFunction, outerResults, requestedPath, optimizedPath, positionalInfo, outputFormat, fromReference) :
             onMissing(model, curr, pathOrJSON, depth, seedOrFunction, outerResults, requestedPath, optimizedPath, positionalInfo, outputFormat);
         return true;
     }
@@ -160,13 +160,13 @@ function evaluateNode(model, curr, pathOrJSON, depth, seedOrFunction, requestedP
                 requestedPath.push(null);
             }
             if (outputFormat === 'JSONG') {
-                onValue(model, curr, pathOrJSON, depth, seedOrFunction, outerResults, requestedPath, optimizedPath, positionalInfo, outputFormat);
-                if (!model._errorsAsValues) {
+                onValue(model, curr, seedOrFunction, outerResults, requestedPath, optimizedPath, positionalInfo, outputFormat, fromReference);
+                if (!model._treatErrorsAsValues) {
                     onError(model, curr, requestedPath, null, outerResults);
                 }
             } else {
                 if (model._treatErrorsAsValues) {
-                    onValue(model, curr, pathOrJSON, depth, seedOrFunction, outerResults, requestedPath, optimizedPath, positionalInfo, outputFormat);
+                    onValue(model, curr, seedOrFunction, outerResults, requestedPath, optimizedPath, positionalInfo, outputFormat, fromReference);
                 } else {
                     onError(model, curr, requestedPath, optimizedPath, outerResults);
                 }
@@ -180,11 +180,9 @@ function evaluateNode(model, curr, pathOrJSON, depth, seedOrFunction, requestedP
                     splice(model, curr);
                     removeHardlink(curr);
                 }
-                model._materialized ?
-                    onValue(model, curr, pathOrJSON, depth, seedOrFunction, outerResults, requestedPath, optimizedPath, positionalInfo, outputFormat) :
-                    onMissing(model, curr, pathOrJSON, depth, seedOrFunction, outerResults, requestedPath, optimizedPath, positionalInfo, outputFormat);
+                onMissing(model, curr, pathOrJSON, depth, seedOrFunction, outerResults, requestedPath, optimizedPath, positionalInfo, outputFormat);
             } else {
-                onValue(model, curr, pathOrJSON, depth, seedOrFunction, outerResults, requestedPath, optimizedPath, positionalInfo, outputFormat);
+                onValue(model, curr, seedOrFunction, outerResults, requestedPath, optimizedPath, positionalInfo, outputFormat, fromReference);
             }
         }
 

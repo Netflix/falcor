@@ -1,7 +1,6 @@
-var jsong = require("../../index");
-var ImmediateScheduler = jsong.ImmediateScheduler;
-var TimeoutScheduler = jsong.TimeoutScheduler;
-var RequestQueue = jsong.RequestQueue;
+var ImmediateScheduler = require('./../../src/scheduler/ImmediateScheduler');
+var TimeoutScheduler = require('./../../src/scheduler/TimeoutScheduler');
+var RequestQueue = require('./../../src/request/RequestQueue');
 var LocalDataSource = require("../data/LocalDataSource");
 var Cache = require("../data/Cache");
 var Expected = require("../data/expected");
@@ -21,6 +20,7 @@ describe("RequestQueue", function() {
     };
 
     it("should be constructable.", function() {
+        debugger
         expect(new RequestQueue({}, immediate));
     });
 

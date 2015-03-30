@@ -474,15 +474,15 @@ module.exports = function() {
             },
 
             AsJSON: {
-                values: [undefined]
+                values: [{}]
             },
 
             AsJSONG: {
-                values: [undefined]
+                values: [{}]
             },
 
             AsPathMap: {
-                values: [undefined]
+                values: [{}]
             }
         },
         expiredLeafNode0: {
@@ -559,15 +559,15 @@ module.exports = function() {
             },
 
             AsJSON: {
-                values: [undefined]
+                values: [{}]
             },
 
             AsJSONG: {
-                values: [undefined]
+                values: [{}]
             },
 
             AsPathMap: {
-                values: [undefined]
+                values: [{}]
             }
         },
         expiredBranchNodeTimestamp: {
@@ -592,15 +592,15 @@ module.exports = function() {
             },
 
             AsJSON: {
-                values: [undefined]
+                values: [{}]
             },
 
             AsJSONG: {
-                values: [undefined]
+                values: [{}]
             },
 
             AsPathMap: {
-                values: [undefined]
+                values: [{}]
             }
         },
         expiredBranchNode0: {
@@ -625,15 +625,15 @@ module.exports = function() {
             },
 
             AsJSON: {
-                values: [undefined]
+                values: [{}]
             },
 
             AsJSONG: {
-                values: [undefined]
+                values: [{}]
             },
 
             AsPathMap: {
-                values: [undefined]
+                values: [{}]
             }
         },
         errorBranchSummary: {
@@ -763,15 +763,15 @@ module.exports = function() {
             },
 
             AsJSON: {
-                values: [undefined]
+                values: [{}]
             },
 
             AsJSONG: {
-                values: [undefined]
+                values: [{}]
             },
 
             AsPathMap: {
-                values: [undefined]
+                values: [{}]
             }
         },
         missingLeafSummary: {
@@ -800,15 +800,15 @@ module.exports = function() {
             },
 
             AsJSON: {
-                values: [undefined]
+                values: [{}]
             },
 
             AsJSONG: {
-                values: [undefined]
+                values: [{}]
             },
 
             AsPathMap: {
-                values: [undefined]
+                values: [{}]
             }
         }
     };

@@ -1107,7 +1107,11 @@ module.exports = function() {
                                 "value": ['movies', 1234]
                             }
                         },
-                        movies: ['videos']
+                        movies: {
+                            "$size": "51",
+                            "$type": "path",
+                            value: ['videos']
+                        }
                     },
                     paths: [["genreList", "inner-reference", null]]
                 }]
@@ -1117,12 +1121,10 @@ module.exports = function() {
                 values: [{
                     json: {
                         genreList: {
-                            __key: 'genreList',
-                            __generation: 0,
                             'inner-reference': {
-                                __key: 'inner-reference',
-                                __generation: 0,
-                                __null: ['videos']
+                                "$size": "51",
+                                "$type": "path",
+                                value: ['videos']
                             }
                         }
                     }
@@ -1223,15 +1225,26 @@ module.exports = function() {
             },
 
             AsJSON: {
-                values: [undefined]
+                values: [{}]
             },
 
             AsJSONG: {
-                values: [undefined]
+                values: [{
+                    jsong: {
+                        genreList: {
+                            4: {
+                                $size: 51,
+                                $type: 'path',
+                                value: ['lists', 'missing-list']
+                            }
+                        }
+                    },
+                    paths: []
+                }]
             },
 
             AsPathMap: {
-                values: [undefined]
+                values: [{}]
             }
         },
         toMissingReference: {
@@ -1266,18 +1279,36 @@ module.exports = function() {
             },
 
             AsJSON: {
-                values: [undefined]
+                values: [{}]
             },
 
             AsJSONG: {
-                values: [undefined]
+                values: [{
+                    jsong: {
+                        genreList: {
+                            6: {
+                                $size: 51,
+                                $type: 'path',
+                                value: ['lists', 'to-missing-list']
+                            }
+                        },
+                        lists: {
+                            'to-missing-list': {
+                                $size: 51,
+                                $type: 'path',
+                                value: ['lists', 'missing-list-2']
+                            }
+                        }
+                    },
+                    paths: []
+                }]
             },
 
             AsPathMap: {
-                values: [undefined]
+                values: [{}]
             }
         },
-        referenceBranchIsExpired: {
+        referenceBranchIsMissing: {
             getPathSets: {
                 query: [
                     ["genreList", "11", "0", null]
@@ -1309,15 +1340,26 @@ module.exports = function() {
             },
 
             AsJSON: {
-                values: [undefined]
+                values: [{}]
             },
 
             AsJSONG: {
-                values: [undefined]
+                values: [{
+                    jsong: {
+                        genreList: {
+                            11: {
+                                $size: 51,
+                                $type: 'path',
+                                value: ['lists', 'missing-branch-link', 'summary']
+                            }
+                        }
+                    },
+                    paths: []
+                }]
             },
 
             AsPathMap: {
-                values: [undefined]
+                values: [{}]
             }
         },
         referenceExpired: {
@@ -1351,15 +1393,33 @@ module.exports = function() {
             },
 
             AsJSON: {
-                values: [undefined]
+                values: [{}]
             },
 
             AsJSONG: {
-                values: [undefined]
+                values: [{
+                    jsong: {
+                        genreList: {
+                            9: {
+                                $size: 51,
+                                $type: 'path',
+                                value: ['lists', 'to-expired-list']
+                            }
+                        },
+                        lists: {
+                            'to-expired-list': {
+                                $size: 52,
+                                $type: 'path',
+                                value: ['lists', 'expired-list']
+                            }
+                        }
+                    },
+                    paths: []
+                }]
             },
 
             AsPathMap: {
-                values: [undefined]
+                values: [{}]
             }
         },
         referenceMissingBranch: {
@@ -1393,15 +1453,15 @@ module.exports = function() {
             },
 
             AsJSON: {
-                values: [undefined]
+                values: [{}]
             },
 
             AsJSONG: {
-                values: [undefined]
+                values: [{}]
             },
 
             AsPathMap: {
-                values: [undefined]
+                values: [{}]
             }
         },
         futureExpiredReference: {
@@ -1436,15 +1496,15 @@ module.exports = function() {
             },
 
             AsJSON: {
-                values: [undefined]
+                values: [{}]
             },
 
             AsJSONG: {
-                values: [undefined]
+                values: [{}]
             },
 
             AsPathMap: {
-                values: [undefined]
+                values: [{}]
             }
         }
     }

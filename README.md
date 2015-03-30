@@ -1,4 +1,4 @@
-# Falcor [![Build Status](https://magnum.travis-ci.com/Netflix/falcor.svg?token=2ZVUVaYjVQbQ8yiHk8zs&branch=master)](https://magnum.travis-ci.com/Netflix/falcor)
+# Falcor [![Build Status](https://magnum.travis-ci.com/Netflix/falcor.svg?token=2ZVUVaYjVQbQ8yiHk8zs&branch=master)](https://magnum.travis-ci.com/Netflix/falcor) [![Coverage Status](https://coveralls.io/repos/Netflix/falcor/badge.svg?branch=master&t=ntL3St)](https://coveralls.io/r/Netflix/falcor?branch=master)
 
 ## What is Falcor?
 
@@ -12,12 +12,12 @@ You retrieve data from a Falcor model using the familiar JavaScript path syntax.
 
 ```JavaScript
 var person = {
-    name: “Steve McGuire”,
-    occupation: “Developer”,
+    name: "Steve McGuire",
+    occupation: "Developer",
     location: {
-      country: “US”,
-      city: “Pacifica”,
-      address: “344 Seaside”
+      country: "US",
+      city: "Pacifica",
+      address: "344 Seaside"
     }
 }
 
@@ -37,9 +37,271 @@ person.getValue("location.address").
 // outputs "344 Seaside"
 ```
 
+## How does Falcor work?
+
+### Retrieving Data from the Model
+
+Falcor allows you to build a *Virtual JSON Model* on the server. The virtual model exposes all of the data that the client needs at a single URL on the server (ex. /model.json). On the client you can retrieve data from the virtual model by setting and retrieving keys, just as you would from any JSON object stored in memory.
+
+In this example the client requests several values from the virtual model on the server and then displays them on-screen.
+
+```JavaScript
+var person = new falcor.Model({
+  source: new falcor.HttpSource("/person.json")
+});
+
+person.get("name", "location.city", "location.address").
+  then(json => display(json));
+```
+
+When a client requests paths from the model, the model attempts to retrieve the data from its in-memory cache. If the data is not found in the local cache, the following GET request is sent to the virtual model on the server.
+```
+http://{yourdomain}/person.json?paths=[["name"], ["location", "city"], ["location", "address"]]
+```
+
+Note that rather than retrieve data from multiple endpoints, all of the data in the virtual model is exposed as single JSON resource. This means that the client can retrieve as much or as little of the graphAs is required in a single HDP request. Furthermore each resource
+
+ and the requested paths within the JSON object are passed in the query string. Disallows the
+
+The virtual JSON model on the server responds with a fragment of the virtual JSON model containing only the requested values. 
+
+```
+HTTP/1.1 200 OK
+Content-Length: length
+Content-Type: application/json; charset=utf-8
+Content-Control: no-cache
+
+{
+  "paths": [["name"], ["location", "city"], ["location", "address"]],
+  "value": {
+    "name": "Steve McGuire",
+    "occupation": "Developer",
+    "location": {
+      "city": "Pacifica",
+      "address": "344 Seaside"
+    }
+  }
+}
+```
+
+Upon receiving the requested data, the client merges the JSON fragment with a template and displays it. 
+
+
+```hbs
+<script id="person-template" type="text/x-handlebars-template">
+  <span{{name}} lives at {{location.address}}, {{location.city}}</span>
+</script>
+```
+
+```JavaScript
+var source   = $("#entry-template").html();
+var template = Handlebars.compile(source);
+
+function display(json) {
+  // json is...
+  // {
+  //   "name": "Steve McGuire",
+  //   "location": {
+  //     "city": "Pacifica",
+  //     "address": "344 Seaside"
+  //   }
+  // }
+
+  document.body.innerHTML = template(json);
+}
+```
+
+Each JSON fragment returned from the server is added to the local cache. Subsequent queries for the same paths do not result in a network request.
+
+```JavaScript
+
+print(JSON.stringify(person.getCache(), null, 2));
+// prints
+// {
+//   "name": "Steve McGuire",
+//   "location": {
+//     "city": "Pacifica",
+//     "address": "344 Seaside"
+//   }
+// }
+
+// prints the name without making a network request.
+person.
+  getValue("name").
+  then(print));
+
+```
+
+### Building the Virtual Model on the Server
+
+The reason that the server model is called "virtual" is that the server JSON Object typically does not exist in memory or on disk. *A Falcor virtual model is like a little application server hosted at a single URL.* Instead of matching URL paths, the virtual model router matches one or more paths through a a single JSON model. The virtual model generates the requested subset of the JSON model on-demand by loading the data from one or more backend data stores.
+
+The following virtual model simulates a person model on the server:
+
+```JavaScript
+// Server
+var falcor = require("falcor");
+var falcorExpress = require("falcor");
+
+var express = require("express");
+var app = express();
+
+var person = new falcor.Model({
+  router: new falcor.Router([
+    {
+      route: ["name","occupation"],
+      get: (pathSet) => 
+        personDB.
+          exec(`SELECT ${pathSet[1].join(",")}
+                  FROM user 
+           WHERE id = ${request.cookies.userid}`)
+    },
+    {
+      route: ["location",["country", "city", "address"]],
+      get: (pathSet) => 
+        locationServer.
+          getLocation(request.cookies.userid).
+          then(location => ({
+            person: { location: getProps(location, pathSet[2]) } 
+          })
+    }
+  ])
+});
+
+var modelServer = new falcor.HttpModelServer(person);
+
+app.get("/person.json", function (req, res) {
+  falcorExpress.serve(req, function(error, output) {
+    res.end(output)
+  });
+});
+
+var server = app.listen(80);
+```
+
+The virtual model exposes the entire JSON model at a single URL and accepts one or more paths in the query string. This allows the client to request as much of the graph as it needs within in a single HTTP request. 
+
+### Async Model-View-Controller
+
+Developers code against the isomorphic model using the same API they used to code against a normal JSON object. 
+
+On the client you code against the model as if it was stored in memory, but the data might be cached locally, stored in memory on the server, or retrieved lazily from multiple data sources. Falcor transparently and efficiently manages all of the network communication needed to keep model data on the client and the server in sync.
+
+# A Simple Issue Tracking App with Falcor
+
+Let's imagine we are building a simple issue tracking system. The system has three types of entities:
+
+1. Users
+2. Issues
+3. Comments
+
+When the application loads, the current user is presented with a list of issues. They can filter the list for only those issues that are assigned to them, or view all issues.
+
+(Image)
+
+Once an issue is selected, the issue detail view is displayed. 
+
+(Image)
+
+When viewing details of an individual issue, the user may edit fields, add comments, and view comments left on the issue by other users.
+
+## Contrasting Falcor with other Alternatives
+
+The domain model of our issue tracking system is a graph. Any user could be related to any other user via the comments they leave on each others issues. That means downloading all of the data for a single user could result in downloading all of the users in the domain model!
+
+To avoid this problem, web applications generally have two choices:
+
+1. Build a RESTful API
+2. Build customized endpoints for each view, each of which contains just enough information about each entity the views purposes.
+
+# Why not REST?
+
+A restful solution would involve creating separate end points for each entities data. makes caching simple, because each entities data is kept separate from every other entities data. 
+
+However it may be necessary to make multiple sequential network request to retrieve enough information to display a single view. In practice this introduces too much latency for many web applications, particularly those intended to be used on mobile devices (ie most of them).
+
+Rest was designed for the WWW. It was intended to serve coarse-grained resources like documents and images. Most web applications deal with fine-grained resources like JSON objects and simple values (ex. a movie rating). In many cases these resources maybe smaller than the H TTP envelope in the response. 
+
+In practice, a purely RESTful model introduces too much latency and overhead for most web applications.
+
+### Customized End Points
+
+The Primary benefit of building a customized end point is that you can avoid the sequential requests forced by the RESTful model. Rather then download the data for one entity, and then follow up with any number of sequential calls to retrieve the data for linked entities, the server can retrieve the client all of the data necessary for a view with a single network request. 
+
+Unfortunately this API is much harder to cache  Since each server endpoint may contain overlapping fragments of data from multiple entities, it is not possible to cash the data
+
+The document return by the server for the true master page might look something like this:
+
+(JSON)
+
+I latency makes a restful model a nonstarter for most mobile applications.
+
+In order to avoid inadvertently downloading the entire graph whenever we download an entity, most web applications either build customized endpoints for each view, or adopt a RESTful model.
+
+# JSON Graph
+
+Nearly every application's domain model is graph.  However most application servers use JSON to send domain model objects over the wire. Converting graph data into JSON is a hazard, because JSON is heirarchical format. When you expand a graph into a tree, you either get duplicates, or introduce duplicates.
+
+Let's imagine we are building a simple issue tracking system. The system has three types of entities:
+
+1. Issues
+2. Users
+3. Comments
+
+Each user is presented with a list of issues assigned to them, and every issue can contain one or more comments from any user in the system.
+
+The client must display issues and allow comments from users.  Each user is displayed a set of issues assigned to them. 
+
+ When 
+
+```JavaScript
+{
+  "id": 234,
+  "name": "Information sent over the wire contains duplicates.",
+  "assignedTo": {
+    "id": 234352,
+    "name": "Steve McGuire",
+    "image": "/headshots/234352.png"
+  },
+  "status": "open",
+  "comments": [
+    {
+      "text": "This is a serious issue, it could lead to stale caches",
+      "user": {
+        "id": 512,
+        "name": "Satyen Desai",
+        "image": "/headshots/512.png"
+      }
+    },
+    {
+      "text": "It also bloats the size of the message!",
+      "user": {
+        "id": 234352,
+        "name": "Steve McGuire",
+        "image": "/headshots/234352.png"
+      }
+    }
+  ]
+}
+```
+
+Rather than create a model of a single issue, let's create the model for the entire domain graph of the issue tracking system.  It will contain all of the data in the cloud, all of the issues, comments, and users.  This model would obviously be too large for any individual client to download. Furthermore we will not actually create  the model, anymore than web applications like Amazon actually have static HTML stored for every individual user. when sections of the model are requested
+Mu*
+You can convert any JSON  object to a JSON Graph Object in three easy steps.
+ 
+1.  Move all types of objects with non-overlapping to a shared location in the JSON object.
+
+# Asynchronous MVC Pattern
+
+The Falcor Model has an asynchronous API.
+
+# Frequently Asked Questions
+
+1. Why not use REST?
+
 ## Why use Falcor?
 
-Falcor uses an architecture which is ideal for web applications that retrieve all or most of their data from a single domain and have a data model that changes infrequently (more reads than writes). For these types of applications, Falcor can be a better choice than either REST or RPC.
+Falcor uses an architecture which is ideal for web applications that retrieve all or most of their data from a single domain and have a data model that changes infrequently (more reads than writes). For these types of applications, Falcor can be a better choice than REST.
 
 Four years ago, Netflix attempted to build a RESTful API. The goal was to get two desirable properties of RESTful architectures: Cache Coherence and Loose Coupling. Gradually the impracticality of rest became clear. Latency was much too high And message sizes were much too large, particularly for mobile
 
@@ -92,278 +354,8 @@ Netflix created resources for each of its domain model entities.
 http://netflix.com/titles/23432
 
 ```
-These resources Did not overlap at first,MakingIt easy to cash them individually
+These resources Did not overlap at first, making it easy to cash them individually
 
-
-## How does Falcor work?
-
-### Retrieving Data from the Model
-
-Falcor allows you to build a *Virtual JSON Model* on the server. The virtual model exposes all of the data that the client needs at a single URL on the server (ex. /model.json). On the client you can retrieve data from the virtual model by setting and retrieving keys, just as you would from any JSON object stored in memory.
-
-In this example the client requests several values from the virtual model on the server and then displays them on-screen.
-
-```JavaScript
-var person = new falcor.Model({
-  source: new falcor.HttpSource("/person.json")
-});
-
-person.get("name", "location.city", "location.address").
-  then(json => display(json));
-```
-
-When a client requests paths from the model, the model attempts to retrieve the data from its in-memory cache. If the data is not found in the local cache, the following GET request is sent to the virtual model on the server.
-```
-http://{yourdomain}/person.json?paths=[["name"], ["location", "city"], ["location", "address"]]
-```
-
-Note that rather than retrieve data from multiple endpoints, all of the data in the virtual model is exposed as single JSON resource. This means that the client can retrieve as much or as little of the graphAs is required in a single HDP request. Furthermore each resource
-
- and the requested paths within the JSON object are passed in the query string. Disallows the
-
-The virtual JSON model on the server responds with a fragment of the virtual JSON model containing only the requested values. 
-
-```
-HTTP/1.1 200 OK
-Content-Length: length
-Content-Type: application/json; charset=utf-8
-Content-Control: no-cache
-
-{
-  paths: [["name"], ["location", "city"], ["location", "address"]],
-  value: {
-    name: “Steve McGuire”,
-    occupation: “Developer”,
-    location: {
-      city: “Pacifica”,
-      address: “344 Seaside”
-    }
-  }
-}
-```
-
-Upon receiving the requested data, the client merges the JSON fragment with a template and displays it. 
-
-
-```HTML
-<script id="person-template" type="text/x-handlebars-template">
-  <span{{name}} lives at {{location.address}}, {{location.city}}</span>
-</script>
-```
-
-```JavaScript
-var source   = $("#entry-template").html();
-var template = Handlebars.compile(source);
-
-function display(json) {
-  // json is...
-  // {
-  //   name: “Steve McGuire”,
-  //   location: {
-  //     city: “Pacifica”,
-  //     address: “344 Seaside”
-  //   }
-  // }
-
-  document.body.innerHTML = template(json);
-}
-```
-
-Each JSON fragment returned from the server is added to the local cache. Subsequent queries for the same paths do not result in a network request.
-
-```JavaScript
-
-print(JSON.stringify(person.getCache(), null, 2));
-// prints
-// {
-//   name: “Steve McGuire”,
-//   location: {
-//     city: “Pacifica”,
-//     address: “344 Seaside”
-//   }
-// }
-
-// prints the name without making a network request.
-person.
-  getValue("name").
-  then(print));
-
-```
-
-### Building the Virtual Model on the Server
-
-The reason that the server model is called "virtual" is that the server JSON Object typically does not exist in memory or on disk. *A Falcor virtual model is like a little application server hosted at a single URL.* Instead of matching URL paths, the virtual model router matches one or more paths through a a single JSON model. The virtual model generates the requested subset of the JSON model on-demand by loading the data from one or more backend data stores.
-
-The following virtual model simulates a person
-
-// Server
-var falcor = require('falcor');
-var falcorExpress = require('falcor');
-
-var express = require('express');
-var app = express();
-
-var person = new falcor.Model({
-  router: new falcor.Router([
-    {
-      route: [“name”,”occupation”],
-      get: (pathSet) => 
-        personDB.
-          exec(`SELECT ${pathSet[1].join(‘,’)}
-                  FROM user 
-           WHERE id = ${request.cookies.userid}`)
-    },
-    {
-      route: [“location”,[“country”, ”city”, “address”]],
-      get: (pathSet) => 
-        locationServer.
-          getLocation(request.cookies.userid).
-          then(location => ({
-            person: { location: getProps(location, pathSet[2]) } 
-          })
-    }
-  ])
-});
-
-var modelServer = new falcor.HttpModelServer(person);
-
-app.get('/person.json', function (req, res) {
-  falcorExpress.serve(req, function(error, output) {
-    res.end(output)
-  });
-});
-
-var server = app.listen(80);
-
-
-The virtual model exposes the entire JSON model at a single URL and accepts one or more paths in the query string. This allows the client to request as much of the graph as it needs within in a single HTTP request. 
-
-### asynchronous model view controller
-
-Three-dimensional flexibility
-
-Developers code against the isomorphic model using the same API they used to code against a normal JSON object. 
-
-
-
-On the client you code against the model as if it was stored in memory, but the data might be cached locally, stored in memory on the server, or retrieved lazily from multiple data sources. Falcor transparently and efficiently manages all of the network communication needed to keep model data on the client and the server in sync.
-
-
-
-
-# A Simple Issue Tracking App with Falcor
-
-Let's imagine we are building a simple issue tracking system. The system has three types of entities:
-
-1. Users
-2. Issues
-3. Comments
-
-When the application loads, the current user is presented with a list of issues. They can filter the list for only those issues that are assigned to them, or view all issues.
-
-(Image)
-
-Once an issue is selected, the issue detail view is displayed. 
-
-(Image)
-
-When viewing details of an individual issue, the user may edit fields, add comments, and view comments left on the issue by other users.
-
-## Contrasting Falcor with other Alternatives
-
-The domain model of our issue tracking system is a graph. Any user could be related to any other user via the comments they leave on each others issues. That means downloading all of the data for a single user could result in downloading all of the users in the domain model!
-
-To avoid this problem, web applications generally have two choices:
-
-1. Build a RESTful API
-2. Build customized endpoints for each view, each of which contains just enough information about each entity the views purposes.
-
-
-# Why not REST?
-
-A restful solution would involve creating separate end points for each entities data. makes caching simple, because each entities data is kept separate from every other entities data. 
-
-
-However it may be necessary to make multiple sequential network request to retrieve enough information to display a single view. In practice this introduces too much latency for many web applications, particularly those intended to be used on mobile devices (ie most of them).
-
-Rest was designed for the WWW. It was intended to serve coarse-grained resources like documents and images. Most web applications deal with fine-grained resources like JSON objects and simple values (ex. a movie rating). In many cases these resources maybe smaller than the H TTP envelope in the response. 
-
-In practice, a purely RESTful model introduces too much latency and overhead for most web applications.
-
-### Customized End Points
-
-The Primary benefit of building a customized end point is that you can avoid the sequential requests forced by the RESTful model. Rather then download the data for one entity, and then follow up with any number of sequential calls to retrieve the data for linked entities, the server can retrieve the client all of the data necessary for a view with a single network request. 
-
-Unfortunately this API is much harder to cache  Since each server endpoint may contain overlapping fragments of data from multiple entities, it is not possible to cash the data
-
-The document return by the server for the true master page might look something like this:
-
-(JSON)
-
-I latency makes a restful model a nonstarter for most mobile applications.
-
-
-
-In order to avoid inadvertently downloading the entire graph whenever we download an entity, most web applications either build customized endpoints for each view, or adopt a RESTful model.
-
-# JSON Graph
-
-Nearly every application's domain model is graph.  However most application servers use JSON to send domain model objects over the wire. Converting graph data into JSON is a hazard, because JSON is heirarchical format. When you expand a graph into a tree, you either get duplicates, or introduce duplicates.
-
-Let's imagine we are building a simple issue tracking system. The system has three types of entities:
-
-1. Issues
-2. Users
-3. Comments
-
-Each user is presented with a list of issues assigned to them, and every issue can contain one or more comments from any user in the system.
-
-The client must display issues and allow comments from users.  Each user is displayed a set of issues assigned to them. 
-
- When 
-
-```JavaScript
-{
-  id: 234,
-  name: "Information sent over the wire contains duplicates.",
-  assignedTo: {
-    id: 234352,
-    name: "Steve McGuire",
-    image: "/headshots/234352.png"
-  },
-  status: "open",
-  comments: [
-    {
-      text: "This is a serious issue, it could lead to stale caches",
-      user: {
-        id: 512,
-        name: "Satyen Desai",
-        image: "/headshots/512.png"
-      }
-    },
-    {
-      text: "It also bloats the size of the message!",
-      user: {
-        id: 234352,
-        name: "Steve McGuire",
-        image: "/headshots/234352.png"
-      }
-    }
-  ]
-}
-```
-
-Rather than create a model of a single issue, let's create the model for the entire domain graph of the issue tracking system.  It will contain all of the data in the cloud, all of the issues, comments, and users.  This model would obviously be too large for any individual client to download. Furthermore we will not actually create  the model, anymore than web applications like Amazon actually have static HTML stored for every individual user. when sections of the model are requested
-Mu*
-You can convert any JSON  object to a JSON Graph Object in three easy steps.
- 
-1.  Move all types of objects with non-overlapping to a shared location in the JSON object.
-
-# Asynchronous MVC Pattern
-
-The Falcor Model has an asynchronous API.
-
-# Frequently Asked Questions
 
 1. How do I retrieve all the data in a collection in a single request.
 
@@ -372,18 +364,11 @@ In general requesting the entire contents of a collection in a single request ca
 *Falcor is designed for Applications that display information to human beings in real-time.* Rather than requesting the entire contents of a list, applications are encouraged to use paging to retrieve the first page as quickly as possible. Typically applications retrieve the first visible page of a list as well as the list length in one request to the Model (and consequently the server). At that point applications can choose whether to load the rest of the list as soon as the first page and length are displayed on screen, or simply lazily load pages as the user scrolls through the list.
 
 
-
-
-
 An Array must be chosen if you would like to be able to retrieve the entire contents of the list in a single request, and none of the values within need to be paths. 
-
-
 
 2. How do I retrieve an Object and all its descendants from a JSON Graph Model.
 
 Clients must explicitly specify the path to every value they want to retrieve from a JSON Grap object.  JSON Graph values include strings, numbers, boolean values, Arrays, or Atomic Maps. It is not possible to retrieve a value from Falcor unless you know its path.
-
-
 
 This should not be restrictive, because UIs know exactly what 
 
@@ -391,7 +376,9 @@ This should not be restrictive, because UIs know exactly what
 
 Falcor clients do _not_ perform transformations on lists in the virtual model like filtering and sorting. Instead clients rely on the virtual model on the server to expose filtered or sorted versions of the lists for them. 
 
+```JavaScript
 model.get("titleList.byRating[0...10].name");
+```
 
 In the example above, virtual model provides a "byRating" key on the titleList which is it sorted version of the same list. 
 
@@ -415,25 +402,21 @@ It is possible to use the NBC fruit pattern in any popular embassy framework, wh
 
 Imagine all of the data he required for you I'm application was available in memory.
 
-
-
-
-```
 In the example above, the sequence of keys "location" and "address" describe a *Path* to the person's street address value in the JSON object. To retrieve the same address value from a Falcor JSON Model, we pass the same sequence of keys to the Model's get method.
 
 ```JavaScript
 var person = new falcor.Model({
   cache: {
-    name: “Steve McGuire”,
-    occupation: “Developer”,
+    name: "Steve McGuire",
+    occupation: "Developer",
     location: {
-    country: “US”,
-    city: “Pacifica”,
-    address: “344 Seaside”
+    country: "US",
+    city: "Pacifica",
+    address: "344 Seaside"
   }
 });
 
-person.getValue([“location”, “address”])
+person.getValue(["location", "address"])
     then(address => print(address));
 
 // prints 344 Seaside
@@ -449,34 +432,34 @@ var person = new falcor.Model({
   source: new falcor.XMLHttpSource("/person.json")
 });
 
-person.get([“location”, “address”],
+person.get(["location", "address"],
      (address) => print(address)).
     toPromise();
 
 // prints 344 Seaside
 
 // Server
-var falcor = require('falcor');
-var falcorExpress = require('falcor');
+var falcor = require("falcor");
+var falcorExpress = require("falcor");
 
-var express = require('express');
+var express = require("express");
 var app = express();
 
 var person = new falcor.Model({
   cache: {
-    name: “Steve McGuire”,
-    occupation: “Developer”,
+    name: "Steve McGuire",
+    occupation: "Developer",
     location: {
-      country: “US”,
-      city: “Pacifica”,
-      address: “344 Seaside”
+      country: "US",
+      city: "Pacifica",
+      address: "344 Seaside"
     }
   }
 });
 
 var modelServer = new falcor.HttpModelServer(person);
 
-app.get('/person.json', function (req, res) {
+app.get("/person.json", function (req, res) {
   falcorExpress.serve(req, function(error, output) {
     res.end(output)
   });
@@ -493,30 +476,30 @@ var person = new falcor.Model({
   source: new falcor.XMLHttpSource("/person.json")
 });
 
-person.getValue([“location”, “address”])
+person.getValue(["location", "address"])
     then(address => print(address));
 
 // prints 344 Seaside
 
 // Server
-var falcor = require('falcor');
-var falcorExpress = require('falcor');
+var falcor = require("falcor");
+var falcorExpress = require("falcor");
 
-var express = require('express');
+var express = require("express");
 var app = express();
 
 var person = new falcor.Model({
   new falcor.Router([
     {
-      route: [“person”, [“name”,”occupation”]],
+      route: ["person", ["name","occupation"]],
       get: (pathSet) => 
         personDB.
-          exec(`SELECT ${pathSet[1].join(‘,’)}
+          exec(`SELECT ${pathSet[1].join(",")}
                   FROM user 
                 WHERE id = ${request.cookies.userid}`)
     },
     {
-      route: [“person”,“location”,[“country”, ”city”, “address”]],
+      route: ["person","location",["country", "city", "address"]],
       get: (pathSet) => 
         locationServer.
           getLocation(request.cookies.userid).
@@ -531,7 +514,7 @@ var person = new falcor.Model({
 
 var modelServer = new falcor.HttpModelServer(person);
 
-app.get('/person.json', function (req, res) {
+app.get("/person.json", function (req, res) {
   falcorExpress.serve(req, function(error, output) {
     res.end(output)
   });
@@ -542,6 +525,7 @@ var server = app.listen(80);
 
 You can also retrieve multiple paths from a Falcor model, and the model will batch them into a single network request.
 
+```JavaScript
 var person = new falcor.Model({
   source: new falcor.HttpSource("/person.json")
 });
@@ -551,14 +535,14 @@ person.get("genreLists[0..1][0..1].boxshot").
 
 // outputs...
 //  {
-//    genreLists: {
-//      “0”: {
-//        “0”: { boxshot: “/237843.png” },
-//        “1”: { boxshot: “/328432.png” }
+//    "genreLists": {
+//      "0": {
+//        "0": { "boxshot": "/237843.png" },
+//        "1": { "boxshot": "/328432.png" }
 //      },
-//      “1”: {
-//        “0”: { boxshot: “/7832443.png” },
-//        “1”: { boxshot: “/432432.png” }
+//      "1": {
+//        "0": { "boxshot": "/7832443.png" },
+//        "1": { "boxshot": "/432432.png" }
 //      }
 //    } 
 // }

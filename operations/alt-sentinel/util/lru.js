@@ -65,12 +65,6 @@ function lruSplice(model, object) {
     root.expired.push(object);
 }
 
-
-// Pops the tail.
-function lruPop(model) {
-    
-}
-
 module.exports = {
     promote: lruPromote,
     splice: lruSplice

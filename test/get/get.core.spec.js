@@ -5,14 +5,6 @@ var Expected = require('../data/expected');
 var Rx = require('rx');
 var getTestRunner = require('./../getTestRunner');
 var testRunner = require('./../testRunner');
-
-/**
- * @param newModel
- * @returns {Model}
- */
-function getModel(newModel, cache) {
-    return newModel ? testRunner.getModel(null, cache || {}) : model;
-}
 var model = testRunner.getModel(null, Cache());
 var References = Expected.References;
 var Complex = Expected.Complex;
@@ -77,7 +69,7 @@ describe('Core', function() {
         it('should get a value through references when the last key is null', function() {
             getTestRunner(References().referenceLeafNode);
         });
-        xit('should never follow an inner reference, but short-circuit.', function() {
+        it('should never follow an inner reference, but short-circuit.', function() {
             getTestRunner(References().innerReference);
         });
         describe('Errors', function() {
@@ -96,24 +88,12 @@ describe('Core', function() {
                 getTestRunner(References().toMissingReference);
             });
             it('should report a missing path in branch key position.', function() {
-                getTestRunner(References().referenceBranchIsExpired);
+                getTestRunner(References().referenceBranchIsMissing);
             });
         });
         describe('Expired', function() {
-            xit('should report a missing requested path when reference is expired.', function() {
+            it('should report a missing requested path when reference is expired.', function() {
                 getTestRunner(References().referenceExpired);
-            });
-            xit('should report a missing requested path when a hardlinked reference becomes expired.', function() {
-                var options = {
-                    preCall: function(model, op, query, count) {
-                        // setup hardlink to an $expires: Date.now() + 99 reference
-                        model[op](model, query, count);
-                        // TODO: Don't try this at home kids.  Guarantee you will be hurt.
-                        model._cache.lists['future-expired-list'].$expires = Date.now() - 10;
-                    },
-                    useSameModel: useNewModel
-                };
-                getTestRunner(References().futureExpiredReference, options);
             });
         });
     });
@@ -186,4 +166,36 @@ describe('Core', function() {
         });
     });
 
+    describe('Bind', function() {
+        it('should get a value directly.', function () {
+            var model = new Model({cache: Cache()}).bindSync(['videos', 1234]);
+            getTestRunner(Bound().directValue, {model: model});
+        });
+        
+        it('should bind to a value.', function () {
+            var model = new Model({cache: Cache()}).bindSync(['genreList', 10]);
+            getTestRunner(Bound().toLeafNode, {model: model});
+        });
+        it('should bind and request a missing path through a reference so the optimized path gets reset.', function () {
+            var model = new Model({cache: Cache()}).bindSync(['genreList']);
+            getTestRunner(Bound().missingValueWithReference, {model: model});
+        });
+        it('should bind and request a missing path.', function () {
+            var model = new Model({cache: Cache()}).bindSync(['videos', 'missingSummary']);
+            getTestRunner(Bound().missingValue, {model: model});
+        });
+
+        it('should throw an error when bound and calling jsong.', function() {
+            var model = new Model({cache: Cache()}).bindSync(['genreList', 10]);
+            var threw = false;
+            try {
+                model._getPathSetsAsJSONG(model, [['summary']]);
+            } catch(ex) {
+                threw = true;
+                testRunner.compare(testRunner.jsongBindException, ex);
+            }
+            testRunner.compare(true, threw);
+        });
+    });
+    require('./get.core.specifics.spec');
 });
