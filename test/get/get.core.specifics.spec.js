@@ -210,7 +210,7 @@ describe('Specific Cases', function() {
     it('should emit value when expired and materialized.', function() {
         var model = new Model({cache: Cache()}).materialize();
         var results = model._getPathSetsAsJSON(model, [['videos', 'expiredLeafByTimestamp', 'summary']], [{}]);
-        testRunner.compare([{json: {$type: 'sentinel'}}], results.values);
+        testRunner.compare([{}], results.values);
     });
     
     it('should ensure that anything removed wont be unhardlinked 2x.  COVERAGE TEST', function() {
@@ -219,7 +219,7 @@ describe('Specific Cases', function() {
         // Removes the hardlink
         model._getPathSetsAsJSON(model, [['videos', 'expiredLeafByTimestamp', 'summary']], [{}]);
         var results = model._getPathSetsAsJSON(model, [['videos', 'expiredLeafByTimestamp', 'summary']], [{}]);
-        testRunner.compare([{json: {$type: 'sentinel'}}], results.values);
+        testRunner.compare([{}], results.values);
     });
 
     it('should be able to have null in the middle of the path.', function() {

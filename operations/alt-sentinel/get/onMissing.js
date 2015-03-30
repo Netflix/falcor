@@ -1,11 +1,10 @@
 var support = require('../util/support');
-var spreadJSON = support.spreadJSON,
-    fastCat = support.fastCat,
+var fastCat = support.fastCat,
     fastCatSkipNulls = support.fastCatSkipNulls,
-    fastCopy = support.fastCopy,
-    isExpired = support.isExpired;
+    fastCopy = support.fastCopy;
+var isExpired = require('./../util/isExpired');
+var spreadJSON = require('./../util/spreadJSON');
 var clone = require('./../util/clone');
-var onValue = require('./onValue');
 
 module.exports = function onMissing(model, node, path, depth, seedOrFunction, outerResults, permuteRequested, permuteOptimized, permutePosition, outputFormat) {
     var pathSlice;
