@@ -1,12 +1,12 @@
-var jsong = require("../../../index");
+var jsong = require("../../index");
 var Model = jsong.Model;
 var expect = require('chai').expect;
-var Cache = require("../../data/Cache");
-var ReducedCache = require("../../data/ReducedCache");
-var Expected = require("../../data/expected");
-var LocalDataSource = require("../../data/LocalDataSource");
+var Cache = require("../data/Cache");
+var ReducedCache = require("../data/ReducedCache");
+var Expected = require("../data/expected");
+var LocalDataSource = require("../data/LocalDataSource");
 var Rx = require("rx");
-var testRunner = require("../../testRunner");
+var testRunner = require("../testRunner");
 var References = Expected.References;
 var Complex = Expected.Complex;
 var Values = Expected.Values;
@@ -55,7 +55,7 @@ describe('Adding', function() {
                 subscribe(noOp, done, done);
         });
     });
-    describe('setPaths', function() {
+    xdescribe('setPaths', function() {
         it('should perform a hard-link with back references toJSONG.', function(done) {
             setTest(setPath, 'toJSONG').
                 subscribe(noOp, done, done);
@@ -73,7 +73,7 @@ describe('Adding', function() {
                 subscribe(noOp, done, done);
         });
     });
-    describe('setJSON', function() {
+    xdescribe('setJSON', function() {
         it('should perform a hard-link with back references toJSONG.', function(done) {
             setTest(setJSON, 'toJSONG').
                 subscribe(noOp, done, done);

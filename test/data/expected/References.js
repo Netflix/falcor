@@ -927,11 +927,7 @@ module.exports = function() {
                     json: {
                         genreList: {
                             1: {
-                                0: {
-                                    "$size": "51",
-                                    "$type": "path",
-                                    "value": ["videos", "553"]
-                                }
+                                0: ["videos", "553"]
                             }
                         }
                     }
@@ -1121,11 +1117,7 @@ module.exports = function() {
                 values: [{
                     json: {
                         genreList: {
-                            'inner-reference': {
-                                "$size": "51",
-                                "$type": "path",
-                                value: ['videos']
-                            }
+                            'inner-reference': ['videos']
                         }
                     }
                 }]
