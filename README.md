@@ -194,8 +194,9 @@ person.
 
 The reason that the server model is called "virtual" is that the server JSON Object typically does not exist in memory or on disk. *A Falcor virtual model is like a little application server hosted at a single URL.* Instead of matching URL paths, the virtual model router matches one or more paths through a a single JSON model. The virtual model generates the requested subset of the JSON model on-demand by loading the data from one or more backend data stores.
 
-The following virtual model simulates a person
+The following virtual model simulates a person model on the server:
 
+```JavaScript
 // Server
 var falcor = require('falcor');
 var falcorExpress = require('falcor');
@@ -234,13 +235,11 @@ app.get('/person.json', function (req, res) {
 });
 
 var server = app.listen(80);
-
+```
 
 The virtual model exposes the entire JSON model at a single URL and accepts one or more paths in the query string. This allows the client to request as much of the graph as it needs within in a single HTTP request. 
 
-### asynchronous model view controller
-
-Three-dimensional flexibility
+### Async Model-View-Controller
 
 Developers code against the isomorphic model using the same API they used to code against a normal JSON object. 
 
