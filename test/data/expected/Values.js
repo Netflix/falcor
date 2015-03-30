@@ -269,11 +269,7 @@ module.exports = function() {
                 values: [{
                     json: {
                         genreList: {
-                            0: {
-                                value: ["lists", "abcd"],
-                                $type: 'path',
-                                $size: 51
-                            }
+                            0: ["lists", "abcd"]
                         }
                     }
                 }]

@@ -25,15 +25,24 @@ module.exports = function onValue(model, node, seedOrFunction, outerResults, per
     }
     
     else if (node.$type === 'path' || node.$type === 'error') {
-        if (outputFormat === 'Values' || outputFormat === 'JSON') {
-            valueNode = node.value;
-        } else {
+        debugger
+        if (outputFormat === 'JSONG') {
             valueNode = clone(node);
+        } else {
+            valueNode = node.value;
         }
     }
 
     else {
-        valueNode = node.value;
+        if (outputFormat === 'JSONG') {
+            if (typeof node.value === 'object') {
+                valueNode = node.value;
+            } else {
+                valueNode = clone(node);
+            }
+        } else {
+            valueNode = node.value;
+        }
     }
 
 
@@ -53,6 +62,7 @@ module.exports = function onValue(model, node, seedOrFunction, outerResults, per
 
         case 'PathMap':
             len = permuteRequested.length - 1;
+            debugger
             if (len === -1) {
                 seedOrFunction.json = valueNode;
             } else {
