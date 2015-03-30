@@ -166,7 +166,7 @@ describe('Core', function() {
             getTestRunner(Errors().genreListErrorNull, {errorsAsValues: true});
         });
     });
-    describe.only('Mixed Modes', function() {
+    describe('Mixed Modes', function() {
         it('should report a value when coming across an error with treateErrorsAsValues + boxValues', function () {
             getTestRunner(Heterogeneous().errorWithBoxedAndTreatErrorAsValues, {errorsAsValues: true, boxed: true});
         });
