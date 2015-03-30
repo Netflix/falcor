@@ -1,10 +1,76 @@
 module.exports = function() {
     return {
-        getPathSets: {
-            query: [["genreList", {from: 0, to: 10}, {to:2}, "summary"]]
-        },
-        AsValues: {
-
+        errorWithBoxedAndTreatErrorAsValues: {
+            getPathSets: {
+                query: [
+                    ["videos", "errorBranch", "summary"]
+                ]
+            },
+            getPathMaps: {
+                query: [
+                    {
+                        videos: {
+                            errorBranch: {
+                                summary: null
+                            }
+                        }
+                    }
+                ]
+            },
+            AsValues: {
+                values: [
+                    {
+                        "path": ["videos", "errorBranch"],
+                        "value": {
+                            "$size": 51,
+                            "$type": "error",
+                            value: "I am yelling timber."
+                        }
+                    }
+                ]
+            },
+            AsJSON: {
+                values: [
+                    {
+                        json: {
+                            "$size": 51,
+                            "$type": "error",
+                            value: "I am yelling timber."
+                        }
+                    }
+                ]
+            },
+            AsJSONG: {
+                values: [
+                    {
+                        paths: [
+                            ["videos", "errorBranch"]
+                        ],
+                        jsong: {
+                            "videos": {
+                                "errorBranch": {
+                                    "$size": 51,
+                                    "$type": "error",
+                                    "value": "I am yelling timber."
+                                }
+                            }
+                        }
+                    }
+                ]
+            },
+            AsPathMap: {
+                values: [{
+                    json: {
+                        videos: {
+                            errorBranch: {
+                                "$size": 51,
+                                "$type": "error",
+                                value: "I am yelling timber."
+                            }
+                        }
+                    }
+                }]
+            }
         }
     };
 };

@@ -7,6 +7,7 @@ var getTestRunner = require('./../getTestRunner');
 var testRunner = require('./../testRunner');
 var model = testRunner.getModel(null, Cache());
 var References = Expected.References;
+var Heterogeneous = Expected.Heterogeneous;
 var Complex = Expected.Complex;
 var Values = Expected.Values;
 var Bound = Expected.Bound;
@@ -163,6 +164,11 @@ describe('Core', function() {
         });
         it('should report an error as a value with null', function () {
             getTestRunner(Errors().genreListErrorNull, {errorsAsValues: true});
+        });
+    });
+    describe('Mixed Modes', function() {
+        it('should report a value when coming across an error with treateErrorsAsValues + boxValues', function () {
+            getTestRunner(Heterogeneous().errorWithBoxedAndTreatErrorAsValues, {errorsAsValues: true, boxed: true});
         });
     });
 

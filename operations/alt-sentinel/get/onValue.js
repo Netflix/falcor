@@ -25,15 +25,23 @@ module.exports = function onValue(model, node, seedOrFunction, outerResults, per
     }
     
     else if (node.$type === 'path' || node.$type === 'error') {
-        if (outputFormat === 'Values' || outputFormat === 'JSON') {
-            valueNode = node.value;
-        } else {
+        if (outputFormat === 'JSONG') {
             valueNode = clone(node);
+        } else {
+            valueNode = node.value;
         }
     }
 
     else {
-        valueNode = node.value;
+        if (outputFormat === 'JSONG') {
+            if (typeof node.value === 'object') {
+                valueNode = clone(node);
+            } else {
+                valueNode = node.value;
+            }
+        } else {
+            valueNode = node.value;
+        }
     }
 
 
@@ -124,7 +132,7 @@ module.exports = function onValue(model, node, seedOrFunction, outerResults, per
             key = permuteOptimized[i];
 
             // TODO: Special case? do string comparisons make big difference?
-            curr[key] = materialized ? materializeNode : clone(node);
+            curr[key] = materialized ? materializeNode : valueNode;
             if (permuteRequested) {
                 seedOrFunction.paths.push(permuteRequested);
             }
