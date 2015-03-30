@@ -213,7 +213,7 @@ module.exports = function() {
                 query: [
                     {
                         "path": ["genreList", "0"],
-                        "value": ["lists", "abcd"]
+                        "value": { "$type": "path", "value": ["lists", "abcd"] }
                     }
                 ]
             },
@@ -291,6 +291,111 @@ module.exports = function() {
                         }
                     },
                     paths: [["genreList", "0"]]
+                }]
+            }
+        },
+        sentinelDirect: {
+            getPathSets: {
+                query: [
+                    ["videos", "1234", "summary"]
+                ]
+            },
+            setPathSets: {
+                query: [{
+                    "path": ["videos", "1234", "summary"],
+                    "value": {
+                        "$type": "sentinel",
+                        "value": {
+                            "title": "House of Cards",
+                            "url": "/movies/1234"
+                        }
+                    }
+                }]
+            },
+            setPathMaps: {
+                query: [{
+                    videos: {
+                        1234: {
+                            summary: {
+                                "title": "House of Cards",
+                                "url": "/movies/1234"
+                            }
+                        }
+                    }
+                }]
+            },
+            setJSONGs: {
+                query: [{
+                    paths: [["videos", "1234", "summary"]],
+                    jsong: {
+                        videos: {
+                            1234: {
+                                summary: {
+                                    "title": "House of Cards",
+                                    "url": "/movies/1234"
+                                }
+                            }
+                        }
+                    }
+                }]
+            },
+            getPathMaps: {
+                query: [{
+                    videos: {
+                        1234: {
+                            summary: null
+                        }
+                    }
+                }]
+            },
+            AsValues: {
+                values: [{
+                    "path": ["videos", "1234", "summary"],
+                    "value": {
+                        "title": "House of Cards",
+                        "url": "/movies/1234"
+                    }
+                }]
+            },
+            AsJSON: {
+                values: [{
+                    json: {
+                        "title": "House of Cards",
+                        "url": "/movies/1234"
+                    }
+                }]
+            },
+            AsJSONG: {
+                values: [{
+                    jsong: {
+                        videos: {
+                            1234: {
+                                summary: {
+                                    "$size": 51,
+                                    "$type": "sentinel",
+                                    "value": {
+                                        "title": "House of Cards",
+                                        "url": "/movies/1234"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    paths: [["videos", "1234", "summary"]]
+                }]
+            },
+            AsPathMap: {
+                values: [{
+                    json: {
+                        videos: {
+                            1234: {
+                                "summary": {
+                                    "title": "House of Cards",
+                                    "url": "/movies/1234"
+                                }
+                            }
+                        }
+                    }
                 }]
             }
         },

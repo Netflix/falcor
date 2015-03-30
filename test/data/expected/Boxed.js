@@ -2,6 +2,18 @@ module.exports = function() {
     return {
         sentinelValue: {
             getPathSets: { query: [["videos", "0", "summary"]] },
+            setPathSets: {
+                query: [{
+                    path: ["videos", "0", "summary"],
+                    value: {
+                        "$type": "sentinel",
+                        "value": {
+                            "title": "Additional Title 0",
+                            "url": "/movies/0"
+                        }
+                    }
+                }]
+            },
             AsValues: {
                 values: [{
                     path: ["videos", "0", "summary"],

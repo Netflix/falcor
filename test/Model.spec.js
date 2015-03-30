@@ -16,10 +16,9 @@ describe("Model", function() {
         require("./get");
     });
     
-//    describe("#set", function() {
-//        require("./set/set.spec");
-//        require('./set/edge-cases.spec');
-//    });
+    describe("#set", function() {
+        require("./set");
+    });
 
 //    describe("#call", function() {
 //        require("./call/call.spec");
