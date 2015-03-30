@@ -37,63 +37,6 @@ person.getValue("location.address").
 // outputs "344 Seaside"
 ```
 
-## Why use Falcor?
-
-Falcor uses an architecture which is ideal for web applications that retrieve all or most of their data from a single domain and have a data model that changes infrequently (more reads than writes). For these types of applications, Falcor can be a better choice than either REST or RPC.
-
-Four years ago, Netflix attempted to build a RESTful API. The goal was to get two desirable properties of RESTful architectures: Cache Coherence and Loose Coupling. Gradually the impracticality of rest became clear. Latency was much too high And message sizes were much too large, particularly for mobile
-
-### Cache Coherence
-
-The **Netflix UI is primarily a browsing problem.** Although we frequently add new titles for our members to enjoy, the catalog is unlikely to change substantially within the period of a single user's session (1-3 hours). That means that the average user session is spent browsing through a large, static catalog. It is precisely these types of problems that benefit greatly from caching.
-
-When you maintain a cache, it is important for the cache to remain coherent. Cache coherence means that the data in the local cache is up-to-date with the changes on the server. Failure to ensure cache coherence can cause stale data to be displayed to the user. Imagine rating "House of Cards" in the "Recently Watched" list only to find that your rating is not reflected in the same title when it appears in "New Releases."
-
-![alt text](http://netflix.github.io/falcor/staledata.png "Stale Data")
-
-RESTful systems achieve Cache Coherence by ensuring that data appears in only one resource. For Netflix this meant creating a separate resource for each individual title.
-
-http://netflix.com/title/23432
-
-{
-  id: 23432,
-  name: "House of Cards",
-  rating: 5,
-  description: "This Emmy-winning original thriller series stars Golden Globe winner Kevin Spacey as ruthless, cunning Congressman Francis Underwood, who will stop at nothing to conquer the halls of power in Washington D.C. His secret weapon: his gorgeous, ambitious, and equally conniving wife Claire (Golden Globe winner Robin Wright).",
-  boxshotURL: "http://cdn6.nflximg.net/webp/8266/13038266.webp",
-  // more fields
-}
-
-This made it possible to update the rating of the title with a single PUT.
-
-### Loose Coupling
-
-RESTful APIs Are loosely coupled and can be used by many different applications. This was important to Netflix as we already had several different applications, including a Tablet, Phone, and TV app. Rather than have the EDGE team build and maintain APIs for each of these applications, the decision was made to build-loosely coupled API that could be used by all UIs.
-
-### The Trouble with REST
-
-The impracticality of using REST became clear overtime.
-
-Another reason for building a loosely coupled API for applications is that Netflix already had several different applications that had different needs. 
-
-Reflecting the different media sizes different applications would display more or less fields on certain screens. 
-The World Wide Web is easy for browsers to cache because each individual resource is found a separate URL. When you visit a site the contents of that site are placed in the browser cache and the URL is used as the key. If the same resource needs to be made available at two different URLs, one URL can redirect to the other. As a result no website need ever appear twice in the browser cache. Eliminating duplicate resources from the browser cache reduces the risk of stale data being displayed to the user. 
-
-In addition to a resource being available at two different locations callAnother source of stale dataIs went to the data into resources overlap. For example Let's say the following URL
-
-http://netflix.com/genreLists?rowOffset=5&rowPageSize=5&colOffset=5&colPageSize=10
-
-
-
-Rather than duplicate a resource in multiple a URL Can redirect to another location. Resources are found in a single location, and it is possible to create a reference to a resource in another location using a HTTP redirect. 
-
-Netflix created resources for each of its domain model entities. 
-```
-http://netflix.com/titles/23432
-
-```
-These resources Did not overlap at first,MakingIt easy to cash them individually
-
 
 ## How does Falcor work?
 
@@ -363,6 +306,66 @@ You can convert any JSON  object to a JSON Graph Object in three easy steps.
 The Falcor Model has an asynchronous API.
 
 # Frequently Asked Questions
+
+1. Why not use REST?
+
+## Why use Falcor?
+
+Falcor uses an architecture which is ideal for web applications that retrieve all or most of their data from a single domain and have a data model that changes infrequently (more reads than writes). For these types of applications, Falcor can be a better choice than REST.
+
+Four years ago, Netflix attempted to build a RESTful API. The goal was to get two desirable properties of RESTful architectures: Cache Coherence and Loose Coupling. Gradually the impracticality of rest became clear. Latency was much too high And message sizes were much too large, particularly for mobile
+
+### Cache Coherence
+
+The **Netflix UI is primarily a browsing problem.** Although we frequently add new titles for our members to enjoy, the catalog is unlikely to change substantially within the period of a single user's session (1-3 hours). That means that the average user session is spent browsing through a large, static catalog. It is precisely these types of problems that benefit greatly from caching.
+
+When you maintain a cache, it is important for the cache to remain coherent. Cache coherence means that the data in the local cache is up-to-date with the changes on the server. Failure to ensure cache coherence can cause stale data to be displayed to the user. Imagine rating "House of Cards" in the "Recently Watched" list only to find that your rating is not reflected in the same title when it appears in "New Releases."
+
+![alt text](http://netflix.github.io/falcor/staledata.png "Stale Data")
+
+RESTful systems achieve Cache Coherence by ensuring that data appears in only one resource. For Netflix this meant creating a separate resource for each individual title.
+
+http://netflix.com/title/23432
+
+{
+  id: 23432,
+  name: "House of Cards",
+  rating: 5,
+  description: "This Emmy-winning original thriller series stars Golden Globe winner Kevin Spacey as ruthless, cunning Congressman Francis Underwood, who will stop at nothing to conquer the halls of power in Washington D.C. His secret weapon: his gorgeous, ambitious, and equally conniving wife Claire (Golden Globe winner Robin Wright).",
+  boxshotURL: "http://cdn6.nflximg.net/webp/8266/13038266.webp",
+  // more fields
+}
+
+This made it possible to update the rating of the title with a single PUT.
+
+### Loose Coupling
+
+RESTful APIs Are loosely coupled and can be used by many different applications. This was important to Netflix as we already had several different applications, including a Tablet, Phone, and TV app. Rather than have the EDGE team build and maintain APIs for each of these applications, the decision was made to build-loosely coupled API that could be used by all UIs.
+
+### The Trouble with REST
+
+The impracticality of using REST became clear overtime.
+
+Another reason for building a loosely coupled API for applications is that Netflix already had several different applications that had different needs. 
+
+Reflecting the different media sizes different applications would display more or less fields on certain screens. 
+The World Wide Web is easy for browsers to cache because each individual resource is found a separate URL. When you visit a site the contents of that site are placed in the browser cache and the URL is used as the key. If the same resource needs to be made available at two different URLs, one URL can redirect to the other. As a result no website need ever appear twice in the browser cache. Eliminating duplicate resources from the browser cache reduces the risk of stale data being displayed to the user. 
+
+In addition to a resource being available at two different locations callAnother source of stale dataIs went to the data into resources overlap. For example Let's say the following URL
+
+http://netflix.com/genreLists?rowOffset=5&rowPageSize=5&colOffset=5&colPageSize=10
+
+
+
+Rather than duplicate a resource in multiple a URL Can redirect to another location. Resources are found in a single location, and it is possible to create a reference to a resource in another location using a HTTP redirect. 
+
+Netflix created resources for each of its domain model entities. 
+```
+http://netflix.com/titles/23432
+
+```
+These resources Did not overlap at first,MakingIt easy to cash them individually
+
 
 1. How do I retrieve all the data in a collection in a single request.
 
