@@ -38,10 +38,6 @@ function fastCat(arr1, arr2) {
 }
 
 function permuteKey(key, memo) {
-    if (memo.done) {
-        return;
-    }
-
     if (memo.isArray) {
         if (memo.loaded && memo.rangeOffset > memo.to) {
             memo.arrOffset++;

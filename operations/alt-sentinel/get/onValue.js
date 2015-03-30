@@ -48,9 +48,8 @@ module.exports = function onValue(model, node, seedOrFunction, outerResults, per
     switch (outputFormat) {
 
         case 'Values':
-            if (seedOrFunction) {
-                seedOrFunction({path: permuteRequested, value: valueNode});
-            }
+            // in any subscription situation, onNexts are always provided, even as a noOp.
+            seedOrFunction({path: permuteRequested, value: valueNode});
             break;
 
         case 'PathMap':
@@ -64,9 +63,6 @@ module.exports = function onValue(model, node, seedOrFunction, outerResults, per
                 }
                 for (i = 0; i < len; i++) {
                     k = permuteRequested[i];
-                    if (k === null) {
-                        continue;
-                    }
                     if (!curr[k]) {
                         curr[k] = {};
                     }
@@ -85,7 +81,6 @@ module.exports = function onValue(model, node, seedOrFunction, outerResults, per
 
         case 'JSON':
             if (seedOrFunction) {
-
                 if (permutePosition.length) {
                     if (!seedOrFunction.json) {
                         seedOrFunction.json = {};
@@ -112,29 +107,27 @@ module.exports = function onValue(model, node, seedOrFunction, outerResults, per
             break;
 
         case 'JSONG':
-            if (seedOrFunction) {
-                curr = seedOrFunction.jsong;
-                if (!curr) {
-                    curr = seedOrFunction.jsong = {};
-                    seedOrFunction.paths = [];
-                }
-                for (i = 0, len = permuteOptimized.length - 1; i < len; i++) {
-                    key = permuteOptimized[i];
-
-                    if (!curr[key]) {
-                        curr[key] = {};
-                    }
-                    curr = curr[key];
-                }
-
-                // assign the last
+            curr = seedOrFunction.jsong;
+            if (!curr) {
+                curr = seedOrFunction.jsong = {};
+                seedOrFunction.paths = [];
+            }
+            for (i = 0, len = permuteOptimized.length - 1; i < len; i++) {
                 key = permuteOptimized[i];
-                
-                // TODO: Special case? do string comparisons make big difference?
-                curr[key] = materialized ? materializeNode : clone(node);
-                if (permuteRequested) {
-                    seedOrFunction.paths.push(permuteRequested);
+
+                if (!curr[key]) {
+                    curr[key] = {};
                 }
+                curr = curr[key];
+            }
+
+            // assign the last
+            key = permuteOptimized[i];
+
+            // TODO: Special case? do string comparisons make big difference?
+            curr[key] = materialized ? materializeNode : clone(node);
+            if (permuteRequested) {
+                seedOrFunction.paths.push(permuteRequested);
             }
             break;
     }

@@ -55,7 +55,6 @@ function walk(model, root, curr, pathOrJSON, depth, seedOrFunction, positionalIn
         }
 
         var memo = {done: false};
-        var first = true;
         var permutePosition = positionalInfo;
         var permuteRequested = requestedPath;
         var permuteOptimized = optimizedPath;
@@ -82,8 +81,7 @@ function walk(model, root, curr, pathOrJSON, depth, seedOrFunction, positionalIn
             permutePosition.push(depth - 1);
         }
 
-        while (!memo.done || first) {
-            first = false;
+        do {
             if (!memo.done) {
                 permuteOptimized = [];
                 permuteRequested = [];
@@ -102,9 +100,11 @@ function walk(model, root, curr, pathOrJSON, depth, seedOrFunction, positionalIn
                 }
             }
 
-            var next = curr[key];
-
-            if (key !== null) {
+            var next;
+            if (key === null || jsonQuery && key === '__null') {
+                next = curr;
+            } else {
+                next = curr[key];
                 permuteOptimized.push(key);
                 permuteRequested.push(key);
             }
@@ -136,7 +136,8 @@ function walk(model, root, curr, pathOrJSON, depth, seedOrFunction, positionalIn
             if (!memo.done) {
                 key = permuteKey(k, memo);
             }
-        }
+            
+        } while (!memo.done);
     }
 }
 
@@ -181,7 +182,7 @@ function evaluateNode(model, curr, pathOrJSON, depth, seedOrFunction, requestedP
                     removeHardlink(curr);
                 }
                 model._materialized ?
-                    onValue(model, curr, seedOrFunction, outerResults, requestedPath, optimizedPath, positionalInfo, outputFormat, fromReference) :
+                    onValue(model, undefined, seedOrFunction, outerResults, requestedPath, optimizedPath, positionalInfo, outputFormat, fromReference) :
                     onMissing(model, curr, pathOrJSON, depth, seedOrFunction, outerResults, requestedPath, optimizedPath, positionalInfo, outputFormat);
             } else {
                 onValue(model, curr, seedOrFunction, outerResults, requestedPath, optimizedPath, positionalInfo, outputFormat, fromReference);
