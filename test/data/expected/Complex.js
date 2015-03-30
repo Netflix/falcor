@@ -861,16 +861,8 @@ module.exports = function() {
                 values: [{
                     json: {
                         genreList: {
-                            0: {
-                                "$size": 51,
-                                "$type": "path",
-                                "value": ["lists", "abcd"]
-                            },
-                            1: {
-                                "$size": 51,
-                                "$type": "path",
-                                "value": ["lists", "my-list"]
-                            }
+                            0: ["lists", "abcd"],
+                            1: ["lists", "my-list"]
                         }
                     }
                 }]
@@ -925,11 +917,7 @@ module.exports = function() {
                 values: [{
                     json: {
                         genreList: {
-                            0: {
-                                "$size": 51,
-                                "$type": "path",
-                                "value": ["lists", "abcd"]
-                            }
+                            0: ["lists", "abcd"]
                         }
                     }
                 }]
@@ -1009,21 +997,9 @@ module.exports = function() {
                 values: [{
                     json: {
                         genreList: {
-                            "-1": {
-                                "$size": 51,
-                                "$type": "path",
-                                "value": ["lists", "def"]
-                            },
-                            0: {
-                                "$size": 51,
-                                "$type": "path",
-                                "value": ["lists", "abcd"]
-                            },
-                            1: {
-                                "$size": 51,
-                                "$type": "path",
-                                "value": ["lists", "my-list"]
-                            }
+                            "-1": ["lists", "def"],
+                            0: ["lists", "abcd"],
+                            1: ["lists", "my-list"]
                         }
                     }
                 }]
@@ -1103,21 +1079,9 @@ module.exports = function() {
                 values: [{
                     json: {
                         genreList: {
-                            "-1": {
-                                "$size": 51,
-                                "$type": "path",
-                                "value": ["lists", "def"]
-                            },
-                            0: {
-                                "$size": 51,
-                                "$type": "path",
-                                "value": ["lists", "abcd"]
-                            },
-                            1: {
-                                "$size": 51,
-                                "$type": "path",
-                                "value": ["lists", "my-list"]
-                            }
+                            "-1": ["lists", "def"],
+                            0: ["lists", "abcd"],
+                            1: ["lists", "my-list"]
                         }
                     }
                 }]
@@ -1185,16 +1149,8 @@ module.exports = function() {
                 values: [{
                     json: {
                         genreList: {
-                            0: {
-                                "$size": 51,
-                                "$type": "path",
-                                "value": ["lists", "abcd"]
-                            },
-                            1: {
-                                "$size": 51,
-                                "$type": "path",
-                                "value": ["lists", "my-list"]
-                            }
+                            0: ["lists", "abcd"],
+                            1: ["lists", "my-list"]
                         }
                     }
                 }]
@@ -1262,16 +1218,8 @@ module.exports = function() {
                 values: [{
                     json: {
                         genreList: {
-                            0: {
-                                "$size": 51,
-                                "$type": "path",
-                                "value": ["lists", "abcd"]
-                            },
-                            1: {
-                                "$size": 51,
-                                "$type": "path",
-                                "value": ["lists", "my-list"]
-                            }
+                            0: ["lists", "abcd"],
+                            1: ["lists", "my-list"]
                         }
                     }
                 }]

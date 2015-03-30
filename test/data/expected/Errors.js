@@ -30,11 +30,7 @@ module.exports = function() {
                 values: [{
                     json: {
                         "videos": {
-                            "errorBranch": {
-                                "$size": "51",
-                                "$type": "error",
-                                "value": "I am yelling timber."
-                            }
+                            "errorBranch": "I am yelling timber."
                         }
                     }
                 }]
@@ -84,11 +80,7 @@ module.exports = function() {
                 values: [{
                     json: {
                         "genreList": {
-                            "2": {
-                                "$size": "51",
-                                "$type": "error",
-                                "value": "Red is the new Black"
-                            }
+                            "2": "Red is the new Black"
                         }
                     }
                 }]
