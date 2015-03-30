@@ -4,11 +4,10 @@ var onMissing = require('./onMissing');
 var onValue = require('./onValue');
 var lru = require('../util/lru');
 var hardLink = require('../util/hardlink');
-var support = require('../util/support');
 var removeHardlink = hardLink.remove;
 var splice = lru.splice;
-var isExpired = support.isExpired;
-var permuteKey = support.permuteKey;
+var isExpired = require('../util/isExpired');
+var permuteKey = require('../util/permuteKey');
 
 // TODO: Objectify?
 function walk(model, root, curr, pathOrJSON, depth, seedOrFunction, positionalInfo, outerResults, optimizedPath, requestedPath, inputFormat, outputFormat, fromReference) {
@@ -181,9 +180,7 @@ function evaluateNode(model, curr, pathOrJSON, depth, seedOrFunction, requestedP
                     splice(model, curr);
                     removeHardlink(curr);
                 }
-                model._materialized ?
-                    onValue(model, undefined, seedOrFunction, outerResults, requestedPath, optimizedPath, positionalInfo, outputFormat, fromReference) :
-                    onMissing(model, curr, pathOrJSON, depth, seedOrFunction, outerResults, requestedPath, optimizedPath, positionalInfo, outputFormat);
+                onMissing(model, curr, pathOrJSON, depth, seedOrFunction, outerResults, requestedPath, optimizedPath, positionalInfo, outputFormat);
             } else {
                 onValue(model, curr, seedOrFunction, outerResults, requestedPath, optimizedPath, positionalInfo, outputFormat, fromReference);
             }

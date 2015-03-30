@@ -1,6 +1,6 @@
 var followReference = require('./followReference');
 var clone = require('./../util/clone');
-var isExpired = require('./../util/support').isExpired;
+var isExpired = require('./../util/isExpired');
 var promote = require('./../util/lru').promote;
 
 module.exports = function getValueSync(model, simplePath) {
