@@ -79,11 +79,11 @@ module.exports = function() {
         },
         referenceValue: {
             getPathSets: { query: [["genreList", "0"]] },
-            AsValues: { 
+            AsValues: {
                 values: [{
                     path: ["genreList", "0"],
                     value: {
-                        "$size": 51,
+                        "$size": 52,
                         "$type": "path",
                         "value": ["lists", "abcd"]
                     }
@@ -92,7 +92,7 @@ module.exports = function() {
             AsJSON: {
                 values: [{
                     json: {
-                        "$size": 51,
+                        "$size": 52,
                         "$type": "path",
                         "value": ["lists", "abcd"]
                     }
@@ -103,7 +103,7 @@ module.exports = function() {
                     json: {
                         "genreList": {
                             "0": {
-                                "$size": 51,
+                                "$size": 52,
                                 "$type": "path",
                                 "value": ["lists", "abcd"]
                             }
@@ -117,7 +117,7 @@ module.exports = function() {
                     jsong: {
                         "genreList": {
                             "0": {
-                                "$size": 51,
+                                "$size": 52,
                                 "$type": "path",
                                 "value": ["lists", "abcd"]
                             }

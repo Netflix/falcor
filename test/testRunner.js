@@ -32,12 +32,21 @@ module.exports = {
         return {
             prefixesAndSuffixes: prefixesAndSuffixes,
             universalExpectedValues: universalExpectedValues
-        }
+        };
     },
     convertIntegers: traverseAndConvert,
-    clean: clean,
-    compare: function(expected, actual, message) {
-        expect(clean(actual), message).to.deep.equals(clean(expected));
+    clean: function(item) {
+        return clean(item, {strip: []});
+    },
+    compare: function(expected, actual, messageOrOptions, options) {
+        var opts = _.extend({
+            strip: []
+        }, options);
+        if (typeof messageOrOptions === 'object') {
+            _.extend(opts, messageOrOptions);
+            messageOrOptions = undefined;
+        }
+        expect(clean(actual, opts), messageOrOptions).to.deep.equals(clean(expected, opts));
     },
     getModel: function(dataSource, cache, errorSelector) {
         dataSource = dataSource || dataSource !== null && new LocalDataSource(Cache(), {errorSelector: errorSelector});
@@ -70,17 +79,19 @@ module.exports = {
     },
     jsongBindException: 'It is not legal to use the JSON Graph format from a bound Model. JSON Graph format can only be used from a root model.'
 };
-function clean(item) {
+function clean(item, options) {
     traverseAndConvert(item);
     strip(item, "__generation", "pathSetIndex");
+
+    options.strip.forEach(function(s) {
+        strip(item, s);
+    });
     return item;
 }
 
 function validateData(expected, actual) {
-    
     expect(actual, "actual").to.be.ok;
     expect(expected, "expected").to.be.ok;
-    
     var keys = Object.keys(expected);
 
     keys.forEach(function(key) {

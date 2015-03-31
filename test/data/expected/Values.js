@@ -280,7 +280,7 @@ module.exports = function() {
                     jsong: {
                         genreList: {
                             0: {
-                                "$size": 51,
+                                "$size": 52,
                                 "$type": "path",
                                 "value": ["lists", "abcd"]
                             }
@@ -409,7 +409,7 @@ module.exports = function() {
                     }
                 }]
             },
-            
+
             setPathSets: {
                 query: [
                     {
@@ -711,7 +711,7 @@ module.exports = function() {
                     jsong: {
                         "genreList": {
                             "2": {
-                                "$size": 51,
+                                "$size": 52,
                                 "$type": "path",
                                 "value": ["lists", "error-list"]
                             }

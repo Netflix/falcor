@@ -91,7 +91,7 @@ module.exports = function() {
                     jsong: {
                         "genreList": {
                             "2": {
-                                "$size": 51,
+                                "$size": 52,
                                 "$type": "path",
                                 "value": ["lists", "error-list"]
                             }

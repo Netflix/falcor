@@ -72,13 +72,13 @@ module.exports = function() {
             },
             AsPathMap: {
                 values: [{
-                    json: { misc: { usentinel: { "$type": "sentinel" } } } 
+                    json: { misc: { usentinel: { "$type": "sentinel" } } }
                 }]
             },
             AsJSONG: {
                 values: [{
                     paths: [["misc", "usentinel"]],
-                    jsong: { misc: { usentinel: { "$type": "sentinel" } } } 
+                    jsong: { misc: { usentinel: { "$type": "sentinel" } } }
                 }]
             }
         }
