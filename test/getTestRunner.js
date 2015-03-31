@@ -26,10 +26,13 @@ function getTestRunner(data, options) {
         forEach(function (prefix) {
             prefixesAndSuffixes[1].map(function (suffix) {
                 var query = data[prefix].query;
-                var countOrFunction = data[prefix].count === undefined ? 1 : 0;
+                var seedsOrFunction = [{}], count;
+                if (suffix === 'AsJSON') {
+                    count = data[prefix].count === undefined || !data[prefix].count ? 1 : data[prefix].count;
+                    seedsOrFunction = Array(count).join(",").split(",").map(function() { return {}; });
+                }
                 var op = "_" + prefix + suffix;
                 
-                countOrFunction = Array(countOrFunction).join(",").split(",").map(function() { return {}; });
 
                 // If this prefix operation intentionally excludes then early return.
                 if (data[prefix].exclude && _.contains(data[prefix].exclude, suffix)) {
@@ -75,7 +78,7 @@ function getTestRunner(data, options) {
                     var vals = expected.values;
                     delete expected.values;
                     
-                    countOrFunction = function(pV) {
+                    seedsOrFunction = function(pV) {
                         if (vals && vals.length) {
                             var tested = false;
                             var path = pV.path.map(toString);
@@ -98,8 +101,8 @@ function getTestRunner(data, options) {
                 }
 
                 // For doing any preprocessing.
-                preCallFn(model, op, _.cloneDeep(query), countOrFunction);
-                actual = model[op](model, _.cloneDeep(query), countOrFunction, model._errorSelector);
+                preCallFn(model, op, _.cloneDeep(query), seedsOrFunction);
+                actual = model[op](model, _.cloneDeep(query), seedsOrFunction, model._errorSelector);
                 
                 actual = Object.keys(expected).reduce(function(memo, key) {
                     memo[key] = actual[key];

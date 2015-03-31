@@ -20,7 +20,6 @@ module.exports = function(walk) {
             currentCachePosition = cache;
         }
 
-        debugger;
         for (var i = 0, len = paths.length; i < len; i++) {
             walk(model, cache, currentCachePosition, paths[i], 0, values[0], [], results, [], [], inputFormat, 'JSONG');
         }

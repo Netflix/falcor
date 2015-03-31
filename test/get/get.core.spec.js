@@ -182,6 +182,13 @@ describe('Core', function() {
             var model = new Model({cache: Cache()}).bindSync(['genreList', 10]);
             getTestRunner(Bound().toLeafNode, {model: model});
         });
+        
+        it('should bind to a value and get multiple paths.', function () {
+            var model = new Model({cache: Cache()}).bindSync(['videos', 3355]);
+            debugger
+            getTestRunner(Bound().multipleQueries, {model: model});
+        });
+        
         it('should bind and request a missing path through a reference so the optimized path gets reset.', function () {
             var model = new Model({cache: Cache()}).bindSync(['genreList']);
             getTestRunner(Bound().missingValueWithReference, {model: model});
