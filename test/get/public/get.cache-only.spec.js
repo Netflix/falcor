@@ -18,7 +18,6 @@ describe('Cache Only', function() {
                 get(['videos', 1234, 'summary'], function(x) {
                     testRunner.compare(expected, x);
                     selector = true;
-                    
                     return {value: x};
                 }).
                 doAction(function(x) {

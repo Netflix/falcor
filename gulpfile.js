@@ -16,15 +16,15 @@ var buildDir = 'bin';
 gulp.task('hint', ['build'], function() {
     return gulp.src(buildDir + '/**/*.js').
         pipe(jshint()).
-	pipe(jshint.reporter('default')).
-	pipe(jshint.reporter('fail'));
+        pipe(jshint.reporter('default')).
+        pipe(jshint.reporter('fail'));
 });
 
 gulp.task('eslint', ['build'], function() {
     return gulp.src(buildDir + '/**/*.js').
         pipe(eslint()).
-	pipe(eslint.format()).
-	pipe(eslint.failOnError());
+        pipe(eslint.format()).
+        pipe(eslint.failOnError());
 });
 
 gulp.task('doc', ['clean.doc', 'doc-d']);

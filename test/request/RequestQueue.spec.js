@@ -20,7 +20,6 @@ describe("RequestQueue", function() {
     };
 
     it("should be constructable.", function() {
-        debugger
         expect(new RequestQueue({}, immediate));
     });
 
@@ -76,7 +75,7 @@ describe("RequestQueue", function() {
                 done();
             });
     });
-    
+
     it("should have multiple requests batched.", function(done) {
         var dataSource = new LocalDataSource(Cache(), {wait:100});
         var dataModel = {

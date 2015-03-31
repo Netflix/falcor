@@ -7,41 +7,6 @@ module.exports = function() {
                 ]
             },
 
-            setPathSets: {
-                query: [
-                    {
-                        "path": ["genreList", "0", "0", "summary"],
-                        "value": {
-                            "title": "House of Cards",
-                            "url": "/movies/1234"
-                        }
-                    }
-                ]
-            },
-            setJSONGs: {
-                query: [{
-                    jsong: {
-                        genreList: {
-                            0: ["lists", "abcd"]
-                        },
-                        lists: {
-                            abcd: {
-                                0: ["videos", "1234"]
-                            }
-                        },
-                        videos: {
-                            1234: {
-                                summary: {
-                                    "title": "House of Cards",
-                                    "url": "/movies/1234"
-                                }
-                            }
-                        }
-                    },
-                    paths: [["genreList", "0", "0", "summary"]]
-                }]
-            },
-
             getPathMaps: {
                 query: [{
                     genreList: {
@@ -84,7 +49,7 @@ module.exports = function() {
                     jsong: {
                         genreList: {
                             0: {
-                                "$size": 51,
+                                "$size": 52,
                                 "$type": "path",
                                 "value": ["lists", "abcd"]
                             }
@@ -92,7 +57,7 @@ module.exports = function() {
                         lists: {
                             abcd: {
                                 0: {
-                                    "$size": 51,
+                                    "$size": 52,
                                     "$type": "path",
                                     "value": ["videos", "1234"]
                                 }
@@ -216,7 +181,7 @@ module.exports = function() {
                     jsong: {
                         genreList: {
                             0: {
-                                "$size": "51",
+                                "$size": "52",
                                 "$type": "path",
                                 "value": ["lists", "abcd"]
                             }
@@ -224,7 +189,7 @@ module.exports = function() {
                         lists: {
                             abcd: {
                                 1: {
-                                    "$size": "51",
+                                    "$size": "52",
                                     "$type": "path",
                                     "value": ["videos", "766"]
                                 }
@@ -287,7 +252,7 @@ module.exports = function() {
                     jsong: {
                         genreList: {
                             0: {
-                                "$size": "51",
+                                "$size": "52",
                                 "$type": "path",
                                 "value": ["lists", "abcd"]
                             }
@@ -295,7 +260,7 @@ module.exports = function() {
                         lists: {
                             abcd: {
                                 2: {
-                                    "$size": "51",
+                                    "$size": "52",
                                     "$type": "path",
                                     "value": ["videos", "7531"]
                                 }
@@ -356,7 +321,7 @@ module.exports = function() {
                     jsong: {
                         genreList: {
                             0: {
-                                "$size": "51",
+                                "$size": "52",
                                 "$type": "path",
                                 "value": ["lists", "abcd"]
                             }
@@ -364,7 +329,7 @@ module.exports = function() {
                         lists: {
                             abcd: {
                                 2: {
-                                    "$size": "51",
+                                    "$size": "52",
                                     "$type": "path",
                                     "value": ["videos", "7531"]
                                 }
@@ -427,7 +392,7 @@ module.exports = function() {
                     jsong: {
                         genreList: {
                             0: {
-                                "$size": "51",
+                                "$size": "52",
                                 "$type": "path",
                                 "value": ["lists", "abcd"]
                             }
@@ -435,7 +400,7 @@ module.exports = function() {
                         lists: {
                             abcd: {
                                 3: {
-                                    "$size": "51",
+                                    "$size": "52",
                                     "$type": "path",
                                     "value": ["videos", "6420"]
                                 }
@@ -496,7 +461,7 @@ module.exports = function() {
                     jsong: {
                         genreList: {
                             0: {
-                                "$size": "51",
+                                "$size": "52",
                                 "$type": "path",
                                 "value": ["lists", "abcd"]
                             }
@@ -504,7 +469,7 @@ module.exports = function() {
                         lists: {
                             abcd: {
                                 3: {
-                                    "$size": "51",
+                                    "$size": "52",
                                     "$type": "path",
                                     "value": ["videos", "6420"]
                                 }
@@ -551,18 +516,6 @@ module.exports = function() {
                 ]
             },
 
-//            setPathSets: {
-//                query: [
-//                    {
-//                        "path": ["genreList", "10", null],
-//                        "value": {
-//                            "title": "House of Cards",
-//                            "url": "/movies/1234"
-//                        }
-//                    }
-//                ]
-//            },
-
             getPathMaps: {
                 query: [{
                     "genreList": {
@@ -603,7 +556,7 @@ module.exports = function() {
                     jsong: {
                         genreList: {
                             10: {
-                                "$size": "51",
+                                "$size": "53",
                                 "$type": "path",
                                 "value": ["videos", "1234", "summary"]
                             }
@@ -687,7 +640,7 @@ module.exports = function() {
                     jsong: {
                         genreList: {
                             1: {
-                                "$size": "51",
+                                "$size": "52",
                                 "$type": "path",
                                 "value": ["lists", "my-list"]
                             }
@@ -695,13 +648,13 @@ module.exports = function() {
                         lists: {
                             "1x5x": {
                                 0: {
-                                    "$size": "51",
+                                    "$size": "52",
                                     "$type": "path",
                                     "value": ["videos", "553"]
                                 }
                             },
                             "my-list": {
-                                "$size": "51",
+                                "$size": "52",
                                 "$type": "path",
                                 "value": ["lists", "1x5x"]
                             }
@@ -791,20 +744,20 @@ module.exports = function() {
                     jsong: {
                         genreList: {
                             1: {
-                                "$size": "51",
+                                "$size": "52",
                                 "$type": "path",
                                 "value": ["lists", "my-list"]
                             }
                         },
                         lists: {
                             "my-list": {
-                                "$size": "51",
+                                "$size": "52",
                                 "$type": "path",
                                 "value": ["lists", "1x5x"]
                             },
                             "1x5x": {
                                 0: {
-                                    "$size": "51",
+                                    "$size": "52",
                                     "$type": "path",
                                     "value": ["videos", "553"]
                                 }
@@ -896,20 +849,20 @@ module.exports = function() {
                     jsong: {
                         genreList: {
                             1: {
-                                "$size": "51",
+                                "$size": "52",
                                 "$type": "path",
                                 "value": ["lists", "my-list"]
                             }
                         },
                         lists: {
                             "my-list": {
-                                "$size": "51",
+                                "$size": "52",
                                 "$type": "path",
                                 "value": ["lists", "1x5x"]
                             },
                             "1x5x": {
                                 0: {
-                                    "$size": "51",
+                                    "$size": "52",
                                     "$type": "path",
                                     "value": ["videos", "553"]
                                 }
@@ -971,7 +924,7 @@ module.exports = function() {
                     jsong: {
                         "genreList": {
                             "5": {
-                                "$size": "51",
+                                "$size": "52",
                                 "$type": "path",
                                 "value": ["lists", "to-error-list"]
                             }
@@ -983,7 +936,7 @@ module.exports = function() {
                                 "value": "House of Pain"
                             },
                             "to-error-list": {
-                                "$size": "51",
+                                "$size": "52",
                                 "$type": "path",
                                 "value": ["lists", "error-list-2"]
                             }
@@ -1037,7 +990,7 @@ module.exports = function() {
                     jsong: {
                         "genreList": {
                             "2": {
-                                "$size": "51",
+                                "$size": "52",
                                 "$type": "path",
                                 "value": ["lists", "error-list"]
                             }
@@ -1098,7 +1051,7 @@ module.exports = function() {
                     jsong: {
                         genreList: {
                             'inner-reference': {
-                                "$size": "51",
+                                "$size": "52",
                                 "$type": "path",
                                 "value": ['movies', 1234]
                             }
@@ -1159,7 +1112,7 @@ module.exports = function() {
                     jsong: {
                         "genreList": {
                             "2": {
-                                "$size": "51",
+                                "$size": "52",
                                 "$type": "path",
                                 "value": ["lists", "error-list"]
                             }
@@ -1225,7 +1178,7 @@ module.exports = function() {
                     jsong: {
                         genreList: {
                             4: {
-                                $size: 51,
+                                $size: 52,
                                 $type: 'path',
                                 value: ['lists', 'missing-list']
                             }
@@ -1279,14 +1232,14 @@ module.exports = function() {
                     jsong: {
                         genreList: {
                             6: {
-                                $size: 51,
+                                $size: 52,
                                 $type: 'path',
                                 value: ['lists', 'to-missing-list']
                             }
                         },
                         lists: {
                             'to-missing-list': {
-                                $size: 51,
+                                $size: 52,
                                 $type: 'path',
                                 value: ['lists', 'missing-list-2']
                             }
@@ -1340,7 +1293,7 @@ module.exports = function() {
                     jsong: {
                         genreList: {
                             11: {
-                                $size: 51,
+                                $size: 53,
                                 $type: 'path',
                                 value: ['lists', 'missing-branch-link', 'summary']
                             }
@@ -1393,7 +1346,7 @@ module.exports = function() {
                     jsong: {
                         genreList: {
                             9: {
-                                $size: 51,
+                                $size: 52,
                                 $type: 'path',
                                 value: ['lists', 'to-expired-list']
                             }
