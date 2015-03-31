@@ -1,4 +1,4 @@
-var falcor = require('./src');
+var falcor = require('./lib/falcor');
 var sentinelGet = require('./operations/alt-sentinel');
 var prototype = falcor.Model.prototype;
 
