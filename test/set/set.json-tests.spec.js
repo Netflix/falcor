@@ -12,7 +12,7 @@ Array.prototype.flatMap = function(selector) {
     return this.reduce(function(xs, x, i, a){
         return xs.concat(selector(x, i, a));
     }, []);
-}
+};
 
 // Tests each output format.
 execute("json values", "Values");
@@ -103,12 +103,12 @@ function partial_cache() {
             "row-0": {
                 "0": { $type: $path, value: ["movies", "pulp-fiction"] },
                 "1": { $type: $path, value: ["movies", "kill-bill-1"] },
-                "2": { $type: $path, value: ["movies", "reservior-dogs"] },
+                "2": { $type: $path, value: ["movies", "reservior-dogs"] }
             }
         },
         "movies": {
             "pulp-fiction": {
-                "movie-id": { $type: $sentinel, value: "pulp-fiction" },
+                "movie-id": { $type: $sentinel, value: "pulp-fiction" }
             },
             "kill-bill-1": { $type: $sentinel }
         }
@@ -213,7 +213,7 @@ function execute(output, suffix) {
                                     "grid": { $type: $path, value: ["grids", "grid-1234"] },
                                     "grids": {
                                         "grid-1234": {
-                                            "0": { $type: $path, value: ["rows", "row-0"] },
+                                            "0": { $type: $path, value: ["rows", "row-0"] }
                                         }
                                     },
                                     "rows": {
@@ -236,7 +236,7 @@ function execute(output, suffix) {
                                     "grid": { $type: $path, value: ["grids", "grid-1234"] },
                                     "grids": {
                                         "grid-1234": {
-                                            "0": { $type: $path, value: ["rows", "row-0"] },
+                                            "0": { $type: $path, value: ["rows", "row-0"] }
                                         }
                                     },
                                     "rows": {
@@ -259,7 +259,7 @@ function execute(output, suffix) {
                                     "grid": { $type: $path, value: ["grids", "grid-1234"] },
                                     "grids": {
                                         "grid-1234": {
-                                            "0": { $type: $path, value: ["rows", "row-0"] },
+                                            "0": { $type: $path, value: ["rows", "row-0"] }
                                         }
                                     },
                                     "rows": {
@@ -303,7 +303,7 @@ function execute(output, suffix) {
                                         "grid": { $type: $path, value: ["grids", "grid-1234"] },
                                         "grids": {
                                             "grid-1234": {
-                                                "0": { $type: $path, value: ["rows", "row-0"] },
+                                                "0": { $type: $path, value: ["rows", "row-0"] }
                                             }
                                         },
                                         "rows": {
@@ -336,7 +336,7 @@ function execute(output, suffix) {
                                         "grid": { $type: $path, value: ["grids", "grid-1234"] },
                                         "grids": {
                                             "grid-1234": {
-                                                "0": { $type: $path, value: ["rows", "row-0"] },
+                                                "0": { $type: $path, value: ["rows", "row-0"] }
                                             }
                                         },
                                         "rows": {
@@ -367,7 +367,7 @@ function execute(output, suffix) {
                                         "grid": { $type: $path, value: ["grids", "grid-1234"] },
                                         "grids": {
                                             "grid-1234": {
-                                                "0": { $type: $path, value: ["rows", "row-0"] },
+                                                "0": { $type: $path, value: ["rows", "row-0"] }
                                             }
                                         },
                                         "rows": {
@@ -394,7 +394,7 @@ function execute(output, suffix) {
                                         "grid": { $type: $path, value: ["grids", "grid-1234"] },
                                         "grids": {
                                             "grid-1234": {
-                                                "0": { $type: $path, value: ["rows", "row-0"] },
+                                                "0": { $type: $path, value: ["rows", "row-0"] }
                                             }
                                         },
                                         "rows": {
@@ -425,7 +425,7 @@ function execute(output, suffix) {
                                         "grid": { $type: $path, value: ["grids", "grid-1234"] },
                                         "grids": {
                                             "grid-1234": {
-                                                "0": { $type: $path, value: ["rows", "row-0"] },
+                                                "0": { $type: $path, value: ["rows", "row-0"] }
                                             }
                                         },
                                         "rows": {
@@ -592,7 +592,7 @@ function execute(output, suffix) {
                                     "grid": { $type: $path, value: ["grids", "grid-1234"] },
                                     "grids": {
                                         "grid-1234": {
-                                            "0": { $type: $path, value: ["rows", "row-0"] },
+                                            "0": { $type: $path, value: ["rows", "row-0"] }
                                         }
                                     },
                                     "rows": {
@@ -621,7 +621,7 @@ function execute(output, suffix) {
                                     "grid": { $type: $path, value: ["grids", "grid-1234"] },
                                     "grids": {
                                         "grid-1234": {
-                                            "0": { $type: $path, value: ["rows", "row-0"] },
+                                            "0": { $type: $path, value: ["rows", "row-0"] }
                                         }
                                     },
                                     "rows": {
@@ -650,7 +650,7 @@ function execute(output, suffix) {
                                     "grid": { $type: $path, value: ["grids", "grid-1234"] },
                                     "grids": {
                                         "grid-1234": {
-                                            "0": { $type: $path, value: ["rows", "row-0"] },
+                                            "0": { $type: $path, value: ["rows", "row-0"] }
                                         }
                                     },
                                     "rows": {
@@ -709,7 +709,7 @@ function execute(output, suffix) {
                                         "grid": { $type: $path, value: ["grids", "grid-1234"] },
                                         "grids": {
                                             "grid-1234": {
-                                                "0": { $type: $path, value: ["rows", "row-0"] },
+                                                "0": { $type: $path, value: ["rows", "row-0"] }
                                             }
                                         },
                                         "rows": {
@@ -751,7 +751,7 @@ function execute(output, suffix) {
                                         "grid": { $type: $path, value: ["grids", "grid-1234"] },
                                         "grids": {
                                             "grid-1234": {
-                                                "0": { $type: $path, value: ["rows", "row-0"] },
+                                                "0": { $type: $path, value: ["rows", "row-0"] }
                                             }
                                         },
                                         "rows": {
@@ -791,7 +791,7 @@ function execute(output, suffix) {
                                         "grid": { $type: $path, value: ["grids", "grid-1234"] },
                                         "grids": {
                                             "grid-1234": {
-                                                "0": { $type: $path, value: ["rows", "row-0"] },
+                                                "0": { $type: $path, value: ["rows", "row-0"] }
                                             }
                                         },
                                         "rows": {
@@ -824,7 +824,7 @@ function execute(output, suffix) {
                                         "grid": { $type: $path, value: ["grids", "grid-1234"] },
                                         "grids": {
                                             "grid-1234": {
-                                                "0": { $type: $path, value: ["rows", "row-0"] },
+                                                "0": { $type: $path, value: ["rows", "row-0"] }
                                             }
                                         },
                                         "rows": {
@@ -864,7 +864,7 @@ function execute(output, suffix) {
                                         "grid": { $type: $path, value: ["grids", "grid-1234"] },
                                         "grids": {
                                             "grid-1234": {
-                                                "0": { $type: $path, value: ["rows", "row-0"] },
+                                                "0": { $type: $path, value: ["rows", "row-0"] }
                                             }
                                         },
                                         "rows": {
@@ -897,7 +897,6 @@ function execute(output, suffix) {
             });
             
             describe("a $path", function() {
-                
                 describe("PathValue", function() {
                     describe("in one place", function() {
                         it("directly", function() {
@@ -936,7 +935,7 @@ function execute(output, suffix) {
                                     "grid": { $type: $path, value: ["grids", "grid-1234"] },
                                     "grids": {
                                         "grid-1234": {
-                                            "0": { $type: $path, value: ["rows", "row-0"] },
+                                            "0": { $type: $path, value: ["rows", "row-0"] }
                                         }
                                     },
                                     "rows": {
@@ -951,7 +950,7 @@ function execute(output, suffix) {
                 });
             });
             
-            // Michael TODO: Check the optimized paths that get is building?
+            // Paul TODO: It seems that you are missing seeds[2] & [4] though they exist in the cache.
             xdescribe("multiple mixed paths and values as", function() {
                 describe("PathValues", function() {
                     it("directly", function() {
@@ -1078,7 +1077,7 @@ function execute(output, suffix) {
                                 "grid": { $type: $path, value: ["grids", "grid-1234"] },
                                 "grids": {
                                     "grid-1234": {
-                                        "0": { $type: $path, value: ["rows", "row-0"] },
+                                        "0": { $type: $path, value: ["rows", "row-0"] }
                                     }
                                 },
                                 "rows": {
@@ -1118,7 +1117,7 @@ function execute(output, suffix) {
                                 "grid": { $type: $path, value: ["grids", "grid-1234"] },
                                 "grids": {
                                     "grid-1234": {
-                                        "0": { $type: $path, value: ["rows", "row-0"] },
+                                        "0": { $type: $path, value: ["rows", "row-0"] }
                                     }
                                 },
                                 "rows": {
@@ -1135,16 +1134,16 @@ function execute(output, suffix) {
     });
 }
 
-// Michael TODO: getPathSetsAsJSONG not creating the "movies" branch?
-xdescribe("Set a cache of partial $path values and build the correct missing paths as a JSON-Graph Envelope.", function() {
-    it("JSON-Graph Envelope", function() {
+// Paul TODO: Verify that we really should create that movies branch.  I don't think we should.
+describe("Set a cache of partial $path values and build the correct missing paths as a JSON-Graph Envelope.", function() {
+    xit("JSON-Graph Envelope", function() {
         set_and_verify_json_graph(this.test, "JSONG", [{
             paths: [["grid", 1, 0, "movie-id"]],
             jsong: {
                 "grid": { $type: $path, value: ["grids", "grid-1234"] },
                 "grids": {
                     "grid-1234": {
-                        "1": { $type: $path, value: ["rows", "row-1"] },
+                        "1": { $type: $path, value: ["rows", "row-1"] }
                     }
                 },
                 "rows": {
@@ -1220,7 +1219,6 @@ function set_envelopes(envelopes, suffix, options) {
         seeds = function(pv) { values.push(pv); }
     }
     var func = model["_setJSONGsAs" + suffix];
-    debugger;
     var results = func(model, envelopes, seeds);
     if(values) { results.values = values; }
     return [model, results];
@@ -1242,7 +1240,6 @@ function verify(suffix) {
         return function() {
             var paths  = slice.call(arguments);
             var seeds   = suffix == "JSON" ? get_seeds(paths) : [{}];
-            debugger;
             if(suffix == "Values") {
                 var values = [];
                 seeds = function(pv) { values.push(pv); }

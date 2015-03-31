@@ -99,7 +99,7 @@ module.exports = function modelOperation(name) {
                         if (op.values[0]) {
                             pathSetValues = op.values;
                             undefineds[0] = false;
-                            if (isJSONG && !isFirstSet) {
+                            if (isJSONG && !isFirstSet && op.values[0].paths) {
                                 jsongPaths = jsongPaths.concat(op.values[0].paths);
                             }
                         } else {
