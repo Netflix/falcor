@@ -1,9 +1,44 @@
 
 module.exports = function() {
     return {
+        routerOrSourceMissing: {
+            getPathSets: {
+                query: [["videos", "missingBranch", "summary"]]
+            },
+            getPathMaps: {
+                query: [{
+                    videos: {
+                        missingBranch: {
+                            summary: null
+                        }
+                    }
+                }]
+            },
+            AsValues: {
+                values: []
+            },
+            AsJSON: {
+                values: [{}]
+            },
+            AsPathMap: {
+                values: [{}]
+            },
+            AsJSONG: {
+                values: [{}]
+            }
+        },
         missingBranch: {
             getPathSets: {
                 query: [["videos", "missingBranch", "summary"]]
+            },
+            getPathMaps: {
+                query: [{
+                    videos: {
+                        missingBranch: {
+                            summary: null
+                        }
+                    }
+                }]
             },
             AsValues: {
                 values: [{
@@ -32,6 +67,15 @@ module.exports = function() {
             getPathSets: {
                 query: [["videos", "1234", "missingLeaf"]]
             },
+            getPathMaps: {
+                query: [{
+                    videos: {
+                        1234: {
+                            missingLeaf: null
+                        }
+                    }
+                }]
+            },
             AsValues: {
                 values: [{
                     "path": ["videos", "1234", "missingLeaf"],
@@ -58,6 +102,13 @@ module.exports = function() {
         sentinelOfUndefined: {
             getPathSets: {
                 query: [["misc", "usentinel"]]
+            },
+            getPathMaps: {
+                query: [{
+                    misc: {
+                        usentinel: null
+                    }
+                }]
             },
             AsValues: {
                 values: [{
