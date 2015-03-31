@@ -1,5 +1,5 @@
 var falcor = require('./lib/falcor');
-var sentinelGet = require('./operations/alt-sentinel');
+var sentinelGet = require('./lib/get');
 var prototype = falcor.Model.prototype;
 
 prototype._getBoundContext = null;
@@ -27,7 +27,7 @@ prototype._setJSONGsAsPathMap = require("./lib/json-sparse/set-json-graph");
 prototype._setJSONGsAsValues = require("./lib/json-values/set-json-graph");
 
 // prototype._setPathMapsAsValues = require("./operations/alt/legacy_setPathMapsAsValues");
-prototype._setCache = require("./operations/alt-sentinel/legacy_setCache");
+prototype._setCache = sentinelGet.setCache;
 
 module.exports = falcor;
 

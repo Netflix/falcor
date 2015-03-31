@@ -951,9 +951,10 @@ function execute(output, suffix) {
             });
             
             // Paul TODO: It seems that you are missing seeds[2] & [4] though they exist in the cache.
-            xdescribe("multiple mixed paths and values as", function() {
+            describe("multiple mixed paths and values as", function() {
                 describe("PathValues", function() {
                     it("directly", function() {
+                        debugger;
                         set_and_verify_path_values(this.test, suffix, [{
                             path: ["movies", "pulp-fiction", "title"],
                             value: "Pulp Fiction"

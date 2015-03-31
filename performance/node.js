@@ -25,7 +25,7 @@ var models = testConfig.models;
 //testConfig.repeatInConfig('mdp-sync-gallery', 15, mdpScrollGallery, config.tests);
 //testConfig.repeatInConfig('model-sync-gallery', 15, modelScrollGallery, config.tests);
 
-var cache = require("../lib/support/test-cache-2")();
+var cache = require('./../test/data/Cache')();
 var model = require("../lib/support/test-model")(cache);
 
 model._getPathSetsAsValues  = require("../lib/json-values/get-path-sets");
@@ -45,7 +45,7 @@ testConfig.repeatInConfig('gallery pathmap pet', 1, testConfig.get.scrollGallery
 testConfig.repeatInConfig('gallery graph mbp', 1, testConfig.get.scrollGallery(models.model, 'JSONG'), config.tests);
 testConfig.repeatInConfig('gallery graph pet', 1, testConfig.get.scrollGallery(model, 'JSONG'), config.tests);
 
-testRunner(benchmark, config, 3, function(totalResults) {
+testRunner(benchmark, config, 10, function(totalResults) {
     var fs = require('fs');
     fs.writeFileSync('out.csv', totalResults.join('\n'))
 });
