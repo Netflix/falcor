@@ -14,6 +14,12 @@ Array.prototype.flatMap = function(selector) {
     }, []);
 }
 
+// Tests each output format.
+execute("json values", "Values");
+execute("dense JSON", "JSON");
+execute("sparse JSON", "PathMap");
+execute("JSON-Graph", "JSONG");
+
 function whole_cache() {
     return {
         "grid": { $type: $path, value: ["grids", "grid-1234"] },
@@ -109,16 +115,9 @@ function partial_cache() {
     }
 }
 
-execute("json values", "Values");
-execute("dense JSON", "JSON");
-execute("sparse JSON", "PathMap");
-execute("JSON-Graph", "JSONG");
-
 function execute(output, suffix) {
 
     describe("Build " + output, function() {
-        // describe("by getting", function() {
-        // });
         describe("by setting", function() {
             describe("a primitive", function() {
                 
@@ -896,6 +895,7 @@ function execute(output, suffix) {
                 });
                 
             });
+            
             describe("a $path", function() {
                 
                 describe("PathValue", function() {
@@ -950,7 +950,96 @@ function execute(output, suffix) {
                     });
                 });
             });
+            
+            // Michael TODO: Check the optimized paths that get is building?
+            xdescribe("multiple mixed paths and values as", function() {
+                describe("PathValues", function() {
+                    it("directly", function() {
+                        set_and_verify_path_values(this.test, suffix, [{
+                            path: ["movies", "pulp-fiction", "title"],
+                            value: "Pulp Fiction"
+                        }, {
+                            path: ["movies", ["pulp-fiction", "kill-bill-1", "reservior-dogs"], "director"],
+                            value: "Quentin Tarantino"
+                        }, {
+                            path: ["movies", "pulp-fiction", "summary"],
+                            value: {
+                                $type: $sentinel,
+                                value: {
+                                    title: "Pulp Fiction",
+                                    url: "/movies/id/pulp-fiction"
+                                }
+                            }
+                        }, {
+                            path: ["movies", ["pulp-fiction", "kill-bill-1", "reservior-dogs"], "genres"],
+                            value: {
+                                $type: $sentinel,
+                                value: ["Crime", "Drama", "Thriller"]
+                            }
+                        }, {
+                            path: ["rows", "row-0", "3"],
+                            value: { $type: $path, value: ["movies", "django-unchained"] }
+                        }]);
+                    });
+                    
+                    it("through references", function() {
+                        set_and_verify_path_values(this.test, suffix, [{
+                            path: ["grid", 0, 0, "title"],
+                            value: "Pulp Fiction"
+                        }, {
+                            path: ["grid", 0, [0, 1, 2], "director"],
+                            value: "Quentin Tarantino"
+                        }, {
+                            path: ["grid", 0, 0, "summary"],
+                            value: {
+                                $type: $sentinel,
+                                value: {
+                                    title: "Pulp Fiction",
+                                    url: "/movies/id/pulp-fiction"
+                                }
+                            }
+                        }, {
+                            path: ["grid", 0, [0, 1, 2], "genres"],
+                            value: {
+                                $type: $sentinel,
+                                value: ["Crime", "Drama", "Thriller"]
+                            }
+                        }, {
+                            path: ["grid", 0, 3],
+                            value: { $type: $path, value: ["movies", "django-unchained"] }
+                        }]);
+                    });
+                });
+                
+                describe("JSON-Graph Envelope", function() {
+                    it("directly", function() {
+                        set_and_verify_json_graph(this.test, suffix, [{
+                            paths: [
+                                ["movies", "pulp-fiction", "title"],
+                                ["movies", ["pulp-fiction", "kill-bill-1", "reservior-dogs"], "director"],
+                                ["movies", "pulp-fiction", "summary"],
+                                ["movies", ["pulp-fiction", "kill-bill-1", "reservior-dogs"], "genres"],
+                                ["rows", "row-0", "3"]
+                            ],
+                            jsong: whole_cache()
+                        }]);
+                    });
+                    it("through references", function() {
+                        set_and_verify_json_graph(this.test, suffix, [{
+                            paths: [
+                                ["grid", 0, 0, "title"],
+                                ["grid", 0, [0, 1, 2], "director"],
+                                ["grid", 0, 0, "summary"],
+                                ["grid", 0, [0, 1, 2], "genres"],
+                                ["grid", 0, 3]
+                            ],
+                            jsong: whole_cache()
+                        }]);
+                    });
+                });
+            });
         });
+        
         describe("by replacing", function() {
             describe("a $sentinel with a primitive", function() {
                 
@@ -1046,6 +1135,29 @@ function execute(output, suffix) {
     });
 }
 
+// Michael TODO: getPathSetsAsJSONG not creating the "movies" branch?
+xdescribe("Set a cache of partial $path values and build the correct missing paths as a JSON-Graph Envelope.", function() {
+    it("JSON-Graph Envelope", function() {
+        set_and_verify_json_graph(this.test, "JSONG", [{
+            paths: [["grid", 1, 0, "movie-id"]],
+            jsong: {
+                "grid": { $type: $path, value: ["grids", "grid-1234"] },
+                "grids": {
+                    "grid-1234": {
+                        "1": { $type: $path, value: ["rows", "row-1"] },
+                    }
+                },
+                "rows": {
+                    "row-1": {
+                        "0": { $type: $path, value: ["movies", "django-unchained"] }
+                    }
+                }
+            }
+        }]);
+    });
+});
+
+
 function apply(func, context) {
     return function(argslist) {
         return func.apply(context, argslist);
@@ -1067,11 +1179,11 @@ function set_and_verify_json_graph(test, suffix, envelopes, options) {
 function get_paths(valuesOrEnv) {
     if(valuesOrEnv.paths) {
         return valuesOrEnv.paths.map(function(path) {
-            return path.concat();
+            return JSON.parse(JSON.stringify(path));
         });
     }
     return valuesOrEnv.map(function(pv) {
-        return pv.path.concat();
+        return JSON.parse(JSON.stringify(pv.path));
     });
 }
 
@@ -1089,26 +1201,28 @@ function get_seeds(pathvalues) {
 
 function set_path_values(pathvalues, suffix, options) {
     var model   = new Model(_.extend({ cache: partial_cache() }, options || {}));
-    var seeds   = get_seeds(pathvalues);
+    var seeds   = suffix == "JSON" ? get_seeds(pathvalues) : [{}];
     if(suffix == "Values") {
-        var seeds2 = [];
-        seeds = function(pv) { seeds2.push(pv); }
+        var values = [];
+        seeds = function(pv) { values.push(pv); }
     }
     var func = model["_setPathSetsAs" + suffix];
     var results = func(model, pathvalues, seeds);
-    if(seeds2) { results.values = seeds2; }
+    if(values) { results.values = values; }
     return [model, results];
 }
 
 function set_envelopes(envelopes, suffix, options) {
     var model   = new Model(_.extend({ cache: partial_cache() }, options || {}));
-    var seeds   = get_seeds(envelopes.flatMap(get_paths));
+    var seeds   = suffix == "JSON" ? get_seeds(envelopes.flatMap(get_paths)) : [{}];
     if(suffix == "Values") {
-        var seeds2 = [];
-        seeds = function(pv) { seeds2.push(pv); }
+        var values = [];
+        seeds = function(pv) { values.push(pv); }
     }
-    var results = model["_setJSONGsAs" + suffix](model, envelopes, seeds);
-    if(seeds2) { results.values = seeds2; }
+    var func = model["_setJSONGsAs" + suffix];
+    debugger;
+    var results = func(model, envelopes, seeds);
+    if(values) { results.values = values; }
     return [model, results];
 }
 
@@ -1127,15 +1241,15 @@ function verify(suffix) {
         
         return function() {
             var paths  = slice.call(arguments);
-            var seeds  = get_seeds(paths);
+            var seeds   = suffix == "JSON" ? get_seeds(paths) : [{}];
             debugger;
             if(suffix == "Values") {
-                var seeds2 = [];
-                seeds = function(pv) { seeds2.push(pv); }
+                var values = [];
+                seeds = function(pv) { values.push(pv); }
             }
             var func = model["_getPathSetsAs" + suffix];
             var output = func(model, paths, seeds);
-            if(seeds2) { output.values = seeds2; }
+            if(values) { output.values = values; }
             return checks.shift().call(this, output);
         };
         
