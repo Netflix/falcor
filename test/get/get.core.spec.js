@@ -153,6 +153,10 @@ describe('Core', function() {
             var model = new Model({cache: Cache(), router: {}}).materialize();
             getTestRunner(Materialized().routerOrSourceMissing, { model: model });
         });
+        it('should not report a materialized path when there is a source.', function() {
+            var model = new Model({cache: Cache(), source: {}}).materialize();
+            getTestRunner(Materialized().routerOrSourceMissing, { model: model });
+        });
     });
     describe('Boxed', function() {
         it('should get an Object value directly as a sentinel in boxed mode', function() {
