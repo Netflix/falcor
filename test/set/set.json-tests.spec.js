@@ -147,6 +147,12 @@ function execute(output, suffix) {
                                 value: "Reservior Dogs"
                             }]);
                         });
+                        xit("through a reference with a null last key", function() {
+                            set_and_verify_path_values(this.test, suffix, [{
+                                path: ["grid", 0, 2, null],
+                                value: "Reservior Dogs"
+                            }]);
+                        });
                     });
                     describe("in multiple places", function() {
                         describe("via keyset", function() {
@@ -271,6 +277,27 @@ function execute(output, suffix) {
                                         "reservior-dogs": {
                                             "title": "Reservior Dogs"
                                         }
+                                    }
+                                }
+                            }]);
+                        });
+                        xit("through a reference with a null last key", function() {
+                            set_and_verify_json_graph(this.test, suffix, [{
+                                paths: [["grid", 0, 2, null]],
+                                jsong: {
+                                    "grid": { $type: $path, value: ["grids", "grid-1234"] },
+                                    "grids": {
+                                        "grid-1234": {
+                                            "0": { $type: $path, value: ["rows", "row-0"] }
+                                        }
+                                    },
+                                    "rows": {
+                                        "row-0": {
+                                            "2": { $type: $path, value: ["movies", "reservior-dogs"] }
+                                        }
+                                    },
+                                    "movies": {
+                                        "reservior-dogs": "Reservior Dogs"
                                     }
                                 }
                             }]);
@@ -502,6 +529,15 @@ function execute(output, suffix) {
                                 }
                             }]);
                         });
+                        xit("through a reference with a null last key", function() {
+                            set_and_verify_path_values(this.test, suffix, [{
+                                path: ["grid", 0, 2, null],
+                                value: {
+                                    $type: $sentinel,
+                                    value: "Reservior Dogs"
+                                }
+                            }]);
+                        });
                     });
                     describe("in multiple places", function() {
                         describe("via keyset", function() {
@@ -667,6 +703,30 @@ function execute(output, suffix) {
                                                     url: "/movies/id/reservior-dogs"
                                                 }
                                             }
+                                        }
+                                    }
+                                }
+                            }]);
+                        });
+                        xit("through a reference with a null last key", function() {
+                            set_and_verify_json_graph(this.test, suffix, [{
+                                paths: [["grid", 0, 2, null]],
+                                jsong: {
+                                    "grid": { $type: $path, value: ["grids", "grid-1234"] },
+                                    "grids": {
+                                        "grid-1234": {
+                                            "0": { $type: $path, value: ["rows", "row-0"] }
+                                        }
+                                    },
+                                    "rows": {
+                                        "row-0": {
+                                            "2": { $type: $path, value: ["movies", "reservior-dogs"] }
+                                        }
+                                    },
+                                    "movies": {
+                                        "reservior-dogs": {
+                                            $type: $sentinel,
+                                            value: "Reservior Dogs"
                                         }
                                     }
                                 }
@@ -1109,7 +1169,7 @@ function execute(output, suffix) {
                                     }
                                 }
                             }
-                        }])
+                        }]);
                     });
                     it("through a reference", function() {
                         set_and_verify_json_graph(this.test, suffix, [{
@@ -1131,14 +1191,84 @@ function execute(output, suffix) {
                     });
                 });
             });
+            
+            describe("a branch with a primitive", function() {
+                describe("PathValue", function() {
+                    it("directly", function() {
+                        set_and_verify_path_values(this.test, suffix, [{
+                            path: ["movies", "pulp-fiction"],
+                            value: "oops"
+                        }])
+                    });
+                });
+                describe("JSON-Graph Envelope", function() {
+                    it("directly", function() {
+                        set_and_verify_json_graph(this.test, suffix, [{
+                            paths: [["movies", "pulp-fiction"]],
+                            jsong: {
+                                "movies": {
+                                    "pulp-fiction": "oops"
+                                }
+                            }
+                        }]);
+                    });
+                });
+            });
+            
+            xdescribe("a branch with an error", function() {
+                describe("PathValue", function() {
+                    it("directly", function() {
+                        set_and_verify_path_values(this.test, suffix, [{
+                            path: ["movies", "pulp-fiction"],
+                            value: {
+                                "$type": "error",
+                                "value": { "message": "oops" }
+                            }
+                        }])
+                    });
+                });
+                describe("JSON-Graph Envelope", function() {
+                    it("directly", function() {
+                        set_and_verify_json_graph(this.test, suffix, [{
+                            paths: [["movies", "pulp-fiction"]],
+                            jsong: {
+                                "movies": {
+                                    "pulp-fiction": {
+                                        "$type": "error",
+                                        "value": { "message": "oops" }
+                                    }
+                                }
+                            }
+                        }]);
+                    });
+                });
+            });
         });
     });
 }
 
 // Paul TODO: Verify that we really should create that movies branch.  I don't think we should.
 describe("Set a cache of partial $path values and build the correct missing paths as a JSON-Graph Envelope.", function() {
-    xit("JSON-Graph Envelope", function() {
-        set_and_verify_json_graph(this.test, "JSONG", [{
+    it("JSON-Graph Envelope", function() {
+        
+        var expected = [{
+            paths: [],
+            jsong: {
+                grid: { '$type': 'path', value: ['grids', 'grid-1234'], '$size': 52 },
+                grids: {
+                    'grid-1234': {
+                        '1': { '$type': 'path', value: ['rows', 'row-1'], '$size': 52 }
+                    }
+                },
+                rows: {
+                    'row-1': {
+                        '0': { '$type': 'path', value: ['movies', 'django-unchained'], '$size': 52 }
+                    }
+                },
+                movies: {}
+            }
+        }];
+        var actual = set_envelopes([{
             paths: [["grid", 1, 0, "movie-id"]],
             jsong: {
                 "grid": { $type: $path, value: ["grids", "grid-1234"] },
@@ -1153,7 +1283,9 @@ describe("Set a cache of partial $path values and build the correct missing path
                     }
                 }
             }
-        }]);
+        }], "JSONG");
+        
+        expect(actual[1].values).to.deep.equals(expected);
     });
 });
 
