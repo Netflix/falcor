@@ -149,6 +149,10 @@ describe('Core', function() {
         it('should report an undefined sentinel for a materialized undefined sentinel', function() {
             getTestRunner(Materialized().sentinelOfUndefined, { materialized: true });
         });
+        it('should not report a materialized path when there is a router.', function() {
+            var model = new Model({cache: Cache(), router: {}}).materialize();
+            getTestRunner(Materialized().routerOrSourceMissing, { model: model });
+        });
     });
     describe('Boxed', function() {
         it('should get an Object value directly as a sentinel in boxed mode', function() {
@@ -177,18 +181,18 @@ describe('Core', function() {
             var model = new Model({cache: Cache()}).bindSync(['videos', 1234]);
             getTestRunner(Bound().directValue, {model: model});
         });
-        
+
         it('should bind to a value.', function () {
             var model = new Model({cache: Cache()}).bindSync(['genreList', 10]);
             getTestRunner(Bound().toLeafNode, {model: model});
         });
-        
+
         it('should bind to a value and get multiple paths.', function () {
             var model = new Model({cache: Cache()}).bindSync(['videos', 3355]);
             debugger
             getTestRunner(Bound().multipleQueries, {model: model});
         });
-        
+
         it('should bind and request a missing path through a reference so the optimized path gets reset.', function () {
             var model = new Model({cache: Cache()}).bindSync(['genreList']);
             getTestRunner(Bound().missingValueWithReference, {model: model});
