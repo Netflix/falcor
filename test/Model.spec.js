@@ -10,7 +10,7 @@ describe("Model", function() {
 
     require('./falcor');
 
-    describe('Core', function() {
+    describe('JSON-Graph Specification', function() {
         describe("#get", function() {
             require("./get");
         });
