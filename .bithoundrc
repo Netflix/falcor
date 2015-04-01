@@ -7,6 +7,7 @@
     "./macros/**",
     "./performance/**",
     "./test/**",
-    "*.js"
+    "./gulpfile.js",
+    "./server.js"
   ]
 }
