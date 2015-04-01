@@ -8,16 +8,16 @@ describe("Model", function() {
         new jsong.Model();
     });
 
-    require("./request/RequestQueue.spec");
-    require("./schedulers/schedulers.spec");
-//    require("./lru");
+    require('./falcor');
 
-    describe("#get", function() {
-        require("./get");
-    });
-    
-    describe("#set", function() {
-        require("./set");
+    describe('JSON-Graph Specification', function() {
+        describe("#get", function() {
+            require("./get");
+        });
+
+        describe("#set", function() {
+            require("./set");
+        });
     });
 
 //    describe("#call", function() {
