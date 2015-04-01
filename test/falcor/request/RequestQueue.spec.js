@@ -1,15 +1,15 @@
-var ImmediateScheduler = require('./../../lib/falcor/scheduler/ImmediateScheduler');
-var TimeoutScheduler = require('./../../lib/falcor/scheduler/TimeoutScheduler');
-var RequestQueue = require('./../../lib/falcor/request/RequestQueue');
-var LocalDataSource = require("../data/LocalDataSource");
-var Cache = require("../data/Cache");
-var Expected = require("../data/expected");
+var ImmediateScheduler = require('./../../../lib/falcor/scheduler/ImmediateScheduler');
+var TimeoutScheduler = require('./../../../lib/falcor/scheduler/TimeoutScheduler');
+var RequestQueue = require('./../../../lib/falcor/request/RequestQueue');
+var LocalDataSource = require("../../data/LocalDataSource");
+var Cache = require("../../data/Cache");
+var Expected = require("../../data/expected");
 var Rx = require("rx");
 var chai = require("chai");
 var expect = chai.expect;
 var References = Expected.References;
 var Values = Expected.Values;
-var requestTestRunner = require("../requestTestRunner");
+var requestTestRunner = require("../../requestTestRunner");
 
 describe("RequestQueue", function() {
     var nextTick = new TimeoutScheduler(0);
