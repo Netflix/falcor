@@ -1,12 +1,13 @@
 {
   "ignore": [
     "**/node_modules/**",
-    "./build/**",
-    "./coverage/**",
-    "./dist/**",
-    "./macros/**",
-    "./performance/**",
-    "./test/**",
-    "*.js"
+    "build/**",
+    "coverage/**",
+    "dist/**",
+    "macros/**",
+    "performance/**",
+    "test/**",
+    "gulpfile.js",
+    "server.js"
   ]
 }
