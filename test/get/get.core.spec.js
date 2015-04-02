@@ -102,6 +102,9 @@ describe('Core', function() {
         it('should use a complex path object with to only.', function() {
             getTestRunner(Complex().toOnly);
         });
+        it('should use a complex path object with 2 complex keys.', function() {
+            getTestRunner(Complex().doubleComplex);
+        });
         it('should use a complex path object with from only.', function() {
             getTestRunner(Complex().fromOnly);
         });

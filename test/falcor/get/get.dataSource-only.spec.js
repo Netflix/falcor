@@ -8,7 +8,9 @@ var testRunner = require('./../../testRunner');
 var noOp = function() {};
 var LocalDataSource = require('../../data/LocalDataSource');
 var ErrorDataSource = require('../../data/ErrorDataSource');
-var isPathOrPathValue = require('../../../lib/falcor/operations/isPathOrPathValue');
+var isPathValue = function(x) {
+    return x && x.hasOwnProperty('path') && x.hasOwnProperty('value');
+};
 
 describe('DataSource Only', function() {
     describe('Selector Functions', function() {
@@ -102,7 +104,7 @@ describe('DataSource Only', function() {
             }).
             subscribe(noOp, function(err) {
                 // ensure its the same error
-                if (Array.isArray(err) && isPathOrPathValue(err[0])) {
+                if (Array.isArray(err) && isPathValue(err[0])) {
                     done();
                 } else {
                     done(err);
