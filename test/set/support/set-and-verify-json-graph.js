@@ -14,9 +14,11 @@ var verify = require("./verify");
 var set_envelopes = require("./set-envelopes");
 
 function set_and_verify_json_graph(test, suffix, envelopes, options) {
-    return verify(suffix).
-        apply(test, set_envelopes(envelopes, suffix, options)).
-        apply(test, envelopes.flatMap(get_paths));
+    var check_set = verify(suffix);
+    var set_tuple = set_envelopes(envelopes, suffix, options);
+    var check_get = check_set.apply(test, set_tuple);
+    var paths     = envelopes.flatMap(get_paths).map(slice_bound(set_tuple[0]))
+    return check_get.apply(test, paths);
 }
 
 function get_paths(envelope) {
@@ -29,4 +31,10 @@ function get_seeds(pathvalues) {
     return pathvalues.map(function() {
         return {};
     });
+}
+
+function slice_bound(model) {
+    return function(path) {
+        return path.slice(model._path.length);
+    }
 }
