@@ -21,9 +21,9 @@ describe("Model", function() {
         });
     });
 
-   describe("#invalidate", function() {
-       require("./invalidate/invalidate.spec");
-   });
+   // describe("#invalidate", function() {
+   //     require("./invalidate/invalidate.spec");
+   // });
 
 //    describe("--behavioral", function() {
 //         require("./behavioral")

@@ -760,9 +760,6 @@ function execute(output, suffix) {
                     });
             });
 
-            // Michael TODO:
-            // the first optimized missing path should be ["grids", "grid-1234", 2, 0, "title"]
-
             it("past an expired reference", function(done) {
 
                 var model = new Model({ cache: partial_cache() });
@@ -785,23 +782,59 @@ function execute(output, suffix) {
                 }], options);
 
                 setTimeout(function() {
-
-                    set_and_verify_json_graph(this.test, suffix, [{
-                        paths: [["grid", 2, 0, "title"]],
-                        jsong: {
-                            "rows": {
-                                "row-0": {
-                                    "0": { $type: $path, value: ["movies", "pulp-fiction"] }
-                                }
-                            },
-                            "movies": {
-                                "pulp-fiction": {
-                                    "title": "Pulp Fiction"
+                    
+                    if(suffix === "JSONG") {
+                        var results = model["_setJSONGsAs" + suffix](model, [{
+                            paths: [["grid", 2, 0, "title"]],
+                            jsong: {
+                                "rows": {
+                                    "row-0": {
+                                        "0": { $type: $path, value: ["movies", "pulp-fiction"] }
+                                    }
+                                },
+                                "movies": {
+                                    "pulp-fiction": {
+                                        "title": "Pulp Fiction"
+                                    }
                                 }
                             }
-                        }
-                    }], options);
-
+                        }], [{}]);
+                        expect(results).to.deep.equals({
+                            values: [{
+                                jsong: {
+                                    grid: { "$type": "path", value: ["grids", "grid-1234"], "$size": 52 },
+                                    grids: {
+                                        "grid-1234": {
+                                            "2": {}
+                                        }
+                                    }
+                                },
+                                paths: []
+                            }],
+                            errors: [],
+                            requestedPaths: [],
+                            optimizedPaths: [],
+                            requestedMissingPaths: [["grid", 2, 0, "title"]],
+                            optimizedMissingPaths: [["grids", "grid-1234", 2, 0, "title"]]
+                        });
+                    } else {
+                        set_and_verify_json_graph(this.test, suffix, [{
+                            paths: [["grid", 2, 0, "title"]],
+                            jsong: {
+                                "rows": {
+                                    "row-0": {
+                                        "0": { $type: $path, value: ["movies", "pulp-fiction"] }
+                                    }
+                                },
+                                "movies": {
+                                    "pulp-fiction": {
+                                        "title": "Pulp Fiction"
+                                    }
+                                }
+                            }
+                        }], options);
+                    }
+                    
                     done();
 
                 }.bind(this), 100);
@@ -968,8 +1001,6 @@ function execute(output, suffix) {
                 });
             });
 
-            // Michael TODO: get as dense JSON creating more branch nodes than it should
-            // see: ./merge-expected-dense-json.js
             describe("a complete cache into an existing partial cache with hard references", function() {
                 it("directly", function() {
 
@@ -981,8 +1012,6 @@ function execute(output, suffix) {
                         ["grid", {to: 1}, 0, "movie-id"],
                         ["grid", {to: 1}, 1, null]
                     ], []);
-
-                    // debugger;
 
                     // Set in a more complete cache with direct paths only.
                     set_and_verify_json_graph(this.test, suffix, [{
@@ -1007,8 +1036,6 @@ function execute(output, suffix) {
                         ["grid", {to: 1}, 0, "movie-id"],
                         ["grid", {to: 1}, 1, null]
                     ], []);
-
-                    // debugger;
 
                     // Set in a more complete cache through references.
                     set_and_verify_json_graph(this.test, suffix, [{

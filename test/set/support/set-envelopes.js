@@ -16,7 +16,7 @@ function set_envelopes(envelopes, suffix, options) {
     var results = func(model, envelopes, seeds);
     if(values) { results.values = values; }
     
-    // console.log(require("util").inspect(results.requestedMissingPaths, {depth: null}));
+    // console.log(require("util").inspect(results.values[0], {depth: null}));
     
     return [model, results];
 }
