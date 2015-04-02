@@ -65,7 +65,7 @@ describe('Cache Only', function() {
         });
     });
     describe('toPathValues', function() {
-        it.only('should get a value from falcor.', function(done) {
+        it('should get a value from falcor.', function(done) {
             var model = new Model({cache: Cache()});
             var expected = Expected.Values().direct.AsValues.values[0];
             var next = 0;
