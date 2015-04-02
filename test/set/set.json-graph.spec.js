@@ -14,7 +14,7 @@ var $path = require("../../lib/types/$path");
 var $sentinel = require("../../lib/types/$sentinel");
 
 // Tests each output format.
-execute("json values", "Values");
+execute("JSON values", "Values");
 execute("dense JSON", "JSON");
 execute("sparse JSON", "PathMap");
 execute("JSON-Graph", "JSONG");
@@ -723,6 +723,102 @@ function execute(output, suffix) {
                 });
             });
             // end set multiple mixed-type json values
+            
+            
+            it("negative expires values to be relative to the current time", function() {
+                
+                var model = new Model({ cache: partial_cache() });
+                var options = {model: model};
+                var start_time = Date.now();
+                
+                set_and_verify_json_graph(this.test, suffix, [{
+                    paths: [["grid", 2]],
+                    jsong: {
+                        "grid": { $type: $path, value: ["grids", "grid-1234"] },
+                        "grids": {
+                            "grid-1234": {
+                                "2": {
+                                    $type: $path,
+                                    value: ["rows", "row-0"],
+                                    $expires: -1000
+                                }
+                            }
+                        }
+                    }
+                }], options);
+                
+                model.boxValues()
+                    .get(["grid", 2])
+                    .toPathValues()
+                    .subscribe(function(pv) {
+                        var box = pv.value;
+                        var now = Date.now();
+                        var elapsed_time = now - start_time;
+                        var future_expire_time = box.$expires;
+                        var future_time = future_expire_time - now;
+                        expect(future_time > elapsed_time);
+                    });
+            });
+            
+            // Michael TODO:
+            // the first optimized missing path should be ["grids", "grid-1234", 2, 0, "title"]
+            
+            it("past an expired reference", function(done) {
+                
+                var model = new Model({ cache: partial_cache() });
+                var options = {model: model};
+                
+                var results = model._getPathSetsAsValues(model, [["grid", 2, 0, "title"]], []);
+                
+                debugger;
+                
+                var missing = results.optimizedMissingPaths[0];
+                var expected_missing = ["grids", "grid-1234", 2, 0, "title"];
+                
+                expect(missing).to.deep.equals(expected_missing);
+                
+                return;
+                
+                set_and_verify_json_graph(this.test, suffix, [{
+                    paths: [["grid", 2]],
+                    jsong: {
+                        "grid": { $type: $path, value: ["grids", "grid-1234"] },
+                        "grids": {
+                            "grid-1234": {
+                                "2": {
+                                    $type: $path,
+                                    value: ["rows", "row-0"],
+                                    $expires: -50
+                                }
+                            }
+                        }
+                    }
+                }], options);
+                
+                setTimeout(function() {
+                    
+                    debugger;
+                    
+                    set_and_verify_json_graph(this.test, suffix, [{
+                        paths: [["grid", 2, 0, "title"]],
+                        jsong: {
+                            "rows": {
+                                "row-0": {
+                                    "0": { $type: $path, value: ["movies", "pulp-fiction"] }
+                                }
+                            },
+                            "movies": {
+                                "pulp-fiction": {
+                                    "title": "Pulp Fiction"
+                                }
+                            }
+                        }
+                    }], options);
+                    
+                    done();
+                    
+                }.bind(this), 100);
+            });
         });
         // end setting new values
         

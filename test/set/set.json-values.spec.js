@@ -13,14 +13,14 @@ var $path = require("../../lib/types/$path");
 var $sentinel = require("../../lib/types/$sentinel");
 
 // Tests each output format.
-execute("json values", "Values");
+execute("JSON values", "Values");
 execute("dense JSON", "JSON");
 execute("sparse JSON", "PathMap");
 execute("JSON-Graph", "JSONG");
 
 function execute(output, suffix) {
     
-    describe("Build " + output + " from JSON Values", function() {
+    describe("Build " + output + " from JSON values", function() {
         // set new values
         describe("by setting", function() {
             // set a primitive value
@@ -305,10 +305,12 @@ function execute(output, suffix) {
             });
             // end set multiple mixed-type json values
             
-            it("adjusts negative expires values to be relative to the current time", function() {
+            it("negative expires values to be relative to the current time", function() {
+                
                 var model = new Model({ cache: partial_cache() });
                 var options = {model: model};
                 var start_time = Date.now();
+                
                 set_and_verify_json_values(this.test, suffix, [{
                     path: ["grid", 2],
                     value: {
@@ -331,7 +333,7 @@ function execute(output, suffix) {
                     });
             });
             
-            xit("past an expired reference", function(done) {
+            it("past an expired reference", function(done) {
                 
                 var model = new Model({ cache: partial_cache() });
                 var options = {model: model};
@@ -341,12 +343,11 @@ function execute(output, suffix) {
                     value: {
                         $type: $path,
                         value: ["rows", "row-0"],
-                        $expires: Date.now() + 100
+                        $expires: -50
                     }
                 }], options);
                 
                 setTimeout(function() {
-                    debugger;
                     
                     set_and_verify_json_values(this.test, suffix, [{
                         path: ["grid", 2, 0, "title"],
@@ -355,7 +356,7 @@ function execute(output, suffix) {
                     
                     done();
                     
-                }.bind(this), 200);
+                }.bind(this), 100);
             });
         });
         // end setting new values
