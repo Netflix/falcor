@@ -20,101 +20,6 @@ execute("dense JSON", "JSON");
 execute("sparse JSON", "PathMap");
 execute("JSON-Graph", "JSONG");
 
-function whole_cache() {
-    return {
-        "grid": { $type: $path, value: ["grids", "grid-1234"] },
-        "grids": {
-            "grid-1234": {
-                "0": { $type: $path, value: ["rows", "row-0"] },
-                "1": { $type: $path, value: ["rows", "row-1"] }
-            }
-        },
-        "rows": {
-            "row-0": {
-                "0": { $type: $path, value: ["movies", "pulp-fiction"] },
-                "1": { $type: $path, value: ["movies", "kill-bill-1"] },
-                "2": { $type: $path, value: ["movies", "reservior-dogs"] },
-                "3": { $type: $path, value: ["movies", "django-unchained"] }
-            }
-        },
-        "movies": {
-            "pulp-fiction": {
-                "movie-id": { $type: $sentinel, value: "pulp-fiction" },
-                "title": { $type: $sentinel, value: "Pulp Fiction" },
-                "director": { $type: $sentinel, value: "Quentin Tarantino" },
-                "genres": {
-                    $type: $sentinel,
-                    value: ["Crime", "Drama", "Thriller"]
-                },
-                "summary": {
-                    $type: $sentinel,
-                    value: {
-                        title: "Pulp Fiction",
-                        url: "/movies/id/pulp-fiction"
-                    }
-                }
-            },
-            "kill-bill-1": {
-                "movie-id": { $type: $sentinel, value: "kill-bill-1" },
-                "title": { $type: $sentinel, value: "Kill Bill: Vol. 1" },
-                "director": { $type: $sentinel, value: "Quentin Tarantino" },
-                "genres": {
-                    $type: $sentinel,
-                    value: ["Crime", "Drama", "Thriller"]
-                },
-                "summary": {
-                    $type: $sentinel,
-                    value: {
-                        title: "Kill Bill: Vol. 1",
-                        url: "/movies/id/kill-bill-1"
-                    }
-                }
-            },
-            "reservior-dogs": {
-                "movie-id": { $type: $sentinel, value: "reservior-dogs" },
-                "title": { $type: $sentinel, value: "Reservior Dogs" },
-                "director": { $type: $sentinel, value: "Quentin Tarantino" },
-                "genres": {
-                    $type: $sentinel,
-                    value: ["Crime", "Drama", "Thriller"]
-                },
-                "summary": {
-                    $type: $sentinel,
-                    value: {
-                        title: "Reservior Dogs",
-                        url: "/movies/id/reservior-dogs"
-                    }
-                }
-            }
-        }
-    }
-}
-
-function partial_cache() {
-    return {
-        "grid": { $type: $path, value: ["grids", "grid-1234"] },
-        "grids": {
-            "grid-1234": {
-                "0": { $type: $path, value: ["rows", "row-0"] },
-                "1": { $type: $path, value: ["rows", "row-1"] }
-            }
-        },
-        "rows": {
-            "row-0": {
-                "0": { $type: $path, value: ["movies", "pulp-fiction"] },
-                "1": { $type: $path, value: ["movies", "kill-bill-1"] },
-                "2": { $type: $path, value: ["movies", "reservior-dogs"] }
-            }
-        },
-        "movies": {
-            "pulp-fiction": {
-                "movie-id": { $type: $sentinel, value: "pulp-fiction" }
-            },
-            "kill-bill-1": { $type: $sentinel }
-        }
-    }
-}
-
 function execute(output, suffix) {
 
     describe("Build " + output, function() {
@@ -1242,6 +1147,62 @@ function execute(output, suffix) {
                 });
             });
         });
+        
+        // Michael TODO: get as dense JSON creating more branch nodes than it should
+        // see: ./merge-expected-dense-json.js
+        
+        xdescribe("by merging", function() {
+            describe("a complete cache into an existing partial cache with hard references", function() {
+                describe("JSON-Graph Envelope", function() {
+                    
+                    it("directly", function() {
+                        
+                        // Initialize a new model.
+                        var model = new Model({ cache: partial_cache() });
+                        
+                        // Get an initial path to build hard references.
+                        model._getPathSetsAsJSON(model, [
+                            ["grid", {to: 1}, 0, "movie-id"],
+                            ["grid", {to: 1}, 1, null]
+                        ], []);
+                        
+                        // debugger;
+                        
+                        // Set in a more complete cache with direct paths only.
+                        set_and_verify_json_graph(this.test, suffix, [{
+                            paths: [
+                                ["rows", "row-0", "3"],
+                                ["movies",
+                                    ["pulp-fiction", "kill-bill-1", "reservior-dogs"],
+                                        ["title", "director", "genres", "summary"]
+                                ]
+                            ],
+                            jsong: whole_cache()
+                        }], {model: model});
+                    });
+                    
+                    it("through references", function() {
+                        
+                        // Initialize a new model.
+                        var model = new Model({ cache: partial_cache() });
+                        
+                        // Get an initial path to build hard references.
+                        model._getPathSetsAsJSON(model, [
+                            ["grid", {to: 1}, 0, "movie-id"],
+                            ["grid", {to: 1}, 1, null]
+                        ], []);
+                        
+                        // debugger;
+                        
+                        // Set in a more complete cache through references.
+                        set_and_verify_json_graph(this.test, suffix, [{
+                            paths: [["grid", {to:1}, {to:3}, ["title", "director", "genres", "summary"]]],
+                            jsong: whole_cache()
+                        }], {model: model});
+                    });
+                });
+            });
+        });
     });
 }
 
@@ -1289,6 +1250,116 @@ describe("Set a cache of partial $path values and build the correct missing path
     });
 });
 
+function whole_cache() {
+    return {
+        "grid": { $type: $path, value: ["grids", "grid-1234"] },
+        "grids": {
+            "grid-1234": {
+                "0": { $type: $path, value: ["rows", "row-0"] },
+                "1": { $type: $path, value: ["grids", "grid-1234", "0"] }
+            }
+        },
+        "rows": {
+            "row-0": {
+                "0": { $type: $path, value: ["movies", "pulp-fiction"] },
+                "1": { $type: $path, value: ["movies", "kill-bill-1"] },
+                "2": { $type: $path, value: ["movies", "reservior-dogs"] },
+                "3": { $type: $path, value: ["movies", "django-unchained"] }
+            }
+        },
+        "movies": {
+            "pulp-fiction": {
+                "movie-id": { $type: $sentinel, value: "pulp-fiction" },
+                "title": { $type: $sentinel, value: "Pulp Fiction" },
+                "director": { $type: $sentinel, value: "Quentin Tarantino" },
+                "genres": {
+                    $type: $sentinel,
+                    value: ["Crime", "Drama", "Thriller"]
+                },
+                "summary": {
+                    $type: $sentinel,
+                    value: {
+                        title: "Pulp Fiction",
+                        url: "/movies/id/pulp-fiction"
+                    }
+                }
+            },
+            "kill-bill-1": {
+                "movie-id": { $type: $sentinel, value: "kill-bill-1" },
+                "title": { $type: $sentinel, value: "Kill Bill: Vol. 1" },
+                "director": { $type: $sentinel, value: "Quentin Tarantino" },
+                "genres": {
+                    $type: $sentinel,
+                    value: ["Crime", "Drama", "Thriller"]
+                },
+                "summary": {
+                    $type: $sentinel,
+                    value: {
+                        title: "Kill Bill: Vol. 1",
+                        url: "/movies/id/kill-bill-1"
+                    }
+                }
+            },
+            "reservior-dogs": {
+                "movie-id": { $type: $sentinel, value: "reservior-dogs" },
+                "title": { $type: $sentinel, value: "Reservior Dogs" },
+                "director": { $type: $sentinel, value: "Quentin Tarantino" },
+                "genres": {
+                    $type: $sentinel,
+                    value: ["Crime", "Drama", "Thriller"]
+                },
+                "summary": {
+                    $type: $sentinel,
+                    value: {
+                        title: "Reservior Dogs",
+                        url: "/movies/id/reservior-dogs"
+                    }
+                }
+            },
+            "django-unchained": {
+                "movie-id": { $type: $sentinel, value: "django-unchained" },
+                "title": { $type: $sentinel, value: "Django Unchained" },
+                "director": { $type: $sentinel, value: "Quentin Tarantino" },
+                "genres": {
+                    $type: $sentinel,
+                    value: ["Western"]
+                },
+                "summary": {
+                    $type: $sentinel,
+                    value: {
+                        title: "Django Unchained",
+                        url: "/movies/id/django-unchained"
+                    }
+                }
+            }
+        }
+    }
+}
+
+function partial_cache() {
+    return {
+        "grid": { $type: $path, value: ["grids", "grid-1234"] },
+        "grids": {
+            "grid-1234": {
+                "0": { $type: $path, value: ["rows", "row-0"] },
+                "1": { $type: $path, value: ["grids", "grid-1234", "0"] }
+            }
+        },
+        "rows": {
+            "row-0": {
+                "0": { $type: $path, value: ["movies", "pulp-fiction"] },
+                "1": { $type: $path, value: ["movies", "kill-bill-1"] },
+                "2": { $type: $path, value: ["movies", "reservior-dogs"] }
+            }
+        },
+        "movies": {
+            "pulp-fiction": {
+                "movie-id": { $type: $sentinel, value: "pulp-fiction" }
+            },
+            "kill-bill-1": { $type: $sentinel }
+        }
+    }
+}
 
 function apply(func, context) {
     return function(argslist) {
@@ -1332,7 +1403,7 @@ function get_seeds(pathvalues) {
 }
 
 function set_path_values(pathvalues, suffix, options) {
-    var model   = new Model(_.extend({ cache: partial_cache() }, options || {}));
+    var model   = options && options.model || new Model(_.extend({ cache: partial_cache() }, options || {}));
     var seeds   = suffix == "JSON" ? get_seeds(pathvalues) : [{}];
     if(suffix == "Values") {
         var values = [];
@@ -1345,7 +1416,7 @@ function set_path_values(pathvalues, suffix, options) {
 }
 
 function set_envelopes(envelopes, suffix, options) {
-    var model   = new Model(_.extend({ cache: partial_cache() }, options || {}));
+    var model   = options && options.model || new Model(_.extend({ cache: partial_cache() }, options || {}));
     var seeds   = suffix == "JSON" ? get_seeds(envelopes.flatMap(get_paths)) : [{}];
     if(suffix == "Values") {
         var values = [];
@@ -1354,6 +1425,9 @@ function set_envelopes(envelopes, suffix, options) {
     var func = model["_setJSONGsAs" + suffix];
     var results = func(model, envelopes, seeds);
     if(values) { results.values = values; }
+    
+    // console.log(require("util").inspect(results.values, {depth: null}));
+    
     return [model, results];
 }
 
