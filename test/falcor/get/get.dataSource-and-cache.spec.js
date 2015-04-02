@@ -91,7 +91,7 @@ describe('DataSource and Partial Cache', function() {
         });
     });
     describe('toJSONG', function() {
-        it('should get multiple arguments into a single toJSON response.', function(done) {
+        it('should get multiple arguments into a single toJSONG response.', function(done) {
             var model = new Model({cache: M(), source: new LocalDataSource(Cache())});
             var expected = Expected.Complex().toOnly.AsJSONG.values[0];
             var next = false;

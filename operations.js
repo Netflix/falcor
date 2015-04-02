@@ -1,5 +1,7 @@
 var falcor = require('./lib/falcor');
 var get = require('./lib/get');
+var set = require('./lib/set');
+// var inv = require('./lib/invalidate');
 var prototype = falcor.Model.prototype;
 
 prototype._getBoundValue = get.getBoundValue;
@@ -13,15 +15,20 @@ prototype._getPathMapsAsJSON = get.getAsJSON;
 prototype._getPathMapsAsPathMap = get.getAsPathMap;
 prototype._getPathMapsAsJSONG = get.getAsJSONG;
 
-prototype._setPathSetsAsJSON = require("./lib/json-dense/set-path-values");
-prototype._setPathSetsAsJSONG = require("./lib/json-graph/set-path-values");
-prototype._setPathSetsAsPathMap = require("./lib/json-sparse/set-path-values");
-prototype._setPathSetsAsValues = require("./lib/json-values/set-path-values");
+prototype._setPathSetsAsJSON = set.setPathSetsAsJSON;
+prototype._setPathSetsAsJSONG = set.setPathSetsAsJSONG;
+prototype._setPathSetsAsPathMap = set.setPathSetsAsPathMap;
+prototype._setPathSetsAsValues = set.setPathSetsAsValues;
 
-prototype._setJSONGsAsJSON = require("./lib/json-dense/set-json-graph");
-prototype._setJSONGsAsJSONG = require("./lib/json-graph/set-json-graph");
-prototype._setJSONGsAsPathMap = require("./lib/json-sparse/set-json-graph");
-prototype._setJSONGsAsValues = require("./lib/json-values/set-json-graph");
+prototype._setJSONGsAsJSON = set.setJSONGsAsJSON;
+prototype._setJSONGsAsJSONG = set.setJSONGsAsJSONG;
+prototype._setJSONGsAsPathMap = set.setJSONGsAsPathMap;
+prototype._setJSONGsAsValues = set.setJSONGsAsValues;
+
+// prototype._invPathSetsAsJSON = inv.invPathSetsAsJSON;
+// prototype._invPathSetsAsJSONG = inv.invPathSetsAsJSONG;
+// prototype._invPathSetsAsPathMap = inv.invPathSetsAsPathMap;
+// prototype._invPathSetsAsValues = inv.invPathSetsAsValues;
 
 // prototype._setPathMapsAsValues = require("./operations/alt/legacy_setPathMapsAsValues");
 prototype._setCache = get.setCache;

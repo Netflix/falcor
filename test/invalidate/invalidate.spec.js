@@ -40,11 +40,7 @@ describe("Invalidate", function() {
             count++;
             testRunner.compare({
                 path: ["videos", 3355, "art"],
-                value: {
-                    "$size": 16,
-                    "$type": "group",
-                    "box-shot": "www.cdn.com/3355"
-                }
+                value: { "box-shot": "www.cdn.com/3355" }
             }, x);
         }, done, function() {
             // wtf is this all about.  I rely on errors in subscriptions all the time.
@@ -152,8 +148,6 @@ describe("Invalidate", function() {
             testRunner.compare({
                 path: ["lists", "abcd", 0, "summary"],
                 value: {
-                    "$size": 10,
-                    "$type": "group",
                     "title": "House of Cards",
                     "url": "/movies/1234"
                 }
