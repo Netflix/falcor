@@ -147,7 +147,7 @@ function execute(output, suffix) {
                                 value: "Reservior Dogs"
                             }]);
                         });
-                        xit("through a reference with a null last key", function() {
+                        it("through a reference with a null last key", function() {
                             set_and_verify_path_values(this.test, suffix, [{
                                 path: ["grid", 0, 2, null],
                                 value: "Reservior Dogs"
@@ -281,7 +281,7 @@ function execute(output, suffix) {
                                 }
                             }]);
                         });
-                        xit("through a reference with a null last key", function() {
+                        it("through a reference with a null last key", function() {
                             set_and_verify_json_graph(this.test, suffix, [{
                                 paths: [["grid", 0, 2, null]],
                                 jsong: {
@@ -529,7 +529,7 @@ function execute(output, suffix) {
                                 }
                             }]);
                         });
-                        xit("through a reference with a null last key", function() {
+                        it("through a reference with a null last key", function() {
                             set_and_verify_path_values(this.test, suffix, [{
                                 path: ["grid", 0, 2, null],
                                 value: {
@@ -708,7 +708,7 @@ function execute(output, suffix) {
                                 }
                             }]);
                         });
-                        xit("through a reference with a null last key", function() {
+                        it("through a reference with a null last key", function() {
                             set_and_verify_json_graph(this.test, suffix, [{
                                 paths: [["grid", 0, 2, null]],
                                 jsong: {
@@ -1010,11 +1010,9 @@ function execute(output, suffix) {
                 });
             });
             
-            // Paul TODO: It seems that you are missing seeds[2] & [4] though they exist in the cache.
             describe("multiple mixed paths and values as", function() {
                 describe("PathValues", function() {
                     it("directly", function() {
-                        debugger;
                         set_and_verify_path_values(this.test, suffix, [{
                             path: ["movies", "pulp-fiction", "title"],
                             value: "Pulp Fiction"
@@ -1215,7 +1213,7 @@ function execute(output, suffix) {
                 });
             });
             
-            xdescribe("a branch with an error", function() {
+            describe("a branch with an error", function() {
                 describe("PathValue", function() {
                     it("directly", function() {
                         set_and_verify_path_values(this.test, suffix, [{
@@ -1247,27 +1245,29 @@ function execute(output, suffix) {
     });
 }
 
-// Paul TODO: Verify that we really should create that movies branch.  I don't think we should.
 describe("Set a cache of partial $path values and build the correct missing paths as a JSON-Graph Envelope.", function() {
     it("JSON-Graph Envelope", function() {
         
         var expected = [{
             paths: [],
             jsong: {
-                grid: { '$type': 'path', value: ['grids', 'grid-1234'], '$size': 52 },
+                grid: { "$type": "path", value: ["grids", "grid-1234"], "$size": 52 },
                 grids: {
-                    'grid-1234': {
-                        '1': { '$type': 'path', value: ['rows', 'row-1'], '$size': 52 }
+                    "grid-1234": {
+                        "1": { "$type": "path", value: ["rows", "row-1"], "$size": 52 }
                     }
                 },
                 rows: {
-                    'row-1': {
-                        '0': { '$type': 'path', value: ['movies', 'django-unchained'], '$size': 52 }
+                    "row-1": {
+                        "0": { "$type": "path", value: ["movies", "django-unchained"], "$size": 52 }
                     }
                 },
-                movies: {}
+                movies: {
+                    "django-unchained": {}
+                }
             }
         }];
+        
         var actual = set_envelopes([{
             paths: [["grid", 1, 0, "movie-id"]],
             jsong: {

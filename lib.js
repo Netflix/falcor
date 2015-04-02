@@ -16,15 +16,15 @@ prototype._getPathMapsAsJSON = sentinelGet.getAsJSON;
 prototype._getPathMapsAsPathMap = sentinelGet.getAsPathMap;
 prototype._getPathMapsAsJSONG = sentinelGet.getAsJSONG;
 
-prototype._setPathSetsAsJSON = require("./lib/json-dense/set-path-values");
-prototype._setPathSetsAsJSONG = require("./lib/json-graph/set-path-values");
-prototype._setPathSetsAsPathMap = require("./lib/json-sparse/set-path-values");
-prototype._setPathSetsAsValues = require("./lib/json-values/set-path-values");
+prototype._setPathSetsAsJSON = require("./lib/set/set-path-values-as-dense-json");
+prototype._setPathSetsAsJSONG = require("./lib/set/set-path-values-as-json-graph");
+prototype._setPathSetsAsPathMap = require("./lib/set/set-path-values-as-sparse-json");
+prototype._setPathSetsAsValues = require("./lib/set/set-path-values-as-path-values");
 
-prototype._setJSONGsAsJSON = require("./lib/json-dense/set-json-graph");
-prototype._setJSONGsAsJSONG = require("./lib/json-graph/set-json-graph");
-prototype._setJSONGsAsPathMap = require("./lib/json-sparse/set-json-graph");
-prototype._setJSONGsAsValues = require("./lib/json-values/set-json-graph");
+prototype._setJSONGsAsJSON = require("./lib/set/set-json-graph-as-dense-json");
+prototype._setJSONGsAsJSONG = require("./lib/set/set-json-graph-as-json-graph");
+prototype._setJSONGsAsPathMap = require("./lib/set/set-json-graph-as-sparse-json");
+prototype._setJSONGsAsValues = require("./lib/set/set-json-graph-as-path-values");
 
 // prototype._setPathMapsAsValues = require("./operations/alt/legacy_setPathMapsAsValues");
 prototype._setCache = sentinelGet.setCache;
