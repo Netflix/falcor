@@ -983,7 +983,7 @@ function execute(output, suffix) {
             
             // Michael TODO: get as dense JSON creating more branch nodes than it should
             // see: ./merge-expected-dense-json.js
-            xdescribe("a complete cache into an existing partial cache with hard references", function() {
+            describe("a complete cache into an existing partial cache with hard references", function() {
                 it("directly", function() {
                     
                     // Initialize a new model.
