@@ -21,10 +21,6 @@ describe("Model", function() {
         });
     });
 
-//    describe("#call", function() {
-//        require("./call/call.spec");
-//    });
-
    describe("#invalidate", function() {
        require("./invalidate/invalidate.spec");
    });

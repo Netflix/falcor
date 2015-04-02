@@ -767,12 +767,6 @@ function execute(output, suffix) {
 
                 var model = new Model({ cache: partial_cache() });
                 var options = {model: model};
-                var results = model._getPathSetsAsValues(model, [["grid", 2, 0, "title"]], []);
-                var missing = results.optimizedMissingPaths[0];
-                var expected_missing = ["grids", "grid-1234", 2, 0, "title"];
-
-                expect(missing).to.deep.equals(expected_missing);
-
 
                 set_and_verify_json_graph(this.test, suffix, [{
                     paths: [["grid", 2]],
@@ -791,8 +785,6 @@ function execute(output, suffix) {
                 }], options);
 
                 setTimeout(function() {
-
-                    debugger;
 
                     set_and_verify_json_graph(this.test, suffix, [{
                         paths: [["grid", 2, 0, "title"]],

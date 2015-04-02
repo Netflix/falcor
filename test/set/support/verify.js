@@ -26,6 +26,7 @@ function verify(suffix) {
             var func = model["_getPathSetsAs" + suffix];
             var output = func(model, paths, seeds);
             if(values) { output.values = values; }
+            
             return checks.shift().call(this, output);
         };
         
