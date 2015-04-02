@@ -1,5 +1,170 @@
 module.exports = function() {
     return {
+        toOnlyLists: {
+            getPathSets: {
+                query: [
+                    ["genreList", {to: 1}, 0, "summary"]
+                ]
+            },
+
+            getPathMaps: {
+                query: [{
+                    "genreList": {
+                        "0": {
+                            "0": {
+                                "summary": null
+                            }
+                        },
+                        "1": {
+                            "0": {
+                                "summary": null
+                            }
+                        }
+                    }
+                }]
+            },
+
+            AsValues: {
+                values: [
+                    {
+                        "path": ["genreList", "0", "0", "summary"],
+                        "value": {
+                            "title": "House of Cards",
+                            "url": "/movies/1234"
+                        }
+                    },
+                    {
+                        "path": ["genreList", "1", "0", "summary"],
+                        "value": {
+                            "title": "Running Man",
+                            "url": "/movies/553"
+                        }
+                    }
+                ]
+            },
+
+            AsJSON: {
+                values: [{
+                    json: {
+                        0: {
+                            0: {
+                                "title": "House of Cards",
+                                "url": "/movies/1234"
+                            }
+                        },
+                        1: {
+                            0: {
+                                "title": "Running Man",
+                                "url": "/movies/553"
+                            }
+                        }
+                    }
+                }]
+            },
+
+            AsJSONG: {
+                values: [{
+                    jsong: {
+                        genreList: {
+                            0: {
+                                "$size": 52,
+                                "$type": "path",
+                                "value": ["lists", "abcd"]
+                            },
+                            1: {
+                                "$size": 52,
+                                "$type": "path",
+                                "value": ["lists", "my-list"]
+                            }
+                        },
+                        lists: {
+                            abcd: {
+                                0: {
+                                    "$size": 52,
+                                    "$type": "path",
+                                    "value": ["videos", "1234"]
+                                }
+                            },
+                            '1x5x': {
+                                0: {
+                                    "$size": 52,
+                                    "$type": "path",
+                                    "value": ["videos", "553"]
+                                }
+                            },
+                            'my-list': {
+                                "$size": 52,
+                                "$type": "path",
+                                "value": ["lists", "1x5x"]
+                            }
+                        },
+                        videos: {
+                            1234: {
+                                "summary": {
+                                    "$size": 51,
+                                    "$type": "sentinel",
+                                    "value": {
+                                        "title": "House of Cards",
+                                        "url": "/movies/1234"
+                                    }
+                                }
+                            },
+                            553: {
+                                "summary": {
+                                    "$size": 51,
+                                    "$type": "sentinel",
+                                    "value": {
+                                        "title": "Running Man",
+                                        "url": "/movies/553"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    paths: [
+                        ["genreList", "0", "0", "summary"],
+                        ["genreList", "1", "0", "summary"]
+                    ]
+                }]
+            },
+
+            AsPathMap: {
+                values: [{
+                    json: {
+                        genreList: {
+                            0: {
+                                0: {
+                                    summary: {
+                                        "title": "House of Cards",
+                                        "url": "/movies/1234"
+                                    }
+                                },
+                                1: {
+                                    summary: {
+                                        "title": "Terminator 3",
+                                        "url": "/movies/766"
+                                    }
+                                }
+                            },
+                            1: {
+                                0: {
+                                    summary: {
+                                        "title": "Running Man",
+                                        "url": "/movies/553"
+                                    }
+                                },
+                                1: {
+                                    summary: {
+                                        "title": "Junior",
+                                        "url": "/movies/5522"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }]
+            }
+        },
         doubleComplex: {
             getPathSets: {
                 query: [
