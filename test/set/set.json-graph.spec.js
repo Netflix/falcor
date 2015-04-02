@@ -763,22 +763,16 @@ function execute(output, suffix) {
             // Michael TODO:
             // the first optimized missing path should be ["grids", "grid-1234", 2, 0, "title"]
 
-            it.only("past an expired reference", function(done) {
+            it("past an expired reference", function(done) {
 
                 var model = new Model({ cache: partial_cache() });
                 var options = {model: model};
-
-                debugger;
                 var results = model._getPathSetsAsValues(model, [["grid", 2, 0, "title"]], []);
-
-                debugger;
-
                 var missing = results.optimizedMissingPaths[0];
                 var expected_missing = ["grids", "grid-1234", 2, 0, "title"];
 
                 expect(missing).to.deep.equals(expected_missing);
 
-                return;
 
                 set_and_verify_json_graph(this.test, suffix, [{
                     paths: [["grid", 2]],
