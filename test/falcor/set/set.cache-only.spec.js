@@ -9,13 +9,15 @@ var noOp = function() {};
 
 describe('Cache Only', function() {
     describe('Selector Functions', function() {
-        it('should get a value from falcor.', function(done) {
+        it('should set a value from falcor.', function(done) {
             var model = new Model({cache: Cache()});
-            var expected = Expected.Values().direct.AsJSON.values[0].json;
+            var expected = {
+                hello: 'world'
+            };
             var selector = false;
             var next = false;
             model.
-                get(['videos', 1234, 'summary'], function(x) {
+                set({path: ['videos', 1234, 'summary'], value: expected}, function(x) {
                     testRunner.compare(expected, x);
                     selector = true;
                     return {value: x};
@@ -31,12 +33,23 @@ describe('Cache Only', function() {
         });
     });
     describe('toJSON', function() {
-        it('should get a value from falcor.', function(done) {
+        it('should set a value from falcor.', function(done) {
             var model = new Model({cache: Cache()});
-            var expected = Expected.Values().direct.AsPathMap.values[0];
+            var value = {hello: 'world'};
+            var expected = {
+                json: {
+                    videos: {
+                        1234: {
+                            summary: {
+                                hello: 'world'
+                            }
+                        }
+                    }
+                }
+            };
             var next = false;
             model.
-                get(['videos', 1234, 'summary']).
+                set({path: ['videos', 1234, 'summary'], value: value}).
                 toJSON().
                 doAction(function(x) {
                     testRunner.compare(expected, x);
@@ -50,10 +63,26 @@ describe('Cache Only', function() {
     describe('toJSONG', function() {
         it('should get a value from falcor.', function(done) {
             var model = new Model({cache: Cache()});
-            var expected = Expected.Values().direct.AsJSONG.values[0];
+            var value = {hello: 'world'};
+            var expected = {
+                jsong: {
+                    videos: {
+                        1234: {
+                            summary: {
+                                $type: 'sentinel',
+                                $size: 51,
+                                value: {
+                                    hello: 'world'
+                                }
+                            }
+                        }
+                    }
+                },
+                paths: [['videos', 1234, 'summary']]
+            };
             var next = false;
             model.
-                get(['videos', 1234, 'summary']).
+                set({path: ['videos', 1234, 'summary'], value: value}).
                 toJSONG().
                 doAction(function(x) {
                     testRunner.compare(expected, x);
@@ -67,14 +96,16 @@ describe('Cache Only', function() {
     describe('toPathValues', function() {
         it('should get a value from falcor.', function(done) {
             var model = new Model({cache: Cache()});
-            var expected = Expected.Values().direct.AsValues.values[0];
-            var next = 0;
+            var value = {hello: 'world'};
+            var next = false;
             model.
-                get(['videos', 1234, 'summary']).
+                set({path: ['videos', 1234, 'summary'], value: value}).
                 toPathValues().
                 doAction(function(x) {
-                    debugger;
-                    testRunner.compare(expected, x);
+                    testRunner.compare({
+                        path: ['videos', 1234, 'summary'],
+                        value: value
+                    }, x);
                     ++next;
                 }, noOp, function() {
                     testRunner.compare(1, next, 'Expect to be onNext 1 time.');

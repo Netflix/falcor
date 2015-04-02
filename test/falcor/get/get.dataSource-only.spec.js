@@ -7,6 +7,8 @@ var getTestRunner = require('./../../getTestRunner');
 var testRunner = require('./../../testRunner');
 var noOp = function() {};
 var LocalDataSource = require('../../data/LocalDataSource');
+var ErrorDataSource = require('../../data/ErrorDataSource');
+var isPathOrPathValue = require('../../../lib/falcor/operations/isPathOrPathValue');
 
 describe('DataSource Only', function() {
     describe('Selector Functions', function() {
@@ -82,6 +84,33 @@ describe('DataSource Only', function() {
                 }).
                 subscribe(noOp, done, done);
         });
+    });
+    it('should report errors from a dataSource.', function(done) {
+        var model = new Model({
+            source: new ErrorDataSource(500, 'Oops!')
+        });
+        model.
+            get(['videos', 1234, 'summary']).
+            doAction(noOp, function(err) {
+                testRunner.compare([{
+                    path: ['videos', 1234, 'summary'],
+                    value: {
+                        message: 'Oops!',
+                        status: 500
+                    }
+                }], err);
+            }).
+            subscribe(noOp, function(err) {
+                // ensure its the same error
+                if (Array.isArray(err) && isPathOrPathValue(err[0])) {
+                    done();
+                } else {
+                    done(err);
+                }
+            }, function() {
+                done('On Completed was called.  ' +
+                     'OnError should of been called.');
+            });
     });
 });
 
