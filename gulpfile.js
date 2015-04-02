@@ -2,6 +2,7 @@ var gulp = require('gulp');
 var jshint = require('gulp-jshint');
 var eslint = require('gulp-eslint');
 var jsdoc = require('gulp-jsdoc');
+var runSequence = require('run-sequence');
 var concat = require('gulp-concat');
 var benchmark = require('gulp-bench');
 
@@ -11,20 +12,20 @@ require('./build/gulp-build');
 require('./build/gulp-test');
 require('./build/performance/gulp-perf');
 
-var buildDir = 'bin';
+var srcDir = 'lib';
 
 gulp.task('hint', ['build'], function() {
-    return gulp.src(buildDir + '/**/*.js').
+    return gulp.src(srcDir + '/**/*.js').
         pipe(jshint()).
         pipe(jshint.reporter('default')).
         pipe(jshint.reporter('fail'));
 });
 
-gulp.task('eslint', ['build'], function() {
-    return gulp.src(buildDir + '/**/*.js').
+gulp.task('lint', function() {
+    return gulp.src(srcDir + '/**/*.js').
         pipe(eslint()).
         pipe(eslint.format()).
-        pipe(eslint.failOnError());
+        pipe(eslint.failAfterError());
 });
 
 gulp.task('doc', ['clean.doc', 'doc-d']);
@@ -44,6 +45,10 @@ gulp.task('doc-d', ['clean.doc', 'doc-p'], function() {
         pipe(jsdoc.generator('doc'));
 });
 
-gulp.task('default', ['build', 'eslint']);
+// Run in serial to fail build if lint fails.
+gulp.task('default', function(callback) {
+    return runSequence('lint', 'build', callback);
+});
+
 gulp.task('build', ['build.node']);
 gulp.task('alt', ['build.alt']);

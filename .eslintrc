@@ -1,0 +1,7 @@
+{
+    "rules": {
+        "no-underscore-dangle"  : 0,
+        "quotes"                : 0,
+        "camelcase"             : 0
+    }
+}
