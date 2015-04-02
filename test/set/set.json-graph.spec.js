@@ -302,7 +302,7 @@ function execute(output, suffix) {
                 });
             });
             // end set primitive value
-            
+
             // set a sentinel value
             describe("a $sentinel", function() {
                 describe("in one place", function() {
@@ -657,7 +657,7 @@ function execute(output, suffix) {
                 });
             });
             // end set sentinel value
-            
+
             // set a path value
             describe("a $path", function() {
                 describe("in one place", function() {
@@ -694,7 +694,7 @@ function execute(output, suffix) {
                 });
             });
             // end set path value
-            
+
             // set multiple mixed-type json values
             describe("multiple mixed paths and values as", function() {
                 it("directly", function() {
@@ -723,14 +723,14 @@ function execute(output, suffix) {
                 });
             });
             // end set multiple mixed-type json values
-            
-            
+
+
             it("negative expires values to be relative to the current time", function() {
-                
+
                 var model = new Model({ cache: partial_cache() });
                 var options = {model: model};
                 var start_time = Date.now();
-                
+
                 set_and_verify_json_graph(this.test, suffix, [{
                     paths: [["grid", 2]],
                     jsong: {
@@ -746,7 +746,7 @@ function execute(output, suffix) {
                         }
                     }
                 }], options);
-                
+
                 model.boxValues()
                     .get(["grid", 2])
                     .toPathValues()
@@ -759,26 +759,27 @@ function execute(output, suffix) {
                         expect(future_time > elapsed_time);
                     });
             });
-            
+
             // Michael TODO:
             // the first optimized missing path should be ["grids", "grid-1234", 2, 0, "title"]
-            
-            it("past an expired reference", function(done) {
-                
+
+            it.only("past an expired reference", function(done) {
+
                 var model = new Model({ cache: partial_cache() });
                 var options = {model: model};
-                
-                var results = model._getPathSetsAsValues(model, [["grid", 2, 0, "title"]], []);
-                
+
                 debugger;
-                
+                var results = model._getPathSetsAsValues(model, [["grid", 2, 0, "title"]], []);
+
+                debugger;
+
                 var missing = results.optimizedMissingPaths[0];
                 var expected_missing = ["grids", "grid-1234", 2, 0, "title"];
-                
+
                 expect(missing).to.deep.equals(expected_missing);
-                
+
                 return;
-                
+
                 set_and_verify_json_graph(this.test, suffix, [{
                     paths: [["grid", 2]],
                     jsong: {
@@ -794,11 +795,11 @@ function execute(output, suffix) {
                         }
                     }
                 }], options);
-                
+
                 setTimeout(function() {
-                    
+
                     debugger;
-                    
+
                     set_and_verify_json_graph(this.test, suffix, [{
                         paths: [["grid", 2, 0, "title"]],
                         jsong: {
@@ -814,14 +815,14 @@ function execute(output, suffix) {
                             }
                         }
                     }], options);
-                    
+
                     done();
-                    
+
                 }.bind(this), 100);
             });
         });
         // end setting new values
-        
+
         // replace existing values
         describe("by replacing", function() {
             // replace a sentinel with a primitive
@@ -863,7 +864,7 @@ function execute(output, suffix) {
                 });
             });
             // end replacing sentinel with primitive
-            
+
             // replace a $path with a different $path to make sure we compare
             // the path lengths and keys before overwriting the cache path.
             describe("a $path with a different $path", function() {
@@ -898,7 +899,7 @@ function execute(output, suffix) {
                     }]);
                 });
             });
-            
+
             // replace a branch with a primitive
             describe("a branch with a primitive", function() {
                 it("directly", function() {
@@ -913,7 +914,7 @@ function execute(output, suffix) {
                 });
             });
             // end replacing branches with primitives
-            
+
             // replace a branch with an error
             describe("a branch with an error", function() {
                 it("directly", function() {
@@ -933,13 +934,13 @@ function execute(output, suffix) {
             // end replacing branches with errors
         });
         // end replacing things
-        
+
         // merge new JSON-Graphs into empty or existing JSON-Graphs
         describe("by merging", function() {
-            
+
             describe("a cache of partial $path values and build the correct missing paths as a JSON-Graph Envelope.", function() {
                 it("JSON-Graph Envelope", function() {
-                    
+
                     var expected = [{
                         paths: [],
                         jsong: {
@@ -959,7 +960,7 @@ function execute(output, suffix) {
                             }
                         }
                     }];
-                    
+
                     var actual = set_envelopes([{
                         paths: [["grid", 1, 0, "movie-id"]],
                         jsong: {
@@ -976,27 +977,27 @@ function execute(output, suffix) {
                             }
                         }
                     }], "JSONG");
-                    
+
                     expect(actual[1].values).to.deep.equals(expected);
                 });
             });
-            
+
             // Michael TODO: get as dense JSON creating more branch nodes than it should
             // see: ./merge-expected-dense-json.js
             describe("a complete cache into an existing partial cache with hard references", function() {
                 it("directly", function() {
-                    
+
                     // Initialize a new model.
                     var model = new Model({ cache: partial_cache() });
-                    
+
                     // Get an initial path to build hard references.
                     model._getPathSetsAsJSON(model, [
                         ["grid", {to: 1}, 0, "movie-id"],
                         ["grid", {to: 1}, 1, null]
                     ], []);
-                    
+
                     // debugger;
-                    
+
                     // Set in a more complete cache with direct paths only.
                     set_and_verify_json_graph(this.test, suffix, [{
                         paths: [
@@ -1009,20 +1010,20 @@ function execute(output, suffix) {
                         jsong: whole_cache()
                     }], {model: model});
                 });
-                
+
                 it("through references", function() {
-                    
+
                     // Initialize a new model.
                     var model = new Model({ cache: partial_cache() });
-                    
+
                     // Get an initial path to build hard references.
                     model._getPathSetsAsJSON(model, [
                         ["grid", {to: 1}, 0, "movie-id"],
                         ["grid", {to: 1}, 1, null]
                     ], []);
-                    
+
                     // debugger;
-                    
+
                     // Set in a more complete cache through references.
                     set_and_verify_json_graph(this.test, suffix, [{
                         paths: [["grid", {to:1}, {to:3}, ["title", "director", "genres", "summary"]]],
