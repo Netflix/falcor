@@ -1,7 +1,7 @@
 var falcor = require('./lib/falcor');
 var get = require('./lib/get');
 var set = require('./lib/set');
-// var inv = require('./lib/invalidate');
+var inv = require('./lib/invalidate');
 var prototype = falcor.Model.prototype;
 
 prototype._getBoundValue = get.getBoundValue;
@@ -25,12 +25,11 @@ prototype._setJSONGsAsJSONG = set.setJSONGsAsJSONG;
 prototype._setJSONGsAsPathMap = set.setJSONGsAsPathMap;
 prototype._setJSONGsAsValues = set.setJSONGsAsValues;
 
-// prototype._invPathSetsAsJSON = inv.invPathSetsAsJSON;
-// prototype._invPathSetsAsJSONG = inv.invPathSetsAsJSONG;
-// prototype._invPathSetsAsPathMap = inv.invPathSetsAsPathMap;
-// prototype._invPathSetsAsValues = inv.invPathSetsAsValues;
+prototype._invPathSetsAsJSON = inv.invPathSetsAsJSON;
+prototype._invPathSetsAsJSONG = inv.invPathSetsAsJSONG;
+prototype._invPathSetsAsPathMap = inv.invPathSetsAsPathMap;
+prototype._invPathSetsAsValues = inv.invPathSetsAsValues;
 
-// prototype._setPathMapsAsValues = require("./operations/alt/legacy_setPathMapsAsValues");
 prototype._setCache = get.setCache;
 
 module.exports = falcor;

@@ -1,14 +1,14 @@
-var jsong = require("../../index");
+var jsong = require("../../../index");
 var Model = jsong.Model;
 var Rx = require("rx");
-var LocalDataSource = require("../data/LocalDataSource");
-var UnoDataSource = require("../data/UnoDataSource");
-var Cache = require("../data/Cache");
-var RCache = require("../data/ReducedCache");
+var LocalDataSource = require("../../data/LocalDataSource");
+var UnoDataSource = require("../../data/UnoDataSource");
+var Cache = require("../../data/Cache");
+var RCache = require("../../data/ReducedCache");
 var ReducedCache = RCache.ReducedCache;
-var Expected = require("../data/expected");
-var getTestRunner = require("../getTestRunner");
-var testRunner = require("../testRunner");
+var Expected = require("../../data/expected");
+var getTestRunner = require("../../getTestRunner");
+var testRunner = require("../../testRunner");
 var References = Expected.References;
 var Complex = Expected.Complex;
 var Values = Expected.Values;
@@ -57,7 +57,7 @@ describe("Invalidate", function() {
             }
         });
     });
-    
+
     it("should invalidate a branch value.", function(done) {
         var dataSourceCount = 0;
         var summary = ["videos", 3355, "summary"];
