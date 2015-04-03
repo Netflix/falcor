@@ -38,6 +38,23 @@ function execute(output, suffix) {
                             }
                         }]);
                     });
+                    it("directly on a bound model", function() {
+                        set_and_verify_json_graph(this.test, suffix, [{
+                            paths: [["movies", "pulp-fiction", "title"]],
+                            jsong: {
+                                "movies": {
+                                    "pulp-fiction": {
+                                        "title": "Pulp Fiction"
+                                    }
+                                }
+                            }
+                        }], {
+                            model: new Model({
+                                cache: partial_cache()
+                            })
+                            .clone(["_path", ["movies"]])
+                        });
+                    });
                     it("through a reference", function() {
                         set_and_verify_json_graph(this.test, suffix, [{
                             paths: [["grid", 0, 0, "title"]],
@@ -179,6 +196,42 @@ function execute(output, suffix) {
                                     }
                                 }
                             }]);
+                        });
+                        it("through through successful, short-circuit, and broken references on a bound model", function() {
+                            set_and_verify_json_graph(this.test, suffix, [{
+                                paths: [["grid", 0, [0, 1, 2], "director"]],
+                                jsong: {
+                                    "grid": { $type: $path, value: ["grids", "grid-1234"] },
+                                    "grids": {
+                                        "grid-1234": {
+                                            "0": { $type: $path, value: ["rows", "row-0"] }
+                                        }
+                                    },
+                                    "rows": {
+                                        "row-0": {
+                                            "0": { $type: $path, value: ["movies", "pulp-fiction"] },
+                                            "1": { $type: $path, value: ["movies", "kill-bill-1"] },
+                                            "2": { $type: $path, value: ["movies", "reservior-dogs"] }
+                                        }
+                                    },
+                                    "movies": {
+                                        "pulp-fiction": {
+                                            "director": "Quentin Tarantino"
+                                        },
+                                        "kill-bill-1": {
+                                            "director": "Quentin Tarantino"
+                                        },
+                                        "reservior-dogs": {
+                                            "director": "Quentin Tarantino"
+                                        }
+                                    }
+                                }
+                            }], {
+                                model: new Model({
+                                    cache: partial_cache()
+                                })
+                                .clone(["_path", ["grid", 0]])
+                            });
                         });
                     });
                     describe("via range", function() {

@@ -4,7 +4,7 @@ var chai = require("chai");
 var expect = chai.expect;
 
 describe("Model", function() {
-    
+
     it("should construct a new Model", function() {
         new jsong.Model();
     });
@@ -24,13 +24,5 @@ describe("Model", function() {
             require("./invalidate")();
         });
     });
-
-   // describe("#invalidate", function() {
-   //     require("./invalidate/invalidate.spec");
-   // });
-
-//    describe("--behavioral", function() {
-//         require("./behavioral")
-//    });
 });
 
