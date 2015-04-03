@@ -26,9 +26,9 @@ function invalidate_path_sets(pathsets, suffix, options) {
 }
 
 function get_seeds(pathsets) {
-    return pathsets.map(function() {
-        return {};
-    });
+    return pathsets
+        .slice(0, Math.ceil(pathsets.length / 2))
+        .map(function() { return {}; });
 }
 
 function get_paths(pathsets) {

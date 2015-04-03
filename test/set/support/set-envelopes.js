@@ -4,6 +4,7 @@ var _ = require("lodash");
 var jsong = require("../../../index");
 var Model = jsong.Model;
 var partial_cache = require("./partial-cache");
+var get_seeds = require("./get-seeds");
 
 function set_envelopes(envelopes, suffix, options) {
     var model   = options && options.model || new Model(_.extend({ cache: partial_cache() }, options || {}));
@@ -14,20 +15,11 @@ function set_envelopes(envelopes, suffix, options) {
         var values = [];
         seeds = function(pv) { values.push(pv); }
     }
-    debugger;
     var func = model["_setJSONGsAs" + suffix];
     var results = func(model, envelopes, seeds);
     if(values) { results.values = values; }
     
-    // console.log(require("util").inspect(results.values, {depth: null}));
-    
     return [model, results];
-}
-
-function get_seeds(pathvalues) {
-    return pathvalues.map(function() {
-        return {};
-    });
 }
 
 function get_paths(envelope) {

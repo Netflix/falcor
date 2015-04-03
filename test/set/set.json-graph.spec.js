@@ -6,6 +6,7 @@ var expect = require('chai').expect;
 
 var whole_cache = require("./support/whole-cache");
 var partial_cache = require("./support/partial-cache");
+var get_pathsets = require("./support/get-pathsets");
 var set_envelopes = require("./support/set-envelopes");
 var set_and_verify_json_graph = require("./support/set-and-verify-json-graph");
 
@@ -13,16 +14,46 @@ var slice = Array.prototype.slice;
 var $path = require("../../lib/types/$path");
 var $sentinel = require("../../lib/types/$sentinel");
 
-// Tests each output format.
-execute("JSON values", "Values");
-execute("dense JSON", "JSON");
-execute("sparse JSON", "PathMap");
-execute("JSON-Graph", "JSONG");
+var modes = [{
+        boxed: true
+    }, {
+        boxed: true,
+        materialized: true
+    }, {
+        boxed: true,
+        treatErrorsAsValues: true
+    }, {
+        boxed: true,
+        materialized: true,
+        treatErrorsAsValues: true
+    }, {
+        materialized: true,
+        treatErrorsAsValues: true
+    }, {
+        materialized: true
+    }, {
+        treatErrorsAsValues: true
+    }];
 
-function execute(output, suffix) {
+// Tests for each mode
+modes.forEach(function(opts) {
+    // Tests each output format.
+    execute("JSON values", "Values");
+    execute("dense JSON", "JSON");
+    execute("sparse JSON", "PathMap");
+    execute("JSON-Graph", "JSONG");
+});
+
+function execute(output, suffix, opts) {
     describe("Build " + output + " from JSON-Graph Envelopes", function() {
         // set new values
         describe("by setting", function() {
+            it("nothing, hopefully", function() {
+                set_and_verify_json_graph(this.test, suffix, [{
+                    paths: [[null, null, null, null], [null, null, null, null]],
+                    jsong: {}
+                }], opts);
+            });
             // set a primitive value
             describe("a primitive value", function() {
                 describe("in one place", function() {
@@ -36,7 +67,7 @@ function execute(output, suffix) {
                                     }
                                 }
                             }
-                        }]);
+                        }], opts);
                     });
                     it("directly on a bound model", function() {
                         set_and_verify_json_graph(this.test, suffix, [{
@@ -49,10 +80,9 @@ function execute(output, suffix) {
                                 }
                             }
                         }], {
-                            model: new Model({
+                            model: new Model(_.extend({
                                 cache: partial_cache()
-                            })
-                            .clone(["_path", ["movies"]])
+                            }, opts)).clone(["_path", ["movies"]])
                         });
                     });
                     it("through a reference", function() {
@@ -76,7 +106,7 @@ function execute(output, suffix) {
                                     }
                                 }
                             }
-                        }]);
+                        }], opts);
                     });
                     it("through a reference that lands on a sentinel", function() {
                         set_and_verify_json_graph(this.test, suffix, [{
@@ -99,7 +129,7 @@ function execute(output, suffix) {
                                     }
                                 }
                             }
-                        }]);
+                        }], opts);
                     });
                     it("through a broken reference", function() {
                         set_and_verify_json_graph(this.test, suffix, [{
@@ -122,7 +152,7 @@ function execute(output, suffix) {
                                     }
                                 }
                             }
-                        }]);
+                        }], opts);
                     });
                     it("through a reference with a null last key", function() {
                         set_and_verify_json_graph(this.test, suffix, [{
@@ -143,7 +173,7 @@ function execute(output, suffix) {
                                     "reservior-dogs": "Reservior Dogs"
                                 }
                             }
-                        }]);
+                        }], opts);
                     });
                 });
                 describe("in multiple places", function() {
@@ -164,9 +194,9 @@ function execute(output, suffix) {
                                         }
                                     }
                                 }
-                            }]);
+                            }], opts);
                         });
-                        it("through through successful, short-circuit, and broken references", function() {
+                        it("through successful, short-circuit, and broken references", function() {
                             set_and_verify_json_graph(this.test, suffix, [{
                                 paths: [["grid", 0, [0, 1, 2], "director"]],
                                 jsong: {
@@ -195,9 +225,9 @@ function execute(output, suffix) {
                                         }
                                     }
                                 }
-                            }]);
+                            }], opts);
                         });
-                        it("through through successful, short-circuit, and broken references on a bound model", function() {
+                        it("through successful, short-circuit, and broken references on a bound model", function() {
                             set_and_verify_json_graph(this.test, suffix, [{
                                 paths: [["grid", 0, [0, 1, 2], "director"]],
                                 jsong: {
@@ -227,10 +257,9 @@ function execute(output, suffix) {
                                     }
                                 }
                             }], {
-                                model: new Model({
+                                model: new Model(_.extend({
                                     cache: partial_cache()
-                                })
-                                .clone(["_path", ["grid", 0]])
+                                }, opts)).clone(["_path", ["grid", 0]])
                             });
                         });
                     });
@@ -264,7 +293,7 @@ function execute(output, suffix) {
                                         }
                                     }
                                 }
-                            }]);
+                            }], opts);
                         });
                         it("from:1, to:2", function() {
                             set_and_verify_json_graph(this.test, suffix, [{
@@ -291,7 +320,7 @@ function execute(output, suffix) {
                                         }
                                     }
                                 }
-                            }]);
+                            }], opts);
                         });
                         it("length:3", function() {
                             set_and_verify_json_graph(this.test, suffix, [{
@@ -322,7 +351,7 @@ function execute(output, suffix) {
                                         }
                                     }
                                 }
-                            }]);
+                            }], opts);
                         });
                         it("from:1, length:2", function() {
                             set_and_verify_json_graph(this.test, suffix, [{
@@ -349,7 +378,7 @@ function execute(output, suffix) {
                                         }
                                     }
                                 }
-                            }]);
+                            }], opts);
                         });
                     });
                 });
@@ -375,7 +404,7 @@ function execute(output, suffix) {
                                     }
                                 }
                             }
-                        }]);
+                        }], opts);
                     });
                     it("through a reference", function() {
                         set_and_verify_json_graph(this.test, suffix, [{
@@ -404,7 +433,7 @@ function execute(output, suffix) {
                                     }
                                 }
                             }
-                        }]);
+                        }], opts);
                     });
                     it("through a reference that lands on a sentinel", function() {
                         set_and_verify_json_graph(this.test, suffix, [{
@@ -433,7 +462,7 @@ function execute(output, suffix) {
                                     }
                                 }
                             }
-                        }]);
+                        }], opts);
                     });
                     it("through a broken reference", function() {
                         set_and_verify_json_graph(this.test, suffix, [{
@@ -462,7 +491,7 @@ function execute(output, suffix) {
                                     }
                                 }
                             }
-                        }]);
+                        }], opts);
                     });
                     it("through a reference with a null last key", function() {
                         set_and_verify_json_graph(this.test, suffix, [{
@@ -486,7 +515,7 @@ function execute(output, suffix) {
                                     }
                                 }
                             }
-                        }]);
+                        }], opts);
                     });
                 });
                 describe("in multiple places", function() {
@@ -516,9 +545,9 @@ function execute(output, suffix) {
                                         }
                                     }
                                 }
-                            }]);
+                            }], opts);
                         });
-                        it("through through successful, short-circuit, and broken references", function() {
+                        it("through successful, short-circuit, and broken references", function() {
                             set_and_verify_json_graph(this.test, suffix, [{
                                 paths: [["grid", 0, [0, 1, 2], "genres"]],
                                 jsong: {
@@ -556,7 +585,7 @@ function execute(output, suffix) {
                                         }
                                     }
                                 }
-                            }]);
+                            }], opts);
                         });
                     });
                     describe("via range", function() {
@@ -598,7 +627,7 @@ function execute(output, suffix) {
                                         }
                                     }
                                 }
-                            }]);
+                            }], opts);
                         });
                         it("from:1, to:2", function() {
                             set_and_verify_json_graph(this.test, suffix, [{
@@ -631,7 +660,7 @@ function execute(output, suffix) {
                                         }
                                     }
                                 }
-                            }]);
+                            }], opts);
                         });
                         it("length:3", function() {
                             set_and_verify_json_graph(this.test, suffix, [{
@@ -671,7 +700,7 @@ function execute(output, suffix) {
                                         }
                                     }
                                 }
-                            }]);
+                            }], opts);
                         });
                         it("from:1, length:2", function() {
                             set_and_verify_json_graph(this.test, suffix, [{
@@ -704,7 +733,7 @@ function execute(output, suffix) {
                                         }
                                     }
                                 }
-                            }]);
+                            }], opts);
                         });
                     });
                 });
@@ -724,7 +753,7 @@ function execute(output, suffix) {
                                     }
                                 }
                             }
-                        }]);
+                        }], opts);
                     });
                     it("through a reference", function() {
                         set_and_verify_json_graph(this.test, suffix, [{
@@ -742,7 +771,7 @@ function execute(output, suffix) {
                                     }
                                 }
                             }
-                        }]);
+                        }], opts);
                     });
                 });
             });
@@ -760,7 +789,7 @@ function execute(output, suffix) {
                             ["rows", "row-0", "3"]
                         ],
                         jsong: whole_cache()
-                    }]);
+                    }], opts);
                 });
                 it("through references", function() {
                     set_and_verify_json_graph(this.test, suffix, [{
@@ -772,15 +801,14 @@ function execute(output, suffix) {
                             ["grid", 0, 3]
                         ],
                         jsong: whole_cache()
-                    }]);
+                    }], opts);
                 });
             });
             // end set multiple mixed-type json values
 
-
             it("negative expires values to be relative to the current time", function() {
 
-                var model = new Model({ cache: partial_cache() });
+                var model = new Model(_.extend({ cache: partial_cache() }, opts));
                 var options = {model: model};
                 var start_time = Date.now();
 
@@ -815,7 +843,7 @@ function execute(output, suffix) {
 
             it("past an expired reference", function(done) {
 
-                var model = new Model({ cache: partial_cache() });
+                var model = new Model(_.extend({ cache: partial_cache() }, opts));
                 var options = {model: model};
 
                 set_and_verify_json_graph(this.test, suffix, [{
@@ -851,7 +879,7 @@ function execute(output, suffix) {
                                     }
                                 }
                             }
-                        }], [{}]);
+                        }], [{}], opts);
                         expect(results).to.deep.equals({
                             values: [{
                                 jsong: {
@@ -892,6 +920,54 @@ function execute(output, suffix) {
 
                 }.bind(this), 100);
             });
+
+            it("enough values to activate cache pruning", function() {
+                
+                var count = 25;
+                var $size = 50;
+                var model = new Model(_.extend({
+                    maxSize: (count * $size) + 1,
+                    collectRatio: 1
+                }, opts)).materialize();
+                
+                set_and_verify_json_graph(this.test, suffix, [{
+                    paths:  [["grid", "grid-1234", {length: count}]],
+                    value: get_cache(0, count)
+                }], {model: model});
+                
+                set_and_verify_json_graph(this.test, suffix, [{
+                    paths:  [["grid", "grid-1234", {from: count, length: count}]],
+                    value: get_cache(count, count + count)
+                }], {model: model});
+                
+                var results = get_pathsets(model, [["grid", "grid-1234", {length: count}]], suffix);
+                var requestedMissingPaths = results.requestedMissingPaths;
+                
+                expect(requestedMissingPaths.length === count);
+                
+                model._collectRatio = 0;
+                
+                set_envelopes([{
+                    paths: [["grid", "grid-1234", {length: count}]],
+                    jsong: get_cache(0, count)
+                }], suffix);
+                
+                results = get_pathsets(model, [["grid", "grid-1234", {length: count * 2}]], suffix);
+                requestedMissingPaths = results.requestedMissingPaths;
+                
+                expect(requestedMissingPaths.length === count * 2);
+                
+                function get_cache(from, to) {
+                    return _.range(from, to).reduce(function(cache, i) {
+                        return cache["grid"]["grid-1234"][i] = {
+                            $type: $sentinel,
+                            $size: $size,
+                            value: undefined
+                        } && cache;
+                    }, {grid:{"grid-1234":{}}});
+                }
+            });
+
         });
         // end setting new values
 
@@ -909,7 +985,7 @@ function execute(output, suffix) {
                                 }
                             }
                         }
-                    }]);
+                    }], opts);
                 });
                 it("through a reference", function() {
                     set_and_verify_json_graph(this.test, suffix, [{
@@ -932,7 +1008,7 @@ function execute(output, suffix) {
                                 }
                             }
                         }
-                    }]);
+                    }], opts);
                 });
             });
             // end replacing sentinel with primitive
@@ -950,7 +1026,7 @@ function execute(output, suffix) {
                                 }
                             }
                         }
-                    }]);
+                    }], opts);
                 });
                 it("through a reference", function() {
                     set_and_verify_json_graph(this.test, suffix, [{
@@ -968,7 +1044,7 @@ function execute(output, suffix) {
                                 }
                             }
                         }
-                    }]);
+                    }], opts);
                 });
             });
 
@@ -982,7 +1058,7 @@ function execute(output, suffix) {
                                 "pulp-fiction": "oops"
                             }
                         }
-                    }]);
+                    }], opts);
                 });
             });
             // end replacing branches with primitives
@@ -1058,7 +1134,7 @@ function execute(output, suffix) {
                 it("directly", function() {
 
                     // Initialize a new model.
-                    var model = new Model({ cache: partial_cache() });
+                    var model = new Model(_.extend({cache: partial_cache()}, opts));
 
                     // Get an initial path to build hard references.
                     model._getPathSetsAsJSON(model, [
@@ -1082,7 +1158,7 @@ function execute(output, suffix) {
                 it("through references", function() {
 
                     // Initialize a new model.
-                    var model = new Model({ cache: partial_cache() });
+                    var model = new Model(_.extend({ cache: partial_cache() }, opts));
 
                     // Get an initial path to build hard references.
                     model._getPathSetsAsJSON(model, [

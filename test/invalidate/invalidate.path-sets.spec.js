@@ -151,6 +151,24 @@ function execute(output, suffix) {
                 });
             });
             // end set multiple mixed-type json values
+            
+            // ridiculous, but everything should be good if you try to invalidate with nothing but nulls...
+            it("nothing, hopefully", function() {
+                var model  = new Model({ cache: whole_cache() });
+                var seeds  = [{}];
+                var seeds2 = [{json: {}}];
+                var seeds3;
+                if(suffix == "Values") {
+                    seeds2 = [];
+                    seeds3 = [];
+                    seeds  = function(pv) { seeds3.push(pv); }
+                } else if(suffix == "JSONG") {
+                    seeds2 = [{jsong: {}, paths: [[null, null, null, null]]}];
+                }
+                var results = model["_invPathSetsAs" + suffix](model, [[null, null, null, null]], seeds);
+                expect(seeds3 || seeds).to.deep.equal(seeds2);
+                expect(model._cache).to.be.ok;
+            });
         });
         // end invalidating path sets
     });
