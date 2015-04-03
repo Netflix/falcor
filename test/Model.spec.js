@@ -13,11 +13,15 @@ describe("Model", function() {
 
     describe('JSON-Graph Specification', function() {
         describe("#get", function() {
-            require("./get");
+            require("./get")();
         });
 
         describe("#set", function() {
-            require("./set");
+            require("./set")();
+        });
+
+        describe("#invalidate", function() {
+            require("./invalidate")();
         });
     });
 
