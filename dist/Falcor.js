@@ -16,7 +16,7 @@
 !function(e){if("object"==typeof exports)module.exports=e();else if("function"==typeof define&&define.amd)define(e);else{var f;"undefined"!=typeof window?f=window:"undefined"!=typeof global?f=global:"undefined"!=typeof self&&(f=self),f.falcor=e()}}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 module.exports = _dereq_('./operations');
 
-},{"./operations":115}],2:[function(_dereq_,module,exports){
+},{"./operations":118}],2:[function(_dereq_,module,exports){
 var Constants = {
     NOOP: function NOOP() {},
     __GENERATION_GUID: 0,
@@ -72,9 +72,11 @@ falcor.EXPIRES_NEVER = 1;
 falcor.now = function now() {
     return Date.now();
 };
+falcor.NOOP = function() {};
 
 module.exports = falcor;
-},{"./rx.ultralite":31}],4:[function(_dereq_,module,exports){
+
+},{"./rx.ultralite":34}],4:[function(_dereq_,module,exports){
 var falcor = _dereq_('./Falcor');
 var Constants = _dereq_('./Constants');
 var RequestQueue = _dereq_('./request/RequestQueue');
@@ -88,9 +90,15 @@ var operations = _dereq_('./operations');
 var getBoundValue = _dereq_('./../get/getBoundValue');
 
 var Model = module.exports = falcor.Model = function Model(options) {
+
     if (!options) {
         options = {};
     }
+
+    this._materialized = options.materialized || false;
+    this._boxed = options.boxed || false;
+    this._treatErrorsAsValues = options.treatErrorsAsValues || false;
+
     this._dataSource = options.source;
     this._maxSize = options.maxSize || Math.pow(2, 53) - 1;
     this._collectRatio = options.collectRatio || 0.75;
@@ -98,6 +106,7 @@ var Model = module.exports = falcor.Model = function Model(options) {
     this._request = new RequestQueue(this, this._scheduler);
     this._errorSelector = options.errorSelector || Model.prototype._errorSelector;
     this._router = options.router;
+
     this._root = options.root || {
         expired: [],
         allowSync: false,
@@ -145,7 +154,7 @@ Model.prototype = {
         return falcor.Observable.create(function(observer) {
 
             var boundModel;
-
+            debugger;
             try {
                 root.allowSync = true;
                 if(!(boundModel = model.bindSync(model._path.concat(boundPath)))) {
@@ -197,31 +206,63 @@ Model.prototype = {
         if(Array.isArray(path) === false) {
             throw new Error("Model#setValueSync must be called with an Array path.");
         }
+
         if(this._dataSource) {
             throw new Error("Model#setValueSync can not be invoked on a Model with a DataSource. Please use the withoutDataSource() method followed by setValueSync if you would like to modify only the local cache.");
         }
-        var value = this.syncCheck("setValueSync") && this._setValueSync(this, this._path.concat(path), value, errorSelector);
 
-        if (value[$TYPE] === ERROR && !this._treatErrorsAsValues) {
-            throw value;
+        if(this.syncCheck("setValueSync")) {
+
+            var json = {};
+            var tEeAV = this._treatErrorsAsValues;
+            var boxed = this._boxed;
+
+            this._treatErrorsAsValues = true;
+            this._boxed = true;
+
+            this._setPathSetsAsJSON(this, [{path: path, value: value}], [json], errorSelector);
+
+            this._treatErrorsAsValues = tEeAV;
+            this._boxed = boxed;
+
+            json = json.json;
+
+            if(json && json[$TYPE] === ERROR && !this._treatErrorsAsValues) {
+                if(this._boxed) {
+                    throw json;
+                } else {
+                    throw json.value;
+                }
+            } else if(this._boxed) {
+                return json;
+            }
+
+            return json && json.value;
         }
-        return value;
     },
     bindSync: function(path) {
         if(Array.isArray(path) === false) {
             throw new Error("Model#bindSync must be called with an Array path.");
         }
         var boundValue = this.syncCheck("bindSync") && getBoundValue(this, this._path.concat(path));
+        var node = boundValue.value;
+        path = boundValue.path;
         if(boundValue.shorted) {
-            if(boundValue = boundValue.value) {
-                if(boundValue[$TYPE] === ERROR) {
-                    throw boundValue;
+            if(!!node) {
+                if(node[$TYPE] === ERROR) {
+                    if(this._boxed) {
+                        throw node;
+                    }
+                    throw node.value;
                     // throw new Error("Model#bindSync can\'t bind to or beyond an error: " + boundValue.toString());
                 }
             }
             return undefined;
-        } else if(boundValue.value && boundValue.value[$TYPE] === ERROR) {
-            throw boundValue.value;
+        } else if(!!node && node[$TYPE] === ERROR) {
+            if(this._boxed) {
+                throw node;
+            }
+            throw node.value;
         }
         return this.clone(["_path", boundValue.path]);
     },
@@ -274,7 +315,7 @@ Model.prototype = {
     }
 };
 
-},{"./../get/getBoundValue":39,"./Constants":2,"./Falcor":3,"./ModelResponse":5,"./operations":10,"./operations/call":7,"./request/RequestQueue":30,"./scheduler/ImmediateScheduler":32,"./scheduler/TimeoutScheduler":33}],5:[function(_dereq_,module,exports){
+},{"./../get/getBoundValue":42,"./Constants":2,"./Falcor":3,"./ModelResponse":5,"./operations":11,"./operations/call":7,"./request/RequestQueue":33,"./scheduler/ImmediateScheduler":35,"./scheduler/TimeoutScheduler":36}],5:[function(_dereq_,module,exports){
 var falcor = _dereq_('./Falcor');
 
 var Observable  = falcor.Observable,
@@ -322,7 +363,11 @@ falcor.Model = Model;
 module.exports = falcor;
 
 },{"./Falcor":3,"./Model":4}],7:[function(_dereq_,module,exports){
+module.exports = call;
+
+var falcor = _dereq_("../../Falcor");
 var ModelResponse = _dereq_('./../../ModelResponse');
+
 function call(path, args, suffixes, paths, selector) {
 
     var model = this;
@@ -348,7 +393,7 @@ function call(path, args, suffixes, paths, selector) {
             getValue(path).
             flatMap(function (localFn) {
                 if (typeof localFn === "function") {
-                    return Rx.Observable.return(localFn.
+                    return falcor.Observable.return(localFn.
                         apply(rootModel.bindSync(thisPath), args).
                         map(function (pathValue) {
                             return {
@@ -375,7 +420,7 @@ function call(path, args, suffixes, paths, selector) {
                                 toJSONG();
                         }));
                 }
-                return Rx.Observable.empty();
+                return falcor.Observable.empty();
             }).
             defaultIfEmpty(dataSource.call(path, args, suffixes, paths)).
             mergeAll().
@@ -410,134 +455,66 @@ function call(path, args, suffixes, paths, selector) {
     });
 }
 
-},{"./../../ModelResponse":5}],8:[function(_dereq_,module,exports){
-var getSourceObserver = _dereq_('./../support/getSourceObserever');
-/**
- * Performs a get on the model source.  I have chosen to use a callback for the sake of
- * simplicity in the code.
- * If performance in the future is relaxed i would like to see Rx.
- * @param {Model} model
- * @param {Array.<Array>} requestedMissingPaths
- * @param {Array.<Array>} optimizedMissingPaths
- * @param {Function} cb
- */
-function getSourceRequest(model, requestedMissingPaths, optimizedMissingPaths, cb) {
-    return model._request.get(
-        requestedMissingPaths,
-        optimizedMissingPaths,
-        getSourceObserver(model, requestedMissingPaths, cb));
-}
+},{"../../Falcor":3,"./../../ModelResponse":5}],8:[function(_dereq_,module,exports){
+var combineOperations = _dereq_('./../support/combineOperations');
+var setSeedsOrOnNext = _dereq_('./../support/setSeedsOrOnNext');
+module.exports = function buildInitialArgs(model, args, seeds, format, selector, onNext) {
+    return function(seedRequired) {
+        var operations = combineOperations(args, format, 'get');
+        setSeedsOrOnNext(operations, seedRequired, seeds, onNext, selector);
 
-module.exports = getSourceRequest;
-
-},{"./../support/getSourceObserever":17}],9:[function(_dereq_,module,exports){
-var combineOperations = _dereq_('../support/combineOperations');
-var partitionOperations = _dereq_('../support/partitionOperations');
-var getSourceRequest = _dereq_('./getSourceRequest');
-var processOperations = _dereq_('../support/processOperations');
-var setSeedsOrOnNext = _dereq_('../support/setSeedsOrOnNext');
-var onNextValues = _dereq_('../support/onNextValue');
-var onCompletedOrError = _dereq_('../support/onCompletedOrError');
-var primeSeeds = _dereq_('../support/primeSeeds');
-var mergeBoundPath = _dereq_('../support/mergeBoundPath');
-
-module.exports = function get(model, args, selector) {
-    return function(options) {
-        var onNext = options.onNext.bind(options),
-            onError = options.onError.bind(options),
-            onCompleted = options.onCompleted.bind(options),
-            errorSelector = model._errorSelector,
-            isProgressive = options.isProgressive,
-            selectorLength = selector && selector.length || 0;
-
-        // State variables
-        var shouldRequest = true;
-        var errors = [];
-        var format = selector && 'AsJSON' ||
-            options.format || 'AsPathMap';
-        var toJSONG = format === 'AsJSONG';
-        var toJSON = format === 'AsPathMap';
-        var toPathValues = format === 'AsValues';
-        var seedRequired = toJSON || toJSONG || selector;
-        var i, len;
-        var foundValue = false;
-        var seeds;
-        if (seedRequired) {
-            seeds = primeSeeds(selector, selectorLength);
-        }
-
-        function recurse(operations, relativeSeeds) {
-
-            // make the JSON-Graph call
-            var combinedResults = processOperations(
-                model,
-                operations,
-                errorSelector);
-
-            var missingPaths = combinedResults.requestedMissingPaths;
-            var isMissing = missingPaths.length;
-            foundValue = foundValue || combinedResults.valuesReceived;
-
-            // Starts the async request process for the servers
-            // data in the case of missing paths.
-            if (shouldRequest && isMissing && model._dataSource) {
-                getSourceRequest(
-                    model,
-                    missingPaths,
-                    combinedResults.optimizedMissingPaths,
-                    function onCompleteFromSourceGet(err, results) {
-                        shouldRequest = false;
-                        if (err) {
-                            errors = errors.concat(err);
-                            recurse([], seeds);
-                            return;
-                        }
-
-                        results.paths = mergeBoundPath(model, results);
-
-                        // partitions the operations by their pathSetIndex
-                        var partitionOperationsAndSeeds = partitionOperations(
-                            results,
-                            missingPaths,
-                            format,
-                            relativeSeeds,
-                            onNext);
-                        recurse.apply(null, partitionOperationsAndSeeds);
-                    });
-            }
-
-            // Else we need to onNext values and complete/error.
-            else {
-                if (!toPathValues && foundValue) {
-                    onNextValues(
-                        model,
-                        onNext,
-                        seeds,
-                        selector);
-                }
-                onCompletedOrError(onCompleted, onError, errors);
-            }
-        }
-
-        try {
-            var operations = combineOperations(args, format, 'get');
-            setSeedsOrOnNext(operations, seedRequired, seeds, onNext, selector);
-            recurse(operations, seeds);
-        } catch(e) {
-            errors = [e];
-            onCompletedOrError(onCompleted, onError, errors);
-        }
+        return [operations, seeds, !!model._dataSource];
     };
 };
 
+},{"./../support/combineOperations":18,"./../support/setSeedsOrOnNext":32}],9:[function(_dereq_,module,exports){
+var getSourceObserver = _dereq_('./../support/getSourceObserever');
+var partitionOperations = _dereq_('./../support/partitionOperations');
+var mergeBoundPath = _dereq_('./../support/mergeBoundPath');
+
+module.exports = getSourceRequest;
+
+function getSourceRequest(model, args, seeds, format, selector, onNext) {
+    return function innerModelSourceRequest(relativeSeeds, combinedResults, cb) {
+        var missingPaths = combinedResults.requestedMissingPaths;
+        return model._request.get(
+            missingPaths,
+            combinedResults.optimizedMissingPaths,
+            getSourceObserver(model, missingPaths, function(err, results) {
+                if (err) {
+                    cb(err);
+                }
+                debugger;
+                results.paths = mergeBoundPath(model, results);
+
+                // partitions the operations by their pathSetIndex
+                var partitionOperationsAndSeeds = partitionOperations(
+                    results,
+                    missingPaths,
+                    format,
+                    relativeSeeds,
+                    onNext);
+                cb(null, partitionOperationsAndSeeds);
+            }));
+    };
+}
 
 
+},{"./../support/getSourceObserever":20,"./../support/mergeBoundPath":24,"./../support/partitionOperations":27}],10:[function(_dereq_,module,exports){
+module.exports = function(model, combinedResults) {
+    return model._dataSource && combinedResults.requestedMissingPaths.length > 0;
+};
 
-},{"../support/combineOperations":15,"../support/mergeBoundPath":21,"../support/onCompletedOrError":22,"../support/onNextValue":23,"../support/partitionOperations":24,"../support/primeSeeds":25,"../support/processOperations":26,"../support/setSeedsOrOnNext":29,"./getSourceRequest":8}],10:[function(_dereq_,module,exports){
+},{}],11:[function(_dereq_,module,exports){
 var ModelResponse = _dereq_('../ModelResponse');
-var get = _dereq_('./get');
-var set = _dereq_('./set');
-var invalidate = _dereq_('./invalidate');
+var request = _dereq_('./request');
+var setInitialArgs = _dereq_('./set/buildInitialArgs');
+var setSourceRequest = _dereq_('./set/modelSourceRequest');
+var getInitialArgs = _dereq_('./get/buildInitialArgs');
+var getSourceRequest = _dereq_('./get/modelSourceRequest');
+var getShouldRequest = _dereq_('./get/shouldRequest');
+var invalidateInitialArgs = _dereq_('./invalidate/invalidateInitialArgs');
+var invalidateSourceRequest = _dereq_('./invalidate/modelSourceRequest');
 
 module.exports = function modelOperation(name) {
     return function() {
@@ -552,89 +529,65 @@ module.exports = function modelOperation(name) {
 
         var modelResponder;
         if (name === 'get') {
-            modelResponder = get(model, args, selector);
+            modelResponder = request(
+                model,
+                args,
+                selector,
+                getInitialArgs,
+                getSourceRequest,
+                getShouldRequest);
         } else if (name === 'set') {
-            modelResponder = set(model, args, selector);
+            modelResponder = request(
+                model,
+                args,
+                selector,
+                setInitialArgs,
+                setSourceRequest);
         } else if (name === 'invalidate') {
-            modelResponder = invalidate(model, args, selector);
+            modelResponder = request(
+                model,
+                args,
+                selector,
+                invalidateInitialArgs,
+                invalidateSourceRequest);
         }
         return ModelResponse.create(modelResponder);
     };
 };
 
-},{"../ModelResponse":5,"./get":9,"./invalidate":11,"./set":12}],11:[function(_dereq_,module,exports){
-var combineOperations = _dereq_('../support/combineOperations');
-var processOperations = _dereq_('../support/processOperations');
-var setSeedsOrOnNext = _dereq_('../support/setSeedsOrOnNext');
-var onNextValues = _dereq_('../support/onNextValue');
-var onCompletedOrError = _dereq_('../support/onCompletedOrError');
-var primeSeeds = _dereq_('../support/primeSeeds');
+},{"../ModelResponse":5,"./get/buildInitialArgs":8,"./get/modelSourceRequest":9,"./get/shouldRequest":10,"./invalidate/invalidateInitialArgs":12,"./invalidate/modelSourceRequest":13,"./request":14,"./set/buildInitialArgs":15,"./set/modelSourceRequest":16}],12:[function(_dereq_,module,exports){
+var combineOperations = _dereq_('./../support/combineOperations');
+var setSeedsOrOnNext = _dereq_('./../support/setSeedsOrOnNext');
+module.exports = function invalidateInitialArgs(model, args, seeds, format, selector, onNext) {
+    return function(seedRequired) {
+        var operations = combineOperations(args, format, 'inv');
+        setSeedsOrOnNext(operations, seedRequired, seeds, onNext, selector);
 
-function invalidate(model, args, selector) {
-    return function(options) {
-        var onNext = options.onNext.bind(options),
-            onError = options.onError.bind(options),
-            onCompleted = options.onCompleted.bind(options),
-            selectorLength = selector && selector.length || 0;
-
-        // State variables
-        var format = selector && 'AsJSON' ||
-            options.format || 'AsPathMap';
-        var toJSONG = format === 'AsJSONG';
-        var toJSON = format === 'AsPathMap';
-        var toPathValues = format === 'AsValues';
-        var seedRequired = toJSON || toJSONG || selector;
-        var i;
-        var foundValue = false;
-        var seeds;
-        if (seedRequired) {
-            seeds = primeSeeds(selector, selectorLength);
-        }
-
-        try {
-            var operations = combineOperations(args, format, 'inv');
-            setSeedsOrOnNext(operations, seedRequired, seeds, onNext, selector);
-
-            // align the seeds to each argument
-            // or adds the onNext function to each operation
-
-            // make the JSON-Graph call
-            var combinedResults = processOperations(
-                model,
-                operations);
-
-            foundValue = foundValue || combinedResults.valuesReceived;
-
-            if (!toPathValues && foundValue) {
-                onNextValues(
-                    model,
-                    onNext,
-                    seeds,
-                    selector);
-            }
-            onCompletedOrError(onCompleted, onError, []);
-
-        } catch(e) {
-            onCompletedOrError(onCompleted, onError, [e]);
-        }
+        return [operations, seeds, false];
     };
-}
+};
 
-module.exports = invalidate;
+},{"./../support/combineOperations":18,"./../support/setSeedsOrOnNext":32}],13:[function(_dereq_,module,exports){
+var noOp = function() {};
+module.exports = function() {
+    return noOp;
+};
 
+},{}],14:[function(_dereq_,module,exports){
+var processOperations = _dereq_('./support/processOperations');
+var setSeedsOrOnNext = _dereq_('./support/setSeedsOrOnNext');
+var onNextValues = _dereq_('./support/onNextValue');
+var onCompletedOrError = _dereq_('./support/onCompletedOrError');
+var primeSeeds = _dereq_('./support/primeSeeds');
+var autoTrue = function() { return true; };
 
-},{"../support/combineOperations":15,"../support/onCompletedOrError":22,"../support/onNextValue":23,"../support/primeSeeds":25,"../support/processOperations":26,"../support/setSeedsOrOnNext":29}],12:[function(_dereq_,module,exports){
-var combineOperations = _dereq_('../support/combineOperations');
-var setSourceRequest = _dereq_('./setSourceRequest');
-var processOperations = _dereq_('../support/processOperations');
-var setSeedsOrOnNext = _dereq_('../support/setSeedsOrOnNext');
-var onNextValues = _dereq_('../support/onNextValue');
-var onCompletedOrError = _dereq_('../support/onCompletedOrError');
-var mergeBoundPath = _dereq_('../support/mergeBoundPath');
-var primeSeeds = _dereq_('../support/primeSeeds');
+module.exports = request;
 
-module.exports = function set(model, args, selector) {
-    return function(options) {
+function request(model, args, selector, buildInitialArgs, modelSourceRequest, shouldRequestFn) {
+    if (!shouldRequestFn) {
+        shouldRequestFn = autoTrue;
+    }
+    return function innerRequest(options) {
         var onNext = options.onNext.bind(options),
             onError = options.onError.bind(options),
             onCompleted = options.onCompleted.bind(options),
@@ -643,7 +596,6 @@ module.exports = function set(model, args, selector) {
             selectorLength = selector && selector.length || 0;
 
         // State variables
-        var shouldRequest = !!model._dataSource;
         var errors = [];
         var format = selector && 'AsJSON' ||
             options.format || 'AsPathMap';
@@ -655,43 +607,32 @@ module.exports = function set(model, args, selector) {
         var i;
         var foundValue = false;
         var seeds = primeSeeds(selector, selectorLength);
+        var initialArgs = buildInitialArgs(model, args, seeds, format, selector, onNext);
+        var sourceRequest = modelSourceRequest(model, args, seeds, format, selector, onNext);
 
-        function recurse(operations, relativeSeeds) {
+        function recurse(operations, relativeSeeds, shouldRequest) {
             var combinedResults = processOperations(
                 model,
                 operations,
                 errorSelector);
 
-
             foundValue = foundValue || combinedResults.valuesReceived;
+            if (combinedResults.errors.length) {
+                errors = errors.concat(combinedResults.errors);
+            }
 
-            if (shouldRequest) {
-
-                // gather all the paths and jsongs into one.
-                var jsong = relativeSeeds[0].jsong;
-                var paths = relativeSeeds[0].paths;
-                for (i = 1; i < relativeSeeds.length; i++) {
-                    paths = paths.concat(relativeSeeds[i].paths);
-                }
-
-                var jsongEnv = {jsong: jsong, paths: paths};
-                setSourceRequest(
-                    model,
-                    jsongEnv,
+            if (shouldRequest && shouldRequestFn(model, combinedResults)) {
+                sourceRequest(
+                    relativeSeeds,
+                    combinedResults,
                     function onCompleteFromSourceSet(err, results) {
-                        shouldRequest = false;
                         if (err) {
                             errors = errors.concat(err);
                             recurse([], seeds);
                             return;
                         }
-                        // Sets the results into the model.
-                        model._setJSONGsAsJSON(model, [results], []);
-
-                        // Gets the original paths / maps back out.
-                        var operations = combineOperations(args, format, 'get');
-                        setSeedsOrOnNext(operations, seedRequired, seeds, onNext, selector);
-                        recurse(operations, seeds);
+                        debugger;
+                        recurse.apply(null, results);
                     });
             }
 
@@ -709,61 +650,90 @@ module.exports = function set(model, args, selector) {
         }
 
         try {
-            var firstFormat = shouldRequest && 'AsJSONG' || format;
-            var operations = combineOperations(args, firstFormat, 'set', shouldRequest && selector);
-            var firstSeeds = seeds;
-            if (shouldRequest && selector) {
-
-                // Share the same jsong env in the jsong but not in the paths.
-                // This will be required for selector functions
-                var jsong = {};
-                firstSeeds = [];
-                operations.forEach(function(op) {
-                    var seed = {
-                        jsong: jsong,
-                        paths: []
-                    };
-                    op.seeds = [seed];
-                    firstSeeds.push(seed);
-                });
-
-            } else if (shouldRequest) {
-                firstSeeds = [{}];
-                setSeedsOrOnNext(operations, seedRequired, firstSeeds, false, selector);
-            } else {
-                operations = combineOperations(args, format, 'set');
-                setSeedsOrOnNext(operations, seedRequired, seeds, onNext, selector);
-                firstSeeds = seeds;
-            }
-
-            recurse(operations, firstSeeds);
+            recurse.apply(null, initialArgs(seedRequired));
         } catch(e) {
             errors = [e];
             onCompletedOrError(onCompleted, onError, errors);
         }
     };
-};
-
-
-},{"../support/combineOperations":15,"../support/mergeBoundPath":21,"../support/onCompletedOrError":22,"../support/onNextValue":23,"../support/primeSeeds":25,"../support/processOperations":26,"../support/setSeedsOrOnNext":29,"./setSourceRequest":13}],13:[function(_dereq_,module,exports){
-var getSourceObserver = _dereq_('./../support/getSourceObserever');
-/**
- * Performs a set on the model source.  I have chosen to use a callback for the sake of
- * simplicity in the code.
- * If performance in the future is relaxed i would like to see Rx.
- * @param {Model} model
- * @param {{jsong: {}, paths: []}} jsongEnv
- * @param {Function} cb
- */
-function setSourceRequest(model, jsongEnv, cb) {
-    return model._request.set(
-        jsongEnv,
-        getSourceObserver(model, jsongEnv.paths, cb));
 }
 
-module.exports = setSourceRequest;
+},{"./support/onCompletedOrError":25,"./support/onNextValue":26,"./support/primeSeeds":28,"./support/processOperations":29,"./support/setSeedsOrOnNext":32}],15:[function(_dereq_,module,exports){
+var combineOperations = _dereq_('./../support/combineOperations');
+var setSeedsOrOnNext = _dereq_('./../support/setSeedsOrOnNext');
+module.exports = function buildInitialArgs(model, args, seeds, format, selector, onNext) {
+    return function(seedRequired) {
+        var shouldRequest = !!model._dataSource;
+        var firstFormat = shouldRequest && 'AsJSONG' || format;
+        var operations = combineOperations(args, firstFormat, 'set', shouldRequest && selector);
+        var firstSeeds = seeds;
+        if (shouldRequest && selector) {
 
-},{"./../support/getSourceObserever":17}],14:[function(_dereq_,module,exports){
+            // Share the same jsong env in the jsong but not in the paths.
+            // This will be required for selector functions
+            var jsong = {};
+            firstSeeds = [];
+            operations.forEach(function(op) {
+                var seed = {
+                    jsong: jsong,
+                    paths: []
+                };
+                op.seeds = [seed];
+                firstSeeds.push(seed);
+            });
+
+        } else if (shouldRequest) {
+            firstSeeds = [{}];
+            setSeedsOrOnNext(operations, seedRequired, firstSeeds, false, selector);
+        } else {
+            operations = combineOperations(args, format, 'set');
+            setSeedsOrOnNext(operations, seedRequired, seeds, onNext, selector);
+            firstSeeds = seeds;
+        }
+
+        return [operations, firstSeeds, shouldRequest];
+    };
+};
+
+},{"./../support/combineOperations":18,"./../support/setSeedsOrOnNext":32}],16:[function(_dereq_,module,exports){
+var getSourceObserver = _dereq_('./../support/getSourceObserever');
+var combineOperations = _dereq_('./../support/combineOperations');
+var setSeedsOrOnNext = _dereq_('./../support/setSeedsOrOnNext');
+
+module.exports = modelSourceRequest;
+
+function modelSourceRequest(model, args, seeds, format, selector, onNext) {
+    return function innerModelSourceRequest(relativeSeeds, combinedResults, cb) {
+        // gather all the paths and jsongs into one.
+        var jsong = relativeSeeds[0].jsong;
+        var paths = relativeSeeds[0].paths;
+        var seedRequired = seeds && seeds.length > 0;
+        for (i = 1; i < relativeSeeds.length; i++) {
+            paths = paths.concat(relativeSeeds[i].paths);
+        }
+
+        var jsongEnv = {jsong: jsong, paths: paths};
+        return model._request.set(
+            jsongEnv,
+            getSourceObserver(model, jsongEnv.paths, function(err, results) {
+                if (err) {
+                    cb(err);
+                }
+                debugger;
+
+                // Sets the results into the model.
+                model._setJSONGsAsJSON(model, [results], []);
+
+                // Gets the original paths / maps back out.
+                var operations = combineOperations(args, format, 'get');
+                setSeedsOrOnNext(operations, seedRequired, seeds, onNext, selector);
+                cb(null, [operations, seeds]);
+            }));
+    };
+}
+
+
+},{"./../support/combineOperations":18,"./../support/getSourceObserever":20,"./../support/setSeedsOrOnNext":32}],17:[function(_dereq_,module,exports){
 module.exports = function buildJSONGOperation(format, seeds, jsongOp, seedOffset, onNext) {
     return {
         methodName: '_setJSONGs' + format,
@@ -776,7 +746,7 @@ module.exports = function buildJSONGOperation(format, seeds, jsongOp, seedOffset
     };
 };
 
-},{}],15:[function(_dereq_,module,exports){
+},{}],18:[function(_dereq_,module,exports){
 var isSeedRequired = _dereq_('./seedRequired');
 var isJSONG = _dereq_('./isJSONG');
 var isPathOrPathValue = _dereq_('./isPathOrPathValue');
@@ -814,7 +784,7 @@ module.exports = function combineOperations(args, format, name, spread) {
         }, []);
 };
 
-},{"./isJSONG":19,"./isPathOrPathValue":20,"./seedRequired":27}],16:[function(_dereq_,module,exports){
+},{"./isJSONG":22,"./isPathOrPathValue":23,"./seedRequired":30}],19:[function(_dereq_,module,exports){
 module.exports = function fastCollapse(paths) {
     return paths.reduce(function(acc, p) {
         var curr = acc[0];
@@ -834,7 +804,7 @@ module.exports = function fastCollapse(paths) {
     }, []);
 }
 
-},{}],17:[function(_dereq_,module,exports){
+},{}],20:[function(_dereq_,module,exports){
 var insertErrors = _dereq_('./insertErrors.js');
 /**
  * creates the model source observer
@@ -862,7 +832,7 @@ function getSourceObserver(model, requestedMissingPaths, cb) {
 
 module.exports = getSourceObserver;
 
-},{"./insertErrors.js":18}],18:[function(_dereq_,module,exports){
+},{"./insertErrors.js":21}],21:[function(_dereq_,module,exports){
 /**
  * will insert the error provided for every requestedPath.
  * @param {Model} model
@@ -886,18 +856,18 @@ module.exports = function insertErrors(model, requestedPaths, err) {
 };
 
 
-},{}],19:[function(_dereq_,module,exports){
+},{}],22:[function(_dereq_,module,exports){
 module.exports = function isJSONG(x) {
     return x.hasOwnProperty("jsong");
 };
 
-},{}],20:[function(_dereq_,module,exports){
+},{}],23:[function(_dereq_,module,exports){
 module.exports = function isPathOrPathValue(x) {
     return !!(Array.isArray(x)) || (
         x.hasOwnProperty("path") && x.hasOwnProperty("value"));
 };
 
-},{}],21:[function(_dereq_,module,exports){
+},{}],24:[function(_dereq_,module,exports){
 module.exports = function mergeBoundPath(model, jsongEnv) {
     var boundPath = model._path;
     var paths = [];
@@ -912,7 +882,7 @@ module.exports = function mergeBoundPath(model, jsongEnv) {
     return paths;
 };
 
-},{}],22:[function(_dereq_,module,exports){
+},{}],25:[function(_dereq_,module,exports){
 module.exports = function onCompletedOrError(onCompleted, onError, errors) {
     if (errors.length) {
         onError(errors);
@@ -921,7 +891,7 @@ module.exports = function onCompletedOrError(onCompleted, onError, errors) {
     }
 };
 
-},{}],23:[function(_dereq_,module,exports){
+},{}],26:[function(_dereq_,module,exports){
 /**
  * will onNext the observer with the seeds provided.
  * @param {Model} model
@@ -951,7 +921,7 @@ module.exports = function onNextValues(model, onNext, seeds, selector) {
     root.allowSync = false;
 };
 
-},{}],24:[function(_dereq_,module,exports){
+},{}],27:[function(_dereq_,module,exports){
 var fastCollapse = _dereq_('./fastCollapse.js');
 var buildJSONGOperation = _dereq_('./buildJSONGOperation');
 
@@ -1002,7 +972,7 @@ function partitionOperations(jsongResponse, requestedMissingPaths, format, seeds
 }
 
 
-},{"./buildJSONGOperation":14,"./fastCollapse.js":16}],25:[function(_dereq_,module,exports){
+},{"./buildJSONGOperation":17,"./fastCollapse.js":19}],28:[function(_dereq_,module,exports){
 module.exports = function primeSeeds(selector, selectorLength) {
     var seeds = [];
     if (selector) {
@@ -1015,7 +985,7 @@ module.exports = function primeSeeds(selector, selectorLength) {
     return seeds;
 };
 
-},{}],26:[function(_dereq_,module,exports){
+},{}],29:[function(_dereq_,module,exports){
 module.exports = function processOperations(model, operations, errorSelector, boundPath) {
     return operations.reduce(function(memo, operation) {
 
@@ -1051,12 +1021,12 @@ module.exports = function processOperations(model, operations, errorSelector, bo
     });
 }
 
-},{}],27:[function(_dereq_,module,exports){
+},{}],30:[function(_dereq_,module,exports){
 module.exports = function isSeedRequired(format) {
     return format === 'AsJSON' || format === 'AsJSONG' || format === 'AsPathMap';
 };
 
-},{}],28:[function(_dereq_,module,exports){
+},{}],31:[function(_dereq_,module,exports){
 module.exports = function setSeedsOnGroups(groups, seeds, hasSelector) {
     var valueIndex = 0;
     var seedsLength = seeds.length;
@@ -1076,7 +1046,7 @@ module.exports = function setSeedsOnGroups(groups, seeds, hasSelector) {
     }
 }
 
-},{}],29:[function(_dereq_,module,exports){
+},{}],32:[function(_dereq_,module,exports){
 var setSeedsOnGroups = _dereq_('./setSeedsOnGroups');
 module.exports = function setSeedsOrOnNext(operations, seedRequired, seeds, onNext, selector) {
     if (seedRequired) {
@@ -1088,8 +1058,9 @@ module.exports = function setSeedsOrOnNext(operations, seedRequired, seeds, onNe
     }
 };
 
-},{"./setSeedsOnGroups":28}],30:[function(_dereq_,module,exports){
+},{"./setSeedsOnGroups":31}],33:[function(_dereq_,module,exports){
 var falcor = _dereq_('./../Falcor');
+var NOOP = falcor.NOOP;
 var RequestQueue = function(jsongModel, scheduler) {
     this._scheduler = scheduler;
     this._jsongModel = jsongModel;
@@ -1550,7 +1521,7 @@ falcor.__Internals.buildQueries = buildQueries;
 
 module.exports = RequestQueue;
 
-},{"./../Falcor":3}],31:[function(_dereq_,module,exports){
+},{"./../Falcor":3}],34:[function(_dereq_,module,exports){
 (function (global){
 /**
     Rx Ultralite!
@@ -1708,7 +1679,7 @@ module.exports = Rx;
 
 
 }).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],32:[function(_dereq_,module,exports){
+},{}],35:[function(_dereq_,module,exports){
 function ImmediateScheduler() {
 }
 
@@ -1720,7 +1691,7 @@ ImmediateScheduler.prototype = {
 
 module.exports = ImmediateScheduler;
 
-},{}],33:[function(_dereq_,module,exports){
+},{}],36:[function(_dereq_,module,exports){
 function TimeoutScheduler(delay) {
     this.delay = delay;
 }
@@ -1733,7 +1704,7 @@ TimeoutScheduler.prototype = {
 
 module.exports = TimeoutScheduler;
 
-},{}],34:[function(_dereq_,module,exports){
+},{}],37:[function(_dereq_,module,exports){
 var hardLink = _dereq_('./util/hardlink');
 var createHardlink = hardLink.create;
 var onValue = _dereq_('./onValue');
@@ -1813,7 +1784,7 @@ function followReference(model, root, node, referenceContainer, reference, seed,
 }
 
 module.exports = followReference;
-},{"./onValue":46,"./util/hardlink":48,"./util/isExpired":49}],35:[function(_dereq_,module,exports){
+},{"./onValue":49,"./util/hardlink":51,"./util/isExpired":52}],38:[function(_dereq_,module,exports){
 var getBoundValue = _dereq_('./getBoundValue');
 var isPathValue = _dereq_('./util/isPathValue');
 module.exports = function(walk) {
@@ -1850,7 +1821,7 @@ module.exports = function(walk) {
         }
 
         for (i = 0, len = paths.length; i < len; i++) {
-            var valueNode;
+            var valueNode = undefined;
             var pathSet = paths[i];
             if (values[i]) {
                 valueNode = values[i];
@@ -1879,7 +1850,7 @@ module.exports = function(walk) {
 };
 
 
-},{"./getBoundValue":39,"./util/isPathValue":51}],36:[function(_dereq_,module,exports){
+},{"./getBoundValue":42,"./util/isPathValue":54}],39:[function(_dereq_,module,exports){
 var getBoundValue = _dereq_('./getBoundValue');
 var isPathValue = _dereq_('./util/isPathValue');
 module.exports = function(walk) {
@@ -1916,7 +1887,7 @@ module.exports = function(walk) {
 };
 
 
-},{"./getBoundValue":39,"./util/isPathValue":51}],37:[function(_dereq_,module,exports){
+},{"./getBoundValue":42,"./util/isPathValue":54}],40:[function(_dereq_,module,exports){
 var getBoundValue = _dereq_('./getBoundValue');
 var isPathValue = _dereq_('./util/isPathValue');
 module.exports = function(walk) {
@@ -1965,7 +1936,7 @@ module.exports = function(walk) {
     };
 };
 
-},{"./getBoundValue":39,"./util/isPathValue":51}],38:[function(_dereq_,module,exports){
+},{"./getBoundValue":42,"./util/isPathValue":54}],41:[function(_dereq_,module,exports){
 var getBoundValue = _dereq_('./getBoundValue');
 var isPathValue = _dereq_('./util/isPathValue');
 module.exports = function(walk) {
@@ -2011,7 +1982,7 @@ module.exports = function(walk) {
 };
 
 
-},{"./getBoundValue":39,"./util/isPathValue":51}],39:[function(_dereq_,module,exports){
+},{"./getBoundValue":42,"./util/isPathValue":54}],42:[function(_dereq_,module,exports){
 var getValueSync = _dereq_('./getValueSync');
 module.exports = function getBoundValue(model, path) {
     var boxed, value, shorted;
@@ -2035,7 +2006,7 @@ module.exports = function getBoundValue(model, path) {
 };
 
 
-},{"./getValueSync":40}],40:[function(_dereq_,module,exports){
+},{"./getValueSync":43}],43:[function(_dereq_,module,exports){
 var followReference = _dereq_('./followReference');
 var clone = _dereq_('./util/clone');
 var isExpired = _dereq_('./util/isExpired');
@@ -2047,9 +2018,8 @@ module.exports = function getValueSync(model, simplePath) {
     var optimizedPath = [];
     var shorted = false, shouldShort = false;
     var depth = 0;
-    var key, next, type, curr = root, out, ref, refNode;
+    var key, next = root, type, curr = root, out, ref, refNode;
     do {
-        
         key = simplePath[depth++];
         if (key !== null) {
             next = curr[key];
@@ -2057,9 +2027,9 @@ module.exports = function getValueSync(model, simplePath) {
 
         if (!next) {
             out = undefined;
+            shorted = true;
             break;
         }
-        
         type = next.$type;
         optimizedPath.push(key);
 
@@ -2073,33 +2043,15 @@ module.exports = function getValueSync(model, simplePath) {
                     out = undefined;
                     break;
                 }
-                
                 type = refNode.$type;
                 next = refNode;
                 optimizedPath = ref[1];
-            } 
-            
+            }
+
             if (type) {
-                
-                // Unfortunately, if all that follows are nulls, then we have not shorted.
-                for (;depth < len; ++depth) {
-                    if (simplePath[depth] !== null) {
-                        shouldShort = true;
-                        break;
-                    } 
-                }
-                
-                // if we should short or report value.  Values are reported on nulls.
-                if (shouldShort) {
-                    shorted = true;
-                    out = undefined;
-                } else {
-                    out = next;
-                }
                 break;
             }
-        } 
-        
+        }
         // If there is a value, then we have great success, else, report an undefined.
         else {
             out = next;
@@ -2107,7 +2059,24 @@ module.exports = function getValueSync(model, simplePath) {
         curr = next;
 
     } while (next && depth < len);
-    
+
+    if (depth < len) {
+        // Unfortunately, if all that follows are nulls, then we have not shorted.
+        for (;depth < len; ++depth) {
+            if (simplePath[depth] !== null) {
+                shouldShort = true;
+                break;
+            }
+        }
+        // if we should short or report value.  Values are reported on nulls.
+        if (shouldShort) {
+            shorted = true;
+            out = undefined;
+        } else {
+            out = next;
+        }
+    }
+
     // promotes if not expired
     if (out) {
         if (isExpired(out)) {
@@ -2126,14 +2095,15 @@ module.exports = function getValueSync(model, simplePath) {
     } else if (out) {
         out = out.value;
     }
-    
+
     return {
         value: out,
         shorted: shorted,
         optimizedPath: optimizedPath
     };
 };
-},{"./followReference":34,"./util/clone":47,"./util/isExpired":49,"./util/lru":52}],41:[function(_dereq_,module,exports){
+
+},{"./followReference":37,"./util/clone":50,"./util/isExpired":52,"./util/lru":55}],44:[function(_dereq_,module,exports){
 var followReference = _dereq_('./followReference');
 var onError = _dereq_('./onError');
 var onMissing = _dereq_('./onMissing');
@@ -2329,7 +2299,7 @@ function evaluateNode(model, curr, pathOrJSON, depth, seedOrFunction, requestedP
 
 module.exports = walk;
 
-},{"./followReference":34,"./onError":44,"./onMissing":45,"./onValue":46,"./util/hardlink":48,"./util/isExpired":49,"./util/isMaterialzed":50,"./util/lru":52,"./util/permuteKey":53}],42:[function(_dereq_,module,exports){
+},{"./followReference":37,"./onError":47,"./onMissing":48,"./onValue":49,"./util/hardlink":51,"./util/isExpired":52,"./util/isMaterialzed":53,"./util/lru":55,"./util/permuteKey":56}],45:[function(_dereq_,module,exports){
 var walk = _dereq_('./getWalk');
 module.exports = {
     getAsJSON: _dereq_('./getAsJSON')(walk),
@@ -2342,7 +2312,7 @@ module.exports = {
 };
 
 
-},{"./getAsJSON":35,"./getAsJSONG":36,"./getAsPathMap":37,"./getAsValues":38,"./getBoundValue":39,"./getValueSync":40,"./getWalk":41,"./legacy_setCache":43}],43:[function(_dereq_,module,exports){
+},{"./getAsJSON":38,"./getAsJSONG":39,"./getAsPathMap":40,"./getAsValues":41,"./getBoundValue":42,"./getValueSync":43,"./getWalk":44,"./legacy_setCache":46}],46:[function(_dereq_,module,exports){
 /* istanbul ignore next */
 var NOOP = function NOOP() {},
     __GENERATION_GUID = 0,
@@ -2418,7 +2388,7 @@ module.exports = function setCache(model, map) {
                             newNode = map;
                             if ((!nodeType || nodeType === SENTINEL || nodeType === 'path') && Array.isArray(nodeValue)) {
                                 delete nodeValue[$SIZE];
-                                console.log(1);
+                                // console.log(1);
                                 if (nodeType) {
                                     nodeSize = 50 + (nodeValue.length || 1);
                                 } else {
@@ -2772,7 +2742,7 @@ module.exports = function setCache(model, map) {
     return nodeRoot;
 }
 
-},{}],44:[function(_dereq_,module,exports){
+},{}],47:[function(_dereq_,module,exports){
 var lru = _dereq_('./util/lru');
 var clone = _dereq_('./util/clone');
 var promote = lru.promote;
@@ -2788,7 +2758,7 @@ module.exports = function onError(model, node, permuteRequested, permuteOptimize
 };
 
 
-},{"./util/clone":47,"./util/lru":52}],45:[function(_dereq_,module,exports){
+},{"./util/clone":50,"./util/lru":55}],48:[function(_dereq_,module,exports){
 var support = _dereq_('./util/support');
 var fastCat = support.fastCat,
     fastCatSkipNulls = support.fastCatSkipNulls,
@@ -2842,7 +2812,7 @@ function concatAndInsertMissing(remainingPath, results, permuteRequested, permut
 }
 
 
-},{"./util/clone":47,"./util/isExpired":49,"./util/spreadJSON":54,"./util/support":55}],46:[function(_dereq_,module,exports){
+},{"./util/clone":50,"./util/isExpired":52,"./util/spreadJSON":57,"./util/support":58}],49:[function(_dereq_,module,exports){
 var lru = _dereq_('./util/lru');
 var clone = _dereq_('./util/clone');
 var promote = lru.promote;
@@ -2987,7 +2957,7 @@ module.exports = function onValue(model, node, seedOrFunction, outerResults, per
 
 
 
-},{"./util/clone":47,"./util/lru":52}],47:[function(_dereq_,module,exports){
+},{"./util/clone":50,"./util/lru":55}],50:[function(_dereq_,module,exports){
 // Copies the node
 module.exports = function clone(node) {
     var outValue, i, len;
@@ -3005,7 +2975,7 @@ module.exports = function clone(node) {
 };
 
 
-},{}],48:[function(_dereq_,module,exports){
+},{}],51:[function(_dereq_,module,exports){
 function createHardlink(from, to) {
     
     // create a back reference
@@ -3040,23 +3010,23 @@ module.exports = {
     remove: removeHardlink
 };
 
-},{}],49:[function(_dereq_,module,exports){
+},{}],52:[function(_dereq_,module,exports){
 var now = _dereq_('../../support/now');
 module.exports = function isExpired(node) {
     var $expires = node.$expires === undefined && -1 || node.$expires;
     return $expires !== -1 && $expires !== 1 && ($expires === 0 || $expires < now());
 };
 
-},{"../../support/now":95}],50:[function(_dereq_,module,exports){
+},{"../../support/now":98}],53:[function(_dereq_,module,exports){
 module.exports = function isMaterialized(model) {
     return model._materialized && !(model._router || model._dataSource);
 };
 
-},{}],51:[function(_dereq_,module,exports){
+},{}],54:[function(_dereq_,module,exports){
 module.exports = function(x) {
     return x.path && x.value;
 };
-},{}],52:[function(_dereq_,module,exports){
+},{}],55:[function(_dereq_,module,exports){
 // [H] -> Next -> ... -> [T]
 // [T] -> Prev -> ... -> [H]
 function lruPromote(model, object) {
@@ -3128,7 +3098,7 @@ module.exports = {
     promote: lruPromote,
     splice: lruSplice
 };
-},{}],53:[function(_dereq_,module,exports){
+},{}],56:[function(_dereq_,module,exports){
 module.exports = function permuteKey(key, memo) {
     if (memo.isArray) {
         if (memo.loaded && memo.rangeOffset > memo.to) {
@@ -3175,7 +3145,7 @@ module.exports = function permuteKey(key, memo) {
 };
 
 
-},{}],54:[function(_dereq_,module,exports){
+},{}],57:[function(_dereq_,module,exports){
 var fastCopy = _dereq_('./support').fastCopy;
 module.exports = function spreadJSON(root, bins, bin) {
     bin = bin || [];
@@ -3200,7 +3170,7 @@ module.exports = function spreadJSON(root, bins, bin) {
     }
 };
 
-},{"./support":55}],55:[function(_dereq_,module,exports){
+},{"./support":58}],58:[function(_dereq_,module,exports){
 
 
 function fastCopy(arr, i) {
@@ -3243,18 +3213,19 @@ module.exports = {
     fastCopy: fastCopy
 };
 
-},{}],56:[function(_dereq_,module,exports){
+},{}],59:[function(_dereq_,module,exports){
 module.exports = {
     invPathSetsAsJSON: _dereq_("./invalidate-path-sets-as-json-dense"),
     invPathSetsAsJSONG: _dereq_("./invalidate-path-sets-as-json-graph"),
     invPathSetsAsPathMap: _dereq_("./invalidate-path-sets-as-json-sparse"),
     invPathSetsAsValues: _dereq_("./invalidate-path-sets-as-json-values")
 };
-},{"./invalidate-path-sets-as-json-dense":57,"./invalidate-path-sets-as-json-graph":58,"./invalidate-path-sets-as-json-sparse":59,"./invalidate-path-sets-as-json-values":60}],57:[function(_dereq_,module,exports){
+},{"./invalidate-path-sets-as-json-dense":60,"./invalidate-path-sets-as-json-graph":61,"./invalidate-path-sets-as-json-sparse":62,"./invalidate-path-sets-as-json-values":63}],60:[function(_dereq_,module,exports){
 module.exports = invalidate_path_sets_as_json_dense;
 
 var clone = _dereq_("../support/clone-dense-json");
 var array_clone = _dereq_("../support/array-clone");
+var array_slice = _dereq_("../support/array-slice");
 
 var options = _dereq_("../support/options");
 var walk_path_set = _dereq_("../walk/walk-path-set");
@@ -3276,7 +3247,7 @@ function invalidate_path_sets_as_json_dense(model, pathsets, values) {
     var parents = array_clone(nodes);
     var requested = [];
     var optimized = [];
-    var json, hasValue, hasValues;
+    var json, hasValue;
 
     roots[0] = roots.root;
 
@@ -3290,20 +3261,14 @@ function invalidate_path_sets_as_json_dense(model, pathsets, values) {
         }
 
         var pathset = pathsets[index];
+        roots.index = index;
         
         walk_path_set(onNode, onEdge, pathset, roots, parents, nodes, requested, optimized);
 
-        hasValue = roots.hasValue;
-        if (!!hasValue) {
-            hasValues = true;
-            if (is_object(json)) {
-                json.json = roots.json;
-            }
-            delete roots.json;
-            delete roots.hasValue;
-        } else if (is_object(json)) {
-            delete json.json;
+        if (is_object(json)) {
+            json.json = roots.json;
         }
+        delete roots.json;
     }
 
     collect(
@@ -3318,8 +3283,8 @@ function invalidate_path_sets_as_json_dense(model, pathsets, values) {
     return {
         values: values,
         errors: roots.errors,
-        hasValue: hasValues,
-        requestedPaths: roots.requestedPaths.concat([requested]),
+        hasValue: true,
+        requestedPaths: roots.requestedPaths,
         optimizedPaths: roots.optimizedPaths,
         requestedMissingPaths: roots.requestedMissingPaths,
         optimizedMissingPaths: roots.optimizedMissingPaths
@@ -3379,9 +3344,12 @@ function onNode(pathset, roots, parents, nodes, requested, optimized, is_top_lev
 function onEdge(pathset, roots, parents, nodes, requested, optimized, key, keyset) {
     roots.json = roots[3];
     roots.hasValue = true;
+    roots.requestedPaths.push(array_slice(requested, roots.offset));
 }
-},{"../lru/collect":61,"../support/array-clone":74,"../support/clone-dense-json":76,"../support/get-valid-key":85,"../support/invalidate-node":89,"../support/is-object":91,"../support/options":96,"../support/update-graph":105,"../walk/walk-path-set":113}],58:[function(_dereq_,module,exports){
+},{"../lru/collect":64,"../support/array-clone":77,"../support/array-slice":78,"../support/clone-dense-json":79,"../support/get-valid-key":88,"../support/invalidate-node":92,"../support/is-object":94,"../support/options":99,"../support/update-graph":108,"../walk/walk-path-set":116}],61:[function(_dereq_,module,exports){
 module.exports = invalidate_path_sets_as_json_graph;
+
+var $path = _dereq_("../types/$path");
 
 var clone = _dereq_("../support/clone-dense-json");
 var array_clone = _dereq_("../support/array-clone");
@@ -3407,7 +3375,6 @@ function invalidate_path_sets_as_json_graph(model, pathsets, values) {
     var requested = [];
     var optimized = [];
     var json = values[0];
-    var hasValue;
 
     roots[0] = roots.root;
     roots[1] = parents[1] = nodes[1] = json.jsong || (json.jsong = {});
@@ -3417,8 +3384,6 @@ function invalidate_path_sets_as_json_graph(model, pathsets, values) {
         var pathset = pathsets[index];
         walk_path_set(onNode, onEdge, pathset, roots, parents, nodes, requested, optimized);
     }
-
-    var hasValue = roots.hasValue;
 
     collect(
         roots.lru,
@@ -3432,8 +3397,8 @@ function invalidate_path_sets_as_json_graph(model, pathsets, values) {
     return {
         values: values,
         errors: roots.errors,
-        hasValue: hasValue,
-        requestedPaths: roots.requestedPaths.concat([requested]),
+        hasValue: true,
+        requestedPaths: roots.requestedPaths,
         optimizedPaths: roots.optimizedPaths,
         requestedMissingPaths: roots.requestedMissingPaths,
         optimizedMissingPaths: roots.optimizedMissingPaths
@@ -3461,9 +3426,8 @@ function onNode(pathset, roots, parents, nodes, requested, optimized, is_top_lev
     if (!is_top_level) {
         parents[0] = parent;
         nodes[0] = node;
-        if (!!(parents[1] = json)) {
-            nodes[1] = json[jsonkey] || (json[jsonkey] = {});
-        }
+        parents[1] = json;
+        nodes[1] = json[jsonkey] || (json[jsonkey] = {});
         return;
     }
 
@@ -3471,21 +3435,18 @@ function onNode(pathset, roots, parents, nodes, requested, optimized, is_top_lev
     
     if (pathset.length > 1) {
         parents[0] = nodes[0] = node;
-        if (!!(parents[1] = json)) {
-            if (type == $path) {
-                json[jsonkey] = clone(roots, node, type, node.value);
-            } else {
-                nodes[1] = json[jsonkey] || (json[jsonkey] = {});
-            }
+        parents[1] = json;
+        if (type == $path) {
+            json[jsonkey] = clone(roots, node, type, node.value);
+        } else {
+            nodes[1] = json[jsonkey] || (json[jsonkey] = {});
         }
         return;
     }
 
     nodes[0] = node;
 
-    if (!!json) {
-        json[jsonkey] = clone(roots, node, type, node && node.value);
-    }
+    json[jsonkey] = clone(roots, node, type, node && node.value);
 
     var lru = roots.lru;
     var size = node.$size || 0;
@@ -3499,11 +3460,12 @@ function onEdge(pathset, roots, parents, nodes, requested, optimized, key, keyse
     roots.json = roots[1];
     roots.hasValue = true;
 }
-},{"../lru/collect":61,"../support/array-clone":74,"../support/clone-dense-json":76,"../support/clone-success-paths":81,"../support/get-valid-key":85,"../support/invalidate-node":89,"../support/is-object":91,"../support/options":96,"../support/update-graph":105,"../walk/walk-path-set-soft-link":112}],59:[function(_dereq_,module,exports){
+},{"../lru/collect":64,"../support/array-clone":77,"../support/clone-dense-json":79,"../support/clone-success-paths":84,"../support/get-valid-key":88,"../support/invalidate-node":92,"../support/is-object":94,"../support/options":99,"../support/update-graph":108,"../types/$path":111,"../walk/walk-path-set-soft-link":115}],62:[function(_dereq_,module,exports){
 module.exports = invalidate_path_sets_as_json_sparse;
 
 var clone = _dereq_("../support/clone-dense-json");
 var array_clone = _dereq_("../support/array-clone");
+var array_slice = _dereq_("../support/array-slice");
 
 var options = _dereq_("../support/options");
 var walk_path_set = _dereq_("../walk/walk-path-set");
@@ -3526,7 +3488,6 @@ function invalidate_path_sets_as_json_sparse(model, pathsets, values) {
     var requested = [];
     var optimized = [];
     var json = values[0];
-    var hasValue;
 
     roots[0] = roots.root;
     roots[3] = parents[3] = nodes[3] = json.json || (json.json = {});
@@ -3534,11 +3495,6 @@ function invalidate_path_sets_as_json_sparse(model, pathsets, values) {
     while (++index < count) {
         var pathset = pathsets[index];
         walk_path_set(onNode, onEdge, pathset, roots, parents, nodes, requested, optimized);
-    }
-
-    var hasValue = roots.hasValue;
-    if (!hasValue) {
-        delete json.json;
     }
 
     collect(
@@ -3553,8 +3509,8 @@ function invalidate_path_sets_as_json_sparse(model, pathsets, values) {
     return {
         values: values,
         errors: roots.errors,
-        hasValue: hasValue,
-        requestedPaths: roots.requestedPaths.concat([requested]),
+        hasValue: true,
+        requestedPaths: roots.requestedPaths,
         optimizedPaths: roots.optimizedPaths,
         requestedMissingPaths: roots.requestedMissingPaths,
         optimizedMissingPaths: roots.optimizedMissingPaths
@@ -3588,18 +3544,15 @@ function onNode(pathset, roots, parents, nodes, requested, optimized, is_top_lev
 
     if (pathset.length > 1) {
         parents[0] = nodes[0] = node;
-        if (!!(parents[3] = json)) {
-            nodes[3] = json[jsonkey] || (json[jsonkey] = {});
-        }
+        parents[3] = json;
+        nodes[3] = json[jsonkey] || (json[jsonkey] = {});
         return;
     }
 
     nodes[0] = node;
 
-    if (!!json) {
-        var type = is_object(node) && node.$type || undefined;
-        json[jsonkey] = clone(roots, node, type, node && node.value);
-    }
+    var type = is_object(node) && node.$type || undefined;
+    json[jsonkey] = clone(roots, node, type, node && node.value);
 
     var lru = roots.lru;
     var size = node.$size || 0;
@@ -3611,12 +3564,14 @@ function onNode(pathset, roots, parents, nodes, requested, optimized, is_top_lev
 function onEdge(pathset, roots, parents, nodes, requested, optimized, key, keyset) {
     roots.json = roots[3];
     roots.hasValue = true;
+    roots.requestedPaths.push(array_slice(requested, roots.offset));
 }
-},{"../lru/collect":61,"../support/array-clone":74,"../support/clone-dense-json":76,"../support/get-valid-key":85,"../support/invalidate-node":89,"../support/is-object":91,"../support/options":96,"../support/update-graph":105,"../walk/walk-path-set":113}],60:[function(_dereq_,module,exports){
+},{"../lru/collect":64,"../support/array-clone":77,"../support/array-slice":78,"../support/clone-dense-json":79,"../support/get-valid-key":88,"../support/invalidate-node":92,"../support/is-object":94,"../support/options":99,"../support/update-graph":108,"../walk/walk-path-set":116}],63:[function(_dereq_,module,exports){
 module.exports = invalidate_path_sets_as_json_values;
 
 var clone = _dereq_("../support/clone-dense-json");
 var array_clone = _dereq_("../support/array-clone");
+var array_slice = _dereq_("../support/array-slice");
 
 var options = _dereq_("../support/options");
 var walk_path_set = _dereq_("../walk/walk-path-set");
@@ -3659,7 +3614,7 @@ function invalidate_path_sets_as_json_values(model, pathsets, onNext) {
     return {
         values: null,
         errors: roots.errors,
-        requestedPaths: roots.requestedPaths.concat([requested]),
+        requestedPaths: roots.requestedPaths,
         optimizedPaths: roots.optimizedPaths,
         requestedMissingPaths: roots.requestedMissingPaths,
         optimizedMissingPaths: roots.optimizedMissingPaths
@@ -3705,33 +3660,34 @@ function onEdge(pathset, roots, parents, nodes, requested, optimized, key, keyse
     var node = nodes[0];
     var type = is_object(node) && node.$type || undefined;
     var onNext = roots.onNext;
-    if (onNext) {
+    if (!!type && onNext) {
         onNext({
             path: array_clone(requested),
             value: clone(roots, node, type, node && node.value)
         });
     }
+    roots.requestedPaths.push(array_slice(requested, roots.offset));
 }
-},{"../lru/collect":61,"../support/array-clone":74,"../support/clone-dense-json":76,"../support/get-valid-key":85,"../support/invalidate-node":89,"../support/is-object":91,"../support/options":96,"../support/update-graph":105,"../walk/walk-path-set":113}],61:[function(_dereq_,module,exports){
+},{"../lru/collect":64,"../support/array-clone":77,"../support/array-slice":78,"../support/clone-dense-json":79,"../support/get-valid-key":88,"../support/invalidate-node":92,"../support/is-object":94,"../support/options":99,"../support/update-graph":108,"../walk/walk-path-set":116}],64:[function(_dereq_,module,exports){
 var update_graph = _dereq_("../support/update-graph");
 module.exports = function(lru, expired, version, total, max, ratio) {
     
     var targetSize = max * ratio;
-    var context, size;
+    var node, size;
     
-    while(!!(context = expired.pop())) {
-        size = context.$size || 0;
+    while(!!(node = expired.pop())) {
+        size = node.$size || 0;
         total -= size;
-        update_graph(context, size, version, lru);
+        update_graph(node, size, version, lru);
     }
     
     if(total >= max) {
         var tail = lru.__tail;
-        while((total >= targetSize) && !!(context = tail)) {
+        while((total >= targetSize) && !!(node = tail)) {
             tail = tail.__prev;
-            size = context.$size || 0;
+            size = node.$size || 0;
             total -= size;
-            update_graph(context, size, version, lru);
+            update_graph(node, size, version, lru);
         }
         
         if((lru.__tail = lru.__prev = tail) == null) {
@@ -3741,7 +3697,7 @@ module.exports = function(lru, expired, version, total, max, ratio) {
         }
     }
 };
-},{"../support/update-graph":105}],62:[function(_dereq_,module,exports){
+},{"../support/update-graph":108}],65:[function(_dereq_,module,exports){
 var $expires_never = 1;
 var is_object = _dereq_("../support/is-object");
 module.exports = function(root, node) {
@@ -3762,7 +3718,7 @@ module.exports = function(root, node) {
     }
     return node;
 };
-},{"../support/is-object":91}],63:[function(_dereq_,module,exports){
+},{"../support/is-object":94}],66:[function(_dereq_,module,exports){
 module.exports = function(root, node) {
     var head = root.__head, tail = root.__tail,
         next = node.__next, prev = node.__prev;
@@ -3773,7 +3729,7 @@ module.exports = function(root, node) {
     node.__next = node.__prev = undefined;
     head = tail = next = prev = undefined;
 };
-},{}],64:[function(_dereq_,module,exports){
+},{}],67:[function(_dereq_,module,exports){
 module.exports = {
     setPathSetsAsJSON: _dereq_('./set-json-values-as-json-dense'),
     setPathSetsAsJSONG: _dereq_('./set-json-values-as-json-graph'),
@@ -3786,7 +3742,7 @@ module.exports = {
     setJSONGsAsValues: _dereq_('./set-json-graph-as-json-values')
 };
 
-},{"./set-json-graph-as-json-dense":65,"./set-json-graph-as-json-graph":66,"./set-json-graph-as-json-sparse":67,"./set-json-graph-as-json-values":68,"./set-json-values-as-json-dense":69,"./set-json-values-as-json-graph":70,"./set-json-values-as-json-sparse":71,"./set-json-values-as-json-values":72}],65:[function(_dereq_,module,exports){
+},{"./set-json-graph-as-json-dense":68,"./set-json-graph-as-json-graph":69,"./set-json-graph-as-json-sparse":70,"./set-json-graph-as-json-values":71,"./set-json-values-as-json-dense":72,"./set-json-values-as-json-graph":73,"./set-json-values-as-json-sparse":74,"./set-json-values-as-json-values":75}],68:[function(_dereq_,module,exports){
 module.exports = set_json_graph_as_json_dense;
 
 var $path = _dereq_("../types/$path");
@@ -3838,9 +3794,9 @@ function set_json_graph_as_json_dense(model, envelopes, values, error_selector) 
 
             json = values && values[++index2];
             if (is_object(json)) {
-                roots[3] = parents[3] = nodes[3] = json.json || (json.json = {});
+                roots.json = roots[3] = parents[3] = nodes[3] = json.json || (json.json = {});
             } else {
-                roots[3] = parents[3] = nodes[3] = undefined;
+                roots.json = roots[3] = parents[3] = nodes[3] = undefined;
             }
 
             var pathset = pathsets[index3];
@@ -3922,31 +3878,28 @@ function onNode(pathset, roots, parents, nodes, requested, optimized, is_top_lev
         return;
     }
 
-    if (!!json) {
+    if (!!json && keyset != null) {
         var type = is_object(node) && node.$type || undefined;
-        var jsonkey = keyset;
-        if (jsonkey == null) {
-            json = roots;
-            jsonkey = 3;
-        }
-        json[jsonkey] = clone(roots, node, type, node && node.value);
+        json[keyset] = clone(roots, node, type, node && node.value);
     }
 }
 
 function onEdge(pathset, roots, parents, nodes, requested, optimized, key, keyset) {
 
     var node = nodes[0];
-    var type = is_object(node) && node.$type || undefined;
+    var type = is_object(node) && node.$type || (node = undefined);
 
     if (node_as_miss(roots, node, type, pathset, requested, optimized) === false) {
         clone_success(roots, requested, optimized);
         if (node_as_error(roots, node, type, requested) === false) {
-            roots.json = roots[3];
+            if(keyset == null) {
+                roots.json = clone(roots, node, type, node && node.value);
+            }
             roots.hasValue = true;
         }
     }
 }
-},{"../lru/collect":61,"../support/array-clone":74,"../support/clone-dense-json":76,"../support/clone-success-paths":81,"../support/get-valid-key":85,"../support/is-object":91,"../support/merge-node":94,"../support/options":96,"../support/treat-node-as-error":101,"../support/treat-node-as-miss":102,"../types/$path":108,"../walk/walk-path-set-soft-link":112}],66:[function(_dereq_,module,exports){
+},{"../lru/collect":64,"../support/array-clone":77,"../support/clone-dense-json":79,"../support/clone-success-paths":84,"../support/get-valid-key":88,"../support/is-object":94,"../support/merge-node":97,"../support/options":99,"../support/treat-node-as-error":104,"../support/treat-node-as-miss":105,"../types/$path":111,"../walk/walk-path-set-soft-link":115}],69:[function(_dereq_,module,exports){
 module.exports = set_json_graph_as_json_graph;
 
 var $path = _dereq_("../types/$path");
@@ -3966,6 +3919,7 @@ var node_as_miss = _dereq_("../support/treat-node-as-miss");
 var node_as_error = _dereq_("../support/treat-node-as-error");
 var clone_success = _dereq_("../support/clone-success-paths");
 
+var promote = _dereq_("../lru/promote");
 var collect = _dereq_("../lru/collect");
 
 function set_json_graph_as_json_graph(model, envelopes, values, error_selector) {
@@ -4002,7 +3956,13 @@ function set_json_graph_as_json_graph(model, envelopes, values, error_selector) 
         }
     }
 
-    var hasValue = roots.hasValue;
+    hasValue = roots.hasValue;
+    if(hasValue) {
+        json.jsong = roots[1];
+    } else {
+        delete json.jsong;
+        delete json.paths;
+    }
 
     collect(
         roots.lru,
@@ -4050,9 +4010,8 @@ function onNode(pathset, roots, parents, nodes, requested, optimized, is_top_lev
     if (!is_top_level) {
         parents[0] = parent;
         parents[2] = messageParent;
-        if (!!(parents[1] = json)) {
-            nodes[1] = json[jsonkey] || (json[jsonkey] = {});
-        }
+        parents[1] = json;
+        nodes[1] = json[jsonkey] || (json[jsonkey] = {});
         return;
     }
 
@@ -4061,34 +4020,39 @@ function onNode(pathset, roots, parents, nodes, requested, optimized, is_top_lev
     if (pathset.length > 1) {
         parents[0] = node;
         parents[2] = message;
-        if (!!(parents[1] = json)) {
-            if (type == $path) {
-                json[jsonkey] = clone(roots, node, type, node.value);
-            } else {
-                nodes[1] = json[jsonkey] || (json[jsonkey] = {});
-            }
+        parents[1] = json;
+        if (type == $path) {
+            json[jsonkey] = clone(roots, node, type, node.value);
+            roots.hasValue = true;
+        } else {
+            nodes[1] = json[jsonkey] || (json[jsonkey] = {});
         }
         return;
     }
 
-    if (!!json) {
-        json[jsonkey] = clone(roots, node, type, node && node.value);
-    }
+    json[jsonkey] = clone(roots, node, type, node && node.value);
+    roots.hasValue = true;
 }
 
 function onEdge(pathset, roots, parents, nodes, requested, optimized, key, keyset) {
 
+    var json;
     var node = nodes[0];
-    var type = is_object(node) && node.$type || undefined;
+    var type = is_object(node) && node.$type || (node = undefined);
 
     if (node_as_miss(roots, node, type, pathset, requested, optimized) === false) {
         clone_success(roots, requested, optimized);
-        // if(node_as_error(roots, node, type, requested) === false) {
+        promote(roots.lru, node);
+        if (keyset == null && !roots.hasValue && (keyset = get_valid_key(optimized)) == null) {
+            node = clone(roots, node, type, node && node.value);
+            json = roots[1];
+            json.$type = node.$type;
+            json.value = node.value;
+        }
         roots.hasValue = true;
-        // }
     }
 }
-},{"../lru/collect":61,"../support/array-clone":74,"../support/clone-graph-json":77,"../support/clone-success-paths":81,"../support/get-valid-key":85,"../support/is-object":91,"../support/merge-node":94,"../support/options":96,"../support/treat-node-as-error":101,"../support/treat-node-as-miss":102,"../types/$path":108,"../walk/walk-path-set-soft-link":112}],67:[function(_dereq_,module,exports){
+},{"../lru/collect":64,"../lru/promote":65,"../support/array-clone":77,"../support/clone-graph-json":80,"../support/clone-success-paths":84,"../support/get-valid-key":88,"../support/is-object":94,"../support/merge-node":97,"../support/options":99,"../support/treat-node-as-error":104,"../support/treat-node-as-miss":105,"../types/$path":111,"../walk/walk-path-set-soft-link":115}],70:[function(_dereq_,module,exports){
 module.exports = set_json_graph_as_json_sparse;
 
 var $path = _dereq_("../types/$path");
@@ -4143,8 +4107,10 @@ function set_json_graph_as_json_sparse(model, envelopes, values, error_selector)
         }
     }
 
-    var hasValue = roots.hasValue;
-    if (!hasValue) {
+    hasValue = roots.hasValue;
+    if(hasValue) {
+        json.json = roots[3];
+    } else {
         delete json.json;
     }
 
@@ -4205,30 +4171,36 @@ function onNode(pathset, roots, parents, nodes, requested, optimized, is_top_lev
     if (pathset.length > 1) {
         parents[0] = node;
         parents[2] = message;
-        if ((length > offset) && !!(parents[3] = json) && (!type || type == $path)) {
+        if ((length > offset) && (!type || type == $path)) {
+            parents[3] = json;
             nodes[3] = json[jsonkey] || (json[jsonkey] = {});
         }
         return;
     }
 
-    if (!!json) {
-        json[jsonkey] = clone(roots, node, type, node && node.value);
-    }
+    json[jsonkey] = clone(roots, node, type, node && node.value);
 }
 
 function onEdge(pathset, roots, parents, nodes, requested, optimized, key, keyset) {
 
+    var json;
     var node = nodes[0];
-    var type = is_object(node) && node.$type || undefined;
+    var type = is_object(node) && node.$type || (node = undefined);
 
     if (node_as_miss(roots, node, type, pathset, requested, optimized) === false) {
         clone_success(roots, requested, optimized);
         if (node_as_error(roots, node, type, requested) === false) {
+            if (keyset == null && !roots.hasValue && (keyset = get_valid_key(optimized)) == null) {
+                node = clone(roots, node, type, node && node.value);
+                json = roots[3];
+                json.$type = node.$type;
+                json.value = node.value;
+            }
             roots.hasValue = true;
         }
     }
 }
-},{"../lru/collect":61,"../support/array-clone":74,"../support/clone-dense-json":76,"../support/clone-success-paths":81,"../support/get-valid-key":85,"../support/is-object":91,"../support/merge-node":94,"../support/options":96,"../support/treat-node-as-error":101,"../support/treat-node-as-miss":102,"../types/$path":108,"../walk/walk-path-set-soft-link":112}],68:[function(_dereq_,module,exports){
+},{"../lru/collect":64,"../support/array-clone":77,"../support/clone-dense-json":79,"../support/clone-success-paths":84,"../support/get-valid-key":88,"../support/is-object":94,"../support/merge-node":97,"../support/options":99,"../support/treat-node-as-error":104,"../support/treat-node-as-miss":105,"../types/$path":111,"../walk/walk-path-set-soft-link":115}],71:[function(_dereq_,module,exports){
 module.exports = set_json_graph_as_json_values;
 
 var $path = _dereq_("../types/$path");
@@ -4337,22 +4309,19 @@ function onNode(pathset, roots, parents, nodes, requested, optimized, is_top_lev
 function onEdge(pathset, roots, parents, nodes, requested, optimized, key, keyset, is_keyset) {
 
     var node = nodes[0];
-    var type = is_object(node) && node.$type || undefined;
+    var type = is_object(node) && node.$type || (node = undefined);
 
     if (node_as_miss(roots, node, type, pathset, requested, optimized) === false) {
         clone_success(roots, requested, optimized);
         if (node_as_error(roots, node, type, requested) === false) {
-            var onNext = roots.onNext;
-            if (onNext) {
-                onNext({
-                    path: array_slice(requested, roots.offset),
-                    value: clone(roots, node, type, node && node.value)
-                });
-            }
+            roots.onNext({
+                path: array_slice(requested, roots.offset),
+                value: clone(roots, node, type, node && node.value)
+            });
         }
     }
 }
-},{"../lru/collect":61,"../support/array-clone":74,"../support/array-slice":75,"../support/clone-dense-json":76,"../support/clone-success-paths":81,"../support/get-valid-key":85,"../support/is-object":91,"../support/merge-node":94,"../support/options":96,"../support/treat-node-as-error":101,"../support/treat-node-as-miss":102,"../types/$path":108,"../walk/walk-path-set-soft-link":112}],69:[function(_dereq_,module,exports){
+},{"../lru/collect":64,"../support/array-clone":77,"../support/array-slice":78,"../support/clone-dense-json":79,"../support/clone-success-paths":84,"../support/get-valid-key":88,"../support/is-object":94,"../support/merge-node":97,"../support/options":99,"../support/treat-node-as-error":104,"../support/treat-node-as-miss":105,"../types/$path":111,"../walk/walk-path-set-soft-link":115}],72:[function(_dereq_,module,exports){
 module.exports = set_json_values_as_json_dense;
 
 var $path = _dereq_("../types/$path");
@@ -4399,9 +4368,9 @@ function set_json_values_as_json_dense(model, pathvalues, values, error_selector
 
         json = values && values[index];
         if (is_object(json)) {
-            roots[3] = parents[3] = nodes[3] = json.json || (json.json = {})
+            roots.json = roots[3] = parents[3] = nodes[3] = json.json || (json.json = {})
         } else {
-            roots[3] = parents[3] = nodes[3] = undefined;
+            roots.json = roots[3] = parents[3] = nodes[3] = undefined;
         }
 
         var pv = pathvalues[index];
@@ -4463,7 +4432,8 @@ function onNode(pathset, roots, parents, nodes, requested, optimized, is_top_lev
         type;
 
     if (!is_top_level) {
-        type = is_object(node) && node.$type && "." || undefined;
+        type = is_object(node) && node.$type || undefined;
+        type = type && pathset.length > 1 && "." || type;
         node = create_branch(roots, parent, node, type, key);
         parents[0] = parent;
         nodes[0] = node;
@@ -4498,30 +4468,27 @@ function onNode(pathset, roots, parents, nodes, requested, optimized, is_top_lev
     update_graph(parent, size - node.$size, roots.version, roots.lru);
     nodes[0] = node;
 
-    if (!!json) {
-        var jsonkey = keyset;
-        if (jsonkey == null) {
-            json = roots;
-            jsonkey = 3;
-        }
-        json[jsonkey] = clone(roots, node, type, node && node.value);
+    if (!!json && keyset != null) {
+        json[keyset] = clone(roots, node, type, node && node.value);
     }
 }
 
 function onEdge(pathset, roots, parents, nodes, requested, optimized, key, keyset) {
 
     var node = nodes[0];
-    var type = is_object(node) && node.$type || undefined;
+    var type = is_object(node) && node.$type || (node = undefined);
 
     if (node_as_miss(roots, node, type, pathset, requested, optimized) === false) {
         clone_success(roots, requested, optimized);
         if (node_as_error(roots, node, type, requested) === false) {
-            roots.json = roots[3];
+            if(keyset == null) {
+                roots.json = clone(roots, node, type, node && node.value);
+            }
             roots.hasValue = true;
         }
     }
 }
-},{"../lru/collect":61,"../support/array-clone":74,"../support/clone-dense-json":76,"../support/clone-success-paths":81,"../support/create-branch":83,"../support/get-valid-key":85,"../support/graph-node":86,"../support/inc-generation":87,"../support/is-object":91,"../support/options":96,"../support/replace-node":99,"../support/treat-node-as-error":101,"../support/treat-node-as-miss":102,"../support/update-back-refs":104,"../support/update-graph":105,"../support/wrap-node":106,"../types/$error":107,"../types/$path":108,"../types/$sentinel":109,"../walk/walk-path-set":113}],70:[function(_dereq_,module,exports){
+},{"../lru/collect":64,"../support/array-clone":77,"../support/clone-dense-json":79,"../support/clone-success-paths":84,"../support/create-branch":86,"../support/get-valid-key":88,"../support/graph-node":89,"../support/inc-generation":90,"../support/is-object":94,"../support/options":99,"../support/replace-node":102,"../support/treat-node-as-error":104,"../support/treat-node-as-miss":105,"../support/update-back-refs":107,"../support/update-graph":108,"../support/wrap-node":109,"../types/$error":110,"../types/$path":111,"../types/$sentinel":112,"../walk/walk-path-set":116}],73:[function(_dereq_,module,exports){
 module.exports = set_json_values_as_json_graph;
 
 var $path = _dereq_("../types/$path");
@@ -4549,6 +4516,7 @@ var node_as_miss = _dereq_("../support/treat-node-as-miss");
 var node_as_error = _dereq_("../support/treat-node-as-error");
 var clone_success = _dereq_("../support/clone-success-paths");
 
+var promote = _dereq_("../lru/promote");
 var collect = _dereq_("../lru/collect");
 
 function set_json_values_as_json_graph(model, pathvalues, values, error_selector) {
@@ -4576,7 +4544,13 @@ function set_json_values_as_json_graph(model, pathvalues, values, error_selector
         walk_path_set(onNode, onEdge, pathset, roots, parents, nodes, requested, optimized);
     }
 
-    var hasValue = roots.hasValue;
+    hasValue = roots.hasValue;
+    if(hasValue) {
+        json.jsong = roots[1];
+    } else {
+        delete json.jsong;
+        delete json.paths;
+    }
 
     collect(
         roots.lru,
@@ -4618,11 +4592,16 @@ function onNode(pathset, roots, parents, nodes, requested, optimized, is_top_lev
         type;
 
     if (!is_top_level) {
-        type = is_object(node) && node.$type && "." || undefined;
+        type = is_object(node) && node.$type || undefined;
+        type = type && pathset.length > 1 && "." || type;
         node = create_branch(roots, parent, node, type, key);
         parents[0] = parent;
         nodes[0] = node;
-        if (!!(parents[1] = json)) {
+        parents[1] = json;
+        if (type == $path) {
+            json[jsonkey] = clone(roots, node, type, node.value);
+            roots.hasValue = true;
+        } else {
             nodes[1] = json[jsonkey] || (json[jsonkey] = {});
         }
         return;
@@ -4633,12 +4612,12 @@ function onNode(pathset, roots, parents, nodes, requested, optimized, is_top_lev
         node = create_branch(roots, parent, node, type, key);
         type = node.$type;
         parents[0] = nodes[0] = node;
-        if (!!(parents[1] = json)) {
-            if (type == $path) {
-                json[jsonkey] = clone(roots, node, type, node.value);
-            } else {
-                nodes[1] = json[jsonkey] || (json[jsonkey] = {});
-            }
+        parents[1] = json;
+        if (type == $path) {
+            json[jsonkey] = clone(roots, node, type, node.value);
+            roots.hasValue = true;
+        } else {
+            nodes[1] = json[jsonkey] || (json[jsonkey] = {});
         }
         return;
     }
@@ -4661,24 +4640,29 @@ function onNode(pathset, roots, parents, nodes, requested, optimized, is_top_lev
     update_graph(parent, size - node.$size, roots.version, roots.lru);
     nodes[0] = node;
 
-    if (!!json) {
-        json[jsonkey] = clone(roots, node, type, node && node.value);
-    }
+    json[jsonkey] = clone(roots, node, type, node && node.value);
+    roots.hasValue = true;
 }
 
 function onEdge(pathset, roots, parents, nodes, requested, optimized, key, keyset) {
 
+    var json;
     var node = nodes[0];
-    var type = is_object(node) && node.$type || undefined;
+    var type = is_object(node) && node.$type || (node = undefined);
 
     if (node_as_miss(roots, node, type, pathset, requested, optimized) === false) {
         clone_success(roots, requested, optimized);
-        // if(node_as_error(roots, node, type, requested) === false) {
+        promote(roots.lru, node);
+        if (keyset == null && !roots.hasValue && (keyset = get_valid_key(optimized)) == null) {
+            node = clone(roots, node, type, node && node.value);
+            json = roots[1];
+            json.$type = node.$type;
+            json.value = node.value;
+        }
         roots.hasValue = true;
-        // }
     }
 }
-},{"../lru/collect":61,"../support/array-clone":74,"../support/clone-graph-json":77,"../support/clone-success-paths":81,"../support/create-branch":83,"../support/get-valid-key":85,"../support/graph-node":86,"../support/inc-generation":87,"../support/is-object":91,"../support/options":96,"../support/replace-node":99,"../support/treat-node-as-error":101,"../support/treat-node-as-miss":102,"../support/update-back-refs":104,"../support/update-graph":105,"../support/wrap-node":106,"../types/$error":107,"../types/$path":108,"../types/$sentinel":109,"../walk/walk-path-set-soft-link":112}],71:[function(_dereq_,module,exports){
+},{"../lru/collect":64,"../lru/promote":65,"../support/array-clone":77,"../support/clone-graph-json":80,"../support/clone-success-paths":84,"../support/create-branch":86,"../support/get-valid-key":88,"../support/graph-node":89,"../support/inc-generation":90,"../support/is-object":94,"../support/options":99,"../support/replace-node":102,"../support/treat-node-as-error":104,"../support/treat-node-as-miss":105,"../support/update-back-refs":107,"../support/update-graph":108,"../support/wrap-node":109,"../types/$error":110,"../types/$path":111,"../types/$sentinel":112,"../walk/walk-path-set-soft-link":115}],74:[function(_dereq_,module,exports){
 module.exports = set_json_values_as_json_sparse;
 
 var $path = _dereq_("../types/$path");
@@ -4732,8 +4716,10 @@ function set_json_values_as_json_sparse(model, pathvalues, values, error_selecto
         walk_path_set(onNode, onEdge, pathset, roots, parents, nodes, requested, optimized);
     }
 
-    var hasValue = roots.hasValue;
-    if (!hasValue) {
+    hasValue = roots.hasValue;
+    if(hasValue) {
+        json.json = roots[3];
+    } else {
         delete json.json;
     }
 
@@ -4778,7 +4764,8 @@ function onNode(pathset, roots, parents, nodes, requested, optimized, is_top_lev
         type;
 
     if (!is_top_level) {
-        type = is_object(node) && node.$type && "." || undefined;
+        type = is_object(node) && node.$type || undefined;
+        type = type && pathset.length > 1 && "." || type;
         node = create_branch(roots, parent, node, type, key);
         parents[0] = parent;
         nodes[0] = node;
@@ -4789,9 +4776,8 @@ function onNode(pathset, roots, parents, nodes, requested, optimized, is_top_lev
         type = is_object(node) && node.$type || undefined;
         node = create_branch(roots, parent, node, type, key);
         parents[0] = nodes[0] = node;
-        if (!!(parents[3] = json)) {
-            nodes[3] = json[jsonkey] || (json[jsonkey] = {});
-        }
+        parents[3] = json;
+        nodes[3] = json[jsonkey] || (json[jsonkey] = {});
         return;
     }
 
@@ -4813,24 +4799,29 @@ function onNode(pathset, roots, parents, nodes, requested, optimized, is_top_lev
     update_graph(parent, size - node.$size, roots.version, roots.lru);
     nodes[0] = node;
 
-    if (!!json) {
-        json[jsonkey] = clone(roots, node, type, node && node.value);
-    }
+    json[jsonkey] = clone(roots, node, type, node && node.value);
 }
 
 function onEdge(pathset, roots, parents, nodes, requested, optimized, key, keyset) {
 
+    var json;
     var node = nodes[0];
-    var type = is_object(node) && node.$type || undefined;
+    var type = is_object(node) && node.$type || (node = undefined);
 
     if (node_as_miss(roots, node, type, pathset, requested, optimized) === false) {
         clone_success(roots, requested, optimized);
         if (node_as_error(roots, node, type, requested) === false) {
+            if (keyset == null && !roots.hasValue && (keyset = get_valid_key(optimized)) == null) {
+                node = clone(roots, node, type, node && node.value);
+                json = roots[3];
+                json.$type = node.$type;
+                json.value = node.value;
+            }
             roots.hasValue = true;
         }
     }
 }
-},{"../lru/collect":61,"../support/array-clone":74,"../support/clone-dense-json":76,"../support/clone-success-paths":81,"../support/create-branch":83,"../support/get-valid-key":85,"../support/graph-node":86,"../support/inc-generation":87,"../support/is-object":91,"../support/options":96,"../support/replace-node":99,"../support/treat-node-as-error":101,"../support/treat-node-as-miss":102,"../support/update-back-refs":104,"../support/update-graph":105,"../support/wrap-node":106,"../types/$error":107,"../types/$path":108,"../types/$sentinel":109,"../walk/walk-path-set":113}],72:[function(_dereq_,module,exports){
+},{"../lru/collect":64,"../support/array-clone":77,"../support/clone-dense-json":79,"../support/clone-success-paths":84,"../support/create-branch":86,"../support/get-valid-key":88,"../support/graph-node":89,"../support/inc-generation":90,"../support/is-object":94,"../support/options":99,"../support/replace-node":102,"../support/treat-node-as-error":104,"../support/treat-node-as-miss":105,"../support/update-back-refs":107,"../support/update-graph":108,"../support/wrap-node":109,"../types/$error":110,"../types/$path":111,"../types/$sentinel":112,"../walk/walk-path-set":116}],75:[function(_dereq_,module,exports){
 module.exports = set_json_values_as_json_values;
 
 var $error = _dereq_("../types/$error");
@@ -4915,7 +4906,8 @@ function onNode(pathset, roots, parents, nodes, requested, optimized, is_top_lev
         type;
 
     if (!is_top_level) {
-        type = is_object(node) && node.$type && "." || undefined;
+        type = is_object(node) && node.$type || undefined;
+        type = type && pathset.length > 1 && "." || type;
         node = create_branch(roots, parent, node, type, key);
         parents[0] = parent;
         nodes[0] = node;
@@ -4951,22 +4943,19 @@ function onNode(pathset, roots, parents, nodes, requested, optimized, is_top_lev
 function onEdge(pathset, roots, parents, nodes, requested, optimized, key, keyset) {
 
     var node = nodes[0];
-    var type = is_object(node) && node.$type || undefined;
+    var type = is_object(node) && node.$type || (node = undefined);
 
     if (node_as_miss(roots, node, type, pathset, requested, optimized) === false) {
         clone_success(roots, requested, optimized);
         if (node_as_error(roots, node, type, requested) === false) {
-            var onNext = roots.onNext;
-            if (onNext) {
-                onNext({
-                    path: array_clone(requested),
-                    value: clone(roots, node, type, node && node.value)
-                });
-            }
+            roots.onNext({
+                path: array_clone(requested),
+                value: clone(roots, node, type, node && node.value)
+            });
         }
     }
 }
-},{"../lru/collect":61,"../support/array-clone":74,"../support/clone-dense-json":76,"../support/clone-success-paths":81,"../support/create-branch":83,"../support/get-valid-key":85,"../support/graph-node":86,"../support/inc-generation":87,"../support/is-object":91,"../support/options":96,"../support/replace-node":99,"../support/treat-node-as-error":101,"../support/treat-node-as-miss":102,"../support/update-back-refs":104,"../support/update-graph":105,"../support/wrap-node":106,"../types/$error":107,"../types/$sentinel":109,"../walk/walk-path-set":113}],73:[function(_dereq_,module,exports){
+},{"../lru/collect":64,"../support/array-clone":77,"../support/clone-dense-json":79,"../support/clone-success-paths":84,"../support/create-branch":86,"../support/get-valid-key":88,"../support/graph-node":89,"../support/inc-generation":90,"../support/is-object":94,"../support/options":99,"../support/replace-node":102,"../support/treat-node-as-error":104,"../support/treat-node-as-miss":105,"../support/update-back-refs":107,"../support/update-graph":108,"../support/wrap-node":109,"../types/$error":110,"../types/$sentinel":112,"../walk/walk-path-set":116}],76:[function(_dereq_,module,exports){
 module.exports = function(array, value) {
     var i = -1;
     var n = array.length;
@@ -4975,7 +4964,7 @@ module.exports = function(array, value) {
     array2[i] = value;
     return array2;
 };
-},{}],74:[function(_dereq_,module,exports){
+},{}],77:[function(_dereq_,module,exports){
 module.exports = function(array) {
     var i = -1;
     var n = array.length;
@@ -4983,7 +4972,7 @@ module.exports = function(array) {
     while(++i < n) { array2[i] = array[i]; }
     return array2;
 };
-},{}],75:[function(_dereq_,module,exports){
+},{}],78:[function(_dereq_,module,exports){
 module.exports = function(array, index) {
     var i = -1;
     var n = array.length - index;
@@ -4991,52 +4980,50 @@ module.exports = function(array, index) {
     while(++i < n) { array2[i] = array[i + index]; }
     return array2;
 };
-},{}],76:[function(_dereq_,module,exports){
+},{}],79:[function(_dereq_,module,exports){
 var $sentinel = _dereq_("../types/$sentinel");
 var clone = _dereq_("./clone");
 module.exports = function(roots, node, type, value) {
-    var json;
+    
     if(node == null || value === undefined) {
-        json = { $type: $sentinel };
-    } else if(roots.boxed == true) {
-        json = clone(node);
-    } else {
-        json = value;
+        return { $type: $sentinel };
     }
-    return json;
+    
+    if(roots.boxed == true) {
+        return !!type && clone(node) || node;
+    }
+    
+    return value;
 }
 
-},{"../types/$sentinel":109,"./clone":82}],77:[function(_dereq_,module,exports){
+},{"../types/$sentinel":112,"./clone":85}],80:[function(_dereq_,module,exports){
 var $sentinel = _dereq_("../types/$sentinel");
 var clone = _dereq_("./clone");
 var is_primitive = _dereq_("./is-primitive");
 module.exports = function(roots, node, type, value) {
-    var json;
+    
     if(node == null || value === undefined) {
-        json = { $type: $sentinel };
-    } else if(roots.boxed == true) {
-        json = clone(node);
-    } else if(type == $sentinel) {
-        if(is_primitive(value)) {
-            json = value;
-        } else {
-            json = clone(node);
-        }
-    } else if(!!type) {
-        json = clone(node);
-    } else {
-        json = value;
+        return { $type: $sentinel };
     }
-    return json;
+    
+    if(roots.boxed == true) {
+        return !!type && clone(node) || node;
+    }
+    
+    if(!type || (type === $sentinel && is_primitive(value))) {
+        return value;
+    }
+    
+    return clone(node);
 }
-},{"../types/$sentinel":109,"./clone":82,"./is-primitive":92}],78:[function(_dereq_,module,exports){
+},{"../types/$sentinel":112,"./clone":85,"./is-primitive":95}],81:[function(_dereq_,module,exports){
 var clone_requested_path = _dereq_("./clone-requested-path");
 var clone_optimized_path = _dereq_("./clone-optimized-path");
 module.exports = function(roots, pathset, requested, optimized) {
     roots.requestedMissingPaths.push(clone_requested_path(roots.bound, requested, pathset, roots.index));
     roots.optimizedMissingPaths.push(clone_optimized_path(optimized, pathset));
 }
-},{"./clone-optimized-path":79,"./clone-requested-path":80}],79:[function(_dereq_,module,exports){
+},{"./clone-optimized-path":82,"./clone-requested-path":83}],82:[function(_dereq_,module,exports){
 module.exports = function(optimized, rest) {
     var x;
     var i = -1;
@@ -5048,8 +5035,9 @@ module.exports = function(optimized, rest) {
     while(++j < m) { if((x = rest[j]) != null) { array2[i++] = x; } }
     return array2;
 }
-},{}],80:[function(_dereq_,module,exports){
+},{}],83:[function(_dereq_,module,exports){
 module.exports = function(bound, requested, rest, index) {
+    var x;
     var i = -1;
     var j = -1;
     var k = -1;
@@ -5058,21 +5046,21 @@ module.exports = function(bound, requested, rest, index) {
     var l = rest.length;
     var array2 = new Array(n + m + l);
     while(++i < n) { array2[i] = bound[i]; }
-    while(++j < m) { array2[i++] = requested[j]; }
-    while(++k < l) { array2[i++] = rest[k]; }
+    while(++j < m) { if((x = requested[j]) != null) { array2[i++] = requested[j]; } }
+    while(++k < l) { if((x = rest[k]) != null) { array2[i++] = rest[k]; } }
     if(index != null) {
         array2.pathSetIndex = index;
     }
     return array2;
 }
-},{}],81:[function(_dereq_,module,exports){
+},{}],84:[function(_dereq_,module,exports){
 var array_slice = _dereq_("./array-slice");
 var array_clone = _dereq_("./array-clone");
 module.exports = function(roots, requested, optimized) {
     roots.requestedPaths.push(array_slice(requested, roots.offset));
     roots.optimizedPaths.push(array_clone(optimized));
 }
-},{"./array-clone":74,"./array-slice":75}],82:[function(_dereq_,module,exports){
+},{"./array-clone":77,"./array-slice":78}],85:[function(_dereq_,module,exports){
 var is_object = _dereq_("./is-object");
 module.exports = function(value) {
     var dest = value, src = dest, i = -1, n, keys, key;
@@ -5089,7 +5077,7 @@ module.exports = function(value) {
     }
     return dest;
 }
-},{"./is-object":91}],83:[function(_dereq_,module,exports){
+},{"./is-object":94}],86:[function(_dereq_,module,exports){
 var $path = _dereq_("../types/$path");
 var $expired = "expired";
 var replace_node = _dereq_("./replace-node");
@@ -5111,7 +5099,7 @@ module.exports = function(roots, parent, node, type, key) {
     }
     return node;
 }
-},{"../types/$path":108,"./graph-node":86,"./is-expired":90,"./is-primitive":92,"./replace-node":99,"./update-back-refs":104}],84:[function(_dereq_,module,exports){
+},{"../types/$path":111,"./graph-node":89,"./is-expired":93,"./is-primitive":95,"./replace-node":102,"./update-back-refs":107}],87:[function(_dereq_,module,exports){
 var __ref = "__ref";
 module.exports = function(node) {
     var ref, i = -1, n = node.__refs_length || 0;
@@ -5122,7 +5110,7 @@ module.exports = function(node) {
     }
     node.__refs_length = undefined
 }
-},{}],85:[function(_dereq_,module,exports){
+},{}],88:[function(_dereq_,module,exports){
 module.exports = function(path) {
     var key, index = path.length - 1;
     do {
@@ -5132,7 +5120,7 @@ module.exports = function(path) {
     } while(--index > -1);
     return null;
 }
-},{}],86:[function(_dereq_,module,exports){
+},{}],89:[function(_dereq_,module,exports){
 
 var $root = "/";
 var $self = "./";
@@ -5148,13 +5136,13 @@ module.exports = function(root, parent, node, key, generation) {
     node[$generation] = generation;
     return node;
 }
-},{}],87:[function(_dereq_,module,exports){
+},{}],90:[function(_dereq_,module,exports){
 var generation = 0;
 module.exports = function() { return generation++; }
-},{}],88:[function(_dereq_,module,exports){
+},{}],91:[function(_dereq_,module,exports){
 var version = 0;
 module.exports = function() { return version++; }
-},{}],89:[function(_dereq_,module,exports){
+},{}],92:[function(_dereq_,module,exports){
 module.exports = invalidate;
 
 var is_object = _dereq_("./is-object");
@@ -5176,7 +5164,7 @@ function invalidate(parent, node, key, lru) {
     }
     return false;
 }
-},{"./is-object":91,"./remove-node":98}],90:[function(_dereq_,module,exports){
+},{"./is-object":94,"./remove-node":101}],93:[function(_dereq_,module,exports){
 var $expires_now = _dereq_("../values/$expires-now");
 var $expires_never = _dereq_("../values/$expires-never");
 var now = _dereq_("./now");
@@ -5196,17 +5184,17 @@ module.exports = function(roots, node) {
     }
     return false;
 }
-},{"../lru/splice":63,"../values/$expires-never":110,"../values/$expires-now":111,"./now":95}],91:[function(_dereq_,module,exports){
+},{"../lru/splice":66,"../values/$expires-never":113,"../values/$expires-now":114,"./now":98}],94:[function(_dereq_,module,exports){
 var obj_typeof = "object";
 module.exports = function(value) {
     return value != null && typeof value == obj_typeof;
 }
-},{}],92:[function(_dereq_,module,exports){
+},{}],95:[function(_dereq_,module,exports){
 var obj_typeof = "object";
 module.exports = function(value) {
     return value == null || typeof value != obj_typeof;
 }
-},{}],93:[function(_dereq_,module,exports){
+},{}],96:[function(_dereq_,module,exports){
 module.exports = key_to_keyset;
 
 var isArray = Array.isArray;
@@ -5227,7 +5215,7 @@ function key_to_keyset(key, iskeyset) {
 }
 
 
-},{}],94:[function(_dereq_,module,exports){
+},{}],97:[function(_dereq_,module,exports){
 
 var $self = "./";
 var $path = _dereq_("../types/$path");
@@ -5376,10 +5364,10 @@ module.exports = function(roots, parent, node, messageParent, message, key) {
             node = graph_node(roots[0], parent, node, key, inc_generation());
         }
         // If the cache and the message are the same value, we branch-merged one of its
-        // ancestors, so give the message a $size and $type, attach its graph pointers,
-        // and update the cache sizes and generations.
+        // ancestors. Give the message a $size and $type, attach its graph pointers, and
+        // update the cache sizes and generations.
         else if(node_is_object && node[$self] == null) {
-            node = wrap_node(node, type, node.value);
+            node = parent[key] = wrap_node(node, type, node.value);
             offset = -node.$size;
             update_graph(parent, offset, roots.version, roots.lru);
             node = graph_node(roots[0], parent, node, key, inc_generation());
@@ -5408,9 +5396,9 @@ module.exports = function(roots, parent, node, messageParent, message, key) {
     return node;
 }
 
-},{"../lru/promote":62,"../support/replace-node":99,"../support/update-graph":105,"../types/$path":108,"../types/$sentinel":109,"../values/$expires-now":111,"./graph-node":86,"./inc-generation":87,"./invalidate-node":89,"./is-expired":90,"./is-object":91,"./is-primitive":92,"./wrap-node":106}],95:[function(_dereq_,module,exports){
+},{"../lru/promote":65,"../support/replace-node":102,"../support/update-graph":108,"../types/$path":111,"../types/$sentinel":112,"../values/$expires-now":114,"./graph-node":89,"./inc-generation":90,"./invalidate-node":92,"./is-expired":93,"./is-object":94,"./is-primitive":95,"./wrap-node":109}],98:[function(_dereq_,module,exports){
 module.exports = Date.now;
-},{}],96:[function(_dereq_,module,exports){
+},{}],99:[function(_dereq_,module,exports){
 var inc_version = _dereq_("../support/inc-version");
 var getBoundValue = _dereq_('../get/getBoundValue');
 
@@ -5442,7 +5430,7 @@ module.exports = function(options, model, error_selector) {
     
     return options;
 };
-},{"../get/getBoundValue":39,"../support/inc-version":88}],97:[function(_dereq_,module,exports){
+},{"../get/getBoundValue":42,"../support/inc-version":91}],100:[function(_dereq_,module,exports){
 module.exports = permute_keyset;
 
 var isArray = Array.isArray;
@@ -5465,7 +5453,7 @@ function permute_keyset(key) {
 }
 
 
-},{}],98:[function(_dereq_,module,exports){
+},{}],101:[function(_dereq_,module,exports){
 var $path = _dereq_("../types/$path");
 var $root = "/";
 var $self = "./";
@@ -5488,7 +5476,7 @@ module.exports = function(parent, node, key, lru) {
     }
     return false;
 }
-},{"../lru/splice":63,"../types/$path":108,"./delete-back-refs":84,"./is-object":91,"./unlink":103}],99:[function(_dereq_,module,exports){
+},{"../lru/splice":66,"../types/$path":111,"./delete-back-refs":87,"./is-object":94,"./unlink":106}],102:[function(_dereq_,module,exports){
 var transfer_back_refs = _dereq_("./transfer-back-refs");
 var invalidate_node = _dereq_("./invalidate-node");
 
@@ -5499,7 +5487,7 @@ module.exports = function(parent, node, replacement, key, lru) {
     }
     return parent[key] = replacement;
 }
-},{"./invalidate-node":89,"./transfer-back-refs":100}],100:[function(_dereq_,module,exports){
+},{"./invalidate-node":92,"./transfer-back-refs":103}],103:[function(_dereq_,module,exports){
 var __ref = "__ref";
 var __refs_length = "__refs_length";
 module.exports = function(node, dest) {
@@ -5517,7 +5505,7 @@ module.exports = function(node, dest) {
     dest[__refs_length] = nodeRefsLength + destRefsLength;
     node[__refs_length] = ref = undefined;
 }
-},{}],101:[function(_dereq_,module,exports){
+},{}],104:[function(_dereq_,module,exports){
 var $error = _dereq_("../types/$error");
 var promote = _dereq_("../lru/promote");
 var array_clone = _dereq_("./array-clone");
@@ -5532,7 +5520,7 @@ module.exports = function(roots, node, type, path) {
     roots.errors.push({ path: array_clone(path), value: node.value });
     return true;
 };
-},{"../lru/promote":62,"../types/$error":107,"./array-clone":74}],102:[function(_dereq_,module,exports){
+},{"../lru/promote":65,"../types/$error":110,"./array-clone":77}],105:[function(_dereq_,module,exports){
 var $sentinel = _dereq_("../types/$sentinel");
 var clone_misses = _dereq_("./clone-missing-paths");
 var is_expired = _dereq_("./is-expired");
@@ -5552,7 +5540,7 @@ module.exports = function(roots, node, type, pathset, requested, optimized) {
     }
     return false;
 };
-},{"../types/$sentinel":109,"./clone-missing-paths":78,"./is-expired":90}],103:[function(_dereq_,module,exports){
+},{"../types/$sentinel":112,"./clone-missing-paths":81,"./is-expired":93}],106:[function(_dereq_,module,exports){
 var $ref = "__ref";
 module.exports = function(ref) {
     var destination = ref.__context;
@@ -5566,7 +5554,7 @@ module.exports = function(ref) {
         ref.__ref_index = ref.__context = destination = undefined;
     }
 }
-},{}],104:[function(_dereq_,module,exports){
+},{}],107:[function(_dereq_,module,exports){
 module.exports = update_back_refs;
 
 var generation = _dereq_("./inc-generation");
@@ -5584,7 +5572,7 @@ function update_back_refs(node, version) {
     return node;
 }
 
-},{"./inc-generation":87}],105:[function(_dereq_,module,exports){
+},{"./inc-generation":90}],108:[function(_dereq_,module,exports){
 var remove_node = _dereq_("./remove-node");
 var update_back_refs = _dereq_("./update-back-refs");
 
@@ -5599,41 +5587,55 @@ module.exports = function(node, offset, version, lru) {
         }
     }
 }
-},{"./remove-node":98,"./update-back-refs":104}],106:[function(_dereq_,module,exports){
+},{"./remove-node":101,"./update-back-refs":107}],109:[function(_dereq_,module,exports){
 var $path = _dereq_("../types/$path");
 var $error = _dereq_("../types/$error");
 var $sentinel = _dereq_("../types/$sentinel");
 
 var now = _dereq_("./now");
 var clone = _dereq_("./clone");
+var is_array = Array.isArray;
 var is_object = _dereq_("./is-object");
 
 module.exports = function(node, type, value) {
     
-    var dest = node, size = 1;
+    var dest = node, size = 0;
     
-    if(type == $path) {
-        // dest = clone(node);
-        size = 50 + (value.length || 1);
-    } else if(type == $sentinel) {
-        // dest = clone(node);
-        size = 50 + ((typeof value == "string") && value.length || 1);
-    } else if(type == $error) {
-        // dest = clone(node);
-        size = node.$size || 51;
-    } else if(is_object(node) && !!(type || (type = node.$type))) {
-        // dest = clone(node);
-        size = node.$size || 51;
+    if(!!type) {
+        dest = clone(node);
+        size = dest.$size;
+    // }
+    // if(type == $path) {
+    //     dest = clone(node);
+    //     size = 50 + (value.length || 1);
+    // } else if(is_object(node) && (type || (type = node.$type))) {
+    //     dest = clone(node);
+    //     size = dest.$size;
     } else {
         dest = { value: value };
-        // dest.value = clone(value);
-        size = 50 + ((typeof value == "string") && value.length || 1);
         type = $sentinel;
     }
     
-    var expires = node.$expires;
+    if(size <= 0 || size == null) {
+        switch(typeof value) {
+            case "number":
+            case "boolean":
+            case "function":
+            case "undefined":
+                size = 51;
+                break;
+            case "object":
+                size = is_array(value) && (50 + value.length) || 51;
+                break;
+            case "string":
+                size = 50 + value.length;
+                break;
+        }
+    }
+    
+    var expires = is_object(node) && node.$expires || undefined;
     if(typeof expires === "number" && expires < 0) {
-        node.$expires = now() + (expires * -1);
+        dest.$expires = now() + (expires * -1);
     }
     
     dest.$type = type;
@@ -5641,17 +5643,17 @@ module.exports = function(node, type, value) {
     
     return dest;
 }
-},{"../types/$error":107,"../types/$path":108,"../types/$sentinel":109,"./clone":82,"./is-object":91,"./now":95}],107:[function(_dereq_,module,exports){
+},{"../types/$error":110,"../types/$path":111,"../types/$sentinel":112,"./clone":85,"./is-object":94,"./now":98}],110:[function(_dereq_,module,exports){
 module.exports = "error";
-},{}],108:[function(_dereq_,module,exports){
-module.exports = "path";
-},{}],109:[function(_dereq_,module,exports){
-module.exports = "sentinel";
-},{}],110:[function(_dereq_,module,exports){
-module.exports = 1;
 },{}],111:[function(_dereq_,module,exports){
-module.exports = 0;
+module.exports = "path";
 },{}],112:[function(_dereq_,module,exports){
+module.exports = "sentinel";
+},{}],113:[function(_dereq_,module,exports){
+module.exports = 1;
+},{}],114:[function(_dereq_,module,exports){
+module.exports = 0;
+},{}],115:[function(_dereq_,module,exports){
 module.exports = walk_path_set;
 
 var $path = _dereq_("../types/$path");
@@ -5749,7 +5751,7 @@ function walk_path_set(onNode, onEdge, pathset, roots, parents, nodes, requested
         );
     } while(is_outer_keyset && permute_keyset(outer_key));
 }
-},{"../support/array-append":73,"../support/array-clone":74,"../support/array-slice":75,"../support/is-expired":90,"../support/is-object":91,"../support/is-primitive":92,"../support/keyset-to-key":93,"../support/permute-keyset":97,"../types/$path":108,"./walk-reference":114}],113:[function(_dereq_,module,exports){
+},{"../support/array-append":76,"../support/array-clone":77,"../support/array-slice":78,"../support/is-expired":93,"../support/is-object":94,"../support/is-primitive":95,"../support/keyset-to-key":96,"../support/permute-keyset":100,"../types/$path":111,"./walk-reference":117}],116:[function(_dereq_,module,exports){
 module.exports = walk_path_set;
 
 var $path = _dereq_("../types/$path");
@@ -5855,7 +5857,7 @@ function walk_path_set(onNode, onEdge, pathset, roots, parents, nodes, requested
         );
     } while(is_outer_keyset && permute_keyset(outer_key));
 }
-},{"../support/array-append":73,"../support/array-clone":74,"../support/array-slice":75,"../support/is-expired":90,"../support/is-object":91,"../support/is-primitive":92,"../support/keyset-to-key":93,"../support/permute-keyset":97,"../types/$path":108,"./walk-reference":114}],114:[function(_dereq_,module,exports){
+},{"../support/array-append":76,"../support/array-clone":77,"../support/array-slice":78,"../support/is-expired":93,"../support/is-object":94,"../support/is-primitive":95,"../support/keyset-to-key":96,"../support/permute-keyset":100,"../types/$path":111,"./walk-reference":117}],117:[function(_dereq_,module,exports){
 module.exports = walk_reference;
 
 var __ref = "__ref";
@@ -5908,7 +5910,7 @@ function walk_reference(onNode, container, reference, roots, parents, nodes, req
     
     return nodes;
 }
-},{"../support/array-append":73,"../support/array-slice":75,"../support/is-object":91,"../support/is-primitive":92}],115:[function(_dereq_,module,exports){
+},{"../support/array-append":76,"../support/array-slice":78,"../support/is-object":94,"../support/is-primitive":95}],118:[function(_dereq_,module,exports){
 var falcor = _dereq_('./lib/falcor');
 var get = _dereq_('./lib/get');
 var set = _dereq_('./lib/set');
@@ -5946,6 +5948,6 @@ prototype._setCache = get.setCache;
 module.exports = falcor;
 
 
-},{"./lib/falcor":6,"./lib/get":42,"./lib/invalidate":56,"./lib/set":64}]},{},[1])
+},{"./lib/falcor":6,"./lib/get":45,"./lib/invalidate":59,"./lib/set":67}]},{},[1])
 (1)
 });

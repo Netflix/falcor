@@ -17,6 +17,9 @@ gulp.task('build.all', ['build.sentinel', 'build.node']);
 gulp.task('build.node', ['clean.dev'], function() {
     return build(['index.js']);
 });
+gulp.task('dist.node', ['clean.dev'], function() {
+    return build(['index.js'], false, false, 'dist');
+});
 
 gulp.task('build.sentinel', ['clean.dev'], function() {
     return build(['sentinel.js']);
