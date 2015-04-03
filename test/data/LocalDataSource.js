@@ -56,7 +56,6 @@ LocalSource.prototype = {
                 observer.onNext(output);
                 observer.onCompleted();
             }
-            
             if (wait > 0) {
                 setTimeout(exec, wait);
             } else {
@@ -74,14 +73,23 @@ LocalSource.prototype = {
         var errorSelector = options.errorSelector;
         return Rx.Observable.create(function(observer) {
             function exec() {
-                var values = [{}];
-                onSet(self, jsongEnv);
-                self.model._setJSONGsAsJSONG(self.model, [jsongEnv], values, errorSelector);
+                var seed = [{}];
+                var tempModel = new jsong.Model({
+                    cache: jsongEnv.jsong,
+                    errorSelector: errorSelector});
+                onSet(self, tempModel);
+
+                tempModel._getPathSetsAsValues(
+                    tempModel,
+                    jsongEnv.paths,
+                    function onNext(pathValue) {
+                        self.model._setPathSetsAsJSONG(self.model, [pathValue], seed);
+                    });
 
                 // always output all the paths
 
-                onResults(values[0]);
-                observer.onNext(values[0]);
+                onResults(seed[0]);
+                observer.onNext(seed[0]);
                 observer.onCompleted();
             }
 
