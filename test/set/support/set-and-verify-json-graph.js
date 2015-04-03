@@ -27,12 +27,6 @@ function get_paths(envelope) {
     });
 }
 
-function get_seeds(pathvalues) {
-    return pathvalues.map(function() {
-        return {};
-    });
-}
-
 function slice_bound(model) {
     return function(path) {
         return path.slice(model._path.length);

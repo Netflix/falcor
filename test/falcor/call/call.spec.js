@@ -42,7 +42,7 @@ describe("Call", function() {
     });
 
     it("executes a local function with call args on a bound Model", function(done) {
-
+        
         var model = getDataModel(new LocalDataSource(Cache()), ReducedCache());
 
         model
