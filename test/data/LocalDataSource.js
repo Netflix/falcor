@@ -56,7 +56,6 @@ LocalSource.prototype = {
                 observer.onNext(output);
                 observer.onCompleted();
             }
-            
             if (wait > 0) {
                 setTimeout(exec, wait);
             } else {
