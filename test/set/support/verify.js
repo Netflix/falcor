@@ -2,6 +2,9 @@ module.exports = verify;
 
 var slice = Array.prototype.slice;
 var expect = require('chai').expect;
+var get_seeds = require("./get-seeds");
+var get_pathsets = require("./get-pathsets");
+var inspect = require("util").inspect;
 
 function verify(suffix) {
     return function(model, input) {
@@ -17,23 +20,34 @@ function verify(suffix) {
         ];
         
         return function() {
-            var paths  = slice.call(arguments);
-            var seeds   = suffix == "JSON" ? get_seeds(paths) : [{}];
-            if(suffix == "Values") {
-                var values = [];
-                seeds = function(pv) { values.push(pv); }
-            }
-            var func = model["_getPathSetsAs" + suffix];
-            var output = func(model, paths, seeds);
-            if(values) { output.values = values; }
-            
-            return checks.shift().call(this, output);
+            return checks.shift().call(this, get_pathsets(model, slice.call(arguments), suffix));
         };
         
         function check(name, prop) {
+            
+            // if(model._boxed || model._materialized || model._treatErrorsAsValues) {
+            //     name += " [" +
+            //         (model._boxed && " boxed" || "") +
+            //         (model._materialized && " materialized" || "") +
+            //         (model._treatErrorsAsValues && " treatErrorsAsValues" || "") +
+            //     " ]";
+            // }
+            
+            name += " [" +
+                (" boxed: " + !!model._boxed) +
+                (", materialized: " + !!model._materialized) +
+                (", treatErrorsAsValues: " + !!model._treatErrorsAsValues) +
+            " ]";
+            
             var fn;
+            
             return function(output) {
-                expect(input[prop], message + " - " + name).to.deep.equals(output[prop]);
+                
+                // console.log("Set " + name + ":", inspect(input[prop], {depth: null}));
+                // console.log("Get " + name + ":", inspect(output[prop], {depth: null}));
+                
+                expect(output[prop], message + " - " + name).to.deep.equals(input[prop]);
+                
                 if(fn = checks.shift()) {
                     return fn.call(this, output);
                 } else {
@@ -42,10 +56,4 @@ function verify(suffix) {
             };
         }
     };
-}
-
-function get_seeds(pathvalues) {
-    return pathvalues.map(function() {
-        return {};
-    });
 }
