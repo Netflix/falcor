@@ -21,6 +21,7 @@ describe('DataSource Only', function() {
             var next = false;
             model.
                 get(['videos', 1234, 'summary'], function(x) {
+                    debugger
                     testRunner.compare(expected, x);
                     selector = true;
 
