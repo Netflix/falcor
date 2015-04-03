@@ -5,4 +5,5 @@ describe('Operations', function() {
     require('./invalidate');
     require('./request');
     require('./schedulers');
+    require('./bind');
 });
