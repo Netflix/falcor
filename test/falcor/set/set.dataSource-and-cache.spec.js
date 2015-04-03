@@ -12,7 +12,7 @@ var LocalDataSource = require('../../data/LocalDataSource');
 
 describe('DataSource and Cache', function() {
     describe('Selector Functions', function() {
-        it('should set a value from falcor.', function(done) {
+        it.only('should set a value from falcor.', function(done) {
             var model = new Model({cache: M(), source: new LocalDataSource(Cache())});
             var e1 = {
                 newValue: '1'
