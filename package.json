@@ -1,6 +1,6 @@
 {
   "name": "falcor",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "main": "index-node",
   "scripts": {
     "test": "./node_modules/gulp/bin/gulp.js test-coverage",
