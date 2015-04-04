@@ -26,6 +26,7 @@ describe("Invalidate", function() {
             }
         });
         var model = getModel(dataSource, Cache());
+        debugger;
         var invalidate = model.
             invalidate(["videos", 3355, "summary"]).
             flatMap(function() {
