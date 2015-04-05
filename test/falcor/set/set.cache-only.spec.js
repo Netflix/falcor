@@ -7,7 +7,7 @@ var getTestRunner = require('./../../getTestRunner');
 var testRunner = require('./../../testRunner');
 var noOp = function() {};
 
-describe('Cache Only', function() {
+describe.only('Cache Only', function() {
     describe('Selector Functions', function() {
         it('should set a value from falcor.', function(done) {
             var model = new Model({cache: Cache()});
