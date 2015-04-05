@@ -47,7 +47,7 @@ modes.forEach(function(opts, i) {
 });
 
 function execute(output, suffix, opts) {
-    
+
     describe("Build " + output + " from JSON values", function() {
         // set new values
         describe("by setting", function() {
@@ -139,7 +139,7 @@ function execute(output, suffix, opts) {
                 });
             });
             // end set primitive value
-            
+
             // set a sentinel value
             describe("a $sentinel", function() {
                 describe("in one place", function() {
@@ -263,7 +263,7 @@ function execute(output, suffix, opts) {
                 });
             });
             // end set sentinel value
-            
+
             // set a path value
             describe("a $path", function() {
                 describe("in one place", function() {
@@ -282,7 +282,7 @@ function execute(output, suffix, opts) {
                 });
             });
             // end set path value
-            
+
             // set multiple mixed-type json values
             describe("multiple mixed paths and values as", function() {
                 it("directly", function() {
@@ -312,7 +312,7 @@ function execute(output, suffix, opts) {
                         value: { $type: $path, value: ["movies", "django-unchained"] }
                     }], opts);
                 });
-                
+
                 it("through references", function() {
                     set_and_verify_json_values(this.test, suffix, [{
                         path: ["grid", 0, 0, "title"],
@@ -342,13 +342,13 @@ function execute(output, suffix, opts) {
                 });
             });
             // end set multiple mixed-type json values
-            
+
             it("negative expires values to be relative to the current time", function() {
-                
+
                 var model = new Model(_.extend({cache: partial_cache()}, opts));
                 var options = {model: model};
                 var start_time = Date.now();
-                
+
                 set_and_verify_json_values(this.test, suffix, [{
                     path: ["grid", 2],
                     value: {
@@ -357,7 +357,7 @@ function execute(output, suffix, opts) {
                         $expires: -1000
                     }
                 }], options);
-                
+
                 model.boxValues()
                     .get(["grid", 2])
                     .toPathValues()
@@ -370,12 +370,12 @@ function execute(output, suffix, opts) {
                         expect(future_time > elapsed_time);
                     });
             });
-            
+
             it("past an expired reference", function(done) {
-                
+
                 var model = new Model(_.extend({cache: partial_cache()}, opts));
                 var options = {model: model};
-                
+
                 set_and_verify_json_values(this.test, suffix, [{
                     path: ["grid", 2],
                     value: {
@@ -384,28 +384,28 @@ function execute(output, suffix, opts) {
                         $expires: -50
                     }
                 }], options);
-                
+
                 setTimeout(function() {
-                    
+
                     set_and_verify_json_values(this.test, suffix, [{
                         path: ["grid", 2, 0, "title"],
                         value: "Pulp Fiction"
                     }], options);
-                    
+
                     done();
-                    
+
                 }.bind(this), 100);
             });
-            
+
             it("enough values to activate cache pruning", function() {
-                
+
                 var count = 25;
                 var $size = 50;
                 var model = new Model(_.extend({
                     maxSize: (count * $size) + 1,
                     collectRatio: 1
                 }, opts)).materialize();
-                
+
                 set_and_verify_json_values(this.test, suffix, [{
                     path:  ["grid", "grid-1234", {length: count}],
                     value: {
@@ -414,7 +414,7 @@ function execute(output, suffix, opts) {
                         value: undefined
                     }
                 }], {model: model});
-                
+
                 set_and_verify_json_values(this.test, suffix, [{
                     path:  ["grid", "grid-1234", {from: count, length: count}],
                     value: {
@@ -423,14 +423,14 @@ function execute(output, suffix, opts) {
                         value: undefined
                     }
                 }], {model: model});
-                
+
                 var results = get_pathsets(model, [["grid", "grid-1234", {length: count}]], suffix);
                 var requestedMissingPaths = results.requestedMissingPaths;
-                
+
                 expect(requestedMissingPaths.length === count);
-                
+
                 model._collectRatio = 0;
-                
+
                 set_pathvalues([{
                     path:  ["grid", "grid-1234", {length: count}],
                     value: {
@@ -439,15 +439,15 @@ function execute(output, suffix, opts) {
                         value: undefined
                     }
                 }], suffix, {model: model});
-                
+
                 results = get_pathsets(model, [["grid", "grid-1234", {length: count * 2}]], suffix);
                 requestedMissingPaths = results.requestedMissingPaths;
-                
+
                 expect(requestedMissingPaths.length === count * 2);
             });
         });
         // end setting new values
-        
+
         // replace existing values
         describe("by replacing", function() {
             // replace a sentinel with a primitive
@@ -466,7 +466,7 @@ function execute(output, suffix, opts) {
                 });
             });
             // end replacing sentinel with primitive
-            
+
             // replace a branch with a primitive
             describe("a branch with a primitive", function() {
                 it("directly", function() {
@@ -477,7 +477,7 @@ function execute(output, suffix, opts) {
                 });
             });
             // end replacing branches with primitives
-            
+
             // replace a branch with an error
             describe("a branch with an error", function() {
                 it("directly", function() {
@@ -491,7 +491,7 @@ function execute(output, suffix, opts) {
                 });
             });
             // end replacing branches with errors
-            
+
             describe("a hard-linked path", function() {
                 it("directly", function() {
                     var model = new Model(_.extend({cache: whole_cache()}, opts));
@@ -501,7 +501,7 @@ function execute(output, suffix, opts) {
                         value: {
                             $type: $path,
                             value: ["rows", "row-0", "2"]
-                        } 
+                        }
                     }], {model: model});
                 });
                 it("through references", function() {

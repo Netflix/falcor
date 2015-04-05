@@ -49,7 +49,7 @@ function execute(output, suffix, opts) {
         // set new values
         describe("by setting", function() {
             // Michael TODO: make sure get is returning the same output as set
-            xit("nothing, hopefully", function() {
+            it("nothing, hopefully", function() {
                 set_and_verify_json_graph(this.test, suffix, [{
                     paths: [[null, null, null, null], [null, null, null, null]],
                     jsong: {}
@@ -864,7 +864,7 @@ function execute(output, suffix, opts) {
                 }], options);
 
                 setTimeout(function() {
-                    
+
                     if(suffix === "JSONG") {
                         var results = model["_setJSONGsAs" + suffix](model, [{
                             paths: [["grid", 2, 0, "title"]],
@@ -916,48 +916,48 @@ function execute(output, suffix, opts) {
                             }
                         }], options);
                     }
-                    
+
                     done();
 
                 }.bind(this), 100);
             });
 
             it("enough values to activate cache pruning", function() {
-                
+
                 var count = 25;
                 var $size = 50;
                 var model = new Model(_.extend({
                     maxSize: (count * $size) + 1,
                     collectRatio: 1
                 }, opts)).materialize();
-                
+
                 set_and_verify_json_graph(this.test, suffix, [{
                     paths:  [["grid", "grid-1234", {length: count}]],
                     value: get_cache(0, count)
                 }], {model: model});
-                
+
                 set_and_verify_json_graph(this.test, suffix, [{
                     paths:  [["grid", "grid-1234", {from: count, length: count}]],
                     value: get_cache(count, count + count)
                 }], {model: model});
-                
+
                 var results = get_pathsets(model, [["grid", "grid-1234", {length: count}]], suffix);
                 var requestedMissingPaths = results.requestedMissingPaths;
-                
+
                 expect(requestedMissingPaths.length === count);
-                
+
                 model._collectRatio = 0;
-                
+
                 set_envelopes([{
                     paths: [["grid", "grid-1234", {length: count}]],
                     jsong: get_cache(0, count)
                 }], suffix);
-                
+
                 results = get_pathsets(model, [["grid", "grid-1234", {length: count * 2}]], suffix);
                 requestedMissingPaths = results.requestedMissingPaths;
-                
+
                 expect(requestedMissingPaths.length === count * 2);
-                
+
                 function get_cache(from, to) {
                     return _.range(from, to).reduce(function(cache, i) {
                         return cache["grid"]["grid-1234"][i] = {
