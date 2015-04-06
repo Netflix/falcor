@@ -14,7 +14,7 @@ var isPathValue = function(x) {
 };
 
 describe('DataSource and Bind', function() {
-    xit('should get a value from from dataSource when bound.', function(done) {
+    it('should get a value from from dataSource when bound.', function(done) {
         var model = new Model({cache: M(), source: new LocalDataSource(Cache())});
         model._root.unsafeMode = true;
         model = model.bindSync(['genreList', 0]);
@@ -26,7 +26,6 @@ describe('DataSource and Bind', function() {
         var next = false;
         model.
             set({path: [1, 'summary'], value: expected}, function(x) {
-                debugger
                 testRunner.compare(expected, x);
                 selector = true;
 
