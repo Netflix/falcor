@@ -16,7 +16,7 @@
 !function(e){if("object"==typeof exports)module.exports=e();else if("function"==typeof define&&define.amd)define(e);else{var f;"undefined"!=typeof window?f=window:"undefined"!=typeof global?f=global:"undefined"!=typeof self&&(f=self),f.falcor=e()}}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 module.exports = _dereq_('./operations');
 
-},{"./operations":118}],2:[function(_dereq_,module,exports){
+},{"./operations":121}],2:[function(_dereq_,module,exports){
 var Constants = {
     NOOP: function NOOP() {},
     __GENERATION_GUID: 0,
@@ -76,7 +76,7 @@ falcor.NOOP = function() {};
 
 module.exports = falcor;
 
-},{"./rx.ultralite":34}],4:[function(_dereq_,module,exports){
+},{"./rx.ultralite":37}],4:[function(_dereq_,module,exports){
 var falcor = _dereq_('./Falcor');
 var Constants = _dereq_('./Constants');
 var RequestQueue = _dereq_('./request/RequestQueue');
@@ -154,7 +154,6 @@ Model.prototype = {
         return falcor.Observable.create(function(observer) {
 
             var boundModel;
-            debugger;
             try {
                 root.allowSync = true;
                 if(!(boundModel = model.bindSync(model._path.concat(boundPath)))) {
@@ -315,7 +314,7 @@ Model.prototype = {
     }
 };
 
-},{"./../get/getBoundValue":42,"./Constants":2,"./Falcor":3,"./ModelResponse":5,"./operations":11,"./operations/call":7,"./request/RequestQueue":33,"./scheduler/ImmediateScheduler":35,"./scheduler/TimeoutScheduler":36}],5:[function(_dereq_,module,exports){
+},{"./../get/getBoundValue":45,"./Constants":2,"./Falcor":3,"./ModelResponse":5,"./operations":12,"./operations/call":7,"./request/RequestQueue":36,"./scheduler/ImmediateScheduler":38,"./scheduler/TimeoutScheduler":39}],5:[function(_dereq_,module,exports){
 var falcor = _dereq_('./Falcor');
 
 var Observable  = falcor.Observable,
@@ -331,7 +330,17 @@ ModelResponse.create = function(forEach) {
     return new ModelResponse(forEach);
 };
 
-function noop() {};
+ModelResponse.fromOperation = function(model, args, selector, forEach) {
+    return new ModelResponse(function(observer) {
+        return forEach(Object.create(observer, {
+            operationModel: {value: model},
+            operationArgs: {value: args},
+            operationSelector: {value: selector}
+        }));
+    });
+};
+
+function noop() {}
 function mixin(self) {
     var mixins = Array.prototype.slice.call(arguments, 1);
     return new ModelResponse(function(other) {
@@ -339,7 +348,7 @@ function mixin(self) {
             return Object.create(proto, mixin);
         }, other));
     });
-};
+}
 
 ModelResponse.prototype = Observable.create(noop);
 ModelResponse.prototype.format = "AsPathMap";
@@ -458,63 +467,78 @@ function call(path, args, suffixes, paths, selector) {
 },{"../../Falcor":3,"./../../ModelResponse":5}],8:[function(_dereq_,module,exports){
 var combineOperations = _dereq_('./../support/combineOperations');
 var setSeedsOrOnNext = _dereq_('./../support/setSeedsOrOnNext');
-module.exports = function buildInitialArgs(model, args, seeds, format, selector, onNext) {
-    return function(seedRequired) {
-        var operations = combineOperations(args, format, 'get');
-        setSeedsOrOnNext(operations, seedRequired, seeds, onNext, selector);
+module.exports = function getInitialArgs(options, seeds, onNext) {
+    var seedRequired = options.format !== 'AsValues';
+    var operations =
+        combineOperations(options.operationArgs, options.format, 'get');
+    setSeedsOrOnNext(
+        operations, seedRequired, seeds, onNext, options.operationSelector);
 
-        return [operations, seeds, !!model._dataSource];
-    };
+    return [operations, seeds, !!options.operationModel._dataSource];
 };
 
-},{"./../support/combineOperations":18,"./../support/setSeedsOrOnNext":32}],9:[function(_dereq_,module,exports){
+},{"./../support/combineOperations":21,"./../support/setSeedsOrOnNext":35}],9:[function(_dereq_,module,exports){
 var getSourceObserver = _dereq_('./../support/getSourceObserever');
 var partitionOperations = _dereq_('./../support/partitionOperations');
 var mergeBoundPath = _dereq_('./../support/mergeBoundPath');
 
 module.exports = getSourceRequest;
 
-function getSourceRequest(model, args, seeds, format, selector, onNext) {
-    return function innerModelSourceRequest(relativeSeeds, combinedResults, cb) {
-        var missingPaths = combinedResults.requestedMissingPaths;
-        return model._request.get(
-            missingPaths,
-            combinedResults.optimizedMissingPaths,
-            getSourceObserver(model, missingPaths, function(err, results) {
-                if (err) {
-                    cb(err);
-                }
-                debugger;
-                results.paths = mergeBoundPath(model, results);
+function getSourceRequest(
+        options, onNext, seeds, relativeSeeds, combinedResults, cb) {
 
-                // partitions the operations by their pathSetIndex
-                var partitionOperationsAndSeeds = partitionOperations(
-                    results,
-                    missingPaths,
-                    format,
-                    relativeSeeds,
-                    onNext);
-                cb(null, partitionOperationsAndSeeds);
-            }));
-    };
+    var missingPaths = combinedResults.requestedMissingPaths;
+    var model = options.operationModel;
+    var boundPath = model._path;
+    return model._request.get(
+        missingPaths,
+        combinedResults.optimizedMissingPaths,
+        getSourceObserver(model, missingPaths, function(err, results) {
+            if (err) {
+                cb(err);
+                return;
+            }
+
+            if (boundPath.length) {
+                results = mergeBoundPath(results, model._path);
+            }
+
+            // partitions the operations by their pathSetIndex
+            var partitionOperationsAndSeeds = partitionOperations(
+                results,
+                missingPaths,
+                options.format,
+                relativeSeeds,
+                onNext);
+            cb(null, partitionOperationsAndSeeds);
+        }));
 }
 
 
-},{"./../support/getSourceObserever":20,"./../support/mergeBoundPath":24,"./../support/partitionOperations":27}],10:[function(_dereq_,module,exports){
+},{"./../support/getSourceObserever":23,"./../support/mergeBoundPath":27,"./../support/partitionOperations":30}],10:[function(_dereq_,module,exports){
+var getInitialArgs = _dereq_('./getInitialArgs');
+var getSourceRequest = _dereq_('./getSourceRequest');
+var shouldRequest = _dereq_('./shouldRequest');
+var request = _dereq_('./../request');
+var processOperations = _dereq_('./../support/processOperations');
+var get = request(
+    getInitialArgs,
+    getSourceRequest,
+    processOperations,
+    shouldRequest);
+
+module.exports = get;
+
+},{"./../request":15,"./../support/processOperations":32,"./getInitialArgs":8,"./getSourceRequest":9,"./shouldRequest":11}],11:[function(_dereq_,module,exports){
 module.exports = function(model, combinedResults) {
     return model._dataSource && combinedResults.requestedMissingPaths.length > 0;
 };
 
-},{}],11:[function(_dereq_,module,exports){
+},{}],12:[function(_dereq_,module,exports){
 var ModelResponse = _dereq_('../ModelResponse');
-var request = _dereq_('./request');
-var setInitialArgs = _dereq_('./set/buildInitialArgs');
-var setSourceRequest = _dereq_('./set/modelSourceRequest');
-var getInitialArgs = _dereq_('./get/buildInitialArgs');
-var getSourceRequest = _dereq_('./get/modelSourceRequest');
-var getShouldRequest = _dereq_('./get/shouldRequest');
-var invalidateInitialArgs = _dereq_('./invalidate/invalidateInitialArgs');
-var invalidateSourceRequest = _dereq_('./invalidate/modelSourceRequest');
+var get = _dereq_('./get');
+var set = _dereq_('./set');
+var invalidate = _dereq_('./invalidate');
 
 module.exports = function modelOperation(name) {
     return function() {
@@ -528,53 +552,51 @@ module.exports = function modelOperation(name) {
         }
 
         var modelResponder;
-        if (name === 'get') {
-            modelResponder = request(
-                model,
-                args,
-                selector,
-                getInitialArgs,
-                getSourceRequest,
-                getShouldRequest);
-        } else if (name === 'set') {
-            modelResponder = request(
-                model,
-                args,
-                selector,
-                setInitialArgs,
-                setSourceRequest);
-        } else if (name === 'invalidate') {
-            modelResponder = request(
-                model,
-                args,
-                selector,
-                invalidateInitialArgs,
-                invalidateSourceRequest);
+        switch (name) {
+            case 'get':
+                modelResponder = get;
+                break;
+            case 'set':
+                modelResponder = set;
+                break;
+            case 'invalidate':
+                modelResponder = invalidate;
+                break;
         }
-        return ModelResponse.create(modelResponder);
+        return ModelResponse.fromOperation(
+            model,
+            args,
+            selector,
+            modelResponder);
     };
 };
 
-},{"../ModelResponse":5,"./get/buildInitialArgs":8,"./get/modelSourceRequest":9,"./get/shouldRequest":10,"./invalidate/invalidateInitialArgs":12,"./invalidate/modelSourceRequest":13,"./request":14,"./set/buildInitialArgs":15,"./set/modelSourceRequest":16}],12:[function(_dereq_,module,exports){
+},{"../ModelResponse":5,"./get":10,"./invalidate":13,"./set":16}],13:[function(_dereq_,module,exports){
+var invalidateInitialArgs = _dereq_('./invalidateInitialArgs');
+var request = _dereq_('./../request');
+var processOperations = _dereq_('./../support/processOperations');
+var invalidate = request(
+    invalidateInitialArgs,
+    null,
+    processOperations);
+
+module.exports = invalidate;
+
+},{"./../request":15,"./../support/processOperations":32,"./invalidateInitialArgs":14}],14:[function(_dereq_,module,exports){
 var combineOperations = _dereq_('./../support/combineOperations');
 var setSeedsOrOnNext = _dereq_('./../support/setSeedsOrOnNext');
-module.exports = function invalidateInitialArgs(model, args, seeds, format, selector, onNext) {
-    return function(seedRequired) {
-        var operations = combineOperations(args, format, 'inv');
-        setSeedsOrOnNext(operations, seedRequired, seeds, onNext, selector);
+module.exports = function getInitialArgs(options, seeds, onNext) {
+    var seedRequired = options.format !== 'AsValues';
+    var operations = combineOperations(
+        options.operationArgs, options.format, 'inv');
+    setSeedsOrOnNext(
+        operations, seedRequired, seeds,
+        onNext, options.operationSelector);
 
-        return [operations, seeds, false];
-    };
+    return [operations, seeds, false];
 };
 
-},{"./../support/combineOperations":18,"./../support/setSeedsOrOnNext":32}],13:[function(_dereq_,module,exports){
-var noOp = function() {};
-module.exports = function() {
-    return noOp;
-};
-
-},{}],14:[function(_dereq_,module,exports){
-var processOperations = _dereq_('./support/processOperations');
+},{"./../support/combineOperations":21,"./../support/setSeedsOrOnNext":35}],15:[function(_dereq_,module,exports){
 var setSeedsOrOnNext = _dereq_('./support/setSeedsOrOnNext');
 var onNextValues = _dereq_('./support/onNextValue');
 var onCompletedOrError = _dereq_('./support/onCompletedOrError');
@@ -583,21 +605,24 @@ var autoTrue = function() { return true; };
 
 module.exports = request;
 
-function request(model, args, selector, buildInitialArgs, modelSourceRequest, shouldRequestFn) {
+function request(initialArgs, sourceRequest, processOperations, shouldRequestFn) {
     if (!shouldRequestFn) {
         shouldRequestFn = autoTrue;
     }
     return function innerRequest(options) {
-        var onNext = options.onNext.bind(options),
-            onError = options.onError.bind(options),
-            onCompleted = options.onCompleted.bind(options),
-            errorSelector = model._errorSelector,
-            isProgressive = options.isProgressive,
-            selectorLength = selector && selector.length || 0;
+        var selector = options.operationSelector;
+        var model = options.operationModel;
+        var args = options.operationArgs;
+        var onNext = options.onNext.bind(options);
+        var onError = options.onError.bind(options);
+        var onCompleted = options.onCompleted.bind(options);
+        var errorSelector = model._errorSelector;
+        var isProgressive = options.isProgressive;
+        var selectorLength = selector && selector.length || 0;
 
         // State variables
         var errors = [];
-        var format = selector && 'AsJSON' ||
+        var format = options.format = selector && 'AsJSON' ||
             options.format || 'AsPathMap';
         var toJSONG = format === 'AsJSONG';
         var toJSON = format === 'AsPathMap';
@@ -607,14 +632,13 @@ function request(model, args, selector, buildInitialArgs, modelSourceRequest, sh
         var i;
         var foundValue = false;
         var seeds = primeSeeds(selector, selectorLength);
-        var initialArgs = buildInitialArgs(model, args, seeds, format, selector, onNext);
-        var sourceRequest = modelSourceRequest(model, args, seeds, format, selector, onNext);
 
-        function recurse(operations, relativeSeeds, shouldRequest) {
+        function recurse(operations, relativeSeeds, shouldRequest, opts) {
             var combinedResults = processOperations(
                 model,
                 operations,
-                errorSelector);
+                errorSelector,
+                opts);
 
             foundValue = foundValue || combinedResults.valuesReceived;
             if (combinedResults.errors.length) {
@@ -623,6 +647,9 @@ function request(model, args, selector, buildInitialArgs, modelSourceRequest, sh
 
             if (shouldRequest && shouldRequestFn(model, combinedResults)) {
                 sourceRequest(
+                    options,
+                    onNext,
+                    seeds,
                     relativeSeeds,
                     combinedResults,
                     function onCompleteFromSourceSet(err, results) {
@@ -631,7 +658,6 @@ function request(model, args, selector, buildInitialArgs, modelSourceRequest, sh
                             recurse([], seeds);
                             return;
                         }
-                        debugger;
                         recurse.apply(null, results);
                     });
             }
@@ -650,7 +676,8 @@ function request(model, args, selector, buildInitialArgs, modelSourceRequest, sh
         }
 
         try {
-            recurse.apply(null, initialArgs(seedRequired));
+            recurse.apply(null,
+                initialArgs(options, seeds, onNext));
         } catch(e) {
             errors = [e];
             onCompletedOrError(onCompleted, onError, errors);
@@ -658,82 +685,142 @@ function request(model, args, selector, buildInitialArgs, modelSourceRequest, sh
     };
 }
 
-},{"./support/onCompletedOrError":25,"./support/onNextValue":26,"./support/primeSeeds":28,"./support/processOperations":29,"./support/setSeedsOrOnNext":32}],15:[function(_dereq_,module,exports){
+},{"./support/onCompletedOrError":28,"./support/onNextValue":29,"./support/primeSeeds":31,"./support/setSeedsOrOnNext":35}],16:[function(_dereq_,module,exports){
+var setInitialArgs = _dereq_('./setInitialArgs');
+var setSourceRequest = _dereq_('./setSourceRequest');
+var request = _dereq_('./../request');
+var setProcessOperations = _dereq_('./setProcessOperations');
+var set = request(
+    setInitialArgs,
+    setSourceRequest,
+    setProcessOperations);
+
+module.exports = set;
+
+},{"./../request":15,"./setInitialArgs":17,"./setProcessOperations":18,"./setSourceRequest":19}],17:[function(_dereq_,module,exports){
 var combineOperations = _dereq_('./../support/combineOperations');
 var setSeedsOrOnNext = _dereq_('./../support/setSeedsOrOnNext');
-module.exports = function buildInitialArgs(model, args, seeds, format, selector, onNext) {
-    return function(seedRequired) {
-        var shouldRequest = !!model._dataSource;
-        var firstFormat = shouldRequest && 'AsJSONG' || format;
-        var operations = combineOperations(args, firstFormat, 'set', shouldRequest && selector);
-        var firstSeeds = seeds;
-        if (shouldRequest && selector) {
+module.exports = function setInitialArgs(options, seeds, onNext) {
+    var seedRequired = options.format !== 'AsValues';
+    var shouldRequest = !!options.operationModel._dataSource;
+    var format = options.format;
+    var args = options.operationArgs;
+    var selector = options.operationSelector;
+    var firstFormat = shouldRequest && 'AsJSONG' || format;
+    var operations = combineOperations(
+            args, firstFormat, 'set', shouldRequest && selector);
+    var firstSeeds;
 
-            // Share the same jsong env in the jsong but not in the paths.
-            // This will be required for selector functions
-            var jsong = {};
-            firstSeeds = [];
-            operations.forEach(function(op) {
-                var seed = {
-                    jsong: jsong,
-                    paths: []
-                };
-                op.seeds = [seed];
-                firstSeeds.push(seed);
-            });
+    if (shouldRequest && selector) {
 
-        } else if (shouldRequest) {
-            firstSeeds = [{}];
-            setSeedsOrOnNext(operations, seedRequired, firstSeeds, false, selector);
-        } else {
-            operations = combineOperations(args, format, 'set');
-            setSeedsOrOnNext(operations, seedRequired, seeds, onNext, selector);
-            firstSeeds = seeds;
-        }
+        // Share the same jsong env in the jsong but not in the paths.
+        // This will be required for selector functions
+        var jsong = {};
+        firstSeeds = [];
+        operations.forEach(function(op) {
+            var seed = {
+                jsong: jsong,
+                paths: []
+            };
+            op.seeds = [seed];
+            firstSeeds.push(seed);
+        });
 
-        return [operations, firstSeeds, shouldRequest];
-    };
+    } else if (shouldRequest) {
+        firstSeeds = [{}];
+        setSeedsOrOnNext(operations, seedRequired, firstSeeds, false, options.selector);
+    } else {
+        firstSeeds = seeds;
+        operations = combineOperations(args, format, 'set');
+        setSeedsOrOnNext(operations, seedRequired, seeds, onNext, options.selector);
+    }
+
+    return [operations, firstSeeds, shouldRequest, {setWithBind: !shouldRequest}];
 };
 
-},{"./../support/combineOperations":18,"./../support/setSeedsOrOnNext":32}],16:[function(_dereq_,module,exports){
+},{"./../support/combineOperations":21,"./../support/setSeedsOrOnNext":35}],18:[function(_dereq_,module,exports){
+var processOperations = _dereq_('./../support/processOperations');
+var mergeBoundPath = _dereq_('./../support/mergeBoundPath');
+
+module.exports = setProcessOperations;
+
+function setProcessOperations(model, operations, errorSelector, options) {
+
+    var boundPath = model._path;
+    var hasBoundPath = boundPath.length > 0;
+    var setWithBind = options.setWithBind;
+
+    if (!setWithBind && hasBoundPath) {
+        model._path = [];
+
+        // For every operations arguments, they must be adjusted.
+        // Since this is always AsJSONG, mergeBoundPath works
+        for (var i = 0, opLen = operations.length; i < opLen; i++) {
+            var args = operations[i].args;
+            for (var j = 0, argsLen = args.length; j < argsLen; j++) {
+                args[i] = mergeBoundPath(args[i], boundPath);
+            }
+        }
+    }
+
+    var results = processOperations(model, operations, errorSelector);
+
+    // TODO: This is where i would do setProgessively
+
+    // Undo what we have done to the model's bound path.
+    if (!setWithBind && hasBoundPath) {
+        model._path = boundPath;
+    }
+
+    return results;
+}
+
+},{"./../support/mergeBoundPath":27,"./../support/processOperations":32}],19:[function(_dereq_,module,exports){
 var getSourceObserver = _dereq_('./../support/getSourceObserever');
 var combineOperations = _dereq_('./../support/combineOperations');
 var setSeedsOrOnNext = _dereq_('./../support/setSeedsOrOnNext');
 
-module.exports = modelSourceRequest;
+module.exports = setSourceRequest;
 
-function modelSourceRequest(model, args, seeds, format, selector, onNext) {
-    return function innerModelSourceRequest(relativeSeeds, combinedResults, cb) {
-        // gather all the paths and jsongs into one.
-        var jsong = relativeSeeds[0].jsong;
-        var paths = relativeSeeds[0].paths;
-        var seedRequired = seeds && seeds.length > 0;
-        for (i = 1; i < relativeSeeds.length; i++) {
-            paths = paths.concat(relativeSeeds[i].paths);
-        }
+function setSourceRequest(
+        options, onNext, seeds, relativeSeeds, combinedResults, cb) {
 
-        var jsongEnv = {jsong: jsong, paths: paths};
-        return model._request.set(
-            jsongEnv,
-            getSourceObserver(model, jsongEnv.paths, function(err, results) {
+    // gather all the paths and jsongs into one.
+    var jsong = relativeSeeds[0].jsong;
+    var paths = relativeSeeds[0].paths;
+    var seedRequired = seeds && seeds.length > 0;
+    var model = options.operationModel;
+
+    for (i = 1; i < relativeSeeds.length; i++) {
+        paths = paths.concat(relativeSeeds[i].paths);
+    }
+
+    var jsongEnv = {jsong: jsong, paths: paths};
+    return model._request.set(
+        jsongEnv,
+        getSourceObserver(
+            model,
+            jsongEnv.paths,
+            function setSourceRequestCB(err, results) {
                 if (err) {
                     cb(err);
                 }
-                debugger;
 
                 // Sets the results into the model.
                 model._setJSONGsAsJSON(model, [results], []);
 
                 // Gets the original paths / maps back out.
-                var operations = combineOperations(args, format, 'get');
-                setSeedsOrOnNext(operations, seedRequired, seeds, onNext, selector);
-                cb(null, [operations, seeds]);
+                var operations = combineOperations(
+                        options.operationArgs, options.format, 'get');
+                setSeedsOrOnNext(
+                    operations, seedRequired,
+                    seeds, onNext, options.operationSelector);
+                cb(null, [operations, seeds, false, {setWithBind: true}]);
             }));
-    };
 }
 
 
-},{"./../support/combineOperations":18,"./../support/getSourceObserever":20,"./../support/setSeedsOrOnNext":32}],17:[function(_dereq_,module,exports){
+},{"./../support/combineOperations":21,"./../support/getSourceObserever":23,"./../support/setSeedsOrOnNext":35}],20:[function(_dereq_,module,exports){
 module.exports = function buildJSONGOperation(format, seeds, jsongOp, seedOffset, onNext) {
     return {
         methodName: '_setJSONGs' + format,
@@ -746,7 +833,7 @@ module.exports = function buildJSONGOperation(format, seeds, jsongOp, seedOffset
     };
 };
 
-},{}],18:[function(_dereq_,module,exports){
+},{}],21:[function(_dereq_,module,exports){
 var isSeedRequired = _dereq_('./seedRequired');
 var isJSONG = _dereq_('./isJSONG');
 var isPathOrPathValue = _dereq_('./isPathOrPathValue');
@@ -784,7 +871,7 @@ module.exports = function combineOperations(args, format, name, spread) {
         }, []);
 };
 
-},{"./isJSONG":22,"./isPathOrPathValue":23,"./seedRequired":30}],19:[function(_dereq_,module,exports){
+},{"./isJSONG":25,"./isPathOrPathValue":26,"./seedRequired":33}],22:[function(_dereq_,module,exports){
 module.exports = function fastCollapse(paths) {
     return paths.reduce(function(acc, p) {
         var curr = acc[0];
@@ -804,7 +891,7 @@ module.exports = function fastCollapse(paths) {
     }, []);
 }
 
-},{}],20:[function(_dereq_,module,exports){
+},{}],23:[function(_dereq_,module,exports){
 var insertErrors = _dereq_('./insertErrors.js');
 /**
  * creates the model source observer
@@ -832,7 +919,7 @@ function getSourceObserver(model, requestedMissingPaths, cb) {
 
 module.exports = getSourceObserver;
 
-},{"./insertErrors.js":21}],21:[function(_dereq_,module,exports){
+},{"./insertErrors.js":24}],24:[function(_dereq_,module,exports){
 /**
  * will insert the error provided for every requestedPath.
  * @param {Model} model
@@ -856,33 +943,63 @@ module.exports = function insertErrors(model, requestedPaths, err) {
 };
 
 
-},{}],22:[function(_dereq_,module,exports){
+},{}],25:[function(_dereq_,module,exports){
 module.exports = function isJSONG(x) {
     return x.hasOwnProperty("jsong");
 };
 
-},{}],23:[function(_dereq_,module,exports){
+},{}],26:[function(_dereq_,module,exports){
 module.exports = function isPathOrPathValue(x) {
     return !!(Array.isArray(x)) || (
         x.hasOwnProperty("path") && x.hasOwnProperty("value"));
 };
 
-},{}],24:[function(_dereq_,module,exports){
-module.exports = function mergeBoundPath(model, jsongEnv) {
-    var boundPath = model._path;
-    var paths = [];
+},{}],27:[function(_dereq_,module,exports){
+var isJSONG = _dereq_('./isJSONG');
+var isPathValue = _dereq_('./isPathOrPathValue');
+
+module.exports =  mergeBoundPath;
+
+function mergeBoundPath(arg, boundPath) {
+    return isJSONG(arg) && mergeBoundPathIntoJSONG(arg, boundPath) ||
+        isPathValue(arg) && mergeBoundPathIntoPathValue(arg, boundPath) ||
+        mergeBoundPathIntoJSON(arg, boundPath);
+}
+
+function mergeBoundPathIntoJSONG(jsongEnv, boundPath) {
+    var newJSONGEnv = {jsong: jsongEnv.jsong, paths: jsongEnv.paths};
     if (boundPath.length) {
+        var paths = [];
         for (i = 0, len = jsongEnv.paths.length; i < len; i++) {
             paths[i] = boundPath.concat(jsongEnv.paths[i]);
         }
-    } else {
-        paths = jsongEnv.paths;
+        newJSONGEnv.paths = paths;
     }
 
-    return paths;
-};
+    return newJSONGEnv;
+}
 
-},{}],25:[function(_dereq_,module,exports){
+function mergeBoundPathIntoJSON(arg, boundPath) {
+    var newArg = arg;
+    if (boundPath.length) {
+        newArg = {};
+        for (var i = 0, len = boundPath.length - 1; i < len; i++) {
+            newArg[boundPath[i]] = {};
+        }
+        newArg[boundPath[i]] = arg;
+    }
+
+    return newArg;
+}
+
+function mergeBoundPathIntoPathValue(arg, boundPath) {
+    return {
+        path: boundPath.concat(arg.path),
+        value: arg.value
+    };
+}
+
+},{"./isJSONG":25,"./isPathOrPathValue":26}],28:[function(_dereq_,module,exports){
 module.exports = function onCompletedOrError(onCompleted, onError, errors) {
     if (errors.length) {
         onError(errors);
@@ -891,7 +1008,7 @@ module.exports = function onCompletedOrError(onCompleted, onError, errors) {
     }
 };
 
-},{}],26:[function(_dereq_,module,exports){
+},{}],29:[function(_dereq_,module,exports){
 /**
  * will onNext the observer with the seeds provided.
  * @param {Model} model
@@ -921,7 +1038,7 @@ module.exports = function onNextValues(model, onNext, seeds, selector) {
     root.allowSync = false;
 };
 
-},{}],27:[function(_dereq_,module,exports){
+},{}],30:[function(_dereq_,module,exports){
 var fastCollapse = _dereq_('./fastCollapse.js');
 var buildJSONGOperation = _dereq_('./buildJSONGOperation');
 
@@ -972,7 +1089,7 @@ function partitionOperations(jsongResponse, requestedMissingPaths, format, seeds
 }
 
 
-},{"./buildJSONGOperation":17,"./fastCollapse.js":19}],28:[function(_dereq_,module,exports){
+},{"./buildJSONGOperation":20,"./fastCollapse.js":22}],31:[function(_dereq_,module,exports){
 module.exports = function primeSeeds(selector, selectorLength) {
     var seeds = [];
     if (selector) {
@@ -985,7 +1102,7 @@ module.exports = function primeSeeds(selector, selectorLength) {
     return seeds;
 };
 
-},{}],29:[function(_dereq_,module,exports){
+},{}],32:[function(_dereq_,module,exports){
 module.exports = function processOperations(model, operations, errorSelector, boundPath) {
     return operations.reduce(function(memo, operation) {
 
@@ -1021,12 +1138,12 @@ module.exports = function processOperations(model, operations, errorSelector, bo
     });
 }
 
-},{}],30:[function(_dereq_,module,exports){
+},{}],33:[function(_dereq_,module,exports){
 module.exports = function isSeedRequired(format) {
     return format === 'AsJSON' || format === 'AsJSONG' || format === 'AsPathMap';
 };
 
-},{}],31:[function(_dereq_,module,exports){
+},{}],34:[function(_dereq_,module,exports){
 module.exports = function setSeedsOnGroups(groups, seeds, hasSelector) {
     var valueIndex = 0;
     var seedsLength = seeds.length;
@@ -1046,7 +1163,7 @@ module.exports = function setSeedsOnGroups(groups, seeds, hasSelector) {
     }
 }
 
-},{}],32:[function(_dereq_,module,exports){
+},{}],35:[function(_dereq_,module,exports){
 var setSeedsOnGroups = _dereq_('./setSeedsOnGroups');
 module.exports = function setSeedsOrOnNext(operations, seedRequired, seeds, onNext, selector) {
     if (seedRequired) {
@@ -1058,7 +1175,7 @@ module.exports = function setSeedsOrOnNext(operations, seedRequired, seeds, onNe
     }
 };
 
-},{"./setSeedsOnGroups":31}],33:[function(_dereq_,module,exports){
+},{"./setSeedsOnGroups":34}],36:[function(_dereq_,module,exports){
 var falcor = _dereq_('./../Falcor');
 var NOOP = falcor.NOOP;
 var RequestQueue = function(jsongModel, scheduler) {
@@ -1521,7 +1638,7 @@ falcor.__Internals.buildQueries = buildQueries;
 
 module.exports = RequestQueue;
 
-},{"./../Falcor":3}],34:[function(_dereq_,module,exports){
+},{"./../Falcor":3}],37:[function(_dereq_,module,exports){
 (function (global){
 /**
     Rx Ultralite!
@@ -1573,7 +1690,7 @@ if(Rx === undefined) {
         Observable: (function() {
             
             function Observable(s) {
-                this.s = s;
+                this._subscribe = s;
             }
             
             Observable.create = Observable.createWithDisposable = function(s) {
@@ -1594,8 +1711,27 @@ if(Rx === undefined) {
             Observable.prototype.materialize;
             Observable.prototype.reduce;
 
+            Observable.of = function() {
+                var len = arguments.length, args = new Array(len);
+                for(var i = 0; i < len; i++) { args[i] = arguments[i]; }
+                return Observable.create(function(observer) {
+                    var errorOcurred = false;
+                    try {
+                        for(var i = 0; i < len; ++i) {
+                            observer.onNext(args[i]);
+                        }
+                    } catch(e) {
+                        errorOcurred = true;
+                        observer.onError(e);
+                    }
+                    if(errorOcurred !== true) {
+                        observer.onCompleted();
+                    }
+                });
+            }
+
             Observable.prototype.subscribe = function(n, e, c) {
-                return this.s(
+                return this._subscribe(
                     (n != null && typeof n === 'object') ?
                     n :
                     Rx.Observer.create(n, e, c)
@@ -1679,7 +1815,7 @@ module.exports = Rx;
 
 
 }).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],35:[function(_dereq_,module,exports){
+},{}],38:[function(_dereq_,module,exports){
 function ImmediateScheduler() {
 }
 
@@ -1691,7 +1827,7 @@ ImmediateScheduler.prototype = {
 
 module.exports = ImmediateScheduler;
 
-},{}],36:[function(_dereq_,module,exports){
+},{}],39:[function(_dereq_,module,exports){
 function TimeoutScheduler(delay) {
     this.delay = delay;
 }
@@ -1704,7 +1840,7 @@ TimeoutScheduler.prototype = {
 
 module.exports = TimeoutScheduler;
 
-},{}],37:[function(_dereq_,module,exports){
+},{}],40:[function(_dereq_,module,exports){
 var hardLink = _dereq_('./util/hardlink');
 var createHardlink = hardLink.create;
 var onValue = _dereq_('./onValue');
@@ -1784,7 +1920,7 @@ function followReference(model, root, node, referenceContainer, reference, seed,
 }
 
 module.exports = followReference;
-},{"./onValue":49,"./util/hardlink":51,"./util/isExpired":52}],38:[function(_dereq_,module,exports){
+},{"./onValue":52,"./util/hardlink":54,"./util/isExpired":55}],41:[function(_dereq_,module,exports){
 var getBoundValue = _dereq_('./getBoundValue');
 var isPathValue = _dereq_('./util/isPathValue');
 module.exports = function(walk) {
@@ -1850,7 +1986,7 @@ module.exports = function(walk) {
 };
 
 
-},{"./getBoundValue":42,"./util/isPathValue":54}],39:[function(_dereq_,module,exports){
+},{"./getBoundValue":45,"./util/isPathValue":57}],42:[function(_dereq_,module,exports){
 var getBoundValue = _dereq_('./getBoundValue');
 var isPathValue = _dereq_('./util/isPathValue');
 module.exports = function(walk) {
@@ -1887,7 +2023,7 @@ module.exports = function(walk) {
 };
 
 
-},{"./getBoundValue":42,"./util/isPathValue":54}],40:[function(_dereq_,module,exports){
+},{"./getBoundValue":45,"./util/isPathValue":57}],43:[function(_dereq_,module,exports){
 var getBoundValue = _dereq_('./getBoundValue');
 var isPathValue = _dereq_('./util/isPathValue');
 module.exports = function(walk) {
@@ -1936,7 +2072,7 @@ module.exports = function(walk) {
     };
 };
 
-},{"./getBoundValue":42,"./util/isPathValue":54}],41:[function(_dereq_,module,exports){
+},{"./getBoundValue":45,"./util/isPathValue":57}],44:[function(_dereq_,module,exports){
 var getBoundValue = _dereq_('./getBoundValue');
 var isPathValue = _dereq_('./util/isPathValue');
 module.exports = function(walk) {
@@ -1982,7 +2118,7 @@ module.exports = function(walk) {
 };
 
 
-},{"./getBoundValue":42,"./util/isPathValue":54}],42:[function(_dereq_,module,exports){
+},{"./getBoundValue":45,"./util/isPathValue":57}],45:[function(_dereq_,module,exports){
 var getValueSync = _dereq_('./getValueSync');
 module.exports = function getBoundValue(model, path) {
     var boxed, value, shorted;
@@ -2006,7 +2142,7 @@ module.exports = function getBoundValue(model, path) {
 };
 
 
-},{"./getValueSync":43}],43:[function(_dereq_,module,exports){
+},{"./getValueSync":46}],46:[function(_dereq_,module,exports){
 var followReference = _dereq_('./followReference');
 var clone = _dereq_('./util/clone');
 var isExpired = _dereq_('./util/isExpired');
@@ -2103,7 +2239,7 @@ module.exports = function getValueSync(model, simplePath) {
     };
 };
 
-},{"./followReference":37,"./util/clone":50,"./util/isExpired":52,"./util/lru":55}],44:[function(_dereq_,module,exports){
+},{"./followReference":40,"./util/clone":53,"./util/isExpired":55,"./util/lru":58}],47:[function(_dereq_,module,exports){
 var followReference = _dereq_('./followReference');
 var onError = _dereq_('./onError');
 var onMissing = _dereq_('./onMissing');
@@ -2299,7 +2435,7 @@ function evaluateNode(model, curr, pathOrJSON, depth, seedOrFunction, requestedP
 
 module.exports = walk;
 
-},{"./followReference":37,"./onError":47,"./onMissing":48,"./onValue":49,"./util/hardlink":51,"./util/isExpired":52,"./util/isMaterialzed":53,"./util/lru":55,"./util/permuteKey":56}],45:[function(_dereq_,module,exports){
+},{"./followReference":40,"./onError":50,"./onMissing":51,"./onValue":52,"./util/hardlink":54,"./util/isExpired":55,"./util/isMaterialzed":56,"./util/lru":58,"./util/permuteKey":59}],48:[function(_dereq_,module,exports){
 var walk = _dereq_('./getWalk');
 module.exports = {
     getAsJSON: _dereq_('./getAsJSON')(walk),
@@ -2312,7 +2448,7 @@ module.exports = {
 };
 
 
-},{"./getAsJSON":38,"./getAsJSONG":39,"./getAsPathMap":40,"./getAsValues":41,"./getBoundValue":42,"./getValueSync":43,"./getWalk":44,"./legacy_setCache":46}],46:[function(_dereq_,module,exports){
+},{"./getAsJSON":41,"./getAsJSONG":42,"./getAsPathMap":43,"./getAsValues":44,"./getBoundValue":45,"./getValueSync":46,"./getWalk":47,"./legacy_setCache":49}],49:[function(_dereq_,module,exports){
 /* istanbul ignore next */
 var NOOP = function NOOP() {},
     __GENERATION_GUID = 0,
@@ -2742,7 +2878,7 @@ module.exports = function setCache(model, map) {
     return nodeRoot;
 }
 
-},{}],47:[function(_dereq_,module,exports){
+},{}],50:[function(_dereq_,module,exports){
 var lru = _dereq_('./util/lru');
 var clone = _dereq_('./util/clone');
 var promote = lru.promote;
@@ -2758,7 +2894,7 @@ module.exports = function onError(model, node, permuteRequested, permuteOptimize
 };
 
 
-},{"./util/clone":50,"./util/lru":55}],48:[function(_dereq_,module,exports){
+},{"./util/clone":53,"./util/lru":58}],51:[function(_dereq_,module,exports){
 var support = _dereq_('./util/support');
 var fastCat = support.fastCat,
     fastCatSkipNulls = support.fastCatSkipNulls,
@@ -2812,7 +2948,7 @@ function concatAndInsertMissing(remainingPath, results, permuteRequested, permut
 }
 
 
-},{"./util/clone":50,"./util/isExpired":52,"./util/spreadJSON":57,"./util/support":58}],49:[function(_dereq_,module,exports){
+},{"./util/clone":53,"./util/isExpired":55,"./util/spreadJSON":60,"./util/support":61}],52:[function(_dereq_,module,exports){
 var lru = _dereq_('./util/lru');
 var clone = _dereq_('./util/clone');
 var promote = lru.promote;
@@ -2957,7 +3093,7 @@ module.exports = function onValue(model, node, seedOrFunction, outerResults, per
 
 
 
-},{"./util/clone":50,"./util/lru":55}],50:[function(_dereq_,module,exports){
+},{"./util/clone":53,"./util/lru":58}],53:[function(_dereq_,module,exports){
 // Copies the node
 module.exports = function clone(node) {
     var outValue, i, len;
@@ -2975,7 +3111,7 @@ module.exports = function clone(node) {
 };
 
 
-},{}],51:[function(_dereq_,module,exports){
+},{}],54:[function(_dereq_,module,exports){
 function createHardlink(from, to) {
     
     // create a back reference
@@ -3010,23 +3146,23 @@ module.exports = {
     remove: removeHardlink
 };
 
-},{}],52:[function(_dereq_,module,exports){
+},{}],55:[function(_dereq_,module,exports){
 var now = _dereq_('../../support/now');
 module.exports = function isExpired(node) {
     var $expires = node.$expires === undefined && -1 || node.$expires;
     return $expires !== -1 && $expires !== 1 && ($expires === 0 || $expires < now());
 };
 
-},{"../../support/now":98}],53:[function(_dereq_,module,exports){
+},{"../../support/now":101}],56:[function(_dereq_,module,exports){
 module.exports = function isMaterialized(model) {
     return model._materialized && !(model._router || model._dataSource);
 };
 
-},{}],54:[function(_dereq_,module,exports){
+},{}],57:[function(_dereq_,module,exports){
 module.exports = function(x) {
     return x.path && x.value;
 };
-},{}],55:[function(_dereq_,module,exports){
+},{}],58:[function(_dereq_,module,exports){
 // [H] -> Next -> ... -> [T]
 // [T] -> Prev -> ... -> [H]
 function lruPromote(model, object) {
@@ -3098,7 +3234,7 @@ module.exports = {
     promote: lruPromote,
     splice: lruSplice
 };
-},{}],56:[function(_dereq_,module,exports){
+},{}],59:[function(_dereq_,module,exports){
 module.exports = function permuteKey(key, memo) {
     if (memo.isArray) {
         if (memo.loaded && memo.rangeOffset > memo.to) {
@@ -3145,7 +3281,7 @@ module.exports = function permuteKey(key, memo) {
 };
 
 
-},{}],57:[function(_dereq_,module,exports){
+},{}],60:[function(_dereq_,module,exports){
 var fastCopy = _dereq_('./support').fastCopy;
 module.exports = function spreadJSON(root, bins, bin) {
     bin = bin || [];
@@ -3170,7 +3306,7 @@ module.exports = function spreadJSON(root, bins, bin) {
     }
 };
 
-},{"./support":58}],58:[function(_dereq_,module,exports){
+},{"./support":61}],61:[function(_dereq_,module,exports){
 
 
 function fastCopy(arr, i) {
@@ -3213,14 +3349,14 @@ module.exports = {
     fastCopy: fastCopy
 };
 
-},{}],59:[function(_dereq_,module,exports){
+},{}],62:[function(_dereq_,module,exports){
 module.exports = {
     invPathSetsAsJSON: _dereq_("./invalidate-path-sets-as-json-dense"),
     invPathSetsAsJSONG: _dereq_("./invalidate-path-sets-as-json-graph"),
     invPathSetsAsPathMap: _dereq_("./invalidate-path-sets-as-json-sparse"),
     invPathSetsAsValues: _dereq_("./invalidate-path-sets-as-json-values")
 };
-},{"./invalidate-path-sets-as-json-dense":60,"./invalidate-path-sets-as-json-graph":61,"./invalidate-path-sets-as-json-sparse":62,"./invalidate-path-sets-as-json-values":63}],60:[function(_dereq_,module,exports){
+},{"./invalidate-path-sets-as-json-dense":63,"./invalidate-path-sets-as-json-graph":64,"./invalidate-path-sets-as-json-sparse":65,"./invalidate-path-sets-as-json-values":66}],63:[function(_dereq_,module,exports){
 module.exports = invalidate_path_sets_as_json_dense;
 
 var clone = _dereq_("../support/clone-dense-json");
@@ -3346,7 +3482,7 @@ function onEdge(pathset, roots, parents, nodes, requested, optimized, key, keyse
     roots.hasValue = true;
     roots.requestedPaths.push(array_slice(requested, roots.offset));
 }
-},{"../lru/collect":64,"../support/array-clone":77,"../support/array-slice":78,"../support/clone-dense-json":79,"../support/get-valid-key":88,"../support/invalidate-node":92,"../support/is-object":94,"../support/options":99,"../support/update-graph":108,"../walk/walk-path-set":116}],61:[function(_dereq_,module,exports){
+},{"../lru/collect":67,"../support/array-clone":80,"../support/array-slice":81,"../support/clone-dense-json":82,"../support/get-valid-key":91,"../support/invalidate-node":95,"../support/is-object":97,"../support/options":102,"../support/update-graph":111,"../walk/walk-path-set":119}],64:[function(_dereq_,module,exports){
 module.exports = invalidate_path_sets_as_json_graph;
 
 var $path = _dereq_("../types/$path");
@@ -3460,7 +3596,7 @@ function onEdge(pathset, roots, parents, nodes, requested, optimized, key, keyse
     roots.json = roots[1];
     roots.hasValue = true;
 }
-},{"../lru/collect":64,"../support/array-clone":77,"../support/clone-dense-json":79,"../support/clone-success-paths":84,"../support/get-valid-key":88,"../support/invalidate-node":92,"../support/is-object":94,"../support/options":99,"../support/update-graph":108,"../types/$path":111,"../walk/walk-path-set-soft-link":115}],62:[function(_dereq_,module,exports){
+},{"../lru/collect":67,"../support/array-clone":80,"../support/clone-dense-json":82,"../support/clone-success-paths":87,"../support/get-valid-key":91,"../support/invalidate-node":95,"../support/is-object":97,"../support/options":102,"../support/update-graph":111,"../types/$path":114,"../walk/walk-path-set-soft-link":118}],65:[function(_dereq_,module,exports){
 module.exports = invalidate_path_sets_as_json_sparse;
 
 var clone = _dereq_("../support/clone-dense-json");
@@ -3566,7 +3702,7 @@ function onEdge(pathset, roots, parents, nodes, requested, optimized, key, keyse
     roots.hasValue = true;
     roots.requestedPaths.push(array_slice(requested, roots.offset));
 }
-},{"../lru/collect":64,"../support/array-clone":77,"../support/array-slice":78,"../support/clone-dense-json":79,"../support/get-valid-key":88,"../support/invalidate-node":92,"../support/is-object":94,"../support/options":99,"../support/update-graph":108,"../walk/walk-path-set":116}],63:[function(_dereq_,module,exports){
+},{"../lru/collect":67,"../support/array-clone":80,"../support/array-slice":81,"../support/clone-dense-json":82,"../support/get-valid-key":91,"../support/invalidate-node":95,"../support/is-object":97,"../support/options":102,"../support/update-graph":111,"../walk/walk-path-set":119}],66:[function(_dereq_,module,exports){
 module.exports = invalidate_path_sets_as_json_values;
 
 var clone = _dereq_("../support/clone-dense-json");
@@ -3668,7 +3804,7 @@ function onEdge(pathset, roots, parents, nodes, requested, optimized, key, keyse
     }
     roots.requestedPaths.push(array_slice(requested, roots.offset));
 }
-},{"../lru/collect":64,"../support/array-clone":77,"../support/array-slice":78,"../support/clone-dense-json":79,"../support/get-valid-key":88,"../support/invalidate-node":92,"../support/is-object":94,"../support/options":99,"../support/update-graph":108,"../walk/walk-path-set":116}],64:[function(_dereq_,module,exports){
+},{"../lru/collect":67,"../support/array-clone":80,"../support/array-slice":81,"../support/clone-dense-json":82,"../support/get-valid-key":91,"../support/invalidate-node":95,"../support/is-object":97,"../support/options":102,"../support/update-graph":111,"../walk/walk-path-set":119}],67:[function(_dereq_,module,exports){
 var update_graph = _dereq_("../support/update-graph");
 module.exports = function(lru, expired, version, total, max, ratio) {
     
@@ -3697,7 +3833,7 @@ module.exports = function(lru, expired, version, total, max, ratio) {
         }
     }
 };
-},{"../support/update-graph":108}],65:[function(_dereq_,module,exports){
+},{"../support/update-graph":111}],68:[function(_dereq_,module,exports){
 var $expires_never = 1;
 var is_object = _dereq_("../support/is-object");
 module.exports = function(root, node) {
@@ -3718,7 +3854,7 @@ module.exports = function(root, node) {
     }
     return node;
 };
-},{"../support/is-object":94}],66:[function(_dereq_,module,exports){
+},{"../support/is-object":97}],69:[function(_dereq_,module,exports){
 module.exports = function(root, node) {
     var head = root.__head, tail = root.__tail,
         next = node.__next, prev = node.__prev;
@@ -3729,7 +3865,7 @@ module.exports = function(root, node) {
     node.__next = node.__prev = undefined;
     head = tail = next = prev = undefined;
 };
-},{}],67:[function(_dereq_,module,exports){
+},{}],70:[function(_dereq_,module,exports){
 module.exports = {
     setPathSetsAsJSON: _dereq_('./set-json-values-as-json-dense'),
     setPathSetsAsJSONG: _dereq_('./set-json-values-as-json-graph'),
@@ -3742,7 +3878,7 @@ module.exports = {
     setJSONGsAsValues: _dereq_('./set-json-graph-as-json-values')
 };
 
-},{"./set-json-graph-as-json-dense":68,"./set-json-graph-as-json-graph":69,"./set-json-graph-as-json-sparse":70,"./set-json-graph-as-json-values":71,"./set-json-values-as-json-dense":72,"./set-json-values-as-json-graph":73,"./set-json-values-as-json-sparse":74,"./set-json-values-as-json-values":75}],68:[function(_dereq_,module,exports){
+},{"./set-json-graph-as-json-dense":71,"./set-json-graph-as-json-graph":72,"./set-json-graph-as-json-sparse":73,"./set-json-graph-as-json-values":74,"./set-json-values-as-json-dense":75,"./set-json-values-as-json-graph":76,"./set-json-values-as-json-sparse":77,"./set-json-values-as-json-values":78}],71:[function(_dereq_,module,exports){
 module.exports = set_json_graph_as_json_dense;
 
 var $path = _dereq_("../types/$path");
@@ -3899,7 +4035,7 @@ function onEdge(pathset, roots, parents, nodes, requested, optimized, key, keyse
         }
     }
 }
-},{"../lru/collect":64,"../support/array-clone":77,"../support/clone-dense-json":79,"../support/clone-success-paths":84,"../support/get-valid-key":88,"../support/is-object":94,"../support/merge-node":97,"../support/options":99,"../support/treat-node-as-error":104,"../support/treat-node-as-miss":105,"../types/$path":111,"../walk/walk-path-set-soft-link":115}],69:[function(_dereq_,module,exports){
+},{"../lru/collect":67,"../support/array-clone":80,"../support/clone-dense-json":82,"../support/clone-success-paths":87,"../support/get-valid-key":91,"../support/is-object":97,"../support/merge-node":100,"../support/options":102,"../support/treat-node-as-error":107,"../support/treat-node-as-miss":108,"../types/$path":114,"../walk/walk-path-set-soft-link":118}],72:[function(_dereq_,module,exports){
 module.exports = set_json_graph_as_json_graph;
 
 var $path = _dereq_("../types/$path");
@@ -4052,7 +4188,7 @@ function onEdge(pathset, roots, parents, nodes, requested, optimized, key, keyse
         roots.hasValue = true;
     }
 }
-},{"../lru/collect":64,"../lru/promote":65,"../support/array-clone":77,"../support/clone-graph-json":80,"../support/clone-success-paths":84,"../support/get-valid-key":88,"../support/is-object":94,"../support/merge-node":97,"../support/options":99,"../support/treat-node-as-error":104,"../support/treat-node-as-miss":105,"../types/$path":111,"../walk/walk-path-set-soft-link":115}],70:[function(_dereq_,module,exports){
+},{"../lru/collect":67,"../lru/promote":68,"../support/array-clone":80,"../support/clone-graph-json":83,"../support/clone-success-paths":87,"../support/get-valid-key":91,"../support/is-object":97,"../support/merge-node":100,"../support/options":102,"../support/treat-node-as-error":107,"../support/treat-node-as-miss":108,"../types/$path":114,"../walk/walk-path-set-soft-link":118}],73:[function(_dereq_,module,exports){
 module.exports = set_json_graph_as_json_sparse;
 
 var $path = _dereq_("../types/$path");
@@ -4200,7 +4336,7 @@ function onEdge(pathset, roots, parents, nodes, requested, optimized, key, keyse
         }
     }
 }
-},{"../lru/collect":64,"../support/array-clone":77,"../support/clone-dense-json":79,"../support/clone-success-paths":84,"../support/get-valid-key":88,"../support/is-object":94,"../support/merge-node":97,"../support/options":99,"../support/treat-node-as-error":104,"../support/treat-node-as-miss":105,"../types/$path":111,"../walk/walk-path-set-soft-link":115}],71:[function(_dereq_,module,exports){
+},{"../lru/collect":67,"../support/array-clone":80,"../support/clone-dense-json":82,"../support/clone-success-paths":87,"../support/get-valid-key":91,"../support/is-object":97,"../support/merge-node":100,"../support/options":102,"../support/treat-node-as-error":107,"../support/treat-node-as-miss":108,"../types/$path":114,"../walk/walk-path-set-soft-link":118}],74:[function(_dereq_,module,exports){
 module.exports = set_json_graph_as_json_values;
 
 var $path = _dereq_("../types/$path");
@@ -4321,7 +4457,7 @@ function onEdge(pathset, roots, parents, nodes, requested, optimized, key, keyse
         }
     }
 }
-},{"../lru/collect":64,"../support/array-clone":77,"../support/array-slice":78,"../support/clone-dense-json":79,"../support/clone-success-paths":84,"../support/get-valid-key":88,"../support/is-object":94,"../support/merge-node":97,"../support/options":99,"../support/treat-node-as-error":104,"../support/treat-node-as-miss":105,"../types/$path":111,"../walk/walk-path-set-soft-link":115}],72:[function(_dereq_,module,exports){
+},{"../lru/collect":67,"../support/array-clone":80,"../support/array-slice":81,"../support/clone-dense-json":82,"../support/clone-success-paths":87,"../support/get-valid-key":91,"../support/is-object":97,"../support/merge-node":100,"../support/options":102,"../support/treat-node-as-error":107,"../support/treat-node-as-miss":108,"../types/$path":114,"../walk/walk-path-set-soft-link":118}],75:[function(_dereq_,module,exports){
 module.exports = set_json_values_as_json_dense;
 
 var $path = _dereq_("../types/$path");
@@ -4488,7 +4624,7 @@ function onEdge(pathset, roots, parents, nodes, requested, optimized, key, keyse
         }
     }
 }
-},{"../lru/collect":64,"../support/array-clone":77,"../support/clone-dense-json":79,"../support/clone-success-paths":84,"../support/create-branch":86,"../support/get-valid-key":88,"../support/graph-node":89,"../support/inc-generation":90,"../support/is-object":94,"../support/options":99,"../support/replace-node":102,"../support/treat-node-as-error":104,"../support/treat-node-as-miss":105,"../support/update-back-refs":107,"../support/update-graph":108,"../support/wrap-node":109,"../types/$error":110,"../types/$path":111,"../types/$sentinel":112,"../walk/walk-path-set":116}],73:[function(_dereq_,module,exports){
+},{"../lru/collect":67,"../support/array-clone":80,"../support/clone-dense-json":82,"../support/clone-success-paths":87,"../support/create-branch":89,"../support/get-valid-key":91,"../support/graph-node":92,"../support/inc-generation":93,"../support/is-object":97,"../support/options":102,"../support/replace-node":105,"../support/treat-node-as-error":107,"../support/treat-node-as-miss":108,"../support/update-back-refs":110,"../support/update-graph":111,"../support/wrap-node":112,"../types/$error":113,"../types/$path":114,"../types/$sentinel":115,"../walk/walk-path-set":119}],76:[function(_dereq_,module,exports){
 module.exports = set_json_values_as_json_graph;
 
 var $path = _dereq_("../types/$path");
@@ -4662,7 +4798,7 @@ function onEdge(pathset, roots, parents, nodes, requested, optimized, key, keyse
         roots.hasValue = true;
     }
 }
-},{"../lru/collect":64,"../lru/promote":65,"../support/array-clone":77,"../support/clone-graph-json":80,"../support/clone-success-paths":84,"../support/create-branch":86,"../support/get-valid-key":88,"../support/graph-node":89,"../support/inc-generation":90,"../support/is-object":94,"../support/options":99,"../support/replace-node":102,"../support/treat-node-as-error":104,"../support/treat-node-as-miss":105,"../support/update-back-refs":107,"../support/update-graph":108,"../support/wrap-node":109,"../types/$error":110,"../types/$path":111,"../types/$sentinel":112,"../walk/walk-path-set-soft-link":115}],74:[function(_dereq_,module,exports){
+},{"../lru/collect":67,"../lru/promote":68,"../support/array-clone":80,"../support/clone-graph-json":83,"../support/clone-success-paths":87,"../support/create-branch":89,"../support/get-valid-key":91,"../support/graph-node":92,"../support/inc-generation":93,"../support/is-object":97,"../support/options":102,"../support/replace-node":105,"../support/treat-node-as-error":107,"../support/treat-node-as-miss":108,"../support/update-back-refs":110,"../support/update-graph":111,"../support/wrap-node":112,"../types/$error":113,"../types/$path":114,"../types/$sentinel":115,"../walk/walk-path-set-soft-link":118}],77:[function(_dereq_,module,exports){
 module.exports = set_json_values_as_json_sparse;
 
 var $path = _dereq_("../types/$path");
@@ -4821,7 +4957,7 @@ function onEdge(pathset, roots, parents, nodes, requested, optimized, key, keyse
         }
     }
 }
-},{"../lru/collect":64,"../support/array-clone":77,"../support/clone-dense-json":79,"../support/clone-success-paths":84,"../support/create-branch":86,"../support/get-valid-key":88,"../support/graph-node":89,"../support/inc-generation":90,"../support/is-object":94,"../support/options":99,"../support/replace-node":102,"../support/treat-node-as-error":104,"../support/treat-node-as-miss":105,"../support/update-back-refs":107,"../support/update-graph":108,"../support/wrap-node":109,"../types/$error":110,"../types/$path":111,"../types/$sentinel":112,"../walk/walk-path-set":116}],75:[function(_dereq_,module,exports){
+},{"../lru/collect":67,"../support/array-clone":80,"../support/clone-dense-json":82,"../support/clone-success-paths":87,"../support/create-branch":89,"../support/get-valid-key":91,"../support/graph-node":92,"../support/inc-generation":93,"../support/is-object":97,"../support/options":102,"../support/replace-node":105,"../support/treat-node-as-error":107,"../support/treat-node-as-miss":108,"../support/update-back-refs":110,"../support/update-graph":111,"../support/wrap-node":112,"../types/$error":113,"../types/$path":114,"../types/$sentinel":115,"../walk/walk-path-set":119}],78:[function(_dereq_,module,exports){
 module.exports = set_json_values_as_json_values;
 
 var $error = _dereq_("../types/$error");
@@ -4955,7 +5091,7 @@ function onEdge(pathset, roots, parents, nodes, requested, optimized, key, keyse
         }
     }
 }
-},{"../lru/collect":64,"../support/array-clone":77,"../support/clone-dense-json":79,"../support/clone-success-paths":84,"../support/create-branch":86,"../support/get-valid-key":88,"../support/graph-node":89,"../support/inc-generation":90,"../support/is-object":94,"../support/options":99,"../support/replace-node":102,"../support/treat-node-as-error":104,"../support/treat-node-as-miss":105,"../support/update-back-refs":107,"../support/update-graph":108,"../support/wrap-node":109,"../types/$error":110,"../types/$sentinel":112,"../walk/walk-path-set":116}],76:[function(_dereq_,module,exports){
+},{"../lru/collect":67,"../support/array-clone":80,"../support/clone-dense-json":82,"../support/clone-success-paths":87,"../support/create-branch":89,"../support/get-valid-key":91,"../support/graph-node":92,"../support/inc-generation":93,"../support/is-object":97,"../support/options":102,"../support/replace-node":105,"../support/treat-node-as-error":107,"../support/treat-node-as-miss":108,"../support/update-back-refs":110,"../support/update-graph":111,"../support/wrap-node":112,"../types/$error":113,"../types/$sentinel":115,"../walk/walk-path-set":119}],79:[function(_dereq_,module,exports){
 module.exports = function(array, value) {
     var i = -1;
     var n = array.length;
@@ -4964,7 +5100,7 @@ module.exports = function(array, value) {
     array2[i] = value;
     return array2;
 };
-},{}],77:[function(_dereq_,module,exports){
+},{}],80:[function(_dereq_,module,exports){
 module.exports = function(array) {
     var i = -1;
     var n = array.length;
@@ -4972,7 +5108,7 @@ module.exports = function(array) {
     while(++i < n) { array2[i] = array[i]; }
     return array2;
 };
-},{}],78:[function(_dereq_,module,exports){
+},{}],81:[function(_dereq_,module,exports){
 module.exports = function(array, index) {
     var i = -1;
     var n = array.length - index;
@@ -4980,7 +5116,7 @@ module.exports = function(array, index) {
     while(++i < n) { array2[i] = array[i + index]; }
     return array2;
 };
-},{}],79:[function(_dereq_,module,exports){
+},{}],82:[function(_dereq_,module,exports){
 var $sentinel = _dereq_("../types/$sentinel");
 var clone = _dereq_("./clone");
 module.exports = function(roots, node, type, value) {
@@ -4996,7 +5132,7 @@ module.exports = function(roots, node, type, value) {
     return value;
 }
 
-},{"../types/$sentinel":112,"./clone":85}],80:[function(_dereq_,module,exports){
+},{"../types/$sentinel":115,"./clone":88}],83:[function(_dereq_,module,exports){
 var $sentinel = _dereq_("../types/$sentinel");
 var clone = _dereq_("./clone");
 var is_primitive = _dereq_("./is-primitive");
@@ -5016,14 +5152,14 @@ module.exports = function(roots, node, type, value) {
     
     return clone(node);
 }
-},{"../types/$sentinel":112,"./clone":85,"./is-primitive":95}],81:[function(_dereq_,module,exports){
+},{"../types/$sentinel":115,"./clone":88,"./is-primitive":98}],84:[function(_dereq_,module,exports){
 var clone_requested_path = _dereq_("./clone-requested-path");
 var clone_optimized_path = _dereq_("./clone-optimized-path");
 module.exports = function(roots, pathset, requested, optimized) {
     roots.requestedMissingPaths.push(clone_requested_path(roots.bound, requested, pathset, roots.index));
     roots.optimizedMissingPaths.push(clone_optimized_path(optimized, pathset));
 }
-},{"./clone-optimized-path":82,"./clone-requested-path":83}],82:[function(_dereq_,module,exports){
+},{"./clone-optimized-path":85,"./clone-requested-path":86}],85:[function(_dereq_,module,exports){
 module.exports = function(optimized, rest) {
     var x;
     var i = -1;
@@ -5035,7 +5171,7 @@ module.exports = function(optimized, rest) {
     while(++j < m) { if((x = rest[j]) != null) { array2[i++] = x; } }
     return array2;
 }
-},{}],83:[function(_dereq_,module,exports){
+},{}],86:[function(_dereq_,module,exports){
 module.exports = function(bound, requested, rest, index) {
     var x;
     var i = -1;
@@ -5053,14 +5189,14 @@ module.exports = function(bound, requested, rest, index) {
     }
     return array2;
 }
-},{}],84:[function(_dereq_,module,exports){
+},{}],87:[function(_dereq_,module,exports){
 var array_slice = _dereq_("./array-slice");
 var array_clone = _dereq_("./array-clone");
 module.exports = function(roots, requested, optimized) {
     roots.requestedPaths.push(array_slice(requested, roots.offset));
     roots.optimizedPaths.push(array_clone(optimized));
 }
-},{"./array-clone":77,"./array-slice":78}],85:[function(_dereq_,module,exports){
+},{"./array-clone":80,"./array-slice":81}],88:[function(_dereq_,module,exports){
 var is_object = _dereq_("./is-object");
 module.exports = function(value) {
     var dest = value, src = dest, i = -1, n, keys, key;
@@ -5077,7 +5213,7 @@ module.exports = function(value) {
     }
     return dest;
 }
-},{"./is-object":94}],86:[function(_dereq_,module,exports){
+},{"./is-object":97}],89:[function(_dereq_,module,exports){
 var $path = _dereq_("../types/$path");
 var $expired = "expired";
 var replace_node = _dereq_("./replace-node");
@@ -5099,7 +5235,7 @@ module.exports = function(roots, parent, node, type, key) {
     }
     return node;
 }
-},{"../types/$path":111,"./graph-node":89,"./is-expired":93,"./is-primitive":95,"./replace-node":102,"./update-back-refs":107}],87:[function(_dereq_,module,exports){
+},{"../types/$path":114,"./graph-node":92,"./is-expired":96,"./is-primitive":98,"./replace-node":105,"./update-back-refs":110}],90:[function(_dereq_,module,exports){
 var __ref = "__ref";
 module.exports = function(node) {
     var ref, i = -1, n = node.__refs_length || 0;
@@ -5110,7 +5246,7 @@ module.exports = function(node) {
     }
     node.__refs_length = undefined
 }
-},{}],88:[function(_dereq_,module,exports){
+},{}],91:[function(_dereq_,module,exports){
 module.exports = function(path) {
     var key, index = path.length - 1;
     do {
@@ -5120,7 +5256,7 @@ module.exports = function(path) {
     } while(--index > -1);
     return null;
 }
-},{}],89:[function(_dereq_,module,exports){
+},{}],92:[function(_dereq_,module,exports){
 
 var $root = "/";
 var $self = "./";
@@ -5136,13 +5272,13 @@ module.exports = function(root, parent, node, key, generation) {
     node[$generation] = generation;
     return node;
 }
-},{}],90:[function(_dereq_,module,exports){
+},{}],93:[function(_dereq_,module,exports){
 var generation = 0;
 module.exports = function() { return generation++; }
-},{}],91:[function(_dereq_,module,exports){
+},{}],94:[function(_dereq_,module,exports){
 var version = 0;
 module.exports = function() { return version++; }
-},{}],92:[function(_dereq_,module,exports){
+},{}],95:[function(_dereq_,module,exports){
 module.exports = invalidate;
 
 var is_object = _dereq_("./is-object");
@@ -5164,7 +5300,7 @@ function invalidate(parent, node, key, lru) {
     }
     return false;
 }
-},{"./is-object":94,"./remove-node":101}],93:[function(_dereq_,module,exports){
+},{"./is-object":97,"./remove-node":104}],96:[function(_dereq_,module,exports){
 var $expires_now = _dereq_("../values/$expires-now");
 var $expires_never = _dereq_("../values/$expires-never");
 var now = _dereq_("./now");
@@ -5184,17 +5320,17 @@ module.exports = function(roots, node) {
     }
     return false;
 }
-},{"../lru/splice":66,"../values/$expires-never":113,"../values/$expires-now":114,"./now":98}],94:[function(_dereq_,module,exports){
+},{"../lru/splice":69,"../values/$expires-never":116,"../values/$expires-now":117,"./now":101}],97:[function(_dereq_,module,exports){
 var obj_typeof = "object";
 module.exports = function(value) {
     return value != null && typeof value == obj_typeof;
 }
-},{}],95:[function(_dereq_,module,exports){
+},{}],98:[function(_dereq_,module,exports){
 var obj_typeof = "object";
 module.exports = function(value) {
     return value == null || typeof value != obj_typeof;
 }
-},{}],96:[function(_dereq_,module,exports){
+},{}],99:[function(_dereq_,module,exports){
 module.exports = key_to_keyset;
 
 var isArray = Array.isArray;
@@ -5215,7 +5351,7 @@ function key_to_keyset(key, iskeyset) {
 }
 
 
-},{}],97:[function(_dereq_,module,exports){
+},{}],100:[function(_dereq_,module,exports){
 
 var $self = "./";
 var $path = _dereq_("../types/$path");
@@ -5396,9 +5532,9 @@ module.exports = function(roots, parent, node, messageParent, message, key) {
     return node;
 }
 
-},{"../lru/promote":65,"../support/replace-node":102,"../support/update-graph":108,"../types/$path":111,"../types/$sentinel":112,"../values/$expires-now":114,"./graph-node":89,"./inc-generation":90,"./invalidate-node":92,"./is-expired":93,"./is-object":94,"./is-primitive":95,"./wrap-node":109}],98:[function(_dereq_,module,exports){
+},{"../lru/promote":68,"../support/replace-node":105,"../support/update-graph":111,"../types/$path":114,"../types/$sentinel":115,"../values/$expires-now":117,"./graph-node":92,"./inc-generation":93,"./invalidate-node":95,"./is-expired":96,"./is-object":97,"./is-primitive":98,"./wrap-node":112}],101:[function(_dereq_,module,exports){
 module.exports = Date.now;
-},{}],99:[function(_dereq_,module,exports){
+},{}],102:[function(_dereq_,module,exports){
 var inc_version = _dereq_("../support/inc-version");
 var getBoundValue = _dereq_('../get/getBoundValue');
 
@@ -5430,7 +5566,7 @@ module.exports = function(options, model, error_selector) {
     
     return options;
 };
-},{"../get/getBoundValue":42,"../support/inc-version":91}],100:[function(_dereq_,module,exports){
+},{"../get/getBoundValue":45,"../support/inc-version":94}],103:[function(_dereq_,module,exports){
 module.exports = permute_keyset;
 
 var isArray = Array.isArray;
@@ -5453,7 +5589,7 @@ function permute_keyset(key) {
 }
 
 
-},{}],101:[function(_dereq_,module,exports){
+},{}],104:[function(_dereq_,module,exports){
 var $path = _dereq_("../types/$path");
 var $root = "/";
 var $self = "./";
@@ -5476,7 +5612,7 @@ module.exports = function(parent, node, key, lru) {
     }
     return false;
 }
-},{"../lru/splice":66,"../types/$path":111,"./delete-back-refs":87,"./is-object":94,"./unlink":106}],102:[function(_dereq_,module,exports){
+},{"../lru/splice":69,"../types/$path":114,"./delete-back-refs":90,"./is-object":97,"./unlink":109}],105:[function(_dereq_,module,exports){
 var transfer_back_refs = _dereq_("./transfer-back-refs");
 var invalidate_node = _dereq_("./invalidate-node");
 
@@ -5487,7 +5623,7 @@ module.exports = function(parent, node, replacement, key, lru) {
     }
     return parent[key] = replacement;
 }
-},{"./invalidate-node":92,"./transfer-back-refs":103}],103:[function(_dereq_,module,exports){
+},{"./invalidate-node":95,"./transfer-back-refs":106}],106:[function(_dereq_,module,exports){
 var __ref = "__ref";
 var __refs_length = "__refs_length";
 module.exports = function(node, dest) {
@@ -5505,7 +5641,7 @@ module.exports = function(node, dest) {
     dest[__refs_length] = nodeRefsLength + destRefsLength;
     node[__refs_length] = ref = undefined;
 }
-},{}],104:[function(_dereq_,module,exports){
+},{}],107:[function(_dereq_,module,exports){
 var $error = _dereq_("../types/$error");
 var promote = _dereq_("../lru/promote");
 var array_clone = _dereq_("./array-clone");
@@ -5520,7 +5656,7 @@ module.exports = function(roots, node, type, path) {
     roots.errors.push({ path: array_clone(path), value: node.value });
     return true;
 };
-},{"../lru/promote":65,"../types/$error":110,"./array-clone":77}],105:[function(_dereq_,module,exports){
+},{"../lru/promote":68,"../types/$error":113,"./array-clone":80}],108:[function(_dereq_,module,exports){
 var $sentinel = _dereq_("../types/$sentinel");
 var clone_misses = _dereq_("./clone-missing-paths");
 var is_expired = _dereq_("./is-expired");
@@ -5540,7 +5676,7 @@ module.exports = function(roots, node, type, pathset, requested, optimized) {
     }
     return false;
 };
-},{"../types/$sentinel":112,"./clone-missing-paths":81,"./is-expired":93}],106:[function(_dereq_,module,exports){
+},{"../types/$sentinel":115,"./clone-missing-paths":84,"./is-expired":96}],109:[function(_dereq_,module,exports){
 var $ref = "__ref";
 module.exports = function(ref) {
     var destination = ref.__context;
@@ -5554,7 +5690,7 @@ module.exports = function(ref) {
         ref.__ref_index = ref.__context = destination = undefined;
     }
 }
-},{}],107:[function(_dereq_,module,exports){
+},{}],110:[function(_dereq_,module,exports){
 module.exports = update_back_refs;
 
 var generation = _dereq_("./inc-generation");
@@ -5572,7 +5708,7 @@ function update_back_refs(node, version) {
     return node;
 }
 
-},{"./inc-generation":90}],108:[function(_dereq_,module,exports){
+},{"./inc-generation":93}],111:[function(_dereq_,module,exports){
 var remove_node = _dereq_("./remove-node");
 var update_back_refs = _dereq_("./update-back-refs");
 
@@ -5587,7 +5723,7 @@ module.exports = function(node, offset, version, lru) {
         }
     }
 }
-},{"./remove-node":101,"./update-back-refs":107}],109:[function(_dereq_,module,exports){
+},{"./remove-node":104,"./update-back-refs":110}],112:[function(_dereq_,module,exports){
 var $path = _dereq_("../types/$path");
 var $error = _dereq_("../types/$error");
 var $sentinel = _dereq_("../types/$sentinel");
@@ -5643,17 +5779,17 @@ module.exports = function(node, type, value) {
     
     return dest;
 }
-},{"../types/$error":110,"../types/$path":111,"../types/$sentinel":112,"./clone":85,"./is-object":94,"./now":98}],110:[function(_dereq_,module,exports){
+},{"../types/$error":113,"../types/$path":114,"../types/$sentinel":115,"./clone":88,"./is-object":97,"./now":101}],113:[function(_dereq_,module,exports){
 module.exports = "error";
-},{}],111:[function(_dereq_,module,exports){
-module.exports = "path";
-},{}],112:[function(_dereq_,module,exports){
-module.exports = "sentinel";
-},{}],113:[function(_dereq_,module,exports){
-module.exports = 1;
 },{}],114:[function(_dereq_,module,exports){
-module.exports = 0;
+module.exports = "path";
 },{}],115:[function(_dereq_,module,exports){
+module.exports = "sentinel";
+},{}],116:[function(_dereq_,module,exports){
+module.exports = 1;
+},{}],117:[function(_dereq_,module,exports){
+module.exports = 0;
+},{}],118:[function(_dereq_,module,exports){
 module.exports = walk_path_set;
 
 var $path = _dereq_("../types/$path");
@@ -5751,7 +5887,7 @@ function walk_path_set(onNode, onEdge, pathset, roots, parents, nodes, requested
         );
     } while(is_outer_keyset && permute_keyset(outer_key));
 }
-},{"../support/array-append":76,"../support/array-clone":77,"../support/array-slice":78,"../support/is-expired":93,"../support/is-object":94,"../support/is-primitive":95,"../support/keyset-to-key":96,"../support/permute-keyset":100,"../types/$path":111,"./walk-reference":117}],116:[function(_dereq_,module,exports){
+},{"../support/array-append":79,"../support/array-clone":80,"../support/array-slice":81,"../support/is-expired":96,"../support/is-object":97,"../support/is-primitive":98,"../support/keyset-to-key":99,"../support/permute-keyset":103,"../types/$path":114,"./walk-reference":120}],119:[function(_dereq_,module,exports){
 module.exports = walk_path_set;
 
 var $path = _dereq_("../types/$path");
@@ -5857,7 +5993,7 @@ function walk_path_set(onNode, onEdge, pathset, roots, parents, nodes, requested
         );
     } while(is_outer_keyset && permute_keyset(outer_key));
 }
-},{"../support/array-append":76,"../support/array-clone":77,"../support/array-slice":78,"../support/is-expired":93,"../support/is-object":94,"../support/is-primitive":95,"../support/keyset-to-key":96,"../support/permute-keyset":100,"../types/$path":111,"./walk-reference":117}],117:[function(_dereq_,module,exports){
+},{"../support/array-append":79,"../support/array-clone":80,"../support/array-slice":81,"../support/is-expired":96,"../support/is-object":97,"../support/is-primitive":98,"../support/keyset-to-key":99,"../support/permute-keyset":103,"../types/$path":114,"./walk-reference":120}],120:[function(_dereq_,module,exports){
 module.exports = walk_reference;
 
 var __ref = "__ref";
@@ -5910,7 +6046,7 @@ function walk_reference(onNode, container, reference, roots, parents, nodes, req
     
     return nodes;
 }
-},{"../support/array-append":76,"../support/array-slice":78,"../support/is-object":94,"../support/is-primitive":95}],118:[function(_dereq_,module,exports){
+},{"../support/array-append":79,"../support/array-slice":81,"../support/is-object":97,"../support/is-primitive":98}],121:[function(_dereq_,module,exports){
 var falcor = _dereq_('./lib/falcor');
 var get = _dereq_('./lib/get');
 var set = _dereq_('./lib/set');
@@ -5948,6 +6084,6 @@ prototype._setCache = get.setCache;
 module.exports = falcor;
 
 
-},{"./lib/falcor":6,"./lib/get":45,"./lib/invalidate":59,"./lib/set":67}]},{},[1])
+},{"./lib/falcor":6,"./lib/get":48,"./lib/invalidate":62,"./lib/set":70}]},{},[1])
 (1)
 });
