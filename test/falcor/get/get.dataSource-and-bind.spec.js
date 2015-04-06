@@ -26,15 +26,18 @@ describe('DataSource and Bind', function() {
         var next = false;
         model.
             get([1, 'summary'], function(x) {
+                debugger
                 testRunner.compare(expected, x);
                 selector = true;
 
                 return {value: x};
             }).
             doAction(function(x) {
+                debugger
                 next = true;
                 testRunner.compare({value: expected}, x);
             }, noOp, function() {
+                debugger
                 testRunner.compare(true, selector, 'Expect to be onNext at least 1 time.');;
                 testRunner.compare(true, next, 'Expect to be onNext at least 1 time.');
             }).
