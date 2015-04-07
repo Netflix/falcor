@@ -6,6 +6,8 @@ var Rx = require('rx');
 var getTestRunner = require('./../../getTestRunner');
 var testRunner = require('./../../testRunner');
 var noOp = function() {};
+var Observable = Rx.Observable;
+var falcor = {Model: Model, Observable:Observable};
 
 describe('Cache Only', function() {
     describe('Selector Functions', function() {
@@ -30,6 +32,37 @@ describe('Cache Only', function() {
                 subscribe(noOp, done, done);
         });
     });
+    
+    describe('Relative Expiration', function() {
+        xit('should retrieve a value from the cache that has a relative expiration that has not expired yet', function() {
+            
+            var value,
+                model = new falcor.Model({
+                    cache: {
+                        user: {
+                            name: {
+                                // Metadata that indicates this object is a Sentinel
+                                $type: "sentinel",
+                                // The value property contains the value box by the Sentinel
+                                value: "Jim Parsons",
+                                // Metadata that dictates that this value should be purged from the {@link Model}'s cache after two minutes. Negative numbers imply that expiration occurs relative to the current time.
+                                $expires: -(1000 * 60 * 2)
+                            }
+                        }
+                    }
+                });
+
+            console.log(model.toPathValues);
+            model.get(["user", "name"]).toPathValues().subscribe(function(pathValue) {
+                value = pathValue;
+            });
+
+            if (value === undefined) {
+                throw new Error("Value not retrieved from cache, despite the fact that it has not expired");
+            }
+        });
+    });
+
     describe('toJSON', function() {
         it('should get a value from falcor.', function(done) {
             var model = new Model({cache: Cache()});
