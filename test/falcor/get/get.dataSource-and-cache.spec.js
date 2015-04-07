@@ -9,6 +9,8 @@ var getTestRunner = require('./../../getTestRunner');
 var testRunner = require('./../../testRunner');
 var noOp = function() {};
 var LocalDataSource = require('../../data/LocalDataSource');
+var Observable = Rx.Observable;
+var falcor = { Model: Model, Observable: Observable };
 
 describe('DataSource and Partial Cache', function() {
     describe('Selector Functions', function() {
@@ -156,6 +158,41 @@ describe('DataSource and Partial Cache', function() {
                     testRunner.compare(2, count, 'Expect to be onNext two times.');
                 }).
                 subscribe(noOp, done, done);
+        });
+    });
+    describe('Re-entrancy', function() {
+        it('calling set/get/call operations that execute synchronously in a selector function should not reset allowSync, thereby disabling subsequent getValueSyncs within the selector functions.', function(done) {
+            var model = new falcor.Model({
+                source: {
+                    get: function() {
+                        return falcor.Observable.of({
+                            paths: [["user", "age"]],
+                            value: {
+                                user: {
+                                    age: 44
+                                }
+                            }
+                        });
+                    }
+                },
+                cache:{
+                    user: {
+                        name: "Jim"
+                    }
+                }
+            });
+            model._root.unsafeMode = false;
+
+            model.get(["user","age"], function(age) {                
+                model.withoutDataSource().get({path:["user","name"], value: 23}).subscribe();
+                
+                // should work, but doesn't because allowSync was set to false by get
+                try {
+                    model.getValueSync(["user", "age"]);
+                } catch(e) {
+                    throw "Unable to run getValueSync because allowSync was set back to false by when get method executed synchronously within a selector function.";
+                }
+            }).subscribe();
         });
     });
 });
