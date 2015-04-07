@@ -884,7 +884,7 @@ function execute(output, suffix, opts) {
                         expect(results).to.deep.equals({
                             values: [{
                                 jsong: {
-                                    grid: { "$type": "path", value: ["grids", "grid-1234"], "$size": 52 },
+                                    grid: { "$type": $path, value: ["grids", "grid-1234"], "$size": 52 },
                                     grids: {
                                         "grid-1234": {
                                             "2": {}
@@ -1093,15 +1093,15 @@ function execute(output, suffix, opts) {
                     var expected = [{
                         paths: [],
                         jsong: {
-                            grid: { "$type": "path", value: ["grids", "grid-1234"], "$size": 52 },
+                            grid: { "$type": $path, value: ["grids", "grid-1234"], "$size": 52 },
                             grids: {
                                 "grid-1234": {
-                                    "1": { "$type": "path", value: ["rows", "row-1"], "$size": 52 }
+                                    "1": { "$type": $path, value: ["rows", "row-1"], "$size": 52 }
                                 }
                             },
                             rows: {
                                 "row-1": {
-                                    "0": { "$type": "path", value: ["movies", "django-unchained"], "$size": 52 }
+                                    "0": { "$type": $path, value: ["movies", "django-unchained"], "$size": 52 }
                                 }
                             },
                             movies: {

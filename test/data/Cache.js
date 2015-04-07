@@ -1,142 +1,146 @@
 var expiredTimestamp = Date.now() - 100;
+var $path = require('./../../lib/types/$path.js');
+var $sentinel = require('./../../lib/types/$sentinel.js');
+var $error = require('./../../lib/types/$error.js');
+
 var Cache = function() {
     return {
         "$size": 1353,
-        "movies": { "$type": "path", "value": ['videos'] },
+        "movies": { "$type": $path, "value": ['videos'] },
         "genreList": {
             "$size": 81,
-            "-1": { "$type": "path", "value": ["lists", "def"] },
-            "0":  { "$type": "path", "value": ["lists", "abcd"] },
-            "1":  { "$type": "path", "value": ["lists", "my-list"] },
-            "2":  { "$type": "path", "value": ["lists", "error-list"] },
-            "3":  { "$type": "path", "value": ["lists", "sentinel-list"] },
-            "4":  { "$type": "path", "value": ["lists", "missing-list"] },
-            "5":  { "$type": "path", "value": ["lists", "to-error-list"] },
-            "6":  { "$type": "path", "value": ["lists", "to-missing-list"] },
-            "7":  { "$type": "path", "value": ["lists", "to-sentinel-list"] },
-            "8":  { "$type": "path", "value": ["lists", "expired-list"] },
-            "9":  { "$type": "path", "value": ["lists", "to-expired-list"] },
-            "10": { "$type": "path", "value": ["videos", 1234, "summary"] },
-            "11": { "$type": "path", "value": ["lists", "missing-branch-link", "summary"] },
-            "12": { "$type": "path", "value": ["lists", "future-expired-list"] },
-            "inner-reference": { "$type": "path", "value": ['movies', 1234] },
-            "sentinel": {
+            "-1": { "$type": $path, "value": ["lists", "def"] },
+            "0":  { "$type": $path, "value": ["lists", "abcd"] },
+            "1":  { "$type": $path, "value": ["lists", "my-list"] },
+            "2":  { "$type": $path, "value": ["lists", "error-list"] },
+            "3":  { "$type": $path, "value": ["lists", "sentinel-list"] },
+            "4":  { "$type": $path, "value": ["lists", "missing-list"] },
+            "5":  { "$type": $path, "value": ["lists", "to-error-list"] },
+            "6":  { "$type": $path, "value": ["lists", "to-missing-list"] },
+            "7":  { "$type": $path, "value": ["lists", "to-sentinel-list"] },
+            "8":  { "$type": $path, "value": ["lists", "expired-list"] },
+            "9":  { "$type": $path, "value": ["lists", "to-expired-list"] },
+            "10": { "$type": $path, "value": ["videos", 1234, "summary"] },
+            "11": { "$type": $path, "value": ["lists", "missing-branch-link", "summary"] },
+            "12": { "$type": $path, "value": ["lists", "future-expired-list"] },
+            "inner-reference": { "$type": $path, "value": ['movies', 1234] },
+            $sentinel: {
                 "$size": 52,
-                "$type": "path",
+                "$type": $path,
                 "value": ["lists", "to-sentinel-list"]
             },
-            "branch-miss": { "$type": "path", "value": ["does", "not", "exist"] }
+            "branch-miss": { "$type": $path, "value": ["does", "not", "exist"] }
         },
         "lists": {
             "$size": 489,
             "abcd": {
                 "$size": 8,
-                "-1": { "$type": "path", "value": ["videos", 4422] },
-                "0":  { "$type": "path", "value": ["videos", 1234] },
-                "1":  { "$type": "path", "value": ["videos", 766] },
-                "2":  { "$type": "path", "value": ["videos", 7531] },
-                "3":  { "$type": "path", "value": ["videos", 6420] },
-                "4":  { "$type": "path", "value": ["videos", 0] },
-                "5":  { "$type": "path", "value": ["videos", 1] },
-                "6":  { "$type": "path", "value": ["videos", 2] },
-                "7":  { "$type": "path", "value": ["videos", 3] },
-                "8":  { "$type": "path", "value": ["videos", 4] },
-                "9":  { "$type": "path", "value": ["videos", 5] },
-                "10": { "$type": "path", "value": ["videos", 6] },
-                "11": { "$type": "path", "value": ["videos", 7] },
-                "12": { "$type": "path", "value": ["videos", 8] },
-                "13": { "$type": "path", "value": ["videos", 9] },
-                "14": { "$type": "path", "value": ["videos", 10] },
-                "15": { "$type": "path", "value": ["videos", 11] },
-                "16": { "$type": "path", "value": ["videos", 12] },
-                "17": { "$type": "path", "value": ["videos", 13] },
-                "18": { "$type": "path", "value": ["videos", 14] },
-                "19": { "$type": "path", "value": ["videos", 15] },
-                "20": { "$type": "path", "value": ["videos", 16] },
-                "21": { "$type": "path", "value": ["videos", 17] },
-                "22": { "$type": "path", "value": ["videos", 18] },
-                "23": { "$type": "path", "value": ["videos", 19] },
-                "24": { "$type": "path", "value": ["videos", 20] },
-                "25": { "$type": "path", "value": ["videos", 21] },
-                "26": { "$type": "path", "value": ["videos", 22] },
-                "27": { "$type": "path", "value": ["videos", 23] },
-                "28": { "$type": "path", "value": ["videos", 24] },
-                "29": { "$type": "path", "value": ["videos", 25] },
-                "30": { "$type": "path", "value": ["videos", 26] },
-                "31": { "$type": "path", "value": ["videos", 27] },
-                "32": { "$type": "path", "value": ["videos", 28] },
-                "33": { "$type": "path", "value": ["videos", 29] }
+                "-1": { "$type": $path, "value": ["videos", 4422] },
+                "0":  { "$type": $path, "value": ["videos", 1234] },
+                "1":  { "$type": $path, "value": ["videos", 766] },
+                "2":  { "$type": $path, "value": ["videos", 7531] },
+                "3":  { "$type": $path, "value": ["videos", 6420] },
+                "4":  { "$type": $path, "value": ["videos", 0] },
+                "5":  { "$type": $path, "value": ["videos", 1] },
+                "6":  { "$type": $path, "value": ["videos", 2] },
+                "7":  { "$type": $path, "value": ["videos", 3] },
+                "8":  { "$type": $path, "value": ["videos", 4] },
+                "9":  { "$type": $path, "value": ["videos", 5] },
+                "10": { "$type": $path, "value": ["videos", 6] },
+                "11": { "$type": $path, "value": ["videos", 7] },
+                "12": { "$type": $path, "value": ["videos", 8] },
+                "13": { "$type": $path, "value": ["videos", 9] },
+                "14": { "$type": $path, "value": ["videos", 10] },
+                "15": { "$type": $path, "value": ["videos", 11] },
+                "16": { "$type": $path, "value": ["videos", 12] },
+                "17": { "$type": $path, "value": ["videos", 13] },
+                "18": { "$type": $path, "value": ["videos", 14] },
+                "19": { "$type": $path, "value": ["videos", 15] },
+                "20": { "$type": $path, "value": ["videos", 16] },
+                "21": { "$type": $path, "value": ["videos", 17] },
+                "22": { "$type": $path, "value": ["videos", 18] },
+                "23": { "$type": $path, "value": ["videos", 19] },
+                "24": { "$type": $path, "value": ["videos", 20] },
+                "25": { "$type": $path, "value": ["videos", 21] },
+                "26": { "$type": $path, "value": ["videos", 22] },
+                "27": { "$type": $path, "value": ["videos", 23] },
+                "28": { "$type": $path, "value": ["videos", 24] },
+                "29": { "$type": $path, "value": ["videos", 25] },
+                "30": { "$type": $path, "value": ["videos", 26] },
+                "31": { "$type": $path, "value": ["videos", 27] },
+                "32": { "$type": $path, "value": ["videos", 28] },
+                "33": { "$type": $path, "value": ["videos", 29] }
             },
             "def": {
                 "$size": 6,
-                "0": { "$type": "path", "value": ["videos", 888] },
-                "1": { "$type": "path", "value": ["videos", 999] },
-                "2": { "$type": "path", "value": ["videos", 542] }
+                "0": { "$type": $path, "value": ["videos", 888] },
+                "1": { "$type": $path, "value": ["videos", 999] },
+                "2": { "$type": $path, "value": ["videos", 542] }
             },
             "sentinel-list": {
                 "$size": 104,
                 "0": {
                     "$size": 52,
-                    "$type": "path",
+                    "$type": $path,
                     "value": ["videos", 333]
                 },
                 "1": {
                     "$size": 52,
-                    "$type": "path",
-                    "value": ["videos", "sentinel"]
+                    "$type": $path,
+                    "value": ["videos", $sentinel]
                 }
             },
             "sentinel-list-2": {
                 "$size": 52,
                 "0": {
                     "$size": 52,
-                    "$type": "path",
+                    "$type": $path,
                     "value": ["videos", 733]
                 }
             },
             "1x5x": {
                 "$size": 4,
-                "0": { "$type": "path", "value": ["videos", 553] },
-                "1": { "$type": "path", "value": ["videos", 5522] }
+                "0": { "$type": $path, "value": ["videos", 553] },
+                "1": { "$type": $path, "value": ["videos", 5522] }
             },
-            "my-list": { "$type": "path", "value": ["lists", "1x5x"] },
+            "my-list": { "$type": $path, "value": ["lists", "1x5x"] },
             "error-list": {
                 "$size": 51,
-                "$type": "error",
+                "$type": $error,
                 "value": "Red is the new Black"
             },
             "error-list-2": {
                 "$size": 51,
-                "$type": "error",
+                "$type": $error,
                 "value": "House of Pain"
             },
             "expired-list": {
                 "$size": 51,
-                "$type": "sentinel",
+                "$type": $sentinel,
                 "$expires": expiredTimestamp,
                 "value": {
-                    "0": { "$type": "path", "value": ["videos", 333] },
-                    "1": { "$type": "path", "value": ["videos", "sentinel"] }
+                    "0": { "$type": $path, "value": ["videos", 333] },
+                    "1": { "$type": $path, "value": ["videos", $sentinel] }
                 }
             },
-            "to-error-list": { "$type": "path", "value": ["lists", "error-list-2"] },
-            "to-missing-list": { "$type": "path", "value": ["lists", "missing-list-2"] },
+            "to-error-list": { "$type": $path, "value": ["lists", "error-list-2"] },
+            "to-missing-list": { "$type": $path, "value": ["lists", "missing-list-2"] },
             "to-expired-list": {
                 "$size": 52,
-                "$type": "path",
+                "$type": $path,
                 "value": ["lists", "expired-list"]
             },
             "future-expired-list": {
-                "$type": "sentinel",
+                "$type": $sentinel,
                 "$expires": Date.now() + 100000,
                 "$size": 51,
                 "value": {
-                    "0": { "$type": "path", "value": ["videos", 1234] }
+                    "0": { "$type": $path, "value": ["videos", 1234] }
                 }
             },
             "to-sentinel-list": {
                 "$size": 52,
-                "$type": "path",
+                "$type": $path,
                 "value": ["lists", "sentinel-list-2"]
             }
         },
@@ -146,7 +150,7 @@ var Cache = function() {
                 "$size": 10,
                 "summary": {
                     "$size": 51,
-                    "$type": "sentinel",
+                    "$type": $sentinel,
                     "value": {
                         "title": "Additional Title 0",
                         "url": "/movies/0"
@@ -157,7 +161,7 @@ var Cache = function() {
                 "$size": 10,
                 "summary": {
                     "$size": 51,
-                    "$type": "sentinel",
+                    "$type": $sentinel,
                     "value": {
                         "title": "Additional Title 1",
                         "url": "/movies/1"
@@ -168,7 +172,7 @@ var Cache = function() {
                 "$size": 10,
                 "summary": {
                     "$size": 51,
-                    "$type": "sentinel",
+                    "$type": $sentinel,
                     "value": {
                         "title": "Additional Title 2",
                         "url": "/movies/2"
@@ -179,7 +183,7 @@ var Cache = function() {
                 "$size": 10,
                 "summary": {
                     "$size": 51,
-                    "$type": "sentinel",
+                    "$type": $sentinel,
                     "value": {
                         "title": "Additional Title 3",
                         "url": "/movies/3"
@@ -190,7 +194,7 @@ var Cache = function() {
                 "$size": 10,
                 "summary": {
                     "$size": 51,
-                    "$type": "sentinel",
+                    "$type": $sentinel,
                     "value": {
                         "title": "Additional Title 4",
                         "url": "/movies/4"
@@ -201,7 +205,7 @@ var Cache = function() {
                 "$size": 10,
                 "summary": {
                     "$size": 51,
-                    "$type": "sentinel",
+                    "$type": $sentinel,
                     "value": {
                         "title": "Additional Title 5",
                         "url": "/movies/5"
@@ -212,7 +216,7 @@ var Cache = function() {
                 "$size": 10,
                 "summary": {
                     "$size": 51,
-                    "$type": "sentinel",
+                    "$type": $sentinel,
                     "value": {
                         "title": "Additional Title 6",
                         "url": "/movies/6"
@@ -223,7 +227,7 @@ var Cache = function() {
                 "$size": 10,
                 "summary": {
                     "$size": 51,
-                    "$type": "sentinel",
+                    "$type": $sentinel,
                     "value": {
                         "title": "Additional Title 7",
                         "url": "/movies/7"
@@ -234,7 +238,7 @@ var Cache = function() {
                 "$size": 10,
                 "summary": {
                     "$size": 51,
-                    "$type": "sentinel",
+                    "$type": $sentinel,
                     "value": {
                         "title": "Additional Title 8",
                         "url": "/movies/8"
@@ -245,7 +249,7 @@ var Cache = function() {
                 "$size": 10,
                 "summary": {
                     "$size": 51,
-                    "$type": "sentinel",
+                    "$type": $sentinel,
                     "value": {
                         "title": "Additional Title 9",
                         "url": "/movies/9"
@@ -256,7 +260,7 @@ var Cache = function() {
                 "$size": 10,
                 "summary": {
                     "$size": 51,
-                    "$type": "sentinel",
+                    "$type": $sentinel,
                     "value": {
                         "title": "Additional Title 10",
                         "url": "/movies/10"
@@ -267,7 +271,7 @@ var Cache = function() {
                 "$size": 10,
                 "summary": {
                     "$size": 51,
-                    "$type": "sentinel",
+                    "$type": $sentinel,
                     "value": {
                         "title": "Additional Title 11",
                         "url": "/movies/11"
@@ -278,7 +282,7 @@ var Cache = function() {
                 "$size": 10,
                 "summary": {
                     "$size": 51,
-                    "$type": "sentinel",
+                    "$type": $sentinel,
                     "value": {
                         "title": "Additional Title 12",
                         "url": "/movies/12"
@@ -289,7 +293,7 @@ var Cache = function() {
                 "$size": 10,
                 "summary": {
                     "$size": 51,
-                    "$type": "sentinel",
+                    "$type": $sentinel,
                     "value": {
                         "title": "Additional Title 13",
                         "url": "/movies/13"
@@ -300,7 +304,7 @@ var Cache = function() {
                 "$size": 10,
                 "summary": {
                     "$size": 51,
-                    "$type": "sentinel",
+                    "$type": $sentinel,
                     "value": {
                         "title": "Additional Title 14",
                         "url": "/movies/14"
@@ -311,7 +315,7 @@ var Cache = function() {
                 "$size": 10,
                 "summary": {
                     "$size": 51,
-                    "$type": "sentinel",
+                    "$type": $sentinel,
                     "value": {
                         "title": "Additional Title 15",
                         "url": "/movies/15"
@@ -322,7 +326,7 @@ var Cache = function() {
                 "$size": 10,
                 "summary": {
                     "$size": 51,
-                    "$type": "sentinel",
+                    "$type": $sentinel,
                     "value": {
                         "title": "Additional Title 16",
                         "url": "/movies/16"
@@ -333,7 +337,7 @@ var Cache = function() {
                 "$size": 10,
                 "summary": {
                     "$size": 51,
-                    "$type": "sentinel",
+                    "$type": $sentinel,
                     "value": {
                         "title": "Additional Title 17",
                         "url": "/movies/17"
@@ -344,7 +348,7 @@ var Cache = function() {
                 "$size": 10,
                 "summary": {
                     "$size": 51,
-                    "$type": "sentinel",
+                    "$type": $sentinel,
                     "value": {
                         "title": "Additional Title 18",
                         "url": "/movies/18"
@@ -355,7 +359,7 @@ var Cache = function() {
                 "$size": 10,
                 "summary": {
                     "$size": 51,
-                    "$type": "sentinel",
+                    "$type": $sentinel,
                     "value": {
                         "title": "Additional Title 19",
                         "url": "/movies/19"
@@ -366,7 +370,7 @@ var Cache = function() {
                 "$size": 10,
                 "summary": {
                     "$size": 51,
-                    "$type": "sentinel",
+                    "$type": $sentinel,
                     "value": {
                         "title": "Additional Title 20",
                         "url": "/movies/20"
@@ -377,7 +381,7 @@ var Cache = function() {
                 "$size": 10,
                 "summary": {
                     "$size": 51,
-                    "$type": "sentinel",
+                    "$type": $sentinel,
                     "value": {
                         "title": "Additional Title 21",
                         "url": "/movies/21"
@@ -388,7 +392,7 @@ var Cache = function() {
                 "$size": 10,
                 "summary": {
                     "$size": 51,
-                    "$type": "sentinel",
+                    "$type": $sentinel,
                     "value": {
                         "title": "Additional Title 22",
                         "url": "/movies/22"
@@ -399,7 +403,7 @@ var Cache = function() {
                 "$size": 10,
                 "summary": {
                     "$size": 51,
-                    "$type": "sentinel",
+                    "$type": $sentinel,
                     "value": {
                         "title": "Additional Title 23",
                         "url": "/movies/23"
@@ -410,7 +414,7 @@ var Cache = function() {
                 "$size": 10,
                 "summary": {
                     "$size": 51,
-                    "$type": "sentinel",
+                    "$type": $sentinel,
                     "value": {
                         "title": "Additional Title 24",
                         "url": "/movies/24"
@@ -421,7 +425,7 @@ var Cache = function() {
                 "$size": 10,
                 "summary": {
                     "$size": 51,
-                    "$type": "sentinel",
+                    "$type": $sentinel,
                     "value": {
                         "title": "Additional Title 25",
                         "url": "/movies/25"
@@ -432,7 +436,7 @@ var Cache = function() {
                 "$size": 10,
                 "summary": {
                     "$size": 51,
-                    "$type": "sentinel",
+                    "$type": $sentinel,
                     "value": {
                         "title": "Additional Title 26",
                         "url": "/movies/26"
@@ -443,7 +447,7 @@ var Cache = function() {
                 "$size": 10,
                 "summary": {
                     "$size": 51,
-                    "$type": "sentinel",
+                    "$type": $sentinel,
                     "value": {
                         "title": "Additional Title 27",
                         "url": "/movies/27"
@@ -454,7 +458,7 @@ var Cache = function() {
                 "$size": 10,
                 "summary": {
                     "$size": 51,
-                    "$type": "sentinel",
+                    "$type": $sentinel,
                     "value": {
                         "title": "Additional Title 28",
                         "url": "/movies/28"
@@ -465,7 +469,7 @@ var Cache = function() {
                 "$size": 10,
                 "summary": {
                     "$size": 51,
-                    "$type": "sentinel",
+                    "$type": $sentinel,
                     "value": {
                         "title": "Additional Title 29",
                         "url": "/movies/29"
@@ -476,7 +480,7 @@ var Cache = function() {
                 "$size": 10,
                 "summary": {
                     "$size": 10,
-                    "$type": "sentinel",
+                    "$type": $sentinel,
                     "value": {
                         "title": "House of Cards",
                         "url": "/movies/1234"
@@ -487,7 +491,7 @@ var Cache = function() {
                 "$size": 10,
                 "summary": {
                     "$size": 10,
-                    "$type": "sentinel",
+                    "$type": $sentinel,
                     "value": {
                         "title": "Terminator 2",
                         "url": "/movies/333"
@@ -498,7 +502,7 @@ var Cache = function() {
                 "$size": 10,
                 "summary": {
                     "$size": 10,
-                    "$type": "sentinel",
+                    "$type": $sentinel,
                     "value": {
                         "title": "Total Recall (Without Colin Farrell)",
                         "url": "/movies/733"
@@ -509,7 +513,7 @@ var Cache = function() {
                 "$size": 10,
                 "summary": {
                     "$size": 10,
-                    "$type": "sentinel",
+                    "$type": $sentinel,
                     "value": {
                         "title": "Running Man",
                         "url": "/movies/553"
@@ -520,7 +524,7 @@ var Cache = function() {
                 "$size": 10,
                 "summary": {
                     "$size": 10,
-                    "$type": "sentinel",
+                    "$type": $sentinel,
                     "value": {
                         "title": "Terminator 3",
                         "url": "/movies/766"
@@ -531,7 +535,7 @@ var Cache = function() {
                 "$size": 10,
                 "summary": {
                     "$size": 10,
-                    "$type": "sentinel",
+                    "$type": $sentinel,
                     "value": {
                         "title": "Terminator Salvation",
                         "url": "/movies/888"
@@ -542,7 +546,7 @@ var Cache = function() {
                 "$size": 10,
                 "summary": {
                     "$size": 10,
-                    "$type": "sentinel",
+                    "$type": $sentinel,
                     "value": {
                         "title": "Jingle All the Way",
                         "url": "/movies/999"
@@ -553,7 +557,7 @@ var Cache = function() {
                 "$size": 10,
                 "summary": {
                     "$size": 10,
-                    "$type": "sentinel",
+                    "$type": $sentinel,
                     "value": {
                         "title": "Beverly Hills Ninja",
                         "url": "/movies/4422"
@@ -564,7 +568,7 @@ var Cache = function() {
                 "$size": 10,
                 "summary": {
                     "$size": 10,
-                    "$type": "sentinel",
+                    "$type": $sentinel,
                     "value": {
                         "title": "Kindergarten Cop",
                         "url": "/movies/7531"
@@ -575,7 +579,7 @@ var Cache = function() {
                 "$size": 10,
                 "summary": {
                     "$size": 10,
-                    "$type": "sentinel",
+                    "$type": $sentinel,
                     "value": {
                         "title": "Junior",
                         "url": "/movies/5522"
@@ -586,18 +590,18 @@ var Cache = function() {
                 "$size": 10,
                 "summary": {
                     "$size": 10,
-                    "$type": "sentinel",
+                    "$type": $sentinel,
                     "value": {
                         "title": "Commando",
                         "url": "/movies/6420"
                     }
                 }
             },
-            "sentinel": {
+            $sentinel: {
                 "$size": 51,
                 "summary": {
                     "$size": 51,
-                    "$type": "sentinel",
+                    "$type": $sentinel,
                     "value": {
                         "title": "Marco Polo",
                         "url": "/movies/sentinel"
@@ -609,7 +613,7 @@ var Cache = function() {
                 "summary": {
                     "$size": 51,
                     "$expires": expiredTimestamp,
-                    "$type": "sentinel",
+                    "$type": $sentinel,
                     "value": {
                         "sad": "panda"
                     }
@@ -620,7 +624,7 @@ var Cache = function() {
                 "summary": {
                     "$expires": 0,
                     "$size": 51,
-                    "$type": "sentinel",
+                    "$type": $sentinel,
                     "value": {
                         "sad": "tunafish"
                     }
@@ -629,18 +633,18 @@ var Cache = function() {
             "expiredBranchByTimestamp": {
                 "$size": 51,
                 "$expires": expiredTimestamp,
-                "$type": "sentinel",
+                "$type": $sentinel,
                 "value": 'expired'
             },
             "expiredBranchBy0": {
                 "$size": 51,
                 "$expires": 0,
-                "$type": "sentinel",
+                "$type": $sentinel,
                 "value": 'expired'
             },
             "errorBranch": {
                 "$size": 51,
-                "$type": "error",
+                "$type": $error,
                 "value": "I am yelling timber."
             },
             "542": {
@@ -649,7 +653,7 @@ var Cache = function() {
                     "$size": 10,
                     "summary": {
                         "$size": 10,
-                        "$type": "sentinel",
+                        "$type": $sentinel,
                         "value": {
                             "title": "Conan, The Barbarian",
                             "url": "/movies/6420"
@@ -661,7 +665,7 @@ var Cache = function() {
                 "$size": 26,
                 "summary": {
                     "$size": 10,
-                    "$type": "sentinel",
+                    "$type": $sentinel,
                     "value": {
                         "title": "Conan, The Destroyer",
                         "url": "/movies/3355"
@@ -669,17 +673,17 @@ var Cache = function() {
                 },
                 "art": {
                     "$size": 16,
-                    "$type": "sentinel",
+                    "$type": $sentinel,
                     "value": {
                         "box-shot": "www.cdn.com/3355"
                     }
                 }
             },
-            "missingValue": { "$type": "sentinel" },
+            "missingValue": { "$type": $sentinel },
             "missingSummary": {
                 "art": {
                     "$size": 16,
-                    "$type": "sentinel",
+                    "$type": $sentinel,
                     "value": {
                         "box-shot": "www.cdn.com/missing-summary"
                     }
@@ -690,7 +694,7 @@ var Cache = function() {
             "$size": 51,
             "usentinel": {
                 "$size": 51,
-                "$type": "sentinel",
+                "$type": $sentinel,
                 "value": undefined
             }
         }

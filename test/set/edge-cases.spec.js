@@ -1,6 +1,8 @@
 var jsong = require("../../index");
 var Model = jsong.Model;
 var expect = require('chai').expect;
+var $path = require("../../lib/types/$path");
+var $sentinel = require("../../lib/types/$sentinel");
 
 describe("Special Cases", function() {
     it("set blows away the cache.", function() {
@@ -11,15 +13,15 @@ describe("Special Cases", function() {
         var set = [
             {
                 jsong: {"genreList": {
-                    "0": { "$type": "path", "value": ["lists", "abcd"] },
-                    "1": { "$type": "path", "value": ["lists", "my-list"] }
+                    "0": { "$type": $path, "value": ["lists", "abcd"] },
+                    "1": { "$type": $path, "value": ["lists", "my-list"] }
                 }},
                 paths: [['genreList', {to:1}, 0, 'summary']]
             },
             {
                 jsong: {"lists": {
-                    "abcd": { "0": { "$type": "path", "value": ["videos", 1234] } },
-                    "my-list": { "$type": "path", "value": ["lists", "1x5x"] }
+                    "abcd": { "0": { "$type": $path, "value": ["videos", 1234] } },
+                    "my-list": { "$type": $path, "value": ["lists", "1x5x"] }
                 }},
                 paths: [["genreList", 1, 0, "summary"]]
             },
@@ -27,14 +29,14 @@ describe("Special Cases", function() {
             // TODO: Paul, this is the one the makes _cache.lists = undefined
             {
                 jsong: {"lists": {"1x5x": {
-                    "0": { "$type": "path", "value": ["videos", 553] }
+                    "0": { "$type": $path, "value": ["videos", 553] }
                 }}},
                 paths: [["genreList", 1, 0, "summary"]]
             },
             {
                 jsong: {"videos": {"553": {"summary": {
                     "$size": 10,
-                    "$type": "sentinel",
+                    "$type": $sentinel,
                     "value": {
                         "title": "Running Man",
                         "url": "/movies/553"

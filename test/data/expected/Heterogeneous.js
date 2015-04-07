@@ -1,3 +1,6 @@
+var $path = require('./../../../lib/types/$path.js');
+var $sentinel = require('./../../../lib/types/$sentinel.js');
+var $error = require('./../../../lib/types/$error.js');
 module.exports = function() {
     return {
         errorWithBoxedAndTreatErrorAsValues: {
@@ -20,10 +23,10 @@ module.exports = function() {
             AsValues: {
                 values: [
                     {
-                        "path": ["videos", "errorBranch"],
+                        path: ["videos", "errorBranch"],
                         "value": {
                             "$size": 51,
-                            "$type": "error",
+                            "$type": $error,
                             value: "I am yelling timber."
                         }
                     }
@@ -34,7 +37,7 @@ module.exports = function() {
                     {
                         json: {
                             "$size": 51,
-                            "$type": "error",
+                            "$type": $error,
                             value: "I am yelling timber."
                         }
                     }
@@ -50,7 +53,7 @@ module.exports = function() {
                             "videos": {
                                 "errorBranch": {
                                     "$size": 51,
-                                    "$type": "error",
+                                    "$type": $error,
                                     "value": "I am yelling timber."
                                 }
                             }
@@ -64,7 +67,7 @@ module.exports = function() {
                         videos: {
                             errorBranch: {
                                 "$size": 51,
-                                "$type": "error",
+                                "$type": $error,
                                 value: "I am yelling timber."
                             }
                         }

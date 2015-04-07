@@ -1,3 +1,6 @@
+var $path = require('./../../../lib/types/$path.js');
+var $sentinel = require('./../../../lib/types/$sentinel.js');
+var $error = require('./../../../lib/types/$error.js');
 module.exports = function() {
     return {
         sentinelValue: {
@@ -6,7 +9,7 @@ module.exports = function() {
                 query: [{
                     path: ["videos", "0", "summary"],
                     value: {
-                        "$type": "sentinel",
+                        "$type": $sentinel,
                         "value": {
                             "title": "Additional Title 0",
                             "url": "/movies/0"
@@ -19,7 +22,7 @@ module.exports = function() {
                     path: ["videos", "0", "summary"],
                     value: {
                         "$size": 51,
-                        "$type": "sentinel",
+                        "$type": $sentinel,
                         "value": {
                             "title": "Additional Title 0",
                             "url": "/movies/0"
@@ -31,7 +34,7 @@ module.exports = function() {
                 values: [{
                     json: {
                         "$size": 51,
-                        "$type": "sentinel",
+                        "$type": $sentinel,
                         "value": {
                             "title": "Additional Title 0",
                             "url": "/movies/0"
@@ -46,7 +49,7 @@ module.exports = function() {
                             "0": {
                                 "summary": {
                                     "$size": 51,
-                                    "$type": "sentinel",
+                                    "$type": $sentinel,
                                     "value": {
                                         "title": "Additional Title 0",
                                         "url": "/movies/0"
@@ -65,7 +68,7 @@ module.exports = function() {
                             "0": {
                                 "summary": {
                                     "$size": 51,
-                                    "$type": "sentinel",
+                                    "$type": $sentinel,
                                     "value": {
                                         "title": "Additional Title 0",
                                         "url": "/movies/0"
@@ -84,7 +87,7 @@ module.exports = function() {
                     path: ["genreList", "0"],
                     value: {
                         "$size": 52,
-                        "$type": "path",
+                        "$type": $path,
                         "value": ["lists", "abcd"]
                     }
                 }]
@@ -93,7 +96,7 @@ module.exports = function() {
                 values: [{
                     json: {
                         "$size": 52,
-                        "$type": "path",
+                        "$type": $path,
                         "value": ["lists", "abcd"]
                     }
                 }]
@@ -104,7 +107,7 @@ module.exports = function() {
                         "genreList": {
                             "0": {
                                 "$size": 52,
-                                "$type": "path",
+                                "$type": $path,
                                 "value": ["lists", "abcd"]
                             }
                         }
@@ -118,7 +121,7 @@ module.exports = function() {
                         "genreList": {
                             "0": {
                                 "$size": 52,
-                                "$type": "path",
+                                "$type": $path,
                                 "value": ["lists", "abcd"]
                             }
                         }

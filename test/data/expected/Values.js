@@ -1,3 +1,6 @@
+var $path = require('./../../../lib/types/$path.js');
+var $sentinel = require('./../../../lib/types/$sentinel.js');
+var $error = require('./../../../lib/types/$error.js');
 module.exports = function() {
     return {
         direct: {
@@ -8,7 +11,7 @@ module.exports = function() {
             },
             setPathSets: {
                 query: [{
-                    "path": ["videos", "1234", "summary"],
+                    path: ["videos", "1234", "summary"],
                     "value": {
                         "title": "House of Cards",
                         "url": "/movies/1234"
@@ -53,7 +56,7 @@ module.exports = function() {
             },
             AsValues: {
                 values: [{
-                    "path": ["videos", "1234", "summary"],
+                    path: ["videos", "1234", "summary"],
                     "value": {
                         "title": "House of Cards",
                         "url": "/movies/1234"
@@ -75,7 +78,7 @@ module.exports = function() {
                             1234: {
                                 summary: {
                                     "$size": 51,
-                                    "$type": "sentinel",
+                                    "$type": $sentinel,
                                     "value": {
                                         "title": "House of Cards",
                                         "url": "/movies/1234"
@@ -110,7 +113,7 @@ module.exports = function() {
             },
             setPathSets: {
                 query: [{
-                    "path": ["videos", "553", "summary"],
+                    path: ["videos", "553", "summary"],
                     "value": {
                         "title": "Running Man",
                         "url": "/movies/553"
@@ -155,7 +158,7 @@ module.exports = function() {
             },
             AsValues: {
                 values: [{
-                    "path": ["videos", "553", "summary"],
+                    path: ["videos", "553", "summary"],
                     "value": {
                         "title": "Running Man",
                         "url": "/movies/553"
@@ -177,7 +180,7 @@ module.exports = function() {
                             553: {
                                 summary: {
                                     "$size": 51,
-                                    "$type": "sentinel",
+                                    "$type": $sentinel,
                                     "value": {
                                         "title": "Running Man",
                                         "url": "/movies/553"
@@ -212,8 +215,8 @@ module.exports = function() {
             setPathSets: {
                 query: [
                     {
-                        "path": ["genreList", "0"],
-                        "value": { "$type": "path", "value": ["lists", "abcd"] }
+                        path: ["genreList", "0"],
+                        "value": { "$type": $path, "value": ["lists", "abcd"] }
                     }
                 ]
             },
@@ -253,7 +256,7 @@ module.exports = function() {
             AsValues: {
                 values: [
                     {
-                        "path": ["genreList", "0"],
+                        path: ["genreList", "0"],
                         "value": ["lists", "abcd"]
                     }
                 ]
@@ -281,7 +284,7 @@ module.exports = function() {
                         genreList: {
                             0: {
                                 "$size": 52,
-                                "$type": "path",
+                                "$type": $path,
                                 "value": ["lists", "abcd"]
                             }
                         }
@@ -298,9 +301,9 @@ module.exports = function() {
             },
             setPathSets: {
                 query: [{
-                    "path": ["videos", "1234", "summary"],
+                    path: ["videos", "1234", "summary"],
                     "value": {
-                        "$type": "sentinel",
+                        "$type": $sentinel,
                         "value": {
                             "title": "House of Cards",
                             "url": "/movies/1234"
@@ -346,7 +349,7 @@ module.exports = function() {
             },
             AsValues: {
                 values: [{
-                    "path": ["videos", "1234", "summary"],
+                    path: ["videos", "1234", "summary"],
                     "value": {
                         "title": "House of Cards",
                         "url": "/movies/1234"
@@ -368,7 +371,7 @@ module.exports = function() {
                             1234: {
                                 summary: {
                                     "$size": 51,
-                                    "$type": "sentinel",
+                                    "$type": $sentinel,
                                     "value": {
                                         "title": "House of Cards",
                                         "url": "/movies/1234"
@@ -413,9 +416,9 @@ module.exports = function() {
             setPathSets: {
                 query: [
                     {
-                        "path": ["videos", "expiredLeafByTimestamp", "summary"],
+                        path: ["videos", "expiredLeafByTimestamp", "summary"],
                         "value": {
-                            "$type": "sentinel",
+                            "$type": $sentinel,
                             "$expires": Date.now() - 100,
                             "value": {
                                 "title": "Marco Polo",
@@ -431,7 +434,7 @@ module.exports = function() {
                     videos: {
                         expiredLeafByTimestamp: {
                             summary: {
-                                "$type": "sentinel",
+                                "$type": $sentinel,
                                 "$expires": Date.now() - 100,
                                 "value": {
                                     "title": "Marco Polo",
@@ -444,13 +447,13 @@ module.exports = function() {
             },
             setJSONG: {
                 query: [{
-                    paths: [["videos", "sentinel", "summary"]],
+                    paths: [["videos", $sentinel, "summary"]],
                     jsong: {
                         videos: {
                             expiredLeafByTimestamp: {
                                 summary: {
                                     "$size": 51,
-                                    "$type": "sentinel",
+                                    "$type": $sentinel,
                                     "$expires": Date.now() - 100,
                                     "value": {
                                         "title": "Marco Polo",
@@ -499,11 +502,11 @@ module.exports = function() {
             setPathSets: {
                 query: [
                     {
-                        "path": ["videos", "expiredLeafBy0", "summary"],
+                        path: ["videos", "expiredLeafBy0", "summary"],
                         "value": {
                             "$expires": 0,
                             "$size": 51,
-                            "$type": "sentinel",
+                            "$type": $sentinel,
                             "value": {
                                 "sad": "tunafish"
                             }
@@ -519,7 +522,7 @@ module.exports = function() {
                             summary: {
                                 "$expires": 0,
                                 "$size": 51,
-                                "$type": "sentinel",
+                                "$type": $sentinel,
                                 "value": {
                                     "sad": "tunafish"
                                 }
@@ -537,7 +540,7 @@ module.exports = function() {
                                 summary: {
                                     "$expires": 0,
                                     "$size": 51,
-                                    "$type": "sentinel",
+                                    "$type": $sentinel,
                                     "value": {
                                         "sad": "tunafish"
                                     }
@@ -647,13 +650,13 @@ module.exports = function() {
             },
             AsValues: {
                 errors: [{
-                    "path": ["videos", "errorBranch"],
+                    path: ["videos", "errorBranch"],
                     "value": "I am yelling timber."
                 }]
             },
             AsJSON: {
                 errors: [{
-                    "path": ["videos", "errorBranch"],
+                    path: ["videos", "errorBranch"],
                     "value": "I am yelling timber."
                 }]
             },
@@ -664,7 +667,7 @@ module.exports = function() {
                         "videos": {
                             "errorBranch": {
                                 "$size": 51,
-                                "$type": "error",
+                                "$type": $error,
                                 "value": "I am yelling timber."
                             }
                         }
@@ -673,7 +676,7 @@ module.exports = function() {
             },
             AsPathMap: {
                 errors: [{
-                    "path": ["videos", "errorBranch"],
+                    path: ["videos", "errorBranch"],
                     "value": "I am yelling timber."
                 }]
             }
@@ -695,13 +698,13 @@ module.exports = function() {
             },
             AsValues: {
                 errors: [{
-                    "path": ["genreList", "2", null],
+                    path: ["genreList", "2", null],
                     "value": "Red is the new Black"
                 }]
             },
             AsJSON: {
                 errors: [{
-                    "path": ["genreList", "2", null],
+                    path: ["genreList", "2", null],
                     "value": "Red is the new Black"
                 }]
             },
@@ -712,14 +715,14 @@ module.exports = function() {
                         "genreList": {
                             "2": {
                                 "$size": 52,
-                                "$type": "path",
+                                "$type": $path,
                                 "value": ["lists", "error-list"]
                             }
                         },
                         "lists": {
                             "error-list": {
                                 "$size": 51,
-                                "$type": "error",
+                                "$type": $error,
                                 "value": "Red is the new Black"
                             }
                         }
@@ -728,7 +731,7 @@ module.exports = function() {
             },
             AsPathMap: {
                 errors: [{
-                    "path": ["genreList", "2", null],
+                    path: ["genreList", "2", null],
                     "value": "Red is the new Black"
                 }]
             }

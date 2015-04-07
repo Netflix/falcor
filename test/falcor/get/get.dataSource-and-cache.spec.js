@@ -42,6 +42,7 @@ describe('DataSource and Partial Cache', function() {
             var next = false;
             model.
                 get(['genreList', 0, {to: 1}, 'summary'], function(complexPath) {
+                    debugger
                     testRunner.compare(expected, complexPath);
                     selector = true;
 

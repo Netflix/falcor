@@ -1,3 +1,6 @@
+var $path = require('./../../../lib/types/$path.js');
+var $sentinel = require('./../../../lib/types/$sentinel.js');
+var $error = require('./../../../lib/types/$error.js');
 module.exports = function() {
     return {
         errorBranchSummary: {
@@ -17,7 +20,7 @@ module.exports = function() {
             },
             AsValues: {
                 values: [{
-                    "path": ["videos", "errorBranch"],
+                    path: ["videos", "errorBranch"],
                     "value": "I am yelling timber."
                 }]
             },
@@ -42,7 +45,7 @@ module.exports = function() {
                         "videos": {
                             "errorBranch": {
                                 "$size": "51",
-                                "$type": "error",
+                                "$type": $error,
                                 "value": "I am yelling timber."
                             }
                         }
@@ -67,7 +70,7 @@ module.exports = function() {
             },
             AsValues: {
                 values: [{
-                    "path": ["genreList", "2", null],
+                    path: ["genreList", "2", null],
                     "value": "Red is the new Black"
                 }]
             },
@@ -92,14 +95,14 @@ module.exports = function() {
                         "genreList": {
                             "2": {
                                 "$size": 52,
-                                "$type": "path",
+                                "$type": $path,
                                 "value": ["lists", "error-list"]
                             }
                         },
                         "lists": {
                             "error-list": {
                                 "$size": "51",
-                                "$type": "error",
+                                "$type": $error,
                                 "value": "Red is the new Black"
                             }
                         }
