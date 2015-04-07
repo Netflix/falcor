@@ -52,7 +52,6 @@ describe('Cache Only', function() {
                     }
                 });
 
-            console.log(model.toPathValues);
             model.get(["user", "name"]).toPathValues().subscribe(function(pathValue) {
                 value = pathValue;
             });
@@ -60,6 +59,37 @@ describe('Cache Only', function() {
             if (value === undefined) {
                 throw new Error("Value not retrieved from cache, despite the fact that it has not expired");
             }
+        });
+    });
+
+    describe('Allow Arrays in JSON Graph branch position', function() {
+        xit('get should go right through arrays in branch position', function() {
+            var model = new falcor.Model({
+                cache: {
+                    users: [
+                        {
+                            name: "Jim",
+                            age: 23
+                        },
+                        {
+                            name: "John",
+                            age: 44
+                        },
+                        {
+                            name: "Derek",
+                            age: 22
+                        }
+                    ]
+                }
+            });
+
+            model.get(["users", {length:3}, ["name","age"]]).toPathValues().toArray().subscribe(function(vals) {
+                console.log(JSON.stringify(vals));
+                testRunner.compare(
+                    JSON.stringify(vals), 
+                    '[{"path":["users",0,"name"],"value":"Jim"},{"path":["users",0,"age"],"value":23},{"path":["users",1,"name"],"value":"John"},{"path":["users",1,"age"],"value":44},{"path":["users",2,"name"],"value":"Derek"},{"path":["users",2,"age"],"value":22}]',
+                    'JSON Graphs That contain arrays in the bridge deposition return the same thing as those that contain maps in the branch position when given the same query');
+            });
         });
     });
 
