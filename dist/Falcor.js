@@ -69,6 +69,11 @@ falcor.__Internals = {};
 falcor.Observable = Rx.Observable;
 falcor.EXPIRES_NOW = 0;
 falcor.EXPIRES_NEVER = 1;
+/**
+ * The current semVer'd data version of falcor.
+ */
+falcor.dataVersion = '0.1.0';
+
 falcor.now = function now() {
     return Date.now();
 };
@@ -1845,6 +1850,7 @@ var hardLink = _dereq_('./util/hardlink');
 var createHardlink = hardLink.create;
 var onValue = _dereq_('./onValue');
 var isExpired = _dereq_('./util/isExpired');
+var $path = _dereq_('./../types/$path.js');
 
 function followReference(model, root, node, referenceContainer, reference, seed, outputFormat) {
 
@@ -1888,7 +1894,7 @@ function followReference(model, root, node, referenceContainer, reference, seed,
                 }
 
                 // Restart the reference follower.
-                if (type === 'path') {
+                if (type === $path) {
                     if (outputFormat === 'JSONG') {
                         onValue(model, next, seed, null, null, reference, null, outputFormat);
                     }
@@ -1920,7 +1926,7 @@ function followReference(model, root, node, referenceContainer, reference, seed,
 }
 
 module.exports = followReference;
-},{"./onValue":52,"./util/hardlink":54,"./util/isExpired":55}],41:[function(_dereq_,module,exports){
+},{"./../types/$path.js":114,"./onValue":52,"./util/hardlink":54,"./util/isExpired":55}],41:[function(_dereq_,module,exports){
 var getBoundValue = _dereq_('./getBoundValue');
 var isPathValue = _dereq_('./util/isPathValue');
 module.exports = function(walk) {
@@ -2147,6 +2153,9 @@ var followReference = _dereq_('./followReference');
 var clone = _dereq_('./util/clone');
 var isExpired = _dereq_('./util/isExpired');
 var promote = _dereq_('./util/lru').promote;
+var $path = _dereq_('./../types/$path.js');
+var $sentinel = _dereq_('./../types/$sentinel.js');
+var $error = _dereq_('./../types/$error.js');
 
 module.exports = function getValueSync(model, simplePath) {
     var root = model._cache;
@@ -2171,7 +2180,7 @@ module.exports = function getValueSync(model, simplePath) {
 
         // Up to the last key we follow references
         if (depth < len) {
-            if (type === 'path') {
+            if (type === $path) {
                 ref = followReference(model, root, root, next, next.value);
                 refNode = ref[0];
 
@@ -2222,12 +2231,12 @@ module.exports = function getValueSync(model, simplePath) {
         }
     }
 
-    if (out && out.$type === 'error' && !model._treatErrorsAsValues) {
+    if (out && out.$type === $error && !model._treatErrorsAsValues) {
         throw {path: simplePath, value: out.value};
     } else if (out && model._boxed) {
         out = !!type ? clone(out) : out;
     } else if (!out && model._materialized) {
-        out = {$type: 'sentinel'};
+        out = {$type: $sentinel};
     } else if (out) {
         out = out.value;
     }
@@ -2239,7 +2248,7 @@ module.exports = function getValueSync(model, simplePath) {
     };
 };
 
-},{"./followReference":40,"./util/clone":53,"./util/isExpired":55,"./util/lru":58}],47:[function(_dereq_,module,exports){
+},{"./../types/$error.js":113,"./../types/$path.js":114,"./../types/$sentinel.js":115,"./followReference":40,"./util/clone":53,"./util/isExpired":55,"./util/lru":58}],47:[function(_dereq_,module,exports){
 var followReference = _dereq_('./followReference');
 var onError = _dereq_('./onError');
 var onMissing = _dereq_('./onMissing');
@@ -2251,6 +2260,8 @@ var removeHardlink = hardLink.remove;
 var splice = lru.splice;
 var isExpired = _dereq_('./util/isExpired');
 var permuteKey = _dereq_('./util/permuteKey');
+var $path = _dereq_('./../types/$path.js');
+var $error = _dereq_('./../types/$error.js');
 
 // TODO: Objectify?
 function walk(model, root, curr, pathOrJSON, depth, seedOrFunction, positionalInfo, outerResults, optimizedPath, requestedPath, inputFormat, outputFormat, fromReference) {
@@ -2364,7 +2375,7 @@ function walk(model, root, curr, pathOrJSON, depth, seedOrFunction, positionalIn
 
                 if (jsonQuery && hasChildren || !jsonQuery && depth < pathOrJSON.length) {
 
-                    if (nType && nType === 'path' && !isExpired(next)) {
+                    if (nType && nType === $path && !isExpired(next)) {
                         if (asJSONG) {
                             onValue(model, next, seedOrFunction, outerResults, false, permuteOptimized, permutePosition, outputFormat);
                         }
@@ -2406,7 +2417,7 @@ function evaluateNode(model, curr, pathOrJSON, depth, seedOrFunction, requestedP
     positionalInfo = positionalInfo || [];
 
     // The Base Cases.  There is a type, therefore we have hit a 'leaf' node.
-    if (currType === 'error') {
+    if (currType === $error) {
         if (fromReference) {
             requestedPath.push(null);
         }
@@ -2435,7 +2446,7 @@ function evaluateNode(model, curr, pathOrJSON, depth, seedOrFunction, requestedP
 
 module.exports = walk;
 
-},{"./followReference":40,"./onError":50,"./onMissing":51,"./onValue":52,"./util/hardlink":54,"./util/isExpired":55,"./util/isMaterialzed":56,"./util/lru":58,"./util/permuteKey":59}],48:[function(_dereq_,module,exports){
+},{"./../types/$error.js":113,"./../types/$path.js":114,"./followReference":40,"./onError":50,"./onMissing":51,"./onValue":52,"./util/hardlink":54,"./util/isExpired":55,"./util/isMaterialzed":56,"./util/lru":58,"./util/permuteKey":59}],48:[function(_dereq_,module,exports){
 var walk = _dereq_('./getWalk');
 module.exports = {
     getAsJSON: _dereq_('./getAsJSON')(walk),
@@ -2482,6 +2493,7 @@ var NOOP = function NOOP() {},
     $TIMESTAMP = "$timestamp",
 
     SENTINEL = "sentinel",
+    PATH = "ref",
     ERROR = "error",
     VALUE = "value",
     EXPIRED = "expired",
@@ -2522,7 +2534,7 @@ module.exports = function setCache(model, map) {
                             nV2 = nodeType ? map[VALUE] : void 0;
                             nodeValue = nodeType === SENTINEL ? map[VALUE] : map;
                             newNode = map;
-                            if ((!nodeType || nodeType === SENTINEL || nodeType === 'path') && Array.isArray(nodeValue)) {
+                            if ((!nodeType || nodeType === SENTINEL || nodeType === PATH) && Array.isArray(nodeValue)) {
                                 delete nodeValue[$SIZE];
                                 // console.log(1);
                                 if (nodeType) {
@@ -2532,7 +2544,7 @@ module.exports = function setCache(model, map) {
                                 }
                                 newNode[$SIZE] = nodeSize;
                                 nodeValue[__CONTAINER] = newNode;
-                            } else if (nodeType === SENTINEL || nodeType === 'path') {
+                            } else if (nodeType === SENTINEL || nodeType === PATH) {
                                 newNode[$SIZE] = nodeSize = 50 + (nV2 && typeof nV2.length === 'number' ? nV2.length : 1);
                             } else if (nodeType === ERROR) {
                                 newNode[$SIZE] = nodeSize = map && map[$SIZE] || 0 || 50 + 1;
@@ -2952,7 +2964,9 @@ function concatAndInsertMissing(remainingPath, results, permuteRequested, permut
 var lru = _dereq_('./util/lru');
 var clone = _dereq_('./util/clone');
 var promote = lru.promote;
-var materializeNode = {$type: 'sentinel'};
+var $path = _dereq_('./../types/$path.js');
+var $sentinel = _dereq_('./../types/$sentinel.js');
+var $error = _dereq_('./../types/$error.js');
 module.exports = function onValue(model, node, seedOrFunction, outerResults, permuteRequested, permuteOptimized, permutePosition, outputFormat, fromReference) {
     var i, len, k, key, curr, prev, prevK;
     var materialized = false, valueNode;
@@ -2967,7 +2981,7 @@ module.exports = function onValue(model, node, seedOrFunction, outerResults, per
     
     // materialized
     if (materialized) {
-        valueNode = materializeNode;
+        valueNode = {$type: $sentinel};
     } 
     
     // Boxed Mode & Reference Node & Error node (only happens when model is in treat errors as values).
@@ -2975,7 +2989,7 @@ module.exports = function onValue(model, node, seedOrFunction, outerResults, per
         valueNode = clone(node);
     }
     
-    else if (node.$type === 'path' || node.$type === 'error') {
+    else if (node.$type === $path || node.$type === $error) {
         if (outputFormat === 'JSONG') {
             valueNode = clone(node);
         } else {
@@ -3083,7 +3097,7 @@ module.exports = function onValue(model, node, seedOrFunction, outerResults, per
             key = permuteOptimized[i];
 
             // TODO: Special case? do string comparisons make big difference?
-            curr[key] = materialized ? materializeNode : valueNode;
+            curr[key] = materialized ? {$type: $sentinel} : valueNode;
             if (permuteRequested) {
                 seedOrFunction.paths.push(permuteRequested);
             }
@@ -3093,7 +3107,7 @@ module.exports = function onValue(model, node, seedOrFunction, outerResults, per
 
 
 
-},{"./util/clone":53,"./util/lru":58}],53:[function(_dereq_,module,exports){
+},{"./../types/$error.js":113,"./../types/$path.js":114,"./../types/$sentinel.js":115,"./util/clone":53,"./util/lru":58}],53:[function(_dereq_,module,exports){
 // Copies the node
 module.exports = function clone(node) {
     var outValue, i, len;
@@ -5782,7 +5796,7 @@ module.exports = function(node, type, value) {
 },{"../types/$error":113,"../types/$path":114,"../types/$sentinel":115,"./clone":88,"./is-object":97,"./now":101}],113:[function(_dereq_,module,exports){
 module.exports = "error";
 },{}],114:[function(_dereq_,module,exports){
-module.exports = "path";
+module.exports = "ref";
 },{}],115:[function(_dereq_,module,exports){
 module.exports = "sentinel";
 },{}],116:[function(_dereq_,module,exports){
