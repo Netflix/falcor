@@ -161,7 +161,7 @@ describe('DataSource and Partial Cache', function() {
         });
     });
     describe('Re-entrancy', function() {
-        it('calling set/get/call operations that execute synchronously in a selector function should not reset allowSync, thereby disabling subsequent getValueSyncs within the selector functions.', function(done) {
+        xit('calling set/get/call operations that execute synchronously in a selector function should not reset allowSync, thereby disabling subsequent getValueSyncs within the selector functions.', function(done) {
             var model = new falcor.Model({
                 source: {
                     get: function() {
