@@ -12,18 +12,15 @@ describe('Bind', function() {
         var model = new Model({source: new LocalDataSource(Cache())});
         var count = 0;
         var expected = Bound().directValue.AsPathMap.values[0];
-        debugger;
         model = model.
             bind(["genreList", 0, 0], ['summary']).
             flatMap(function(model) {
                 return model.get(['summary']);
             }).
             doAction(function(x) {
-                debugger;
                 testRunner.compare(expected, x);
                 count++;
             }, noOp, function() {
-                debugger;
                 testRunner.compare(1, count, 'onNext should be called 1 time.');
             }).
             subscribe(noOp, done, done);
