@@ -22,6 +22,7 @@ describe('Progressive', function() {
             var count = 0;
             model.
                 get(['videos', 1234, 'summary'], ['videos', 766, 'summary'], function(v1234, v766) {
+                    debugger
                     if (count === 0) {
                         testRunner.compare(expected[0], v1234);
                         testRunner.compare(undefined, v766,
