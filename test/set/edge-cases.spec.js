@@ -1,8 +1,8 @@
 var jsong = require("../../index");
 var Model = jsong.Model;
 var expect = require('chai').expect;
-var $path = require("../../lib/types/$path");
-var $sentinel = require("../../lib/types/$sentinel");
+var $path = require("../../lib/types/path");
+var $sentinel = require("../../lib/types/sentinel");
 
 describe("Special Cases", function() {
     it("set blows away the cache.", function() {
@@ -25,7 +25,7 @@ describe("Special Cases", function() {
                 }},
                 paths: [["genreList", 1, 0, "summary"]]
             },
-            
+
             // TODO: Paul, this is the one the makes _cache.lists = undefined
             {
                 jsong: {"lists": {"1x5x": {
@@ -53,13 +53,13 @@ describe("Special Cases", function() {
                 expect(model._cache.lists).to.be.ok;
             }
         });
-        
+
         model._getPathSetsAsValues(model, get, function(x) {
             expect(x).to.deep.equals({
                 value: {
                     "title": "Running Man",
                     "url": "/movies/553"
-                }, 
+                },
                 path: ["genreList", 1, 0, "summary"]
             });
         });

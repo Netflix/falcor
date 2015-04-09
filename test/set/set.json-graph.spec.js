@@ -11,8 +11,8 @@ var set_envelopes = require("./support/set-envelopes");
 var set_and_verify_json_graph = require("./support/set-and-verify-json-graph");
 
 var slice = Array.prototype.slice;
-var $path = require("../../lib/types/$path");
-var $sentinel = require("../../lib/types/$sentinel");
+var $path = require("../../lib/types/path");
+var $sentinel = require("../../lib/types/sentinel");
 
 var modes = [{
         boxed: true

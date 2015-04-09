@@ -1,5 +1,5 @@
-var $path = require("../../../lib/types/$path");
-var $sentinel = require("../../../lib/types/$sentinel");
+var $path = require("../../../lib/types/path");
+var $sentinel = require("../../../lib/types/sentinel");
 
 module.exports = function() {
     return {

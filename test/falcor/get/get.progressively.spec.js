@@ -22,7 +22,6 @@ describe('Progressive', function() {
             var count = 0;
             model.
                 get(['videos', 1234, 'summary'], ['videos', 766, 'summary'], function(v1234, v766) {
-                    debugger
                     if (count === 0) {
                         testRunner.compare(expected[0], v1234);
                         testRunner.compare(undefined, v766,
@@ -33,7 +32,7 @@ describe('Progressive', function() {
                     }
                     count++;
                 }).
-                toProgressive().
+                progressively().
                 doAction(noOp, noOp, function() {
                     testRunner.compare(2, count, 'selector should be called 2x');
                 }).
@@ -52,7 +51,7 @@ describe('Progressive', function() {
                     }
                     count++;
                 }).
-                toProgressive().
+                progressively().
                 doAction(noOp, noOp, function() {
                     testRunner.compare(2, count, 'selector should be called 2x');
                 }).
@@ -73,7 +72,7 @@ describe('Progressive', function() {
                     }
                     count++;
                 }).
-                toProgressive().
+                progressively().
                 doAction(noOp, noOp, function() {
                     testRunner.compare(2, count, 'selector should be called 2x');
                 }).
@@ -88,7 +87,7 @@ describe('Progressive', function() {
             var count = 0;
             var progressive = model.
                 get(['videos', 1234, 'summary'], ['videos', 766, 'summary']).
-                toProgressive().
+                progressively().
                 toPathValues();
 
             var standard = model2.
@@ -127,7 +126,7 @@ describe('Progressive', function() {
             var progressive = model.
                 bindSync(['genreList', 0]).
                 get([{to: 1}, 'summary']).
-                toProgressive().
+                progressively().
                 toPathValues();
 
             var standard = model2.
