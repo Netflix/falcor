@@ -13,8 +13,8 @@ var get_pathsets = require("./support/get-pathsets");
 var set_and_verify_json_values = require("./support/set-and-verify-json-values");
 
 var slice = Array.prototype.slice;
-var $path = require("../../lib/types/$path");
-var $sentinel = require("../../lib/types/$sentinel");
+var $path = require("../../lib/types/path");
+var $sentinel = require("../../lib/types/sentinel");
 
 var modes = [{
         boxed: true

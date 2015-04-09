@@ -9,8 +9,8 @@ var partial_cache = require("../set/support/partial-cache");
 var invalidate_and_verify_path_sets = require("./support/invalidate-and-verify-path-sets");
 
 var slice = Array.prototype.slice;
-var $path = require("../../lib/types/$path");
-var $sentinel = require("../../lib/types/$sentinel");
+var $path = require("../../lib/types/path");
+var $sentinel = require("../../lib/types/sentinel");
 
 // Tests each output format.
 execute("JSON values", "Values");
@@ -19,7 +19,7 @@ execute("sparse JSON", "PathMap");
 execute("JSON-Graph", "JSONG");
 
 function execute(output, suffix) {
-    
+
     describe("Build " + output + " from path sets", function() {
         // set new values
         describe("by invalidating", function() {
@@ -68,7 +68,7 @@ function execute(output, suffix) {
                 });
             });
             // end set primitive value
-            
+
             // set a sentinel value
             describe("a $sentinel", function() {
                 describe("in one place", function() {
@@ -114,7 +114,7 @@ function execute(output, suffix) {
                 });
             });
             // end set sentinel value
-            
+
             // set a path value
             describe("a $path", function() {
                 describe("in one place", function() {
@@ -127,7 +127,7 @@ function execute(output, suffix) {
                 });
             });
             // end set path value
-            
+
             // set multiple mixed-type json values
             describe("multiple mixed paths and values as", function() {
                 it("directly", function() {
@@ -139,7 +139,7 @@ function execute(output, suffix) {
                         ["rows", "row-0", "3"]
                     ]);
                 });
-                
+
                 it("through references", function() {
                     invalidate_and_verify_path_sets(this.test, suffix, [
                         ["grid", 0, 0, "title"],
@@ -151,7 +151,7 @@ function execute(output, suffix) {
                 });
             });
             // end set multiple mixed-type json values
-            
+
             // ridiculous, but everything should be good if you try to invalidate with nothing but nulls...
             it("nothing, hopefully", function() {
                 var model  = new Model({ cache: whole_cache() });
