@@ -108,7 +108,7 @@ describe('Cache Only', function() {
                     }, x);
                     ++next;
                 }, noOp, function() {
-                    testRunner.compare(1, next, 'Expect to be onNext 1 time.');
+                    testRunner.compare(true, next > 0, 'Expect to be onNext to be called at least 1 time.');
                 }).
                 subscribe(noOp, done, done);
         });
