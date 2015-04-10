@@ -11,3 +11,4 @@ tmp/
 cTestFinal.js
 bin2
 out.csv
+npm-debug.log
