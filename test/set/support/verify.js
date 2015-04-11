@@ -5,6 +5,7 @@ var expect = require('chai').expect;
 var get_seeds = require("./get-seeds");
 var get_pathsets = require("./get-pathsets");
 var inspect = require("util").inspect;
+var testRunner = require("../../testRunner");
 
 function verify(suffix) {
     return function(model, input) {
@@ -46,7 +47,7 @@ function verify(suffix) {
                 // console.log("Set " + name + ":", inspect(input[prop], {depth: null}));
                 // console.log("Get " + name + ":", inspect(output[prop], {depth: null}));
                 
-                expect(output[prop], message + " - " + name).to.deep.equals(input[prop]);
+                testRunner.compare(output[prop], input[prop], message + " - " + name);
                 
                 if(fn = checks.shift()) {
                     return fn.call(this, output);
