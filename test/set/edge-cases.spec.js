@@ -3,8 +3,35 @@ var Model = jsong.Model;
 var expect = require('chai').expect;
 var $path = require("../../lib/types/path");
 var $sentinel = require("../../lib/types/sentinel");
+var testRunner = require('../testRunner');
 
 describe("Special Cases", function() {
+    it.only('should set the cache in.', function() {
+        var model = new Model({cache: {}});
+        var edgeCaseCache = {
+            jsong: {
+                user: {
+                    name: "Jim",
+                    location: {$type: "error", value: "Something broke!"},
+                    age: {$type: 'sentinel'}
+                }
+            },
+            paths: [
+                ['user', ['name', 'location', 'age']]
+            ]
+        };
+
+        var pathMap = [{}];
+        model._setJSONGsAsPathMap(model, [edgeCaseCache], pathMap);
+
+        testRunner.compare({
+            json: {
+                user: {
+                    name: 'Jim'
+                }
+            }
+        }, pathMap[0]);
+    });
     it("set blows away the cache.", function() {
         var model = new Model({});
         var get = [["genreList", 1, 0, "summary"]];
