@@ -1,7 +1,7 @@
 var expiredTimestamp = Date.now() - 100;
-var $path = require('./../../lib/types/$path.js');
-var $sentinel = require('./../../lib/types/$sentinel.js');
-var $error = require('./../../lib/types/$error.js');
+var $path = require('./../../lib/types/path.js');
+var $sentinel = require('./../../lib/types/sentinel.js');
+var $error = require('./../../lib/types/error.js');
 
 var Cache = function() {
     return {

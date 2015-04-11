@@ -20,18 +20,21 @@ describe('Progressive', function() {
             var model = new Model({cache: M(), source: new LocalDataSource(Cache())});
             var expected = Expected.Complex().toOnly.AsJSON.values[0].json;
             var count = 0;
+            var e1 = {
+                newValue: '1'
+            };
+            var e2 = {
+                newValue: '2'
+            };
             model.
-                get(['videos', 1234, 'summary'], ['videos', 766, 'summary'], function(v1234, v766) {
-                    if (count === 0) {
-                        testRunner.compare(expected[0], v1234);
-                        testRunner.compare(undefined, v766,
-                           'video 766 should be undefined when count === 0');
-                    } else {
-                        testRunner.compare(expected[0], v1234);
-                        testRunner.compare(expected[1], v766);
-                    }
-                    count++;
-                }).
+                set(
+                    {path: ['videos', 1234, 'summary'], value: e1},
+                    {path: ['videos', 766, 'summary'], value: e2},
+                    function(v1234, v766) {
+                        testRunner.compare(e1, v1234);
+                        testRunner.compare(e2, v766);
+                        count++;
+                    }).
                 progressively().
                 doAction(noOp, noOp, function() {
                     testRunner.compare(2, count, 'selector should be called 2x');
@@ -42,15 +45,17 @@ describe('Progressive', function() {
             var model = new Model({cache: M(), source: new LocalDataSource(Cache())});
             var expected = Expected.Complex().toOnly.AsJSON.values[0].json;
             var count = 0;
+            var count = 0;
+            var e1 = {
+                newValue: '1'
+            };
             model.
-                get(['genreList', 0, {to: 1}, 'summary'], function(complexPath) {
-                    if (count === 0) {
-                        testRunner.compare({0: expected[0]}, complexPath);
-                    } else {
-                        testRunner.compare(expected, complexPath);
-                    }
-                    count++;
-                }).
+                set(
+                    {path: ['genreList', 0, {to:1}, 'summary'], value: e1},
+                    function(list) {
+                        testRunner.compare({0: e1, 1: e1}, list);
+                        count++;
+                    }).
                 progressively().
                 doAction(noOp, noOp, function() {
                     testRunner.compare(2, count, 'selector should be called 2x');
@@ -62,16 +67,17 @@ describe('Progressive', function() {
             model._root.unsafeMode = true;
             var expected = Expected.Complex().toOnly.AsJSON.values[0].json;
             var count = 0;
+            var e1 = {
+                newValue: '1'
+            };
             model.
                 bindSync(['genreList', 0]).
-                get([{to: 1}, 'summary'], function(complexPath) {
-                    if (count === 0) {
-                        testRunner.compare({0: expected[0]}, complexPath);
-                    } else {
-                        testRunner.compare(expected, complexPath);
-                    }
-                    count++;
-                }).
+                set(
+                    {path: [{to:1}, 'summary'], value: e1},
+                    function(list) {
+                        testRunner.compare({0: e1, 1: e1}, list);
+                        count++;
+                    }).
                 progressively().
                 doAction(noOp, noOp, function() {
                     testRunner.compare(2, count, 'selector should be called 2x');
@@ -85,13 +91,23 @@ describe('Progressive', function() {
             var model2 = new Model({cache: M(), source: new LocalDataSource(Cache())});
             var expected = Expected.Complex().toOnly.AsJSON.values[0].json;
             var count = 0;
+            var e1 = {
+                newValue: '1'
+            };
+            var e2 = {
+                newValue: '2'
+            };
             var progressive = model.
-                get(['videos', 1234, 'summary'], ['videos', 766, 'summary']).
+                set(
+                    {path: ['videos', 1234, 'summary'], value: e1},
+                    {path: ['videos', 766, 'summary'], value: e2}).
                 progressively().
                 toPathValues();
 
             var standard = model2.
-                get(['videos', 1234, 'summary'], ['videos', 766, 'summary']).
+                set(
+                    {path: ['videos', 1234, 'summary'], value: e1},
+                    {path: ['videos', 766, 'summary'], value: e2}).
                 toPathValues();
 
             var progressiveResult = false;
@@ -121,17 +137,20 @@ describe('Progressive', function() {
             var model2 = new Model({cache: M(), source: new LocalDataSource(Cache())});
             var expected = Expected.Complex().toOnly.AsJSON.values[0].json;
             var count = 0;
+            var e1 = {
+                newValue: '1'
+            };
             model._root.unsafeMode = true;
             model2._root.unsafeMode = true;
             var progressive = model.
                 bindSync(['genreList', 0]).
-                get([{to: 1}, 'summary']).
+                set({path: [{to:1}, 'summary'], value: e1}).
                 progressively().
                 toPathValues();
 
             var standard = model2.
                 bindSync(['genreList', 0]).
-                get([{to: 1}, 'summary']).
+                set({path: [{to:1}, 'summary'], value: e1}).
                 toPathValues();
 
             var progressiveResult = false;

@@ -1,6 +1,6 @@
-var $path = require('./../../lib/types/$path.js');
-var $sentinel = require('./../../lib/types/$sentinel.js');
-var $error = require('./../../lib/types/$error.js');
+var $path = require('./../../lib/types/path.js');
+var $sentinel = require('./../../lib/types/sentinel.js');
+var $error = require('./../../lib/types/error.js');
 var ReducedCache = function() {
     return {
         "$size": 38,
