@@ -49,7 +49,6 @@ modes.forEach(function(opts, i) {
 });
 
 function execute(output, suffix, opts) {
-
     describe("Build " + output + " from JSON values", function() {
         // set new values
         describe("by setting", function() {
