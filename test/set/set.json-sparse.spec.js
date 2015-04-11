@@ -10,11 +10,12 @@ var partial_cache = require("./support/partial-cache");
 var set_pathvalues = require("./support/set-pathvalues");
 var get_pathsets = require("./support/get-pathsets");
 
-var set_and_verify_json_values = require("./support/set-and-verify-json-values");
+var set_and_verify_json_sparse = require("./support/set-and-verify-json-sparse");
 
 var slice = Array.prototype.slice;
 var $path = require("../../lib/types/$path");
 var $sentinel = require("../../lib/types/$sentinel");
+
 
 var modes = [{
         
@@ -50,12 +51,12 @@ modes.forEach(function(opts, i) {
 
 function execute(output, suffix, opts) {
 
-    describe("Build " + output + " from JSON values", function() {
+    describe("Build " + output + " from sparse JSON", function() {
         // set new values
         describe("by setting", function() {
             // Michael TODO: make sure get is returning the same output as set
             xit("nothing, hopefully", function() {
-                set_and_verify_json_values(this.test, suffix, [{
+                set_and_verify_json_sparse(this.test, suffix, [{
                     path: [null, null, null, null],
                     value: "Shouldn't be in the cache."
                 }, {
@@ -67,31 +68,31 @@ function execute(output, suffix, opts) {
             describe("a primitive value", function() {
                 describe("in one place", function() {
                     it("directly", function() {
-                        set_and_verify_json_values(this.test, suffix, [{
+                        set_and_verify_json_sparse(this.test, suffix, [{
                             path: ["movies", "pulp-fiction", "title"],
                             value: "Pulp Fiction"
                         }], opts);
                     });
                     it("through a reference", function() {
-                        set_and_verify_json_values(this.test, suffix, [{
+                        set_and_verify_json_sparse(this.test, suffix, [{
                             path: ["grid", 0, 0, "title"],
                             value: "Pulp Fiction"
                         }], opts);
                     });
                     it("through a reference that lands on a sentinel", function() {
-                        set_and_verify_json_values(this.test, suffix, [{
+                        set_and_verify_json_sparse(this.test, suffix, [{
                             path: ["grid", 0, 1, "title"],
                             value: "Kill Bill: Vol. 1"
                         }], opts);
                     });
                     it("through a broken reference", function() {
-                        set_and_verify_json_values(this.test, suffix, [{
+                        set_and_verify_json_sparse(this.test, suffix, [{
                             path: ["grid", 0, 2, "title"],
                             value: "Reservior Dogs"
                         }], opts);
                     });
                     it("through a reference with a null last key", function() {
-                        set_and_verify_json_values(this.test, suffix, [{
+                        set_and_verify_json_sparse(this.test, suffix, [{
                             path: ["grid", 0, 2, null],
                             value: "Reservior Dogs"
                         }], opts);
@@ -100,13 +101,13 @@ function execute(output, suffix, opts) {
                 describe("in multiple places", function() {
                     describe("via keyset", function() {
                         it("directly", function() {
-                            set_and_verify_json_values(this.test, suffix, [{
+                            set_and_verify_json_sparse(this.test, suffix, [{
                                 path: ["movies", ["pulp-fiction", "kill-bill-1", "reservior-dogs"], "director"],
                                 value: "Quentin Tarantino"
                             }], opts);
                         });
                         it("through through successful, short-circuit, and broken references", function() {
-                            set_and_verify_json_values(this.test, suffix, [{
+                            set_and_verify_json_sparse(this.test, suffix, [{
                                 path: ["grid", 0, [0, 1, 2], "director"],
                                 value: "Quentin Tarantino"
                             }], opts);
@@ -114,25 +115,25 @@ function execute(output, suffix, opts) {
                     });
                     describe("via range", function() {
                         it("to:2", function() {
-                            set_and_verify_json_values(this.test, suffix, [{
+                            set_and_verify_json_sparse(this.test, suffix, [{
                                 path: ["grid", 0, {to:2}, "director"],
                                 value: "Quentin Tarantino"
                             }], opts);
                         });
                         it("from:1, to:2", function() {
-                            set_and_verify_json_values(this.test, suffix, [{
+                            set_and_verify_json_sparse(this.test, suffix, [{
                                 path: ["grid", 0, {from:1, to:2}, "director"],
                                 value: "Quentin Tarantino"
                             }], opts);
                         });
                         it("length:3", function() {
-                            set_and_verify_json_values(this.test, suffix, [{
+                            set_and_verify_json_sparse(this.test, suffix, [{
                                 path: ["grid", 0, {length:3}, "director"],
                                 value: "Quentin Tarantino"
                             }], opts);
                         });
                         it("from:1, length:2", function() {
-                            set_and_verify_json_values(this.test, suffix, [{
+                            set_and_verify_json_sparse(this.test, suffix, [{
                                 path: ["grid", 0, {from:1, length:2}, "director"],
                                 value: "Quentin Tarantino"
                             }], opts);
@@ -146,7 +147,7 @@ function execute(output, suffix, opts) {
             describe("a $sentinel", function() {
                 describe("in one place", function() {
                     it("directly", function() {
-                        set_and_verify_json_values(this.test, suffix, [{
+                        set_and_verify_json_sparse(this.test, suffix, [{
                             path: ["movies", "pulp-fiction", "summary"],
                             value: {
                                 $type: $sentinel,
@@ -158,7 +159,7 @@ function execute(output, suffix, opts) {
                         }], opts);
                     });
                     it("through a reference", function() {
-                        set_and_verify_json_values(this.test, suffix, [{
+                        set_and_verify_json_sparse(this.test, suffix, [{
                             path: ["grid", 0, 0, "summary"],
                             value: {
                                 $type: $sentinel,
@@ -170,7 +171,7 @@ function execute(output, suffix, opts) {
                         }], opts);
                     });
                     it("through a reference that lands on a sentinel", function() {
-                        set_and_verify_json_values(this.test, suffix, [{
+                        set_and_verify_json_sparse(this.test, suffix, [{
                             path: ["grid", 0, 1, "summary"],
                             value: {
                                 $type: $sentinel,
@@ -182,7 +183,7 @@ function execute(output, suffix, opts) {
                         }], opts);
                     });
                     it("through a broken reference", function() {
-                        set_and_verify_json_values(this.test, suffix, [{
+                        set_and_verify_json_sparse(this.test, suffix, [{
                             path: ["grid", 0, 2, "summary"],
                             value: {
                                 $type: $sentinel,
@@ -194,7 +195,7 @@ function execute(output, suffix, opts) {
                         }], opts);
                     });
                     it("through a reference with a null last key", function() {
-                        set_and_verify_json_values(this.test, suffix, [{
+                        set_and_verify_json_sparse(this.test, suffix, [{
                             path: ["grid", 0, 2, null],
                             value: {
                                 $type: $sentinel,
@@ -206,7 +207,7 @@ function execute(output, suffix, opts) {
                 describe("in multiple places", function() {
                     describe("via keyset", function() {
                         it("directly", function() {
-                            set_and_verify_json_values(this.test, suffix, [{
+                            set_and_verify_json_sparse(this.test, suffix, [{
                                 path: ["movies", ["pulp-fiction", "kill-bill-1", "reservior-dogs"], "genres"],
                                 value: {
                                     $type: $sentinel,
@@ -215,7 +216,7 @@ function execute(output, suffix, opts) {
                             }], opts);
                         });
                         it("through through successful, short-circuit, and broken references", function() {
-                            set_and_verify_json_values(this.test, suffix, [{
+                            set_and_verify_json_sparse(this.test, suffix, [{
                                 path: ["grid", 0, [0, 1, 2], "genres"],
                                 value: {
                                     $type: $sentinel,
@@ -226,7 +227,7 @@ function execute(output, suffix, opts) {
                     });
                     describe("via range", function() {
                         it("to:2", function() {
-                            set_and_verify_json_values(this.test, suffix, [{
+                            set_and_verify_json_sparse(this.test, suffix, [{
                                 path: ["grid", 0, {to:2}, "genres"],
                                 value: {
                                     $type: $sentinel,
@@ -235,7 +236,7 @@ function execute(output, suffix, opts) {
                             }], opts);
                         });
                         it("from:1, to:2", function() {
-                            set_and_verify_json_values(this.test, suffix, [{
+                            set_and_verify_json_sparse(this.test, suffix, [{
                                 path: ["grid", 0, {from:1, to:2}, "genres"],
                                 value: {
                                     $type: $sentinel,
@@ -244,7 +245,7 @@ function execute(output, suffix, opts) {
                             }], opts);
                         });
                         it("length:3", function() {
-                            set_and_verify_json_values(this.test, suffix, [{
+                            set_and_verify_json_sparse(this.test, suffix, [{
                                 path: ["grid", 0, {length:3}, "genres"],
                                 value: {
                                     $type: $sentinel,
@@ -253,7 +254,7 @@ function execute(output, suffix, opts) {
                             }], opts);
                         });
                         it("from:1, length:2", function() {
-                            set_and_verify_json_values(this.test, suffix, [{
+                            set_and_verify_json_sparse(this.test, suffix, [{
                                 path: ["grid", 0, {from:1, length:2}, "genres"],
                                 value: {
                                     $type: $sentinel,
@@ -270,13 +271,13 @@ function execute(output, suffix, opts) {
             describe("a $path", function() {
                 describe("in one place", function() {
                     it("directly", function() {
-                        set_and_verify_json_values(this.test, suffix, [{
+                        set_and_verify_json_sparse(this.test, suffix, [{
                             path: ["rows", "row-0", "3"],
                             value: { $type: $path, value: ["movies", "django-unchained"] }
                         }], opts);
                     });
                     it("through a reference", function() {
-                        set_and_verify_json_values(this.test, suffix, [{
+                        set_and_verify_json_sparse(this.test, suffix, [{
                             path: ["grid", 0, 3],
                             value: { $type: $path, value: ["movies", "django-unchained"] }
                         }], opts);
@@ -286,9 +287,11 @@ function execute(output, suffix, opts) {
             // end set path value
 
             // set multiple mixed-type json values
-            describe("multiple mixed paths and values as", function() {
+            describe("multiple mixed paths and values", function() {
                 it("directly", function() {
-                    set_and_verify_json_values(this.test, suffix, [{
+                    // Michael todo: getAsJSON with PathMaps doesn't seem to be terminating
+                    // when it encounters leaf nodes with $type specified.
+                    set_and_verify_json_sparse(this.test, suffix, [{
                         path: ["movies", "pulp-fiction", "title"],
                         value: "Pulp Fiction"
                     }, {
@@ -316,7 +319,7 @@ function execute(output, suffix, opts) {
                 });
 
                 it("through references", function() {
-                    set_and_verify_json_values(this.test, suffix, [{
+                    set_and_verify_json_sparse(this.test, suffix, [{
                         path: ["grid", 0, 0, "title"],
                         value: "Pulp Fiction"
                     }, {
@@ -350,8 +353,8 @@ function execute(output, suffix, opts) {
                 var model = new Model(_.extend({cache: partial_cache()}, opts));
                 var options = {model: model};
                 var start_time = Date.now();
-
-                set_and_verify_json_values(this.test, suffix, [{
+                debugger;
+                set_and_verify_json_sparse(this.test, suffix, [{
                     path: ["grid", 2],
                     value: {
                         $type: $path,
@@ -378,7 +381,7 @@ function execute(output, suffix, opts) {
                 var model = new Model(_.extend({cache: partial_cache()}, opts));
                 var options = {model: model};
 
-                set_and_verify_json_values(this.test, suffix, [{
+                set_and_verify_json_sparse(this.test, suffix, [{
                     path: ["grid", 2],
                     value: {
                         $type: $path,
@@ -389,7 +392,7 @@ function execute(output, suffix, opts) {
 
                 setTimeout(function() {
 
-                    set_and_verify_json_values(this.test, suffix, [{
+                    set_and_verify_json_sparse(this.test, suffix, [{
                         path: ["grid", 2, 0, "title"],
                         value: "Pulp Fiction"
                     }], options);
@@ -408,7 +411,7 @@ function execute(output, suffix, opts) {
                     collectRatio: 1
                 }, opts)).materialize();
 
-                set_and_verify_json_values(this.test, suffix, [{
+                set_and_verify_json_sparse(this.test, suffix, [{
                     path:  ["grid", "grid-1234", {length: count}],
                     value: {
                         $type: $sentinel,
@@ -417,7 +420,7 @@ function execute(output, suffix, opts) {
                     }
                 }], {model: model});
 
-                set_and_verify_json_values(this.test, suffix, [{
+                set_and_verify_json_sparse(this.test, suffix, [{
                     path:  ["grid", "grid-1234", {from: count, length: count}],
                     value: {
                         $type: $sentinel,
@@ -455,13 +458,13 @@ function execute(output, suffix, opts) {
             // replace a sentinel with a primitive
             describe("a $sentinel with a primitive", function() {
                 it("directly", function() {
-                    set_and_verify_json_values(this.test, suffix, [{
+                    set_and_verify_json_sparse(this.test, suffix, [{
                         path: ["movies", "pulp-fiction", "movie-id"],
                         value: "pulp-fiction-2"
                     }], opts);
                 });
                 it("through a reference", function() {
-                    set_and_verify_json_values(this.test, suffix, [{
+                    set_and_verify_json_sparse(this.test, suffix, [{
                         path: ["grid", 0, 0, "movie-id"],
                         value: "pulp-fiction-2"
                     }], opts);
@@ -472,7 +475,7 @@ function execute(output, suffix, opts) {
             // replace a branch with a primitive
             describe("a branch with a primitive", function() {
                 it("directly", function() {
-                    set_and_verify_json_values(this.test, suffix, [{
+                    set_and_verify_json_sparse(this.test, suffix, [{
                         path: ["movies", "pulp-fiction"],
                         value: "oops"
                     }])
@@ -483,7 +486,7 @@ function execute(output, suffix, opts) {
             // replace a branch with an error
             describe("a branch with an error", function() {
                 it("directly", function() {
-                    set_and_verify_json_values(this.test, suffix, [{
+                    set_and_verify_json_sparse(this.test, suffix, [{
                         path: ["movies", "pulp-fiction"],
                         value: {
                             "$type": "error",
@@ -498,7 +501,7 @@ function execute(output, suffix, opts) {
                 it("directly", function() {
                     var model = new Model(_.extend({cache: whole_cache()}, opts));
                     get_pathsets(model,[["grid", {to:1}, {to:3}, ["movie-id", "title", "director", "genres", "summary"]]], suffix);
-                    set_and_verify_json_values(this.test, suffix, [{
+                    set_and_verify_json_sparse(this.test, suffix, [{
                         path: ["rows", "row-0", "3"],
                         value: {
                             $type: $path,
@@ -509,7 +512,7 @@ function execute(output, suffix, opts) {
                 it("through references", function() {
                     var model = new Model(_.extend({cache: whole_cache()}, opts));
                     get_pathsets(model,[["grid", {to:1}, {to:3}, ["movie-id", "title", "director", "genres", "summary"]]], suffix);
-                    set_and_verify_json_values(this.test, suffix, [{
+                    set_and_verify_json_sparse(this.test, suffix, [{
                         path: ["grid", {to:1}, "3"],
                         value: {
                             $type: $path,

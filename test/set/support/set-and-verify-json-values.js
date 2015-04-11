@@ -2,10 +2,11 @@ module.exports = set_and_verify_json_values;
 
 var verify = require("./verify");
 var set_pathvalues = require("./set-pathvalues");
+var clone = require("./clone");
 
 function set_and_verify_json_values(test, suffix, pathvalues, options) {
     return verify(suffix).
-        apply(test, set_pathvalues(pathvalues, suffix, options)).
+        apply(test, set_pathvalues(pathvalues, suffix, clone(options))).
         apply(test, get_paths(pathvalues));
 }
 

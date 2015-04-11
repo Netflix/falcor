@@ -20,6 +20,11 @@ prototype._setPathSetsAsJSONG = set.setPathSetsAsJSONG;
 prototype._setPathSetsAsPathMap = set.setPathSetsAsPathMap;
 prototype._setPathSetsAsValues = set.setPathSetsAsValues;
 
+prototype._setPathMapsAsJSON = set.setPathMapsAsJSON;
+prototype._setPathMapsAsJSONG = set.setPathMapsAsJSONG;
+prototype._setPathMapsAsPathMap = set.setPathMapsAsPathMap;
+prototype._setPathMapsAsValues = set.setPathMapsAsValues;
+
 prototype._setJSONGsAsJSON = set.setJSONGsAsJSON;
 prototype._setJSONGsAsJSONG = set.setJSONGsAsJSONG;
 prototype._setJSONGsAsPathMap = set.setJSONGsAsPathMap;
@@ -30,7 +35,8 @@ prototype._invPathSetsAsJSONG = inv.invPathSetsAsJSONG;
 prototype._invPathSetsAsPathMap = inv.invPathSetsAsPathMap;
 prototype._invPathSetsAsValues = inv.invPathSetsAsValues;
 
-prototype._setCache = get.setCache;
+// prototype._setCache = get.setCache;
+prototype._setCache = set.setCache;
 
 module.exports = falcor;
 

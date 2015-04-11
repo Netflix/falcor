@@ -1,4 +1,4 @@
-module.exports = set_pathvalues;
+module.exports = set_pathmaps;
 
 var _ = require("lodash");
 var jsong = require("../../../index");
@@ -7,15 +7,15 @@ var partial_cache = require("./partial-cache");
 var get_seeds = require("./get-seeds");
 var sort_path_values = require("./sort-path-values");
 
-function set_pathvalues(pathvalues, suffix, options) {
+function set_pathmaps(pathmaps, suffix, options) {
     var model   = options && options.model || new Model(_.extend({ cache: partial_cache() }, options || {}));
-    var seeds   = suffix == "JSON" ? get_seeds(pathvalues) : [{}];
+    var seeds   = suffix == "JSON" ? get_seeds(pathmaps) : [{}];
     if(suffix == "Values") {
         var values = [];
         seeds = function(pv) { values.push(pv); }
     }
-    var func = model["_setPathSetsAs" + suffix];
-    var results = func(model, pathvalues, seeds);
+    var func = model["_setPathMapsAs" + suffix];
+    var results = func(model, pathmaps, seeds);
     if(values) { results.values = values.sort(sort_path_values); }
     else if(suffix == "JSONG") {
         results.values.forEach(function(envelope) {
