@@ -31,6 +31,11 @@ describe("Special Cases", function() {
                 }
             }
         }, pathMap[0]);
+        
+        var jsons = [{}];
+        model._cache = {};
+        model._setJSONGsAsJSON(model, [edgeCaseCache], jsons);
+        testRunner.compare({ json: { name: 'Jim' } }, jsons[0]);
     });
     it("set blows away the cache.", function() {
         var model = new Model({});
