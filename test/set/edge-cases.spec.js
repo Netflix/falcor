@@ -6,7 +6,7 @@ var $sentinel = require("../../lib/types/sentinel");
 var testRunner = require('../testRunner');
 
 describe("Special Cases", function() {
-    it.only('should set the cache in.', function() {
+    it('should set the cache in.', function() {
         var model = new Model({cache: {}});
         var edgeCaseCache = {
             jsong: {
