@@ -5,10 +5,8 @@ var $error = require('./../../lib/types/error.js');
 
 var Cache = function() {
     return {
-        "$size": 1353,
         "movies": { "$type": $path, "value": ['videos'] },
         "genreList": {
-            "$size": 81,
             "-1": { "$type": $path, "value": ["lists", "def"] },
             "0":  { "$type": $path, "value": ["lists", "abcd"] },
             "1":  { "$type": $path, "value": ["lists", "my-list"] },
@@ -25,16 +23,13 @@ var Cache = function() {
             "12": { "$type": $path, "value": ["lists", "future-expired-list"] },
             "inner-reference": { "$type": $path, "value": ['movies', 1234] },
             $sentinel: {
-                "$size": 52,
                 "$type": $path,
                 "value": ["lists", "to-sentinel-list"]
             },
             "branch-miss": { "$type": $path, "value": ["does", "not", "exist"] }
         },
         "lists": {
-            "$size": 489,
             "abcd": {
-                "$size": 8,
                 "-1": { "$type": $path, "value": ["videos", 4422] },
                 "0":  { "$type": $path, "value": ["videos", 1234] },
                 "1":  { "$type": $path, "value": ["videos", 766] },
@@ -72,13 +67,11 @@ var Cache = function() {
                 "33": { "$type": $path, "value": ["videos", 29] }
             },
             "def": {
-                "$size": 6,
                 "0": { "$type": $path, "value": ["videos", 888] },
                 "1": { "$type": $path, "value": ["videos", 999] },
                 "2": { "$type": $path, "value": ["videos", 542] }
             },
             "sentinel-list": {
-                "$size": 104,
                 "0": {
                     "$size": 52,
                     "$type": $path,
@@ -91,7 +84,6 @@ var Cache = function() {
                 }
             },
             "sentinel-list-2": {
-                "$size": 52,
                 "0": {
                     "$size": 52,
                     "$type": $path,
@@ -99,7 +91,6 @@ var Cache = function() {
                 }
             },
             "1x5x": {
-                "$size": 4,
                 "0": { "$type": $path, "value": ["videos", 553] },
                 "1": { "$type": $path, "value": ["videos", 5522] }
             },
@@ -145,9 +136,7 @@ var Cache = function() {
             }
         },
         "videos": {
-            "$size": 732,
             "0": {
-                "$size": 10,
                 "summary": {
                     "$size": 51,
                     "$type": $sentinel,
@@ -158,7 +147,6 @@ var Cache = function() {
                 }
             },
             "1": {
-                "$size": 10,
                 "summary": {
                     "$size": 51,
                     "$type": $sentinel,
@@ -169,7 +157,6 @@ var Cache = function() {
                 }
             },
             "2": {
-                "$size": 10,
                 "summary": {
                     "$size": 51,
                     "$type": $sentinel,
@@ -180,7 +167,6 @@ var Cache = function() {
                 }
             },
             "3": {
-                "$size": 10,
                 "summary": {
                     "$size": 51,
                     "$type": $sentinel,
@@ -191,7 +177,6 @@ var Cache = function() {
                 }
             },
             "4": {
-                "$size": 10,
                 "summary": {
                     "$size": 51,
                     "$type": $sentinel,
@@ -202,7 +187,6 @@ var Cache = function() {
                 }
             },
             "5": {
-                "$size": 10,
                 "summary": {
                     "$size": 51,
                     "$type": $sentinel,
@@ -213,7 +197,6 @@ var Cache = function() {
                 }
             },
             "6": {
-                "$size": 10,
                 "summary": {
                     "$size": 51,
                     "$type": $sentinel,
@@ -224,7 +207,6 @@ var Cache = function() {
                 }
             },
             "7": {
-                "$size": 10,
                 "summary": {
                     "$size": 51,
                     "$type": $sentinel,
@@ -235,7 +217,6 @@ var Cache = function() {
                 }
             },
             "8": {
-                "$size": 10,
                 "summary": {
                     "$size": 51,
                     "$type": $sentinel,
@@ -246,7 +227,6 @@ var Cache = function() {
                 }
             },
             "9": {
-                "$size": 10,
                 "summary": {
                     "$size": 51,
                     "$type": $sentinel,
@@ -257,7 +237,6 @@ var Cache = function() {
                 }
             },
             "10": {
-                "$size": 10,
                 "summary": {
                     "$size": 51,
                     "$type": $sentinel,
@@ -268,7 +247,6 @@ var Cache = function() {
                 }
             },
             "11": {
-                "$size": 10,
                 "summary": {
                     "$size": 51,
                     "$type": $sentinel,
@@ -279,7 +257,6 @@ var Cache = function() {
                 }
             },
             "12": {
-                "$size": 10,
                 "summary": {
                     "$size": 51,
                     "$type": $sentinel,
@@ -290,7 +267,6 @@ var Cache = function() {
                 }
             },
             "13": {
-                "$size": 10,
                 "summary": {
                     "$size": 51,
                     "$type": $sentinel,
@@ -301,7 +277,6 @@ var Cache = function() {
                 }
             },
             "14": {
-                "$size": 10,
                 "summary": {
                     "$size": 51,
                     "$type": $sentinel,
@@ -312,7 +287,6 @@ var Cache = function() {
                 }
             },
             "15": {
-                "$size": 10,
                 "summary": {
                     "$size": 51,
                     "$type": $sentinel,
@@ -323,7 +297,6 @@ var Cache = function() {
                 }
             },
             "16": {
-                "$size": 10,
                 "summary": {
                     "$size": 51,
                     "$type": $sentinel,
@@ -334,7 +307,6 @@ var Cache = function() {
                 }
             },
             "17": {
-                "$size": 10,
                 "summary": {
                     "$size": 51,
                     "$type": $sentinel,
@@ -345,7 +317,6 @@ var Cache = function() {
                 }
             },
             "18": {
-                "$size": 10,
                 "summary": {
                     "$size": 51,
                     "$type": $sentinel,
@@ -356,7 +327,6 @@ var Cache = function() {
                 }
             },
             "19": {
-                "$size": 10,
                 "summary": {
                     "$size": 51,
                     "$type": $sentinel,
@@ -367,7 +337,6 @@ var Cache = function() {
                 }
             },
             "20": {
-                "$size": 10,
                 "summary": {
                     "$size": 51,
                     "$type": $sentinel,
@@ -378,7 +347,6 @@ var Cache = function() {
                 }
             },
             "21": {
-                "$size": 10,
                 "summary": {
                     "$size": 51,
                     "$type": $sentinel,
@@ -389,7 +357,6 @@ var Cache = function() {
                 }
             },
             "22": {
-                "$size": 10,
                 "summary": {
                     "$size": 51,
                     "$type": $sentinel,
@@ -400,7 +367,6 @@ var Cache = function() {
                 }
             },
             "23": {
-                "$size": 10,
                 "summary": {
                     "$size": 51,
                     "$type": $sentinel,
@@ -411,7 +377,6 @@ var Cache = function() {
                 }
             },
             "24": {
-                "$size": 10,
                 "summary": {
                     "$size": 51,
                     "$type": $sentinel,
@@ -422,7 +387,6 @@ var Cache = function() {
                 }
             },
             "25": {
-                "$size": 10,
                 "summary": {
                     "$size": 51,
                     "$type": $sentinel,
@@ -433,7 +397,6 @@ var Cache = function() {
                 }
             },
             "26": {
-                "$size": 10,
                 "summary": {
                     "$size": 51,
                     "$type": $sentinel,
@@ -444,7 +407,6 @@ var Cache = function() {
                 }
             },
             "27": {
-                "$size": 10,
                 "summary": {
                     "$size": 51,
                     "$type": $sentinel,
@@ -455,7 +417,6 @@ var Cache = function() {
                 }
             },
             "28": {
-                "$size": 10,
                 "summary": {
                     "$size": 51,
                     "$type": $sentinel,
@@ -466,7 +427,6 @@ var Cache = function() {
                 }
             },
             "29": {
-                "$size": 10,
                 "summary": {
                     "$size": 51,
                     "$type": $sentinel,
@@ -477,9 +437,8 @@ var Cache = function() {
                 }
             },
             "1234": {
-                "$size": 10,
                 "summary": {
-                    "$size": 10,
+                    "$size": 51,
                     "$type": $sentinel,
                     "value": {
                         "title": "House of Cards",
@@ -488,9 +447,8 @@ var Cache = function() {
                 }
             },
             "333": {
-                "$size": 10,
                 "summary": {
-                    "$size": 10,
+                    "$size": 51,
                     "$type": $sentinel,
                     "value": {
                         "title": "Terminator 2",
@@ -499,9 +457,8 @@ var Cache = function() {
                 }
             },
             "733": {
-                "$size": 10,
                 "summary": {
-                    "$size": 10,
+                    "$size": 51,
                     "$type": $sentinel,
                     "value": {
                         "title": "Total Recall (Without Colin Farrell)",
@@ -510,9 +467,8 @@ var Cache = function() {
                 }
             },
             "553": {
-                "$size": 10,
                 "summary": {
-                    "$size": 10,
+                    "$size": 51,
                     "$type": $sentinel,
                     "value": {
                         "title": "Running Man",
@@ -521,9 +477,8 @@ var Cache = function() {
                 }
             },
             "766": {
-                "$size": 10,
                 "summary": {
-                    "$size": 10,
+                    "$size": 51,
                     "$type": $sentinel,
                     "value": {
                         "title": "Terminator 3",
@@ -532,9 +487,8 @@ var Cache = function() {
                 }
             },
             "888": {
-                "$size": 10,
                 "summary": {
-                    "$size": 10,
+                    "$size": 51,
                     "$type": $sentinel,
                     "value": {
                         "title": "Terminator Salvation",
@@ -543,9 +497,8 @@ var Cache = function() {
                 }
             },
             "999": {
-                "$size": 10,
                 "summary": {
-                    "$size": 10,
+                    "$size": 51,
                     "$type": $sentinel,
                     "value": {
                         "title": "Jingle All the Way",
@@ -554,9 +507,8 @@ var Cache = function() {
                 }
             },
             "4422": {
-                "$size": 10,
                 "summary": {
-                    "$size": 10,
+                    "$size": 51,
                     "$type": $sentinel,
                     "value": {
                         "title": "Beverly Hills Ninja",
@@ -565,9 +517,8 @@ var Cache = function() {
                 }
             },
             "7531": {
-                "$size": 10,
                 "summary": {
-                    "$size": 10,
+                    "$size": 51,
                     "$type": $sentinel,
                     "value": {
                         "title": "Kindergarten Cop",
@@ -576,9 +527,8 @@ var Cache = function() {
                 }
             },
             "5522": {
-                "$size": 10,
                 "summary": {
-                    "$size": 10,
+                    "$size": 51,
                     "$type": $sentinel,
                     "value": {
                         "title": "Junior",
@@ -587,9 +537,8 @@ var Cache = function() {
                 }
             },
             "6420": {
-                "$size": 10,
                 "summary": {
-                    "$size": 10,
+                    "$size": 51,
                     "$type": $sentinel,
                     "value": {
                         "title": "Commando",
@@ -598,7 +547,6 @@ var Cache = function() {
                 }
             },
             $sentinel: {
-                "$size": 51,
                 "summary": {
                     "$size": 51,
                     "$type": $sentinel,
@@ -609,7 +557,6 @@ var Cache = function() {
                 }
             },
             "expiredLeafByTimestamp": {
-                "$size": 51,
                 "summary": {
                     "$size": 51,
                     "$expires": expiredTimestamp,
@@ -620,7 +567,6 @@ var Cache = function() {
                 }
             },
             "expiredLeafBy0": {
-                "$size": 51,
                 "summary": {
                     "$expires": 0,
                     "$size": 51,
@@ -648,11 +594,9 @@ var Cache = function() {
                 "value": "I am yelling timber."
             },
             "542": {
-                "$size": 10,
                 "video-item": {
-                    "$size": 10,
                     "summary": {
-                        "$size": 10,
+                        "$size": 51,
                         "$type": $sentinel,
                         "value": {
                             "title": "Conan, The Barbarian",
@@ -662,9 +606,8 @@ var Cache = function() {
                 }
             },
             "3355": {
-                "$size": 26,
                 "summary": {
-                    "$size": 10,
+                    "$size": 51,
                     "$type": $sentinel,
                     "value": {
                         "title": "Conan, The Destroyer",
@@ -691,7 +634,6 @@ var Cache = function() {
             }
         },
         "misc": {
-            "$size": 51,
             "usentinel": {
                 "$size": 51,
                 "$type": $sentinel,

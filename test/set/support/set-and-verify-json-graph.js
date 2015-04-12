@@ -12,10 +12,11 @@ var Model = jsong.Model;
 var partial_cache = require("./partial-cache");
 var verify = require("./verify");
 var set_envelopes = require("./set-envelopes");
+var clone = require("./clone");
 
 function set_and_verify_json_graph(test, suffix, envelopes, options) {
     var check_set = verify(suffix);
-    var set_tuple = set_envelopes(envelopes, suffix, options);
+    var set_tuple = set_envelopes(envelopes, suffix, clone(options));
     var check_get = check_set.apply(test, set_tuple);
     var paths     = envelopes.flatMap(get_paths).map(slice_bound(set_tuple[0]))
     return check_get.apply(test, paths);

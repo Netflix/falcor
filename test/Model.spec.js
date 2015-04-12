@@ -9,6 +9,7 @@ describe("Model", function() {
         new jsong.Model();
     });
 
+    require('./integration');
     require('./falcor');
 
     describe('JSON-Graph Specification', function() {
