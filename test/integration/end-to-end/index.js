@@ -71,15 +71,20 @@ describe("End-to-End", function() {
                 }
             }
         };
+        var expectedErrors = [{
+            path: ["user", "location"],
+            value: "Something broke!"
+        }];
         model.
             get(["user", ["name", "age", "location"]]).
-            doAction(function(x) {
+            subscribe(function(x) {
                 testRunner.compare(expected, x);
                 called++;
-            }, noOp, function() {
+            }, function(errors) {
+                testRunner.compare(expectedErrors, errors, 'expecting an error.');
                 testRunner.compare(1, called, 'expected to be onNext\'d one time.');
-            }).
-            subscribe(noOp, done, done);
+                done();
+            }, done.bind(null, "Shouldn't get an onCompleted."));
     });
 
     after(function() {

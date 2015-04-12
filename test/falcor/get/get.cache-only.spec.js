@@ -6,6 +6,8 @@ var Rx = require('rx');
 var getTestRunner = require('./../../getTestRunner');
 var testRunner = require('./../../testRunner');
 var noOp = function() {};
+var Observable = Rx.Observable;
+var falcor = {Model: Model, Observable:Observable};
 
 describe('Cache Only', function() {
     describe('Selector Functions', function() {
@@ -30,6 +32,67 @@ describe('Cache Only', function() {
                 subscribe(noOp, done, done);
         });
     });
+    
+    describe('Relative Expiration', function() {
+        xit('should retrieve a value from the cache that has a relative expiration that has not expired yet', function() {
+            
+            var value,
+                model = new falcor.Model({
+                    cache: {
+                        user: {
+                            name: {
+                                // Metadata that indicates this object is a Sentinel
+                                $type: "sentinel",
+                                // The value property contains the value box by the Sentinel
+                                value: "Jim Parsons",
+                                // Metadata that dictates that this value should be purged from the {@link Model}'s cache after two minutes. Negative numbers imply that expiration occurs relative to the current time.
+                                $expires: -(1000 * 60 * 2)
+                            }
+                        }
+                    }
+                });
+
+            model.get(["user", "name"]).toPathValues().subscribe(function(pathValue) {
+                value = pathValue;
+            });
+
+            if (value === undefined) {
+                throw new Error("Value not retrieved from cache, despite the fact that it has not expired");
+            }
+        });
+    });
+
+    describe('Allow Arrays in JSON Graph branch position', function() {
+        xit('get should go right through arrays in branch position', function() {
+            var model = new falcor.Model({
+                cache: {
+                    users: [
+                        {
+                            name: "Jim",
+                            age: 23
+                        },
+                        {
+                            name: "John",
+                            age: 44
+                        },
+                        {
+                            name: "Derek",
+                            age: 22
+                        }
+                    ]
+                }
+            });
+
+            model.get(["users", {length:3}, ["name","age"]]).toPathValues().toArray().subscribe(function(vals) {
+                console.log(JSON.stringify(vals));
+                testRunner.compare(
+                    JSON.stringify(vals), 
+                    '[{"path":["users",0,"name"],"value":"Jim"},{"path":["users",0,"age"],"value":23},{"path":["users",1,"name"],"value":"John"},{"path":["users",1,"age"],"value":44},{"path":["users",2,"name"],"value":"Derek"},{"path":["users",2,"age"],"value":22}]',
+                    'JSON Graphs That contain arrays in the bridge deposition return the same thing as those that contain maps in the branch position when given the same query');
+            });
+        });
+    });
+
     describe('toJSON', function() {
         it('should get a value from falcor.', function(done) {
             var model = new Model({cache: Cache()});
