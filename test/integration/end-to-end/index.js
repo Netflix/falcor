@@ -84,7 +84,7 @@ describe("End-to-End", function() {
                 testRunner.compare(expectedErrors, errors, 'expecting an error.');
                 testRunner.compare(1, called, 'expected to be onNext\'d one time.');
                 done();
-            }, done);
+            }, done.bind(null, "Shouldn't get an onCompleted."));
     });
 
     after(function() {
