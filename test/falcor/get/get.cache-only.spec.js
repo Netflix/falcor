@@ -34,7 +34,7 @@ describe('Cache Only', function() {
     });
     
     describe('Relative Expiration', function() {
-        it('should retrieve a value from the cache that has a relative expiration that has not expired yet', function() {
+        xit('should retrieve a value from the cache that has a relative expiration that has not expired yet', function() {
             
             var value,
                 model = new falcor.Model({
@@ -63,7 +63,7 @@ describe('Cache Only', function() {
     });
 
     describe('Allow Arrays in JSON Graph branch position', function() {
-        it('get should go right through arrays in branch position', function() {
+        xit('get should go right through arrays in branch position', function() {
             var model = new falcor.Model({
                 cache: {
                     users: [
