@@ -14,6 +14,12 @@ var noOp = function() {};
 var getDataModel = testRunner.getModel;
 var _ = require('lodash');
 
+var prefix = require("../../lib/types/internal-prefix");
+var __head = prefix + "head";
+var __tail = prefix + "tail";
+var __next = prefix + "next";
+var __prev = prefix + "prev";
+
 describe('Set', function() {
     describe('setPaths', function() {
         describe('PathMap', function () {
@@ -246,10 +252,10 @@ function singleItem(query, output) {
     var model = new Model({cache: {}});
     return testRunner.set(model, _.cloneDeep(querys[1][query]), output).
         do(function () {
-            expect(model._root.__head.value).to.equal('i am 1');
-            expect(model._root.__head.__next).to.be.not.ok;
-            expect(model._root.__head.__prev).to.be.not.ok;
-            expect(model._root.__tail).to.be.not.ok;
+            expect(model._root[__head].value).to.equal('i am 1');
+            expect(model._root[__head][__next]).to.be.not.ok;
+            expect(model._root[__head][__prev]).to.be.not.ok;
+            expect(model._root[__tail]).to.be.not.ok;
         });
 }
 
@@ -260,12 +266,12 @@ function doubleItem(query, output) {
             return testRunner.set(model, _.cloneDeep(querys[2][query]), output);
         }).
         do(function () {
-            expect(model._root.__head.value).to.equal('i am 2');
-            expect(model._root.__tail.value).to.equal('i am 1');
-            expect(model._root.__head.__next.value).to.equal('i am 1');
-            expect(model._root.__tail.__prev.value).to.equal('i am 2');
-            expect(model._root.__head.__prev).to.be.not.ok;
-            expect(model._root.__tail.__next).to.be.not.ok;
+            expect(model._root[__head].value).to.equal('i am 2');
+            expect(model._root[__tail].value).to.equal('i am 1');
+            expect(model._root[__head][__next].value).to.equal('i am 1');
+            expect(model._root[__tail][__prev].value).to.equal('i am 2');
+            expect(model._root[__head][__prev]).to.be.not.ok;
+            expect(model._root[__tail][__next]).to.be.not.ok;
         });
 }
 
@@ -279,13 +285,13 @@ function tripleItem(query, output) {
             return testRunner.set(model, _.cloneDeep(querys[3][query]), output);
         }).
         do(function () {
-            expect(model._root.__head.value).to.equal('i am 3');
-            expect(model._root.__tail.value).to.equal('i am 1');
-            expect(model._root.__head.__next.value).to.equal('i am 2');
-            expect(model._root.__tail.__prev.value).to.equal('i am 2');
-            expect(model._root.__head.__next.__next.value).to.equal('i am 1');
-            expect(model._root.__tail.__prev.__prev.value).to.equal('i am 3');
-            expect(model._root.__head.__prev).to.be.not.ok;
-            expect(model._root.__tail.__next).to.be.not.ok;
+            expect(model._root[__head].value).to.equal('i am 3');
+            expect(model._root[__tail].value).to.equal('i am 1');
+            expect(model._root[__head][__next].value).to.equal('i am 2');
+            expect(model._root[__tail][__prev].value).to.equal('i am 2');
+            expect(model._root[__head][__next][__next].value).to.equal('i am 1');
+            expect(model._root[__tail][__prev][__prev].value).to.equal('i am 3');
+            expect(model._root[__head][__prev]).to.be.not.ok;
+            expect(model._root[__tail][__next]).to.be.not.ok;
         });
 }

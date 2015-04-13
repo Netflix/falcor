@@ -14,6 +14,12 @@ var Bound = Expected.Bound;
 var noOp = function() {};
 var _ = require('lodash');
 
+var prefix = require("../../lib/types/internal-prefix");
+var __ref = prefix + "ref";
+var __context = prefix + "context";
+var __ref_index = prefix + "ref_index";
+var __refs_length = prefix + "refs_length";
+
 describe('Adding', function() {
     var getPath = ['genreList', 0, 0, 'summary'];
     var getJSON = {genreList: {0: {0: {summary: null}}}};
@@ -98,17 +104,17 @@ function getTest(query, output) {
     var lhs = model._cache.genreList[0];
     var rhs = model._cache.lists.abcd;
     
-    expect(lhs.__ref_index).to.not.be.ok;
-    expect(rhs.__refs_length).to.not.be.ok;
-    expect(lhs.__context).to.not.be.ok;
+    expect(lhs[__ref_index]).to.not.be.ok;
+    expect(rhs[__refs_length]).to.not.be.ok;
+    expect(lhs[__context]).to.not.be.ok;
     
     return testRunner.get(model, _.cloneDeep(query), output).
         do(noOp, noOp, function() {
             debugger;
-            expect(lhs.__ref_index).to.equal(0);
-            expect(rhs.__refs_length).to.equal(1);
-            expect(rhs['__ref' + lhs.__ref_index]).to.equal(lhs);
-            expect(lhs.__context).to.equal(rhs);
+            expect(lhs[__ref_index]).to.equal(0);
+            expect(rhs[__refs_length]).to.equal(1);
+            expect(rhs[__ref + lhs[__ref_index]]).to.equal(lhs);
+            expect(lhs[__context]).to.equal(rhs);
         });
 }
 
@@ -117,16 +123,16 @@ function setTest(query, output) {
     var lhs = model._cache.genreList[0];
     var rhs = model._cache.lists.abcd;
 
-    expect(lhs.__ref_index).to.not.be.ok;
-    expect(rhs.__refs_length).to.not.be.ok;
-    expect(lhs.__context).to.not.be.ok;
+    expect(lhs[__ref_index]).to.not.be.ok;
+    expect(rhs[__refs_length]).to.not.be.ok;
+    expect(lhs[__context]).to.not.be.ok;
 
     return testRunner.set(model, _.cloneDeep(query), output).
         do(noOp, noOp, function() {
             debugger;
-            expect(lhs.__ref_index).to.equal(0);
-            expect(rhs.__refs_length).to.equal(1);
-            expect(rhs['__ref' + lhs.__ref_index]).to.equal(lhs);
-            expect(lhs.__context).to.equal(rhs);
+            expect(lhs[__ref_index]).to.equal(0);
+            expect(rhs[__refs_length]).to.equal(1);
+            expect(rhs[__ref + lhs[__ref_index]]).to.equal(lhs);
+            expect(lhs[__context]).to.equal(rhs);
         });
 }

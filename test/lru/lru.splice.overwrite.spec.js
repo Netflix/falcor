@@ -14,6 +14,12 @@ var noOp = function() {};
 var getDataModel = testRunner.getModel;
 var _ = require('lodash');
 
+var prefix = require("../../lib/types/internal-prefix");
+var __head = prefix + "head";
+var __tail = prefix + "tail";
+var __next = prefix + "next";
+var __prev = prefix + "prev";
+
 describe('Overwrite', function() {
     describe('Input Paths', function() {
         describe('AsJSONG', function() {
@@ -76,10 +82,10 @@ function spliceOverwrite(query, output) {
             return testRunner.set(model, _.cloneDeep(query), output);
         }).
         do(function() {
-            expect(model._root.__head.value).to.equal('overwrite');
-            expect(model._root.__head.__next).to.be.not.ok;
-            expect(model._root.__head.__prev).to.be.not.ok;
-            expect(model._root.__tail).to.be.not.ok;
+            expect(model._root[__head].value).to.equal('overwrite');
+            expect(model._root[__head][__next]).to.be.not.ok;
+            expect(model._root[__head][__prev]).to.be.not.ok;
+            expect(model._root[__tail]).to.be.not.ok;
         });
 }
 

@@ -9,6 +9,10 @@ var _ = require("lodash");
 var noOp = function() {};
 var Rx = require('rx');
 
+var prefix = require("../lib/types/internal-prefix");
+var __key = prefix + "key";
+var __generation = prefix + "generation";
+
 module.exports = {
     validateData: validateData,
     validateOperation: validateOperation,
@@ -81,7 +85,7 @@ module.exports = {
 };
 function clean(item, options) {
     traverseAndConvert(item);
-    strip(item, "__generation", "pathSetIndex");
+    strip(item, __key, __generation, "pathSetIndex");
 
     options.strip.forEach(function(s) {
         strip(item, s);
@@ -108,8 +112,8 @@ function validateOperation(name, expected, actual, messageSuffix) {
     // Removes all 5 !== "5" errors when it comes to pathValues.
     traverseAndConvert(actual);
     traverseAndConvert(expected);
-    strip(expected, "__generation", "__key");
-    strip(actual, "__generation", "__key", "pathSetIndex");
+    strip(expected, __generation, __key);
+    strip(actual, __generation, __key, "pathSetIndex");
 
     if (expected.values) {
         expect(actual.values, name + ".values " + messageSuffix).
