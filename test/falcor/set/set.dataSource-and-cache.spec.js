@@ -133,6 +133,46 @@ describe('DataSource and Cache', function() {
                 }).
                 subscribe(noOp, done, done);
         });
+        it('should perform multiple trips to a dataSource.', function(done) {
+            var count = 0;
+            var model = new Model({
+                source: new LocalDataSource(Cache(), {
+                    onSet: function(source, tmp, jsongEnv) {
+                        count++;
+                        if (count === 1) {
+                            return {
+                                jsong: jsongEnv.jsong,
+                                paths: [jsongEnv.paths[0]]
+                            };
+                        }
+                        return jsongEnv;
+                    }
+                })
+            });
+            model.
+                set(
+                    {path: ['genreList', 0, 0, 'summary'], value: 1337},
+                    {path: ['genreList', 0, 1, 'summary'], value: 7331}).
+                doAction(function(x) {
+                    testRunner.compare({
+                        json: {
+                            genreList: {
+                                0: {
+                                    0: {
+                                        summary: 1337
+                                    },
+                                    1: {
+                                        summary: 7331
+                                    }
+                                }
+                            }
+                        }
+                    }, x);
+                }, noOp, function() {
+                    testRunner.compare(2, count);
+                }).
+                subscribe(noOp, done, done);
+        });
     });
 
     describe('toPathValues', function() {

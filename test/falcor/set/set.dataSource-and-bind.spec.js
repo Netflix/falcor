@@ -24,7 +24,6 @@ describe('DataSource and Bind', function() {
         };
         var selector = false;
         var next = false;
-        debugger
         model.
             set({path: [1, 'summary'], value: expected}, function(x) {
                 testRunner.compare(expected, x);
@@ -38,6 +37,51 @@ describe('DataSource and Bind', function() {
             }, noOp, function() {
                 testRunner.compare(true, selector, 'Expect to be onNext at least 1 time.');;
                 testRunner.compare(true, next, 'Expect to be onNext at least 1 time.');
+            }).
+            subscribe(noOp, done, done);
+    });
+
+    xit('should perform multiple trips to a dataSource.', function(done) {
+        var count = 0;
+        var model = new Model({
+            cache: M(),
+            source: new LocalDataSource(Cache(), {
+                onSet: function(source, tmp, jsongEnv) {
+                    count++;
+                    if (count === 1) {
+                        return {
+                            jsong: jsongEnv.jsong,
+                            paths: [jsongEnv.paths[0]]
+                        };
+                    }
+                    return jsongEnv;
+                }
+            })
+        });
+        model._root.unsafeMode = true;
+        model = model.bindSync(['genreList', 0]);
+        model.
+            set(
+                {path: [0, 'summary'], value: 1337},
+                {path: [1, 'summary'], value: 7331}
+            ).
+            doAction(function(x) {
+                testRunner.compare({
+                    json: {
+                        genreList: {
+                            0: {
+                                0: {
+                                    summary: 1337
+                                },
+                                1: {
+                                    summary: 7331
+                                }
+                            }
+                        }
+                    }
+                }, x);
+            }, noOp, function() {
+
             }).
             subscribe(noOp, done, done);
     });

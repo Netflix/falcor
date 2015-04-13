@@ -36,7 +36,7 @@ describe('DataSource Only', function() {
                 subscribe(noOp, done, done);
         });
 
-        it.only('should perform multiple trips to a dataSource.', function(done) {
+        it('should perform multiple trips to a dataSource.', function(done) {
             var count = 0;
             var model = new Model({
                 source: new LocalDataSource(Cache(), {
