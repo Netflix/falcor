@@ -21,6 +21,10 @@ function coverage(port, launchWindow) {
     app.use(express.static('coverage/lcov-report'));
     return listen(port, launchWindow);
 }
+function examples(port, launchWindow) {
+    app.use(express.static('examples'));
+    return listen(port, launchWindow);
+}
 
 // Run if main
 if (require.main === module) {
@@ -29,6 +33,9 @@ if (require.main === module) {
     switch (run) {
         case 'coverage':
             coverage(port, true);
+            break;
+        case 'examples':
+            examples(port, true);
             break;
     }
 }
