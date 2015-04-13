@@ -14,6 +14,12 @@ var noOp = function() {};
 var getDataModel = testRunner.getModel;
 var _ = require('lodash');
 
+var prefix = require("../../lib/types/internal-prefix");
+var __head = prefix + "head";
+var __tail = prefix + "tail";
+var __next = prefix + "next";
+var __prev = prefix + "prev";
+
 describe('Expired', function() {
     describe('Input Paths', function() {
         describe('AsJSONG', function() {
@@ -83,7 +89,7 @@ function spliceExpired(query, output) {
         }
     }});
 
-    expect(model._root.__head.value).to.equal('sad panda');
+    expect(model._root[__head].value).to.equal('sad panda');
 
     return Rx.Observable.
         return('').
@@ -93,7 +99,7 @@ function spliceExpired(query, output) {
         }).
         do(function() {
         }, function() {}, function() {
-            expect(model._root.__head).to.be.not.ok;
-            expect(model._root.__tail).to.be.not.ok;
+            expect(model._root[__head]).to.be.not.ok;
+            expect(model._root[__tail]).to.be.not.ok;
         });
 }
