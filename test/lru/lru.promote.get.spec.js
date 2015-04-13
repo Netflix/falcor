@@ -14,6 +14,12 @@ var noOp = function() {};
 var getDataModel = testRunner.getModel;
 var _ = require('lodash');
 
+var prefix = require("../../lib/types/internal-prefix");
+var __head = prefix + "head";
+var __tail = prefix + "tail";
+var __next = prefix + "next";
+var __prev = prefix + "prev";
+
 describe('Get', function () {
     describe('getPaths', function () {
         it('should promote the get item to the head toPathValues.', function (done) {
@@ -117,7 +123,7 @@ function testPaths(output, model, q) {
     return testRunner.
         get(model, q, output).
         do(noOp, noOp, function() {
-            expect(model._root.__head.value).to.equal(cache[q[0]]);
+            expect(model._root[__head].value).to.equal(cache[q[0]]);
         });
 }
 function testJSON(output, model, q) {
@@ -126,7 +132,7 @@ function testJSON(output, model, q) {
     return testRunner.
         get(model, q, output).
         do(noOp, noOp, function() {
-            expect(model._root.__head.value).to.equal(cache[Object.keys(q)[0]]);
+            expect(model._root[__head].value).to.equal(cache[Object.keys(q)[0]]);
         });
 }
 function testMultipleJSON(output) {
@@ -136,15 +142,15 @@ function testMultipleJSON(output) {
         concat(testJSON(output, model, getJSON2)).
         concat(testJSON(output, model, getJSON3)).
         do(noOp, noOp, function() {
-            var curr = model._root.__head;
+            var curr = model._root[__head];
             multipleOrder.forEach(function(value) {
                 expect(curr.value).to.equal(value);
-                curr = curr.__next;
+                curr = curr[__next];
             });
-            curr = model._root.__tail;
+            curr = model._root[__tail];
             multipleOrder.reverse().forEach(function(value) {
                 expect(curr.value).to.equal(value);
-                curr = curr.__prev;
+                curr = curr[__prev];
             });
         });
 }
@@ -155,28 +161,28 @@ function testMultiplePaths(output) {
         concat(testPaths(output, model, getPaths2)).
         concat(testPaths(output, model, getPaths3)).
         do(noOp, noOp, function() {
-            var curr = model._root.__head;
+            var curr = model._root[__head];
             multipleOrder.forEach(function(value) {
                 expect(curr.value).to.equal(value);
-                curr = curr.__next;
+                curr = curr[__next];
             });
-            curr = model._root.__tail;
+            curr = model._root[__tail];
             multipleOrder.reverse().forEach(function(value) {
                 expect(curr.value).to.equal(value);
-                curr = curr.__prev;
+                curr = curr[__prev];
             });
         });
 }
 
 function getQueryPath(model) {
     debugger
-    if (model._root.__head.value === 'i am 1') {
+    if (model._root[__head].value === 'i am 1') {
         return _.cloneDeep(getPaths2);
     }
     return _.cloneDeep(getPaths1);
 }
 function getQueryJSON(model) {
-    if (model._root.__head.value === 'i am 1') {
+    if (model._root[__head].value === 'i am 1') {
         return _.cloneDeep(getJSON2);
     }
     return _.cloneDeep(getJSON1);

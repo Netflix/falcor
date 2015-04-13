@@ -496,7 +496,7 @@ function execute(output, suffix, opts) {
             describe("a hard-linked path", function() {
                 it("directly", function() {
                     var model = new Model(_.extend({cache: whole_cache()}, opts));
-                    get_pathsets(model,[["grid", {to:1}, {to:3}, ["movie-id", "title", "director", "genres", "summary"]]], suffix);
+                    get_pathsets(model, [["grid", {to:1}, {to:3}, ["movie-id", "title", "director", "genres", "summary"]]], suffix);
                     set_and_verify_json_values(this.test, suffix, [{
                         path: ["rows", "row-0", "3"],
                         value: {

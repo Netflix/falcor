@@ -1455,5 +1455,5 @@ module.exports = function() {
                 values: [{}]
             }
         }
-    }
+    };
 };
