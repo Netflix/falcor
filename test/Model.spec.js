@@ -9,21 +9,21 @@ describe("Model", function() {
         new jsong.Model();
     });
 
-    //require('./integration');
-    //require('./falcor');
+    require('./integration');
+    require('./falcor');
 
     describe('JSON-Graph Specification', function() {
-        //describe("#get", function() {
-            //require("./get")();
-        //});
+        describe("#get", function() {
+            require("./get")();
+        });
 
         describe("#set", function() {
             require("./set")();
         });
 
-        //describe("#invalidate", function() {
-            //require("./invalidate")();
-        //});
+        describe("#invalidate", function() {
+            require("./invalidate")();
+        });
     });
 });
 
