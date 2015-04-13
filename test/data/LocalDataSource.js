@@ -2,7 +2,7 @@ var Rx = require("rx");
 var Observable = Rx.Observable;
 var jsong = require("../../index.js");
 var _ = require("lodash");
-var noOp = function() {};
+var noOp = function(a, b, c) { return c; };
 
 var LocalSource = module.exports = function(cache, options) {
     this._options = _.extend({
@@ -77,7 +77,7 @@ LocalSource.prototype = {
                 var tempModel = new jsong.Model({
                     cache: jsongEnv.jsong,
                     errorSelector: errorSelector});
-                onSet(self, tempModel);
+                jsongEnv = onSet(self, tempModel, jsongEnv);
 
                 tempModel._getPathSetsAsValues(
                     tempModel,

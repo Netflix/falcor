@@ -40,5 +40,51 @@ describe('DataSource and Bind', function() {
             }).
             subscribe(noOp, done, done);
     });
+
+    it('should perform multiple trips to a dataSource.', function(done) {
+        var count = 0;
+        var model = new Model({
+            cache: M(),
+            source: new LocalDataSource(Cache(), {
+                onSet: function(source, tmp, jsongEnv) {
+                    count++;
+
+                    if (count === 1) {
+
+                        // Don't do it this way, it will cause memory leaks.
+                        model._cache.lists.abcd[1] = undefined;
+                        return {
+                            jsong: jsongEnv.jsong,
+                            paths: [jsongEnv.paths[0]]
+                        };
+                    }
+
+                    return jsongEnv;
+                }
+            })
+        });
+        model._root.unsafeMode = true;
+        model = model.bindSync(['genreList', 0]);
+        model.
+            set(
+                {path: [0, 'summary'], value: 1337},
+                {path: [1, 'summary'], value: 7331}
+            ).
+            doAction(function(x) {
+                testRunner.compare({
+                    json: {
+                        0: {
+                            summary: 1337
+                        },
+                        1: {
+                            summary: 7331
+                        }
+                    }
+                }, x);
+            }, noOp, function() {
+                testRunner.compare(2, count);
+            }).
+            subscribe(noOp, done, done);
+    });
 });
 

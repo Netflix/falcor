@@ -48,8 +48,8 @@
     "uglifyify": "~2.1.1",
     "underscore": "~1.6.0",
     "xmlhttprequest": "~1.7.0",
-    "falcor-server": "git+ssh://git@github.com/Netflix/falcor-server.git#v0.0.2",
-    "falcor-browser": "git+ssh://git@github.com/Netflix/falcor-browser.git#v0.0.2"
+    "falcor-server": "git+ssh://git@github.com/Netflix/falcor-server.git#v0.0.3",
+    "falcor-browser": "git+ssh://git@github.com/Netflix/falcor-browser.git#v0.0.3"
   },
   "dependencies": {
     "rx": "^2.3.25"
