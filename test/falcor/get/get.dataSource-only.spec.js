@@ -21,7 +21,6 @@ describe('DataSource Only', function() {
             var next = false;
             model.
                 get(['videos', 1234, 'summary'], function(x) {
-                    debugger
                     testRunner.compare(expected, x);
                     selector = true;
 
@@ -31,8 +30,41 @@ describe('DataSource Only', function() {
                     next = true;
                     testRunner.compare({value: expected}, x);
                 }, noOp, function() {
-                    testRunner.compare(true, selector, 'Expect to be onNext at least 1 time.');;
+                    testRunner.compare(true, selector, 'Expect to be onNext at least 1 time.');
                     testRunner.compare(true, next, 'Expect to be onNext at least 1 time.');
+                }).
+                subscribe(noOp, done, done);
+        });
+
+        it.only('should perform multiple trips to a dataSource.', function(done) {
+            var count = 0;
+            var model = new Model({
+                source: new LocalDataSource(Cache(), {
+                    onGet: function(source, paths) {
+                        if (count === 0) {
+                            paths.pop();
+                        }
+                        count++;
+                    }
+                })
+            });
+            var expected = Expected.Values().direct.AsJSON.values[0].json;
+            model.
+                get(
+                    ['videos', 1234, 'summary'],
+                    ['videos', 3355, 'art'],
+                    function(v1234, v3355) {
+                        testRunner.compare(expected, v1234);
+                        testRunner.compare({
+                            "box-shot": "www.cdn.com/3355"
+                        }, v3355);
+
+                        return {value: v1234};
+                    }).
+                doAction(function(x) {
+                    testRunner.compare({value: expected}, x);
+                }, noOp, function() {
+
                 }).
                 subscribe(noOp, done, done);
         });

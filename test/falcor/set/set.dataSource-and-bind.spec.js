@@ -24,6 +24,7 @@ describe('DataSource and Bind', function() {
         };
         var selector = false;
         var next = false;
+        debugger
         model.
             set({path: [1, 'summary'], value: expected}, function(x) {
                 testRunner.compare(expected, x);
