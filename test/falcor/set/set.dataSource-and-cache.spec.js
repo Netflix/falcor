@@ -140,6 +140,9 @@ describe('DataSource and Cache', function() {
                     onSet: function(source, tmp, jsongEnv) {
                         count++;
                         if (count === 1) {
+
+                            // Don't do it this way, it will cause memory leaks.
+                            model._cache.lists.abcd[1] = undefined;
                             return {
                                 jsong: jsongEnv.jsong,
                                 paths: [jsongEnv.paths[0]]

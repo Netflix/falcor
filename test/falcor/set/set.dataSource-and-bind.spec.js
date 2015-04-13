@@ -41,19 +41,24 @@ describe('DataSource and Bind', function() {
             subscribe(noOp, done, done);
     });
 
-    xit('should perform multiple trips to a dataSource.', function(done) {
+    it('should perform multiple trips to a dataSource.', function(done) {
         var count = 0;
         var model = new Model({
             cache: M(),
             source: new LocalDataSource(Cache(), {
                 onSet: function(source, tmp, jsongEnv) {
                     count++;
+
                     if (count === 1) {
+
+                        // Don't do it this way, it will cause memory leaks.
+                        model._cache.lists.abcd[1] = undefined;
                         return {
                             jsong: jsongEnv.jsong,
                             paths: [jsongEnv.paths[0]]
                         };
                     }
+
                     return jsongEnv;
                 }
             })
@@ -68,20 +73,16 @@ describe('DataSource and Bind', function() {
             doAction(function(x) {
                 testRunner.compare({
                     json: {
-                        genreList: {
-                            0: {
-                                0: {
-                                    summary: 1337
-                                },
-                                1: {
-                                    summary: 7331
-                                }
-                            }
+                        0: {
+                            summary: 1337
+                        },
+                        1: {
+                            summary: 7331
                         }
                     }
                 }, x);
             }, noOp, function() {
-
+                testRunner.compare(2, count);
             }).
             subscribe(noOp, done, done);
     });
