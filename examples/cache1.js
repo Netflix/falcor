@@ -29,9 +29,3 @@ var model = {
 };
 
 
-app.listen(1337, function(err) {
-    if (err) {
-        throw err;
-        return;
-    }
-});

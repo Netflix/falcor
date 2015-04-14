@@ -1,7 +1,5 @@
-var Falcor = require('./../Falcor');
-var DataSource = require('falcor-browser');
-var model = new Falcor.Model({
-    source: new DataSource('http://127.0.0.1:1337/member.json')
+var model = new falcor.Model({
+    source: new XMLHttpSource('http://127.0.0.1:1337/member.json')
 });
 
 model.

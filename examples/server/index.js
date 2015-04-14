@@ -1,5 +1,6 @@
 var express = require('express');
 var app = express();
+
 var Falcor = require('./../Falcor');
 var FalcorServer = require('falcor-server');
 var model = new Falcor.Model({cache: {
@@ -31,12 +32,10 @@ var model = new Falcor.Model({cache: {
         //, ... more genres
     ]
 }});
-
 app.use('/member.json', FalcorServer.ExpressMiddleware(model));
-
+app.use(express.static('examples'));
 app.listen(1337, function(err) {
     if (err) {
         throw err;
-        return;
     }
 });
