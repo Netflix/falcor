@@ -52,6 +52,7 @@
     "falcor-browser": "git+ssh://git@github.com/Netflix/falcor-browser.git#v0.0.3"
   },
   "dependencies": {
-    "rx": "^2.3.25"
+    "rx": "^2.3.25",
+    "promise": "7.0.0"
   }
 }
