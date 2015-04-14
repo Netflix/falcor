@@ -18,7 +18,7 @@ Falcor is not a replacement for your MVC framework, your database, or your appli
 
 You retrieve data from a Falcor model using the familiar JavaScript path syntax. 
 
-```JavaScript
+```JavaScript 
 var person = {
     name: "Steve McGuire",
     occupation: "Developer",
