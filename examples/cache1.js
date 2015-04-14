@@ -27,3 +27,11 @@ var model = {
         //, ... more genres
     ]
 };
+
+
+app.listen(1337, function(err) {
+    if (err) {
+        throw err;
+        return;
+    }
+});

@@ -1,5 +1,6 @@
 var express = require('express');
 var app = express();
+var Falcor = require('./../Falcor');
 var FalcorServer = require('falcor-server');
 var model = new Falcor.Model({cache: {
     genreLists: [
@@ -31,19 +32,7 @@ var model = new Falcor.Model({cache: {
     ]
 }});
 
-var fullCacheServer = new FalcorServer(fullCacheModel);
-
-// Simple middleware to handle get/post
-app.use('/member.json', function(req, res, next) {
-    fullCacheServer.fromHttpRequest(req, function(err, jsongString) {
-        if (err) {
-            res.status(500).send(err);
-        } else {
-            res.status(200).send(jsongString);
-        }
-        next();
-    });
-});
+app.use('/member.json', FalcorServer.ExpressMiddleware(model));
 
 app.listen(1337, function(err) {
     if (err) {
