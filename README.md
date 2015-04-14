@@ -16,7 +16,7 @@ Falcor lets you represent all of your cloud data sources as *One Virtual JSON Mo
 
 Falcor is not a replacement for your MVC framework, your database, or your application server. Instead you add Falcor to your existing stack to optimize client/server communication. Falcor is ideal for mobile apps, because it combines the caching benefits of REST with the low latency of RPC.
 
-You retrieve data from a Falcor model using the familiar JavaScript path syntax. 
+You retrieve data from a Falcor model using the familiar JavaScript path syntax.  
 
 ```JavaScript 
 var person = {
