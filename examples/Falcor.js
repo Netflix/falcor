@@ -16,50 +16,7 @@
 !function(e){if("object"==typeof exports)module.exports=e();else if("function"==typeof define&&define.amd)define(e);else{var f;"undefined"!=typeof window?f=window:"undefined"!=typeof global?f=global:"undefined"!=typeof self&&(f=self),f.falcor=e()}}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 module.exports = _dereq_('./operations');
 
-},{"./operations":130}],2:[function(_dereq_,module,exports){
-var Constants = {
-    NOOP: function NOOP() {},
-    __GENERATION_GUID: 0,
-    __GENERATION_VERSION: 0,
-    __CONTAINER: "__reference_container",
-    __CONTEXT: "__context",
-    __GENERATION: "__generation",
-    __GENERATION_UPDATED: "__generation_updated",
-    __INVALIDATED: "__invalidated",
-    __KEY: "__key",
-    __KEYS: "__keys",
-    __IS_KEY_SET: "__is_key_set",
-    __NULL: "__null",
-    __SELF: "./",
-    __PARENT: "../",
-    __REF: "__ref",
-    __REF_INDEX: "__ref_index",
-    __REFS_LENGTH: "__refs_length",
-    __ROOT: "/",
-    __OFFSET: "__offset",
-    __FALKOR_EMPTY_OBJECT: '__FALKOR_EMPTY_OBJECT',
-
-    $TYPE: "$type",
-    $SIZE: "$size",
-    $EXPIRES: "$expires",
-    $TIMESTAMP: "$timestamp",
-
-    SENTINEL: "sentinel",
-    ERROR: "error",
-    VALUE: "value",
-    EXPIRED: "expired",
-    LEAF: "leaf"
-};
-
-Constants.__INTERNAL_KEYS = [
-    Constants.__CONTAINER, Constants.__CONTEXT, Constants.__GENERATION, Constants.__GENERATION_UPDATED,
-    Constants.__INVALIDATED, Constants.__KEY, Constants.__KEYS, Constants.__IS_KEY_SET, Constants.__NULL, Constants.__SELF,
-    Constants.__PARENT, Constants.__REF, Constants.__REF_INDEX, Constants.__REFS_LENGTH, Constants.__OFFSET, Constants.__ROOT
-];
-
-module.exports = Constants;
-
-},{}],3:[function(_dereq_,module,exports){
+},{"./operations":149}],2:[function(_dereq_,module,exports){
 if (typeof falcor === 'undefined') {
     var falcor = {};
 }
@@ -81,18 +38,21 @@ falcor.NOOP = function() {};
 
 module.exports = falcor;
 
-},{"./rx.ultralite":37}],4:[function(_dereq_,module,exports){
+},{"./rx.ultralite":41}],3:[function(_dereq_,module,exports){
 var falcor = _dereq_('./Falcor');
-var Constants = _dereq_('./Constants');
 var RequestQueue = _dereq_('./request/RequestQueue');
 var ImmediateScheduler = _dereq_('./scheduler/ImmediateScheduler');
 var TimeoutScheduler = _dereq_('./scheduler/TimeoutScheduler');
-var $TYPE = Constants.$TYPE;
-var ERROR = Constants.$TYPE;
+var ERROR = _dereq_("../types/error");
 var ModelResponse = _dereq_('./ModelResponse');
 var call = _dereq_('./operations/call');
 var operations = _dereq_('./operations');
+var dotSyntaxParser = _dereq_('./operations/parser/parser');
 var getBoundValue = _dereq_('./../get/getBoundValue');
+var slice = Array.prototype.slice;
+var $ref = _dereq_('./../types/path');
+var $error = _dereq_('./../types/error');
+var $sentinel = _dereq_('./../types/sentinel');
 
 var Model = module.exports = falcor.Model = function Model(options) {
 
@@ -127,6 +87,21 @@ var Model = module.exports = falcor.Model = function Model(options) {
 
 Model.EXPIRES_NOW = falcor.EXPIRES_NOW;
 Model.EXPIRES_NEVER = falcor.EXPIRES_NEVER;
+
+Model.ref = function(path) {
+    if (typeof path === 'string') {
+        path = dotSyntaxParser(path);
+    }
+    return {$type: $ref, value: path};
+};
+
+Model.error = function(error) {
+    return {$type: $error, value: error};
+};
+
+Model.atom = function(value) {
+    return {$type: $sentinel, value: value};
+};
 
 Model.prototype = {
     _boxed: false,
@@ -200,7 +175,7 @@ Model.prototype = {
         return this.syncCheck("getValueSync") && this._getValueSync(this, path).value;
     },
     setValueSync: function(path, value, errorSelector) {
-        
+
         if(Array.isArray(path) === false) {
             if(typeof errorSelector !== "function") {
                 errorSelector = value || this._errorSelector;
@@ -229,7 +204,7 @@ Model.prototype = {
 
             json = json.json;
 
-            if(json && json[$TYPE] === ERROR && !this._treatErrorsAsValues) {
+            if(json && json.$type === ERROR && !this._treatErrorsAsValues) {
                 if(this._boxed) {
                     throw json;
                 } else {
@@ -251,7 +226,7 @@ Model.prototype = {
         path = boundValue.path;
         if(boundValue.shorted) {
             if(!!node) {
-                if(node[$TYPE] === ERROR) {
+                if(node.$type === ERROR) {
                     if(this._boxed) {
                         throw node;
                     }
@@ -260,7 +235,7 @@ Model.prototype = {
                 }
             }
             return undefined;
-        } else if(!!node && node[$TYPE] === ERROR) {
+        } else if(!!node && node.$type === ERROR) {
             if(this._boxed) {
                 throw node;
             }
@@ -277,7 +252,7 @@ Model.prototype = {
             clone[key] = self[key];
         });
 
-        Array.prototype.slice.call(arguments).forEach(function(tuple) {
+        slice.call(arguments).forEach(function(tuple) {
             clone[tuple[0]] = tuple[1];
         });
 
@@ -317,7 +292,7 @@ Model.prototype = {
     }
 };
 
-},{"./../get/getBoundValue":45,"./Constants":2,"./Falcor":3,"./ModelResponse":5,"./operations":12,"./operations/call":7,"./request/RequestQueue":36,"./scheduler/ImmediateScheduler":38,"./scheduler/TimeoutScheduler":39}],5:[function(_dereq_,module,exports){
+},{"../types/error":139,"./../get/getBoundValue":49,"./../types/error":139,"./../types/path":140,"./../types/sentinel":141,"./Falcor":2,"./ModelResponse":4,"./operations":11,"./operations/call":6,"./operations/parser/parser":16,"./request/RequestQueue":40,"./scheduler/ImmediateScheduler":42,"./scheduler/TimeoutScheduler":43}],4:[function(_dereq_,module,exports){
 var falcor = _dereq_('./Falcor');
 
 var Observable  = falcor.Observable,
@@ -371,14 +346,14 @@ ModelResponse.prototype.toJSONG = function() {
 
 module.exports = ModelResponse;
 
-},{"./Falcor":3}],6:[function(_dereq_,module,exports){
+},{"./Falcor":2}],5:[function(_dereq_,module,exports){
 var falcor = _dereq_('./Falcor');
 var Model = _dereq_('./Model');
 falcor.Model = Model;
 
 module.exports = falcor;
 
-},{"./Falcor":3,"./Model":4}],7:[function(_dereq_,module,exports){
+},{"./Falcor":2,"./Model":3}],6:[function(_dereq_,module,exports){
 module.exports = call;
 
 var falcor = _dereq_("../../Falcor");
@@ -471,7 +446,7 @@ function call(path, args, suffixes, paths, selector) {
     });
 }
 
-},{"../../Falcor":3,"./../../ModelResponse":5}],8:[function(_dereq_,module,exports){
+},{"../../Falcor":2,"./../../ModelResponse":4}],7:[function(_dereq_,module,exports){
 var combineOperations = _dereq_('./../support/combineOperations');
 var setSeedsOrOnNext = _dereq_('./../support/setSeedsOrOnNext');
 
@@ -490,10 +465,10 @@ module.exports = function getInitialArgs(options, seeds, onNext) {
     setSeedsOrOnNext(
         operations, seedRequired, seeds, onNext, options.operationSelector);
     var requestOptions;
-    return [operations, seeds, !!options.operationModel._dataSource];
+    return [operations];
 };
 
-},{"./../support/combineOperations":22,"./../support/setSeedsOrOnNext":35}],9:[function(_dereq_,module,exports){
+},{"./../support/combineOperations":26,"./../support/setSeedsOrOnNext":39}],8:[function(_dereq_,module,exports){
 var getSourceObserver = _dereq_('./../support/getSourceObserever');
 var partitionOperations = _dereq_('./../support/partitionOperations');
 var mergeBoundPath = _dereq_('./../support/mergeBoundPath');
@@ -501,37 +476,45 @@ var mergeBoundPath = _dereq_('./../support/mergeBoundPath');
 module.exports = getSourceRequest;
 
 function getSourceRequest(
-        options, onNext, seeds, relativeSeeds, combinedResults, cb) {
+    options, onNext, seeds, combinedResults, requestOptions, cb) {
 
-    var missingPaths = combinedResults.requestedMissingPaths;
     var model = options.operationModel;
     var boundPath = model._path;
+    var missingPaths = combinedResults.requestedMissingPaths;
+    if (boundPath.length) {
+        for (var i = 0; i < missingPaths.length; ++i) {
+            var pathSetIndex = missingPaths[i].pathSetIndex;
+            var path = missingPaths[i] = boundPath.concat(missingPaths[i]);
+            path.pathSetIndex = pathSetIndex;
+        }
+    }
+
     return model._request.get(
         missingPaths,
         combinedResults.optimizedMissingPaths,
-        getSourceObserver(model, missingPaths, function(err, results) {
-            if (err) {
-                cb(err);
-                return;
-            }
+        getSourceObserver(
+            model,
+            missingPaths,
+            function getSourceCallback(err, results) {
+                if (err) {
+                    cb(err);
+                    return;
+                }
 
-            if (boundPath.length) {
-                results = mergeBoundPath(results, model._path);
-            }
+                // partitions the operations by their pathSetIndex
+                var partitionOperationsAndSeeds = partitionOperations(
+                    results,
+                    seeds,
+                    options.format,
+                    onNext);
 
-            // partitions the operations by their pathSetIndex
-            var partitionOperationsAndSeeds = partitionOperations(
-                results,
-                missingPaths,
-                options.format,
-                relativeSeeds,
-                onNext);
-            cb(null, partitionOperationsAndSeeds);
-        }));
+                // We allow for the rerequesting to happen.
+                cb(null, partitionOperationsAndSeeds);
+            }));
 }
 
 
-},{"./../support/getSourceObserever":23,"./../support/mergeBoundPath":27,"./../support/partitionOperations":30}],10:[function(_dereq_,module,exports){
+},{"./../support/getSourceObserever":27,"./../support/mergeBoundPath":31,"./../support/partitionOperations":34}],9:[function(_dereq_,module,exports){
 var getInitialArgs = _dereq_('./getInitialArgs');
 var getSourceRequest = _dereq_('./getSourceRequest');
 var shouldRequest = _dereq_('./shouldRequest');
@@ -545,12 +528,12 @@ var get = request(
 
 module.exports = get;
 
-},{"./../request":15,"./../support/processOperations":32,"./getInitialArgs":8,"./getSourceRequest":9,"./shouldRequest":11}],11:[function(_dereq_,module,exports){
+},{"./../request":18,"./../support/processOperations":36,"./getInitialArgs":7,"./getSourceRequest":8,"./shouldRequest":10}],10:[function(_dereq_,module,exports){
 module.exports = function(model, combinedResults) {
     return model._dataSource && combinedResults.requestedMissingPaths.length > 0;
 };
 
-},{}],12:[function(_dereq_,module,exports){
+},{}],11:[function(_dereq_,module,exports){
 var ModelResponse = _dereq_('../ModelResponse');
 var get = _dereq_('./get');
 var set = _dereq_('./set');
@@ -587,7 +570,7 @@ module.exports = function modelOperation(name) {
     };
 };
 
-},{"../ModelResponse":5,"./get":10,"./invalidate":13,"./set":16}],13:[function(_dereq_,module,exports){
+},{"../ModelResponse":4,"./get":9,"./invalidate":12,"./set":19}],12:[function(_dereq_,module,exports){
 var invalidateInitialArgs = _dereq_('./invalidateInitialArgs');
 var request = _dereq_('./../request');
 var processOperations = _dereq_('./../support/processOperations');
@@ -598,7 +581,7 @@ var invalidate = request(
 
 module.exports = invalidate;
 
-},{"./../request":15,"./../support/processOperations":32,"./invalidateInitialArgs":14}],14:[function(_dereq_,module,exports){
+},{"./../request":18,"./../support/processOperations":36,"./invalidateInitialArgs":13}],13:[function(_dereq_,module,exports){
 var combineOperations = _dereq_('./../support/combineOperations');
 var setSeedsOrOnNext = _dereq_('./../support/setSeedsOrOnNext');
 module.exports = function getInitialArgs(options, seeds, onNext) {
@@ -609,21 +592,425 @@ module.exports = function getInitialArgs(options, seeds, onNext) {
         operations, seedRequired, seeds,
         onNext, options.operationSelector);
 
-    return [operations, seeds, false];
+    return [operations, seeds];
 };
 
-},{"./../support/combineOperations":22,"./../support/setSeedsOrOnNext":35}],15:[function(_dereq_,module,exports){
+},{"./../support/combineOperations":26,"./../support/setSeedsOrOnNext":39}],14:[function(_dereq_,module,exports){
+module.exports = {
+    token: 'token',
+    dotSeparator: '.',
+    commaSeparator: ',',
+    openingBracket: '[',
+    closingBracket: ']',
+    space: 'space',
+    quote: 'quote',
+    unknown: 'unknown'
+};
+
+},{}],15:[function(_dereq_,module,exports){
+module.exports = {
+    nestedIndexers: 'Indexers cannot be nested',
+    closingWithoutOpeningIndexer: 'A closing indexer, "]", was provided without an opening indexer.',
+    leadingDotInIndexer: 'The dot operator in an indexer cannot be used this way.',
+    twoDot: 'Cannot have two dot separators outside of an indexer range.',
+    dotComma: 'Cannot have a comma preceded by a dot separator.',
+    commasOutsideOfIndexers: 'Commas cannot be used outside of indexers.',
+    trailingComma: 'Cannot have trailing commas in indexers.',
+    leadingComma: 'Leading commas in ranges are not allowed.',
+    emptyQuotes: 'Cannot have empty quotes',
+    emptyIndexer: 'Cannot have empty indexer.',
+    quotesOutsideIndexer: 'Cannot have quotes outside indexer.',
+    nonTerminatingQuotes: 'The quotes within the indexer were not closed.',
+    tokensMustBeNumeric: 'Tokens without quotes must be numeric.',
+    indexerTokensMustBeCommaDelimited: 'Indexer tokens must be comma delimited.',
+    numericRange: 'Only numeric keys can be used in ranges.'
+};
+
+},{}],16:[function(_dereq_,module,exports){
+var tokenizer = _dereq_('./tokenizer');
+var TokenTypes = _dereq_('./TokenTypes');
+var Expections = _dereq_('./expections');
+
+/**
+ * not only is this the parser, it is also the
+ * semantic analyzer for brevity sake / we never need
+ * this to change overall types of output.
+ */
+module.exports = function parser(string) {
+    var out = [];
+    var tokenized = tokenizer(string);
+    var state = {};
+
+    var token = tokenized();
+    while (!token.done) {
+
+        switch (token.type) {
+            case TokenTypes.token:
+                insertToken(token.token, state, out);
+                break;
+            case TokenTypes.dotSeparator:
+                dotSeparator(token.token, state, out);
+                break;
+            case TokenTypes.space:
+                space(token.token, state, out);
+                break;
+            case TokenTypes.commaSeparator:
+                commaSeparator(token.token, state, out);
+                break;
+            case TokenTypes.openingBracket:
+                openIndexer(token.token, state, out);
+                break;
+            case TokenTypes.closingBracket:
+                closeIndexer(token.token, state, out);
+                break;
+            case TokenTypes.quote:
+                quote(token.token, state, out);
+                break;
+        }
+
+        token = tokenized();
+    }
+
+    return out;
+};
+
+function space(token, state, out) {
+    // The space character only matters when inIndexer
+    // and in quote mode.
+    if (state.inIndexer && state.quote) {
+        state.indexerToken += token;
+    }
+}
+
+function insertToken(token, state, out) {
+    state.hasDot = false;
+
+    // if within indexer then there are several edge cases.
+    if (state.inIndexer) {
+        tokenInIndexer(token, state, out);
+        return;
+    }
+
+    // if not in indexer just insert into end position.
+    out[out.length] = token;
+}
+
+function dotSeparator(token, state, out) {
+
+    // If in indexer then dotOperators have different meanings.
+    if (state.inIndexer) {
+        indexerDotOperator(token, state, out);
+    }
+
+    // throws an expection if a range operator is outside of a range.
+    else if (state.hasDot) {
+        throw Expections.twoDot;
+    }
+    state.hasDot = true;
+}
+
+function commaSeparator(token, state, out) {
+    if (state.hasDot) {
+        throw Expections.dotComma;
+    }
+
+    // If in indexer then dotOperators have different meanings.
+    if (state.inIndexer) {
+        indexerCommaOperator(token, state, out);
+    }
+}
+
+// Accumulates dotSeparators inside indexers
+function indexerDotOperator(token, state, out) {
+
+    // must be preceded by token.
+    if (state.indexerToken === undefined) {
+        throw Expections.leadingDotInIndexer;
+    }
+
+    // if in quote mode, add the dot indexer to quote.
+    if (state.quote) {
+        state.indexerToken += token;
+        return;
+    }
+
+
+    if (!state.rangeCount) {
+        state.range = true;
+        state.rangeCount = 0;
+    }
+
+    ++state.rangeCount;
+
+    if (state.rangeCount === 2) {
+        state.inclusiveRange = true;
+    }
+
+    else if (state.rangeCount === 3) {
+        state.exclusiveRange = true;
+        state.inclusiveRange = false;
+    }
+}
+
+function indexerCommaOperator(token, state, out) {
+
+    // are we a range indexer?
+    if (state.range) {
+        closeRangedIndexer(token, state, out);
+    }
+
+    // push previous token and clear state.
+    else if (state.inIndexer) {
+        pushTokenIntoIndexer(token, state, out);
+    }
+
+    // If a comma is used outside of an indexer throw
+    else {
+        throw Expections.commasOutsideOfIndexers;
+    }
+}
+
+function pushTokenIntoIndexer(token, state, out) {
+    // no token to push, throw error.
+    if (state.indexerToken === undefined) {
+        throw Expections.leadingComma;
+    }
+
+    // push the current token onto the stack then clear state.
+    state.indexer[state.indexer.length] = state.indexerToken;
+    cleanIndexerTokenState(state);
+}
+
+function openIndexer(token, state, out) {
+    if (state.inIndexer) {
+        throw Expections.nestedIndexers;
+    }
+    state.inIndexer = true;
+    state.indexer = [];
+}
+
+function closeIndexer(token, state, out) {
+
+    // must be within an indexer to close.
+    if (!state.inIndexer) {
+        throw Expections.closingWithoutOpeningIndexer;
+    }
+
+    // The quotes could be non terminating
+    if (state.quote) {
+        throw Expections.nonTerminatingQuotes;
+    }
+
+
+    // are we a range indexer?
+    if (state.range) {
+        closeRangedIndexer(token, state, out);
+    }
+
+    // are we have a token?
+    else if (state.indexerToken !== undefined) {
+        pushTokenIntoIndexer(token, state, out);
+    }
+
+    // empty indexer.  Must be after the potential addition
+    // statements.
+    if (state.indexer && state.indexer.length === 0) {
+        throw Expections.emptyIndexer;
+    }
+
+    // flatten to avoid odd JSON output.
+    if (state.indexer && state.indexer.length === 1) {
+        state.indexer = state.indexer[0];
+    }
+
+    out[out.length] = state.indexer;
+
+    // removes all indexer state
+    cleanIndexerRangeState(state);
+    cleanIndexerTokenState(state);
+    state.indexer =
+        state.inIndexer = undefined;
+}
+
+function closeRangedIndexer(token, state, out) {
+    state.indexer[state.indexer.length] = {
+        from: state.indexerToken,
+        to: state.rangeCloseToken - (state.exclusiveRange && 1 || 0)
+    };
+    cleanIndexerRangeState(state);
+}
+
+function cleanIndexerRangeState(state) {
+    state.inclusiveRange =
+        state.exclusiveRange =
+        state.range =
+        state.rangeCloseToken =
+        state.rangeCount = undefined;
+}
+
+// removes state associated with indexerTokenState.
+function cleanIndexerTokenState(state) {
+    state.indexerToken =
+        state.indexerTokenQuoted = undefined;
+}
+
+function tokenInRange(token, state, out) {
+    token = +token;
+    if (isNaN(token)) {
+        throw Expections.numericRange;
+    }
+
+    state.rangeCloseToken = token;
+}
+
+function tokenInIndexer(token, state, out) {
+
+    // finish the range token.
+    if (state.range) {
+        tokenInRange(token, state, out);
+    }
+
+
+    // quote mode, accumulate tokens.
+    else if (state.quote) {
+        if (state.indexerToken === undefined) {
+            state.indexerToken = '';
+        }
+        state.indexerToken += token;
+    }
+
+    // We are in range mode.
+    else {
+        token = +token;
+        if (isNaN(token)) {
+            throw Expections.tokensMustBeNumeric;
+        }
+
+        state.indexerToken = token;
+    }
+}
+
+// this function just ensures that quotes only happen in indexers,
+// outside of ranges, and with 1 or more length tokens.
+function quote(token, state, out) {
+
+    if (state.indexerTokenQuoted) {
+        throw Expections.indexerTokensMustBeCommaDelimited;
+    }
+
+    if (!state.inIndexer) {
+        throw Expections.quotesOutsideIndexer;
+    }
+
+    var was = state.quote;
+    var toBe = !was;
+    state.quote = toBe;
+
+    // so deep
+    if (was && !toBe) {
+        if (state.indexerToken === undefined) {
+            throw Expections.emptyQuotes;
+        }
+        state.indexerTokenQuoted = true;
+    }
+}
+
+},{"./TokenTypes":14,"./expections":15,"./tokenizer":17}],17:[function(_dereq_,module,exports){
+var TokenTypes = _dereq_('./TokenTypes');
+var DOT_SEPARATOR = '.';
+var COMMA_SEPARATOR = ',';
+var OPENING_BRACKET = '[';
+var CLOSING_BRACKET = ']';
+var DOUBLE_OUOTES = '"';
+var SINGE_OUOTES = "'";
+var SPACE = " ";
+var SPECIAL_CHARACTERS = '\'"[]., ';
+var TokenTypes = _dereq_('./TokenTypes');
+
+module.exports = function tokenizer(string) {
+    var idx = -1;
+    return function() {
+        var token = '';
+        var done;
+        do {
+
+            done = idx === string.length;
+            if (done) {
+                return {done: true};
+            }
+            // we have to peek at the next token
+            var character = string[idx + 1];
+
+            // if its not a special character we need to accumulate it.
+            var isQuote = character === SINGE_OUOTES ||
+                character === DOUBLE_OUOTES;
+
+            if (character !== undefined &&
+                    SPECIAL_CHARACTERS.indexOf(character) === -1) {
+                token += character;
+                ++idx;
+                continue;
+            }
+            if (token.length) {
+                return toOutput(token, TokenTypes.token, done);
+            }
+
+            ++idx;
+            var type;
+            switch (character) {
+                case DOT_SEPARATOR:
+                    type = TokenTypes.dotSeparator;
+                    break;
+                case COMMA_SEPARATOR:
+                    type = TokenTypes.commaSeparator;
+                    break;
+                case OPENING_BRACKET:
+                    type = TokenTypes.openingBracket;
+                    break;
+                case CLOSING_BRACKET:
+                    type = TokenTypes.closingBracket;
+                    break;
+                case SPACE:
+                    type = TokenTypes.space;
+                    break;
+                case DOUBLE_OUOTES:
+                case SINGE_OUOTES:
+                    type = TokenTypes.quote;
+                    break;
+            }
+            if (type) {
+                return toOutput(token, type, done);
+            }
+        } while (!done);
+        if (token.length) {
+            return toOutput(token, TokenTypes.token, false);
+        }
+        return {done: true};
+    };
+};
+
+function toOutput(token, type, done) {
+    return {
+        token: token,
+        done: done,
+        type: type
+    };
+}
+
+
+},{"./TokenTypes":14}],18:[function(_dereq_,module,exports){
 var setSeedsOrOnNext = _dereq_('./support/setSeedsOrOnNext');
 var onNextValues = _dereq_('./support/onNextValue');
 var onCompletedOrError = _dereq_('./support/onCompletedOrError');
+var dotSyntaxParser = _dereq_('./parser/parser');
 var primeSeeds = _dereq_('./support/primeSeeds');
-var autoTrue = function() { return true; };
+var autoFalse = function() { return false; };
 
 module.exports = request;
 
 function request(initialArgs, sourceRequest, processOperations, shouldRequestFn) {
     if (!shouldRequestFn) {
-        shouldRequestFn = autoTrue;
+        shouldRequestFn = autoFalse;
     }
     return function innerRequest(options) {
         var selector = options.operationSelector;
@@ -645,11 +1032,28 @@ function request(initialArgs, sourceRequest, processOperations, shouldRequestFn)
         var toPathValues = format === 'AsValues';
         var seedRequired = toJSON || toJSONG || selector;
         var boundPath = model._path;
-        var i;
+        var i, len;
         var foundValue = false;
         var seeds = primeSeeds(selector, selectorLength);
+        var loopCount = 0;
 
-        function recurse(operations, relativeSeeds, shouldRequest, opts) {
+        // parse any dotSyntax
+        for (i = 0, len = args.length; i < len; i++) {
+            // it is a dotSyntax string.
+            if (typeof args[i] === 'string') {
+                args[i] = dotSyntaxParser(args[i]);
+            }
+
+            // it is a pathValue with dotSyntax.
+            else if (typeof args[i].path === 'string') {
+                args[i].path = dotSyntaxParser(args[i].path);
+            }
+        }
+
+        function recurse(operations, opts) {
+            if (loopCount > 50) {
+                throw 'Loop Kill switch thrown.';
+            }
             var combinedResults = processOperations(
                 model,
                 operations,
@@ -668,20 +1072,24 @@ function request(initialArgs, sourceRequest, processOperations, shouldRequestFn)
                 onNextValues(model, onNext, seeds, selector);
             }
 
-            if (shouldRequest && shouldRequestFn(model, combinedResults)) {
+            // Performs the recursing via dataSource
+            if (shouldRequestFn(model, combinedResults, loopCount)) {
                 sourceRequest(
                     options,
                     onNext,
                     seeds,
-                    relativeSeeds,
                     combinedResults,
+                    opts,
                     function onCompleteFromSourceSet(err, results) {
                         if (err) {
                             errors = errors.concat(err);
                             recurse([], seeds);
                             return;
                         }
-                        recurse.apply(null, results);
+                        ++loopCount;
+
+                        // We continue to string the opts through
+                        recurse(results, opts);
                     });
             }
 
@@ -704,19 +1112,21 @@ function request(initialArgs, sourceRequest, processOperations, shouldRequestFn)
     };
 }
 
-},{"./support/onCompletedOrError":28,"./support/onNextValue":29,"./support/primeSeeds":31,"./support/setSeedsOrOnNext":35}],16:[function(_dereq_,module,exports){
+},{"./parser/parser":16,"./support/onCompletedOrError":32,"./support/onNextValue":33,"./support/primeSeeds":35,"./support/setSeedsOrOnNext":39}],19:[function(_dereq_,module,exports){
 var setInitialArgs = _dereq_('./setInitialArgs');
 var setSourceRequest = _dereq_('./setSourceRequest');
 var request = _dereq_('./../request');
 var setProcessOperations = _dereq_('./setProcessOperations');
+var shouldRequest = _dereq_('./shouldRequest');
 var set = request(
     setInitialArgs,
     setSourceRequest,
-    setProcessOperations);
+    setProcessOperations,
+    shouldRequest);
 
 module.exports = set;
 
-},{"./../request":15,"./setInitialArgs":17,"./setProcessOperations":18,"./setSourceRequest":19}],17:[function(_dereq_,module,exports){
+},{"./../request":18,"./setInitialArgs":20,"./setProcessOperations":21,"./setSourceRequest":22,"./shouldRequest":23}],20:[function(_dereq_,module,exports){
 var combineOperations = _dereq_('./../support/combineOperations');
 var setSeedsOrOnNext = _dereq_('./../support/setSeedsOrOnNext');
 var Formats = _dereq_('./../support/Formats');
@@ -731,6 +1141,9 @@ module.exports = function setInitialArgs(options, seeds, onNext) {
     var selector = options.operationSelector;
     var isProgressive = options.operationIsProgressive;
     var firstSeeds, operations;
+    var requestOptions = {
+        removeBoundPath: shouldRequest
+    };
 
     // If Model is a slave, in shouldRequest mode,
     // a single seed is required to accumulate the jsong results.
@@ -740,6 +1153,9 @@ module.exports = function setInitialArgs(options, seeds, onNext) {
         firstSeeds = [{}];
         setSeedsOrOnNext(
             operations, true, firstSeeds, false, options.selector);
+
+        // we must keep track of the set seeds.
+        requestOptions.requestSeed = firstSeeds[0];
     }
 
     // This model is the master, therefore a regular set can be performed.
@@ -749,10 +1165,6 @@ module.exports = function setInitialArgs(options, seeds, onNext) {
         setSeedsOrOnNext(
             operations, seedRequired, seeds, onNext, options.operationSelector);
     }
-
-    var requestOptions = {
-        removeBoundPath: shouldRequest
-    };
 
     // We either have to construct the master operations if
     // the ModelResponse is isProgressive
@@ -768,10 +1180,11 @@ module.exports = function setInitialArgs(options, seeds, onNext) {
 
         requestOptions.isProgressive = true;
     }
-    return [operations, firstSeeds, shouldRequest, requestOptions];
+
+    return [operations, requestOptions];
 };
 
-},{"./../support/Formats":20,"./../support/combineOperations":22,"./../support/setSeedsOrOnNext":35}],18:[function(_dereq_,module,exports){
+},{"./../support/Formats":24,"./../support/combineOperations":26,"./../support/setSeedsOrOnNext":39}],21:[function(_dereq_,module,exports){
 var processOperations = _dereq_('./../support/processOperations');
 var combineOperations = _dereq_('./../support/combineOperations');
 var mergeBoundPath = _dereq_('./../support/mergeBoundPath');
@@ -806,7 +1219,7 @@ function setProcessOperations(model, operations, errorSelector, requestOptions) 
         for (var i = 0, opLen = operations.length; i < opLen; i++) {
             var args = operations[i].args;
             for (var j = 0, argsLen = args.length; j < argsLen; j++) {
-                args[i] = mergeBoundPath(args[i], boundPath);
+                args[j] = mergeBoundPath(args[j], boundPath);
             }
         }
     }
@@ -826,7 +1239,7 @@ function setProcessOperations(model, operations, errorSelector, requestOptions) 
     return results;
 }
 
-},{"./../support/Formats":20,"./../support/combineOperations":22,"./../support/mergeBoundPath":27,"./../support/processOperations":32}],19:[function(_dereq_,module,exports){
+},{"./../support/Formats":24,"./../support/combineOperations":26,"./../support/mergeBoundPath":31,"./../support/processOperations":36}],22:[function(_dereq_,module,exports){
 var getSourceObserver = _dereq_('./../support/getSourceObserever');
 var combineOperations = _dereq_('./../support/combineOperations');
 var setSeedsOrOnNext = _dereq_('./../support/setSeedsOrOnNext');
@@ -835,14 +1248,15 @@ var toPathValues = _dereq_('./../support/Formats').toPathValues;
 module.exports = setSourceRequest;
 
 function setSourceRequest(
-        options, onNext, seeds, relativeSeeds, combinedResults, cb) {
+        options, onNext, seeds, combinedResults, requestOptions, cb) {
     var model = options.operationModel;
     var seedRequired = options.format !== toPathValues;
+    var requestSeed = requestOptions.requestSeed;
     return model._request.set(
-        relativeSeeds[0],
+        requestSeed,
         getSourceObserver(
             model,
-            relativeSeeds[0].paths,
+            requestSeed.paths,
             function setSourceRequestCB(err, results) {
                 if (err) {
                     cb(err);
@@ -857,12 +1271,25 @@ function setSourceRequest(
                 setSeedsOrOnNext(
                     operations, seedRequired,
                     seeds, onNext, options.operationSelector);
-                cb(null, [operations, seeds, false, {removeBoundPath: false}]);
+
+                // unset the removeBoundPath.
+                requestOptions.removeBoundPath = false;
+
+                cb(null, operations);
             }));
 }
 
 
-},{"./../support/Formats":20,"./../support/combineOperations":22,"./../support/getSourceObserever":23,"./../support/setSeedsOrOnNext":35}],20:[function(_dereq_,module,exports){
+},{"./../support/Formats":24,"./../support/combineOperations":26,"./../support/getSourceObserever":27,"./../support/setSeedsOrOnNext":39}],23:[function(_dereq_,module,exports){
+// Set differs from get in the sense that the first time through
+// the recurse loop a server operation must be performed if it can be.
+module.exports = function(model, combinedResults, loopCount) {
+    return model._dataSource && (
+        combinedResults.requestedMissingPaths.length > 0 ||
+        loopCount === 0);
+};
+
+},{}],24:[function(_dereq_,module,exports){
 module.exports = {
     toPathValues: 'AsValues',
     toJSON: 'AsPathMap',
@@ -870,7 +1297,7 @@ module.exports = {
     selector: 'AsJSON',
 };
 
-},{}],21:[function(_dereq_,module,exports){
+},{}],25:[function(_dereq_,module,exports){
 module.exports = function buildJSONGOperation(format, seeds, jsongOp, seedOffset, onNext) {
     return {
         methodName: '_setJSONGs' + format,
@@ -883,7 +1310,7 @@ module.exports = function buildJSONGOperation(format, seeds, jsongOp, seedOffset
     };
 };
 
-},{}],22:[function(_dereq_,module,exports){
+},{}],26:[function(_dereq_,module,exports){
 var isSeedRequired = _dereq_('./seedRequired');
 var isJSONG = _dereq_('./isJSONG');
 var isPathOrPathValue = _dereq_('./isPathOrPathValue');
@@ -894,6 +1321,7 @@ module.exports = function combineOperations(args, format, name, spread, isProgre
     var isValues = !seedRequired;
     var hasSelector = seedRequired && format === toSelector;
     var seedsOffset = 0;
+
     return args.
         reduce(function(groups, argument) {
             var group = groups[groups.length - 1];
@@ -912,19 +1340,20 @@ module.exports = function combineOperations(args, format, name, spread, isProgre
                     onNext: null,
                     seedsOffset: seedsOffset,
                     isProgressive: isProgressive,
+                    type: type,
                     args: []
                 };
                 groups.push(group);
-                if (hasSelector) {
-                    seedsOffset++;
-                }
+            }
+            if (hasSelector) {
+                ++seedsOffset;
             }
             group.args.push(argument);
             return groups;
         }, []);
 };
 
-},{"./Formats":20,"./isJSONG":25,"./isPathOrPathValue":26,"./seedRequired":33}],23:[function(_dereq_,module,exports){
+},{"./Formats":24,"./isJSONG":29,"./isPathOrPathValue":30,"./seedRequired":37}],27:[function(_dereq_,module,exports){
 var insertErrors = _dereq_('./insertErrors.js');
 /**
  * creates the model source observer
@@ -952,7 +1381,7 @@ function getSourceObserver(model, requestedMissingPaths, cb) {
 
 module.exports = getSourceObserver;
 
-},{"./insertErrors.js":24}],24:[function(_dereq_,module,exports){
+},{"./insertErrors.js":28}],28:[function(_dereq_,module,exports){
 /**
  * will insert the error provided for every requestedPath.
  * @param {Model} model
@@ -976,18 +1405,18 @@ module.exports = function insertErrors(model, requestedPaths, err) {
 };
 
 
-},{}],25:[function(_dereq_,module,exports){
+},{}],29:[function(_dereq_,module,exports){
 module.exports = function isJSONG(x) {
     return x.hasOwnProperty("jsong");
 };
 
-},{}],26:[function(_dereq_,module,exports){
+},{}],30:[function(_dereq_,module,exports){
 module.exports = function isPathOrPathValue(x) {
     return !!(Array.isArray(x)) || (
         x.hasOwnProperty("path") && x.hasOwnProperty("value"));
 };
 
-},{}],27:[function(_dereq_,module,exports){
+},{}],31:[function(_dereq_,module,exports){
 var isJSONG = _dereq_('./isJSONG');
 var isPathValue = _dereq_('./isPathOrPathValue');
 
@@ -1032,7 +1461,7 @@ function mergeBoundPathIntoPathValue(arg, boundPath) {
     };
 }
 
-},{"./isJSONG":25,"./isPathOrPathValue":26}],28:[function(_dereq_,module,exports){
+},{"./isJSONG":29,"./isPathOrPathValue":30}],32:[function(_dereq_,module,exports){
 module.exports = function onCompletedOrError(onCompleted, onError, errors) {
     if (errors.length) {
         onError(errors);
@@ -1041,7 +1470,7 @@ module.exports = function onCompletedOrError(onCompleted, onError, errors) {
     }
 };
 
-},{}],29:[function(_dereq_,module,exports){
+},{}],33:[function(_dereq_,module,exports){
 /**
  * will onNext the observer with the seeds provided.
  * @param {Model} model
@@ -1071,7 +1500,7 @@ module.exports = function onNextValues(model, onNext, seeds, selector) {
     root.allowSync = false;
 };
 
-},{}],30:[function(_dereq_,module,exports){
+},{}],34:[function(_dereq_,module,exports){
 var buildJSONGOperation = _dereq_('./buildJSONGOperation');
 
 /**
@@ -1081,9 +1510,12 @@ var buildJSONGOperation = _dereq_('./buildJSONGOperation');
  */
 module.exports = partitionOperations;
 
-function partitionOperations(jsongResponse, requestedMissingPaths, format, seeds, onNext) {
+function partitionOperations(
+        jsongResponse, seeds, format, onNext) {
+
     var partitionedOps = [];
-    var nextSeeds = [];
+    var requestedMissingPaths = jsongResponse.paths;
+
     if (format === 'AsJSON') {
         // fast collapse ass the requestedMissingPaths into their
         // respective groups
@@ -1102,22 +1534,25 @@ function partitionOperations(jsongResponse, requestedMissingPaths, format, seeds
         }
         opsFromRequestedMissingPaths.forEach(function(op, i) {
             var seed = [seeds[op.idx]];
+            var jsong = {
+                jsong: jsongResponse.jsong,
+                paths: op.paths
+            };
             partitionedOps.push(buildJSONGOperation(
                 format,
                 seed,
-                jsongResponse,
-                i,
+                jsong,
+                op.idx,
                 onNext));
-            nextSeeds.push(seed);
         });
     } else {
         partitionedOps[0] = buildJSONGOperation(format, seeds, jsongResponse, 0, onNext);
     }
-    return [partitionedOps, nextSeeds];
+    return partitionedOps;
 }
 
 
-},{"./buildJSONGOperation":21}],31:[function(_dereq_,module,exports){
+},{"./buildJSONGOperation":25}],35:[function(_dereq_,module,exports){
 module.exports = function primeSeeds(selector, selectorLength) {
     var seeds = [];
     if (selector) {
@@ -1130,7 +1565,7 @@ module.exports = function primeSeeds(selector, selectorLength) {
     return seeds;
 };
 
-},{}],32:[function(_dereq_,module,exports){
+},{}],36:[function(_dereq_,module,exports){
 module.exports = function processOperations(model, operations, errorSelector, boundPath) {
     return operations.reduce(function(memo, operation) {
 
@@ -1166,12 +1601,12 @@ module.exports = function processOperations(model, operations, errorSelector, bo
     });
 }
 
-},{}],33:[function(_dereq_,module,exports){
+},{}],37:[function(_dereq_,module,exports){
 module.exports = function isSeedRequired(format) {
     return format === 'AsJSON' || format === 'AsJSONG' || format === 'AsPathMap';
 };
 
-},{}],34:[function(_dereq_,module,exports){
+},{}],38:[function(_dereq_,module,exports){
 module.exports = function setSeedsOnGroups(groups, seeds, hasSelector) {
     var valueIndex = 0;
     var seedsLength = seeds.length;
@@ -1191,7 +1626,7 @@ module.exports = function setSeedsOnGroups(groups, seeds, hasSelector) {
     }
 }
 
-},{}],35:[function(_dereq_,module,exports){
+},{}],39:[function(_dereq_,module,exports){
 var setSeedsOnGroups = _dereq_('./setSeedsOnGroups');
 module.exports = function setSeedsOrOnNext(operations, seedRequired, seeds, onNext, selector) {
     if (seedRequired) {
@@ -1203,7 +1638,7 @@ module.exports = function setSeedsOrOnNext(operations, seedRequired, seeds, onNe
     }
 };
 
-},{"./setSeedsOnGroups":34}],36:[function(_dereq_,module,exports){
+},{"./setSeedsOnGroups":38}],40:[function(_dereq_,module,exports){
 var falcor = _dereq_('./../Falcor');
 var NOOP = falcor.NOOP;
 var RequestQueue = function(jsongModel, scheduler) {
@@ -1666,7 +2101,7 @@ falcor.__Internals.buildQueries = buildQueries;
 
 module.exports = RequestQueue;
 
-},{"./../Falcor":3}],37:[function(_dereq_,module,exports){
+},{"./../Falcor":2}],41:[function(_dereq_,module,exports){
 (function (global){
 /**
     Rx Ultralite!
@@ -1843,7 +2278,7 @@ module.exports = Rx;
 
 
 }).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],38:[function(_dereq_,module,exports){
+},{}],42:[function(_dereq_,module,exports){
 function ImmediateScheduler() {
 }
 
@@ -1855,7 +2290,7 @@ ImmediateScheduler.prototype = {
 
 module.exports = ImmediateScheduler;
 
-},{}],39:[function(_dereq_,module,exports){
+},{}],43:[function(_dereq_,module,exports){
 function TimeoutScheduler(delay) {
     this.delay = delay;
 }
@@ -1868,12 +2303,13 @@ TimeoutScheduler.prototype = {
 
 module.exports = TimeoutScheduler;
 
-},{}],40:[function(_dereq_,module,exports){
+},{}],44:[function(_dereq_,module,exports){
 var hardLink = _dereq_('./util/hardlink');
 var createHardlink = hardLink.create;
 var onValue = _dereq_('./onValue');
 var isExpired = _dereq_('./util/isExpired');
 var $path = _dereq_('./../types/path.js');
+var __context = _dereq_("../internal/context");
 
 function followReference(model, root, node, referenceContainer, reference, seed, outputFormat) {
 
@@ -1881,9 +2317,9 @@ function followReference(model, root, node, referenceContainer, reference, seed,
     var k, next;
 
     while (true) {
-        if (depth === 0 && referenceContainer.__context) {
+        if (depth === 0 && referenceContainer[__context]) {
             depth = reference.length;
-            next = referenceContainer.__context;
+            next = referenceContainer[__context];
         } else {
             k = reference[depth++];
             next = node[k];
@@ -1911,7 +2347,7 @@ function followReference(model, root, node, referenceContainer, reference, seed,
                     break;
                 }
 
-                if (!referenceContainer.__context) {
+                if (!referenceContainer[__context]) {
                     createHardlink(referenceContainer, next);
                 }
 
@@ -1949,7 +2385,7 @@ function followReference(model, root, node, referenceContainer, reference, seed,
 
 module.exports = followReference;
 
-},{"./../types/path.js":121,"./onValue":52,"./util/hardlink":54,"./util/isExpired":55}],41:[function(_dereq_,module,exports){
+},{"../internal/context":66,"./../types/path.js":140,"./onValue":56,"./util/hardlink":58,"./util/isExpired":59}],45:[function(_dereq_,module,exports){
 var getBoundValue = _dereq_('./getBoundValue');
 var isPathValue = _dereq_('./util/isPathValue');
 module.exports = function(walk) {
@@ -2015,7 +2451,7 @@ module.exports = function(walk) {
 };
 
 
-},{"./getBoundValue":45,"./util/isPathValue":57}],42:[function(_dereq_,module,exports){
+},{"./getBoundValue":49,"./util/isPathValue":61}],46:[function(_dereq_,module,exports){
 var getBoundValue = _dereq_('./getBoundValue');
 var isPathValue = _dereq_('./util/isPathValue');
 module.exports = function(walk) {
@@ -2052,7 +2488,7 @@ module.exports = function(walk) {
 };
 
 
-},{"./getBoundValue":45,"./util/isPathValue":57}],43:[function(_dereq_,module,exports){
+},{"./getBoundValue":49,"./util/isPathValue":61}],47:[function(_dereq_,module,exports){
 var getBoundValue = _dereq_('./getBoundValue');
 var isPathValue = _dereq_('./util/isPathValue');
 module.exports = function(walk) {
@@ -2101,7 +2537,7 @@ module.exports = function(walk) {
     };
 };
 
-},{"./getBoundValue":45,"./util/isPathValue":57}],44:[function(_dereq_,module,exports){
+},{"./getBoundValue":49,"./util/isPathValue":61}],48:[function(_dereq_,module,exports){
 var getBoundValue = _dereq_('./getBoundValue');
 var isPathValue = _dereq_('./util/isPathValue');
 module.exports = function(walk) {
@@ -2147,7 +2583,7 @@ module.exports = function(walk) {
 };
 
 
-},{"./getBoundValue":45,"./util/isPathValue":57}],45:[function(_dereq_,module,exports){
+},{"./getBoundValue":49,"./util/isPathValue":61}],49:[function(_dereq_,module,exports){
 var getValueSync = _dereq_('./getValueSync');
 module.exports = function getBoundValue(model, path) {
     var boxed, value, shorted;
@@ -2171,7 +2607,7 @@ module.exports = function getBoundValue(model, path) {
 };
 
 
-},{"./getValueSync":46}],46:[function(_dereq_,module,exports){
+},{"./getValueSync":50}],50:[function(_dereq_,module,exports){
 var followReference = _dereq_('./followReference');
 var clone = _dereq_('./util/clone');
 var isExpired = _dereq_('./util/isExpired');
@@ -2271,7 +2707,7 @@ module.exports = function getValueSync(model, simplePath) {
     };
 };
 
-},{"./../types/error.js":120,"./../types/path.js":121,"./../types/sentinel.js":122,"./followReference":40,"./util/clone":53,"./util/isExpired":55,"./util/lru":58}],47:[function(_dereq_,module,exports){
+},{"./../types/error.js":139,"./../types/path.js":140,"./../types/sentinel.js":141,"./followReference":44,"./util/clone":57,"./util/isExpired":59,"./util/lru":62}],51:[function(_dereq_,module,exports){
 var followReference = _dereq_('./followReference');
 var onError = _dereq_('./onError');
 var onMissing = _dereq_('./onMissing');
@@ -2285,6 +2721,7 @@ var isExpired = _dereq_('./util/isExpired');
 var permuteKey = _dereq_('./util/permuteKey');
 var $path = _dereq_('./../types/path');
 var $error = _dereq_('./../types/error');
+var __invalidated = _dereq_("../internal/invalidated");
 
 // TODO: Objectify?
 function walk(model, root, curr, pathOrJSON, depth, seedOrFunction, positionalInfo, outerResults, optimizedPath, requestedPath, inputFormat, outputFormat, fromReference) {
@@ -2306,22 +2743,27 @@ function walk(model, root, curr, pathOrJSON, depth, seedOrFunction, positionalIn
         var atEndOfJSONQuery = false;
         var k, i, len;
         if (jsonQuery) {
-            if (pathOrJSON && typeof pathOrJSON === 'object') {
-                if (Array.isArray(pathOrJSON)) {
-                    atEndOfJSONQuery = true;
-                } else {
-                    k = Object.keys(pathOrJSON);
-                    if (k.length === 1) {
-                        k = k[0];
-                    }
+            // it has a $type property means we have hit a end.
+            if (pathOrJSON && pathOrJSON.$type) {
+                atEndOfJSONQuery = true;
+            }
+
+            // is it an object?
+            else if (pathOrJSON && typeof pathOrJSON === 'object') {
+                // A terminating condition
+                k = Object.keys(pathOrJSON);
+                if (k.length === 1) {
+                    k = k[0];
                 }
-            } else {
+            }
+
+            // found a primitive, we hit the end.
+            else {
                 atEndOfJSONQuery = true;
             }
         } else {
             k = pathOrJSON[depth];
         }
-
 
         // BaseCase: we have hit the end of our query without finding a 'leaf' node, therefore emit missing.
         if (atEndOfJSONQuery || !jsonQuery && depth === pathOrJSON.length) {
@@ -2341,7 +2783,6 @@ function walk(model, root, curr, pathOrJSON, depth, seedOrFunction, positionalIn
         var asJSON = outputFormat === 'JSON';
         var isKeySet = false;
         var hasChildren = false;
-        fromReference = false;
         depth++;
 
         var key;
@@ -2365,6 +2806,7 @@ function walk(model, root, curr, pathOrJSON, depth, seedOrFunction, positionalIn
         }
 
         do {
+            fromReference = false;
             if (!memo.done) {
                 permuteOptimized = [];
                 permuteRequested = [];
@@ -2378,8 +2820,12 @@ function walk(model, root, curr, pathOrJSON, depth, seedOrFunction, positionalIn
 
             var nextPathOrPathMap = jsonQuery ? pathOrJSON[key] : pathOrJSON;
             if (jsonQuery && nextPathOrPathMap) {
-                if (typeof nextPathOrPathMap === 'object' && !Array.isArray(nextPathOrPathMap)) {
-                    hasChildren = Object.keys(nextPathOrPathMap).length > 0;
+                if (typeof nextPathOrPathMap === 'object') {
+                    if (nextPathOrPathMap.$type) {
+                        hasChildren = false;
+                    } else {
+                        hasChildren = Object.keys(nextPathOrPathMap).length > 0;
+                    }
                 }
             }
 
@@ -2454,7 +2900,7 @@ function evaluateNode(model, curr, pathOrJSON, depth, seedOrFunction, requestedP
     // Else we have found a value, emit the current position information.
     else {
         if (isExpired(curr)) {
-            if (!curr.__invalidated) {
+            if (!curr[__invalidated]) {
                 splice(model, curr);
                 removeHardlink(curr);
             }
@@ -2469,7 +2915,7 @@ function evaluateNode(model, curr, pathOrJSON, depth, seedOrFunction, requestedP
 
 module.exports = walk;
 
-},{"./../types/error":120,"./../types/path":121,"./followReference":40,"./onError":50,"./onMissing":51,"./onValue":52,"./util/hardlink":54,"./util/isExpired":55,"./util/isMaterialzed":56,"./util/lru":58,"./util/permuteKey":59}],48:[function(_dereq_,module,exports){
+},{"../internal/invalidated":69,"./../types/error":139,"./../types/path":140,"./followReference":44,"./onError":54,"./onMissing":55,"./onValue":56,"./util/hardlink":58,"./util/isExpired":59,"./util/isMaterialzed":60,"./util/lru":62,"./util/permuteKey":63}],52:[function(_dereq_,module,exports){
 var walk = _dereq_('./getWalk');
 module.exports = {
     getAsJSON: _dereq_('./getAsJSON')(walk),
@@ -2482,7 +2928,7 @@ module.exports = {
 };
 
 
-},{"./getAsJSON":41,"./getAsJSONG":42,"./getAsPathMap":43,"./getAsValues":44,"./getBoundValue":45,"./getValueSync":46,"./getWalk":47,"./legacy_setCache":49}],49:[function(_dereq_,module,exports){
+},{"./getAsJSON":45,"./getAsJSONG":46,"./getAsPathMap":47,"./getAsValues":48,"./getBoundValue":49,"./getValueSync":50,"./getWalk":51,"./legacy_setCache":53}],53:[function(_dereq_,module,exports){
 /* istanbul ignore next */
 var NOOP = function NOOP() {},
     __GENERATION_GUID = 0,
@@ -2913,7 +3359,7 @@ module.exports = function setCache(model, map) {
     return nodeRoot;
 }
 
-},{}],50:[function(_dereq_,module,exports){
+},{}],54:[function(_dereq_,module,exports){
 var lru = _dereq_('./util/lru');
 var clone = _dereq_('./util/clone');
 var promote = lru.promote;
@@ -2929,7 +3375,7 @@ module.exports = function onError(model, node, permuteRequested, permuteOptimize
 };
 
 
-},{"./util/clone":53,"./util/lru":58}],51:[function(_dereq_,module,exports){
+},{"./util/clone":57,"./util/lru":62}],55:[function(_dereq_,module,exports){
 var support = _dereq_('./util/support');
 var fastCat = support.fastCat,
     fastCatSkipNulls = support.fastCatSkipNulls,
@@ -2983,7 +3429,7 @@ function concatAndInsertMissing(remainingPath, results, permuteRequested, permut
 }
 
 
-},{"./util/clone":53,"./util/isExpired":55,"./util/spreadJSON":60,"./util/support":61}],52:[function(_dereq_,module,exports){
+},{"./util/clone":57,"./util/isExpired":59,"./util/spreadJSON":64,"./util/support":65}],56:[function(_dereq_,module,exports){
 var lru = _dereq_('./util/lru');
 var clone = _dereq_('./util/clone');
 var promote = lru.promote;
@@ -3130,8 +3576,9 @@ module.exports = function onValue(model, node, seedOrFunction, outerResults, per
 
 
 
-},{"./../types/error":120,"./../types/path":121,"./../types/sentinel":122,"./util/clone":53,"./util/lru":58}],53:[function(_dereq_,module,exports){
+},{"./../types/error":139,"./../types/path":140,"./../types/sentinel":141,"./util/clone":57,"./util/lru":62}],57:[function(_dereq_,module,exports){
 // Copies the node
+var prefix = _dereq_("../../internal/prefix");
 module.exports = function clone(node) {
     var outValue, i, len;
     var keys = Object.keys(node);
@@ -3139,7 +3586,7 @@ module.exports = function clone(node) {
     outValue = {};
     for (i = 0, len = keys.length; i < len; i++) {
         var k = keys[i];
-        if (k.indexOf('__') === 0 || k === '/' || k === './' || k === '../') {
+        if (k[0] === prefix) {
             continue;
         }
         outValue[k] = node[k];
@@ -3148,33 +3595,38 @@ module.exports = function clone(node) {
 };
 
 
-},{}],54:[function(_dereq_,module,exports){
+},{"../../internal/prefix":74}],58:[function(_dereq_,module,exports){
+var __ref = _dereq_("../../internal/ref");
+var __context = _dereq_("../../internal/context");
+var __ref_index = _dereq_("../../internal/ref-index");
+var __refs_length = _dereq_("../../internal/refs-length");
+
 function createHardlink(from, to) {
     
     // create a back reference
-    var backRefs  = to.__refs_length || 0;
-    to['__ref' + backRefs] = from;
-    to.__refs_length = backRefs + 1;
+    var backRefs  = to[__refs_length] || 0;
+    to[__ref + backRefs] = from;
+    to[__refs_length] = backRefs + 1;
     
     // create a hard reference
-    from.__ref_index = backRefs;
-    from.__context = to;
+    from[__ref_index] = backRefs;
+    from[__context] = to;
 }
 
 function removeHardlink(cacheObject) {
-    var context = cacheObject.__context;
+    var context = cacheObject[__context];
     if (context) {
-        var idx = cacheObject.__ref_index;
-        var len = context.__refs_length;
+        var idx = cacheObject[__ref_index];
+        var len = context[__refs_length];
         
         while (idx < len) {
-            context['__ref' + idx] = context[__REF + idx + 1];
+            context[__ref + idx] = context[__REF + idx + 1];
             ++idx;
         }
         
-        context.__refs_length = len - 1;
-        cacheObject.__context = undefined;
-        cacheObject.__ref_index = undefined;
+        context[__refs_length] = len - 1;
+        cacheObject[__context] = undefined;
+        cacheObject[__ref_index] = undefined;
     }
 }
 
@@ -3183,87 +3635,93 @@ module.exports = {
     remove: removeHardlink
 };
 
-},{}],55:[function(_dereq_,module,exports){
+},{"../../internal/context":66,"../../internal/ref":77,"../../internal/ref-index":76,"../../internal/refs-length":78}],59:[function(_dereq_,module,exports){
 var now = _dereq_('../../support/now');
 module.exports = function isExpired(node) {
     var $expires = node.$expires === undefined && -1 || node.$expires;
     return $expires !== -1 && $expires !== 1 && ($expires === 0 || $expires < now());
 };
 
-},{"../../support/now":107}],56:[function(_dereq_,module,exports){
+},{"../../support/now":126}],60:[function(_dereq_,module,exports){
 module.exports = function isMaterialized(model) {
     return model._materialized && !(model._router || model._dataSource);
 };
 
-},{}],57:[function(_dereq_,module,exports){
+},{}],61:[function(_dereq_,module,exports){
 module.exports = function(x) {
     return x.path && x.value;
 };
-},{}],58:[function(_dereq_,module,exports){
+},{}],62:[function(_dereq_,module,exports){
+var __head = _dereq_("../../internal/head");
+var __tail = _dereq_("../../internal/tail");
+var __next = _dereq_("../../internal/next");
+var __prev = _dereq_("../../internal/prev");
+var __invalidated = _dereq_("../../internal/invalidated");
+
 // [H] -> Next -> ... -> [T]
 // [T] -> Prev -> ... -> [H]
 function lruPromote(model, object) {
     var root = model._root;
-    var head = root.__head;
+    var head = root[__head];
     if (head === object) {
         return;
     }
 
     // First insert
     if (!head) {
-        root.__head = object;
+        root[__head] = object;
         return;
     }
 
     // The head and the tail need to separate
-    if (!root.__tail) {
-        root.__head = object;
-        root.__tail = head;
-        object.__next = head;
+    if (!root[__tail]) {
+        root[__head] = object;
+        root[__tail] = head;
+        object[__next] = head;
         
         // Now tail
-        head.__prev = object;
+        head[__prev] = object;
         return;
     }
 
     // Its in the cache.  Splice out.
-    var prev = object.__prev;
-    var next = object.__next;
+    var prev = object[__prev];
+    var next = object[__next];
     if (next) {
-        next.__prev = prev;
+        next[__prev] = prev;
     }
     if (prev) {
-        prev.__next = next;
+        prev[__next] = next;
     }
-    object.__prev = undefined;
+    object[__prev] = undefined;
 
     // Insert into head position
-    root.__head = object;
-    object.__next = head;
-    head.__prev = object;
+    root[__head] = object;
+    object[__next] = head;
+    head[__prev] = object;
 }
 
 function lruSplice(model, object) {
     var root = model._root;
 
     // Its in the cache.  Splice out.
-    var prev = object.__prev;
-    var next = object.__next;
+    var prev = object[__prev];
+    var next = object[__next];
     if (next) {
-        next.__prev = prev;
+        next[__prev] = prev;
     }
     if (prev) {
-        prev.__next = next;
+        prev[__next] = next;
     }
-    object.__prev = undefined;
+    object[__prev] = undefined;
     
-    if (object === root.__head) {
-        root.__head = undefined;
+    if (object === root[__head]) {
+        root[__head] = undefined;
     }
-    if (object === root.__tail) {
-        root.__tail = undefined;
+    if (object === root[__tail]) {
+        root[__tail] = undefined;
     }
-    object.__invalidated = true;
+    object[__invalidated] = true;
     root.expired.push(object);
 }
 
@@ -3271,7 +3729,8 @@ module.exports = {
     promote: lruPromote,
     splice: lruSplice
 };
-},{}],59:[function(_dereq_,module,exports){
+},{"../../internal/head":68,"../../internal/invalidated":69,"../../internal/next":71,"../../internal/prev":75,"../../internal/tail":79}],63:[function(_dereq_,module,exports){
+var prefix = _dereq_("../../internal/prefix");
 module.exports = function permuteKey(key, memo) {
     if (memo.isArray) {
         if (memo.loaded && memo.rangeOffset > memo.to) {
@@ -3279,8 +3738,8 @@ module.exports = function permuteKey(key, memo) {
             memo.loaded = false;
         }
 
-        var idx = memo.arrOffset;
-        if (idx === key.length) {
+        var idx = memo.arrOffset, length = key.length;
+        if (idx === length) {
             memo.done = true;
             return '';
         }
@@ -3298,7 +3757,24 @@ module.exports = function permuteKey(key, memo) {
 
             return memo.rangeOffset++;
         } else {
-            memo.arrOffset++;
+            do  {
+                if (type !== 'string') {
+                    break;
+                }
+
+                if (el[0] !== prefix && el[0] !== '$') {
+                    break;
+                }
+
+                el = key[++idx];
+            } while (el === undefined || idx < length);
+
+            if (el === undefined || idx === length) {
+                memo.done = true;
+                return '';
+            }
+
+            memo.arrOffset = idx + 1;
             return el;
         }
     } else {
@@ -3318,14 +3794,14 @@ module.exports = function permuteKey(key, memo) {
 };
 
 
-},{}],60:[function(_dereq_,module,exports){
+},{"../../internal/prefix":74}],64:[function(_dereq_,module,exports){
 var fastCopy = _dereq_('./support').fastCopy;
 module.exports = function spreadJSON(root, bins, bin) {
     bin = bin || [];
     if (!bins.length) {
         bins.push(bin);
     }
-    if (root == null || typeof root !== 'object') {
+    if (!root || typeof root !== 'object' || root.$type) {
         return [];
     }
     var keys = Object.keys(root);
@@ -3343,7 +3819,7 @@ module.exports = function spreadJSON(root, bins, bin) {
     }
 };
 
-},{"./support":61}],61:[function(_dereq_,module,exports){
+},{"./support":65}],65:[function(_dereq_,module,exports){
 
 
 function fastCopy(arr, i) {
@@ -3386,14 +3862,45 @@ module.exports = {
     fastCopy: fastCopy
 };
 
-},{}],62:[function(_dereq_,module,exports){
+},{}],66:[function(_dereq_,module,exports){
+module.exports = _dereq_("./prefix") + "context";
+},{"./prefix":74}],67:[function(_dereq_,module,exports){
+module.exports = _dereq_("./prefix") + "generation";
+},{"./prefix":74}],68:[function(_dereq_,module,exports){
+module.exports = _dereq_("./prefix") + "head";
+},{"./prefix":74}],69:[function(_dereq_,module,exports){
+module.exports = _dereq_("./prefix") + "invalidated";
+},{"./prefix":74}],70:[function(_dereq_,module,exports){
+module.exports = _dereq_("./prefix") + "key";
+},{"./prefix":74}],71:[function(_dereq_,module,exports){
+module.exports = _dereq_("./prefix") + "next";
+},{"./prefix":74}],72:[function(_dereq_,module,exports){
+module.exports = _dereq_("./prefix") + "offset";
+},{"./prefix":74}],73:[function(_dereq_,module,exports){
+module.exports = _dereq_("./prefix") + "parent";
+},{"./prefix":74}],74:[function(_dereq_,module,exports){
+// This may look like an empty string, but it's actually a single zero-width-space character.
+module.exports = "​";
+},{}],75:[function(_dereq_,module,exports){
+module.exports = _dereq_("./prefix") + "prev";
+},{"./prefix":74}],76:[function(_dereq_,module,exports){
+module.exports = _dereq_("./prefix") + "ref-index";
+},{"./prefix":74}],77:[function(_dereq_,module,exports){
+module.exports = _dereq_("./prefix") + "ref";
+},{"./prefix":74}],78:[function(_dereq_,module,exports){
+module.exports = _dereq_("./prefix") + "refs-length";
+},{"./prefix":74}],79:[function(_dereq_,module,exports){
+module.exports = _dereq_("./prefix") + "tail";
+},{"./prefix":74}],80:[function(_dereq_,module,exports){
+module.exports = _dereq_("./prefix") + "version";
+},{"./prefix":74}],81:[function(_dereq_,module,exports){
 module.exports = {
     invPathSetsAsJSON: _dereq_("./invalidate-path-sets-as-json-dense"),
     invPathSetsAsJSONG: _dereq_("./invalidate-path-sets-as-json-graph"),
     invPathSetsAsPathMap: _dereq_("./invalidate-path-sets-as-json-sparse"),
     invPathSetsAsValues: _dereq_("./invalidate-path-sets-as-json-values")
 };
-},{"./invalidate-path-sets-as-json-dense":63,"./invalidate-path-sets-as-json-graph":64,"./invalidate-path-sets-as-json-sparse":65,"./invalidate-path-sets-as-json-values":66}],63:[function(_dereq_,module,exports){
+},{"./invalidate-path-sets-as-json-dense":82,"./invalidate-path-sets-as-json-graph":83,"./invalidate-path-sets-as-json-sparse":84,"./invalidate-path-sets-as-json-values":85}],82:[function(_dereq_,module,exports){
 module.exports = invalidate_path_sets_as_json_dense;
 
 var clone = _dereq_("../support/clone-dense-json");
@@ -3436,7 +3943,7 @@ function invalidate_path_sets_as_json_dense(model, pathsets, values) {
         var pathset = pathsets[index];
         roots.index = index;
         
-        walk_path_set(onNode, onEdge, pathset, roots, parents, nodes, requested, optimized);
+        walk_path_set(onNode, onEdge, pathset, 0, roots, parents, nodes, requested, optimized);
 
         if (is_object(json)) {
             json.json = roots.json;
@@ -3514,12 +4021,12 @@ function onNode(pathset, roots, parents, nodes, requested, optimized, is_top_lev
     update_graph(parent, size, version, lru);
 }
 
-function onEdge(pathset, roots, parents, nodes, requested, optimized, key, keyset) {
+function onEdge(pathset, depth, roots, parents, nodes, requested, optimized, key, keyset) {
     roots.json = roots[3];
     roots.hasValue = true;
     roots.requestedPaths.push(array_slice(requested, roots.offset));
 }
-},{"../lru/collect":67,"../support/array-clone":85,"../support/array-slice":86,"../support/clone-dense-json":87,"../support/get-valid-key":97,"../support/invalidate-node":101,"../support/is-object":103,"../support/options":108,"../support/update-graph":118,"../walk/walk-path-set":128}],64:[function(_dereq_,module,exports){
+},{"../lru/collect":86,"../support/array-clone":104,"../support/array-slice":105,"../support/clone-dense-json":106,"../support/get-valid-key":116,"../support/invalidate-node":120,"../support/is-object":122,"../support/options":127,"../support/update-graph":137,"../walk/walk-path-set":147}],83:[function(_dereq_,module,exports){
 module.exports = invalidate_path_sets_as_json_graph;
 
 var $path = _dereq_("../types/path");
@@ -3555,7 +4062,7 @@ function invalidate_path_sets_as_json_graph(model, pathsets, values) {
 
     while (++index < count) {
         var pathset = pathsets[index];
-        walk_path_set(onNode, onEdge, pathset, roots, parents, nodes, requested, optimized);
+        walk_path_set(onNode, onEdge, pathset, 0, roots, parents, nodes, requested, optimized);
     }
 
     collect(
@@ -3628,13 +4135,13 @@ function onNode(pathset, roots, parents, nodes, requested, optimized, is_top_lev
     update_graph(parent, size, version, lru);
 }
 
-function onEdge(pathset, roots, parents, nodes, requested, optimized, key, keyset) {
+function onEdge(pathset, depth, roots, parents, nodes, requested, optimized, key, keyset) {
     clone_success(roots, requested, optimized);
     roots.json = roots[1];
     roots.hasValue = true;
 }
 
-},{"../lru/collect":67,"../support/array-clone":85,"../support/clone-dense-json":87,"../support/clone-success-paths":93,"../support/get-valid-key":97,"../support/invalidate-node":101,"../support/is-object":103,"../support/options":108,"../support/update-graph":118,"../types/path":121,"../walk/walk-path-set-soft-link":127}],65:[function(_dereq_,module,exports){
+},{"../lru/collect":86,"../support/array-clone":104,"../support/clone-dense-json":106,"../support/clone-success-paths":112,"../support/get-valid-key":116,"../support/invalidate-node":120,"../support/is-object":122,"../support/options":127,"../support/update-graph":137,"../types/path":140,"../walk/walk-path-set-soft-link":146}],84:[function(_dereq_,module,exports){
 module.exports = invalidate_path_sets_as_json_sparse;
 
 var clone = _dereq_("../support/clone-dense-json");
@@ -3668,7 +4175,7 @@ function invalidate_path_sets_as_json_sparse(model, pathsets, values) {
 
     while (++index < count) {
         var pathset = pathsets[index];
-        walk_path_set(onNode, onEdge, pathset, roots, parents, nodes, requested, optimized);
+        walk_path_set(onNode, onEdge, pathset, 0, roots, parents, nodes, requested, optimized);
     }
 
     collect(
@@ -3735,12 +4242,12 @@ function onNode(pathset, roots, parents, nodes, requested, optimized, is_top_lev
     update_graph(parent, size, version, lru);
 }
 
-function onEdge(pathset, roots, parents, nodes, requested, optimized, key, keyset) {
+function onEdge(pathset, depth, roots, parents, nodes, requested, optimized, key, keyset) {
     roots.json = roots[3];
     roots.hasValue = true;
     roots.requestedPaths.push(array_slice(requested, roots.offset));
 }
-},{"../lru/collect":67,"../support/array-clone":85,"../support/array-slice":86,"../support/clone-dense-json":87,"../support/get-valid-key":97,"../support/invalidate-node":101,"../support/is-object":103,"../support/options":108,"../support/update-graph":118,"../walk/walk-path-set":128}],66:[function(_dereq_,module,exports){
+},{"../lru/collect":86,"../support/array-clone":104,"../support/array-slice":105,"../support/clone-dense-json":106,"../support/get-valid-key":116,"../support/invalidate-node":120,"../support/is-object":122,"../support/options":127,"../support/update-graph":137,"../walk/walk-path-set":147}],85:[function(_dereq_,module,exports){
 module.exports = invalidate_path_sets_as_json_values;
 
 var clone = _dereq_("../support/clone-dense-json");
@@ -3773,7 +4280,7 @@ function invalidate_path_sets_as_json_values(model, pathsets, onNext) {
 
     while (++index < count) {
         var pathset = pathsets[index];
-        walk_path_set(onNode, onEdge, pathset, roots, parents, nodes, requested, optimized);
+        walk_path_set(onNode, onEdge, pathset, 0, roots, parents, nodes, requested, optimized);
     }
 
     collect(
@@ -3830,7 +4337,7 @@ function onNode(pathset, roots, parents, nodes, requested, optimized, is_top_lev
     update_graph(parent, size, version, lru);
 }
 
-function onEdge(pathset, roots, parents, nodes, requested, optimized, key, keyset) {
+function onEdge(pathset, depth, roots, parents, nodes, requested, optimized, key, keyset) {
     var node = nodes[0];
     var type = is_object(node) && node.$type || undefined;
     var onNext = roots.onNext;
@@ -3842,7 +4349,12 @@ function onEdge(pathset, roots, parents, nodes, requested, optimized, key, keyse
     }
     roots.requestedPaths.push(array_slice(requested, roots.offset));
 }
-},{"../lru/collect":67,"../support/array-clone":85,"../support/array-slice":86,"../support/clone-dense-json":87,"../support/get-valid-key":97,"../support/invalidate-node":101,"../support/is-object":103,"../support/options":108,"../support/update-graph":118,"../walk/walk-path-set":128}],67:[function(_dereq_,module,exports){
+},{"../lru/collect":86,"../support/array-clone":104,"../support/array-slice":105,"../support/clone-dense-json":106,"../support/get-valid-key":116,"../support/invalidate-node":120,"../support/is-object":122,"../support/options":127,"../support/update-graph":137,"../walk/walk-path-set":147}],86:[function(_dereq_,module,exports){
+var __head = _dereq_("../internal/head");
+var __tail = _dereq_("../internal/tail");
+var __next = _dereq_("../internal/next");
+var __prev = _dereq_("../internal/prev");
+
 var update_graph = _dereq_("../support/update-graph");
 module.exports = function(lru, expired, version, total, max, ratio) {
     
@@ -3856,54 +4368,64 @@ module.exports = function(lru, expired, version, total, max, ratio) {
     }
     
     if(total >= max) {
-        var tail = lru.__tail;
-        while((total >= targetSize) && !!(node = tail)) {
-            tail = tail.__prev;
+        var prev = lru[__tail];
+        while((total >= targetSize) && !!(node = prev)) {
+            prev = prev[__prev];
             size = node.$size || 0;
             total -= size;
             update_graph(node, size, version, lru);
         }
         
-        if((lru.__tail = lru.__prev = tail) == null) {
-            lru.__head = lru.__next = undefined;
+        if((lru[__tail] = lru[__prev] = prev) == null) {
+            lru[__head] = lru[__next] = undefined;
         } else {
-            tail.__next = undefined;
+            prev[__next] = undefined;
         }
     }
 };
-},{"../support/update-graph":118}],68:[function(_dereq_,module,exports){
-var $expires_never = 1;
+},{"../internal/head":68,"../internal/next":71,"../internal/prev":75,"../internal/tail":79,"../support/update-graph":137}],87:[function(_dereq_,module,exports){
+var $expires_never = _dereq_("../values/expires-never");
+var __head = _dereq_("../internal/head");
+var __tail = _dereq_("../internal/tail");
+var __next = _dereq_("../internal/next");
+var __prev = _dereq_("../internal/prev");
+
 var is_object = _dereq_("../support/is-object");
 module.exports = function(root, node) {
     if(is_object(node) && (node.$expires !== $expires_never)) {
-        var head = root.__head, tail = root.__tail,
-            next = node.__next, prev = node.__prev;
+        var head = root[__head], tail = root[__tail],
+            next = node[__next], prev = node[__prev];
         if (node !== head) {
-            (next != null && typeof next === "object") && (next.__prev = prev);
-            (prev != null && typeof prev === "object") && (prev.__next = next);
-            (next = head) && (head != null && typeof head === "object") && (head.__prev = node);
-            (root.__head = root.__next = head = node);
-            (head.__next = next);
-            (head.__prev = undefined);
+            (next != null && typeof next === "object") && (next[__prev] = prev);
+            (prev != null && typeof prev === "object") && (prev[__next] = next);
+            (next = head) && (head != null && typeof head === "object") && (head[__prev] = node);
+            (root[__head] = root[__next] = head = node);
+            (head[__next] = next);
+            (head[__prev] = undefined);
         }
         if (tail == null || node === tail) {
-            root.__tail = root.__prev = tail = prev || node;
+            root[__tail] = root[__prev] = tail = prev || node;
         }
     }
     return node;
 };
-},{"../support/is-object":103}],69:[function(_dereq_,module,exports){
+},{"../internal/head":68,"../internal/next":71,"../internal/prev":75,"../internal/tail":79,"../support/is-object":122,"../values/expires-never":142}],88:[function(_dereq_,module,exports){
+var __head = _dereq_("../internal/head");
+var __tail = _dereq_("../internal/tail");
+var __next = _dereq_("../internal/next");
+var __prev = _dereq_("../internal/prev");
+
 module.exports = function(root, node) {
-    var head = root.__head, tail = root.__tail,
-        next = node.__next, prev = node.__prev;
-    (next != null && typeof next === "object") && (next.__prev = prev);
-    (prev != null && typeof prev === "object") && (prev.__next = next);
-    (node === head) && (root.__head = root.__next = next);
-    (node === tail) && (root.__tail = root.__prev = prev);
-    node.__next = node.__prev = undefined;
+    var head = root[__head], tail = root[__tail],
+        next = node[__next], prev = node[__prev];
+    (next != null && typeof next === "object") && (next[__prev] = prev);
+    (prev != null && typeof prev === "object") && (prev[__next] = next);
+    (node === head) && (root[__head] = root[__next] = next);
+    (node === tail) && (root[__tail] = root[__prev] = prev);
+    node[__next] = node[__prev] = undefined;
     head = tail = next = prev = undefined;
 };
-},{}],70:[function(_dereq_,module,exports){
+},{"../internal/head":68,"../internal/next":71,"../internal/prev":75,"../internal/tail":79}],89:[function(_dereq_,module,exports){
 module.exports = {
     setPathSetsAsJSON: _dereq_('./set-json-values-as-json-dense'),
     setPathSetsAsJSONG: _dereq_('./set-json-values-as-json-graph'),
@@ -3923,7 +4445,7 @@ module.exports = {
     setCache: _dereq_('./set-cache')
 };
 
-},{"./set-cache":71,"./set-json-graph-as-json-dense":72,"./set-json-graph-as-json-graph":73,"./set-json-graph-as-json-sparse":74,"./set-json-graph-as-json-values":75,"./set-json-sparse-as-json-dense":76,"./set-json-sparse-as-json-graph":77,"./set-json-sparse-as-json-sparse":78,"./set-json-sparse-as-json-values":79,"./set-json-values-as-json-dense":80,"./set-json-values-as-json-graph":81,"./set-json-values-as-json-sparse":82,"./set-json-values-as-json-values":83}],71:[function(_dereq_,module,exports){
+},{"./set-cache":90,"./set-json-graph-as-json-dense":91,"./set-json-graph-as-json-graph":92,"./set-json-graph-as-json-sparse":93,"./set-json-graph-as-json-values":94,"./set-json-sparse-as-json-dense":95,"./set-json-sparse-as-json-graph":96,"./set-json-sparse-as-json-sparse":97,"./set-json-sparse-as-json-values":98,"./set-json-values-as-json-dense":99,"./set-json-values-as-json-graph":100,"./set-json-values-as-json-sparse":101,"./set-json-values-as-json-values":102}],90:[function(_dereq_,module,exports){
 module.exports = set_cache;
 
 var $error = _dereq_("../types/error");
@@ -3955,10 +4477,11 @@ function set_cache(model, pathmap, error_selector) {
     var parents = array_clone(nodes);
     var requested = [];
     var optimized = [];
-
+    var keys_stack = [];
+    
     roots[0] = roots.root;
 
-    walk_path_map(onNode, onEdge, pathmap, roots, parents, nodes, requested, optimized);
+    walk_path_map(onNode, onEdge, pathmap, keys_stack, 0, roots, parents, nodes, requested, optimized);
 
     collect(
         roots.lru,
@@ -3988,15 +4511,6 @@ function onNode(pathmap, roots, parents, nodes, requested, optimized, is_top_lev
     var node = parent[key],
         type;
 
-    if (!is_top_level) {
-        type = is_object(node) && node.$type || undefined;
-        type = type && is_branch && "." || type;
-        node = create_branch(roots, parent, node, type, key);
-        parents[0] = parent;
-        nodes[0] = node;
-        return;
-    }
-
     if (is_branch) {
         type = is_object(node) && node.$type || undefined;
         node = create_branch(roots, parent, node, type, key);
@@ -4023,10 +4537,10 @@ function onNode(pathmap, roots, parents, nodes, requested, optimized, is_top_lev
     nodes[0] = node;
 }
 
-function onEdge(pathmap, roots, parents, nodes, requested, optimized, key, keyset) {
+function onEdge(pathmap, keys_stack, depth, roots, parents, nodes, requested, optimized, key, keyset) {
 
 }
-},{"../lru/collect":67,"../support/array-clone":85,"../support/clone-dense-json":87,"../support/create-branch":95,"../support/get-valid-key":97,"../support/graph-node":98,"../support/inc-generation":99,"../support/is-object":103,"../support/options":108,"../support/replace-node":111,"../support/update-back-refs":117,"../support/update-graph":118,"../support/wrap-node":119,"../types/error":120,"../types/sentinel":122,"../walk/walk-path-map":126}],72:[function(_dereq_,module,exports){
+},{"../lru/collect":86,"../support/array-clone":104,"../support/clone-dense-json":106,"../support/create-branch":114,"../support/get-valid-key":116,"../support/graph-node":117,"../support/inc-generation":118,"../support/is-object":122,"../support/options":127,"../support/replace-node":130,"../support/update-back-refs":136,"../support/update-graph":137,"../support/wrap-node":138,"../types/error":139,"../types/sentinel":141,"../walk/walk-path-map":145}],91:[function(_dereq_,module,exports){
 module.exports = set_json_graph_as_json_dense;
 
 var $path = _dereq_("../types/path");
@@ -4054,7 +4568,7 @@ function set_json_graph_as_json_dense(model, envelopes, values, error_selector) 
     roots.offset = model._path.length;
     roots.bound = [];
     roots = options(roots, model, error_selector);
-
+    
     var index = -1;
     var index2 = -1;
     var count = envelopes.length;
@@ -4086,7 +4600,7 @@ function set_json_graph_as_json_dense(model, envelopes, values, error_selector) 
             var pathset = pathsets[index3];
             roots.index = index3;
 
-            walk_path_set(onNode, onEdge, pathset, roots, parents, nodes, requested, optimized);
+            walk_path_set(onNode, onEdge, pathset, 0, roots, parents, nodes, requested, optimized);
 
             hasValue = roots.hasValue;
             if (!!hasValue) {
@@ -4164,13 +4678,13 @@ function onNode(pathset, roots, parents, nodes, requested, optimized, is_top_lev
     }
 }
 
-function onEdge(pathset, roots, parents, nodes, requested, optimized, key, keyset) {
+function onEdge(pathset, depth, roots, parents, nodes, requested, optimized, key, keyset) {
 
     var json;
     var node = nodes[0];
     var type = is_object(node) && node.$type || (node = undefined);
 
-    if (node_as_miss(roots, node, type, pathset, requested, optimized) === false) {
+    if (node_as_miss(roots, node, type, pathset, depth, requested, optimized) === false) {
         clone_success(roots, requested, optimized);
         if (node_as_error(roots, node, type, requested) === false) {
             if(keyset == null) {
@@ -4183,7 +4697,7 @@ function onEdge(pathset, roots, parents, nodes, requested, optimized, key, keyse
     }
 }
 
-},{"../lru/collect":67,"../support/array-clone":85,"../support/clone-dense-json":87,"../support/clone-success-paths":93,"../support/get-valid-key":97,"../support/is-object":103,"../support/merge-node":106,"../support/options":108,"../support/treat-node-as-error":113,"../support/treat-node-as-missing-path-set":115,"../types/path":121,"../walk/walk-path-set-soft-link":127}],73:[function(_dereq_,module,exports){
+},{"../lru/collect":86,"../support/array-clone":104,"../support/clone-dense-json":106,"../support/clone-success-paths":112,"../support/get-valid-key":116,"../support/is-object":122,"../support/merge-node":125,"../support/options":127,"../support/treat-node-as-error":132,"../support/treat-node-as-missing-path-set":134,"../types/path":140,"../walk/walk-path-set-soft-link":146}],92:[function(_dereq_,module,exports){
 module.exports = set_json_graph_as_json_graph;
 
 var $path = _dereq_("../types/path");
@@ -4236,7 +4750,7 @@ function set_json_graph_as_json_graph(model, envelopes, values, error_selector) 
         nodes[2] = jsong;
         while (++index2 < count2) {
             var pathset = pathsets[index2];
-            walk_path_set(onNode, onEdge, pathset, roots, parents, nodes, requested, optimized);
+            walk_path_set(onNode, onEdge, pathset, 0, roots, parents, nodes, requested, optimized);
         }
     }
 
@@ -4318,13 +4832,13 @@ function onNode(pathset, roots, parents, nodes, requested, optimized, is_top_lev
     roots.hasValue = true;
 }
 
-function onEdge(pathset, roots, parents, nodes, requested, optimized, key, keyset) {
+function onEdge(pathset, depth, roots, parents, nodes, requested, optimized, key, keyset) {
 
     var json;
     var node = nodes[0];
     var type = is_object(node) && node.$type || (node = undefined);
 
-    if (node_as_miss(roots, node, type, pathset, requested, optimized) === false) {
+    if (node_as_miss(roots, node, type, pathset, depth, requested, optimized) === false) {
         clone_success(roots, requested, optimized);
         promote(roots.lru, node);
         if (keyset == null && !roots.hasValue && (keyset = get_valid_key(optimized)) == null) {
@@ -4337,7 +4851,7 @@ function onEdge(pathset, roots, parents, nodes, requested, optimized, key, keyse
     }
 }
 
-},{"../lru/collect":67,"../lru/promote":68,"../support/array-clone":85,"../support/clone-graph-json":88,"../support/clone-success-paths":93,"../support/get-valid-key":97,"../support/is-object":103,"../support/merge-node":106,"../support/options":108,"../support/treat-node-as-error":113,"../support/treat-node-as-missing-path-set":115,"../types/path":121,"../walk/walk-path-set-soft-link":127}],74:[function(_dereq_,module,exports){
+},{"../lru/collect":86,"../lru/promote":87,"../support/array-clone":104,"../support/clone-graph-json":107,"../support/clone-success-paths":112,"../support/get-valid-key":116,"../support/is-object":122,"../support/merge-node":125,"../support/options":127,"../support/treat-node-as-error":132,"../support/treat-node-as-missing-path-set":134,"../types/path":140,"../walk/walk-path-set-soft-link":146}],93:[function(_dereq_,module,exports){
 module.exports = set_json_graph_as_json_sparse;
 
 var $path = _dereq_("../types/path");
@@ -4388,7 +4902,7 @@ function set_json_graph_as_json_sparse(model, envelopes, values, error_selector)
         nodes[2] = jsong;
         while (++index2 < count2) {
             var pathset = pathsets[index2];
-            walk_path_set(onNode, onEdge, pathset, roots, parents, nodes, requested, optimized);
+            walk_path_set(onNode, onEdge, pathset, 0, roots, parents, nodes, requested, optimized);
         }
     }
 
@@ -4464,13 +4978,13 @@ function onNode(pathset, roots, parents, nodes, requested, optimized, is_top_lev
     }
 }
 
-function onEdge(pathset, roots, parents, nodes, requested, optimized, key, keyset) {
+function onEdge(pathset, depth, roots, parents, nodes, requested, optimized, key, keyset) {
 
     var json;
     var node = nodes[0];
     var type = is_object(node) && node.$type || (node = undefined);
 
-    if (node_as_miss(roots, node, type, pathset, requested, optimized) === false) {
+    if (node_as_miss(roots, node, type, pathset, depth, requested, optimized) === false) {
         clone_success(roots, requested, optimized);
         if (node_as_error(roots, node, type, requested) === false) {
             if (keyset == null && !roots.hasValue && (keyset = get_valid_key(optimized)) == null) {
@@ -4487,7 +5001,7 @@ function onEdge(pathset, roots, parents, nodes, requested, optimized, key, keyse
     }
 }
 
-},{"../lru/collect":67,"../support/array-clone":85,"../support/clone-dense-json":87,"../support/clone-success-paths":93,"../support/get-valid-key":97,"../support/is-object":103,"../support/merge-node":106,"../support/options":108,"../support/treat-node-as-error":113,"../support/treat-node-as-missing-path-set":115,"../types/path":121,"../walk/walk-path-set-soft-link":127}],75:[function(_dereq_,module,exports){
+},{"../lru/collect":86,"../support/array-clone":104,"../support/clone-dense-json":106,"../support/clone-success-paths":112,"../support/get-valid-key":116,"../support/is-object":122,"../support/merge-node":125,"../support/options":127,"../support/treat-node-as-error":132,"../support/treat-node-as-missing-path-set":134,"../types/path":140,"../walk/walk-path-set-soft-link":146}],94:[function(_dereq_,module,exports){
 module.exports = set_json_graph_as_json_values;
 
 var $path = _dereq_("../types/path");
@@ -4537,7 +5051,7 @@ function set_json_graph_as_json_values(model, envelopes, onNext, error_selector)
         nodes[2] = jsong;
         while (++index2 < count2) {
             var pathset = pathsets[index2];
-            walk_path_set(onNode, onEdge, pathset, roots, parents, nodes, requested, optimized);
+            walk_path_set(onNode, onEdge, pathset, 0, roots, parents, nodes, requested, optimized);
         }
     }
 
@@ -4593,12 +5107,12 @@ function onNode(pathset, roots, parents, nodes, requested, optimized, is_top_lev
     }
 }
 
-function onEdge(pathset, roots, parents, nodes, requested, optimized, key, keyset, is_keyset) {
+function onEdge(pathset, depth, roots, parents, nodes, requested, optimized, key, keyset, is_keyset) {
 
     var node = nodes[0];
     var type = is_object(node) && node.$type || (node = undefined);
 
-    if (node_as_miss(roots, node, type, pathset, requested, optimized) === false) {
+    if (node_as_miss(roots, node, type, pathset, depth, requested, optimized) === false) {
         clone_success(roots, requested, optimized);
         if (node_as_error(roots, node, type, requested) === false) {
             roots.onNext({
@@ -4609,7 +5123,7 @@ function onEdge(pathset, roots, parents, nodes, requested, optimized, key, keyse
     }
 }
 
-},{"../lru/collect":67,"../support/array-clone":85,"../support/array-slice":86,"../support/clone-dense-json":87,"../support/clone-success-paths":93,"../support/get-valid-key":97,"../support/is-object":103,"../support/merge-node":106,"../support/options":108,"../support/treat-node-as-error":113,"../support/treat-node-as-missing-path-set":115,"../types/path":121,"../walk/walk-path-set-soft-link":127}],76:[function(_dereq_,module,exports){
+},{"../lru/collect":86,"../support/array-clone":104,"../support/array-slice":105,"../support/clone-dense-json":106,"../support/clone-success-paths":112,"../support/get-valid-key":116,"../support/is-object":122,"../support/merge-node":125,"../support/options":127,"../support/treat-node-as-error":132,"../support/treat-node-as-missing-path-set":134,"../types/path":140,"../walk/walk-path-set-soft-link":146}],95:[function(_dereq_,module,exports){
 module.exports = set_json_sparse_as_json_dense;
 
 var $path = _dereq_("../types/path");
@@ -4648,6 +5162,7 @@ function set_json_sparse_as_json_dense(model, pathmaps, values, error_selector) 
     var parents = array_clone(nodes);
     var requested = [];
     var optimized = [];
+    var keys_stack = [];
     var json, hasValue, hasValues;
 
     roots[0] = roots.root;
@@ -4664,7 +5179,7 @@ function set_json_sparse_as_json_dense(model, pathmaps, values, error_selector) 
         var pathmap = pathmaps[index];
         roots.index = index;
 
-        walk_path_map(onNode, onEdge, pathmap, roots, parents, nodes, requested, optimized);
+        walk_path_map(onNode, onEdge, pathmap, keys_stack, 0, roots, parents, nodes, requested, optimized);
 
         hasValue = roots.hasValue;
         if (!!hasValue) {
@@ -4757,13 +5272,13 @@ function onNode(pathmap, roots, parents, nodes, requested, optimized, is_top_lev
     nodes[0] = node;
 }
 
-function onEdge(pathmap, roots, parents, nodes, requested, optimized, key, keyset) {
+function onEdge(pathmap, keys_stack, depth, roots, parents, nodes, requested, optimized, key, keyset) {
 
     var json;
     var node = nodes[0];
     var type = is_object(node) && node.$type || (node = undefined);
 
-    if (node_as_miss(roots, node, type, pathmap, requested, optimized) === false) {
+    if (node_as_miss(roots, node, type, pathmap, keys_stack, depth, requested, optimized) === false) {
         clone_success(roots, requested, optimized);
         if (node_as_error(roots, node, type, requested) === false) {
             if(keyset == null) {
@@ -4775,7 +5290,7 @@ function onEdge(pathmap, roots, parents, nodes, requested, optimized, key, keyse
         }
     }
 }
-},{"../lru/collect":67,"../support/array-clone":85,"../support/clone-dense-json":87,"../support/clone-success-paths":93,"../support/create-branch":95,"../support/get-valid-key":97,"../support/graph-node":98,"../support/inc-generation":99,"../support/is-object":103,"../support/options":108,"../support/replace-node":111,"../support/treat-node-as-error":113,"../support/treat-node-as-missing-path-map":114,"../support/update-back-refs":117,"../support/update-graph":118,"../support/wrap-node":119,"../types/error":120,"../types/path":121,"../types/sentinel":122,"../walk/walk-path-map":126}],77:[function(_dereq_,module,exports){
+},{"../lru/collect":86,"../support/array-clone":104,"../support/clone-dense-json":106,"../support/clone-success-paths":112,"../support/create-branch":114,"../support/get-valid-key":116,"../support/graph-node":117,"../support/inc-generation":118,"../support/is-object":122,"../support/options":127,"../support/replace-node":130,"../support/treat-node-as-error":132,"../support/treat-node-as-missing-path-map":133,"../support/update-back-refs":136,"../support/update-graph":137,"../support/wrap-node":138,"../types/error":139,"../types/path":140,"../types/sentinel":141,"../walk/walk-path-map":145}],96:[function(_dereq_,module,exports){
 module.exports = set_json_sparse_as_json_graph;
 
 var $path = _dereq_("../types/path");
@@ -4815,6 +5330,7 @@ function set_json_sparse_as_json_graph(model, pathmaps, values, error_selector) 
     var parents = array_clone(nodes);
     var requested = [];
     var optimized = [];
+    var keys_stack = [];
     var json = values[0];
     var hasValue;
 
@@ -4824,7 +5340,7 @@ function set_json_sparse_as_json_graph(model, pathmaps, values, error_selector) 
 
     while (++index < count) {
         var pathmap = pathmaps[index];
-        walk_path_map(onNode, onEdge, pathmap, roots, parents, nodes, requested, optimized);
+        walk_path_map(onNode, onEdge, pathmap, keys_stack, 0, roots, parents, nodes, requested, optimized);
     }
 
     hasValue = roots.hasValue;
@@ -4927,13 +5443,13 @@ function onNode(pathmap, roots, parents, nodes, requested, optimized, is_top_lev
     roots.hasValue = true;
 }
 
-function onEdge(pathmap, roots, parents, nodes, requested, optimized, key, keyset) {
+function onEdge(pathmap, keys_stack, depth, roots, parents, nodes, requested, optimized, key, keyset) {
 
     var json;
     var node = nodes[0];
     var type = is_object(node) && node.$type || (node = undefined);
 
-    if (node_as_miss(roots, node, type, pathmap, requested, optimized) === false) {
+    if (node_as_miss(roots, node, type, pathmap, keys_stack, depth, requested, optimized) === false) {
         clone_success(roots, requested, optimized);
         promote(roots.lru, node);
         if (keyset == null && !roots.hasValue && (keyset = get_valid_key(optimized)) == null) {
@@ -4945,7 +5461,7 @@ function onEdge(pathmap, roots, parents, nodes, requested, optimized, key, keyse
         roots.hasValue = true;
     }
 }
-},{"../lru/collect":67,"../lru/promote":68,"../support/array-clone":85,"../support/clone-graph-json":88,"../support/clone-success-paths":93,"../support/create-branch":95,"../support/get-valid-key":97,"../support/graph-node":98,"../support/inc-generation":99,"../support/is-object":103,"../support/options":108,"../support/replace-node":111,"../support/treat-node-as-error":113,"../support/treat-node-as-missing-path-map":114,"../support/update-back-refs":117,"../support/update-graph":118,"../support/wrap-node":119,"../types/error":120,"../types/path":121,"../types/sentinel":122,"../walk/walk-path-map-soft-link":125}],78:[function(_dereq_,module,exports){
+},{"../lru/collect":86,"../lru/promote":87,"../support/array-clone":104,"../support/clone-graph-json":107,"../support/clone-success-paths":112,"../support/create-branch":114,"../support/get-valid-key":116,"../support/graph-node":117,"../support/inc-generation":118,"../support/is-object":122,"../support/options":127,"../support/replace-node":130,"../support/treat-node-as-error":132,"../support/treat-node-as-missing-path-map":133,"../support/update-back-refs":136,"../support/update-graph":137,"../support/wrap-node":138,"../types/error":139,"../types/path":140,"../types/sentinel":141,"../walk/walk-path-map-soft-link":144}],97:[function(_dereq_,module,exports){
 module.exports = set_json_sparse_as_json_sparse;
 
 var $path = _dereq_("../types/path");
@@ -4984,6 +5500,7 @@ function set_json_sparse_as_json_sparse(model, pathmaps, values, error_selector)
     var parents = array_clone(nodes);
     var requested = [];
     var optimized = [];
+    var keys_stack = [];
     var json = values[0];
     var hasValue;
 
@@ -4992,7 +5509,7 @@ function set_json_sparse_as_json_sparse(model, pathmaps, values, error_selector)
 
     while (++index < count) {
         var pathmap = pathmaps[index];
-        walk_path_map(onNode, onEdge, pathmap, roots, parents, nodes, requested, optimized);
+        walk_path_map(onNode, onEdge, pathmap, keys_stack, 0, roots, parents, nodes, requested, optimized);
     }
 
     hasValue = roots.hasValue;
@@ -5080,13 +5597,13 @@ function onNode(pathmap, roots, parents, nodes, requested, optimized, is_top_lev
     nodes[0] = node;
 }
 
-function onEdge(pathmap, roots, parents, nodes, requested, optimized, key, keyset) {
+function onEdge(pathmap, keys_stack, depth, roots, parents, nodes, requested, optimized, key, keyset) {
 
     var json;
     var node = nodes[0];
     var type = is_object(node) && node.$type || (node = undefined);
 
-    if (node_as_miss(roots, node, type, pathmap, requested, optimized) === false) {
+    if (node_as_miss(roots, node, type, pathmap, keys_stack, depth, requested, optimized) === false) {
         clone_success(roots, requested, optimized);
         if (node_as_error(roots, node, type, requested) === false) {
             if (keyset == null && !roots.hasValue && (keyset = get_valid_key(optimized)) == null) {
@@ -5102,7 +5619,7 @@ function onEdge(pathmap, roots, parents, nodes, requested, optimized, key, keyse
         }
     }
 }
-},{"../lru/collect":67,"../support/array-clone":85,"../support/clone-dense-json":87,"../support/clone-success-paths":93,"../support/create-branch":95,"../support/get-valid-key":97,"../support/graph-node":98,"../support/inc-generation":99,"../support/is-object":103,"../support/options":108,"../support/replace-node":111,"../support/treat-node-as-error":113,"../support/treat-node-as-missing-path-map":114,"../support/update-back-refs":117,"../support/update-graph":118,"../support/wrap-node":119,"../types/error":120,"../types/path":121,"../types/sentinel":122,"../walk/walk-path-map":126}],79:[function(_dereq_,module,exports){
+},{"../lru/collect":86,"../support/array-clone":104,"../support/clone-dense-json":106,"../support/clone-success-paths":112,"../support/create-branch":114,"../support/get-valid-key":116,"../support/graph-node":117,"../support/inc-generation":118,"../support/is-object":122,"../support/options":127,"../support/replace-node":130,"../support/treat-node-as-error":132,"../support/treat-node-as-missing-path-map":133,"../support/update-back-refs":136,"../support/update-graph":137,"../support/wrap-node":138,"../types/error":139,"../types/path":140,"../types/sentinel":141,"../walk/walk-path-map":145}],98:[function(_dereq_,module,exports){
 module.exports = set_path_map_as_json_values;
 
 var $error = _dereq_("../types/error");
@@ -5140,13 +5657,13 @@ function set_path_map_as_json_values(model, pathmaps, onNext, error_selector) {
     var parents = array_clone(nodes);
     var requested = [];
     var optimized = [];
-
+    var keys_stack = [];
     roots[0] = roots.root;
     roots.onNext = onNext;
 
     while (++index < count) {
         var pathmap = pathmaps[index];
-        walk_path_map(onNode, onEdge, pathmap, roots, parents, nodes, requested, optimized);
+        walk_path_map(onNode, onEdge, pathmap, keys_stack, 0, roots, parents, nodes, requested, optimized);
     }
 
     collect(
@@ -5219,12 +5736,12 @@ function onNode(pathmap, roots, parents, nodes, requested, optimized, is_top_lev
     nodes[0] = node;
 }
 
-function onEdge(pathmap, roots, parents, nodes, requested, optimized, key, keyset) {
+function onEdge(pathmap, keys_stack, depth, roots, parents, nodes, requested, optimized, key, keyset) {
 
     var node = nodes[0];
     var type = is_object(node) && node.$type || (node = undefined);
 
-    if (node_as_miss(roots, node, type, pathmap, requested, optimized) === false) {
+    if (node_as_miss(roots, node, type, pathmap, keys_stack, depth, requested, optimized) === false) {
         clone_success(roots, requested, optimized);
         if (node_as_error(roots, node, type, requested) === false) {
             roots.onNext({
@@ -5234,7 +5751,7 @@ function onEdge(pathmap, roots, parents, nodes, requested, optimized, key, keyse
         }
     }
 }
-},{"../lru/collect":67,"../support/array-clone":85,"../support/clone-dense-json":87,"../support/clone-success-paths":93,"../support/create-branch":95,"../support/get-valid-key":97,"../support/graph-node":98,"../support/inc-generation":99,"../support/is-object":103,"../support/options":108,"../support/replace-node":111,"../support/treat-node-as-error":113,"../support/treat-node-as-missing-path-map":114,"../support/update-back-refs":117,"../support/update-graph":118,"../support/wrap-node":119,"../types/error":120,"../types/sentinel":122,"../walk/walk-path-map":126}],80:[function(_dereq_,module,exports){
+},{"../lru/collect":86,"../support/array-clone":104,"../support/clone-dense-json":106,"../support/clone-success-paths":112,"../support/create-branch":114,"../support/get-valid-key":116,"../support/graph-node":117,"../support/inc-generation":118,"../support/is-object":122,"../support/options":127,"../support/replace-node":130,"../support/treat-node-as-error":132,"../support/treat-node-as-missing-path-map":133,"../support/update-back-refs":136,"../support/update-graph":137,"../support/wrap-node":138,"../types/error":139,"../types/sentinel":141,"../walk/walk-path-map":145}],99:[function(_dereq_,module,exports){
 module.exports = set_json_values_as_json_dense;
 
 var $path = _dereq_("../types/path");
@@ -5252,6 +5769,7 @@ var is_object = _dereq_("../support/is-object");
 var get_valid_key = _dereq_("../support/get-valid-key");
 var create_branch = _dereq_("../support/create-branch");
 var wrap_node = _dereq_("../support/wrap-node");
+var invalidate_node = _dereq_("../support/invalidate-node");
 var replace_node = _dereq_("../support/replace-node");
 var graph_node = _dereq_("../support/graph-node");
 var update_back_refs = _dereq_("../support/update-back-refs");
@@ -5291,7 +5809,7 @@ function set_json_values_as_json_dense(model, pathvalues, values, error_selector
         roots.value = pv.value;
         roots.index = index;
 
-        walk_path_set(onNode, onEdge, pathset, roots, parents, nodes, requested, optimized);
+        walk_path_set(onNode, onEdge, pathset, 0, roots, parents, nodes, requested, optimized);
 
         hasValue = roots.hasValue;
         if (!!hasValue) {
@@ -5358,7 +5876,8 @@ function onNode(pathset, roots, parents, nodes, requested, optimized, is_top_lev
     if (is_branch) {
         type = is_object(node) && node.$type || undefined;
         node = create_branch(roots, parent, node, type, key);
-        parents[0] = nodes[0] = node;
+        parents[0] = parent;
+        nodes[0] = node;
         if (is_keyset && !!json) {
             nodes[3] = json[keyset] || (json[keyset] = {});
         }
@@ -5370,27 +5889,34 @@ function onNode(pathset, roots, parents, nodes, requested, optimized, is_top_lev
     var size = is_object(node) && node.$size || 0;
     var mess = roots.value;
 
-    type = is_object(mess) && mess.$type || undefined;
-    mess = wrap_node(mess, type, !!type ? mess.value : mess);
-    type || (type = $sentinel);
+    if(mess === undefined && roots.headless) {
+        invalidate_node(parent, node, key, roots.lru);
+        update_graph(parent, size, roots.version, roots.lru);
+        node = undefined;
+    } else {
+        type = is_object(mess) && mess.$type || undefined;
+        mess = wrap_node(mess, type, !!type ? mess.value : mess);
+        type || (type = $sentinel);
 
-    if (type == $error && !!selector) {
-        mess = selector(requested, mess);
+        if (type == $error && !!selector) {
+            mess = selector(requested, mess);
+        }
+
+        node = replace_node(parent, node, mess, key, roots.lru);
+        node = graph_node(root, parent, node, key, inc_generation());
+        update_graph(parent, size - node.$size, roots.version, roots.lru);
     }
-
-    node = replace_node(parent, node, mess, key, roots.lru);
-    node = graph_node(root, parent, node, key, inc_generation());
-    update_graph(parent, size - node.$size, roots.version, roots.lru);
+    
     nodes[0] = node;
 }
 
-function onEdge(pathset, roots, parents, nodes, requested, optimized, key, keyset) {
+function onEdge(pathset, depth, roots, parents, nodes, requested, optimized, key, keyset) {
 
     var json;
     var node = nodes[0];
     var type = is_object(node) && node.$type || (node = undefined);
 
-    if (node_as_miss(roots, node, type, pathset, requested, optimized) === false) {
+    if (node_as_miss(roots, node, type, pathset, depth, requested, optimized) === false) {
         clone_success(roots, requested, optimized);
         if (node_as_error(roots, node, type, requested) === false) {
             if(keyset == null) {
@@ -5403,7 +5929,7 @@ function onEdge(pathset, roots, parents, nodes, requested, optimized, key, keyse
     }
 }
 
-},{"../lru/collect":67,"../support/array-clone":85,"../support/clone-dense-json":87,"../support/clone-success-paths":93,"../support/create-branch":95,"../support/get-valid-key":97,"../support/graph-node":98,"../support/inc-generation":99,"../support/is-object":103,"../support/options":108,"../support/replace-node":111,"../support/treat-node-as-error":113,"../support/treat-node-as-missing-path-set":115,"../support/update-back-refs":117,"../support/update-graph":118,"../support/wrap-node":119,"../types/error":120,"../types/path":121,"../types/sentinel":122,"../walk/walk-path-set":128}],81:[function(_dereq_,module,exports){
+},{"../lru/collect":86,"../support/array-clone":104,"../support/clone-dense-json":106,"../support/clone-success-paths":112,"../support/create-branch":114,"../support/get-valid-key":116,"../support/graph-node":117,"../support/inc-generation":118,"../support/invalidate-node":120,"../support/is-object":122,"../support/options":127,"../support/replace-node":130,"../support/treat-node-as-error":132,"../support/treat-node-as-missing-path-set":134,"../support/update-back-refs":136,"../support/update-graph":137,"../support/wrap-node":138,"../types/error":139,"../types/path":140,"../types/sentinel":141,"../walk/walk-path-set":147}],100:[function(_dereq_,module,exports){
 module.exports = set_json_values_as_json_graph;
 
 var $path = _dereq_("../types/path");
@@ -5421,6 +5947,7 @@ var is_object = _dereq_("../support/is-object");
 var get_valid_key = _dereq_("../support/get-valid-key");
 var create_branch = _dereq_("../support/create-branch");
 var wrap_node = _dereq_("../support/wrap-node");
+var invalidate_node = _dereq_("../support/invalidate-node");
 var replace_node = _dereq_("../support/replace-node");
 var graph_node = _dereq_("../support/graph-node");
 var update_back_refs = _dereq_("../support/update-back-refs");
@@ -5456,7 +5983,7 @@ function set_json_values_as_json_graph(model, pathvalues, values, error_selector
         var pathset = pv.path;
         roots.value = pv.value;
 
-        walk_path_set(onNode, onEdge, pathset, roots, parents, nodes, requested, optimized);
+        walk_path_set(onNode, onEdge, pathset, 0, roots, parents, nodes, requested, optimized);
     }
 
     hasValue = roots.hasValue;
@@ -5526,7 +6053,8 @@ function onNode(pathset, roots, parents, nodes, requested, optimized, is_top_lev
         type = is_object(node) && node.$type || undefined;
         node = create_branch(roots, parent, node, type, key);
         type = node.$type;
-        parents[0] = nodes[0] = node;
+        parents[0] = parent;
+        nodes[0] = node;
         parents[1] = json;
         if (type == $path) {
             json[jsonkey] = clone(roots, node, type, node.value);
@@ -5542,30 +6070,36 @@ function onNode(pathset, roots, parents, nodes, requested, optimized, is_top_lev
     var size = is_object(node) && node.$size || 0;
     var mess = roots.value;
 
-    type = is_object(mess) && mess.$type || undefined;
-    mess = wrap_node(mess, type, !!type ? mess.value : mess);
-    type || (type = $sentinel);
+    if(mess === undefined && roots.headless) {
+        invalidate_node(parent, node, key, roots.lru);
+        update_graph(parent, size, roots.version, roots.lru);
+        node = undefined;
+    } else {
+        type = is_object(mess) && mess.$type || undefined;
+        mess = wrap_node(mess, type, !!type ? mess.value : mess);
+        type || (type = $sentinel);
 
-    if (type == $error && !!selector) {
-        mess = selector(requested, mess);
+        if (type == $error && !!selector) {
+            mess = selector(requested, mess);
+        }
+
+        node = replace_node(parent, node, mess, key, roots.lru);
+        node = graph_node(root, parent, node, key, inc_generation());
+        update_graph(parent, size - node.$size, roots.version, roots.lru);
     }
-
-    node = replace_node(parent, node, mess, key, roots.lru);
-    node = graph_node(root, parent, node, key, inc_generation());
-    update_graph(parent, size - node.$size, roots.version, roots.lru);
     nodes[0] = node;
 
     json[jsonkey] = clone(roots, node, type, node && node.value);
     roots.hasValue = true;
 }
 
-function onEdge(pathset, roots, parents, nodes, requested, optimized, key, keyset) {
+function onEdge(pathset, depth, roots, parents, nodes, requested, optimized, key, keyset) {
 
     var json;
     var node = nodes[0];
     var type = is_object(node) && node.$type || (node = undefined);
 
-    if (node_as_miss(roots, node, type, pathset, requested, optimized) === false) {
+    if (node_as_miss(roots, node, type, pathset, depth, requested, optimized) === false) {
         clone_success(roots, requested, optimized);
         promote(roots.lru, node);
         if (keyset == null && !roots.hasValue && (keyset = get_valid_key(optimized)) == null) {
@@ -5578,7 +6112,7 @@ function onEdge(pathset, roots, parents, nodes, requested, optimized, key, keyse
     }
 }
 
-},{"../lru/collect":67,"../lru/promote":68,"../support/array-clone":85,"../support/clone-graph-json":88,"../support/clone-success-paths":93,"../support/create-branch":95,"../support/get-valid-key":97,"../support/graph-node":98,"../support/inc-generation":99,"../support/is-object":103,"../support/options":108,"../support/replace-node":111,"../support/treat-node-as-error":113,"../support/treat-node-as-missing-path-set":115,"../support/update-back-refs":117,"../support/update-graph":118,"../support/wrap-node":119,"../types/error":120,"../types/path":121,"../types/sentinel":122,"../walk/walk-path-set-soft-link":127}],82:[function(_dereq_,module,exports){
+},{"../lru/collect":86,"../lru/promote":87,"../support/array-clone":104,"../support/clone-graph-json":107,"../support/clone-success-paths":112,"../support/create-branch":114,"../support/get-valid-key":116,"../support/graph-node":117,"../support/inc-generation":118,"../support/invalidate-node":120,"../support/is-object":122,"../support/options":127,"../support/replace-node":130,"../support/treat-node-as-error":132,"../support/treat-node-as-missing-path-set":134,"../support/update-back-refs":136,"../support/update-graph":137,"../support/wrap-node":138,"../types/error":139,"../types/path":140,"../types/sentinel":141,"../walk/walk-path-set-soft-link":146}],101:[function(_dereq_,module,exports){
 module.exports = set_json_values_as_json_sparse;
 
 var $path = _dereq_("../types/path");
@@ -5596,6 +6130,7 @@ var is_object = _dereq_("../support/is-object");
 var get_valid_key = _dereq_("../support/get-valid-key");
 var create_branch = _dereq_("../support/create-branch");
 var wrap_node = _dereq_("../support/wrap-node");
+var invalidate_node = _dereq_("../support/invalidate-node");
 var replace_node = _dereq_("../support/replace-node");
 var graph_node = _dereq_("../support/graph-node");
 var update_back_refs = _dereq_("../support/update-back-refs");
@@ -5629,7 +6164,7 @@ function set_json_values_as_json_sparse(model, pathvalues, values, error_selecto
         var pathset = pv.path;
         roots.value = pv.value;
 
-        walk_path_set(onNode, onEdge, pathset, roots, parents, nodes, requested, optimized);
+        walk_path_set(onNode, onEdge, pathset, 0, roots, parents, nodes, requested, optimized);
     }
 
     hasValue = roots.hasValue;
@@ -5693,7 +6228,8 @@ function onNode(pathset, roots, parents, nodes, requested, optimized, is_top_lev
     if (is_branch) {
         type = is_object(node) && node.$type || undefined;
         node = create_branch(roots, parent, node, type, key);
-        parents[0] = nodes[0] = node;
+        parents[0] = parent;
+        nodes[0] = node;
         nodes[3] = json[jsonkey] || (json[jsonkey] = {});
         return;
     }
@@ -5703,27 +6239,33 @@ function onNode(pathset, roots, parents, nodes, requested, optimized, is_top_lev
     var size = is_object(node) && node.$size || 0;
     var mess = roots.value;
 
-    type = is_object(mess) && mess.$type || undefined;
-    mess = wrap_node(mess, type, !!type ? mess.value : mess);
-    type || (type = $sentinel);
+    if(mess === undefined && roots.headless) {
+        invalidate_node(parent, node, key, roots.lru);
+        update_graph(parent, size, roots.version, roots.lru);
+        node = undefined;
+    } else {
+        type = is_object(mess) && mess.$type || undefined;
+        mess = wrap_node(mess, type, !!type ? mess.value : mess);
+        type || (type = $sentinel);
 
-    if (type == $error && !!selector) {
-        mess = selector(requested, mess);
+        if (type == $error && !!selector) {
+            mess = selector(requested, mess);
+        }
+
+        node = replace_node(parent, node, mess, key, roots.lru);
+        node = graph_node(root, parent, node, key, inc_generation());
+        update_graph(parent, size - node.$size, roots.version, roots.lru);
     }
-
-    node = replace_node(parent, node, mess, key, roots.lru);
-    node = graph_node(root, parent, node, key, inc_generation());
-    update_graph(parent, size - node.$size, roots.version, roots.lru);
     nodes[0] = node;
 }
 
-function onEdge(pathset, roots, parents, nodes, requested, optimized, key, keyset) {
+function onEdge(pathset, depth, roots, parents, nodes, requested, optimized, key, keyset) {
 
     var json;
     var node = nodes[0];
     var type = is_object(node) && node.$type || (node = undefined);
 
-    if (node_as_miss(roots, node, type, pathset, requested, optimized) === false) {
+    if (node_as_miss(roots, node, type, pathset, depth, requested, optimized) === false) {
         clone_success(roots, requested, optimized);
         if (node_as_error(roots, node, type, requested) === false) {
             if (keyset == null && !roots.hasValue && (keyset = get_valid_key(optimized)) == null) {
@@ -5740,7 +6282,7 @@ function onEdge(pathset, roots, parents, nodes, requested, optimized, key, keyse
     }
 }
 
-},{"../lru/collect":67,"../support/array-clone":85,"../support/clone-dense-json":87,"../support/clone-success-paths":93,"../support/create-branch":95,"../support/get-valid-key":97,"../support/graph-node":98,"../support/inc-generation":99,"../support/is-object":103,"../support/options":108,"../support/replace-node":111,"../support/treat-node-as-error":113,"../support/treat-node-as-missing-path-set":115,"../support/update-back-refs":117,"../support/update-graph":118,"../support/wrap-node":119,"../types/error":120,"../types/path":121,"../types/sentinel":122,"../walk/walk-path-set":128}],83:[function(_dereq_,module,exports){
+},{"../lru/collect":86,"../support/array-clone":104,"../support/clone-dense-json":106,"../support/clone-success-paths":112,"../support/create-branch":114,"../support/get-valid-key":116,"../support/graph-node":117,"../support/inc-generation":118,"../support/invalidate-node":120,"../support/is-object":122,"../support/options":127,"../support/replace-node":130,"../support/treat-node-as-error":132,"../support/treat-node-as-missing-path-set":134,"../support/update-back-refs":136,"../support/update-graph":137,"../support/wrap-node":138,"../types/error":139,"../types/path":140,"../types/sentinel":141,"../walk/walk-path-set":147}],102:[function(_dereq_,module,exports){
 module.exports = set_json_values_as_json_values;
 
 var $error = _dereq_("../types/error");
@@ -5757,6 +6299,7 @@ var is_object = _dereq_("../support/is-object");
 var get_valid_key = _dereq_("../support/get-valid-key");
 var create_branch = _dereq_("../support/create-branch");
 var wrap_node = _dereq_("../support/wrap-node");
+var invalidate_node = _dereq_("../support/invalidate-node");
 var replace_node = _dereq_("../support/replace-node");
 var graph_node = _dereq_("../support/graph-node");
 var update_back_refs = _dereq_("../support/update-back-refs");
@@ -5786,7 +6329,7 @@ function set_json_values_as_json_values(model, pathvalues, onNext, error_selecto
         var pv = pathvalues[index];
         var pathset = pv.path;
         roots.value = pv.value;
-        walk_path_set(onNode, onEdge, pathset, roots, parents, nodes, requested, optimized);
+        walk_path_set(onNode, onEdge, pathset, 0, roots, parents, nodes, requested, optimized);
     }
 
     collect(
@@ -5813,7 +6356,7 @@ function onNode(pathset, roots, parents, nodes, requested, optimized, is_top_lev
     var parent;
 
     if (key == null) {
-        if ((key = get_valid_key(optimized)) == null) {
+        if ((key = get_valid_key(optimized, nodes)) == null) {
             return;
         }
         parent = parents[0];
@@ -5821,8 +6364,7 @@ function onNode(pathset, roots, parents, nodes, requested, optimized, is_top_lev
         parent = nodes[0];
     }
 
-    var node = parent[key],
-        type;
+    var node = parent[key], type;
 
     if (!is_top_level) {
         type = is_object(node) && node.$type || undefined;
@@ -5836,7 +6378,8 @@ function onNode(pathset, roots, parents, nodes, requested, optimized, is_top_lev
     if (is_branch) {
         type = is_object(node) && node.$type || undefined;
         node = create_branch(roots, parent, node, type, key);
-        parents[0] = nodes[0] = node;
+        parents[0] = parent;
+        nodes[0] = node;
         return;
     }
 
@@ -5844,27 +6387,33 @@ function onNode(pathset, roots, parents, nodes, requested, optimized, is_top_lev
     var root = roots[0];
     var size = is_object(node) && node.$size || 0;
     var mess = roots.value;
+    
+    if(mess === undefined && roots.headless) {
+        invalidate_node(parent, node, key, roots.lru);
+        update_graph(parent, size, roots.version, roots.lru);
+        node = undefined;
+    } else {
+        type = is_object(mess) && mess.$type || undefined;
+        mess = wrap_node(mess, type, !!type ? mess.value : mess);
+        type || (type = $sentinel);
 
-    type = is_object(mess) && mess.$type || undefined;
-    mess = wrap_node(mess, type, !!type ? mess.value : mess);
-    type || (type = $sentinel);
+        if (type == $error && !!selector) {
+            mess = selector(requested, mess);
+        }
 
-    if (type == $error && !!selector) {
-        mess = selector(requested, mess);
+        node = replace_node(parent, node, mess, key, roots.lru);
+        node = graph_node(root, parent, node, key, inc_generation());
+        update_graph(parent, size - node.$size, roots.version, roots.lru);
     }
-
-    node = replace_node(parent, node, mess, key, roots.lru);
-    node = graph_node(root, parent, node, key, inc_generation());
-    update_graph(parent, size - node.$size, roots.version, roots.lru);
     nodes[0] = node;
 }
 
-function onEdge(pathset, roots, parents, nodes, requested, optimized, key, keyset) {
+function onEdge(pathset, depth, roots, parents, nodes, requested, optimized, key, keyset) {
 
     var node = nodes[0];
     var type = is_object(node) && node.$type || (node = undefined);
 
-    if (node_as_miss(roots, node, type, pathset, requested, optimized) === false) {
+    if (node_as_miss(roots, node, type, pathset, depth, requested, optimized) === false) {
         clone_success(roots, requested, optimized);
         if (node_as_error(roots, node, type, requested) === false) {
             roots.onNext({
@@ -5875,7 +6424,7 @@ function onEdge(pathset, roots, parents, nodes, requested, optimized, key, keyse
     }
 }
 
-},{"../lru/collect":67,"../support/array-clone":85,"../support/clone-dense-json":87,"../support/clone-success-paths":93,"../support/create-branch":95,"../support/get-valid-key":97,"../support/graph-node":98,"../support/inc-generation":99,"../support/is-object":103,"../support/options":108,"../support/replace-node":111,"../support/treat-node-as-error":113,"../support/treat-node-as-missing-path-set":115,"../support/update-back-refs":117,"../support/update-graph":118,"../support/wrap-node":119,"../types/error":120,"../types/sentinel":122,"../walk/walk-path-set":128}],84:[function(_dereq_,module,exports){
+},{"../lru/collect":86,"../support/array-clone":104,"../support/clone-dense-json":106,"../support/clone-success-paths":112,"../support/create-branch":114,"../support/get-valid-key":116,"../support/graph-node":117,"../support/inc-generation":118,"../support/invalidate-node":120,"../support/is-object":122,"../support/options":127,"../support/replace-node":130,"../support/treat-node-as-error":132,"../support/treat-node-as-missing-path-set":134,"../support/update-back-refs":136,"../support/update-graph":137,"../support/wrap-node":138,"../types/error":139,"../types/sentinel":141,"../walk/walk-path-set":147}],103:[function(_dereq_,module,exports){
 module.exports = function(array, value) {
     var i = -1;
     var n = array.length;
@@ -5884,7 +6433,7 @@ module.exports = function(array, value) {
     array2[i] = value;
     return array2;
 };
-},{}],85:[function(_dereq_,module,exports){
+},{}],104:[function(_dereq_,module,exports){
 module.exports = function(array) {
     var i = -1;
     var n = array.length;
@@ -5892,7 +6441,7 @@ module.exports = function(array) {
     while(++i < n) { array2[i] = array[i]; }
     return array2;
 };
-},{}],86:[function(_dereq_,module,exports){
+},{}],105:[function(_dereq_,module,exports){
 module.exports = function(array, index) {
     var i = -1;
     var n = array.length - index;
@@ -5900,7 +6449,7 @@ module.exports = function(array, index) {
     while(++i < n) { array2[i] = array[i + index]; }
     return array2;
 };
-},{}],87:[function(_dereq_,module,exports){
+},{}],106:[function(_dereq_,module,exports){
 var $sentinel = _dereq_("../types/sentinel");
 var clone = _dereq_("./clone");
 module.exports = function(roots, node, type, value) {
@@ -5916,7 +6465,7 @@ module.exports = function(roots, node, type, value) {
     return value;
 }
 
-},{"../types/sentinel":122,"./clone":94}],88:[function(_dereq_,module,exports){
+},{"../types/sentinel":141,"./clone":113}],107:[function(_dereq_,module,exports){
 var $sentinel = _dereq_("../types/sentinel");
 var clone = _dereq_("./clone");
 var is_primitive = _dereq_("./is-primitive");
@@ -5937,58 +6486,109 @@ module.exports = function(roots, node, type, value) {
     return clone(node);
 }
 
-},{"../types/sentinel":122,"./clone":94,"./is-primitive":104}],89:[function(_dereq_,module,exports){
-module.exports = function(roots, pathmap, requested, optimized) {
-    var requestedMissingPaths = roots.requestedMissingPaths;
-    var optimizedMissingPaths = roots.optimizedMissingPaths;
+},{"../types/sentinel":141,"./clone":113,"./is-primitive":123}],108:[function(_dereq_,module,exports){
+var clone_requested = _dereq_("./clone-requested-path");
+var clone_optimized = _dereq_("./clone-optimized-path");
+var walk_path_map   = _dereq_("../walk/walk-path-map-soft-link");
+var is_object = _dereq_("./is-object");
+var empty = [];
+
+module.exports = function(roots, pathmap, keys_stack, depth, requested, optimized) {
+    var patset_keys = explode_keys(pathmap, keys_stack.concat(), depth);
+    var pathset = patset_keys.map(function(keys) {
+        keys = keys.filter(function(key) { return key != "null"; });
+        switch(keys.length) {
+            case 0:
+                return null;
+            case 1:
+                return keys[0];
+            default:
+                return keys;
+        }
+    });
     
+    roots.requestedMissingPaths.push(clone_requested(roots.bound, requested, pathset, depth, roots.index));
+    roots.optimizedMissingPaths.push(clone_optimized(optimized, pathset, depth));
 }
-},{}],90:[function(_dereq_,module,exports){
+
+function explode_keys(pathmap, keys_stack, depth) {
+    if(is_object(pathmap)) {
+        var keys = Object.keys(pathmap);
+        var keys2 = keys_stack[depth] || (keys_stack[depth] = []);
+        keys2.push.apply(keys2, keys);
+        keys.forEach(function(key) {
+            explode_keys(pathmap[key], keys_stack, depth + 1);
+        });
+    }
+    return keys_stack;
+}
+},{"../walk/walk-path-map-soft-link":144,"./clone-optimized-path":110,"./clone-requested-path":111,"./is-object":122}],109:[function(_dereq_,module,exports){
 var clone_requested_path = _dereq_("./clone-requested-path");
 var clone_optimized_path = _dereq_("./clone-optimized-path");
-module.exports = function(roots, pathset, requested, optimized) {
-    roots.requestedMissingPaths.push(clone_requested_path(roots.bound, requested, pathset, roots.index));
-    roots.optimizedMissingPaths.push(clone_optimized_path(optimized, pathset));
+module.exports = function(roots, pathset, depth, requested, optimized) {
+    roots.requestedMissingPaths.push(clone_requested_path(roots.bound, requested, pathset, depth, roots.index));
+    roots.optimizedMissingPaths.push(clone_optimized_path(optimized, pathset, depth));
 }
-},{"./clone-optimized-path":91,"./clone-requested-path":92}],91:[function(_dereq_,module,exports){
-module.exports = function(optimized, rest) {
+},{"./clone-optimized-path":110,"./clone-requested-path":111}],110:[function(_dereq_,module,exports){
+module.exports = function(optimized, pathset, depth) {
     var x;
     var i = -1;
-    var j = -1;
+    var j = depth - 1;
     var n = optimized.length;
-    var m = rest.length;
+    var m = pathset.length;
     var array2 = [];
-    while(++i < n) { array2[i] = optimized[i]; }
-    while(++j < m) { if((x = rest[j]) != null) { array2[i++] = x; } }
+    while(++i < n) {
+        array2[i] = optimized[i];
+    }
+    while(++j < m) {
+        if((x = pathset[j]) != null) {
+            array2[i++] = x;
+        }
+    }
     return array2;
 }
-},{}],92:[function(_dereq_,module,exports){
-module.exports = function(bound, requested, rest, index) {
+},{}],111:[function(_dereq_,module,exports){
+var is_object = _dereq_("./is-object");
+module.exports = function(bound, requested, pathset, depth, index) {
     var x;
     var i = -1;
     var j = -1;
-    var k = -1;
-    var n = bound.length;
+    var l = 0;
     var m = requested.length;
-    var l = rest.length;
-    var array2 = new Array(n + m + l);
-    while(++i < n) { array2[i] = bound[i]; }
-    while(++j < m) { if((x = requested[j]) != null) { array2[i++] = requested[j]; } }
-    while(++k < l) { if((x = rest[k]) != null) { array2[i++] = rest[k]; } }
+    var n = bound.length;
+    var array2 = [];
+    while(++i < n) {
+        array2[i] = bound[i];
+    }
+    while(++j < m) {
+        if((x = requested[j]) != null) {
+            if(is_object(pathset[l++])) {
+                array2[i++] = [x];
+            } else {
+                array2[i++] = x;
+            }
+        }
+    }
+    m = n + l + pathset.length - depth;
+    while(i < m) {
+        array2[i++] = pathset[l++];
+    }
     if(index != null) {
         array2.pathSetIndex = index;
     }
     return array2;
 }
-},{}],93:[function(_dereq_,module,exports){
+},{"./is-object":122}],112:[function(_dereq_,module,exports){
 var array_slice = _dereq_("./array-slice");
 var array_clone = _dereq_("./array-clone");
 module.exports = function(roots, requested, optimized) {
     roots.requestedPaths.push(array_slice(requested, roots.offset));
     roots.optimizedPaths.push(array_clone(optimized));
 }
-},{"./array-clone":85,"./array-slice":86}],94:[function(_dereq_,module,exports){
+},{"./array-clone":104,"./array-slice":105}],113:[function(_dereq_,module,exports){
 var is_object = _dereq_("./is-object");
+var prefix = _dereq_("../internal/prefix");
+
 module.exports = function(value) {
     var dest = value, src = dest, i = -1, n, keys, key;
     if(is_object(dest)) {
@@ -5997,14 +6597,14 @@ module.exports = function(value) {
         n = keys.length;
         while(++i < n) {
             key = keys[i];
-            if((key[0] !== "_" || key[1] !== "_") && (key !== "/" && key !== "./" && key !== "../")) {
+            if(key[0] !== prefix) {
                 dest[key] = src[key];
             }
         }
     }
     return dest;
 }
-},{"./is-object":103}],95:[function(_dereq_,module,exports){
+},{"../internal/prefix":74,"./is-object":122}],114:[function(_dereq_,module,exports){
 var $path = _dereq_("../types/path");
 var $expired = "expired";
 var replace_node = _dereq_("./replace-node");
@@ -6027,18 +6627,22 @@ module.exports = function(roots, parent, node, type, key) {
     return node;
 }
 
-},{"../types/path":121,"./graph-node":98,"./is-expired":102,"./is-primitive":104,"./replace-node":111,"./update-back-refs":117}],96:[function(_dereq_,module,exports){
-var __ref = "__ref";
+},{"../types/path":140,"./graph-node":117,"./is-expired":121,"./is-primitive":123,"./replace-node":130,"./update-back-refs":136}],115:[function(_dereq_,module,exports){
+var __ref = _dereq_("../internal/ref");
+var __context = _dereq_("../internal/context");
+var __ref_index = _dereq_("../internal/ref-index");
+var __refs_length = _dereq_("../internal/refs-length");
+
 module.exports = function(node) {
-    var ref, i = -1, n = node.__refs_length || 0;
+    var ref, i = -1, n = node[__refs_length] || 0;
     while(++i < n) {
         if((ref = node[__ref + i]) !== undefined) {
-            ref.__context = ref.__ref_index = node[__ref + i] = undefined;
+            ref[__context] = ref[__ref_index] = node[__ref + i] = undefined;
         }
     }
-    node.__refs_length = undefined
+    node[__refs_length] = undefined
 }
-},{}],97:[function(_dereq_,module,exports){
+},{"../internal/context":66,"../internal/ref":77,"../internal/ref-index":76,"../internal/refs-length":78}],116:[function(_dereq_,module,exports){
 module.exports = function(path) {
     var key, index = path.length - 1;
     do {
@@ -6048,33 +6652,29 @@ module.exports = function(path) {
     } while(--index > -1);
     return null;
 }
-},{}],98:[function(_dereq_,module,exports){
-
-var $root = "/";
-var $self = "./";
-var $parent = "../";
-var $key = "__key";
-var $generation = "__generation";
+},{}],117:[function(_dereq_,module,exports){
+var __parent = _dereq_("../internal/parent");
+var __key = _dereq_("../internal/key");
+var __generation = _dereq_("../internal/generation");
 
 module.exports = function(root, parent, node, key, generation) {
-    node[$root] = root;
-    node[$self] = node;
-    node[$parent] = parent;
-    node[$key] = key;
-    node[$generation] = generation;
+    node[__parent] = parent;
+    node[__key] = key;
+    node[__generation] = generation;
     return node;
 }
-},{}],99:[function(_dereq_,module,exports){
+},{"../internal/generation":67,"../internal/key":70,"../internal/parent":73}],118:[function(_dereq_,module,exports){
 var generation = 0;
 module.exports = function() { return generation++; }
-},{}],100:[function(_dereq_,module,exports){
+},{}],119:[function(_dereq_,module,exports){
 var version = 0;
 module.exports = function() { return version++; }
-},{}],101:[function(_dereq_,module,exports){
+},{}],120:[function(_dereq_,module,exports){
 module.exports = invalidate;
 
 var is_object = _dereq_("./is-object");
 var remove_node = _dereq_("./remove-node");
+var prefix = _dereq_("../internal/prefix");
 
 function invalidate(parent, node, key, lru) {
     if(remove_node(parent, node, key, lru)) {
@@ -6083,7 +6683,7 @@ function invalidate(parent, node, key, lru) {
             var keys = Object.keys(node);
             for(var i = -1, n = keys.length; ++i < n;) {
                 var key = keys[i];
-                if((key[0] !== "_" || key[1] !== "_") && (key !== "/" && key !== "./" && key !== "../")) {
+                if(key[0] !== prefix && key[0] !== "$") {
                     invalidate(node, node[key], key, lru);
                 }
             }
@@ -6092,9 +6692,10 @@ function invalidate(parent, node, key, lru) {
     }
     return false;
 }
-},{"./is-object":103,"./remove-node":110}],102:[function(_dereq_,module,exports){
+},{"../internal/prefix":74,"./is-object":122,"./remove-node":129}],121:[function(_dereq_,module,exports){
 var $expires_now = _dereq_("../values/expires-now");
 var $expires_never = _dereq_("../values/expires-never");
+var __invalidated = _dereq_("../internal/invalidated");
 var now = _dereq_("./now");
 var splice = _dereq_("../lru/splice");
 
@@ -6103,8 +6704,8 @@ module.exports = function(roots, node) {
     if((expires != null                            ) && (
         expires != $expires_never                  ) && (
         expires == $expires_now || expires < now()))    {
-        if(!node.__invalidated) {
-            node.__invalidated = true;
+        if(!node[__invalidated]) {
+            node[__invalidated] = true;
             roots.expired.push(node);
             splice(roots.lru, node);
         }
@@ -6113,36 +6714,37 @@ module.exports = function(roots, node) {
     return false;
 }
 
-},{"../lru/splice":69,"../values/expires-never":123,"../values/expires-now":124,"./now":107}],103:[function(_dereq_,module,exports){
+},{"../internal/invalidated":69,"../lru/splice":88,"../values/expires-never":142,"../values/expires-now":143,"./now":126}],122:[function(_dereq_,module,exports){
 var obj_typeof = "object";
 module.exports = function(value) {
     return value != null && typeof value == obj_typeof;
 }
-},{}],104:[function(_dereq_,module,exports){
+},{}],123:[function(_dereq_,module,exports){
 var obj_typeof = "object";
 module.exports = function(value) {
     return value == null || typeof value != obj_typeof;
 }
-},{}],105:[function(_dereq_,module,exports){
+},{}],124:[function(_dereq_,module,exports){
 module.exports = key_to_keyset;
 
+var __offset = _dereq_("../internal/offset");
 var is_array = Array.isArray;
 var is_object = _dereq_("./is-object");
 
 function key_to_keyset(key, iskeyset) {
     if(iskeyset) {
         if(is_array(key)) {
-            key = key[key.__offset];
+            key = key[key[__offset]];
             return key_to_keyset(key, is_object(key));
         } else {
-            return key.__offset;
+            return key[__offset];
         }
     }
     return key;
 }
 
 
-},{"./is-object":103}],106:[function(_dereq_,module,exports){
+},{"../internal/offset":72,"./is-object":122}],125:[function(_dereq_,module,exports){
 
 var $self = "./";
 var $path = _dereq_("../types/path");
@@ -6323,28 +6925,29 @@ module.exports = function(roots, parent, node, messageParent, message, key) {
     return node;
 }
 
-},{"../lru/promote":68,"../support/replace-node":111,"../support/update-graph":118,"../types/path":121,"../types/sentinel":122,"../values/expires-now":124,"./graph-node":98,"./inc-generation":99,"./invalidate-node":101,"./is-expired":102,"./is-object":103,"./is-primitive":104,"./wrap-node":119}],107:[function(_dereq_,module,exports){
+},{"../lru/promote":87,"../support/replace-node":130,"../support/update-graph":137,"../types/path":140,"../types/sentinel":141,"../values/expires-now":143,"./graph-node":117,"./inc-generation":118,"./invalidate-node":120,"./is-expired":121,"./is-object":122,"./is-primitive":123,"./wrap-node":138}],126:[function(_dereq_,module,exports){
 module.exports = Date.now;
-},{}],108:[function(_dereq_,module,exports){
+},{}],127:[function(_dereq_,module,exports){
 var inc_version = _dereq_("../support/inc-version");
 var getBoundValue = _dereq_('../get/getBoundValue');
 
 module.exports = function(options, model, error_selector) {
     
-    var version        = options.version = inc_version();
-    var lru            = options.lru                   || (options.lru                   = model._root);
-    var root           = options.root                  || (options.root                  = model._cache);
-    var expired        = options.expired               || (options.expired               = lru.expired);
-    var bound          = options.bound                 || (options.bound                 = model._path || []);
-    var errors         = options.errors                || (options.errors                = []);
-    var requested      = options.requestedPaths        || (options.requestedPaths        = []);
-    var optimized      = options.optimizedPaths        || (options.optimizedPaths        = []);
-    var missing_r      = options.requestedMissingPaths || (options.requestedMissingPaths = []);
-    var missing_o      = options.optimizedMissingPaths || (options.optimizedMissingPaths = []);
-    var nodes          = options.nodes                 || (options.nodes = []);
-    var boxed          = options.boxed  = model._boxed || false;
-    var materialized   = options.materialized = model._materialized;
-    var errorsAsValues = options.errorsAsValues = model._treatErrorsAsValues || false;
+    var bound = options.bound     || (options.bound                 = model._path || []);
+    var root  = options.root      || (options.root                  = model._cache);
+    var nodes = options.nodes     || (options.nodes                 = []);
+    var lru   = options.lru       || (options.lru                   = model._root);
+    options.expired               || (options.expired               = lru.expired);
+    options.errors                || (options.errors                = []);
+    options.requestedPaths        || (options.requestedPaths        = []);
+    options.optimizedPaths        || (options.optimizedPaths        = []);
+    options.requestedMissingPaths || (options.requestedMissingPaths = []);
+    options.optimizedMissingPaths || (options.optimizedMissingPaths = []);
+    options.boxed  = model._boxed || false;
+    options.materialized = model._materialized;
+    options.errorsAsValues = model._treatErrorsAsValues || false;
+    options.headless = model._dataSource == null;
+    options.version = inc_version();
     
     options.offset || (options.offset = 0);
     options.error_selector = error_selector || model._errorSelector;
@@ -6357,45 +6960,42 @@ module.exports = function(options, model, error_selector) {
     
     return options;
 };
-},{"../get/getBoundValue":45,"../support/inc-version":100}],109:[function(_dereq_,module,exports){
+},{"../get/getBoundValue":49,"../support/inc-version":119}],128:[function(_dereq_,module,exports){
 module.exports = permute_keyset;
 
+var __offset = _dereq_("../internal/offset");
 var is_array = Array.isArray;
 var is_object = _dereq_("./is-object");
 
 function permute_keyset(key) {
     if(is_array(key)) {
         
-        if(key.__offset === undefined) {
-            key.__offset = -1;
+        if(key[__offset] === undefined) {
+            key[__offset] = -1;
             if(key.length == 0) {
-                throw new Error("Array keysets must contain at least one key.");
+                return false;
             }
         }
-        if(++key.__offset >= key.length) {
-            return permute_keyset(key[key.__offset = -1]);
+        if(++key[__offset] >= key.length) {
+            return permute_keyset(key[key[__offset] = -1]);
         } else {
             return true;
         }
     } else if(is_object(key)) {
-        if(key.__offset === undefined) {
-            key.__offset = (key.from || (key.from = 0)) - 1;
+        if(key[__offset] === undefined) {
+            key[__offset] = (key.from || (key.from = 0)) - 1;
             if(key.to === undefined) {
-                if(!key.length) {
+                if(key.length === undefined) {
                     throw new Error("Range keysets must specify at least one index to retrieve.");
+                } else if(key.length === 0) {
+                    return false;
                 }
                 key.to = key.from + (key.length || 1) - 1;
             }
         }
         
-        if(key.to < key.from) {
-            key.from = key.to;
-            key.to = key.__offset + 1;
-            key.__offset = key.from - 1;
-        }
-        
-        if(++key.__offset > key.to) {
-            key.__offset = key.from - 1;
+        if(++key[__offset] > key.to) {
+            key[__offset] = key.from - 1;
             return false;
         }
         
@@ -6406,11 +7006,9 @@ function permute_keyset(key) {
 }
 
 
-},{"./is-object":103}],110:[function(_dereq_,module,exports){
+},{"../internal/offset":72,"./is-object":122}],129:[function(_dereq_,module,exports){
 var $path = _dereq_("../types/path");
-var $root = "/";
-var $self = "./";
-var $parent = "../"
+var __parent = _dereq_("../internal/parent");
 var unlink = _dereq_("./unlink");
 var delete_back_refs = _dereq_("./delete-back-refs");
 var splice = _dereq_("../lru/splice");
@@ -6424,13 +7022,13 @@ module.exports = function(parent, node, key, lru) {
             splice(lru, node);
         }
         delete_back_refs(node);
-        parent[key] = node[$root] = node[$parent] = node[$self] = undefined;
+        parent[key] = node[__parent] = undefined;
         return true;
     }
     return false;
 }
 
-},{"../lru/splice":69,"../types/path":121,"./delete-back-refs":96,"./is-object":103,"./unlink":116}],111:[function(_dereq_,module,exports){
+},{"../internal/parent":73,"../lru/splice":88,"../types/path":140,"./delete-back-refs":115,"./is-object":122,"./unlink":135}],130:[function(_dereq_,module,exports){
 var transfer_back_refs = _dereq_("./transfer-back-refs");
 var invalidate_node = _dereq_("./invalidate-node");
 
@@ -6441,9 +7039,11 @@ module.exports = function(parent, node, replacement, key, lru) {
     }
     return parent[key] = replacement;
 }
-},{"./invalidate-node":101,"./transfer-back-refs":112}],112:[function(_dereq_,module,exports){
-var __ref = "__ref";
-var __refs_length = "__refs_length";
+},{"./invalidate-node":120,"./transfer-back-refs":131}],131:[function(_dereq_,module,exports){
+var __ref = _dereq_("../internal/ref");
+var __context = _dereq_("../internal/context");
+var __refs_length = _dereq_("../internal/refs-length");
+
 module.exports = function(node, dest) {
     var nodeRefsLength = node[__refs_length] || 0,
         destRefsLength = dest[__refs_length] || 0,
@@ -6451,7 +7051,7 @@ module.exports = function(node, dest) {
     while(++i < nodeRefsLength) {
         ref = node[__ref + i];
         if(ref !== undefined) {
-            ref.__context = dest;
+            ref[__context] = dest;
             dest[__ref + (destRefsLength + i)] = ref;
             node[__ref + i] = undefined;
         }
@@ -6459,7 +7059,7 @@ module.exports = function(node, dest) {
     dest[__refs_length] = nodeRefsLength + destRefsLength;
     node[__refs_length] = ref = undefined;
 }
-},{}],113:[function(_dereq_,module,exports){
+},{"../internal/context":66,"../internal/ref":77,"../internal/refs-length":78}],132:[function(_dereq_,module,exports){
 var $error = _dereq_("../types/error");
 var promote = _dereq_("../lru/promote");
 var array_clone = _dereq_("./array-clone");
@@ -6475,95 +7075,108 @@ module.exports = function(roots, node, type, path) {
     return true;
 };
 
-},{"../lru/promote":68,"../types/error":120,"./array-clone":85}],114:[function(_dereq_,module,exports){
+},{"../lru/promote":87,"../types/error":139,"./array-clone":104}],133:[function(_dereq_,module,exports){
 var $sentinel = _dereq_("../types/sentinel");
 var clone_misses = _dereq_("./clone-missing-path-maps");
 var is_expired = _dereq_("./is-expired");
 
-module.exports = function(roots, node, type, pathmap, requested, optimized) {
+module.exports = function(roots, node, type, pathmap, keys_stack, depth, requested, optimized) {
     var dematerialized = !roots.materialized;
     if(node == null && dematerialized) {
-        clone_misses(roots, pathmap, requested, optimized);
+        clone_misses(roots, pathmap, keys_stack, depth, requested, optimized);
         return true;
     } else if(!!type) {
         if(type == $sentinel && node.value === undefined && dematerialized && !roots.boxed) {
             return true;
         } else if(is_expired(roots, node)) {
-            clone_misses(roots, pathmap, requested, optimized);
+            clone_misses(roots, pathmap, keys_stack, depth, requested, optimized);
             return true;
         }
     }
     return false;
 };
-},{"../types/sentinel":122,"./clone-missing-path-maps":89,"./is-expired":102}],115:[function(_dereq_,module,exports){
+},{"../types/sentinel":141,"./clone-missing-path-maps":108,"./is-expired":121}],134:[function(_dereq_,module,exports){
 var $sentinel = _dereq_("../types/sentinel");
 var clone_misses = _dereq_("./clone-missing-path-sets");
 var is_expired = _dereq_("./is-expired");
 
-module.exports = function(roots, node, type, pathset, requested, optimized) {
+module.exports = function(roots, node, type, pathset, depth, requested, optimized) {
     var dematerialized = !roots.materialized;
     if(node == null && dematerialized) {
-        clone_misses(roots, pathset, requested, optimized);
+        clone_misses(roots, pathset, depth, requested, optimized);
         return true;
     } else if(!!type) {
         if(type == $sentinel && node.value === undefined && dematerialized && !roots.boxed) {
             return true;
         } else if(is_expired(roots, node)) {
-            clone_misses(roots, pathset, requested, optimized);
+            clone_misses(roots, pathset, depth, requested, optimized);
             return true;
         }
     }
     return false;
 };
 
-},{"../types/sentinel":122,"./clone-missing-path-sets":90,"./is-expired":102}],116:[function(_dereq_,module,exports){
-var $ref = "__ref";
+},{"../types/sentinel":141,"./clone-missing-path-sets":109,"./is-expired":121}],135:[function(_dereq_,module,exports){
+var __ref = _dereq_("../internal/ref");
+var __context = _dereq_("../internal/context");
+var __ref_index = _dereq_("../internal/ref-index");
+var __refs_length = _dereq_("../internal/refs-length");
+
 module.exports = function(ref) {
-    var destination = ref.__context;
+    var destination = ref[__context];
     if(destination) {
-        var i = (ref.__ref_index || 0) - 1,
-            n = (destination.__refs_length || 0) - 1;
+        var i = (ref[__ref_index] || 0) - 1,
+            n = (destination[__refs_length] || 0) - 1;
         while(++i <= n) {
-            destination[$ref + i] = destination[$ref + (i + 1)];
+            destination[__ref + i] = destination[__ref + (i + 1)];
         }
-        destination.__refs_length = n;
-        ref.__ref_index = ref.__context = destination = undefined;
+        destination[__refs_length] = n;
+        ref[__ref_index] = ref[__context] = destination = undefined;
     }
 }
-},{}],117:[function(_dereq_,module,exports){
+},{"../internal/context":66,"../internal/ref":77,"../internal/ref-index":76,"../internal/refs-length":78}],136:[function(_dereq_,module,exports){
 module.exports = update_back_refs;
+
+var __ref = _dereq_("../internal/ref");
+var __parent = _dereq_("../internal/parent");
+var __version = _dereq_("../internal/version");
+var __generation = _dereq_("../internal/generation");
+var __refs_length = _dereq_("../internal/refs-length");
 
 var generation = _dereq_("./inc-generation");
 
 function update_back_refs(node, version) {
-    if(node && node.__version !== version) {
-        node.__version = version;
-        node.__generation = generation();
-        update_back_refs(node["../"], version);
-        var i = -1, n = node.__refs_length || 0;
+    if(node && node[__version] !== version) {
+        node[__version] = version;
+        node[__generation] = generation();
+        update_back_refs(node[__parent], version);
+        var i = -1, n = node[__refs_length] || 0;
         while(++i < n) {
-            update_back_refs(node["__ref" + i], version);
+            update_back_refs(node[__ref + i], version);
         }
     }
     return node;
 }
 
-},{"./inc-generation":99}],118:[function(_dereq_,module,exports){
+},{"../internal/generation":67,"../internal/parent":73,"../internal/ref":77,"../internal/refs-length":78,"../internal/version":80,"./inc-generation":118}],137:[function(_dereq_,module,exports){
+var __key = _dereq_("../internal/key");
+var __version = _dereq_("../internal/version");
+var __parent = _dereq_("../internal/parent");
 var remove_node = _dereq_("./remove-node");
 var update_back_refs = _dereq_("./update-back-refs");
 
 module.exports = function(node, offset, version, lru) {
     var child;
     while(child = node) {
-        node = child["../"];
+        node = child[__parent];
         if((child.$size = (child.$size || 0) - offset) <= 0 && node != null) {
-            remove_node(node, child, child.__key, lru);
-        } else if(child.__version !== version) {
+            remove_node(node, child, child[__key], lru);
+        } else if(child[__version] !== version) {
             update_back_refs(child, version);
         }
     }
 }
-},{"./remove-node":110,"./update-back-refs":117}],119:[function(_dereq_,module,exports){
+},{"../internal/key":70,"../internal/parent":73,"../internal/version":80,"./remove-node":129,"./update-back-refs":136}],138:[function(_dereq_,module,exports){
 var $path = _dereq_("../types/path");
 var $error = _dereq_("../types/error");
 var $sentinel = _dereq_("../types/sentinel");
@@ -6620,19 +7233,20 @@ module.exports = function(node, type, value) {
     return dest;
 }
 
-},{"../types/error":120,"../types/path":121,"../types/sentinel":122,"./clone":94,"./is-object":103,"./now":107}],120:[function(_dereq_,module,exports){
+},{"../types/error":139,"../types/path":140,"../types/sentinel":141,"./clone":113,"./is-object":122,"./now":126}],139:[function(_dereq_,module,exports){
 module.exports = "error";
-},{}],121:[function(_dereq_,module,exports){
+},{}],140:[function(_dereq_,module,exports){
 module.exports = "ref";
-},{}],122:[function(_dereq_,module,exports){
+},{}],141:[function(_dereq_,module,exports){
 module.exports = "sentinel";
-},{}],123:[function(_dereq_,module,exports){
+},{}],142:[function(_dereq_,module,exports){
 module.exports = 1;
-},{}],124:[function(_dereq_,module,exports){
+},{}],143:[function(_dereq_,module,exports){
 module.exports = 0;
-},{}],125:[function(_dereq_,module,exports){
+},{}],144:[function(_dereq_,module,exports){
 module.exports = walk_path_map;
 
+var prefix = _dereq_("../internal/prefix");
 var $path = _dereq_("../types/path");
 
 var walk_reference = _dereq_("./walk-reference");
@@ -6648,12 +7262,12 @@ var is_array = Array.isArray;
 
 var promote = _dereq_("../lru/promote");
 
-function walk_path_map(onNode, onEdge, pathmap, roots, parents, nodes, requested, optimized, key, keyset, is_keyset) {
+function walk_path_map(onNode, onEdge, pathmap, keys_stack, depth, roots, parents, nodes, requested, optimized, key, keyset, is_keyset) {
     
     var node = nodes[0];
     
     if(is_primitive(pathmap) || is_primitive(node)) {
-        return onEdge(pathmap, roots, parents, nodes, requested, optimized, key, keyset);
+        return onEdge(pathmap, keys_stack, depth, roots, parents, nodes, requested, optimized, key, keyset);
     }
     
     var type = node.$type;
@@ -6662,7 +7276,7 @@ function walk_path_map(onNode, onEdge, pathmap, roots, parents, nodes, requested
         
         if(is_expired(roots, node)) {
             nodes[0] = undefined;
-            return onEdge(pathmap, roots, parents, nodes, requested, optimized, key, keyset);
+            return onEdge(pathmap, keys_stack, depth, roots, parents, nodes, requested, optimized, key, keyset);
         }
         
         promote(roots.lru, node);
@@ -6679,21 +7293,21 @@ function walk_path_map(onNode, onEdge, pathmap, roots, parents, nodes, requested
         node = nodes[0];
         
         if(node == null) {
-            return onEdge(pathmap, roots, parents, nodes, requested, optimized, key, keyset);
+            return onEdge(pathmap, keys_stack, depth, roots, parents, nodes, requested, optimized, key, keyset);
         } else if(is_primitive(node) || ((type = node.$type) && type != $path)) {
-            onNode([], roots, parents, nodes, requested, optimized, true, null, keyset, false);
-            return onEdge(pathmap, roots, parents, nodes, array_append(requested, null), optimized, key, keyset);
+            onNode(pathmap, roots, parents, nodes, requested, optimized, true, null, keyset, false);
+            return onEdge(pathmap, keys_stack, depth, roots, parents, nodes, array_append(requested, null), optimized, key, keyset);
         }
     }
     
     if(type != null) {
-        return onEdge(pathmap, roots, parents, nodes, requested, optimized, key, keyset);
+        return onEdge(pathmap, keys_stack, depth, roots, parents, nodes, requested, optimized, key, keyset);
     }
     
-    var keys = Object.keys(pathmap);
+    var keys = keys_stack[depth] = Object.keys(pathmap);
     
     if(keys.length == 0) {
-        return onEdge(pathmap, roots, parents, nodes, requested, optimized, key, keyset);
+        return onEdge(pathmap, keys_stack, depth, roots, parents, nodes, requested, optimized, key, keyset);
     }
     
     var is_outer_keyset = keys.length > 1;
@@ -6702,11 +7316,7 @@ function walk_path_map(onNode, onEdge, pathmap, roots, parents, nodes, requested
         
         var inner_key = keys[i];
         
-        if((inner_key[0] === "_"    && inner_key[1] === "_") || (
-            inner_key[0] === "$"  ) || (
-            inner_key    === "/"  ) || (
-            inner_key    === "./" ) || (
-            inner_key    === "../")  ) {
+        if((inner_key[0] === prefix) || (inner_key[0] === "$")) {
             continue;
         }
         
@@ -6720,11 +7330,7 @@ function walk_path_map(onNode, onEdge, pathmap, roots, parents, nodes, requested
         var is_branch = is_object(pathmap2) && !pathmap2.$type;// && !is_array(pathmap2);
         if(is_branch) {
             for(child_key in pathmap2) {
-                if((child_key[0] === "_"    && child_key[1] === "_") || (
-                    child_key[0] === "$"  ) || (
-                    child_key    === "/"  ) || (
-                    child_key    === "./" ) || (
-                    child_key    === "../")  ) {
+                if((child_key[0] === prefix) || (child_key[0] === "$")) {
                     continue;
                 }
                 child_key = pathmap2.hasOwnProperty(child_key);
@@ -6733,7 +7339,7 @@ function walk_path_map(onNode, onEdge, pathmap, roots, parents, nodes, requested
             is_branch = child_key === true;
         }
         
-        if(inner_key == "__null") {
+        if(inner_key == "null") {
             requested2 = array_append(requested, null);
             optimized2 = array_clone(optimized);
             inner_key  = key;
@@ -6748,20 +7354,22 @@ function walk_path_map(onNode, onEdge, pathmap, roots, parents, nodes, requested
         
         if(is_branch) {
             walk_path_map(onNode, onEdge,
-                pathmap2,
+                pathmap2, keys_stack, depth + 1,
                 roots, parents2, nodes2,
                 requested2, optimized2,
                 inner_key, inner_keyset, is_outer_keyset
             );
         } else {
-            onEdge(pathmap2, roots, parents2, nodes2, requested2, optimized2, inner_key, inner_keyset);
+            onEdge(pathmap2, keys_stack, depth, roots, parents2, nodes2, requested2, optimized2, inner_key, inner_keyset);
         }
     }
 }
 
-},{"../lru/promote":68,"../support/array-append":84,"../support/array-clone":85,"../support/array-slice":86,"../support/is-expired":102,"../support/is-object":103,"../support/is-primitive":104,"../types/path":121,"./walk-reference":129}],126:[function(_dereq_,module,exports){
+},{"../internal/prefix":74,"../lru/promote":87,"../support/array-append":103,"../support/array-clone":104,"../support/array-slice":105,"../support/is-expired":121,"../support/is-object":122,"../support/is-primitive":123,"../types/path":140,"./walk-reference":148}],145:[function(_dereq_,module,exports){
 module.exports = walk_path_map;
 
+var prefix = _dereq_("../internal/prefix");
+var __context = _dereq_("../internal/context");
 var $path = _dereq_("../types/path");
 
 var walk_reference = _dereq_("./walk-reference");
@@ -6777,12 +7385,12 @@ var is_array = Array.isArray;
 
 var promote = _dereq_("../lru/promote");
 
-function walk_path_map(onNode, onEdge, pathmap, roots, parents, nodes, requested, optimized, key, keyset, is_keyset) {
+function walk_path_map(onNode, onEdge, pathmap, keys_stack, depth, roots, parents, nodes, requested, optimized, key, keyset, is_keyset) {
     
     var node = nodes[0];
     
     if(is_primitive(pathmap) || is_primitive(node)) {
-        return onEdge(pathmap, roots, parents, nodes, requested, optimized, key, keyset);
+        return onEdge(pathmap, keys_stack, depth, roots, parents, nodes, requested, optimized, key, keyset);
     }
     
     var type = node.$type;
@@ -6791,14 +7399,14 @@ function walk_path_map(onNode, onEdge, pathmap, roots, parents, nodes, requested
         
         if(is_expired(roots, node)) {
             nodes[0] = undefined;
-            return onEdge(pathmap, roots, parents, nodes, requested, optimized, key, keyset);
+            return onEdge(pathmap, keys_stack, depth, roots, parents, nodes, requested, optimized, key, keyset);
         }
         
         promote(roots.lru, node);
         
         var container = node;
         var reference = node.value;
-        node = node.__context;
+        node = node[__context];
         
         if(node != null) {
             type = node.$type;
@@ -6813,22 +7421,22 @@ function walk_path_map(onNode, onEdge, pathmap, roots, parents, nodes, requested
             node = nodes[0];
             
             if(node == null) {
-                return onEdge(pathmap, roots, parents, nodes, requested, optimized, key, keyset);
+                return onEdge(pathmap, keys_stack, depth, roots, parents, nodes, requested, optimized, key, keyset);
             } else if(is_primitive(node) || ((type = node.$type) && type != $path)) {
-                onNode([], roots, parents, nodes, requested, optimized, true, null, keyset, false);
-                return onEdge(pathmap, roots, parents, nodes, array_append(requested, null), optimized, key, keyset);
+                onNode(pathmap, roots, parents, nodes, requested, optimized, true, null, keyset, false);
+                return onEdge(pathmap, keys_stack, depth, roots, parents, nodes, array_append(requested, null), optimized, key, keyset);
             }
         }
     }
     
     if(type != null) {
-        return onEdge(pathmap, roots, parents, nodes, requested, optimized, key, keyset);
+        return onEdge(pathmap, keys_stack, depth, roots, parents, nodes, requested, optimized, key, keyset);
     }
     
-    var keys = Object.keys(pathmap);
+    var keys = keys_stack[depth] = Object.keys(pathmap);
     
     if(keys.length == 0) {
-        return onEdge(pathmap, roots, parents, nodes, requested, optimized, key, keyset);
+        return onEdge(pathmap, keys_stack, depth, roots, parents, nodes, requested, optimized, key, keyset);
     }
     
     var is_outer_keyset = keys.length > 1;
@@ -6837,11 +7445,7 @@ function walk_path_map(onNode, onEdge, pathmap, roots, parents, nodes, requested
         
         var inner_key = keys[i];
         
-        if((inner_key[0] === "_"    && inner_key[1] === "_") || (
-            inner_key[0] === "$"  ) || (
-            inner_key    === "/"  ) || (
-            inner_key    === "./" ) || (
-            inner_key    === "../")  ) {
+        if((inner_key[0] === prefix) || (inner_key[0] === "$")) {
             continue;
         }
         
@@ -6855,11 +7459,7 @@ function walk_path_map(onNode, onEdge, pathmap, roots, parents, nodes, requested
         var is_branch = is_object(pathmap2) && !pathmap2.$type;// && !is_array(pathmap2);
         if(is_branch) {
             for(child_key in pathmap2) {
-                if((child_key[0] === "_"    && child_key[1] === "_") || (
-                    child_key[0] === "$"  ) || (
-                    child_key    === "/"  ) || (
-                    child_key    === "./" ) || (
-                    child_key    === "../")  ) {
+                if((child_key[0] === prefix) || (child_key[0] === "$")) {
                     continue;
                 }
                 child_key = pathmap2.hasOwnProperty(child_key);
@@ -6868,7 +7468,7 @@ function walk_path_map(onNode, onEdge, pathmap, roots, parents, nodes, requested
             is_branch = child_key === true;
         }
         
-        if(inner_key == "__null") {
+        if(inner_key == "null") {
             requested2 = array_append(requested, null);
             optimized2 = array_clone(optimized);
             inner_key  = key;
@@ -6883,18 +7483,18 @@ function walk_path_map(onNode, onEdge, pathmap, roots, parents, nodes, requested
         
         if(is_branch) {
             walk_path_map(onNode, onEdge,
-                pathmap2,
+                pathmap2, keys_stack, depth + 1,
                 roots, parents2, nodes2,
                 requested2, optimized2,
                 inner_key, inner_keyset, is_outer_keyset
             );
         } else {
-            onEdge(pathmap2, roots, parents2, nodes2, requested2, optimized2, inner_key, inner_keyset);
+            onEdge(pathmap2, keys_stack, depth, roots, parents2, nodes2, requested2, optimized2, inner_key, inner_keyset);
         }
     }
 }
 
-},{"../lru/promote":68,"../support/array-append":84,"../support/array-clone":85,"../support/array-slice":86,"../support/is-expired":102,"../support/is-object":103,"../support/is-primitive":104,"../types/path":121,"./walk-reference":129}],127:[function(_dereq_,module,exports){
+},{"../internal/context":66,"../internal/prefix":74,"../lru/promote":87,"../support/array-append":103,"../support/array-clone":104,"../support/array-slice":105,"../support/is-expired":121,"../support/is-object":122,"../support/is-primitive":123,"../types/path":140,"./walk-reference":148}],146:[function(_dereq_,module,exports){
 module.exports = walk_path_set;
 
 var $path = _dereq_("../types/path");
@@ -6915,12 +7515,12 @@ var permute_keyset = _dereq_("../support/permute-keyset");
 
 var promote = _dereq_("../lru/promote");
 
-function walk_path_set(onNode, onEdge, pathset, roots, parents, nodes, requested, optimized, key, keyset, is_keyset) {
+function walk_path_set(onNode, onEdge, pathset, depth, roots, parents, nodes, requested, optimized, key, keyset, is_keyset) {
 
     var node = nodes[0];
 
-    if(pathset.length == 0 || is_primitive(node)) {
-        return onEdge(pathset, roots, parents, nodes, requested, optimized, key, keyset);
+    if(depth >= pathset.length || is_primitive(node)) {
+        return onEdge(pathset, depth, roots, parents, nodes, requested, optimized, key, keyset);
     }
 
     var type = node.$type;
@@ -6929,7 +7529,7 @@ function walk_path_set(onNode, onEdge, pathset, roots, parents, nodes, requested
 
         if(is_expired(roots, node)) {
             nodes[0] = undefined;
-            return onEdge(pathset, roots, parents, nodes, requested, optimized, key, keyset);
+            return onEdge(pathset, depth, roots, parents, nodes, requested, optimized, key, keyset);
         }
         
         promote(roots.lru, node);
@@ -6946,20 +7546,20 @@ function walk_path_set(onNode, onEdge, pathset, roots, parents, nodes, requested
         node = nodes[0];
 
         if(node == null) {
-            return onEdge(pathset, roots, parents, nodes, requested, optimized, key, keyset);
+            return onEdge(pathset, depth, roots, parents, nodes, requested, optimized, key, keyset);
         } else if(is_primitive(node) || ((type = node.$type) && type != $path)) {
-            onNode(empty_array, roots, parents, nodes, requested, optimized, true, false, null, keyset, false);
-            return onEdge(pathset, roots, parents, nodes, array_append(requested, null), optimized, key, keyset);
+            onNode(pathset, roots, parents, nodes, requested, optimized, true, false, null, keyset, false);
+            return onEdge(pathset, depth, roots, parents, nodes, array_append(requested, null), optimized, key, keyset);
         }
     }
 
     if(type != null) {
-        return onEdge(pathset, roots, parents, nodes, requested, optimized, key, keyset);
+        return onEdge(pathset, depth, roots, parents, nodes, requested, optimized, key, keyset);
     }
 
-    var outer_key = pathset[0];
+    var outer_key = pathset[depth];
     var is_outer_keyset = is_object(outer_key);
-    var is_branch = pathset.length > 1;
+    var is_branch = depth < pathset.length - 1;
     var run_once = false;
     
     while(is_outer_keyset && permute_keyset(outer_key) && (run_once = true) || (run_once = !run_once)) {
@@ -6991,16 +7591,18 @@ function walk_path_set(onNode, onEdge, pathset, roots, parents, nodes, requested
         }
 
         walk_path_set(onNode, onEdge,
-            array_slice(pathset, 1),
+            pathset, depth + 1,
             roots, parents2, nodes2,
             requested2, optimized2,
             inner_key, inner_keyset, is_outer_keyset
         );
     }
 }
-},{"../lru/promote":68,"../support/array-append":84,"../support/array-clone":85,"../support/array-slice":86,"../support/is-expired":102,"../support/is-object":103,"../support/is-primitive":104,"../support/keyset-to-key":105,"../support/permute-keyset":109,"../types/path":121,"./walk-reference":129}],128:[function(_dereq_,module,exports){
+},{"../lru/promote":87,"../support/array-append":103,"../support/array-clone":104,"../support/array-slice":105,"../support/is-expired":121,"../support/is-object":122,"../support/is-primitive":123,"../support/keyset-to-key":124,"../support/permute-keyset":128,"../types/path":140,"./walk-reference":148}],147:[function(_dereq_,module,exports){
 module.exports = walk_path_set;
 
+var prefix = _dereq_("../internal/prefix");
+var __context = _dereq_("../internal/context");
 var $path = _dereq_("../types/path");
 var empty_array = new Array(0);
 
@@ -7019,12 +7621,12 @@ var permute_keyset = _dereq_("../support/permute-keyset");
 
 var promote = _dereq_("../lru/promote");
 
-function walk_path_set(onNode, onEdge, pathset, roots, parents, nodes, requested, optimized, key, keyset, is_keyset) {
+function walk_path_set(onNode, onEdge, pathset, depth, roots, parents, nodes, requested, optimized, key, keyset, is_keyset) {
 
     var node = nodes[0];
 
-    if(pathset.length == 0 || is_primitive(node)) {
-        return onEdge(pathset, roots, parents, nodes, requested, optimized, key, keyset);
+    if(depth >= pathset.length || is_primitive(node)) {
+        return onEdge(pathset, depth, roots, parents, nodes, requested, optimized, key, keyset);
     }
 
     var type = node.$type;
@@ -7033,14 +7635,14 @@ function walk_path_set(onNode, onEdge, pathset, roots, parents, nodes, requested
 
         if(is_expired(roots, node)) {
             nodes[0] = undefined;
-            return onEdge(pathset, roots, parents, nodes, requested, optimized, key, keyset);
+            return onEdge(pathset, depth, roots, parents, nodes, requested, optimized, key, keyset);
         }
         
         promote(roots.lru, node);
         
         var container = node;
         var reference = node.value;
-        node = node.__context;
+        node = node[__context];
 
         if(node != null) {
             type = node.$type;
@@ -7057,21 +7659,21 @@ function walk_path_set(onNode, onEdge, pathset, roots, parents, nodes, requested
             node = nodes[0];
 
             if(node == null) {
-                return onEdge(pathset, roots, parents, nodes, requested, optimized, key, keyset);
+                return onEdge(pathset, depth, roots, parents, nodes, requested, optimized, key, keyset);
             } else if(is_primitive(node) || ((type = node.$type) && type != $path)) {
                 onNode(pathset, roots, parents, nodes, requested, optimized, true, false, null, keyset, false);
-                return onEdge(pathset, roots, parents, nodes, array_append(requested, null), optimized, key, keyset);
+                return onEdge(pathset, depth, roots, parents, nodes, array_append(requested, null), optimized, key, keyset);
             }
         }
     }
 
     if(type != null) {
-        return onEdge(pathset, roots, parents, nodes, requested, optimized, key, keyset);
+        return onEdge(pathset, depth, roots, parents, nodes, requested, optimized, key, keyset);
     }
 
-    var outer_key = pathset[0];
+    var outer_key = pathset[depth];
     var is_outer_keyset = is_object(outer_key);
-    var is_branch = pathset.length > 1;
+    var is_branch = depth < pathset.length - 1;
     var run_once = false;
     
     while(is_outer_keyset && permute_keyset(outer_key) && (run_once = true) || (run_once = !run_once)) {
@@ -7104,18 +7706,22 @@ function walk_path_set(onNode, onEdge, pathset, roots, parents, nodes, requested
         }
 
         walk_path_set(onNode, onEdge,
-            array_slice(pathset, 1),
+            pathset, depth + 1,
             roots, parents2, nodes2,
             requested2, optimized2,
             inner_key, inner_keyset, is_outer_keyset
         );
     }
 }
-},{"../lru/promote":68,"../support/array-append":84,"../support/array-clone":85,"../support/array-slice":86,"../support/is-expired":102,"../support/is-object":103,"../support/is-primitive":104,"../support/keyset-to-key":105,"../support/permute-keyset":109,"../types/path":121,"./walk-reference":129}],129:[function(_dereq_,module,exports){
+
+},{"../internal/context":66,"../internal/prefix":74,"../lru/promote":87,"../support/array-append":103,"../support/array-clone":104,"../support/array-slice":105,"../support/is-expired":121,"../support/is-object":122,"../support/is-primitive":123,"../support/keyset-to-key":124,"../support/permute-keyset":128,"../types/path":140,"./walk-reference":148}],148:[function(_dereq_,module,exports){
 module.exports = walk_reference;
 
-var __ref = "__ref";
-var empty_array = new Array(0);
+var prefix = _dereq_("../internal/prefix");
+var __ref = _dereq_("../internal/ref");
+var __context = _dereq_("../internal/context");
+var __ref_index = _dereq_("../internal/ref-index");
+var __refs_length = _dereq_("../internal/refs-length");
 
 var is_object      = _dereq_("../support/is-object");
 var is_primitive   = _dereq_("../support/is-primitive");
@@ -7137,7 +7743,7 @@ function walk_reference(onNode, container, reference, roots, parents, nodes, req
         if(node == null) {
             return nodes;
         } else if(is_primitive(node) || node.$type) {
-            onNode(empty_array, roots, parents, nodes, requested, optimized, false, false, keyset, null, false);
+            onNode(reference, roots, parents, nodes, requested, optimized, false, false, keyset, null, false);
             return nodes;
         }
         
@@ -7146,7 +7752,7 @@ function walk_reference(onNode, container, reference, roots, parents, nodes, req
             if(key != null) {
                 keyset = key;
                 optimized.push(key);
-                onNode(array_slice(reference, index), roots, parents, nodes, requested, optimized, false, index < count - 1, key, null, false);
+                onNode(reference, roots, parents, nodes, requested, optimized, false, index < count - 1, key, null, false);
                 break;
             }
         } while(++index < count);
@@ -7154,17 +7760,17 @@ function walk_reference(onNode, container, reference, roots, parents, nodes, req
     
     node = nodes[0];
     
-    if(is_object(node) && container.__context !== node) {
-        var backrefs = node.__refs_length || 0;
-        node.__refs_length = backrefs + 1;
+    if(is_object(node) && container[__context] !== node) {
+        var backrefs = node[__refs_length] || 0;
+        node[__refs_length] = backrefs + 1;
         node[__ref + backrefs] = container;
-        container.__context    = node;
-        container.__ref_index  = backrefs;
+        container[__context]    = node;
+        container[__ref_index]  = backrefs;
     }
     
     return nodes;
 }
-},{"../support/array-append":84,"../support/array-slice":86,"../support/is-object":103,"../support/is-primitive":104}],130:[function(_dereq_,module,exports){
+},{"../internal/context":66,"../internal/prefix":74,"../internal/ref":77,"../internal/ref-index":76,"../internal/refs-length":78,"../support/array-append":103,"../support/array-slice":105,"../support/is-object":122,"../support/is-primitive":123}],149:[function(_dereq_,module,exports){
 var falcor = _dereq_('./lib/falcor');
 var get = _dereq_('./lib/get');
 var set = _dereq_('./lib/set');
@@ -7208,6 +7814,6 @@ prototype._setCache = set.setCache;
 module.exports = falcor;
 
 
-},{"./lib/falcor":6,"./lib/get":48,"./lib/invalidate":62,"./lib/set":70}]},{},[1])
+},{"./lib/falcor":5,"./lib/get":52,"./lib/invalidate":81,"./lib/set":89}]},{},[1])
 (1)
 });
