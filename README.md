@@ -19,7 +19,7 @@ Now set up a simple webpage and import the newly-generated falcor library:
     <script>
       var model = new falcor.Model(/* Model options */);
       // your code goes here
-    <script>
+    </script>
   </head>
   <body>
   </body>
