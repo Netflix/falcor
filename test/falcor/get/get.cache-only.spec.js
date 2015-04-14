@@ -84,7 +84,7 @@ describe('Cache Only', function() {
             });
 
             model.get(["users", {length:3}, ["name","age"]]).toPathValues().toArray().subscribe(function(vals) {
-                console.log(JSON.stringify(vals));
+                // console.log(JSON.stringify(vals));
                 testRunner.compare(
                     JSON.stringify(vals), 
                     '[{"path":["users",0,"name"],"value":"Jim"},{"path":["users",0,"age"],"value":23},{"path":["users",1,"name"],"value":"John"},{"path":["users",1,"age"],"value":44},{"path":["users",2,"name"],"value":"Derek"},{"path":["users",2,"age"],"value":22}]',
