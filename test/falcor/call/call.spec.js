@@ -33,7 +33,7 @@ describe("Call", function() {
 
         model.
             call(["lists", "my-list", "add"], [1234], [["summary"]]).
-            concat(model.get(["lists", "my-list", 0, "summary"])).
+            concat(model.get(["lists", "my-list", 0, "summary"]).asObservable()).
             toArray().
             subscribe(function(videos) {
                 testRunner.compare(videos[0], videos[1]);
@@ -61,7 +61,7 @@ describe("Call", function() {
             flatMap(function(model) {
                 return model.
                     call(["add"], [1234], [["summary"]]).
-                    concat(model.get([0, "summary"])).
+                    concat(model.get([0, "summary"]).asObservable()).
                     toArray();
             }).
             subscribe(function(videos) {
@@ -85,7 +85,7 @@ describe("Call", function() {
             call(["lists", "my-list", "add"], [1234], [["summary"]], function(paths) {
                 return this.getValueSync(paths[0]);
             }).
-            concat(model.get(["lists", "my-list", 0, "summary"], function(x) { return x; })).
+            concat(model.get(["lists", "my-list", 0, "summary"], function(x) { return x; }).asObservable()).
             toArray().
             subscribe(function(videos) {
                 testRunner.compare(videos[0], videos[1]);
@@ -115,7 +115,7 @@ describe("Call", function() {
                     call(["add"], [1234], [["summary"]], function(paths) {
                         return this.getValueSync(paths[0]);
                     }).
-                    concat(model.get([0, "summary"], function(x) { return x; })).
+                    concat(model.get([0, "summary"], function(x) { return x; }).asObservable()).
                     toArray();
             }).
             subscribe(function(videos) {
