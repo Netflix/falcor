@@ -2,10 +2,28 @@
 
 ## Getting Started
 
-Make sure you are using NPM v 2.7.5+! You also to set up an SSH key on GitHub because dependent repos are private. 
+First make sure you are using NPM v 2.7.5+. Some versions of NPM contain bugs which prevent repositories referenced with a git URL from being downloaded. You also need to **set up an SSH key on GitHub**, because some repositories that the project depends on are currently private.
+
+First build:
 ```
 npm install falcor
+npm install gulp -g
 gulp dist
+```
+Now set up a simple webpage and import the newly-generated falcor library:
+```html
+<html>
+  <head>
+    <!-- The generated library can be found in the "dist" folder under the Falcor root. -->
+    <script src="./dist/Falcor.js"></script>
+    <script>
+      var model = new falcor.Model(/* Model options */);
+      // your code goes here
+    </script>
+  </head>
+  <body>
+  </body>
+</html>
 ```
 
 ## What is Falcor?
@@ -16,9 +34,9 @@ Falcor lets you represent all of your cloud data sources as *One Virtual JSON Mo
 
 Falcor is not a replacement for your MVC framework, your database, or your application server. Instead you add Falcor to your existing stack to optimize client/server communication. Falcor is ideal for mobile apps, because it combines the caching benefits of REST with the low latency of RPC.
 
-You retrieve data from a Falcor model using the familiar JavaScript path syntax. 
+You retrieve data from a Falcor model using the familiar JavaScript path syntax.   
 
-```JavaScript
+```JavaScript 
 var person = {
     name: "Steve McGuire",
     occupation: "Developer",
