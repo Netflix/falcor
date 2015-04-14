@@ -10,8 +10,7 @@ npm install falcor
 npm install gulp -g
 gulp dist
 ```
-Now set up a simple webpage and import the newly generated falcor library:
-private. 
+Now set up a simple webpage and import the newly-generated falcor library:
 ```html
 <html>
   <head>
