@@ -9,9 +9,8 @@ var _ = require("lodash");
 var noOp = function() {};
 var Rx = require('rx');
 
-var prefix = require("../lib/types/internal-prefix");
-var __key = prefix + "key";
-var __generation = prefix + "generation";
+var __key = require("../lib/internal/key");
+var __generation = require("../lib/internal/generation");
 
 module.exports = {
     validateData: validateData,

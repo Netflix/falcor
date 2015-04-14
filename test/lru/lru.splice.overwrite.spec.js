@@ -14,11 +14,10 @@ var noOp = function() {};
 var getDataModel = testRunner.getModel;
 var _ = require('lodash');
 
-var prefix = require("../../lib/types/internal-prefix");
-var __head = prefix + "head";
-var __tail = prefix + "tail";
-var __next = prefix + "next";
-var __prev = prefix + "prev";
+var __head = require("../../lib/internal/head");
+var __tail = require("../../lib/internal/tail");
+var __next = require("../../lib/internal/next");
+var __prev = require("../../lib/internal/prev");
 
 describe('Overwrite', function() {
     describe('Input Paths', function() {
