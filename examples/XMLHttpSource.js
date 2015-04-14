@@ -21,7 +21,7 @@ XMLHttpSource.prototype = {
      * @inheritDoc DataSource#set
      */
     set: function (jsong) {
-        var method = 'GET';
+        var method = 'POST';
         var config = buildQueryObject(this._jsongUrl, method, {
             path: jsong,
             method: 'set'

@@ -115,6 +115,9 @@ Model.prototype = {
         return this.get(path, function(x) { return x });
     },
     setValue: function(path, value) {
+        if (typeof path === 'string') {
+            path = dotSyntaxParser(path);
+        }
         return this.set(Array.isArray(path) ?
         {path: path, value: value} :
             path, function(x) { return x; });
@@ -250,25 +253,25 @@ Model.prototype = {
         return this.clone(["_path", boundValue.path]);
     },
     clone: function() {
-        
+
         var self = this;
         var clone = new Model();
-        
+
         var key, tuple;
-        
+
         var keys = Object.keys(self);
         var keysIdx = -1;
         var keysLen = keys.length;
         while(++keysIdx < keysLen) {
             clone[key = keys[keysIdx]] = self[key];
         }
-        
+
         var argsIdx = -1;
         var argsLen = arguments.length;
         while(++argsIdx < argsLen) {
             clone[(tuple = arguments[argsIdx])[0]] = tuple[1];
         }
-        
+
         return clone;
     },
     batch: function(schedulerOrDelay) {

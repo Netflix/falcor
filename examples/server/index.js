@@ -1,4 +1,5 @@
 var express = require('express');
+var Router = require('./router');
 var app = express();
 
 app.use(express.static('examples'));
