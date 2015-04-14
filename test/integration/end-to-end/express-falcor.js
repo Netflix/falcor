@@ -6,31 +6,11 @@ var falcor = require('../../../index');
 var Rx = require('rx');
 var edgeCaseCache = require('./../../data/EdgeCase')();
 var fullCacheModel = new falcor.Model({cache: Cache()}).materialize();
-var fullCacheServer = new FalcorServer(fullCacheModel);
 var edgeCaseModel = new falcor.Model({cache: edgeCaseCache}).materialize();
-var edgeCaseServer = new FalcorServer(edgeCaseModel);
 
 // Simple middleware to handle get/post
-app.use('/falcor', function(req, res, next) {
-    fullCacheServer.fromHttpRequest(req, function(err, jsongString) {
-        if (err) {
-            res.status(500).send(err);
-        } else {
-            res.status(200).send(jsongString);
-        }
-        next();
-    });
-});
-app.use('/falcor.edge', function(req, res, next) {
-    edgeCaseServer.fromHttpRequest(req, function(err, jsongString) {
-        if (err) {
-            res.status(500).send(err);
-        } else {
-            res.status(200).send(jsongString);
-        }
-        next();
-    });
-});
+app.use('/falcor', FalcorServer.ExpressMiddleware(fullCacheModel));
+app.use('/falcor.edge', FalcorServer.ExpressMiddleware(edgeCaseModel));
 
 module.exports = function(port) {
     // Note: Will never complete unless explicitly closed.
