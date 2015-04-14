@@ -2,10 +2,28 @@
 
 ## Getting Started
 
-Make sure you are using NPM v 2.7.5+! You also to set up an SSH key on GitHub because dependent repos are private. 
+First make sure you are using NPM v 2.7.5+. Some versions of NPM contain bugs which prevent it from downloading repositories referenced with a git URL. You also need to **set up an SSH key on GitHub**, because dependent repos are private. 
+
+First build:
 ```
 npm install falcor
+npm install gulp -g
 gulp dist
+```
+Now set up a simple webpage and import the newly generated falcor library:
+private. 
+```html
+<html>
+  <head>
+    <script src="./dist/Falcor.js"><script>
+    <script>
+      var model = new falcor.Model(/* Model options */);
+      // your code goes here
+    <script>
+  </head>
+  <body>
+  </body>
+</html>
 ```
 
 ## What is Falcor?
