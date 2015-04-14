@@ -32,10 +32,10 @@ describe('Cache Only', function() {
                 subscribe(noOp, done, done);
         });
     });
-    
+
     describe('Relative Expiration', function() {
         it('should retrieve a value from the cache that has a relative expiration that has not expired yet', function() {
-            
+
             var value,
                 model = new falcor.Model({
                     cache: {
@@ -86,7 +86,7 @@ describe('Cache Only', function() {
             model.get(["users", {length:3}, ["name","age"]]).toPathValues().toArray().subscribe(function(vals) {
                 // console.log(JSON.stringify(vals));
                 testRunner.compare(
-                    JSON.stringify(vals), 
+                    JSON.stringify(vals),
                     '[{"path":["users",0,"name"],"value":"Jim"},{"path":["users",0,"age"],"value":23},{"path":["users",1,"name"],"value":"John"},{"path":["users",1,"age"],"value":44},{"path":["users",2,"name"],"value":"Derek"},{"path":["users",2,"age"],"value":22}]',
                     'JSON Graphs That contain arrays in the bridge deposition return the same thing as those that contain maps in the branch position when given the same query');
             });
