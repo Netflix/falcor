@@ -2,7 +2,7 @@
 
 ## Getting Started
 
-First make sure you are using NPM v 2.7.5+. Some versions of NPM contain bugs which prevent it from downloading repositories referenced with a git URL. You also need to **set up an SSH key on GitHub**, because dependent repos are private. 
+First make sure you are using NPM v 2.7.5+. Some versions of NPM contain bugs which prevent repositories referenced with a git URL from being downloaded. You also need to **set up an SSH key on GitHub**, because some repositories that the project depends on are currently private.
 
 First build:
 ```
@@ -432,7 +432,7 @@ app.get("/person.json", function (req, res) {
   });
 });
 
-var server = app.listen(80); 
+var server = app.listen(80);
 ```
 
 You can also retrieve multiple paths from a Falcor model, and the model will batch them into a single network request.
