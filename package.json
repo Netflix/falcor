@@ -1,7 +1,7 @@
 {
   "name": "falcor",
   "version": "0.0.7",
-  "main": "index-node",
+  "main": "./dist/Falcor.js",
   "scripts": {
     "test": "./node_modules/gulp/bin/gulp.js test-coverage",
     "dist": "./node_modules/gulp/bin/gulp.js build"
