@@ -183,8 +183,10 @@ describe('Specific Cases', function() {
         var model = new Model({cache: Cache()});
         var queries = [
             [{videos: {1234: 'string'}}],
-            [{videos: {1234: ['arr']}}],
-            [{videos: {1234: 5}}]
+            [{videos: {1234: 5}}],
+            [{videos: {1234: {
+                $type: 'test'
+            }}}]
         ];
         queries.forEach(function(q) {
             var result = model._getPathMapsAsJSON(model, q, [{}]);
@@ -192,7 +194,7 @@ describe('Specific Cases', function() {
             testRunner.compare([['videos', 1234]], result.requestedMissingPaths);
         });
     });
-    
+
     it('should be able to ask with non-nulls in the pathMap when missing in materialize.', function() {
         var model = new Model({cache: Cache()}).materialize();
         var queries = [
@@ -206,16 +208,16 @@ describe('Specific Cases', function() {
             testRunner.compare([{json: {$type: 'sentinel'}}], result.values);
         });
     });
-    
+
     it('should emit value when expired and materialized.', function() {
         var model = new Model({cache: Cache()}).materialize();
         var results = model._getPathSetsAsJSON(model, [['videos', 'expiredLeafByTimestamp', 'summary']], [{}]);
         testRunner.compare([{}], results.values);
     });
-    
+
     it('should ensure that anything removed wont be unhardlinked 2x.  COVERAGE TEST', function() {
         var model = new Model({cache: Cache()}).materialize();
-        
+
         // Removes the hardlink
         model._getPathSetsAsJSON(model, [['videos', 'expiredLeafByTimestamp', 'summary']], [{}]);
         var results = model._getPathSetsAsJSON(model, [['videos', 'expiredLeafByTimestamp', 'summary']], [{}]);

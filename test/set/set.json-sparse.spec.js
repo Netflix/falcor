@@ -18,7 +18,7 @@ var $sentinel = require("../../lib/types/sentinel");
 
 
 var modes = [{
-        
+
     }, {
         boxed: true
     }, {
@@ -359,7 +359,7 @@ function execute(output, suffix, opts) {
                     value: {
                         $type: $path,
                         value: ["rows", "row-0"],
-                        $expires: -1000
+                        $expires: -100000
                     }
                 }], options);
 
@@ -392,6 +392,7 @@ function execute(output, suffix, opts) {
 
                 setTimeout(function() {
 
+                debugger
                     set_and_verify_json_sparse(this.test, suffix, [{
                         path: ["grid", 2, 0, "title"],
                         value: "Pulp Fiction"
