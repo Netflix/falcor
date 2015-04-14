@@ -31,7 +31,10 @@ describe("Invalidate", function() {
         var invalidate = model.
             invalidate(["videos", 3355, "summary"]).
             flatMap(function() {
-                return model.withoutDataSource().get(["videos", 3355, "summary"]);
+                return model.
+                    withoutDataSource().
+                    get(["videos", 3355, "summary"]).
+                    asObservable();
             }).
             doAction(function(x) {
                 throw inspect(x, {depth: 10}) + " should not be onNext'd";
@@ -84,7 +87,10 @@ describe("Invalidate", function() {
         var invalidate = model.
             invalidate(["videos", 3355]).
             flatMap(function() {
-                return model.withoutDataSource().get(summary.slice());
+                return model.
+                    withoutDataSource().
+                    get(summary.slice()).
+                    asObservable();
             }).
             doAction(function(x) {
                 throw inspect(x, {depth: 10}) + " should not be onNext'd";
@@ -138,7 +144,10 @@ describe("Invalidate", function() {
         var invalidate = model.
             invalidate(["genreList", 0]).
             flatMap(function() {
-                return model.withoutDataSource().get(summary.concat());
+                return model.
+                    withoutDataSource().
+                    get(summary.concat()).
+                    asObservable();
             }).
             doAction(function(x) {
                 throw inspect(x, {depth: 10}) + " should not be onNext'd";
