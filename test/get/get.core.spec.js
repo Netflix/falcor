@@ -91,6 +91,9 @@ describe('Core', function() {
             it('should report a missing path in branch key position.', function() {
                 getTestRunner(References().referenceBranchIsMissing);
             });
+            it('should report a missing path with first position reference.', function() {
+                getTestRunner(References().missingFirstKey);
+            });
         });
         describe('Expired', function() {
             it('should report a missing requested path when reference is expired.', function() {

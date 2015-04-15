@@ -21,6 +21,7 @@ var Cache = function() {
             "10": { "$type": $path, "value": ["videos", 1234, "summary"] },
             "11": { "$type": $path, "value": ["lists", "missing-branch-link", "summary"] },
             "12": { "$type": $path, "value": ["lists", "future-expired-list"] },
+            "13": { "$type": $path, "value": ["missing", 12341234] },
             "inner-reference": { "$type": $path, "value": ['movies', 1234] },
             $sentinel: {
                 "$type": $path,
