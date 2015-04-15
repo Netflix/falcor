@@ -5,7 +5,8 @@ var genreListService = require('./genreListsService');
 var Model = require('./../Falcor').Model;
 
 function NetflixRouter(req, res) {
-
+    this.req = req;
+    this.res = res;
 }
 
 module.exports = NetflixRouter;
