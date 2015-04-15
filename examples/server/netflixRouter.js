@@ -4,7 +4,13 @@ var ratingService = require('./ratingService');
 var genreListService = require('./genreListsService');
 var Model = require('./../Falcor').Model;
 
-module.exports = new Router([
+function NetflixRouter(req, res) {
+
+}
+
+module.exports = NetflixRouter;
+
+NetflixRouter.prototype = new Router([
     {
         route: 'titleById[{integers}].rating',
         get: function(pathSet) {

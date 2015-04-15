@@ -3,7 +3,7 @@ var app = express();
 
 var Falcor = require('./../Falcor');
 var FalcorServer = require('falcor-server');
-var netflixRouter = require('./netflixRouter');
+var NetflixRouter = require('./netflixRouter');
 var cache = {
     genreLists: [
         {
@@ -33,14 +33,10 @@ var cache = {
         //, ... more genres
     ]
 };
-//app.use('/member.json', FalcorServer.ExpressMiddleware(model));
 app.use('/member.json', FalcorServer.ExpressMiddleware(function(req, res) {
-    var router = Object.create(netflixRouter);
-    router.req = req;
-    router.res = res;
     return new Model({
-        //cache: cache,
-        source: router
+        //cache: cache, No more cache!
+        source: new NetflixRouter(req, res)
     });
 }));
 
