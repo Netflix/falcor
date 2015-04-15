@@ -3,6 +3,7 @@ var titleService = require('./titleService');
 var ratingService = require('./ratingService');
 var genreListService = require('./genreListsService');
 var Model = require('./../Falcor').Model;
+var Promise = require('promise');
 
 function NetflixRouter(req, res) {
     this.req = req;
@@ -63,21 +64,45 @@ NetflixRouter.prototype = new Router([
         }
     },
     {
-        route: 'genreLists[{ranges}][{ranges}]',
+        route: 'genreLists[{ranges}].name',
         get: function(pathSet) {
             var rows = pathSet[1];
-            var columns = pathSet[2];
 
             return genreListService.
-                get(rows, columns, this.req.userId).
+                get(rows, 'name', this.req.userId).
                 then(function(genreListMap) {
                     var genreLists = {};
 
                     genreListMap.rows.forEach(function(row) {
-                        var genreRow = genreLists[row.index] = {};
+                        genreLists[row.index] = {
+                            name: row.name
+                        };
+                    });
 
+                    return {
+                        jsong: {
+                            genreLists: genreLists
+                        }
+                    };
+                });
+        }
+    },
+    {
+        route: 'genreLists[{ranges}].titles[{ranges}]',
+        get: function(pathSet) {
+            var rows = pathSet[1];
+            var cols = pathSet[3];
+
+            return genreListService.
+                get(rows, cols, this.req.userId).
+                then(function(genreListMap) {
+                    var genreLists = {};
+
+                    genreListMap.rows.forEach(function(row) {
+                        var genreListRow = genreLists[row.index] = {};
+                        var genreListTitles = genreListRow.titles = {};
                         row.columns.forEach(function(col) {
-                            genreRow[col.index] =
+                            genreListTitles[col.index] =
                                 Model.ref('titlesById[' + col.titleId + ']');
                         });
                     });
