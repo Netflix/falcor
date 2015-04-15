@@ -13,7 +13,7 @@ describe("End-to-End", function() {
     var server = require('./express-falcor')(1337).publishValue();
     var dispose = server.connect();
 
-    it.only('should perform a simple get.', function(done) {
+    it('should perform a simple get.', function(done) {
         var expected = Values().direct.AsJSON.values[0].json;
         var model = new falcor.Model({
             source: source
