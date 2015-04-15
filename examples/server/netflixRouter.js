@@ -20,12 +20,11 @@ NetflixRouter.prototype = new Router([
 
             return ratingService.
                 get(titleIds, this.req.userId).
-                then(function(titlesMap) {
+                then(function(titles) {
                     var titlesById = {};
 
-                    titleIds.forEach(function(id) {
-                        var rating = titlesMap[id];
-                        titlesById[id] = {rating: rating};
+                    titles.forEach(function(title) {
+                        titlesById[title.id] = {rating: title.rating};
                     });
 
                     return {
@@ -44,14 +43,13 @@ NetflixRouter.prototype = new Router([
 
             return titleService.
                 get(titleIds).
-                then(function(titlesMap) {
+                then(function(titles) {
                     var titlesById = {};
 
-                    titleIds.forEach(function(id) {
-                        var title = titlesMap[id];
-                        titlesById[id] = {};
+                    titles.forEach(function(title) {
+                        titlesById[title.id] = {};
                         requestedProps.forEach(function(requestedProp) {
-                            titlesById[id][requestedProp] = title[requestedProp];
+                            titlesById[title.id][requestedProp] = title[requestedProp];
                         });
                     });
 

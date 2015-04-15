@@ -112,7 +112,7 @@ Model.prototype = {
     invalidate: operations("invalidate"),
     call: call,
     getValue: function(path) {
-        return this.get(path, function(x) { return x });
+        return this.get(path, function(x) { return x; });
     },
     setValue: function(path, value) {
         if (typeof path === 'string') {
@@ -128,8 +128,15 @@ Model.prototype = {
             paths = new Array(arguments.length - 1),
             i = -1, n = arguments.length - 1;
 
+        if (typeof boundPath === 'string') {
+            boundPath = dotSyntaxParser(boundPath);
+        }
+
         while(++i < n) {
-            paths[i] = arguments[i + 1];
+            var p = paths[i] = arguments[i + 1];
+            if (typeof p === 'string') {
+                paths[i] = dotSyntaxParser(p);
+            }
         }
 
         if(n === 0) { throw new Error("Model#bind requires at least one value path."); }
@@ -175,6 +182,9 @@ Model.prototype = {
         return pathmaps[0].json;
     },
     getValueSync: function(path) {
+        if (typeof path === 'string') {
+            path = dotSyntaxParser(path);
+        }
         if (Array.isArray(path) === false) {
             throw new Error("Model#getValueSync must be called with an Array path.");
         }
@@ -184,6 +194,9 @@ Model.prototype = {
         return this.syncCheck("getValueSync") && this._getValueSync(this, path).value;
     },
     setValueSync: function(path, value, errorSelector) {
+        if (typeof path === 'string') {
+            path = dotSyntaxParser(path);
+        }
 
         if(Array.isArray(path) === false) {
             if(typeof errorSelector !== "function") {
@@ -227,6 +240,9 @@ Model.prototype = {
         }
     },
     bindSync: function(path) {
+        if (typeof path === 'string') {
+            path = dotSyntaxParser(path);
+        }
         if(Array.isArray(path) === false) {
             throw new Error("Model#bindSync must be called with an Array path.");
         }
@@ -365,7 +381,6 @@ ModelResponse.prototype.progressively = function() {
 ModelResponse.prototype.toJSONG = function() {
     return mixin(this, jsongMixin);
 };
-
 ModelResponse.prototype.toArray = function() {
     var self = this;
     return new ModelResponse(function(observer) {
@@ -379,7 +394,6 @@ ModelResponse.prototype.toArray = function() {
         });
     });
 };
-
 ModelResponse.prototype.then = function(onNext, onError) {
     var self = this;
     return new falcor.Promise(function(resolve, reject) {
@@ -2442,7 +2456,8 @@ function followReference(model, root, node, referenceContainer, reference, seed,
         break;
     }
 
-    if (depth < reference.length) {
+
+    if (depth < reference.length && node !== undefined) {
         var ref = [];
         for (var i = 0; i < depth; i++) {
             ref[i] = reference[i];
@@ -7333,70 +7348,71 @@ var is_array = Array.isArray;
 var promote = _dereq_("../lru/promote");
 
 function walk_path_map(onNode, onEdge, pathmap, keys_stack, depth, roots, parents, nodes, requested, optimized, key, keyset, is_keyset) {
-    
+
     var node = nodes[0];
-    
+
     if(is_primitive(pathmap) || is_primitive(node)) {
         return onEdge(pathmap, keys_stack, depth, roots, parents, nodes, requested, optimized, key, keyset);
     }
-    
+
     var type = node.$type;
-    
+
     while(type === $path) {
-        
+
         if(is_expired(roots, node)) {
             nodes[0] = undefined;
             return onEdge(pathmap, keys_stack, depth, roots, parents, nodes, requested, optimized, key, keyset);
         }
-        
+
         promote(roots.lru, node);
-        
+
         var container = node;
         var reference = node.value;
-        
+
         nodes[0] = parents[0] = roots[0];
         nodes[1] = parents[1] = roots[1];
         nodes[2] = parents[2] = roots[2];
-        
+
         walk_reference(onNode, container, reference, roots, parents, nodes, requested, optimized);
-        
+
         node = nodes[0];
-        
+
         if(node == null) {
+            optimized = array_clone(reference);
             return onEdge(pathmap, keys_stack, depth, roots, parents, nodes, requested, optimized, key, keyset);
         } else if(is_primitive(node) || ((type = node.$type) && type != $path)) {
             onNode(pathmap, roots, parents, nodes, requested, optimized, true, null, keyset, false);
             return onEdge(pathmap, keys_stack, depth, roots, parents, nodes, array_append(requested, null), optimized, key, keyset);
         }
     }
-    
+
     if(type != null) {
         return onEdge(pathmap, keys_stack, depth, roots, parents, nodes, requested, optimized, key, keyset);
     }
-    
+
     var keys = keys_stack[depth] = Object.keys(pathmap);
-    
+
     if(keys.length == 0) {
         return onEdge(pathmap, keys_stack, depth, roots, parents, nodes, requested, optimized, key, keyset);
     }
-    
+
     var is_outer_keyset = keys.length > 1;
-    
+
     for(var i = -1, n = keys.length; ++i < n;) {
-        
+
         var inner_key = keys[i];
-        
+
         if((inner_key[0] === prefix) || (inner_key[0] === "$")) {
             continue;
         }
-        
+
         var inner_keyset = is_outer_keyset ? inner_key : keyset;
         var nodes2 = array_clone(nodes);
         var parents2 = array_clone(parents);
         var pathmap2 = pathmap[inner_key];
         var requested2, optimized2, is_branch;
         var has_child_key = false;
-        
+
         var is_branch = is_object(pathmap2) && !pathmap2.$type;// && !is_array(pathmap2);
         if(is_branch) {
             for(child_key in pathmap2) {
@@ -7408,7 +7424,7 @@ function walk_path_map(onNode, onEdge, pathmap, keys_stack, depth, roots, parent
             }
             is_branch = child_key === true;
         }
-        
+
         if(inner_key == "null") {
             requested2 = array_append(requested, null);
             optimized2 = array_clone(optimized);
@@ -7421,7 +7437,7 @@ function walk_path_map(onNode, onEdge, pathmap, keys_stack, depth, roots, parent
             optimized2 = array_append(optimized, inner_key);
             onNode(pathmap2, roots, parents2, nodes2, requested2, optimized2, true, is_branch, inner_key, inner_keyset, is_outer_keyset);
         }
-        
+
         if(is_branch) {
             walk_path_map(onNode, onEdge,
                 pathmap2, keys_stack, depth + 1,
@@ -7456,41 +7472,42 @@ var is_array = Array.isArray;
 var promote = _dereq_("../lru/promote");
 
 function walk_path_map(onNode, onEdge, pathmap, keys_stack, depth, roots, parents, nodes, requested, optimized, key, keyset, is_keyset) {
-    
+
     var node = nodes[0];
-    
+
     if(is_primitive(pathmap) || is_primitive(node)) {
         return onEdge(pathmap, keys_stack, depth, roots, parents, nodes, requested, optimized, key, keyset);
     }
-    
+
     var type = node.$type;
-    
+
     while(type === $path) {
-        
+
         if(is_expired(roots, node)) {
             nodes[0] = undefined;
             return onEdge(pathmap, keys_stack, depth, roots, parents, nodes, requested, optimized, key, keyset);
         }
-        
+
         promote(roots.lru, node);
-        
+
         var container = node;
         var reference = node.value;
         node = node[__context];
-        
+
         if(node != null) {
             type = node.$type;
             optimized = array_clone(reference);
             nodes[0] = node;
         } else {
-            
+
             nodes[0] = parents[0] = roots[0];
-            
+
             walk_reference(onNode, container, reference, roots, parents, nodes, requested, optimized);
-            
+
             node = nodes[0];
-            
+
             if(node == null) {
+                optimized = array_clone(reference);
                 return onEdge(pathmap, keys_stack, depth, roots, parents, nodes, requested, optimized, key, keyset);
             } else if(is_primitive(node) || ((type = node.$type) && type != $path)) {
                 onNode(pathmap, roots, parents, nodes, requested, optimized, true, null, keyset, false);
@@ -7498,34 +7515,34 @@ function walk_path_map(onNode, onEdge, pathmap, keys_stack, depth, roots, parent
             }
         }
     }
-    
+
     if(type != null) {
         return onEdge(pathmap, keys_stack, depth, roots, parents, nodes, requested, optimized, key, keyset);
     }
-    
+
     var keys = keys_stack[depth] = Object.keys(pathmap);
-    
+
     if(keys.length == 0) {
         return onEdge(pathmap, keys_stack, depth, roots, parents, nodes, requested, optimized, key, keyset);
     }
-    
+
     var is_outer_keyset = keys.length > 1;
-    
+
     for(var i = -1, n = keys.length; ++i < n;) {
-        
+
         var inner_key = keys[i];
-        
+
         if((inner_key[0] === prefix) || (inner_key[0] === "$")) {
             continue;
         }
-        
+
         var inner_keyset = is_outer_keyset ? inner_key : keyset;
         var nodes2 = array_clone(nodes);
         var parents2 = array_clone(parents);
         var pathmap2 = pathmap[inner_key];
         var requested2, optimized2, is_branch;
         var child_key = false;
-        
+
         var is_branch = is_object(pathmap2) && !pathmap2.$type;// && !is_array(pathmap2);
         if(is_branch) {
             for(child_key in pathmap2) {
@@ -7537,7 +7554,7 @@ function walk_path_map(onNode, onEdge, pathmap, keys_stack, depth, roots, parent
             }
             is_branch = child_key === true;
         }
-        
+
         if(inner_key == "null") {
             requested2 = array_append(requested, null);
             optimized2 = array_clone(optimized);
@@ -7550,7 +7567,7 @@ function walk_path_map(onNode, onEdge, pathmap, keys_stack, depth, roots, parent
             optimized2 = array_append(optimized, inner_key);
             onNode(pathmap2, roots, parents2, nodes2, requested2, optimized2, true, is_branch, inner_key, inner_keyset, is_outer_keyset);
         }
-        
+
         if(is_branch) {
             walk_path_map(onNode, onEdge,
                 pathmap2, keys_stack, depth + 1,
@@ -7601,9 +7618,9 @@ function walk_path_set(onNode, onEdge, pathset, depth, roots, parents, nodes, re
             nodes[0] = undefined;
             return onEdge(pathset, depth, roots, parents, nodes, requested, optimized, key, keyset);
         }
-        
+
         promote(roots.lru, node);
-        
+
         var container = node;
         var reference = node.value;
 
@@ -7616,6 +7633,7 @@ function walk_path_set(onNode, onEdge, pathset, depth, roots, parents, nodes, re
         node = nodes[0];
 
         if(node == null) {
+            optimized = array_clone(reference);
             return onEdge(pathset, depth, roots, parents, nodes, requested, optimized, key, keyset);
         } else if(is_primitive(node) || ((type = node.$type) && type != $path)) {
             onNode(pathset, roots, parents, nodes, requested, optimized, true, false, null, keyset, false);
@@ -7631,7 +7649,7 @@ function walk_path_set(onNode, onEdge, pathset, depth, roots, parents, nodes, re
     var is_outer_keyset = is_object(outer_key);
     var is_branch = depth < pathset.length - 1;
     var run_once = false;
-    
+
     while(is_outer_keyset && permute_keyset(outer_key) && (run_once = true) || (run_once = !run_once)) {
         var inner_key, inner_keyset;
 
@@ -7668,6 +7686,7 @@ function walk_path_set(onNode, onEdge, pathset, depth, roots, parents, nodes, re
         );
     }
 }
+
 },{"../lru/promote":87,"../support/array-append":103,"../support/array-clone":104,"../support/array-slice":105,"../support/is-expired":121,"../support/is-object":122,"../support/is-primitive":123,"../support/keyset-to-key":124,"../support/permute-keyset":128,"../types/path":140,"./walk-reference":148}],147:[function(_dereq_,module,exports){
 module.exports = walk_path_set;
 
@@ -7707,9 +7726,9 @@ function walk_path_set(onNode, onEdge, pathset, depth, roots, parents, nodes, re
             nodes[0] = undefined;
             return onEdge(pathset, depth, roots, parents, nodes, requested, optimized, key, keyset);
         }
-        
+
         promote(roots.lru, node);
-        
+
         var container = node;
         var reference = node.value;
         node = node[__context];
@@ -7729,6 +7748,7 @@ function walk_path_set(onNode, onEdge, pathset, depth, roots, parents, nodes, re
             node = nodes[0];
 
             if(node == null) {
+                optimized = array_clone(reference);
                 return onEdge(pathset, depth, roots, parents, nodes, requested, optimized, key, keyset);
             } else if(is_primitive(node) || ((type = node.$type) && type != $path)) {
                 onNode(pathset, roots, parents, nodes, requested, optimized, true, false, null, keyset, false);
@@ -7745,9 +7765,9 @@ function walk_path_set(onNode, onEdge, pathset, depth, roots, parents, nodes, re
     var is_outer_keyset = is_object(outer_key);
     var is_branch = depth < pathset.length - 1;
     var run_once = false;
-    
+
     while(is_outer_keyset && permute_keyset(outer_key) && (run_once = true) || (run_once = !run_once)) {
-        
+
         var inner_key, inner_keyset;
 
         if(is_outer_keyset === true) {
@@ -7799,24 +7819,24 @@ var array_slice    = _dereq_("../support/array-slice");
 var array_append   = _dereq_("../support/array-append");
 
 function walk_reference(onNode, container, reference, roots, parents, nodes, requested, optimized) {
-    
+
     optimized.length = 0;
-    
+
     var index = -1;
     var count = reference.length;
     var node, key, keyset;
-    
+
     while(++index < count) {
-        
+
         node = nodes[0];
-        
+
         if(node == null) {
             return nodes;
         } else if(is_primitive(node) || node.$type) {
             onNode(reference, roots, parents, nodes, requested, optimized, false, false, keyset, null, false);
             return nodes;
         }
-        
+
         do {
             key = reference[index];
             if(key != null) {
@@ -7827,9 +7847,9 @@ function walk_reference(onNode, container, reference, roots, parents, nodes, req
             }
         } while(++index < count);
     }
-    
+
     node = nodes[0];
-    
+
     if(is_object(node) && container[__context] !== node) {
         var backrefs = node[__refs_length] || 0;
         node[__refs_length] = backrefs + 1;
@@ -7837,9 +7857,10 @@ function walk_reference(onNode, container, reference, roots, parents, nodes, req
         container[__context]    = node;
         container[__ref_index]  = backrefs;
     }
-    
+
     return nodes;
 }
+
 },{"../internal/context":66,"../internal/prefix":74,"../internal/ref":77,"../internal/ref-index":76,"../internal/refs-length":78,"../support/array-append":103,"../support/array-slice":105,"../support/is-object":122,"../support/is-primitive":123}],149:[function(_dereq_,module,exports){
 /*global define:false require:false */
 module.exports = (function(){

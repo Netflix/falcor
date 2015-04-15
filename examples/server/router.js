@@ -10,7 +10,7 @@ function Router(routes) {
         var hasName = routes[i].route.indexOf('name') > 0;
 
         if (hasTitles && hasRatings) {
-            this._ratings = routes[i].get;
+            this._ratings = routes[i];
         } else if (hasTitles) {
             this._nameAndBoxShots = routes[i].get;
         } else if (hasName) {
@@ -23,6 +23,17 @@ function Router(routes) {
 
 Router.prototype = {
     get: function(optimizedPaths) {
+        return this._execute(optimizedPaths, 'get');
+    },
+    set: function(jsong) {
+        var model = new Model({cache: jsong.jsong});
+        var path = jsong.paths[0];
+        model._root.unsafeMode = true;
+        var rating = model.getValueSync(path);
+
+        return this._execute([path], 'set', rating);
+    },
+    _execute: function(optimizedPaths, method, args) {
 
         // must use Rx for now, the Thenable interface will make havoc on
         // our codes.
@@ -35,8 +46,11 @@ Router.prototype = {
             var hasRatings = last.indexOf('rating') === 0;
             var hasName = last.indexOf('name') === 0;
             if (hasTitles && hasRatings) {
-                obs = self._ratings.call(self, p);
+                p[1] = Array.isArray(p[1]) && p[1] || [p[1]];
+                obs = self._ratings[method].call(self, p, args);
             } else if (hasTitles) {
+                p[1] = Array.isArray(p[1]) && p[1] || [p[1]];
+                p[2] = Array.isArray(p[2]) && p[2] || [p[2]];
                 obs = self._nameAndBoxShots.call(self, p);
             } else if (hasName && p.length === 3) {
                 obs = self._genreListNames.call(self, p);
@@ -53,6 +67,7 @@ Router.prototype = {
                 });
         });
 
+        // this is for get
         return Rx.Observable.
             from(obs).
             mergeAll().

@@ -1,6 +1,9 @@
 var express = require('express');
 var app = express();
 
+// middleware for posts
+app.use(require('body-parser').json());
+
 var Falcor = require('./../Falcor');
 var Model = Falcor.Model;
 var FalcorServer = require('falcor-server');

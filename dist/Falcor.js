@@ -16,7 +16,7 @@
 !function(e){if("object"==typeof exports)module.exports=e();else if("function"==typeof define&&define.amd)define(e);else{var f;"undefined"!=typeof window?f=window:"undefined"!=typeof global?f=global:"undefined"!=typeof self&&(f=self),f.falcor=e()}}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 module.exports = _dereq_('./operations');
 
-},{"./operations":149}],2:[function(_dereq_,module,exports){
+},{"./operations":162}],2:[function(_dereq_,module,exports){
 if (typeof falcor === 'undefined') {
     var falcor = {};
 }
@@ -327,11 +327,11 @@ Model.prototype = {
 },{"../types/error":139,"./../get/getBoundValue":49,"./../types/error":139,"./../types/path":140,"./../types/sentinel":141,"./Falcor":2,"./ModelResponse":4,"./operations":11,"./operations/call":6,"./operations/parser/parser":16,"./request/RequestQueue":40,"./scheduler/ImmediateScheduler":42,"./scheduler/TimeoutScheduler":43}],4:[function(_dereq_,module,exports){
 var falcor = _dereq_('./Falcor');
 
-//if(typeof Promise !== "undefined" && Promise) {
-    //falcor.Promise = Promise;
-//} else {
-    //falcor.Promise = require("promise");
-//}
+if(typeof Promise !== "undefined" && Promise) {
+    falcor.Promise = Promise;
+} else {
+    falcor.Promise = _dereq_("promise");
+}
 
 var Observable  = falcor.Observable,
     valuesMixin = { format: { value: "AsValues"  } },
@@ -430,7 +430,7 @@ ModelResponse.prototype.then = function(onNext, onError) {
 
 module.exports = ModelResponse;
 
-},{"./Falcor":2}],5:[function(_dereq_,module,exports){
+},{"./Falcor":2,"promise":152}],5:[function(_dereq_,module,exports){
 var falcor = _dereq_('./Falcor');
 var Model = _dereq_('./Model');
 falcor.Model = Model;
@@ -2456,7 +2456,8 @@ function followReference(model, root, node, referenceContainer, reference, seed,
         break;
     }
 
-    if (depth < reference.length) {
+
+    if (depth < reference.length && node !== undefined) {
         var ref = [];
         for (var i = 0; i < depth; i++) {
             ref[i] = reference[i];
@@ -7347,70 +7348,71 @@ var is_array = Array.isArray;
 var promote = _dereq_("../lru/promote");
 
 function walk_path_map(onNode, onEdge, pathmap, keys_stack, depth, roots, parents, nodes, requested, optimized, key, keyset, is_keyset) {
-    
+
     var node = nodes[0];
-    
+
     if(is_primitive(pathmap) || is_primitive(node)) {
         return onEdge(pathmap, keys_stack, depth, roots, parents, nodes, requested, optimized, key, keyset);
     }
-    
+
     var type = node.$type;
-    
+
     while(type === $path) {
-        
+
         if(is_expired(roots, node)) {
             nodes[0] = undefined;
             return onEdge(pathmap, keys_stack, depth, roots, parents, nodes, requested, optimized, key, keyset);
         }
-        
+
         promote(roots.lru, node);
-        
+
         var container = node;
         var reference = node.value;
-        
+
         nodes[0] = parents[0] = roots[0];
         nodes[1] = parents[1] = roots[1];
         nodes[2] = parents[2] = roots[2];
-        
+
         walk_reference(onNode, container, reference, roots, parents, nodes, requested, optimized);
-        
+
         node = nodes[0];
-        
+
         if(node == null) {
+            optimized = array_clone(reference);
             return onEdge(pathmap, keys_stack, depth, roots, parents, nodes, requested, optimized, key, keyset);
         } else if(is_primitive(node) || ((type = node.$type) && type != $path)) {
             onNode(pathmap, roots, parents, nodes, requested, optimized, true, null, keyset, false);
             return onEdge(pathmap, keys_stack, depth, roots, parents, nodes, array_append(requested, null), optimized, key, keyset);
         }
     }
-    
+
     if(type != null) {
         return onEdge(pathmap, keys_stack, depth, roots, parents, nodes, requested, optimized, key, keyset);
     }
-    
+
     var keys = keys_stack[depth] = Object.keys(pathmap);
-    
+
     if(keys.length == 0) {
         return onEdge(pathmap, keys_stack, depth, roots, parents, nodes, requested, optimized, key, keyset);
     }
-    
+
     var is_outer_keyset = keys.length > 1;
-    
+
     for(var i = -1, n = keys.length; ++i < n;) {
-        
+
         var inner_key = keys[i];
-        
+
         if((inner_key[0] === prefix) || (inner_key[0] === "$")) {
             continue;
         }
-        
+
         var inner_keyset = is_outer_keyset ? inner_key : keyset;
         var nodes2 = array_clone(nodes);
         var parents2 = array_clone(parents);
         var pathmap2 = pathmap[inner_key];
         var requested2, optimized2, is_branch;
         var has_child_key = false;
-        
+
         var is_branch = is_object(pathmap2) && !pathmap2.$type;// && !is_array(pathmap2);
         if(is_branch) {
             for(child_key in pathmap2) {
@@ -7422,7 +7424,7 @@ function walk_path_map(onNode, onEdge, pathmap, keys_stack, depth, roots, parent
             }
             is_branch = child_key === true;
         }
-        
+
         if(inner_key == "null") {
             requested2 = array_append(requested, null);
             optimized2 = array_clone(optimized);
@@ -7435,7 +7437,7 @@ function walk_path_map(onNode, onEdge, pathmap, keys_stack, depth, roots, parent
             optimized2 = array_append(optimized, inner_key);
             onNode(pathmap2, roots, parents2, nodes2, requested2, optimized2, true, is_branch, inner_key, inner_keyset, is_outer_keyset);
         }
-        
+
         if(is_branch) {
             walk_path_map(onNode, onEdge,
                 pathmap2, keys_stack, depth + 1,
@@ -7470,41 +7472,42 @@ var is_array = Array.isArray;
 var promote = _dereq_("../lru/promote");
 
 function walk_path_map(onNode, onEdge, pathmap, keys_stack, depth, roots, parents, nodes, requested, optimized, key, keyset, is_keyset) {
-    
+
     var node = nodes[0];
-    
+
     if(is_primitive(pathmap) || is_primitive(node)) {
         return onEdge(pathmap, keys_stack, depth, roots, parents, nodes, requested, optimized, key, keyset);
     }
-    
+
     var type = node.$type;
-    
+
     while(type === $path) {
-        
+
         if(is_expired(roots, node)) {
             nodes[0] = undefined;
             return onEdge(pathmap, keys_stack, depth, roots, parents, nodes, requested, optimized, key, keyset);
         }
-        
+
         promote(roots.lru, node);
-        
+
         var container = node;
         var reference = node.value;
         node = node[__context];
-        
+
         if(node != null) {
             type = node.$type;
             optimized = array_clone(reference);
             nodes[0] = node;
         } else {
-            
+
             nodes[0] = parents[0] = roots[0];
-            
+
             walk_reference(onNode, container, reference, roots, parents, nodes, requested, optimized);
-            
+
             node = nodes[0];
-            
+
             if(node == null) {
+                optimized = array_clone(reference);
                 return onEdge(pathmap, keys_stack, depth, roots, parents, nodes, requested, optimized, key, keyset);
             } else if(is_primitive(node) || ((type = node.$type) && type != $path)) {
                 onNode(pathmap, roots, parents, nodes, requested, optimized, true, null, keyset, false);
@@ -7512,34 +7515,34 @@ function walk_path_map(onNode, onEdge, pathmap, keys_stack, depth, roots, parent
             }
         }
     }
-    
+
     if(type != null) {
         return onEdge(pathmap, keys_stack, depth, roots, parents, nodes, requested, optimized, key, keyset);
     }
-    
+
     var keys = keys_stack[depth] = Object.keys(pathmap);
-    
+
     if(keys.length == 0) {
         return onEdge(pathmap, keys_stack, depth, roots, parents, nodes, requested, optimized, key, keyset);
     }
-    
+
     var is_outer_keyset = keys.length > 1;
-    
+
     for(var i = -1, n = keys.length; ++i < n;) {
-        
+
         var inner_key = keys[i];
-        
+
         if((inner_key[0] === prefix) || (inner_key[0] === "$")) {
             continue;
         }
-        
+
         var inner_keyset = is_outer_keyset ? inner_key : keyset;
         var nodes2 = array_clone(nodes);
         var parents2 = array_clone(parents);
         var pathmap2 = pathmap[inner_key];
         var requested2, optimized2, is_branch;
         var child_key = false;
-        
+
         var is_branch = is_object(pathmap2) && !pathmap2.$type;// && !is_array(pathmap2);
         if(is_branch) {
             for(child_key in pathmap2) {
@@ -7551,7 +7554,7 @@ function walk_path_map(onNode, onEdge, pathmap, keys_stack, depth, roots, parent
             }
             is_branch = child_key === true;
         }
-        
+
         if(inner_key == "null") {
             requested2 = array_append(requested, null);
             optimized2 = array_clone(optimized);
@@ -7564,7 +7567,7 @@ function walk_path_map(onNode, onEdge, pathmap, keys_stack, depth, roots, parent
             optimized2 = array_append(optimized, inner_key);
             onNode(pathmap2, roots, parents2, nodes2, requested2, optimized2, true, is_branch, inner_key, inner_keyset, is_outer_keyset);
         }
-        
+
         if(is_branch) {
             walk_path_map(onNode, onEdge,
                 pathmap2, keys_stack, depth + 1,
@@ -7615,9 +7618,9 @@ function walk_path_set(onNode, onEdge, pathset, depth, roots, parents, nodes, re
             nodes[0] = undefined;
             return onEdge(pathset, depth, roots, parents, nodes, requested, optimized, key, keyset);
         }
-        
+
         promote(roots.lru, node);
-        
+
         var container = node;
         var reference = node.value;
 
@@ -7630,6 +7633,7 @@ function walk_path_set(onNode, onEdge, pathset, depth, roots, parents, nodes, re
         node = nodes[0];
 
         if(node == null) {
+            optimized = array_clone(reference);
             return onEdge(pathset, depth, roots, parents, nodes, requested, optimized, key, keyset);
         } else if(is_primitive(node) || ((type = node.$type) && type != $path)) {
             onNode(pathset, roots, parents, nodes, requested, optimized, true, false, null, keyset, false);
@@ -7645,7 +7649,7 @@ function walk_path_set(onNode, onEdge, pathset, depth, roots, parents, nodes, re
     var is_outer_keyset = is_object(outer_key);
     var is_branch = depth < pathset.length - 1;
     var run_once = false;
-    
+
     while(is_outer_keyset && permute_keyset(outer_key) && (run_once = true) || (run_once = !run_once)) {
         var inner_key, inner_keyset;
 
@@ -7682,6 +7686,7 @@ function walk_path_set(onNode, onEdge, pathset, depth, roots, parents, nodes, re
         );
     }
 }
+
 },{"../lru/promote":87,"../support/array-append":103,"../support/array-clone":104,"../support/array-slice":105,"../support/is-expired":121,"../support/is-object":122,"../support/is-primitive":123,"../support/keyset-to-key":124,"../support/permute-keyset":128,"../types/path":140,"./walk-reference":148}],147:[function(_dereq_,module,exports){
 module.exports = walk_path_set;
 
@@ -7721,9 +7726,9 @@ function walk_path_set(onNode, onEdge, pathset, depth, roots, parents, nodes, re
             nodes[0] = undefined;
             return onEdge(pathset, depth, roots, parents, nodes, requested, optimized, key, keyset);
         }
-        
+
         promote(roots.lru, node);
-        
+
         var container = node;
         var reference = node.value;
         node = node[__context];
@@ -7743,6 +7748,7 @@ function walk_path_set(onNode, onEdge, pathset, depth, roots, parents, nodes, re
             node = nodes[0];
 
             if(node == null) {
+                optimized = array_clone(reference);
                 return onEdge(pathset, depth, roots, parents, nodes, requested, optimized, key, keyset);
             } else if(is_primitive(node) || ((type = node.$type) && type != $path)) {
                 onNode(pathset, roots, parents, nodes, requested, optimized, true, false, null, keyset, false);
@@ -7759,9 +7765,9 @@ function walk_path_set(onNode, onEdge, pathset, depth, roots, parents, nodes, re
     var is_outer_keyset = is_object(outer_key);
     var is_branch = depth < pathset.length - 1;
     var run_once = false;
-    
+
     while(is_outer_keyset && permute_keyset(outer_key) && (run_once = true) || (run_once = !run_once)) {
-        
+
         var inner_key, inner_keyset;
 
         if(is_outer_keyset === true) {
@@ -7813,24 +7819,24 @@ var array_slice    = _dereq_("../support/array-slice");
 var array_append   = _dereq_("../support/array-append");
 
 function walk_reference(onNode, container, reference, roots, parents, nodes, requested, optimized) {
-    
+
     optimized.length = 0;
-    
+
     var index = -1;
     var count = reference.length;
     var node, key, keyset;
-    
+
     while(++index < count) {
-        
+
         node = nodes[0];
-        
+
         if(node == null) {
             return nodes;
         } else if(is_primitive(node) || node.$type) {
             onNode(reference, roots, parents, nodes, requested, optimized, false, false, keyset, null, false);
             return nodes;
         }
-        
+
         do {
             key = reference[index];
             if(key != null) {
@@ -7841,9 +7847,9 @@ function walk_reference(onNode, container, reference, roots, parents, nodes, req
             }
         } while(++index < count);
     }
-    
+
     node = nodes[0];
-    
+
     if(is_object(node) && container[__context] !== node) {
         var backrefs = node[__refs_length] || 0;
         node[__refs_length] = backrefs + 1;
@@ -7851,10 +7857,1235 @@ function walk_reference(onNode, container, reference, roots, parents, nodes, req
         container[__context]    = node;
         container[__ref_index]  = backrefs;
     }
-    
+
     return nodes;
 }
+
 },{"../internal/context":66,"../internal/prefix":74,"../internal/ref":77,"../internal/ref-index":76,"../internal/refs-length":78,"../support/array-append":103,"../support/array-slice":105,"../support/is-object":122,"../support/is-primitive":123}],149:[function(_dereq_,module,exports){
+/*global define:false require:false */
+module.exports = (function(){
+	// Import Events
+	var events = _dereq_('events')
+
+	// Export Domain
+	var domain = {}
+	domain.createDomain = domain.create = function(){
+		var d = new events.EventEmitter()
+
+		function emitError(e) {
+			d.emit('error', e)
+		}
+
+		d.add = function(emitter){
+			emitter.on('error', emitError)
+		}
+		d.remove = function(emitter){
+			emitter.removeListener('error', emitError)
+		}
+		d.bind = function(fn){
+			return function(){
+				var args = Array.prototype.slice.call(arguments)
+				try {
+					fn.apply(null, args)
+				}
+				catch (err){
+					emitError(err)
+				}
+			}
+		}
+		d.intercept = function(fn){
+			return function(err){
+				if ( err ) {
+					emitError(err)
+				}
+				else {
+					var args = Array.prototype.slice.call(arguments, 1)
+					try {
+						fn.apply(null, args)
+					}
+					catch (err){
+						emitError(err)
+					}
+				}
+			}
+		}
+		d.run = function(fn){
+			try {
+				fn()
+			}
+			catch (err) {
+				emitError(err)
+			}
+			return this
+		};
+		d.dispose = function(){
+			this.removeAllListeners()
+			return this
+		};
+		d.enter = d.exit = function(){
+			return this
+		}
+		return d
+	};
+	return domain
+}).call(this)
+},{"events":150}],150:[function(_dereq_,module,exports){
+// Copyright Joyent, Inc. and other Node contributors.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a
+// copy of this software and associated documentation files (the
+// "Software"), to deal in the Software without restriction, including
+// without limitation the rights to use, copy, modify, merge, publish,
+// distribute, sublicense, and/or sell copies of the Software, and to permit
+// persons to whom the Software is furnished to do so, subject to the
+// following conditions:
+//
+// The above copyright notice and this permission notice shall be included
+// in all copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+// OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN
+// NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+// DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+// OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
+// USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+function EventEmitter() {
+  this._events = this._events || {};
+  this._maxListeners = this._maxListeners || undefined;
+}
+module.exports = EventEmitter;
+
+// Backwards-compat with node 0.10.x
+EventEmitter.EventEmitter = EventEmitter;
+
+EventEmitter.prototype._events = undefined;
+EventEmitter.prototype._maxListeners = undefined;
+
+// By default EventEmitters will print a warning if more than 10 listeners are
+// added to it. This is a useful default which helps finding memory leaks.
+EventEmitter.defaultMaxListeners = 10;
+
+// Obviously not all Emitters should be limited to 10. This function allows
+// that to be increased. Set to zero for unlimited.
+EventEmitter.prototype.setMaxListeners = function(n) {
+  if (!isNumber(n) || n < 0 || isNaN(n))
+    throw TypeError('n must be a positive number');
+  this._maxListeners = n;
+  return this;
+};
+
+EventEmitter.prototype.emit = function(type) {
+  var er, handler, len, args, i, listeners;
+
+  if (!this._events)
+    this._events = {};
+
+  // If there is no 'error' event listener then throw.
+  if (type === 'error') {
+    if (!this._events.error ||
+        (isObject(this._events.error) && !this._events.error.length)) {
+      er = arguments[1];
+      if (er instanceof Error) {
+        throw er; // Unhandled 'error' event
+      }
+      throw TypeError('Uncaught, unspecified "error" event.');
+    }
+  }
+
+  handler = this._events[type];
+
+  if (isUndefined(handler))
+    return false;
+
+  if (isFunction(handler)) {
+    switch (arguments.length) {
+      // fast cases
+      case 1:
+        handler.call(this);
+        break;
+      case 2:
+        handler.call(this, arguments[1]);
+        break;
+      case 3:
+        handler.call(this, arguments[1], arguments[2]);
+        break;
+      // slower
+      default:
+        len = arguments.length;
+        args = new Array(len - 1);
+        for (i = 1; i < len; i++)
+          args[i - 1] = arguments[i];
+        handler.apply(this, args);
+    }
+  } else if (isObject(handler)) {
+    len = arguments.length;
+    args = new Array(len - 1);
+    for (i = 1; i < len; i++)
+      args[i - 1] = arguments[i];
+
+    listeners = handler.slice();
+    len = listeners.length;
+    for (i = 0; i < len; i++)
+      listeners[i].apply(this, args);
+  }
+
+  return true;
+};
+
+EventEmitter.prototype.addListener = function(type, listener) {
+  var m;
+
+  if (!isFunction(listener))
+    throw TypeError('listener must be a function');
+
+  if (!this._events)
+    this._events = {};
+
+  // To avoid recursion in the case that type === "newListener"! Before
+  // adding it to the listeners, first emit "newListener".
+  if (this._events.newListener)
+    this.emit('newListener', type,
+              isFunction(listener.listener) ?
+              listener.listener : listener);
+
+  if (!this._events[type])
+    // Optimize the case of one listener. Don't need the extra array object.
+    this._events[type] = listener;
+  else if (isObject(this._events[type]))
+    // If we've already got an array, just append.
+    this._events[type].push(listener);
+  else
+    // Adding the second element, need to change to array.
+    this._events[type] = [this._events[type], listener];
+
+  // Check for listener leak
+  if (isObject(this._events[type]) && !this._events[type].warned) {
+    var m;
+    if (!isUndefined(this._maxListeners)) {
+      m = this._maxListeners;
+    } else {
+      m = EventEmitter.defaultMaxListeners;
+    }
+
+    if (m && m > 0 && this._events[type].length > m) {
+      this._events[type].warned = true;
+      console.error('(node) warning: possible EventEmitter memory ' +
+                    'leak detected. %d listeners added. ' +
+                    'Use emitter.setMaxListeners() to increase limit.',
+                    this._events[type].length);
+      if (typeof console.trace === 'function') {
+        // not supported in IE 10
+        console.trace();
+      }
+    }
+  }
+
+  return this;
+};
+
+EventEmitter.prototype.on = EventEmitter.prototype.addListener;
+
+EventEmitter.prototype.once = function(type, listener) {
+  if (!isFunction(listener))
+    throw TypeError('listener must be a function');
+
+  var fired = false;
+
+  function g() {
+    this.removeListener(type, g);
+
+    if (!fired) {
+      fired = true;
+      listener.apply(this, arguments);
+    }
+  }
+
+  g.listener = listener;
+  this.on(type, g);
+
+  return this;
+};
+
+// emits a 'removeListener' event iff the listener was removed
+EventEmitter.prototype.removeListener = function(type, listener) {
+  var list, position, length, i;
+
+  if (!isFunction(listener))
+    throw TypeError('listener must be a function');
+
+  if (!this._events || !this._events[type])
+    return this;
+
+  list = this._events[type];
+  length = list.length;
+  position = -1;
+
+  if (list === listener ||
+      (isFunction(list.listener) && list.listener === listener)) {
+    delete this._events[type];
+    if (this._events.removeListener)
+      this.emit('removeListener', type, listener);
+
+  } else if (isObject(list)) {
+    for (i = length; i-- > 0;) {
+      if (list[i] === listener ||
+          (list[i].listener && list[i].listener === listener)) {
+        position = i;
+        break;
+      }
+    }
+
+    if (position < 0)
+      return this;
+
+    if (list.length === 1) {
+      list.length = 0;
+      delete this._events[type];
+    } else {
+      list.splice(position, 1);
+    }
+
+    if (this._events.removeListener)
+      this.emit('removeListener', type, listener);
+  }
+
+  return this;
+};
+
+EventEmitter.prototype.removeAllListeners = function(type) {
+  var key, listeners;
+
+  if (!this._events)
+    return this;
+
+  // not listening for removeListener, no need to emit
+  if (!this._events.removeListener) {
+    if (arguments.length === 0)
+      this._events = {};
+    else if (this._events[type])
+      delete this._events[type];
+    return this;
+  }
+
+  // emit removeListener for all listeners on all events
+  if (arguments.length === 0) {
+    for (key in this._events) {
+      if (key === 'removeListener') continue;
+      this.removeAllListeners(key);
+    }
+    this.removeAllListeners('removeListener');
+    this._events = {};
+    return this;
+  }
+
+  listeners = this._events[type];
+
+  if (isFunction(listeners)) {
+    this.removeListener(type, listeners);
+  } else {
+    // LIFO order
+    while (listeners.length)
+      this.removeListener(type, listeners[listeners.length - 1]);
+  }
+  delete this._events[type];
+
+  return this;
+};
+
+EventEmitter.prototype.listeners = function(type) {
+  var ret;
+  if (!this._events || !this._events[type])
+    ret = [];
+  else if (isFunction(this._events[type]))
+    ret = [this._events[type]];
+  else
+    ret = this._events[type].slice();
+  return ret;
+};
+
+EventEmitter.listenerCount = function(emitter, type) {
+  var ret;
+  if (!emitter._events || !emitter._events[type])
+    ret = 0;
+  else if (isFunction(emitter._events[type]))
+    ret = 1;
+  else
+    ret = emitter._events[type].length;
+  return ret;
+};
+
+function isFunction(arg) {
+  return typeof arg === 'function';
+}
+
+function isNumber(arg) {
+  return typeof arg === 'number';
+}
+
+function isObject(arg) {
+  return typeof arg === 'object' && arg !== null;
+}
+
+function isUndefined(arg) {
+  return arg === void 0;
+}
+
+},{}],151:[function(_dereq_,module,exports){
+// shim for using process in browser
+
+var process = module.exports = {};
+
+process.nextTick = (function () {
+    var canSetImmediate = typeof window !== 'undefined'
+    && window.setImmediate;
+    var canPost = typeof window !== 'undefined'
+    && window.postMessage && window.addEventListener
+    ;
+
+    if (canSetImmediate) {
+        return function (f) { return window.setImmediate(f) };
+    }
+
+    if (canPost) {
+        var queue = [];
+        window.addEventListener('message', function (ev) {
+            var source = ev.source;
+            if ((source === window || source === null) && ev.data === 'process-tick') {
+                ev.stopPropagation();
+                if (queue.length > 0) {
+                    var fn = queue.shift();
+                    fn();
+                }
+            }
+        }, true);
+
+        return function nextTick(fn) {
+            queue.push(fn);
+            window.postMessage('process-tick', '*');
+        };
+    }
+
+    return function nextTick(fn) {
+        setTimeout(fn, 0);
+    };
+})();
+
+process.title = 'browser';
+process.browser = true;
+process.env = {};
+process.argv = [];
+
+function noop() {}
+
+process.on = noop;
+process.addListener = noop;
+process.once = noop;
+process.off = noop;
+process.removeListener = noop;
+process.removeAllListeners = noop;
+process.emit = noop;
+
+process.binding = function (name) {
+    throw new Error('process.binding is not supported');
+}
+
+// TODO(shtylman)
+process.cwd = function () { return '/' };
+process.chdir = function (dir) {
+    throw new Error('process.chdir is not supported');
+};
+
+},{}],152:[function(_dereq_,module,exports){
+'use strict';
+
+module.exports = _dereq_('./lib')
+
+},{"./lib":157}],153:[function(_dereq_,module,exports){
+'use strict';
+
+var asap = _dereq_('asap/raw')
+
+function noop() {};
+
+// States:
+//
+// 0 - pending
+// 1 - fulfilled with _value
+// 2 - rejected with _value
+// 3 - adopted the state of another promise, _value
+//
+// once the state is no longer pending (0) it is immutable
+
+// All `_` prefixed properties will be reduced to `_{random number}`
+// at build time to obfuscate them and discourage their use.
+// We don't use symbols or Object.defineProperty to fully hide them
+// because the performance isn't good enough.
+
+
+// to avoid using try/catch inside critical functions, we
+// extract them to here.
+var LAST_ERROR = null;
+var IS_ERROR = {};
+function getThen(obj) {
+  try {
+    return obj.then;
+  } catch (ex) {
+    LAST_ERROR = ex;
+    return IS_ERROR;
+  }
+}
+
+function tryCallOne(fn, a) {
+  try {
+    return fn(a);
+  } catch (ex) {
+    LAST_ERROR = ex;
+    return IS_ERROR;
+  }
+}
+function tryCallTwo(fn, a, b) {
+  try {
+    fn(a, b);
+  } catch (ex) {
+    LAST_ERROR = ex;
+    return IS_ERROR;
+  }
+}
+
+module.exports = Promise;
+function Promise(fn) {
+  if (typeof this !== 'object') throw new TypeError('Promises must be constructed via new')
+  if (typeof fn !== 'function') throw new TypeError('not a function')
+  this._71 = 0;
+  this._18 = null;
+  this._61 = [];
+  if (fn === noop) return;
+  doResolve(fn, this);
+}
+Promise.prototype._10 = function (onFulfilled, onRejected) {
+  var self = this;
+  return new this.constructor(function (resolve, reject) {
+    var res = new Promise(noop);
+    res.then(resolve, reject);
+    self._24(new Handler(onFulfilled, onRejected, res));
+  });
+};
+Promise.prototype.then = function(onFulfilled, onRejected) {
+  if (this.constructor !== Promise) return this._10(onFulfilled, onRejected);
+  var res = new Promise(noop);
+  this._24(new Handler(onFulfilled, onRejected, res));
+  return res;
+};
+Promise.prototype._24 = function(deferred) {
+  if (this._71 === 3) {
+    this._18._24(deferred);
+    return;
+  }
+  if (this._71 === 0) {
+    this._61.push(deferred);
+    return;
+  }
+  var state = this._71;
+  var value = this._18;
+  asap(function() {
+    var cb = state === 1 ? deferred.onFulfilled : deferred.onRejected
+    if (cb === null) {
+      (state === 1 ? deferred.promise._82(value) : deferred.promise._67(value))
+      return
+    }
+    var ret = tryCallOne(cb, value);
+    if (ret === IS_ERROR) {
+      deferred.promise._67(LAST_ERROR)
+    } else {
+      deferred.promise._82(ret)
+    }
+  });
+};
+Promise.prototype._82 = function(newValue) {
+  //Promise Resolution Procedure: https://github.com/promises-aplus/promises-spec#the-promise-resolution-procedure
+  if (newValue === this) {
+    return this._67(new TypeError('A promise cannot be resolved with itself.'))
+  }
+  if (newValue && (typeof newValue === 'object' || typeof newValue === 'function')) {
+    var then = getThen(newValue);
+    if (then === IS_ERROR) {
+      return this._67(LAST_ERROR);
+    }
+    if (
+      then === this.then &&
+      newValue instanceof Promise &&
+      newValue._24 === this._24
+    ) {
+      this._71 = 3;
+      this._18 = newValue;
+      for (var i = 0; i < this._61.length; i++) {
+        newValue._24(this._61[i]);
+      }
+      return;
+    } else if (typeof then === 'function') {
+      doResolve(then.bind(newValue), this)
+      return
+    }
+  }
+  this._71 = 1
+  this._18 = newValue
+  this._94()
+}
+
+Promise.prototype._67 = function (newValue) {
+  this._71 = 2
+  this._18 = newValue
+  this._94()
+}
+Promise.prototype._94 = function () {
+  for (var i = 0; i < this._61.length; i++)
+    this._24(this._61[i])
+  this._61 = null
+}
+
+
+function Handler(onFulfilled, onRejected, promise){
+  this.onFulfilled = typeof onFulfilled === 'function' ? onFulfilled : null
+  this.onRejected = typeof onRejected === 'function' ? onRejected : null
+  this.promise = promise;
+}
+
+/**
+ * Take a potentially misbehaving resolver function and make sure
+ * onFulfilled and onRejected are only called once.
+ *
+ * Makes no guarantees about asynchrony.
+ */
+function doResolve(fn, promise) {
+  var done = false;
+  var res = tryCallTwo(fn, function (value) {
+    if (done) return
+    done = true
+    promise._82(value)
+  }, function (reason) {
+    if (done) return
+    done = true
+    promise._67(reason)
+  })
+  if (!done && res === IS_ERROR) {
+    done = true
+    promise._67(LAST_ERROR)
+  }
+}
+},{"asap/raw":161}],154:[function(_dereq_,module,exports){
+'use strict';
+
+var Promise = _dereq_('./core.js')
+
+module.exports = Promise
+Promise.prototype.done = function (onFulfilled, onRejected) {
+  var self = arguments.length ? this.then.apply(this, arguments) : this
+  self.then(null, function (err) {
+    setTimeout(function () {
+      throw err
+    }, 0)
+  })
+}
+},{"./core.js":153}],155:[function(_dereq_,module,exports){
+'use strict';
+
+//This file contains the ES6 extensions to the core Promises/A+ API
+
+var Promise = _dereq_('./core.js')
+var asap = _dereq_('asap/raw')
+
+module.exports = Promise
+
+/* Static Functions */
+
+function ValuePromise(value) {
+  this.then = function (onFulfilled) {
+    if (typeof onFulfilled !== 'function') return this
+    return new Promise(function (resolve, reject) {
+      asap(function () {
+        try {
+          resolve(onFulfilled(value))
+        } catch (ex) {
+          reject(ex);
+        }
+      })
+    })
+  }
+}
+ValuePromise.prototype = Promise.prototype
+
+var TRUE = new ValuePromise(true)
+var FALSE = new ValuePromise(false)
+var NULL = new ValuePromise(null)
+var UNDEFINED = new ValuePromise(undefined)
+var ZERO = new ValuePromise(0)
+var EMPTYSTRING = new ValuePromise('')
+
+Promise.resolve = function (value) {
+  if (value instanceof Promise) return value
+
+  if (value === null) return NULL
+  if (value === undefined) return UNDEFINED
+  if (value === true) return TRUE
+  if (value === false) return FALSE
+  if (value === 0) return ZERO
+  if (value === '') return EMPTYSTRING
+
+  if (typeof value === 'object' || typeof value === 'function') {
+    try {
+      var then = value.then
+      if (typeof then === 'function') {
+        return new Promise(then.bind(value))
+      }
+    } catch (ex) {
+      return new Promise(function (resolve, reject) {
+        reject(ex)
+      })
+    }
+  }
+
+  return new ValuePromise(value)
+}
+
+Promise.all = function (arr) {
+  var args = Array.prototype.slice.call(arr)
+
+  return new Promise(function (resolve, reject) {
+    if (args.length === 0) return resolve([])
+    var remaining = args.length
+    function res(i, val) {
+      if (val && (typeof val === 'object' || typeof val === 'function')) {
+        var then = val.then
+        if (typeof then === 'function') {
+          then.call(val, function (val) { res(i, val) }, reject)
+          return
+        }
+      }
+      args[i] = val
+      if (--remaining === 0) {
+        resolve(args);
+      }
+    }
+    for (var i = 0; i < args.length; i++) {
+      res(i, args[i])
+    }
+  })
+}
+
+Promise.reject = function (value) {
+  return new Promise(function (resolve, reject) { 
+    reject(value);
+  });
+}
+
+Promise.race = function (values) {
+  return new Promise(function (resolve, reject) { 
+    values.forEach(function(value){
+      Promise.resolve(value).then(resolve, reject);
+    })
+  });
+}
+
+/* Prototype Methods */
+
+Promise.prototype['catch'] = function (onRejected) {
+  return this.then(null, onRejected);
+}
+
+},{"./core.js":153,"asap/raw":161}],156:[function(_dereq_,module,exports){
+'use strict';
+
+var Promise = _dereq_('./core.js')
+
+module.exports = Promise
+Promise.prototype['finally'] = function (f) {
+  return this.then(function (value) {
+    return Promise.resolve(f()).then(function () {
+      return value
+    })
+  }, function (err) {
+    return Promise.resolve(f()).then(function () {
+      throw err
+    })
+  })
+}
+
+},{"./core.js":153}],157:[function(_dereq_,module,exports){
+'use strict';
+
+module.exports = _dereq_('./core.js')
+_dereq_('./done.js')
+_dereq_('./finally.js')
+_dereq_('./es6-extensions.js')
+_dereq_('./node-extensions.js')
+
+},{"./core.js":153,"./done.js":154,"./es6-extensions.js":155,"./finally.js":156,"./node-extensions.js":158}],158:[function(_dereq_,module,exports){
+'use strict';
+
+//This file contains then/promise specific extensions that are only useful for node.js interop
+
+var Promise = _dereq_('./core.js')
+var asap = _dereq_('asap')
+
+module.exports = Promise
+
+/* Static Functions */
+
+Promise.denodeify = function (fn, argumentCount) {
+  argumentCount = argumentCount || Infinity
+  return function () {
+    var self = this
+    var args = Array.prototype.slice.call(arguments)
+    return new Promise(function (resolve, reject) {
+      while (args.length && args.length > argumentCount) {
+        args.pop()
+      }
+      args.push(function (err, res) {
+        if (err) reject(err)
+        else resolve(res)
+      })
+      var res = fn.apply(self, args)
+      if (res && (typeof res === 'object' || typeof res === 'function') && typeof res.then === 'function') {
+        resolve(res)
+      }
+    })
+  }
+}
+Promise.nodeify = function (fn) {
+  return function () {
+    var args = Array.prototype.slice.call(arguments)
+    var callback = typeof args[args.length - 1] === 'function' ? args.pop() : null
+    var ctx = this
+    try {
+      return fn.apply(this, arguments).nodeify(callback, ctx)
+    } catch (ex) {
+      if (callback === null || typeof callback == 'undefined') {
+        return new Promise(function (resolve, reject) { reject(ex) })
+      } else {
+        asap(function () {
+          callback.call(ctx, ex)
+        })
+      }
+    }
+  }
+}
+
+Promise.prototype.nodeify = function (callback, ctx) {
+  if (typeof callback != 'function') return this
+
+  this.then(function (value) {
+    asap(function () {
+      callback.call(ctx, null, value)
+    })
+  }, function (err) {
+    asap(function () {
+      callback.call(ctx, err)
+    })
+  })
+}
+
+},{"./core.js":153,"asap":159}],159:[function(_dereq_,module,exports){
+"use strict";
+
+// rawAsap provides everything we need except exception management.
+var rawAsap = _dereq_("./raw");
+// RawTasks are recycled to reduce GC churn.
+var freeTasks = [];
+// We queue errors to ensure they are thrown in right order (FIFO).
+// Array-as-queue is good enough here, since we are just dealing with exceptions.
+var pendingErrors = [];
+var requestErrorThrow = rawAsap.makeRequestCallFromTimer(throwFirstError);
+
+function throwFirstError() {
+    if (pendingErrors.length) {
+        throw pendingErrors.shift();
+    }
+}
+
+/**
+ * Calls a task as soon as possible after returning, in its own event, with priority
+ * over other events like animation, reflow, and repaint. An error thrown from an
+ * event will not interrupt, nor even substantially slow down the processing of
+ * other events, but will be rather postponed to a lower priority event.
+ * @param {{call}} task A callable object, typically a function that takes no
+ * arguments.
+ */
+module.exports = asap;
+function asap(task) {
+    var rawTask;
+    if (freeTasks.length) {
+        rawTask = freeTasks.pop();
+    } else {
+        rawTask = new RawTask();
+    }
+    rawTask.task = task;
+    rawAsap(rawTask);
+}
+
+// We wrap tasks with recyclable task objects.  A task object implements
+// `call`, just like a function.
+function RawTask() {
+    this.task = null;
+}
+
+// The sole purpose of wrapping the task is to catch the exception and recycle
+// the task object after its single use.
+RawTask.prototype.call = function () {
+    try {
+        this.task.call();
+    } catch (error) {
+        if (asap.onerror) {
+            // This hook exists purely for testing purposes.
+            // Its name will be periodically randomized to break any code that
+            // depends on its existence.
+            asap.onerror(error);
+        } else {
+            // In a web browser, exceptions are not fatal. However, to avoid
+            // slowing down the queue of pending tasks, we rethrow the error in a
+            // lower priority turn.
+            pendingErrors.push(error);
+            requestErrorThrow();
+        }
+    } finally {
+        this.task = null;
+        freeTasks[freeTasks.length] = this;
+    }
+};
+
+},{"./raw":160}],160:[function(_dereq_,module,exports){
+(function (global){
+"use strict";
+
+// Use the fastest means possible to execute a task in its own turn, with
+// priority over other events including IO, animation, reflow, and redraw
+// events in browsers.
+//
+// An exception thrown by a task will permanently interrupt the processing of
+// subsequent tasks. The higher level `asap` function ensures that if an
+// exception is thrown by a task, that the task queue will continue flushing as
+// soon as possible, but if you use `rawAsap` directly, you are responsible to
+// either ensure that no exceptions are thrown from your task, or to manually
+// call `rawAsap.requestFlush` if an exception is thrown.
+module.exports = rawAsap;
+function rawAsap(task) {
+    if (!queue.length) {
+        requestFlush();
+        flushing = true;
+    }
+    // Equivalent to push, but avoids a function call.
+    queue[queue.length] = task;
+}
+
+var queue = [];
+// Once a flush has been requested, no further calls to `requestFlush` are
+// necessary until the next `flush` completes.
+var flushing = false;
+// `requestFlush` is an implementation-specific method that attempts to kick
+// off a `flush` event as quickly as possible. `flush` will attempt to exhaust
+// the event queue before yielding to the browser's own event loop.
+var requestFlush;
+// The position of the next task to execute in the task queue. This is
+// preserved between calls to `flush` so that it can be resumed if
+// a task throws an exception.
+var index = 0;
+// If a task schedules additional tasks recursively, the task queue can grow
+// unbounded. To prevent memory exhaustion, the task queue will periodically
+// truncate already-completed tasks.
+var capacity = 1024;
+
+// The flush function processes all tasks that have been scheduled with
+// `rawAsap` unless and until one of those tasks throws an exception.
+// If a task throws an exception, `flush` ensures that its state will remain
+// consistent and will resume where it left off when called again.
+// However, `flush` does not make any arrangements to be called again if an
+// exception is thrown.
+function flush() {
+    while (index < queue.length) {
+        var currentIndex = index;
+        // Advance the index before calling the task. This ensures that we will
+        // begin flushing on the next task the task throws an error.
+        index = index + 1;
+        queue[currentIndex].call();
+        // Prevent leaking memory for long chains of recursive calls to `asap`.
+        // If we call `asap` within tasks scheduled by `asap`, the queue will
+        // grow, but to avoid an O(n) walk for every task we execute, we don't
+        // shift tasks off the queue after they have been executed.
+        // Instead, we periodically shift 1024 tasks off the queue.
+        if (index > capacity) {
+            // Manually shift all values starting at the index back to the
+            // beginning of the queue.
+            for (var scan = 0; scan < index; scan++) {
+                queue[scan] = queue[scan + index];
+            }
+            queue.length -= index;
+            index = 0;
+        }
+    }
+    queue.length = 0;
+    index = 0;
+    flushing = false;
+}
+
+// `requestFlush` is implemented using a strategy based on data collected from
+// every available SauceLabs Selenium web driver worker at time of writing.
+// https://docs.google.com/spreadsheets/d/1mG-5UYGup5qxGdEMWkhP6BWCz053NUb2E1QoUTU16uA/edit#gid=783724593
+
+// Safari 6 and 6.1 for desktop, iPad, and iPhone are the only browsers that
+// have WebKitMutationObserver but not un-prefixed MutationObserver.
+// Must use `global` instead of `window` to work in both frames and web
+// workers. `global` is a provision of Browserify, Mr, Mrs, or Mop.
+var BrowserMutationObserver = global.MutationObserver || global.WebKitMutationObserver;
+
+// MutationObservers are desirable because they have high priority and work
+// reliably everywhere they are implemented.
+// They are implemented in all modern browsers.
+//
+// - Android 4-4.3
+// - Chrome 26-34
+// - Firefox 14-29
+// - Internet Explorer 11
+// - iPad Safari 6-7.1
+// - iPhone Safari 7-7.1
+// - Safari 6-7
+if (typeof BrowserMutationObserver === "function") {
+    requestFlush = makeRequestCallFromMutationObserver(flush);
+
+// MessageChannels are desirable because they give direct access to the HTML
+// task queue, are implemented in Internet Explorer 10, Safari 5.0-1, and Opera
+// 11-12, and in web workers in many engines.
+// Although message channels yield to any queued rendering and IO tasks, they
+// would be better than imposing the 4ms delay of timers.
+// However, they do not work reliably in Internet Explorer or Safari.
+
+// Internet Explorer 10 is the only browser that has setImmediate but does
+// not have MutationObservers.
+// Although setImmediate yields to the browser's renderer, it would be
+// preferrable to falling back to setTimeout since it does not have
+// the minimum 4ms penalty.
+// Unfortunately there appears to be a bug in Internet Explorer 10 Mobile (and
+// Desktop to a lesser extent) that renders both setImmediate and
+// MessageChannel useless for the purposes of ASAP.
+// https://github.com/kriskowal/q/issues/396
+
+// Timers are implemented universally.
+// We fall back to timers in workers in most engines, and in foreground
+// contexts in the following browsers.
+// However, note that even this simple case requires nuances to operate in a
+// broad spectrum of browsers.
+//
+// - Firefox 3-13
+// - Internet Explorer 6-9
+// - iPad Safari 4.3
+// - Lynx 2.8.7
+} else {
+    requestFlush = makeRequestCallFromTimer(flush);
+}
+
+// `requestFlush` requests that the high priority event queue be flushed as
+// soon as possible.
+// This is useful to prevent an error thrown in a task from stalling the event
+// queue if the exception handled by Node.js’s
+// `process.on("uncaughtException")` or by a domain.
+rawAsap.requestFlush = requestFlush;
+
+// To request a high priority event, we induce a mutation observer by toggling
+// the text of a text node between "1" and "-1".
+function makeRequestCallFromMutationObserver(callback) {
+    var toggle = 1;
+    var observer = new BrowserMutationObserver(callback);
+    var node = document.createTextNode("");
+    observer.observe(node, {characterData: true});
+    return function requestCall() {
+        toggle = -toggle;
+        node.data = toggle;
+    };
+}
+
+// The message channel technique was discovered by Malte Ubl and was the
+// original foundation for this library.
+// http://www.nonblocking.io/2011/06/windownexttick.html
+
+// Safari 6.0.5 (at least) intermittently fails to create message ports on a
+// page's first load. Thankfully, this version of Safari supports
+// MutationObservers, so we don't need to fall back in that case.
+
+// function makeRequestCallFromMessageChannel(callback) {
+//     var channel = new MessageChannel();
+//     channel.port1.onmessage = callback;
+//     return function requestCall() {
+//         channel.port2.postMessage(0);
+//     };
+// }
+
+// For reasons explained above, we are also unable to use `setImmediate`
+// under any circumstances.
+// Even if we were, there is another bug in Internet Explorer 10.
+// It is not sufficient to assign `setImmediate` to `requestFlush` because
+// `setImmediate` must be called *by name* and therefore must be wrapped in a
+// closure.
+// Never forget.
+
+// function makeRequestCallFromSetImmediate(callback) {
+//     return function requestCall() {
+//         setImmediate(callback);
+//     };
+// }
+
+// Safari 6.0 has a problem where timers will get lost while the user is
+// scrolling. This problem does not impact ASAP because Safari 6.0 supports
+// mutation observers, so that implementation is used instead.
+// However, if we ever elect to use timers in Safari, the prevalent work-around
+// is to add a scroll event listener that calls for a flush.
+
+// `setTimeout` does not call the passed callback if the delay is less than
+// approximately 7 in web workers in Firefox 8 through 18, and sometimes not
+// even then.
+
+function makeRequestCallFromTimer(callback) {
+    return function requestCall() {
+        // We dispatch a timeout with a specified delay of 0 for engines that
+        // can reliably accommodate that request. This will usually be snapped
+        // to a 4 milisecond delay, but once we're flushing, there's no delay
+        // between events.
+        var timeoutHandle = setTimeout(handleTimer, 0);
+        // However, since this timer gets frequently dropped in Firefox
+        // workers, we enlist an interval handle that will try to fire
+        // an event 20 times per second until it succeeds.
+        var intervalHandle = setInterval(handleTimer, 50);
+
+        function handleTimer() {
+            // Whichever timer succeeds will cancel both timers and
+            // execute the callback.
+            clearTimeout(timeoutHandle);
+            clearInterval(intervalHandle);
+            callback();
+        }
+    };
+}
+
+// This is for `asap.js` only.
+// Its name will be periodically randomized to break any code that depends on
+// its existence.
+rawAsap.makeRequestCallFromTimer = makeRequestCallFromTimer;
+
+// ASAP was originally a nextTick shim included in Q. This was factored out
+// into this ASAP package. It was later adapted to RSVP which made further
+// amendments. These decisions, particularly to marginalize MessageChannel and
+// to capture the MutationObserver implementation in a closure, were integrated
+// back into ASAP proper.
+// https://github.com/tildeio/rsvp.js/blob/cddf7232546a9cf858524b75cde6f9edf72620a7/lib/rsvp/asap.js
+
+
+}).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
+},{}],161:[function(_dereq_,module,exports){
+(function (process){
+"use strict";
+
+var domain; // The domain module is executed on demand
+var hasSetImmediate = typeof setImmediate === "function";
+
+// Use the fastest means possible to execute a task in its own turn, with
+// priority over other events including network IO events in Node.js.
+//
+// An exception thrown by a task will permanently interrupt the processing of
+// subsequent tasks. The higher level `asap` function ensures that if an
+// exception is thrown by a task, that the task queue will continue flushing as
+// soon as possible, but if you use `rawAsap` directly, you are responsible to
+// either ensure that no exceptions are thrown from your task, or to manually
+// call `rawAsap.requestFlush` if an exception is thrown.
+module.exports = rawAsap;
+function rawAsap(task) {
+    if (!queue.length) {
+        requestFlush();
+        flushing = true;
+    }
+    // Avoids a function call
+    queue[queue.length] = task;
+}
+
+var queue = [];
+// Once a flush has been requested, no further calls to `requestFlush` are
+// necessary until the next `flush` completes.
+var flushing = false;
+// The position of the next task to execute in the task queue. This is
+// preserved between calls to `flush` so that it can be resumed if
+// a task throws an exception.
+var index = 0;
+// If a task schedules additional tasks recursively, the task queue can grown
+// unbounded. To prevent memory excaustion, the task queue will periodically
+// truncate already-completed tasks.
+var capacity = 1024;
+
+// The flush function processes all tasks that have been scheduled with
+// `rawAsap` unless and until one of those tasks throws an exception.
+// If a task throws an exception, `flush` ensures that its state will remain
+// consistent and will resume where it left off when called again.
+// However, `flush` does not make any arrangements to be called again if an
+// exception is thrown.
+function flush() {
+    while (index < queue.length) {
+        var currentIndex = index;
+        // Advance the index before calling the task. This ensures that we will
+        // begin flushing on the next task the task throws an error.
+        index = index + 1;
+        queue[currentIndex].call();
+        // Prevent leaking memory for long chains of recursive calls to `asap`.
+        // If we call `asap` within tasks scheduled by `asap`, the queue will
+        // grow, but to avoid an O(n) walk for every task we execute, we don't
+        // shift tasks off the queue after they have been executed.
+        // Instead, we periodically shift 1024 tasks off the queue.
+        if (index > capacity) {
+            // Manually shift all values starting at the index back to the
+            // beginning of the queue.
+            for (var scan = 0; scan < index; scan++) {
+                queue[scan] = queue[scan + index];
+            }
+            queue.length -= index;
+            index = 0;
+        }
+    }
+    queue.length = 0;
+    index = 0;
+    flushing = false;
+}
+
+rawAsap.requestFlush = requestFlush;
+function requestFlush() {
+    // Ensure flushing is not bound to any domain.
+    // It is not sufficient to exit the domain, because domains exist on a stack.
+    // To execute code outside of any domain, the following dance is necessary.
+    var parentDomain = process.domain;
+    if (parentDomain) {
+        if (!domain) {
+            // Lazy execute the domain module.
+            // Only employed if the user elects to use domains.
+            domain = _dereq_("domain");
+        }
+        domain.active = process.domain = null;
+    }
+
+    // `setImmediate` is slower that `process.nextTick`, but `process.nextTick`
+    // cannot handle recursion.
+    // `requestFlush` will only be called recursively from `asap.js`, to resume
+    // flushing after an error is thrown into a domain.
+    // Conveniently, `setImmediate` was introduced in the same version
+    // `process.nextTick` started throwing recursion errors.
+    if (flushing && hasSetImmediate) {
+        setImmediate(flush);
+    } else {
+        process.nextTick(flush);
+    }
+
+    if (parentDomain) {
+        domain.active = process.domain = parentDomain;
+    }
+}
+
+
+}).call(this,_dereq_("IrXUsu"))
+},{"IrXUsu":151,"domain":149}],162:[function(_dereq_,module,exports){
 var falcor = _dereq_('./lib/falcor');
 var get = _dereq_('./lib/get');
 var set = _dereq_('./lib/set');
