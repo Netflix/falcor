@@ -9,8 +9,8 @@ var fullCacheModel = new falcor.Model({cache: Cache()}).materialize();
 var edgeCaseModel = new falcor.Model({cache: edgeCaseCache}).materialize();
 
 // Simple middleware to handle get/post
-app.use('/falcor', FalcorServer.ExpressMiddleware(fullCacheModel));
-app.use('/falcor.edge', FalcorServer.ExpressMiddleware(edgeCaseModel));
+app.use('/falcor', FalcorServer.expressMiddleware(function() { return fullCacheModel; }));
+app.use('/falcor.edge', FalcorServer.expressMiddleware(function() { return edgeCaseModel; }));
 
 module.exports = function(port) {
     // Note: Will never complete unless explicitly closed.
