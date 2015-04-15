@@ -1280,7 +1280,7 @@ module.exports = function() {
             ],
 
             optimizedMissingPaths: [
-                ["lists", "missing-branch-link", "0"]
+                ["lists", "missing-branch-link", "summary", "0"]
             ],
 
             AsValues: {
@@ -1449,6 +1449,44 @@ module.exports = function() {
 
             AsJSONG: {
                 values: [{}]
+            },
+
+            AsPathMap: {
+                values: [{}]
+            }
+        },
+        missingFirstKey: {
+            getPathSets: {
+                query: [
+                    ["genreList", 13, "summary"]
+                ]
+            },
+
+            optimizedMissingPaths: [
+                ["missing", 12341234, "summary"]
+            ],
+
+            AsValues: {
+                values: []
+            },
+
+            AsJSON: {
+                values: [{}]
+            },
+
+            AsJSONG: {
+                values: [{
+                    jsong: {
+                        genreList: {
+                            13: {
+                                $type: $path,
+                                $size: 52,
+                                value: ['missing', 12341234]
+                            }
+                        }
+                    },
+                    paths: []
+                }]
             },
 
             AsPathMap: {
