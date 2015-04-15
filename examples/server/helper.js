@@ -6,7 +6,7 @@ module.exports = {
         var from = range.from;
         var to = range.to;
         var out = [];
-        for (var i = from; i < to; i++) {
+        for (var i = from; i <= to; i++) {
             out[out.length] = i;
         }
 

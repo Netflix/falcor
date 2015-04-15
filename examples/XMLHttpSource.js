@@ -1,11 +1,11 @@
 var Observable = falcor.Observable;
 
-function XMLHttpSource(jsongUrl, timeout) {
+function HttpSource(jsongUrl, timeout) {
     this._jsongUrl = jsongUrl;
     this._timeout = timeout || 15000;
 }
 
-XMLHttpSource.prototype = {
+HttpSource.prototype = {
     /**
      * @inheritDoc DataSource#get
      */

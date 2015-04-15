@@ -1,5 +1,4 @@
 var express = require('express');
-var Router = require('./router');
 var app = express();
 
 // middleware for posts
