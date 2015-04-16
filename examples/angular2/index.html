@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+
+<!-- Angular2 imports -->
+<script src="lib/angular2bundle.js"></script>
+
+<!-- FalcorJS imports -->
+<script src="../Falcor.js"></script>
+
+<!-- App register -->
+<script src="lib/app.js"></script>
+<style type="text/css">
+  html, body {
+    margin: 0;
+    padding: 0;
+  }
+  html {
+    box-sizing: border-box;
+  }
+  *, *:before, *:after {
+    box-sizing: inherit;
+  }
+  h1, h2, h3 {
+    margin: 0;
+  }
+</style>
+</head>
+<body>
+
+  <app>
+    Loading...
+  </app>
+
+  <!-- Application bootstrap logic -->
+  <script>
+    System.import('app').catch(console.log.bind(console));
+  </script>
+</body>
+
+
+</html>
