@@ -6,6 +6,10 @@ var runSequence = require('run-sequence');
 var concat = require('gulp-concat');
 var benchmark = require('gulp-bench');
 
+// angular2
+var traceur = require('gulp-traceur');
+var rename = require('gulp-rename');
+
 // Registers build tasks
 require('./build/gulp-clean');
 require('./build/gulp-build');
@@ -13,6 +17,25 @@ require('./build/gulp-test');
 require('./build/performance/gulp-perf');
 
 var srcDir = 'lib';
+
+
+var ng2dir = './examples/angular2';
+gulp.task('angular2.build', function () {
+  return gulp.src(ng2dir+'/*.js')
+    .pipe(rename({extname: ''}))
+    .pipe(traceur({
+      modules: 'instantiate',
+      moduleName: true,
+      annotations: true,
+      types: true,
+      memberVariables: true
+    }))
+    .pipe(rename({extname: '.js'}))
+    .pipe(gulp.dest(ng2dir+'/lib'));
+});
+gulp.task('angular2', ['angular2.build'], function() {
+    gulp.watch(ng2dir+'/*.js', ['angular2.build']);
+})
 
 gulp.task('hint', ['build'], function() {
     return gulp.src(srcDir + '/**/*.js').
