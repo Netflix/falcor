@@ -2,10 +2,14 @@ language: node_js
 
 node_js:
     - "0.10"
+    - "0.12"
 
 branches:
     only:
         - master
+
+# Update npm to the latest version
+before_install: npm update -g npm
 
 # travis runs 'npm install' by default, as the 'install' step
 
