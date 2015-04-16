@@ -1,0 +1,52 @@
+html, body {
+  margin: 0;
+  padding: 0;
+}
+html {
+  box-sizing: border-box;
+}
+*, *:before, *:after {
+  box-sizing: inherit;
+}
+h1, h2, h3 {
+  margin: 0;
+}
+.scroll-row {
+  width: auto;
+  overflow-x: scroll;
+  overflow-y: hidden;
+  white-space: nowrap;
+  position: relative;
+}
+main {
+  padding: 1em;
+  padding-top: 8em;
+}
+.genre-name, .movie-name {
+  padding: 1em;
+  padding-left: 0;
+}
+.movie {
+  display: inline-block;
+}
+.movie-box-image {
+  height: 233px;
+}
+.logo {
+  color: #e50914;
+  cursor: pointer;
+}
+body {
+  min-width: 200px;
+}
+.side-details{
+  float: left;
+  width: 14em;
+}
+movie-details .movie-copy {
+  padding: 1em;
+
+}
+movie-details h3.movie-name {
+  padding-bottom: 0;
+}
