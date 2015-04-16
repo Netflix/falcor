@@ -2,30 +2,25 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<link rel="stylesheet" type="text/css" href="lib/netflix.css">
+<link rel="stylesheet" type="text/css" href="lib/styles.css">
+<!-- ES6-related imports -->
+<script src="lib/traceur-runtime.js"></script>
+<script src="lib/es6-module-loader-sans-promises.src.js"></script>
+<script src="lib/extension-register.js"></script>
+<script>register(System);</script>
 
-<!-- Angular2 imports -->
-<script src="lib/angular2bundle.js"></script>
+<!-- Angular2-related imports -->
+<script src="lib/zone.js"></script>
+<script src="lib/long-stack-trace-zone.js"></script>
 
 <!-- FalcorJS imports -->
 <script src="../Falcor.js"></script>
 
 <!-- App register -->
+<script src="lib/angular2.js"></script>
 <script src="lib/app.js"></script>
-<style type="text/css">
-  html, body {
-    margin: 0;
-    padding: 0;
-  }
-  html {
-    box-sizing: border-box;
-  }
-  *, *:before, *:after {
-    box-sizing: inherit;
-  }
-  h1, h2, h3 {
-    margin: 0;
-  }
-</style>
+<script src="lib/ViewTeleporter.js"></script>
 </head>
 <body>
 
@@ -33,11 +28,12 @@
     Loading...
   </app>
 
-  <!-- Application bootstrap logic -->
-  <script>
-    System.import('app').catch(console.log.bind(console));
-  </script>
+
 </body>
 
+<!-- Application bootstrap logic -->
+<script>
+  System.import('app')//.catch(console.log.bind(console));
+</script>
 
 </html>
