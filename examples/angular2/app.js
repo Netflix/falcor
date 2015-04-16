@@ -1,6 +1,6 @@
 import {Component, View, Decorator, ViewPort} from 'angular2/angular2';
-import {If, For, Switch, SwitchWhen, SwitchDefault} from 'angular2/directives';
 import {bootstrap, NgElement} from 'angular2/angular2';
+import {If, For} from 'angular2/directives';
 import {bind} from 'angular2/di';
 import {Router} from 'ViewTeleporter';
 
@@ -110,7 +110,9 @@ class GenreList {}
 @View({
   template: `
   <navbar id="hd">
-    <h1 class="logo" (click)="home()">Angular 2 + FalcorJS</h1>
+    <h1 class="logo" (click)="home()">
+      Angular 2 + FalcorJS
+    </h1>
   </navbar>
 
   <main>
@@ -129,7 +131,7 @@ class GenreList {}
 
 
   `,
-  directives: [ If, For, Switch, SwitchWhen, SwitchDefault, GenreList, MovieDetails ]
+  directives: [ If, GenreList, MovieDetails ]
 })
 class App {
   constructor(router: Router) {
@@ -189,27 +191,27 @@ function getCache() {
       {
         titles: [
           $ref('titlesById[60]'),
-          $ref('titlesById[65]'),
           $ref('titlesById[51]'),
           $ref('titlesById[62]'),
+          $ref('titlesById[65]'),
         ],
         name: 'Horror Movies'
       },
       {
         titles: [
-          $ref('titlesById[99]'),
           $ref('titlesById[7]'),
           $ref('titlesById[33]'),
           $ref('titlesById[89]'),
+          $ref('titlesById[99]'),
         ],
         name: 'Netflix Originals'
       },
       {
         titles: [
+          $ref('titlesById[12]'),
           $ref('titlesById[42]'),
           $ref('titlesById[9]'),
           $ref('titlesById[7]'),
-          $ref('titlesById[99]'),
         ],
         name: 'Dramas'
       },
@@ -232,7 +234,10 @@ function getCache() {
       '12': {
         name: 'The Wolf of Wall Street',
         rating: 5,
-        img: 'http://cdn2.nflximg.net/webp/8752/11138752.webp'
+        img: 'http://cdn2.nflximg.net/webp/8752/11138752.webp',
+        copy: 'Martin Scorcese\'s high-rolling Wall Street drama is based on the memoirs of stockbroker Jordan Belfort, whose giddy career ended in federal prison.',
+        starring: 'Leonardo DiCaprio, Jonah Hill, Margot Robbie, Matthew McConaughey, Kyle Chandler, Jon Bernthal',
+        genres: 'Dramas based on Books, Crime Dramas, Biographical Dramas, Dramas, Dramas based on real life'
       },
       '33': {
         name: 'Marco Polo',
@@ -244,6 +249,7 @@ function getCache() {
       },
       '89': {
         name: 'Arrested Development',
+        seasons: 4,
         img: 'http://cdn8.nflximg.net/webp/1088/11741088.webp',
         starring: 'Jason Bateman, Portia de Rossi, Will Arnett',
         genres: 'Sitcoms, TV Shows, TV Comedies',
@@ -253,7 +259,11 @@ function getCache() {
       '60': {
         name: 'Bates Motel',
         rating: 5,
-        img: 'http://cdn0.nflximg.net/webp/8540/12128540.webp'
+        seasons: 2,
+        img: 'http://cdn0.nflximg.net/webp/8540/12128540.webp',
+        copy: 'Everyone knows what happened in "Psycho," but this chilling series takes viewers inside Norman Bates\' world before Marion Crane checked in.',
+        starring: 'Vera Farmiga, Freddie Highmore, Max Thieriot, Olivia Cooke, Nicola Peltz, Nestor Carbonell',
+        genres: 'TV Shows, TV Dramas, TV Horror, TV Mysteries'
       },
       '7': {
         name: 'Orange Is the new Black',
@@ -299,7 +309,9 @@ function getCache() {
         name: 'Event Horizon',
         rating: 5,
         copy: 'After a signal is received from a long-missing spaceship, a rescue ship investigates, but the crew soon realizes something unimaginable has happened.',
-        img: 'http://cdn1.nflximg.net/images/6797/8256797.jpg'
+        img: 'http://cdn1.nflximg.net/images/6797/8256797.jpg',
+        starring: 'Laurence Fishburne, Sam Neill, Kathleen Quinlan, Joely Richardson, Richard T. Jones, Jack Noseworthy',
+        genres: 'Horror Movies, Sci-Fi & Fantasy, Supernatural Horror Movies, Sci-Fi Horror Movies'
       },
       '62': {
         name: 'Sharknado',
