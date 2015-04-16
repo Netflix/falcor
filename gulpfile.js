@@ -9,6 +9,7 @@ var benchmark = require('gulp-bench');
 // angular2
 var traceur = require('gulp-traceur');
 var rename = require('gulp-rename');
+var plumber = require('gulp-plumber');
 
 // Registers build tasks
 require('./build/gulp-clean');
@@ -23,6 +24,7 @@ var ng2dir = './examples/angular2';
 gulp.task('angular2.build', function () {
   return gulp.src(ng2dir+'/*.js')
     .pipe(rename({extname: ''}))
+    .pipe(plumber())
     .pipe(traceur({
       modules: 'instantiate',
       moduleName: true,
