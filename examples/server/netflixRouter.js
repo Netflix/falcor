@@ -3,7 +3,6 @@ var titleService = require('./titleService');
 var ratingService = require('./ratingService');
 var genreListService = require('./genreListsService');
 var Model = require('./../Falcor').Model;
-var Promise = require('promise');
 
 function NetflixRouter(req, res) {
     this.req = req;
@@ -25,15 +24,7 @@ NetflixRouter.prototype = new Router([
             //          1: { name: 'New Releases' }
             //      }
             // }
-            var rows = pathSet[1];
-            return genreListService.
-                get(rows, 'name').
-                then(function(genreListArray) {
-                    var genreLists = {};
-                    genreListArray.forEach(function(gL) {
-
-                    });
-                });
+            var genreListRange = pathSet[1];
         }
     }
 ]);

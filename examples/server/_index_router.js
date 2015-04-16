@@ -4,12 +4,12 @@ var app = express();
 // middleware for posts
 app.use(require('./urlencode'));
 
-var Falcor = require('./../Falcor');
-var Model = Falcor.Model;
-var FalcorServer = require('falcor-server');
+var falcor = require('./../falcor');
+var Model = falcor.Model;
+var middleware = require('falcor-server').expressMiddleware;
 var NetflixRouter = require('./netflixRouter');
 
-app.use('/member.json', FalcorServer.expressMiddleware(function(req, res) {
+app.use('/member.json', middleware(function(req, res) {
     return new Model({
         //cache: cache, No more cache!
         source: new NetflixRouter(req, res)

@@ -5,9 +5,9 @@ var model = {
             titles: [
                 {
                     id: 1007,
-                    name: 'Bloodline',
+                    name: 'Dare Devil',
                     rating: 4,
-                    boxshot: '../assets/bl.webp'
+                    boxShot: 'http://cdn6.nflximg.net/webp/5516/20935516.webp'
                 }
                 //, ... more titles
             ]
@@ -19,7 +19,7 @@ var model = {
                     id: 956,
                     name: 'House of Cards',
                     rating: 4,
-                    boxshot: '../assets/hoc.webp'
+                    boxShot: 'http://cdn5.nflximg.net/webp/8265/13038265.webp'
                 }
                 //, ... more titles
             ]
@@ -27,5 +27,3 @@ var model = {
         //, ... more genres
     ]
 };
-
-
