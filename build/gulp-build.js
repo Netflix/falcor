@@ -4,7 +4,7 @@ var license = require('gulp-license');
 var rename = require('gulp-rename');
 var surround = require('./surround');
 var tvuiPrefix = '//@depend ../Rx.netflix.js\n' +
-    '//@depend netflix/falcor/Falcor.js\n' +
+    '//@depend netflix/falcor/falcor.js\n' +
     '(function(exports) {';
 var tvuiPostfix = 'exports.Model = Model;\n' +
     '}(netflix.falcor));';
@@ -32,7 +32,7 @@ function build(file, standAloneName, outName, dest) {
             standalone: standAloneName || 'falcor'
         })).
         pipe(license('Apache', licenseInfo)).
-        pipe(rename(outName || 'Falcor.js')).
+        pipe(rename(outName || 'falcor.js')).
         pipe(gulp.dest(dest || 'bin'));
 }
 
