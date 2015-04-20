@@ -15,7 +15,7 @@ Now set up a simple webpage and import the newly-generated falcor library:
 <html>
   <head>
     <!-- The generated library can be found in the "dist" folder under the Falcor root. -->
-    <script src="./dist/Falcor.js"></script>
+    <script src="./dist/falcor.js"></script>
     <script>
       var model = new falcor.Model(/* Model options */);
       // your code goes here
