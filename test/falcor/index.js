@@ -4,7 +4,6 @@ describe('Operations', function() {
     require('./call');
     require('./invalidate');
     require('./request');
-    require('./parser');
     require('./schedulers');
     require('./bind');
 });

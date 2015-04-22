@@ -49,6 +49,7 @@
     "underscore": "~1.6.0",
     "xmlhttprequest": "~1.7.0",
     "falcor-server": "git+ssh://git@github.com/Netflix/falcor-server.git#v0.0.10",
+    "falcor-path-syntax": "git+ssh://git@github.com/Netflix/falcor-path-syntax.git#v0.1.5",
     "falcor-browser": "git+ssh://git@github.com/Netflix/falcor-browser.git#v0.0.4"
   },
   "dependencies": {
