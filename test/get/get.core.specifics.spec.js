@@ -238,4 +238,15 @@ describe('Specific Cases', function() {
             testRunner.compare(expected, seed);
         });
     });
+
+    it('should not report anything on empty paths.', function() {
+        var model = new Model({cache: Cache()});
+        var queries = [
+            ['videos', {length: 0}, 'summary'],
+            ['videos', {to: 0, from: 1}, 'summary'],
+            ['videos', [], 'summary']
+        ];
+        var results = model._getPathSetsAsJSONG(model, queries, [{}]);
+        testRunner.compare(0, results.requestedMissingPaths.length);
+    });
 });
