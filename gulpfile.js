@@ -51,5 +51,3 @@ gulp.task('default', function(callback) {
 });
 
 gulp.task('build', ['build.node']);
-gulp.task('dist', ['dist.node']);
-gulp.task('alt', ['build.alt']);
