@@ -3,5 +3,5 @@ describe('Set', function() {
     require('./set.dataSource-and-bind.spec');
     require('./set.dataSource-and-cache.spec');
     require('./set.progressively.spec');
-    require('./set.dotSyntax.spec');
+    require('./set.pathSyntax.spec');
 });

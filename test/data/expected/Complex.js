@@ -141,12 +141,6 @@ module.exports = function() {
                                         "title": "House of Cards",
                                         "url": "/movies/1234"
                                     }
-                                },
-                                1: {
-                                    summary: {
-                                        "title": "Terminator 3",
-                                        "url": "/movies/766"
-                                    }
                                 }
                             },
                             1: {
@@ -154,12 +148,6 @@ module.exports = function() {
                                     summary: {
                                         "title": "Running Man",
                                         "url": "/movies/553"
-                                    }
-                                },
-                                1: {
-                                    summary: {
-                                        "title": "Junior",
-                                        "url": "/movies/5522"
                                     }
                                 }
                             }
