@@ -21,10 +21,12 @@
     "coveralls": "^2.11.2",
     "diff": "~1.0.8",
     "express": "~4.9.0",
+    "falcor-browser": "git+ssh://git@github.com/Netflix/falcor-browser.git#v0.0.4",
+    "falcor-path-syntax": "git+ssh://git@github.com/Netflix/falcor-path-syntax.git#v0.1.5",
+    "falcor-server": "git+ssh://git@github.com/Netflix/falcor-server.git#v0.0.10",
     "gulp": "~3.8.8",
     "gulp-beautify": "~1.1.0",
     "gulp-bench": "~1.0.3",
-    "gulp-browserify": "~0.5.0",
     "gulp-clean": "~0.3.1",
     "gulp-concat": "~2.4.1",
     "gulp-eslint": "^0.7.0",
@@ -47,10 +49,8 @@
     "through2": "~0.6.1",
     "uglifyify": "~2.1.1",
     "underscore": "~1.6.0",
-    "xmlhttprequest": "~1.7.0",
-    "falcor-server": "git+ssh://git@github.com/Netflix/falcor-server.git#v0.0.10",
-    "falcor-path-syntax": "git+ssh://git@github.com/Netflix/falcor-path-syntax.git#v0.1.5",
-    "falcor-browser": "git+ssh://git@github.com/Netflix/falcor-browser.git#v0.0.4"
+    "vinyl-source-stream": "^1.1.0",
+    "xmlhttprequest": "~1.7.0"
   },
   "dependencies": {
     "rx": "^2.3.25",
