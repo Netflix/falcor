@@ -28,17 +28,13 @@ describe('Bind', function() {
             }).
             subscribe(noOp, done, done);
     });
-    it('should bind to a branch node and build proper missing paths', function() {
+    it.only('should bind to a branch node and build proper missing paths', function() {
         // Michael todo: Optimized missing paths are all jacked up here.
         debugger;
         var model = new Model({ cache: getCache() }).bindSync(["lolomos","c595efe8-4de0-4226-8d4a-ebe89d236e2f_ROOT"]);
         var results = model._getPathSetsAsPathMap(model, [
-            [{"from":0,"to":4},0,"item",["summary","outline","info","heroImages","rating","share","queue","details"]],
-            [{"from":5,"to":9},0,"item",["summary","outline","info","heroImages","rating","share","queue","details"]],
-            [{"from":30,"to":34},0,"item",["summary","outline","info","heroImages","rating","share","queue","details"]],
-            [{"from":0,"to":4},0,"evidence"],
-            [{"from":5,"to":9},0,"evidence"],
-            [{"from":30,"to":34},0,"evidence"]
+            [[{"from":0,"to":4}, {"from":5,"to":9}, {"from":30,"to":34}], 0,"item",["summary","outline","info","heroImages","rating","share","queue","details"]],
+            [[{"from":0,"to":4}, {"from":5,"to":9}, {"from":30,"to":34}], 0,"evidence"]
         ], [{}]);
 
         expect(typeof results.optimizedMissingPaths[10][0] !== 'undefined').to.be.ok;
@@ -49,19 +45,13 @@ function getCache() {
     return {
         "lolomo": {
             "$type": "ref",
-            "value": {
-                "0": "lolomos",
-                "1": "c595efe8-4de0-4226-8d4a-ebe89d236e2f_ROOT"
-            },
+            "value": ["lolomos", "c595efe8-4de0-4226-8d4a-ebe89d236e2f_ROOT"],
         },
         "lolomos": {
             "c595efe8-4de0-4226-8d4a-ebe89d236e2f_ROOT": {
                 "0": {
                     "$type": "ref",
-                    "value": {
-                        "0": "lists",
-                        "1": "c595efe8-4de0-4226-8d4a-ebe89d236e2f_fcce4c47-7b36-456b-89ac-bde430a24ca8"
-                    },
+                    "value": ["lists", "c595efe8-4de0-4226-8d4a-ebe89d236e2f_fcce4c47-7b36-456b-89ac-bde430a24ca8"],
                 },
             },
         },
@@ -70,10 +60,7 @@ function getCache() {
                 "0": {
                     "item": {
                         "$type": "ref",
-                        "value": {
-                            "0": "videos",
-                            "1": "80041601"
-                        },
+                        "value": ["videos", "80041601"],
                     },
                     "evidence": {
                         "value": {
