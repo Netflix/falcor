@@ -28,7 +28,7 @@ describe('Bind', function() {
             }).
             subscribe(noOp, done, done);
     });
-    it.only('should bind to a branch node and build proper missing paths', function() {
+    it('should bind to a branch node and build proper missing paths', function() {
         // Michael todo: Optimized missing paths are all jacked up here.
         debugger;
         var model = new Model({ cache: getCache() }).bindSync(["lolomos","c595efe8-4de0-4226-8d4a-ebe89d236e2f_ROOT"]);
@@ -38,6 +38,15 @@ describe('Bind', function() {
         ], [{}]);
 
         expect(typeof results.optimizedMissingPaths[10][0] !== 'undefined').to.be.ok;
+    });
+    it.only('ensure that roman riding is working', function() {
+        // Michael todo: Optimized missing paths are all jacked up here.
+        var model = new Model({ cache: getCache() })
+        model._root.unsafeMode = true;
+        var out = model._getValueSync(model, ["lolomos","c595efe8-4de0-4226-8d4a-ebe89d236e2f_ROOT", 1, 0]);
+        debugger
+
+        expect(out.optimizedPath).to.deep.equal(["lolomos","c595efe8-4de0-4226-8d4a-ebe89d236e2f_ROOT", 1, 0]);
     });
 });
 
