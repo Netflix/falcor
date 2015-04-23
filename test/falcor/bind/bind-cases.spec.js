@@ -39,7 +39,7 @@ describe('Bind', function() {
 
         expect(typeof results.optimizedMissingPaths[10][0] !== 'undefined').to.be.ok;
     });
-    it.only('ensure that roman riding is working', function() {
+    it('ensure that roman riding is working', function() {
         // Michael todo: Optimized missing paths are all jacked up here.
         var model = new Model({ cache: getCache() })
         model._root.unsafeMode = true;
