@@ -40,7 +40,7 @@ describe('Bind', function() {
             [{"from":5,"to":9},0,"evidence"],
             [{"from":30,"to":34},0,"evidence"]
         ], [{}]);
-        
+
         expect(typeof results.optimizedMissingPaths[10][0] !== 'undefined').to.be.ok;
     });
 });
