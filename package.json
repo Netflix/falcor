@@ -1,16 +1,16 @@
 {
   "name": "falcor",
-  "version": "0.0.11",
-  "main": "./dist/Falcor.js",
+  "version": "0.0.12",
+  "main": "./index.js",
   "scripts": {
     "test": "./node_modules/gulp/bin/gulp.js test-coverage",
     "dist": "./node_modules/gulp/bin/gulp.js build"
   },
   "files": [
     "build",
-    "framework",
-    "macros",
     "dist",
+    "lib",
+    "index.js",
     "test"
   ],
   "devDependencies": {
