@@ -1,6 +1,6 @@
 {
   "name": "falcor",
-  "version": "0.0.12",
+  "version": "0.0.13",
   "main": "./index.js",
   "scripts": {
     "test": "./node_modules/gulp/bin/gulp.js test-coverage",
@@ -22,8 +22,6 @@
     "diff": "~1.0.8",
     "express": "~4.9.0",
     "falcor-browser": "git+ssh://git@github.com/Netflix/falcor-browser.git#v0.0.4",
-    "falcor-observable": "git+ssh://git@github.com/Netflix/falcor-observable.git#v0.1.0",
-    "falcor-path-syntax": "git+ssh://git@github.com/Netflix/falcor-path-syntax.git#v0.1.5",
     "falcor-server": "git+ssh://git@github.com/Netflix/falcor-server.git#v0.0.10",
     "gulp": "~3.8.8",
     "gulp-beautify": "~1.1.0",
@@ -55,6 +53,8 @@
   },
   "dependencies": {
     "rx": "^2.3.25",
-    "promise": "7.0.0"
+    "promise": "7.0.0",
+    "falcor-observable": "git+ssh://git@github.com/Netflix/falcor-observable.git#v0.1.0",
+    "falcor-path-syntax": "git+ssh://git@github.com/Netflix/falcor-path-syntax.git#v0.1.5"
   }
 }
