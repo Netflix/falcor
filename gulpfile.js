@@ -30,7 +30,7 @@ gulp.task('lint', function() {
 
 gulp.task('doc', ['clean.doc', 'doc-d']);
 gulp.task('doc-p', function() {
-    return gulp.src('framework/docs.js').
+    return gulp.src('lib/docs.js').
         pipe(jsdoc.parser({
             plugins: ['plugins/markdown'],
             name: 'Falcor',
