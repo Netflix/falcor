@@ -1,6 +1,6 @@
 {
   "name": "falcor",
-  "version": "0.0.13",
+  "version": "0.0.14",
   "main": "./index.js",
   "scripts": {
     "test": "./node_modules/gulp/bin/gulp.js test-coverage",
@@ -54,7 +54,7 @@
   "dependencies": {
     "rx": "^2.3.25",
     "promise": "7.0.0",
-    "falcor-observable": "git+ssh://git@github.com/Netflix/falcor-observable.git#v0.1.0",
+    "falcor-observable": "git+ssh://git@github.com/Netflix/falcor-observable.git#v0.1.1",
     "falcor-path-syntax": "git+ssh://git@github.com/Netflix/falcor-path-syntax.git#v0.1.5"
   }
 }
