@@ -31,10 +31,10 @@ gulp.task('dist.browser', ['clean.dist'], function() {
 function build(file, standAloneName, outName, dest) {
     outName = outName || 'falcor.js';
 
-    return browserify(file, {
+    return browserify(file).
+        bundle({
             standalone: standAloneName || 'falcor'
         }).
-        bundle().
         pipe(vinyl(outName)).
         pipe(license('Apache', licenseInfo)).
         pipe(gulp.dest(dest || 'bin'));
