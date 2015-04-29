@@ -98,7 +98,7 @@ describe("Special Cases", function() {
     });
 
     // TODO: Paul, consider making this a part of you super set tests.
-    it.only('should return the ranged items when ranges in array.', function() {
+    it('should return the ranged items when ranges in array.', function() {
         var JSONG = {
             jsong: {
                 foo: {
@@ -119,9 +119,9 @@ describe("Special Cases", function() {
         var model = new Model();
         var out = [{}];
 
-        debugger
+        debugger;
         model._setJSONGsAsJSON(model, [JSONG], out);
-        expect(out[0]).to.deep.equals({
+        expect(out[0].json).to.deep.equals({
             0: 0,
             1: 75
         });
