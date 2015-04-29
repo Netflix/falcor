@@ -215,7 +215,6 @@ describe('DataSource and Cache', function() {
                 newValue: '1'
             };
             var count = 0;
-            // TODO: not sure if this works
             model.
                 set({path: ['genreList', 0, {to: 1}, 'summary'], value: expected}).
                 toPathValues().
@@ -236,5 +235,37 @@ describe('DataSource and Cache', function() {
                 }).
                 subscribe(noOp, done, done);
         });
+    });
+    it('should ensure that the jsong sent to server is optimized.', function(done) {
+        var model = new Model({
+            cache: Cache(),
+            source: new LocalDataSource(Cache(), {
+                onSet: function(source, tmp, jsongEnv) {
+                    sourceCalled = true;
+                    testRunner.compare({
+                        jsong: {
+                            videos: {
+                                1234: {
+                                    summary: 5
+                                }
+                            }
+                        },
+                        paths: [['videos', 1234, 'summary']]
+                    }, jsongEnv);
+                    return jsongEnv;
+                }
+            })
+        });
+        var called = false;
+        var sourceCalled = false;
+        model.
+            set({path: ['genreList', 0, 0, 'summary'], value: 5}).
+            doAction(function(x) {
+                called = true;
+            }, noOp, function() {
+                testRunner.compare(true, called, 'Expected onNext to be called');
+                testRunner.compare(true, sourceCalled, 'Expected source.set to be called.');
+            }).
+            subscribe(noOp, done, done);
     });
 });
