@@ -13,7 +13,7 @@ describe("Special Cases", function() {
                 user: {
                     name: "Jim",
                     location: {$type: "error", value: "Something broke!"},
-                    age: {$type: 'sentinel'}
+                    age: {$type: $sentinel}
                 }
             },
             paths: [
@@ -31,7 +31,7 @@ describe("Special Cases", function() {
                 }
             }
         }, pathMap[0]);
-        
+
         var jsons = [{}];
         model._cache = {};
         model._setJSONGsAsJSON(model, [edgeCaseCache], jsons);
@@ -94,6 +94,36 @@ describe("Special Cases", function() {
                 },
                 path: ["genreList", 1, 0, "summary"]
             });
+        });
+    });
+
+    // TODO: Paul, consider making this a part of you super set tests.
+    it.only('should return the ranged items when ranges in array.', function() {
+        var JSONG = {
+            jsong: {
+                foo: {
+                    0: {
+                        $type: $sentinel,
+                        value: 0
+                    },
+                    1: {
+                        $type: $sentinel,
+                        value: 75
+                    }
+                }
+            },
+            paths: [
+                ['foo', [{from: 0, to: 1}]]
+            ]
+        };
+        var model = new Model();
+        var out = [{}];
+
+        debugger
+        model._setJSONGsAsJSON(model, [JSONG], out);
+        expect(out[0]).to.deep.equals({
+            0: 0,
+            1: 75
         });
     });
 });
