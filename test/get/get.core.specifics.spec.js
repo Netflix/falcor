@@ -13,6 +13,7 @@ var Bound = Expected.Bound;
 var Materialized = Expected.Materialized;
 var Boxed = Expected.Boxed;
 var Errors = Expected.Errors;
+var $sentinel = require("../../lib/types/sentinel");
 
 describe('Specific Cases', function() {
     describe('Selector Missing PathSet Index', function() {
@@ -61,7 +62,7 @@ describe('Specific Cases', function() {
             model._getPathSetsAsJSONG(model, [['videos', 1, 'summary']], seed);
 
             testRunner.compare({
-                $type: 'sentinel',
+                $type: $sentinel,
                 $size: 51,
                 value: {
                     "title": "Additional Title 0",
@@ -70,7 +71,7 @@ describe('Specific Cases', function() {
             }, seed[0].jsong.videos[0].summary);
 
             testRunner.compare({
-                $type: 'sentinel',
+                $type: $sentinel,
                 $size: 51,
                 value: {
                     "title": "Additional Title 1",
@@ -205,7 +206,7 @@ describe('Specific Cases', function() {
         queries.forEach(function(q) {
             var result = model._getPathMapsAsJSON(model, q, [{}]);
 
-            testRunner.compare([{json: {$type: 'sentinel'}}], result.values);
+            testRunner.compare([{json: {$type: $sentinel}}], result.values);
         });
     });
 
@@ -248,5 +249,34 @@ describe('Specific Cases', function() {
         ];
         var results = model._getPathSetsAsJSONG(model, queries, [{}]);
         testRunner.compare(0, results.requestedMissingPaths.length);
+    });
+
+    it('should return the ranged items when ranges in array.', function() {
+        var JSONG = {
+            jsong: {
+                foo: {
+                    0: {
+                        $type: $sentinel,
+                        value: 0
+                    },
+                    1: {
+                        $type: $sentinel,
+                        value: 75
+                    }
+                }
+            },
+            paths: [
+                ['foo', [{from: 0, to: 1}]]
+            ]
+        };
+        var model = new Model({cache: JSONG.jsong});
+        var out = [{}];
+
+        debugger
+        model._getPathSetsAsJSON(model, JSONG.paths, out);
+        testRunner.compare({
+            0: 0,
+            1: 75
+        }, out[0].json);
     });
 });
