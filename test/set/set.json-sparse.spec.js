@@ -14,7 +14,7 @@ var set_and_verify_json_sparse = require("./support/set-and-verify-json-sparse")
 
 var slice = Array.prototype.slice;
 var $path = require("../../lib/types/path");
-var $sentinel = require("../../lib/types/sentinel");
+var $atom = require("../../lib/types/atom");
 
 
 var modes = [{
@@ -79,7 +79,7 @@ function execute(output, suffix, opts) {
                             value: "Pulp Fiction"
                         }], opts);
                     });
-                    it("through a reference that lands on a sentinel", function() {
+                    it("through a reference that lands on a atom", function() {
                         set_and_verify_json_sparse(this.test, suffix, [{
                             path: ["grid", 0, 1, "title"],
                             value: "Kill Bill: Vol. 1"
@@ -143,14 +143,14 @@ function execute(output, suffix, opts) {
             });
             // end set primitive value
 
-            // set a sentinel value
-            describe("a $sentinel", function() {
+            // set a atom value
+            describe("a $atom", function() {
                 describe("in one place", function() {
                     it("directly", function() {
                         set_and_verify_json_sparse(this.test, suffix, [{
                             path: ["movies", "pulp-fiction", "summary"],
                             value: {
-                                $type: $sentinel,
+                                $type: $atom,
                                 value: {
                                     title: "Pulp Fiction",
                                     url: "/movies/id/pulp-fiction"
@@ -162,7 +162,7 @@ function execute(output, suffix, opts) {
                         set_and_verify_json_sparse(this.test, suffix, [{
                             path: ["grid", 0, 0, "summary"],
                             value: {
-                                $type: $sentinel,
+                                $type: $atom,
                                 value: {
                                     title: "Pulp Fiction",
                                     url: "/movies/id/pulp-fiction"
@@ -170,11 +170,11 @@ function execute(output, suffix, opts) {
                             }
                         }], opts);
                     });
-                    it("through a reference that lands on a sentinel", function() {
+                    it("through a reference that lands on a atom", function() {
                         set_and_verify_json_sparse(this.test, suffix, [{
                             path: ["grid", 0, 1, "summary"],
                             value: {
-                                $type: $sentinel,
+                                $type: $atom,
                                 value: {
                                     title: "Kill Bill: Vol. 1",
                                     url: "/movies/id/kill-bill-1"
@@ -186,7 +186,7 @@ function execute(output, suffix, opts) {
                         set_and_verify_json_sparse(this.test, suffix, [{
                             path: ["grid", 0, 2, "summary"],
                             value: {
-                                $type: $sentinel,
+                                $type: $atom,
                                 value: {
                                     title: "Reservior Dogs",
                                     url: "/movies/id/reservior-dogs"
@@ -198,7 +198,7 @@ function execute(output, suffix, opts) {
                         set_and_verify_json_sparse(this.test, suffix, [{
                             path: ["grid", 0, 2, null],
                             value: {
-                                $type: $sentinel,
+                                $type: $atom,
                                 value: "Reservior Dogs"
                             }
                         }], opts);
@@ -210,7 +210,7 @@ function execute(output, suffix, opts) {
                             set_and_verify_json_sparse(this.test, suffix, [{
                                 path: ["movies", ["pulp-fiction", "kill-bill-1", "reservior-dogs"], "genres"],
                                 value: {
-                                    $type: $sentinel,
+                                    $type: $atom,
                                     value: ["Crime", "Drama", "Thriller"]
                                 }
                             }], opts);
@@ -219,7 +219,7 @@ function execute(output, suffix, opts) {
                             set_and_verify_json_sparse(this.test, suffix, [{
                                 path: ["grid", 0, [0, 1, 2], "genres"],
                                 value: {
-                                    $type: $sentinel,
+                                    $type: $atom,
                                     value: ["Crime", "Drama", "Thriller"]
                                 }
                             }], opts);
@@ -230,7 +230,7 @@ function execute(output, suffix, opts) {
                             set_and_verify_json_sparse(this.test, suffix, [{
                                 path: ["grid", 0, {to:2}, "genres"],
                                 value: {
-                                    $type: $sentinel,
+                                    $type: $atom,
                                     value: ["Crime", "Drama", "Thriller"]
                                 }
                             }], opts);
@@ -239,7 +239,7 @@ function execute(output, suffix, opts) {
                             set_and_verify_json_sparse(this.test, suffix, [{
                                 path: ["grid", 0, {from:1, to:2}, "genres"],
                                 value: {
-                                    $type: $sentinel,
+                                    $type: $atom,
                                     value: ["Crime", "Drama", "Thriller"]
                                 }
                             }], opts);
@@ -248,7 +248,7 @@ function execute(output, suffix, opts) {
                             set_and_verify_json_sparse(this.test, suffix, [{
                                 path: ["grid", 0, {length:3}, "genres"],
                                 value: {
-                                    $type: $sentinel,
+                                    $type: $atom,
                                     value: ["Crime", "Drama", "Thriller"]
                                 }
                             }], opts);
@@ -257,7 +257,7 @@ function execute(output, suffix, opts) {
                             set_and_verify_json_sparse(this.test, suffix, [{
                                 path: ["grid", 0, {from:1, length:2}, "genres"],
                                 value: {
-                                    $type: $sentinel,
+                                    $type: $atom,
                                     value: ["Crime", "Drama", "Thriller"]
                                 }
                             }], opts);
@@ -265,7 +265,7 @@ function execute(output, suffix, opts) {
                     });
                 });
             });
-            // end set sentinel value
+            // end set atom value
 
             // set a path value
             describe("a $path", function() {
@@ -300,7 +300,7 @@ function execute(output, suffix, opts) {
                     }, {
                         path: ["movies", "pulp-fiction", "summary"],
                         value: {
-                            $type: $sentinel,
+                            $type: $atom,
                             value: {
                                 title: "Pulp Fiction",
                                 url: "/movies/id/pulp-fiction"
@@ -309,7 +309,7 @@ function execute(output, suffix, opts) {
                     }, {
                         path: ["movies", ["pulp-fiction", "kill-bill-1", "reservior-dogs"], "genres"],
                         value: {
-                            $type: $sentinel,
+                            $type: $atom,
                             value: ["Crime", "Drama", "Thriller"]
                         }
                     }, {
@@ -328,7 +328,7 @@ function execute(output, suffix, opts) {
                     }, {
                         path: ["grid", 0, 0, "summary"],
                         value: {
-                            $type: $sentinel,
+                            $type: $atom,
                             value: {
                                 title: "Pulp Fiction",
                                 url: "/movies/id/pulp-fiction"
@@ -337,7 +337,7 @@ function execute(output, suffix, opts) {
                     }, {
                         path: ["grid", 0, [0, 1, 2], "genres"],
                         value: {
-                            $type: $sentinel,
+                            $type: $atom,
                             value: ["Crime", "Drama", "Thriller"]
                         }
                     }, {
@@ -415,7 +415,7 @@ function execute(output, suffix, opts) {
                 set_and_verify_json_sparse(this.test, suffix, [{
                     path:  ["grid", "grid-1234", {length: count}],
                     value: {
-                        $type: $sentinel,
+                        $type: $atom,
                         $size: $size,
                         value: undefined
                     }
@@ -424,7 +424,7 @@ function execute(output, suffix, opts) {
                 set_and_verify_json_sparse(this.test, suffix, [{
                     path:  ["grid", "grid-1234", {from: count, length: count}],
                     value: {
-                        $type: $sentinel,
+                        $type: $atom,
                         $size: $size,
                         value: undefined
                     }
@@ -440,7 +440,7 @@ function execute(output, suffix, opts) {
                 set_pathvalues([{
                     path:  ["grid", "grid-1234", {length: count}],
                     value: {
-                        $type: $sentinel,
+                        $type: $atom,
                         $size: $size,
                         value: undefined
                     }
@@ -456,8 +456,8 @@ function execute(output, suffix, opts) {
 
         // replace existing values
         describe("by replacing", function() {
-            // replace a sentinel with a primitive
-            describe("a $sentinel with a primitive", function() {
+            // replace a atom with a primitive
+            describe("a $atom with a primitive", function() {
                 it("directly", function() {
                     set_and_verify_json_sparse(this.test, suffix, [{
                         path: ["movies", "pulp-fiction", "movie-id"],
@@ -471,7 +471,7 @@ function execute(output, suffix, opts) {
                     }], opts);
                 });
             });
-            // end replacing sentinel with primitive
+            // end replacing atom with primitive
 
             // replace a branch with a primitive
             describe("a branch with a primitive", function() {

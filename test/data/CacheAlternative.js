@@ -21,7 +21,7 @@ var Cache = function() {
         "videos": {
             "0": {
                 "summary": {
-                    "$type": "sentinel",
+                    "$type": "atom",
                     "value": {
                         "title": "Additional Title 0",
                         "url": "/movies/0"
@@ -30,7 +30,7 @@ var Cache = function() {
             },
             "1": {
                 "summary": {
-                    "$type": "sentinel",
+                    "$type": "atom",
                     "value": {
                         "title": "Additional Title 1",
                         "url": "/movies/1"
@@ -39,7 +39,7 @@ var Cache = function() {
             },
             "2": {
                 "summary": {
-                    "$type": "sentinel",
+                    "$type": "atom",
                     "value": {
                         "title": "Additional Title 2",
                         "url": "/movies/2"
@@ -48,7 +48,7 @@ var Cache = function() {
             },
             "3": {
                 "summary": {
-                    "$type": "sentinel",
+                    "$type": "atom",
                     "value": {
                         "title": "Additional Title 3",
                         "url": "/movies/3"
@@ -57,7 +57,7 @@ var Cache = function() {
             },
             "4": {
                 "summary": {
-                    "$type": "sentinel",
+                    "$type": "atom",
                     "value": {
                         "title": "Additional Title 4",
                         "url": "/movies/4"
@@ -66,7 +66,7 @@ var Cache = function() {
             },
             "5": {
                 "summary": {
-                    "$type": "sentinel",
+                    "$type": "atom",
                     "value": {
                         "title": "Additional Title 5",
                         "url": "/movies/5"
@@ -75,7 +75,7 @@ var Cache = function() {
             },
             "1234": {
                 "summary": {
-                    "$type": "sentinel",
+                    "$type": "atom",
                     "value": {
                         "title": "House of Cards",
                         "url": "/movies/1234"
@@ -84,7 +84,7 @@ var Cache = function() {
             },
             "766": {
                 "summary": {
-                    "$type": "sentinel",
+                    "$type": "atom",
                     "value": {
                         "title": "Terminator 3",
                         "url": "/movies/766"
@@ -93,7 +93,7 @@ var Cache = function() {
             },
             "7531": {
                 "summary": {
-                    "$type": "sentinel",
+                    "$type": "atom",
                     "value": {
                         "title": "Kindergarten Cop",
                         "url": "/movies/7531"
@@ -102,7 +102,7 @@ var Cache = function() {
             },
             "6420": {
                 "summary": {
-                    "$type": "sentinel",
+                    "$type": "atom",
                     "value": {
                         "title": "Commando",
                         "url": "/movies/6420"

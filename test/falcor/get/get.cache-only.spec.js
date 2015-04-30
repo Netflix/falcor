@@ -42,7 +42,7 @@ describe('Cache Only', function() {
                         user: {
                             name: {
                                 // Metadata that indicates this object is a Sentinel
-                                $type: "sentinel",
+                                $type: "atom",
                                 // The value property contains the value box by the Sentinel
                                 value: "Jim Parsons",
                                 // Metadata that dictates that this value should be purged from the {@link Model}'s cache after two minutes. Negative numbers imply that expiration occurs relative to the current time.

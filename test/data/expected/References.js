@@ -1,5 +1,5 @@
 var $path = require('./../../../lib/types/path.js');
-var $sentinel = require('./../../../lib/types/sentinel.js');
+var $atom = require('./../../../lib/types/atom.js');
 var $error = require('./../../../lib/types/error.js');
 module.exports = function() {
     return {
@@ -70,7 +70,7 @@ module.exports = function() {
                             1234: {
                                 summary: {
                                     "$size": 51,
-                                    "$type": $sentinel,
+                                    "$type": $atom,
                                     "value": {
                                         "title": "House of Cards",
                                         "url": "/movies/1234"
@@ -202,7 +202,7 @@ module.exports = function() {
                             766: {
                                 summary: {
                                     "$size": 51,
-                                    "$type": $sentinel,
+                                    "$type": $atom,
                                     "value": {
                                         "title": "Terminator 3",
                                         "url": "/movies/766"
@@ -342,7 +342,7 @@ module.exports = function() {
                             7531: {
                                 summary: {
                                     "$size": 51,
-                                    "$type": $sentinel,
+                                    "$type": $atom,
                                     "value": {
                                         "title": "Kindergarten Cop",
                                         "url": "/movies/7531"
@@ -482,7 +482,7 @@ module.exports = function() {
                             6420: {
                                 summary: {
                                     "$size": 51,
-                                    "$type": $sentinel,
+                                    "$type": $atom,
                                     "value": {
                                         "title": "Commando",
                                         "url": "/movies/6420"
@@ -568,7 +568,7 @@ module.exports = function() {
                             1234: {
                                 summary: {
                                     "$size": 51,
-                                    "$type": $sentinel,
+                                    "$type": $atom,
                                     "value": {
                                         "title": "House of Cards",
                                         "url": "/movies/1234"
@@ -666,7 +666,7 @@ module.exports = function() {
                             553: {
                                 summary: {
                                     "$size": 51,
-                                    "$type": $sentinel,
+                                    "$type": $atom,
                                     "value": {
                                         "title": "Running Man",
                                         "url": "/movies/553"
@@ -770,7 +770,7 @@ module.exports = function() {
                             553: {
                                 summary: {
                                     "$size": 51,
-                                    "$type": $sentinel,
+                                    "$type": $atom,
                                     "value": {
                                         "title": "Running Man",
                                         "url": "/movies/553"

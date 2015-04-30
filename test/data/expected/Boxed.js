@@ -1,15 +1,15 @@
 var $path = require('./../../../lib/types/path.js');
-var $sentinel = require('./../../../lib/types/sentinel.js');
+var $atom = require('./../../../lib/types/atom.js');
 var $error = require('./../../../lib/types/error.js');
 module.exports = function() {
     return {
-        sentinelValue: {
+        atomValue: {
             getPathSets: { query: [["videos", "0", "summary"]] },
             setPathSets: {
                 query: [{
                     path: ["videos", "0", "summary"],
                     value: {
-                        "$type": $sentinel,
+                        "$type": $atom,
                         "value": {
                             "title": "Additional Title 0",
                             "url": "/movies/0"
@@ -22,7 +22,7 @@ module.exports = function() {
                     path: ["videos", "0", "summary"],
                     value: {
                         "$size": 51,
-                        "$type": $sentinel,
+                        "$type": $atom,
                         "value": {
                             "title": "Additional Title 0",
                             "url": "/movies/0"
@@ -34,7 +34,7 @@ module.exports = function() {
                 values: [{
                     json: {
                         "$size": 51,
-                        "$type": $sentinel,
+                        "$type": $atom,
                         "value": {
                             "title": "Additional Title 0",
                             "url": "/movies/0"
@@ -49,7 +49,7 @@ module.exports = function() {
                             "0": {
                                 "summary": {
                                     "$size": 51,
-                                    "$type": $sentinel,
+                                    "$type": $atom,
                                     "value": {
                                         "title": "Additional Title 0",
                                         "url": "/movies/0"
@@ -68,7 +68,7 @@ module.exports = function() {
                             "0": {
                                 "summary": {
                                     "$size": 51,
-                                    "$type": $sentinel,
+                                    "$type": $atom,
                                     "value": {
                                         "title": "Additional Title 0",
                                         "url": "/movies/0"

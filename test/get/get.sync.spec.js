@@ -95,11 +95,11 @@ describe('GetValueSync', function() {
     });
 
     describe('BoxValues', function() {
-        it("should get a value directly as a sentinel in boxed mode", function() {
+        it("should get a value directly as a atom in boxed mode", function() {
             var model = new Model({cache: Cache()}).boxValues();
             model._root.unsafeMode = true;
             var value = model.getValueSync(['videos', 0, 'summary']);
-            testRunner.compare(Boxed().sentinelValue.AsJSON.values[0].json, value);
+            testRunner.compare(Boxed().atomValue.AsJSON.values[0].json, value);
         });
         it("should get a reference value directly as a reference in boxed mode", function() {
             var model = new Model({cache: Cache()}).boxValues();
@@ -114,19 +114,19 @@ describe('GetValueSync', function() {
             var model = new Model({cache: Cache()}).materialize();
             model._root.unsafeMode = true;
             var value = model.getValueSync(['genreList', 'missing-branch']);
-            testRunner.compare({$type: 'sentinel'}, value);
+            testRunner.compare({$type: 'atom'}, value);
         });
         it('should get undefined when encountering an expired branch.', function() {
             var model = new Model({cache: Cache()}).materialize();
             model._root.unsafeMode = true;
             var value = model.getValueSync(['videos', 'expiredLeafByTimestamp', 'summary']);
-            testRunner.compare({$type: 'sentinel'}, value);
+            testRunner.compare({$type: 'atom'}, value);
         });
         it('should get undefined when selecting past a leaf value.', function() {
             var model = new Model({cache: Cache()}).materialize();
             model._root.unsafeMode = true;
             var value = model.getValueSync(['videos', 1234, 'summary', 'missing']);
-            testRunner.compare({$type: 'sentinel'}, value);
+            testRunner.compare({$type: 'atom'}, value);
         });
     });
     

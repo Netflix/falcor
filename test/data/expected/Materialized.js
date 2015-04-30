@@ -1,5 +1,5 @@
 var $path = require('./../../../lib/types/path.js');
-var $sentinel = require('./../../../lib/types/sentinel.js');
+var $atom = require('./../../../lib/types/atom.js');
 var $error = require('./../../../lib/types/error.js');
 
 module.exports = function() {
@@ -46,23 +46,23 @@ module.exports = function() {
             AsValues: {
                 values: [{
                     path: ["videos", "missingBranch"],
-                    "value": { "$type": $sentinel }
+                    "value": { "$type": $atom }
                 }]
             },
             AsJSON: {
                 values: [{
-                    json: { "$type": $sentinel }
+                    json: { "$type": $atom }
                 }]
             },
             AsPathMap: {
                 values: [{
-                    json: { videos: { missingBranch: { "$type": $sentinel } } }
+                    json: { videos: { missingBranch: { "$type": $atom } } }
                 }]
             },
             AsJSONG: {
                 values: [{
                     paths: [["videos", "missingBranch"]],
-                    jsong: { videos: { missingBranch: { "$type": $sentinel } } }
+                    jsong: { videos: { missingBranch: { "$type": $atom } } }
                 }]
             }
         },
@@ -82,57 +82,57 @@ module.exports = function() {
             AsValues: {
                 values: [{
                     path: ["videos", "1234", "missingLeaf"],
-                    "value": { "$type": $sentinel }
+                    "value": { "$type": $atom }
                 }]
             },
             AsJSON: {
                 values: [{
-                    json: { "$type": $sentinel }
+                    json: { "$type": $atom }
                 }]
             },
             AsPathMap: {
                 values: [{
-                    json: { videos: { 1234: { missingLeaf: { "$type": $sentinel } } } }
+                    json: { videos: { 1234: { missingLeaf: { "$type": $atom } } } }
                 }]
             },
             AsJSONG: {
                 values: [{
                     paths: [["videos", "1234", "missingLeaf"]],
-                    jsong: { videos: { 1234: { missingLeaf: { "$type": $sentinel } } } }
+                    jsong: { videos: { 1234: { missingLeaf: { "$type": $atom } } } }
                 }]
             }
         },
-        sentinelOfUndefined: {
+        atomOfUndefined: {
             getPathSets: {
-                query: [["misc", "usentinel"]]
+                query: [["misc", "uatom"]]
             },
             getPathMaps: {
                 query: [{
                     misc: {
-                        usentinel: null
+                        uatom: null
                     }
                 }]
             },
             AsValues: {
                 values: [{
-                    path: ["misc", "usentinel"],
-                    "value": { "$type": $sentinel }
+                    path: ["misc", "uatom"],
+                    "value": { "$type": $atom }
                 }]
             },
             AsJSON: {
                 values: [{
-                    json: { "$type": $sentinel }
+                    json: { "$type": $atom }
                 }]
             },
             AsPathMap: {
                 values: [{
-                    json: { misc: { usentinel: { "$type": $sentinel } } }
+                    json: { misc: { uatom: { "$type": $atom } } }
                 }]
             },
             AsJSONG: {
                 values: [{
-                    paths: [["misc", "usentinel"]],
-                    jsong: { misc: { usentinel: { "$type": $sentinel } } }
+                    paths: [["misc", "uatom"]],
+                    jsong: { misc: { uatom: { "$type": $atom } } }
                 }]
             }
         }

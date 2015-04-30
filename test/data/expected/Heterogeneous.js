@@ -1,5 +1,5 @@
 var $path = require('./../../../lib/types/path.js');
-var $sentinel = require('./../../../lib/types/sentinel.js');
+var $atom = require('./../../../lib/types/atom.js');
 var $error = require('./../../../lib/types/error.js');
 module.exports = function() {
     return {

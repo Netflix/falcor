@@ -98,15 +98,15 @@ describe('Multiple Gets', function () {
 
 var cache = {
     1: {
-        $type: 'sentinel',
+        $type: 'atom',
         value: 'i am 1'
     },
     2: {
-        $type: 'sentinel',
+        $type: 'atom',
         value: 'i am 2'
     },
     3: {
-        $type: 'sentinel',
+        $type: 'atom',
         value: 'i am 3'
     }
 };

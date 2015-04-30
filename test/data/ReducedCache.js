@@ -1,5 +1,5 @@
 var $path = require('./../../lib/types/path.js');
-var $sentinel = require('./../../lib/types/sentinel.js');
+var $atom = require('./../../lib/types/atom.js');
 var $error = require('./../../lib/types/error.js');
 var ReducedCache = function() {
     return {
@@ -26,7 +26,7 @@ var ReducedCache = function() {
             "1234": {
                 "$size": 10,
                 "summary": {
-                    $type: $sentinel,
+                    $type: $atom,
                     value: {
                         "title": "House of Cards",
                         "url": "/movies/1234"
@@ -36,7 +36,7 @@ var ReducedCache = function() {
             "5522": {
                 "$size": 10,
                 "summary": {
-                    $type: $sentinel,
+                    $type: $atom,
                     value: {
                         "title": "Junior",
                         "url": "/movies/5522"
@@ -65,7 +65,7 @@ var MinimalCache = function() {
             "1234": {
                 "$size": 10,
                 "summary": {
-                    $type: $sentinel,
+                    $type: $atom,
                     value: {
                         "title": "House of Cards",
                         "url": "/movies/1234"

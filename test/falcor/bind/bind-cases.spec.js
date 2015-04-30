@@ -92,7 +92,7 @@ function getCache() {
                                 }
                             },
                         },
-                        "$type": "sentinel",
+                        "$type": "atom",
                     }
                 },
             },
@@ -111,10 +111,10 @@ function getCache() {
                         },
                         "listType": null
                     },
-                    "$type": "sentinel",
+                    "$type": "atom",
                 },
                 "summary": {
-                    "$type": "sentinel",
+                    "$type": "atom",
                 },
                 "outline": {
                     "value": {
@@ -142,13 +142,13 @@ function getCache() {
                         "type": "show",
                         "listType": null
                     },
-                    "$type": "sentinel",
+                    "$type": "atom",
                 },
                 "rating": {
                     "value": {
                         "userRating": null,
                     },
-                    "$type": "sentinel",
+                    "$type": "atom",
                 },
                 "heroImages": {
                     "value": {
@@ -171,7 +171,7 @@ function getCache() {
                             "height": 513
                         }
                     },
-                    "$type": "sentinel",
+                    "$type": "atom",
                 }
             },
         }

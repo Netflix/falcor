@@ -82,7 +82,7 @@ function spliceExpired(query, output) {
             "summary": {
                 "$size": 51,
                 "$expires": Date.now() + 50,
-                "$type": "sentinel",
+                "$type": "atom",
                 "value": 'sad panda'
             }
         }

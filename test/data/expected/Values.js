@@ -1,5 +1,5 @@
 var $path = require('./../../../lib/types/path.js');
-var $sentinel = require('./../../../lib/types/sentinel.js');
+var $atom = require('./../../../lib/types/atom.js');
 var $error = require('./../../../lib/types/error.js');
 module.exports = function() {
     return {
@@ -78,7 +78,7 @@ module.exports = function() {
                             1234: {
                                 summary: {
                                     "$size": 51,
-                                    "$type": $sentinel,
+                                    "$type": $atom,
                                     "value": {
                                         "title": "House of Cards",
                                         "url": "/movies/1234"
@@ -180,7 +180,7 @@ module.exports = function() {
                             553: {
                                 summary: {
                                     "$size": 51,
-                                    "$type": $sentinel,
+                                    "$type": $atom,
                                     "value": {
                                         "title": "Running Man",
                                         "url": "/movies/553"
@@ -293,7 +293,7 @@ module.exports = function() {
                 }]
             }
         },
-        sentinelDirect: {
+        atomDirect: {
             getPathSets: {
                 query: [
                     ["videos", "1234", "summary"]
@@ -303,7 +303,7 @@ module.exports = function() {
                 query: [{
                     path: ["videos", "1234", "summary"],
                     "value": {
-                        "$type": $sentinel,
+                        "$type": $atom,
                         "value": {
                             "title": "House of Cards",
                             "url": "/movies/1234"
@@ -371,7 +371,7 @@ module.exports = function() {
                             1234: {
                                 summary: {
                                     "$size": 51,
-                                    "$type": $sentinel,
+                                    "$type": $atom,
                                     "value": {
                                         "title": "House of Cards",
                                         "url": "/movies/1234"
@@ -418,11 +418,11 @@ module.exports = function() {
                     {
                         path: ["videos", "expiredLeafByTimestamp", "summary"],
                         "value": {
-                            "$type": $sentinel,
+                            "$type": $atom,
                             "$expires": Date.now() - 100,
                             "value": {
                                 "title": "Marco Polo",
-                                "url": "/movies/sentinel"
+                                "url": "/movies/atom"
                             }
                         }
                     }
@@ -434,11 +434,11 @@ module.exports = function() {
                     videos: {
                         expiredLeafByTimestamp: {
                             summary: {
-                                "$type": $sentinel,
+                                "$type": $atom,
                                 "$expires": Date.now() - 100,
                                 "value": {
                                     "title": "Marco Polo",
-                                    "url": "/movies/sentinel"
+                                    "url": "/movies/atom"
                                 }
                             }
                         }
@@ -447,17 +447,17 @@ module.exports = function() {
             },
             setJSONG: {
                 query: [{
-                    paths: [["videos", $sentinel, "summary"]],
+                    paths: [["videos", $atom, "summary"]],
                     jsong: {
                         videos: {
                             expiredLeafByTimestamp: {
                                 summary: {
                                     "$size": 51,
-                                    "$type": $sentinel,
+                                    "$type": $atom,
                                     "$expires": Date.now() - 100,
                                     "value": {
                                         "title": "Marco Polo",
-                                        "url": "/movies/sentinel"
+                                        "url": "/movies/atom"
                                     }
                                 }
                             }
@@ -506,7 +506,7 @@ module.exports = function() {
                         "value": {
                             "$expires": 0,
                             "$size": 51,
-                            "$type": $sentinel,
+                            "$type": $atom,
                             "value": {
                                 "sad": "tunafish"
                             }
@@ -522,7 +522,7 @@ module.exports = function() {
                             summary: {
                                 "$expires": 0,
                                 "$size": 51,
-                                "$type": $sentinel,
+                                "$type": $atom,
                                 "value": {
                                     "sad": "tunafish"
                                 }
@@ -540,7 +540,7 @@ module.exports = function() {
                                 summary: {
                                     "$expires": 0,
                                     "$size": 51,
-                                    "$type": $sentinel,
+                                    "$type": $atom,
                                     "value": {
                                         "sad": "tunafish"
                                     }
