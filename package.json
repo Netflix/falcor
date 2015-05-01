@@ -55,6 +55,7 @@
     "rx": "^2.3.25",
     "promise": "7.0.0",
     "falcor-observable": "git+ssh://git@github.com/Netflix/falcor-observable.git",
-    "falcor-path-syntax": "git+ssh://git@github.com/Netflix/falcor-path-syntax.git"
+    "falcor-path-syntax": "git+ssh://git@github.com/Netflix/falcor-path-syntax.git",
+    "asap": "~2.0.3"
   }
 }
