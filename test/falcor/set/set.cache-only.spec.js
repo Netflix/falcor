@@ -69,7 +69,7 @@ describe('Cache Only', function() {
                     videos: {
                         1234: {
                             summary: {
-                                $type: 'sentinel',
+                                $type: 'atom',
                                 $size: 51,
                                 value: {
                                     hello: 'world'

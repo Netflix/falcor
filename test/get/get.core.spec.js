@@ -146,14 +146,14 @@ describe('Core', function() {
         it('should get a value directly in materialized mode', function() {
             getTestRunner(Values().direct, { materialized: true });
         });
-        it('should report an undefined sentinel for a materialized missing branch node', function() {
+        it('should report an undefined atom for a materialized missing branch node', function() {
             getTestRunner(Materialized().missingBranch, { materialized: true });
         });
-        it('should report an undefined sentinel for a materialized missing leaf node', function() {
+        it('should report an undefined atom for a materialized missing leaf node', function() {
             getTestRunner(Materialized().missingLeaf, { materialized: true });
         });
-        it('should report an undefined sentinel for a materialized undefined sentinel', function() {
-            getTestRunner(Materialized().sentinelOfUndefined, { materialized: true });
+        it('should report an undefined atom for a materialized undefined atom', function() {
+            getTestRunner(Materialized().atomOfUndefined, { materialized: true });
         });
         it('should not report a materialized path when there is a router.', function() {
             var model = new Model({cache: Cache(), router: {}}).materialize();
@@ -165,8 +165,8 @@ describe('Core', function() {
         });
     });
     describe('Boxed', function() {
-        it('should get an Object value directly as a sentinel in boxed mode', function() {
-            getTestRunner(Boxed().sentinelValue, { boxed: true });
+        it('should get an Object value directly as a atom in boxed mode', function() {
+            getTestRunner(Boxed().atomValue, { boxed: true });
         });
         it('should get a reference value directly as a reference in boxed mode', function() {
             getTestRunner(Boxed().referenceValue, { boxed: true });

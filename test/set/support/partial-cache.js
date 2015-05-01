@@ -1,5 +1,5 @@
 var $path = require("../../../lib/types/path");
-var $sentinel = require("../../../lib/types/sentinel");
+var $atom = require("../../../lib/types/atom");
 
 module.exports = function() {
     return {
@@ -19,9 +19,9 @@ module.exports = function() {
         },
         "movies": {
             "pulp-fiction": {
-                "movie-id": { $type: $sentinel, value: "pulp-fiction" }
+                "movie-id": { $type: $atom, value: "pulp-fiction" }
             },
-            "kill-bill-1": { $type: $sentinel }
+            "kill-bill-1": { $type: $atom }
         }
     };
 };

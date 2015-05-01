@@ -1,5 +1,5 @@
 var $path = require("../../../lib/types/path");
-var $sentinel = require("../../../lib/types/sentinel");
+var $atom = require("../../../lib/types/atom");
 
 module.exports = function() {
     return {
@@ -20,15 +20,15 @@ module.exports = function() {
         },
         "movies": {
             "pulp-fiction": {
-                "movie-id": { $type: $sentinel, value: "pulp-fiction" },
-                "title": { $type: $sentinel, value: "Pulp Fiction" },
-                "director": { $type: $sentinel, value: "Quentin Tarantino" },
+                "movie-id": { $type: $atom, value: "pulp-fiction" },
+                "title": { $type: $atom, value: "Pulp Fiction" },
+                "director": { $type: $atom, value: "Quentin Tarantino" },
                 "genres": {
-                    $type: $sentinel,
+                    $type: $atom,
                     value: ["Crime", "Drama", "Thriller"]
                 },
                 "summary": {
-                    $type: $sentinel,
+                    $type: $atom,
                     value: {
                         title: "Pulp Fiction",
                         url: "/movies/id/pulp-fiction"
@@ -36,15 +36,15 @@ module.exports = function() {
                 }
             },
             "kill-bill-1": {
-                "movie-id": { $type: $sentinel, value: "kill-bill-1" },
-                "title": { $type: $sentinel, value: "Kill Bill: Vol. 1" },
-                "director": { $type: $sentinel, value: "Quentin Tarantino" },
+                "movie-id": { $type: $atom, value: "kill-bill-1" },
+                "title": { $type: $atom, value: "Kill Bill: Vol. 1" },
+                "director": { $type: $atom, value: "Quentin Tarantino" },
                 "genres": {
-                    $type: $sentinel,
+                    $type: $atom,
                     value: ["Crime", "Drama", "Thriller"]
                 },
                 "summary": {
-                    $type: $sentinel,
+                    $type: $atom,
                     value: {
                         title: "Kill Bill: Vol. 1",
                         url: "/movies/id/kill-bill-1"
@@ -52,15 +52,15 @@ module.exports = function() {
                 }
             },
             "reservior-dogs": {
-                "movie-id": { $type: $sentinel, value: "reservior-dogs" },
-                "title": { $type: $sentinel, value: "Reservior Dogs" },
-                "director": { $type: $sentinel, value: "Quentin Tarantino" },
+                "movie-id": { $type: $atom, value: "reservior-dogs" },
+                "title": { $type: $atom, value: "Reservior Dogs" },
+                "director": { $type: $atom, value: "Quentin Tarantino" },
                 "genres": {
-                    $type: $sentinel,
+                    $type: $atom,
                     value: ["Crime", "Drama", "Thriller"]
                 },
                 "summary": {
-                    $type: $sentinel,
+                    $type: $atom,
                     value: {
                         title: "Reservior Dogs",
                         url: "/movies/id/reservior-dogs"
@@ -68,15 +68,15 @@ module.exports = function() {
                 }
             },
             "django-unchained": {
-                "movie-id": { $type: $sentinel, value: "django-unchained" },
-                "title": { $type: $sentinel, value: "Django Unchained" },
-                "director": { $type: $sentinel, value: "Quentin Tarantino" },
+                "movie-id": { $type: $atom, value: "django-unchained" },
+                "title": { $type: $atom, value: "Django Unchained" },
+                "director": { $type: $atom, value: "Quentin Tarantino" },
                 "genres": {
-                    $type: $sentinel,
+                    $type: $atom,
                     value: ["Western"]
                 },
                 "summary": {
-                    $type: $sentinel,
+                    $type: $atom,
                     value: {
                         title: "Django Unchained",
                         url: "/movies/id/django-unchained"

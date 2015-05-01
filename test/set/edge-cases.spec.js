@@ -2,7 +2,7 @@ var jsong = require("../../index");
 var Model = jsong.Model;
 var expect = require('chai').expect;
 var $path = require("../../lib/types/path");
-var $sentinel = require("../../lib/types/sentinel");
+var $atom = require("../../lib/types/atom");
 var testRunner = require('../testRunner');
 
 describe("Special Cases", function() {
@@ -13,7 +13,7 @@ describe("Special Cases", function() {
                 user: {
                     name: "Jim",
                     location: {$type: "error", value: "Something broke!"},
-                    age: {$type: $sentinel}
+                    age: {$type: $atom}
                 }
             },
             paths: [
@@ -68,7 +68,7 @@ describe("Special Cases", function() {
             {
                 jsong: {"videos": {"553": {"summary": {
                     "$size": 10,
-                    "$type": $sentinel,
+                    "$type": $atom,
                     "value": {
                         "title": "Running Man",
                         "url": "/movies/553"
@@ -103,11 +103,11 @@ describe("Special Cases", function() {
             jsong: {
                 foo: {
                     0: {
-                        $type: $sentinel,
+                        $type: $atom,
                         value: 0
                     },
                     1: {
-                        $type: $sentinel,
+                        $type: $atom,
                         value: 75
                     }
                 }

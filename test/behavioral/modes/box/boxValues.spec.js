@@ -16,15 +16,15 @@ var _ = require('lodash');
 describe('Box Only', function() {
     var pathValue = ['videos', 1234, 'summary'];
     var jsonValue = {videos: {1234: {summary: null}}};
-    var pathSentinel = ['videos', 'sentinel', 'summary'];
-    var jsonSentinel = {videos: {sentinel: {summary: null}}};
+    var pathSentinel = ['videos', 'atom', 'summary'];
+    var jsonSentinel = {videos: {atom: {summary: null}}};
     describe('getPaths', function() {
         it('should get a value that is is a value selector.', function(done) {
             getTestValue(pathValue, 'selector').
                 subscribe(noOp, done, done);
         });
 
-        it('should get a value that is a sentinel selector.', function(done) {
+        it('should get a value that is a atom selector.', function(done) {
             getTestSentinel(pathSentinel, 'selector').
                 subscribe(noOp, done, done);
         });
@@ -33,7 +33,7 @@ describe('Box Only', function() {
                 subscribe(noOp, done, done);
         });
 
-        it('should get a value that is a sentinel toPathValues.', function(done) {
+        it('should get a value that is a atom toPathValues.', function(done) {
             getTestSentinel(pathSentinel, 'toPathValues').
                 subscribe(noOp, done, done);
         });
@@ -42,7 +42,7 @@ describe('Box Only', function() {
                 subscribe(noOp, done, done);
         });
 
-        it('should get a value that is a sentinel toJSON.', function(done) {
+        it('should get a value that is a atom toJSON.', function(done) {
             getTestSentinel(pathSentinel, 'toJSON').
                 subscribe(noOp, done, done);
         });
@@ -51,7 +51,7 @@ describe('Box Only', function() {
                 subscribe(noOp, done, done);
         });
 
-        it('should get a value that is a sentinel toJSONG.', function(done) {
+        it('should get a value that is a atom toJSONG.', function(done) {
             getTestSentinel(pathSentinel, 'toJSONG').
                 subscribe(noOp, done, done);
         });
@@ -62,7 +62,7 @@ describe('Box Only', function() {
                 subscribe(noOp, done, done);
         });
 
-        it('should get a value that is a sentinel selector.', function(done) {
+        it('should get a value that is a atom selector.', function(done) {
             getTestSentinel(jsonSentinel, 'selector').
                 subscribe(noOp, done, done);
         });
@@ -71,7 +71,7 @@ describe('Box Only', function() {
                 subscribe(noOp, done, done);
         });
 
-        it('should get a value that is a sentinel toPathValues.', function(done) {
+        it('should get a value that is a atom toPathValues.', function(done) {
             getTestSentinel(jsonSentinel, 'toPathValues').
                 subscribe(noOp, done, done);
         });
@@ -80,7 +80,7 @@ describe('Box Only', function() {
                 subscribe(noOp, done, done);
         });
 
-        it('should get a value that is a sentinel toJSON.', function(done) {
+        it('should get a value that is a atom toJSON.', function(done) {
             getTestSentinel(jsonSentinel, 'toJSON').
                 subscribe(noOp, done, done);
         });
@@ -89,7 +89,7 @@ describe('Box Only', function() {
                 subscribe(noOp, done, done);
         });
 
-        it('should get a value that is a sentinel toJSONG.', function(done) {
+        it('should get a value that is a atom toJSONG.', function(done) {
             getTestSentinel(jsonSentinel, 'toJSONG').
                 subscribe(noOp, done, done);
         });
@@ -127,13 +127,13 @@ function getTestSentinel(query, output) {
             } else if (output === 'toPathValues') {
                 summary = video.value;
             } else if (output === 'toJSON') {
-                summary = video.json.videos.sentinel.summary;
+                summary = video.json.videos.atom.summary;
             } else if (output === 'toJSONG') {
-                summary = video.jsong.videos.sentinel.summary;
+                summary = video.jsong.videos.atom.summary;
             }
             expect(summary.title).to.not.be.ok;
             expect(summary.value.title).to.equal('Marco Polo');
-            expect(summary.$type).to.equal('sentinel');
+            expect(summary.$type).to.equal('atom');
         });
 }
 

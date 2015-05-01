@@ -13,7 +13,7 @@ var Bound = Expected.Bound;
 var Materialized = Expected.Materialized;
 var Boxed = Expected.Boxed;
 var Errors = Expected.Errors;
-var $sentinel = require("../../lib/types/sentinel");
+var $atom = require("../../lib/types/atom");
 
 describe('Specific Cases', function() {
     describe('Selector Missing PathSet Index', function() {
@@ -62,7 +62,7 @@ describe('Specific Cases', function() {
             model._getPathSetsAsJSONG(model, [['videos', 1, 'summary']], seed);
 
             testRunner.compare({
-                $type: $sentinel,
+                $type: $atom,
                 $size: 51,
                 value: {
                     "title": "Additional Title 0",
@@ -71,7 +71,7 @@ describe('Specific Cases', function() {
             }, seed[0].jsong.videos[0].summary);
 
             testRunner.compare({
-                $type: $sentinel,
+                $type: $atom,
                 $size: 51,
                 value: {
                     "title": "Additional Title 1",
@@ -206,7 +206,7 @@ describe('Specific Cases', function() {
         queries.forEach(function(q) {
             var result = model._getPathMapsAsJSON(model, q, [{}]);
 
-            testRunner.compare([{json: {$type: $sentinel}}], result.values);
+            testRunner.compare([{json: {$type: $atom}}], result.values);
         });
     });
 
@@ -256,11 +256,11 @@ describe('Specific Cases', function() {
             jsong: {
                 foo: {
                     0: {
-                        $type: $sentinel,
+                        $type: $atom,
                         value: 0
                     },
                     1: {
-                        $type: $sentinel,
+                        $type: $atom,
                         value: 75
                     }
                 }

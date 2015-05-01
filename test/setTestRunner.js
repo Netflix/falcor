@@ -14,7 +14,7 @@ function getModel(newModel, cache) {
 
 function followReference(cache, path) {
     path.forEach(function(v) {
-        cache = cache && cache[v] && (cache[v].$type === "sentinel" ? cache[v].value : cache[v]);
+        cache = cache && cache[v] && (cache[v].$type === "atom" ? cache[v].value : cache[v]);
     });
     return cache;
 }
@@ -52,7 +52,7 @@ function fillInReferences(model, pathTo, prefix) {
         // no complex keys yet.
         var k = pathTo[i];
         value = c[k];
-        c = c[k] && (c[k].$type === "sentinel" ? c[k].value : c[k]);
+        c = c[k] && (c[k].$type === "atom" ? c[k].value : c[k]);
         modelC = modelC && modelC[k] || undefined;
 
         // TODO: Does this work with intentional missing items from c (lists, missing-list)
@@ -74,7 +74,7 @@ function fillInReferences(model, pathTo, prefix) {
     // Finally put in the final object into the cache so that we can set it while following references.
     // since a reference that points to an empty spot in the cache will be considered a "miss"
     // If something is there then it will put nothing there.
-    (followReference(cache, prefix.concat(followed)) === undefined) && model._setPathSetsAsValues(model, [{path: prefix.concat(followed), value: {$type: "sentinel", value: null}}]);
+    (followReference(cache, prefix.concat(followed)) === undefined) && model._setPathSetsAsValues(model, [{path: prefix.concat(followed), value: {$type: "atom", value: null}}]);
 }
 
 function setTestRunner(data, options) {

@@ -6,7 +6,7 @@ var chai = require("chai");
 var expect = chai.expect;
 var $ref = require('./../lib/types/path');
 var $error = require('./../lib/types/error');
-var $sentinel = require('./../lib/types/sentinel');
+var $atom = require('./../lib/types/atom');
 
 describe("Model", function() {
 
@@ -28,7 +28,7 @@ describe("Model", function() {
         testRunner.compare({$type: $error, value: err}, out);
 
         out = Model.atom(1337);
-        testRunner.compare({$type: $sentinel, value: 1337}, out);
+        testRunner.compare({$type: $atom, value: 1337}, out);
     });
 
     require('./integration');

@@ -33,7 +33,7 @@ describe("End-to-End", function() {
             subscribe(noOp, done, done);
     });
 
-    it('should perform a get for a missing path and get sentinel back.', function(done) {
+    it('should perform a get for a missing path and get atom back.', function(done) {
         var model = new falcor.Model({
             source: source
         });
@@ -42,7 +42,7 @@ describe("End-to-End", function() {
             json: {
                 videos: {
                     'missing-branch': {
-                        $type: 'sentinel',
+                        $type: 'atom',
                     }
                 }
             }
@@ -59,7 +59,7 @@ describe("End-to-End", function() {
             subscribe(noOp, done, done);
     });
 
-    it('should get multiple sentinel types.', function(done) {
+    it('should get multiple atom types.', function(done) {
         var model = new falcor.Model({
             source: edgeCaseSource
         });

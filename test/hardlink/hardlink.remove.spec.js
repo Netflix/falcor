@@ -202,7 +202,7 @@ function setExpireyAndGet(query, output, get) {
     var model = new Model({cache: {
         genreList: {
             0: {
-                $type: 'sentinel',
+                $type: 'atom',
                 $expires: Date.now() + 50,
                 value: ['lists', 'abcd']
             }

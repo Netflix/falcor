@@ -10,7 +10,7 @@ var invalidate_and_verify_path_sets = require("./support/invalidate-and-verify-p
 
 var slice = Array.prototype.slice;
 var $path = require("../../lib/types/path");
-var $sentinel = require("../../lib/types/sentinel");
+var $atom = require("../../lib/types/atom");
 
 // Tests each output format.
 execute("JSON values", "Values");
@@ -32,7 +32,7 @@ function execute(output, suffix) {
                     it("through a reference", function() {
                         invalidate_and_verify_path_sets(this.test, suffix, [["grid", 0, 0, "title"]]);
                     });
-                    it("through a reference that lands on a sentinel", function() {
+                    it("through a reference that lands on a atom", function() {
                         invalidate_and_verify_path_sets(this.test, suffix, [["grid", 0, 1, "title"]]);
                     });
                     it("through a broken reference", function() {
@@ -69,8 +69,8 @@ function execute(output, suffix) {
             });
             // end set primitive value
 
-            // set a sentinel value
-            describe("a $sentinel", function() {
+            // set a atom value
+            describe("a $atom", function() {
                 describe("in one place", function() {
                     it("directly", function() {
                         invalidate_and_verify_path_sets(this.test, suffix, [["movies", "pulp-fiction", "summary"]]);
@@ -78,7 +78,7 @@ function execute(output, suffix) {
                     it("through a reference", function() {
                         invalidate_and_verify_path_sets(this.test, suffix, [["grid", 0, 0, "summary"]]);
                     });
-                    it("through a reference that lands on a sentinel", function() {
+                    it("through a reference that lands on a atom", function() {
                         invalidate_and_verify_path_sets(this.test, suffix, [["grid", 0, 1, "summary"]]);
                     });
                     it("through a broken reference", function() {
@@ -113,7 +113,7 @@ function execute(output, suffix) {
                     });
                 });
             });
-            // end set sentinel value
+            // end set atom value
 
             // set a path value
             describe("a $path", function() {

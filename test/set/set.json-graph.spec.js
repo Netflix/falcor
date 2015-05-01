@@ -12,7 +12,7 @@ var set_and_verify_json_graph = require("./support/set-and-verify-json-graph");
 
 var slice = Array.prototype.slice;
 var $path = require("../../lib/types/path");
-var $sentinel = require("../../lib/types/sentinel");
+var $atom = require("../../lib/types/atom");
 
 var modes = [{
         
@@ -111,7 +111,7 @@ function execute(output, suffix, opts) {
                             }
                         }], opts);
                     });
-                    it("through a reference that lands on a sentinel", function() {
+                    it("through a reference that lands on a atom", function() {
                         set_and_verify_json_graph(this.test, suffix, [{
                             paths: [["grid", 0, 1, "title"]],
                             values: {
@@ -388,8 +388,8 @@ function execute(output, suffix, opts) {
             });
             // end set primitive value
 
-            // set a sentinel value
-            describe("a $sentinel", function() {
+            // set a atom value
+            describe("a $atom", function() {
                 describe("in one place", function() {
                     it("directly", function() {
                         set_and_verify_json_graph(this.test, suffix, [{
@@ -398,7 +398,7 @@ function execute(output, suffix, opts) {
                                 "movies": {
                                     "pulp-fiction": {
                                         "summary": {
-                                            $type: $sentinel,
+                                            $type: $atom,
                                             value: {
                                                 title: "Pulp Fiction",
                                                 url: "/movies/id/pulp-fiction"
@@ -427,7 +427,7 @@ function execute(output, suffix, opts) {
                                 "movies": {
                                     "pulp-fiction": {
                                         "summary": {
-                                            $type: $sentinel,
+                                            $type: $atom,
                                             value: {
                                                 title: "Pulp Fiction",
                                                 url: "/movies/id/pulp-fiction"
@@ -438,7 +438,7 @@ function execute(output, suffix, opts) {
                             }
                         }], opts);
                     });
-                    it("through a reference that lands on a sentinel", function() {
+                    it("through a reference that lands on a atom", function() {
                         set_and_verify_json_graph(this.test, suffix, [{
                             paths: [["grid", 0, 1, "summary"]],
                             jsong: {
@@ -456,7 +456,7 @@ function execute(output, suffix, opts) {
                                 "movies": {
                                     "kill-bill-1": {
                                         "summary": {
-                                            $type: $sentinel,
+                                            $type: $atom,
                                             value: {
                                                 title: "Kill Bill: Vol. 1",
                                                 url: "/movies/id/kill-bill-1"
@@ -485,7 +485,7 @@ function execute(output, suffix, opts) {
                                 "movies": {
                                     "reservior-dogs": {
                                         "summary": {
-                                            $type: $sentinel,
+                                            $type: $atom,
                                             value: {
                                                 title: "Reservior Dogs",
                                                 url: "/movies/id/reservior-dogs"
@@ -513,7 +513,7 @@ function execute(output, suffix, opts) {
                                 },
                                 "movies": {
                                     "reservior-dogs": {
-                                        $type: $sentinel,
+                                        $type: $atom,
                                         value: "Reservior Dogs"
                                     }
                                 }
@@ -530,19 +530,19 @@ function execute(output, suffix, opts) {
                                     "movies": {
                                         "pulp-fiction": {
                                             "genres": {
-                                                $type: $sentinel,
+                                                $type: $atom,
                                                 value: ["Crime", "Drama", "Thriller"]
                                             }
                                         },
                                         "kill-bill-1": {
                                             "genres": {
-                                                $type: $sentinel,
+                                                $type: $atom,
                                                 value: ["Crime", "Drama", "Thriller"]
                                             }
                                         },
                                         "reservior-dogs": {
                                             "genres": {
-                                                $type: $sentinel,
+                                                $type: $atom,
                                                 value: ["Crime", "Drama", "Thriller"]
                                             }
                                         }
@@ -570,19 +570,19 @@ function execute(output, suffix, opts) {
                                     "movies": {
                                         "pulp-fiction": {
                                             "genres": {
-                                                $type: $sentinel,
+                                                $type: $atom,
                                                 value: ["Crime", "Drama", "Thriller"]
                                             }
                                         },
                                         "kill-bill-1": {
                                             "genres": {
-                                                $type: $sentinel,
+                                                $type: $atom,
                                                 value: ["Crime", "Drama", "Thriller"]
                                             }
                                         },
                                         "reservior-dogs": {
                                             "genres": {
-                                                $type: $sentinel,
+                                                $type: $atom,
                                                 value: ["Crime", "Drama", "Thriller"]
                                             }
                                         }
@@ -612,19 +612,19 @@ function execute(output, suffix, opts) {
                                     "movies": {
                                         "pulp-fiction": {
                                             "genres": {
-                                                $type: $sentinel,
+                                                $type: $atom,
                                                 value: ["Crime", "Drama", "Thriller"]
                                             }
                                         },
                                         "kill-bill-1": {
                                             "genres": {
-                                                $type: $sentinel,
+                                                $type: $atom,
                                                 value: ["Crime", "Drama", "Thriller"]
                                             }
                                         },
                                         "reservior-dogs": {
                                             "genres": {
-                                                $type: $sentinel,
+                                                $type: $atom,
                                                 value: ["Crime", "Drama", "Thriller"]
                                             }
                                         }
@@ -651,13 +651,13 @@ function execute(output, suffix, opts) {
                                     "movies": {
                                         "kill-bill-1": {
                                             "genres": {
-                                                $type: $sentinel,
+                                                $type: $atom,
                                                 value: ["Crime", "Drama", "Thriller"]
                                             }
                                         },
                                         "reservior-dogs": {
                                             "genres": {
-                                                $type: $sentinel,
+                                                $type: $atom,
                                                 value: ["Crime", "Drama", "Thriller"]
                                             }
                                         }
@@ -685,19 +685,19 @@ function execute(output, suffix, opts) {
                                     "movies": {
                                         "pulp-fiction": {
                                             "genres": {
-                                                $type: $sentinel,
+                                                $type: $atom,
                                                 value: ["Crime", "Drama", "Thriller"]
                                             }
                                         },
                                         "kill-bill-1": {
                                             "genres": {
-                                                $type: $sentinel,
+                                                $type: $atom,
                                                 value: ["Crime", "Drama", "Thriller"]
                                             }
                                         },
                                         "reservior-dogs": {
                                             "genres": {
-                                                $type: $sentinel,
+                                                $type: $atom,
                                                 value: ["Crime", "Drama", "Thriller"]
                                             }
                                         }
@@ -724,13 +724,13 @@ function execute(output, suffix, opts) {
                                     "movies": {
                                         "kill-bill-1": {
                                             "genres": {
-                                                $type: $sentinel,
+                                                $type: $atom,
                                                 value: ["Crime", "Drama", "Thriller"]
                                             }
                                         },
                                         "reservior-dogs": {
                                             "genres": {
-                                                $type: $sentinel,
+                                                $type: $atom,
                                                 value: ["Crime", "Drama", "Thriller"]
                                             }
                                         }
@@ -741,7 +741,7 @@ function execute(output, suffix, opts) {
                     });
                 });
             });
-            // end set sentinel value
+            // end set atom value
 
             // set a path value
             describe("a $path", function() {
@@ -963,7 +963,7 @@ function execute(output, suffix, opts) {
                 function get_cache(from, to) {
                     return _.range(from, to).reduce(function(cache, i) {
                         return cache["grid"]["grid-1234"][i] = {
-                            $type: $sentinel,
+                            $type: $atom,
                             $size: $size,
                             value: undefined
                         } && cache;
@@ -976,8 +976,8 @@ function execute(output, suffix, opts) {
 
         // replace existing values
         describe("by replacing", function() {
-            // replace a sentinel with a primitive
-            describe("a $sentinel with a primitive", function() {
+            // replace a atom with a primitive
+            describe("a $atom with a primitive", function() {
                 it("directly", function() {
                     set_and_verify_json_graph(this.test, suffix, [{
                         paths: [["movies", "pulp-fiction", "movie-id"]],
@@ -1014,7 +1014,7 @@ function execute(output, suffix, opts) {
                     }], opts);
                 });
             });
-            // end replacing sentinel with primitive
+            // end replacing atom with primitive
 
             // replace a $path with a different $path to make sure we compare
             // the path lengths and keys before overwriting the cache path.
