@@ -6,6 +6,8 @@ First make sure you are using NPM v 2.7.5+. Some versions of NPM contain bugs wh
 
 First build:
 ```
+git clone https://github.com/Netflix/falcor
+cd falcor
 npm install
 npm run dist
 ```
@@ -14,7 +16,7 @@ Now set up a simple webpage and import the newly-generated falcor library:
 <html>
   <head>
     <!-- The generated library can be found in the "dist" folder under the Falcor root. -->
-    <script src="./dist/falcor.js"></script>
+    <script src="./dist/falcor.browser.js"></script>
     <script>
       var model = new falcor.Model(/* Model options */);
       // your code goes here
