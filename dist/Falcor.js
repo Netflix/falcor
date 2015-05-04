@@ -57,7 +57,7 @@ prototype._setCache = set.setCache;
 module.exports = falcor;
 
 
-},{"./lib/falcor":5,"./lib/get":47,"./lib/invalidate":76,"./lib/set":84}],2:[function(_dereq_,module,exports){
+},{"./lib/falcor":6,"./lib/get":49,"./lib/invalidate":78,"./lib/set":86}],2:[function(_dereq_,module,exports){
 if (typeof falcor === 'undefined') {
     var falcor = {};
 }
@@ -79,13 +79,15 @@ falcor.NOOP = function() {};
 
 module.exports = falcor;
 
-},{"falcor-observable":152}],3:[function(_dereq_,module,exports){
+},{"falcor-observable":156}],3:[function(_dereq_,module,exports){
 var falcor = _dereq_('./Falcor');
 var RequestQueue = _dereq_('./request/RequestQueue');
 var ImmediateScheduler = _dereq_('./scheduler/ImmediateScheduler');
+var ASAPScheduler = _dereq_('./scheduler/ASAPScheduler');
 var TimeoutScheduler = _dereq_('./scheduler/TimeoutScheduler');
 var ERROR = _dereq_("../types/error");
 var ModelResponse = _dereq_('./ModelResponse');
+var ModelDataSourceAdapter = _dereq_('./ModelDataSourceAdapter');
 var call = _dereq_('./operations/call');
 var operations = _dereq_('./operations');
 var pathSyntax = _dereq_('falcor-path-syntax');
@@ -93,7 +95,7 @@ var getBoundValue = _dereq_('./../get/getBoundValue');
 var slice = Array.prototype.slice;
 var $ref = _dereq_('./../types/path');
 var $error = _dereq_('./../types/error');
-var $sentinel = _dereq_('./../types/sentinel');
+var $atom = _dereq_('./../types/atom');
 
 var Model = module.exports = falcor.Model = function Model(options) {
 
@@ -141,7 +143,7 @@ Model.error = function(error) {
 };
 
 Model.atom = function(value) {
-    return {$type: $sentinel, value: value};
+    return {$type: $atom, value: value};
 };
 
 Model.prototype = {
@@ -337,7 +339,7 @@ Model.prototype = {
         if(typeof schedulerOrDelay === "number") {
             schedulerOrDelay = new TimeoutScheduler(Math.round(Math.abs(schedulerOrDelay)));
         } else if(!schedulerOrDelay || !schedulerOrDelay.schedule) {
-            schedulerOrDelay = new ImmediateScheduler();
+            schedulerOrDelay = new ASAPScheduler();
         }
         return this.clone(["_request", new RequestQueue(this, schedulerOrDelay)]);
     },
@@ -346,6 +348,9 @@ Model.prototype = {
     },
     treatErrorsAsValues: function() {
         return this.clone(["_treatErrorsAsValues", true]);
+    },
+    asDataSource: function() {
+        return new ModelDataSourceAdapter(this);
     },
     materialize: function() {
         return this.clone(["_materialized", true]);
@@ -364,10 +369,32 @@ Model.prototype = {
             throw new Error("Model#" + name + " may only be called within the context of a request selector.");
         }
         return true;
+    },
+    toJSON: function() {
+        return this._path;
     }
 };
 
-},{"../types/error":134,"./../get/getBoundValue":44,"./../types/error":134,"./../types/path":135,"./../types/sentinel":136,"./Falcor":2,"./ModelResponse":4,"./operations":11,"./operations/call":6,"./request/RequestQueue":36,"./scheduler/ImmediateScheduler":37,"./scheduler/TimeoutScheduler":38,"falcor-path-syntax":155}],4:[function(_dereq_,module,exports){
+},{"../types/error":137,"./../get/getBoundValue":46,"./../types/atom":136,"./../types/error":137,"./../types/path":138,"./Falcor":2,"./ModelDataSourceAdapter":4,"./ModelResponse":5,"./operations":12,"./operations/call":7,"./request/RequestQueue":37,"./scheduler/ASAPScheduler":38,"./scheduler/ImmediateScheduler":39,"./scheduler/TimeoutScheduler":40,"falcor-path-syntax":160}],4:[function(_dereq_,module,exports){
+function ModelDataSourceAdapter(model) {
+    this._model = model.materialize().boxValues().treatErrorsAsValues();
+}
+
+ModelDataSourceAdapter.prototype = {
+    get: function(pathSets) {
+        return this._model.get.apply(this._model, pathSets).toJSONG();
+    },
+    set: function(jsongResponse) {
+        return this._model.set(jsongResponse).toJSONG();
+    },
+    call: function(path, args, suffixes, paths) {
+        var params = [path, args, suffixes].concat(paths);
+        return this._model.call.apply(this._model, params).toJSONG();
+    }
+};
+
+module.exports = ModelDataSourceAdapter;
+},{}],5:[function(_dereq_,module,exports){
 var falcor = _dereq_('./Falcor');
 var pathSyntax = _dereq_('falcor-path-syntax');
 
@@ -461,14 +488,14 @@ ModelResponse.prototype.then = function(onNext, onError) {
 
 module.exports = ModelResponse;
 
-},{"./Falcor":2,"falcor-path-syntax":155,"promise":161}],5:[function(_dereq_,module,exports){
+},{"./Falcor":2,"falcor-path-syntax":160,"promise":167}],6:[function(_dereq_,module,exports){
 var falcor = _dereq_('./Falcor');
 var Model = _dereq_('./Model');
 falcor.Model = Model;
 
 module.exports = falcor;
 
-},{"./Falcor":2,"./Model":3}],6:[function(_dereq_,module,exports){
+},{"./Falcor":2,"./Model":3}],7:[function(_dereq_,module,exports){
 module.exports = call;
 
 var falcor = _dereq_("../../Falcor");
@@ -528,7 +555,7 @@ function call(path, args, suffixes, paths, selector) {
                 }
                 return falcor.Observable.empty();
             }).
-            defaultIfEmpty(dataSource.call(path, args, suffixes, paths)).
+            defaultIfEmpty(dataSource && dataSource.call(path, args, suffixes, paths) || falcor.Observable.empty()).
             mergeAll().
             subscribe(function (envelope) {
                 var invalidated = envelope.invalidated;
@@ -561,7 +588,7 @@ function call(path, args, suffixes, paths, selector) {
     });
 }
 
-},{"../../Falcor":2,"./../../ModelResponse":4}],7:[function(_dereq_,module,exports){
+},{"../../Falcor":2,"./../../ModelResponse":5}],8:[function(_dereq_,module,exports){
 var combineOperations = _dereq_('./../support/combineOperations');
 var setSeedsOrOnNext = _dereq_('./../support/setSeedsOrOnNext');
 
@@ -583,7 +610,7 @@ module.exports = function getInitialArgs(options, seeds, onNext) {
     return [operations];
 };
 
-},{"./../support/combineOperations":22,"./../support/setSeedsOrOnNext":35}],8:[function(_dereq_,module,exports){
+},{"./../support/combineOperations":23,"./../support/setSeedsOrOnNext":36}],9:[function(_dereq_,module,exports){
 var getSourceObserver = _dereq_('./../support/getSourceObserever');
 var partitionOperations = _dereq_('./../support/partitionOperations');
 var mergeBoundPath = _dereq_('./../support/mergeBoundPath');
@@ -629,7 +656,7 @@ function getSourceRequest(
 }
 
 
-},{"./../support/getSourceObserever":23,"./../support/mergeBoundPath":27,"./../support/partitionOperations":30}],9:[function(_dereq_,module,exports){
+},{"./../support/getSourceObserever":24,"./../support/mergeBoundPath":28,"./../support/partitionOperations":31}],10:[function(_dereq_,module,exports){
 var getInitialArgs = _dereq_('./getInitialArgs');
 var getSourceRequest = _dereq_('./getSourceRequest');
 var shouldRequest = _dereq_('./shouldRequest');
@@ -643,12 +670,12 @@ var get = request(
 
 module.exports = get;
 
-},{"./../request":14,"./../support/processOperations":32,"./getInitialArgs":7,"./getSourceRequest":8,"./shouldRequest":10}],10:[function(_dereq_,module,exports){
+},{"./../request":15,"./../support/processOperations":33,"./getInitialArgs":8,"./getSourceRequest":9,"./shouldRequest":11}],11:[function(_dereq_,module,exports){
 module.exports = function(model, combinedResults) {
     return model._dataSource && combinedResults.requestedMissingPaths.length > 0;
 };
 
-},{}],11:[function(_dereq_,module,exports){
+},{}],12:[function(_dereq_,module,exports){
 var ModelResponse = _dereq_('../ModelResponse');
 var get = _dereq_('./get');
 var set = _dereq_('./set');
@@ -685,7 +712,7 @@ module.exports = function modelOperation(name) {
     };
 };
 
-},{"../ModelResponse":4,"./get":9,"./invalidate":12,"./set":15}],12:[function(_dereq_,module,exports){
+},{"../ModelResponse":5,"./get":10,"./invalidate":13,"./set":16}],13:[function(_dereq_,module,exports){
 var invalidateInitialArgs = _dereq_('./invalidateInitialArgs');
 var request = _dereq_('./../request');
 var processOperations = _dereq_('./../support/processOperations');
@@ -696,7 +723,7 @@ var invalidate = request(
 
 module.exports = invalidate;
 
-},{"./../request":14,"./../support/processOperations":32,"./invalidateInitialArgs":13}],13:[function(_dereq_,module,exports){
+},{"./../request":15,"./../support/processOperations":33,"./invalidateInitialArgs":14}],14:[function(_dereq_,module,exports){
 var combineOperations = _dereq_('./../support/combineOperations');
 var setSeedsOrOnNext = _dereq_('./../support/setSeedsOrOnNext');
 module.exports = function getInitialArgs(options, seeds, onNext) {
@@ -710,7 +737,7 @@ module.exports = function getInitialArgs(options, seeds, onNext) {
     return [operations, seeds];
 };
 
-},{"./../support/combineOperations":22,"./../support/setSeedsOrOnNext":35}],14:[function(_dereq_,module,exports){
+},{"./../support/combineOperations":23,"./../support/setSeedsOrOnNext":36}],15:[function(_dereq_,module,exports){
 var setSeedsOrOnNext = _dereq_('./support/setSeedsOrOnNext');
 var onNextValues = _dereq_('./support/onNextValue');
 var onCompletedOrError = _dereq_('./support/onCompletedOrError');
@@ -804,13 +831,14 @@ function request(initialArgs, sourceRequest, processOperations, shouldRequestFn)
             recurse.apply(null,
                 initialArgs(options, seeds, onNext));
         } catch(e) {
+            debugger;
             errors = [e];
             onCompletedOrError(onCompleted, onError, errors);
         }
     };
 }
 
-},{"./support/onCompletedOrError":28,"./support/onNextValue":29,"./support/primeSeeds":31,"./support/setSeedsOrOnNext":35}],15:[function(_dereq_,module,exports){
+},{"./support/onCompletedOrError":29,"./support/onNextValue":30,"./support/primeSeeds":32,"./support/setSeedsOrOnNext":36}],16:[function(_dereq_,module,exports){
 var setInitialArgs = _dereq_('./setInitialArgs');
 var setSourceRequest = _dereq_('./setSourceRequest');
 var request = _dereq_('./../request');
@@ -824,7 +852,7 @@ var set = request(
 
 module.exports = set;
 
-},{"./../request":14,"./setInitialArgs":16,"./setProcessOperations":17,"./setSourceRequest":18,"./shouldRequest":19}],16:[function(_dereq_,module,exports){
+},{"./../request":15,"./setInitialArgs":17,"./setProcessOperations":18,"./setSourceRequest":19,"./shouldRequest":20}],17:[function(_dereq_,module,exports){
 var combineOperations = _dereq_('./../support/combineOperations');
 var setSeedsOrOnNext = _dereq_('./../support/setSeedsOrOnNext');
 var Formats = _dereq_('./../support/Formats');
@@ -882,7 +910,7 @@ module.exports = function setInitialArgs(options, seeds, onNext) {
     return [operations, requestOptions];
 };
 
-},{"./../support/Formats":20,"./../support/combineOperations":22,"./../support/setSeedsOrOnNext":35}],17:[function(_dereq_,module,exports){
+},{"./../support/Formats":21,"./../support/combineOperations":23,"./../support/setSeedsOrOnNext":36}],18:[function(_dereq_,module,exports){
 var processOperations = _dereq_('./../support/processOperations');
 var combineOperations = _dereq_('./../support/combineOperations');
 var mergeBoundPath = _dereq_('./../support/mergeBoundPath');
@@ -924,6 +952,13 @@ function setProcessOperations(model, operations, errorSelector, requestOptions) 
 
     var results = processOperations(model, operations, errorSelector);
 
+    // We need to set the requestSeed to be the optimizedPaths only.
+    // The bound path must be removed for this to work.
+    if (removeBoundPath && model._dataSource && results.optimizedPaths) {
+        var requestSeed = requestOptions.requestSeed = {};
+        model._getPathSetsAsJSONG(model, results.optimizedPaths, [requestSeed]);
+    }
+
     // Undo what we have done to the model's bound path.
     if (removeBoundPath && hasBoundPath) {
         model._path = boundPath;
@@ -937,7 +972,7 @@ function setProcessOperations(model, operations, errorSelector, requestOptions) 
     return results;
 }
 
-},{"./../support/Formats":20,"./../support/combineOperations":22,"./../support/mergeBoundPath":27,"./../support/processOperations":32}],18:[function(_dereq_,module,exports){
+},{"./../support/Formats":21,"./../support/combineOperations":23,"./../support/mergeBoundPath":28,"./../support/processOperations":33}],19:[function(_dereq_,module,exports){
 var getSourceObserver = _dereq_('./../support/getSourceObserever');
 var combineOperations = _dereq_('./../support/combineOperations');
 var setSeedsOrOnNext = _dereq_('./../support/setSeedsOrOnNext');
@@ -978,7 +1013,7 @@ function setSourceRequest(
 }
 
 
-},{"./../support/Formats":20,"./../support/combineOperations":22,"./../support/getSourceObserever":23,"./../support/setSeedsOrOnNext":35}],19:[function(_dereq_,module,exports){
+},{"./../support/Formats":21,"./../support/combineOperations":23,"./../support/getSourceObserever":24,"./../support/setSeedsOrOnNext":36}],20:[function(_dereq_,module,exports){
 // Set differs from get in the sense that the first time through
 // the recurse loop a server operation must be performed if it can be.
 module.exports = function(model, combinedResults, loopCount) {
@@ -987,7 +1022,7 @@ module.exports = function(model, combinedResults, loopCount) {
         loopCount === 0);
 };
 
-},{}],20:[function(_dereq_,module,exports){
+},{}],21:[function(_dereq_,module,exports){
 module.exports = {
     toPathValues: 'AsValues',
     toJSON: 'AsPathMap',
@@ -995,7 +1030,7 @@ module.exports = {
     selector: 'AsJSON',
 };
 
-},{}],21:[function(_dereq_,module,exports){
+},{}],22:[function(_dereq_,module,exports){
 module.exports = function buildJSONGOperation(format, seeds, jsongOp, seedOffset, onNext) {
     return {
         methodName: '_setJSONGs' + format,
@@ -1008,7 +1043,7 @@ module.exports = function buildJSONGOperation(format, seeds, jsongOp, seedOffset
     };
 };
 
-},{}],22:[function(_dereq_,module,exports){
+},{}],23:[function(_dereq_,module,exports){
 var isSeedRequired = _dereq_('./seedRequired');
 var isJSONG = _dereq_('./isJSONG');
 var isPathOrPathValue = _dereq_('./isPathOrPathValue');
@@ -1051,7 +1086,7 @@ module.exports = function combineOperations(args, format, name, spread, isProgre
         }, []);
 };
 
-},{"./Formats":20,"./isJSONG":25,"./isPathOrPathValue":26,"./seedRequired":33}],23:[function(_dereq_,module,exports){
+},{"./Formats":21,"./isJSONG":26,"./isPathOrPathValue":27,"./seedRequired":34}],24:[function(_dereq_,module,exports){
 var insertErrors = _dereq_('./insertErrors.js');
 /**
  * creates the model source observer
@@ -1079,7 +1114,7 @@ function getSourceObserver(model, requestedMissingPaths, cb) {
 
 module.exports = getSourceObserver;
 
-},{"./insertErrors.js":24}],24:[function(_dereq_,module,exports){
+},{"./insertErrors.js":25}],25:[function(_dereq_,module,exports){
 /**
  * will insert the error provided for every requestedPath.
  * @param {Model} model
@@ -1103,18 +1138,18 @@ module.exports = function insertErrors(model, requestedPaths, err) {
 };
 
 
-},{}],25:[function(_dereq_,module,exports){
+},{}],26:[function(_dereq_,module,exports){
 module.exports = function isJSONG(x) {
     return x.hasOwnProperty("jsong");
 };
 
-},{}],26:[function(_dereq_,module,exports){
+},{}],27:[function(_dereq_,module,exports){
 module.exports = function isPathOrPathValue(x) {
     return !!(Array.isArray(x)) || (
         x.hasOwnProperty("path") && x.hasOwnProperty("value"));
 };
 
-},{}],27:[function(_dereq_,module,exports){
+},{}],28:[function(_dereq_,module,exports){
 var isJSONG = _dereq_('./isJSONG');
 var isPathValue = _dereq_('./isPathOrPathValue');
 
@@ -1159,7 +1194,7 @@ function mergeBoundPathIntoPathValue(arg, boundPath) {
     };
 }
 
-},{"./isJSONG":25,"./isPathOrPathValue":26}],28:[function(_dereq_,module,exports){
+},{"./isJSONG":26,"./isPathOrPathValue":27}],29:[function(_dereq_,module,exports){
 module.exports = function onCompletedOrError(onCompleted, onError, errors) {
     if (errors.length) {
         onError(errors);
@@ -1168,7 +1203,7 @@ module.exports = function onCompletedOrError(onCompleted, onError, errors) {
     }
 };
 
-},{}],29:[function(_dereq_,module,exports){
+},{}],30:[function(_dereq_,module,exports){
 /**
  * will onNext the observer with the seeds provided.
  * @param {Model} model
@@ -1203,7 +1238,7 @@ module.exports = function onNextValues(model, onNext, seeds, selector) {
     }
 };
 
-},{}],30:[function(_dereq_,module,exports){
+},{}],31:[function(_dereq_,module,exports){
 var buildJSONGOperation = _dereq_('./buildJSONGOperation');
 
 /**
@@ -1255,7 +1290,7 @@ function partitionOperations(
 }
 
 
-},{"./buildJSONGOperation":21}],31:[function(_dereq_,module,exports){
+},{"./buildJSONGOperation":22}],32:[function(_dereq_,module,exports){
 module.exports = function primeSeeds(selector, selectorLength) {
     var seeds = [];
     if (selector) {
@@ -1268,7 +1303,7 @@ module.exports = function primeSeeds(selector, selectorLength) {
     return seeds;
 };
 
-},{}],32:[function(_dereq_,module,exports){
+},{}],33:[function(_dereq_,module,exports){
 module.exports = function processOperations(model, operations, errorSelector, boundPath) {
     return operations.reduce(function(memo, operation) {
 
@@ -1292,6 +1327,7 @@ module.exports = function processOperations(model, operations, errorSelector, bo
 
         memo.requestedMissingPaths = memo.requestedMissingPaths.concat(missing);
         memo.optimizedMissingPaths = memo.optimizedMissingPaths.concat(results.optimizedMissingPaths);
+        memo.optimizedPaths = memo.optimizedPaths.concat(results.optimizedPaths);
         memo.errors = memo.errors.concat(results.errors);
         memo.valuesReceived = memo.valuesReceived || results.requestedPaths.length > 0;
 
@@ -1300,16 +1336,17 @@ module.exports = function processOperations(model, operations, errorSelector, bo
         errors: [],
         requestedMissingPaths: [],
         optimizedMissingPaths: [],
+        optimizedPaths: [],
         valuesReceived: false
     });
 }
 
-},{}],33:[function(_dereq_,module,exports){
+},{}],34:[function(_dereq_,module,exports){
 module.exports = function isSeedRequired(format) {
     return format === 'AsJSON' || format === 'AsJSONG' || format === 'AsPathMap';
 };
 
-},{}],34:[function(_dereq_,module,exports){
+},{}],35:[function(_dereq_,module,exports){
 module.exports = function setSeedsOnGroups(groups, seeds, hasSelector) {
     var valueIndex = 0;
     var seedsLength = seeds.length;
@@ -1329,7 +1366,7 @@ module.exports = function setSeedsOnGroups(groups, seeds, hasSelector) {
     }
 }
 
-},{}],35:[function(_dereq_,module,exports){
+},{}],36:[function(_dereq_,module,exports){
 var setSeedsOnGroups = _dereq_('./setSeedsOnGroups');
 module.exports = function setSeedsOrOnNext(operations, seedRequired, seeds, onNext, selector) {
     if (seedRequired) {
@@ -1341,7 +1378,7 @@ module.exports = function setSeedsOrOnNext(operations, seedRequired, seeds, onNe
     }
 };
 
-},{"./setSeedsOnGroups":34}],36:[function(_dereq_,module,exports){
+},{"./setSeedsOnGroups":35}],37:[function(_dereq_,module,exports){
 var falcor = _dereq_('./../Falcor');
 var NOOP = falcor.NOOP;
 var RequestQueue = function(jsongModel, scheduler) {
@@ -1804,7 +1841,22 @@ falcor.__Internals.buildQueries = buildQueries;
 
 module.exports = RequestQueue;
 
-},{"./../Falcor":2}],37:[function(_dereq_,module,exports){
+},{"./../Falcor":2}],38:[function(_dereq_,module,exports){
+var asap = _dereq_('asap');
+
+
+function ASAPScheduler() {
+}
+
+ASAPScheduler.prototype = {
+    schedule: function(action) {
+        asap(action);
+    }
+};
+
+module.exports = ASAPScheduler;
+
+},{"asap":146}],39:[function(_dereq_,module,exports){
 function ImmediateScheduler() {
 }
 
@@ -1816,7 +1868,7 @@ ImmediateScheduler.prototype = {
 
 module.exports = ImmediateScheduler;
 
-},{}],38:[function(_dereq_,module,exports){
+},{}],40:[function(_dereq_,module,exports){
 function TimeoutScheduler(delay) {
     this.delay = delay;
 }
@@ -1829,7 +1881,7 @@ TimeoutScheduler.prototype = {
 
 module.exports = TimeoutScheduler;
 
-},{}],39:[function(_dereq_,module,exports){
+},{}],41:[function(_dereq_,module,exports){
 var hardLink = _dereq_('./util/hardlink');
 var createHardlink = hardLink.create;
 var onValue = _dereq_('./onValue');
@@ -1912,7 +1964,7 @@ function followReference(model, root, node, referenceContainer, reference, seed,
 
 module.exports = followReference;
 
-},{"../internal/context":61,"./../types/path.js":135,"./onValue":51,"./util/hardlink":53,"./util/isExpired":54}],40:[function(_dereq_,module,exports){
+},{"../internal/context":63,"./../types/path.js":138,"./onValue":53,"./util/hardlink":55,"./util/isExpired":56}],42:[function(_dereq_,module,exports){
 var getBoundValue = _dereq_('./getBoundValue');
 var isPathValue = _dereq_('./util/isPathValue');
 module.exports = function(walk) {
@@ -1978,7 +2030,7 @@ module.exports = function(walk) {
 };
 
 
-},{"./getBoundValue":44,"./util/isPathValue":56}],41:[function(_dereq_,module,exports){
+},{"./getBoundValue":46,"./util/isPathValue":58}],43:[function(_dereq_,module,exports){
 var getBoundValue = _dereq_('./getBoundValue');
 var isPathValue = _dereq_('./util/isPathValue');
 module.exports = function(walk) {
@@ -2015,7 +2067,7 @@ module.exports = function(walk) {
 };
 
 
-},{"./getBoundValue":44,"./util/isPathValue":56}],42:[function(_dereq_,module,exports){
+},{"./getBoundValue":46,"./util/isPathValue":58}],44:[function(_dereq_,module,exports){
 var getBoundValue = _dereq_('./getBoundValue');
 var isPathValue = _dereq_('./util/isPathValue');
 module.exports = function(walk) {
@@ -2064,7 +2116,7 @@ module.exports = function(walk) {
     };
 };
 
-},{"./getBoundValue":44,"./util/isPathValue":56}],43:[function(_dereq_,module,exports){
+},{"./getBoundValue":46,"./util/isPathValue":58}],45:[function(_dereq_,module,exports){
 var getBoundValue = _dereq_('./getBoundValue');
 var isPathValue = _dereq_('./util/isPathValue');
 module.exports = function(walk) {
@@ -2110,7 +2162,7 @@ module.exports = function(walk) {
 };
 
 
-},{"./getBoundValue":44,"./util/isPathValue":56}],44:[function(_dereq_,module,exports){
+},{"./getBoundValue":46,"./util/isPathValue":58}],46:[function(_dereq_,module,exports){
 var getValueSync = _dereq_('./getValueSync');
 module.exports = function getBoundValue(model, path) {
     var boxed, value, shorted;
@@ -2134,13 +2186,13 @@ module.exports = function getBoundValue(model, path) {
 };
 
 
-},{"./getValueSync":45}],45:[function(_dereq_,module,exports){
+},{"./getValueSync":47}],47:[function(_dereq_,module,exports){
 var followReference = _dereq_('./followReference');
 var clone = _dereq_('./util/clone');
 var isExpired = _dereq_('./util/isExpired');
 var promote = _dereq_('./util/lru').promote;
 var $path = _dereq_('./../types/path.js');
-var $sentinel = _dereq_('./../types/sentinel.js');
+var $atom = _dereq_('./../types/atom.js');
 var $error = _dereq_('./../types/error.js');
 
 module.exports = function getValueSync(model, simplePath) {
@@ -2177,7 +2229,7 @@ module.exports = function getValueSync(model, simplePath) {
                 }
                 type = refNode.$type;
                 next = refNode;
-                optimizedPath = ref[1];
+                optimizedPath = ref[1].slice(0);
             }
 
             if (type) {
@@ -2227,7 +2279,7 @@ module.exports = function getValueSync(model, simplePath) {
     } else if (out && model._boxed) {
         out = !!type ? clone(out) : out;
     } else if (!out && model._materialized) {
-        out = {$type: $sentinel};
+        out = {$type: $atom};
     } else if (out) {
         out = out.value;
     }
@@ -2239,7 +2291,7 @@ module.exports = function getValueSync(model, simplePath) {
     };
 };
 
-},{"./../types/error.js":134,"./../types/path.js":135,"./../types/sentinel.js":136,"./followReference":39,"./util/clone":52,"./util/isExpired":54,"./util/lru":57}],46:[function(_dereq_,module,exports){
+},{"./../types/atom.js":136,"./../types/error.js":137,"./../types/path.js":138,"./followReference":41,"./util/clone":54,"./util/isExpired":56,"./util/lru":59}],48:[function(_dereq_,module,exports){
 var followReference = _dereq_('./followReference');
 var onError = _dereq_('./onError');
 var onMissing = _dereq_('./onMissing');
@@ -2254,6 +2306,7 @@ var permuteKey = _dereq_('./util/permuteKey');
 var $path = _dereq_('./../types/path');
 var $error = _dereq_('./../types/error');
 var __invalidated = _dereq_("../internal/invalidated");
+var prefix = _dereq_("./../internal/prefix");
 
 function walk(model, root, curr, pathOrJSON, depth, seedOrFunction, positionalInfo, outerResults, optimizedPath, requestedPath, inputFormat, outputFormat, fromReference) {
     if ((!curr || curr && curr.$type) &&
@@ -2279,10 +2332,19 @@ function walk(model, root, curr, pathOrJSON, depth, seedOrFunction, positionalIn
                 atEndOfJSONQuery = true;
             }
 
-            // is it an object?
             else if (pathOrJSON && typeof pathOrJSON === 'object') {
-                // A terminating condition
                 k = Object.keys(pathOrJSON);
+
+                // Parses out all the prefix keys so that later parts
+                // of the algorithm do not have to consider them.
+                var parsedKeys = [];
+                var parsedKeysLength = -1;
+                for (i = 0, len = k.length; i < len; ++i) {
+                    if (k[i][0] !== prefix && k[i][0] !== '$') {
+                        parsedKeys[++parsedKeysLength] = k[i];
+                    }
+                }
+                k = parsedKeys;
                 if (k.length === 1) {
                     k = k[0];
                 }
@@ -2451,7 +2513,7 @@ function evaluateNode(model, curr, pathOrJSON, depth, seedOrFunction, requestedP
 
 module.exports = walk;
 
-},{"../internal/invalidated":64,"./../types/error":134,"./../types/path":135,"./followReference":39,"./onError":49,"./onMissing":50,"./onValue":51,"./util/hardlink":53,"./util/isExpired":54,"./util/isMaterialzed":55,"./util/lru":57,"./util/permuteKey":58}],47:[function(_dereq_,module,exports){
+},{"../internal/invalidated":66,"./../internal/prefix":71,"./../types/error":137,"./../types/path":138,"./followReference":41,"./onError":51,"./onMissing":52,"./onValue":53,"./util/hardlink":55,"./util/isExpired":56,"./util/isMaterialzed":57,"./util/lru":59,"./util/permuteKey":60}],49:[function(_dereq_,module,exports){
 var walk = _dereq_('./getWalk');
 module.exports = {
     getAsJSON: _dereq_('./getAsJSON')(walk),
@@ -2464,7 +2526,7 @@ module.exports = {
 };
 
 
-},{"./getAsJSON":40,"./getAsJSONG":41,"./getAsPathMap":42,"./getAsValues":43,"./getBoundValue":44,"./getValueSync":45,"./getWalk":46,"./legacy_setCache":48}],48:[function(_dereq_,module,exports){
+},{"./getAsJSON":42,"./getAsJSONG":43,"./getAsPathMap":44,"./getAsValues":45,"./getBoundValue":46,"./getValueSync":47,"./getWalk":48,"./legacy_setCache":50}],50:[function(_dereq_,module,exports){
 /* istanbul ignore next */
 var NOOP = function NOOP() {},
     __GENERATION_GUID = 0,
@@ -2497,7 +2559,7 @@ var NOOP = function NOOP() {},
     $EXPIRES = "$expires",
     $TIMESTAMP = "$timestamp",
 
-    SENTINEL = "sentinel",
+    SENTINEL = "atom",
     PATH = "ref",
     ERROR = "error",
     VALUE = "value",
@@ -2555,7 +2617,7 @@ module.exports = function setCache(model, map) {
                                 newNode[$SIZE] = nodeSize = map && map[$SIZE] || 0 || 50 + 1;
                             } else if (!(map != null && typeof map === 'object')) {
                                 nodeSize = 50 + (typeof nodeValue === 'string' && nodeValue.length || 1);
-                                nodeType = 'sentinel';
+                                nodeType = 'atom';
                                 newNode = {};
                                 newNode[VALUE] = nodeValue;
                                 newNode[$TYPE] = nodeType;
@@ -2895,7 +2957,7 @@ module.exports = function setCache(model, map) {
     return nodeRoot;
 }
 
-},{}],49:[function(_dereq_,module,exports){
+},{}],51:[function(_dereq_,module,exports){
 var lru = _dereq_('./util/lru');
 var clone = _dereq_('./util/clone');
 var promote = lru.promote;
@@ -2911,7 +2973,7 @@ module.exports = function onError(model, node, permuteRequested, permuteOptimize
 };
 
 
-},{"./util/clone":52,"./util/lru":57}],50:[function(_dereq_,module,exports){
+},{"./util/clone":54,"./util/lru":59}],52:[function(_dereq_,module,exports){
 var support = _dereq_('./util/support');
 var fastCat = support.fastCat,
     fastCatSkipNulls = support.fastCatSkipNulls,
@@ -2965,12 +3027,12 @@ function concatAndInsertMissing(remainingPath, results, permuteRequested, permut
 }
 
 
-},{"./util/clone":52,"./util/isExpired":54,"./util/spreadJSON":59,"./util/support":60}],51:[function(_dereq_,module,exports){
+},{"./util/clone":54,"./util/isExpired":56,"./util/spreadJSON":61,"./util/support":62}],53:[function(_dereq_,module,exports){
 var lru = _dereq_('./util/lru');
 var clone = _dereq_('./util/clone');
 var promote = lru.promote;
 var $path = _dereq_('./../types/path');
-var $sentinel = _dereq_('./../types/sentinel');
+var $atom = _dereq_('./../types/atom');
 var $error = _dereq_('./../types/error');
 module.exports = function onValue(model, node, seedOrFunction, outerResults, permuteRequested, permuteOptimized, permutePosition, outputFormat, fromReference) {
     var i, len, k, key, curr, prev, prevK;
@@ -2986,7 +3048,7 @@ module.exports = function onValue(model, node, seedOrFunction, outerResults, per
 
     // materialized
     if (materialized) {
-        valueNode = {$type: $sentinel};
+        valueNode = {$type: $atom};
     }
 
     // Boxed Mode & Reference Node & Error node (only happens when model is in treat errors as values).
@@ -3102,7 +3164,7 @@ module.exports = function onValue(model, node, seedOrFunction, outerResults, per
             key = permuteOptimized[i];
 
             // TODO: Special case? do string comparisons make big difference?
-            curr[key] = materialized ? {$type: $sentinel} : valueNode;
+            curr[key] = materialized ? {$type: $atom} : valueNode;
             if (permuteRequested) {
                 seedOrFunction.paths.push(permuteRequested);
             }
@@ -3112,7 +3174,7 @@ module.exports = function onValue(model, node, seedOrFunction, outerResults, per
 
 
 
-},{"./../types/error":134,"./../types/path":135,"./../types/sentinel":136,"./util/clone":52,"./util/lru":57}],52:[function(_dereq_,module,exports){
+},{"./../types/atom":136,"./../types/error":137,"./../types/path":138,"./util/clone":54,"./util/lru":59}],54:[function(_dereq_,module,exports){
 // Copies the node
 var prefix = _dereq_("../../internal/prefix");
 module.exports = function clone(node) {
@@ -3131,7 +3193,7 @@ module.exports = function clone(node) {
 };
 
 
-},{"../../internal/prefix":69}],53:[function(_dereq_,module,exports){
+},{"../../internal/prefix":71}],55:[function(_dereq_,module,exports){
 var __ref = _dereq_("../../internal/ref");
 var __context = _dereq_("../../internal/context");
 var __ref_index = _dereq_("../../internal/ref-index");
@@ -3171,23 +3233,23 @@ module.exports = {
     remove: removeHardlink
 };
 
-},{"../../internal/context":61,"../../internal/ref":72,"../../internal/ref-index":71,"../../internal/refs-length":73}],54:[function(_dereq_,module,exports){
+},{"../../internal/context":63,"../../internal/ref":74,"../../internal/ref-index":73,"../../internal/refs-length":75}],56:[function(_dereq_,module,exports){
 var now = _dereq_('../../support/now');
 module.exports = function isExpired(node) {
     var $expires = node.$expires === undefined && -1 || node.$expires;
     return $expires !== -1 && $expires !== 1 && ($expires === 0 || $expires < now());
 };
 
-},{"../../support/now":121}],55:[function(_dereq_,module,exports){
+},{"../../support/now":123}],57:[function(_dereq_,module,exports){
 module.exports = function isMaterialized(model) {
     return model._materialized && !(model._router || model._dataSource);
 };
 
-},{}],56:[function(_dereq_,module,exports){
+},{}],58:[function(_dereq_,module,exports){
 module.exports = function(x) {
     return x.path && x.value;
 };
-},{}],57:[function(_dereq_,module,exports){
+},{}],59:[function(_dereq_,module,exports){
 var __head = _dereq_("../../internal/head");
 var __tail = _dereq_("../../internal/tail");
 var __next = _dereq_("../../internal/next");
@@ -3265,8 +3327,7 @@ module.exports = {
     promote: lruPromote,
     splice: lruSplice
 };
-},{"../../internal/head":63,"../../internal/invalidated":64,"../../internal/next":66,"../../internal/prev":70,"../../internal/tail":74}],58:[function(_dereq_,module,exports){
-var prefix = _dereq_("../../internal/prefix");
+},{"../../internal/head":65,"../../internal/invalidated":66,"../../internal/next":68,"../../internal/prev":72,"../../internal/tail":76}],60:[function(_dereq_,module,exports){
 module.exports = function permuteKey(key, memo) {
     if (memo.isArray) {
         if (memo.loaded && memo.rangeOffset > memo.to) {
@@ -3293,23 +3354,6 @@ module.exports = function permuteKey(key, memo) {
 
             return memo.rangeOffset++;
         } else {
-            do  {
-                // if (type !== 'string') {
-                //     break;
-                // }
-
-                if (el[0] !== prefix && el[0] !== '$') {
-                    break;
-                }
-
-                el = key[++idx];
-            } while (el !== undefined || idx < length);
-
-            if (el === undefined || idx === length) {
-                memo.done = true;
-                return '';
-            }
-
             memo.arrOffset = idx + 1;
             return el;
         }
@@ -3331,7 +3375,7 @@ module.exports = function permuteKey(key, memo) {
 };
 
 
-},{"../../internal/prefix":69}],59:[function(_dereq_,module,exports){
+},{}],61:[function(_dereq_,module,exports){
 var fastCopy = _dereq_('./support').fastCopy;
 module.exports = function spreadJSON(root, bins, bin) {
     bin = bin || [];
@@ -3356,7 +3400,7 @@ module.exports = function spreadJSON(root, bins, bin) {
     }
 };
 
-},{"./support":60}],60:[function(_dereq_,module,exports){
+},{"./support":62}],62:[function(_dereq_,module,exports){
 
 
 function fastCopy(arr, i) {
@@ -3399,45 +3443,45 @@ module.exports = {
     fastCopy: fastCopy
 };
 
-},{}],61:[function(_dereq_,module,exports){
+},{}],63:[function(_dereq_,module,exports){
 module.exports = _dereq_("./prefix") + "context";
-},{"./prefix":69}],62:[function(_dereq_,module,exports){
+},{"./prefix":71}],64:[function(_dereq_,module,exports){
 module.exports = _dereq_("./prefix") + "generation";
-},{"./prefix":69}],63:[function(_dereq_,module,exports){
+},{"./prefix":71}],65:[function(_dereq_,module,exports){
 module.exports = _dereq_("./prefix") + "head";
-},{"./prefix":69}],64:[function(_dereq_,module,exports){
+},{"./prefix":71}],66:[function(_dereq_,module,exports){
 module.exports = _dereq_("./prefix") + "invalidated";
-},{"./prefix":69}],65:[function(_dereq_,module,exports){
+},{"./prefix":71}],67:[function(_dereq_,module,exports){
 module.exports = _dereq_("./prefix") + "key";
-},{"./prefix":69}],66:[function(_dereq_,module,exports){
+},{"./prefix":71}],68:[function(_dereq_,module,exports){
 module.exports = _dereq_("./prefix") + "next";
-},{"./prefix":69}],67:[function(_dereq_,module,exports){
+},{"./prefix":71}],69:[function(_dereq_,module,exports){
 module.exports = _dereq_("./prefix") + "offset";
-},{"./prefix":69}],68:[function(_dereq_,module,exports){
+},{"./prefix":71}],70:[function(_dereq_,module,exports){
 module.exports = _dereq_("./prefix") + "parent";
-},{"./prefix":69}],69:[function(_dereq_,module,exports){
+},{"./prefix":71}],71:[function(_dereq_,module,exports){
 // This may look like an empty string, but it's actually a single zero-width-space character.
 module.exports = "​";
-},{}],70:[function(_dereq_,module,exports){
+},{}],72:[function(_dereq_,module,exports){
 module.exports = _dereq_("./prefix") + "prev";
-},{"./prefix":69}],71:[function(_dereq_,module,exports){
+},{"./prefix":71}],73:[function(_dereq_,module,exports){
 module.exports = _dereq_("./prefix") + "ref-index";
-},{"./prefix":69}],72:[function(_dereq_,module,exports){
+},{"./prefix":71}],74:[function(_dereq_,module,exports){
 module.exports = _dereq_("./prefix") + "ref";
-},{"./prefix":69}],73:[function(_dereq_,module,exports){
+},{"./prefix":71}],75:[function(_dereq_,module,exports){
 module.exports = _dereq_("./prefix") + "refs-length";
-},{"./prefix":69}],74:[function(_dereq_,module,exports){
+},{"./prefix":71}],76:[function(_dereq_,module,exports){
 module.exports = _dereq_("./prefix") + "tail";
-},{"./prefix":69}],75:[function(_dereq_,module,exports){
+},{"./prefix":71}],77:[function(_dereq_,module,exports){
 module.exports = _dereq_("./prefix") + "version";
-},{"./prefix":69}],76:[function(_dereq_,module,exports){
+},{"./prefix":71}],78:[function(_dereq_,module,exports){
 module.exports = {
     invPathSetsAsJSON: _dereq_("./invalidate-path-sets-as-json-dense"),
     invPathSetsAsJSONG: _dereq_("./invalidate-path-sets-as-json-graph"),
     invPathSetsAsPathMap: _dereq_("./invalidate-path-sets-as-json-sparse"),
     invPathSetsAsValues: _dereq_("./invalidate-path-sets-as-json-values")
 };
-},{"./invalidate-path-sets-as-json-dense":77,"./invalidate-path-sets-as-json-graph":78,"./invalidate-path-sets-as-json-sparse":79,"./invalidate-path-sets-as-json-values":80}],77:[function(_dereq_,module,exports){
+},{"./invalidate-path-sets-as-json-dense":79,"./invalidate-path-sets-as-json-graph":80,"./invalidate-path-sets-as-json-sparse":81,"./invalidate-path-sets-as-json-values":82}],79:[function(_dereq_,module,exports){
 module.exports = invalidate_path_sets_as_json_dense;
 
 var clone = _dereq_("../support/clone-dense-json");
@@ -3563,7 +3607,7 @@ function onEdge(pathset, depth, roots, parents, nodes, requested, optimized, key
     roots.hasValue = true;
     roots.requestedPaths.push(array_slice(requested, roots.offset));
 }
-},{"../lru/collect":81,"../support/array-clone":99,"../support/array-slice":100,"../support/clone-dense-json":101,"../support/get-valid-key":111,"../support/invalidate-node":115,"../support/is-object":117,"../support/options":122,"../support/update-graph":132,"../walk/walk-path-set":142}],78:[function(_dereq_,module,exports){
+},{"../lru/collect":83,"../support/array-clone":101,"../support/array-slice":102,"../support/clone-dense-json":103,"../support/get-valid-key":113,"../support/invalidate-node":117,"../support/is-object":119,"../support/options":124,"../support/update-graph":134,"../walk/walk-path-set":144}],80:[function(_dereq_,module,exports){
 module.exports = invalidate_path_sets_as_json_graph;
 
 var $path = _dereq_("../types/path");
@@ -3678,7 +3722,7 @@ function onEdge(pathset, depth, roots, parents, nodes, requested, optimized, key
     roots.hasValue = true;
 }
 
-},{"../lru/collect":81,"../support/array-clone":99,"../support/clone-dense-json":101,"../support/clone-success-paths":107,"../support/get-valid-key":111,"../support/invalidate-node":115,"../support/is-object":117,"../support/options":122,"../support/update-graph":132,"../types/path":135,"../walk/walk-path-set-soft-link":141}],79:[function(_dereq_,module,exports){
+},{"../lru/collect":83,"../support/array-clone":101,"../support/clone-dense-json":103,"../support/clone-success-paths":109,"../support/get-valid-key":113,"../support/invalidate-node":117,"../support/is-object":119,"../support/options":124,"../support/update-graph":134,"../types/path":138,"../walk/walk-path-set-soft-link":143}],81:[function(_dereq_,module,exports){
 module.exports = invalidate_path_sets_as_json_sparse;
 
 var clone = _dereq_("../support/clone-dense-json");
@@ -3784,7 +3828,7 @@ function onEdge(pathset, depth, roots, parents, nodes, requested, optimized, key
     roots.hasValue = true;
     roots.requestedPaths.push(array_slice(requested, roots.offset));
 }
-},{"../lru/collect":81,"../support/array-clone":99,"../support/array-slice":100,"../support/clone-dense-json":101,"../support/get-valid-key":111,"../support/invalidate-node":115,"../support/is-object":117,"../support/options":122,"../support/update-graph":132,"../walk/walk-path-set":142}],80:[function(_dereq_,module,exports){
+},{"../lru/collect":83,"../support/array-clone":101,"../support/array-slice":102,"../support/clone-dense-json":103,"../support/get-valid-key":113,"../support/invalidate-node":117,"../support/is-object":119,"../support/options":124,"../support/update-graph":134,"../walk/walk-path-set":144}],82:[function(_dereq_,module,exports){
 module.exports = invalidate_path_sets_as_json_values;
 
 var clone = _dereq_("../support/clone-dense-json");
@@ -3886,7 +3930,7 @@ function onEdge(pathset, depth, roots, parents, nodes, requested, optimized, key
     }
     roots.requestedPaths.push(array_slice(requested, roots.offset));
 }
-},{"../lru/collect":81,"../support/array-clone":99,"../support/array-slice":100,"../support/clone-dense-json":101,"../support/get-valid-key":111,"../support/invalidate-node":115,"../support/is-object":117,"../support/options":122,"../support/update-graph":132,"../walk/walk-path-set":142}],81:[function(_dereq_,module,exports){
+},{"../lru/collect":83,"../support/array-clone":101,"../support/array-slice":102,"../support/clone-dense-json":103,"../support/get-valid-key":113,"../support/invalidate-node":117,"../support/is-object":119,"../support/options":124,"../support/update-graph":134,"../walk/walk-path-set":144}],83:[function(_dereq_,module,exports){
 var __head = _dereq_("../internal/head");
 var __tail = _dereq_("../internal/tail");
 var __next = _dereq_("../internal/next");
@@ -3920,7 +3964,7 @@ module.exports = function(lru, expired, version, total, max, ratio) {
         }
     }
 };
-},{"../internal/head":63,"../internal/next":66,"../internal/prev":70,"../internal/tail":74,"../support/update-graph":132}],82:[function(_dereq_,module,exports){
+},{"../internal/head":65,"../internal/next":68,"../internal/prev":72,"../internal/tail":76,"../support/update-graph":134}],84:[function(_dereq_,module,exports){
 var $expires_never = _dereq_("../values/expires-never");
 var __head = _dereq_("../internal/head");
 var __tail = _dereq_("../internal/tail");
@@ -3946,7 +3990,7 @@ module.exports = function(root, node) {
     }
     return node;
 };
-},{"../internal/head":63,"../internal/next":66,"../internal/prev":70,"../internal/tail":74,"../support/is-object":117,"../values/expires-never":137}],83:[function(_dereq_,module,exports){
+},{"../internal/head":65,"../internal/next":68,"../internal/prev":72,"../internal/tail":76,"../support/is-object":119,"../values/expires-never":139}],85:[function(_dereq_,module,exports){
 var __head = _dereq_("../internal/head");
 var __tail = _dereq_("../internal/tail");
 var __next = _dereq_("../internal/next");
@@ -3962,7 +4006,7 @@ module.exports = function(root, node) {
     node[__next] = node[__prev] = undefined;
     head = tail = next = prev = undefined;
 };
-},{"../internal/head":63,"../internal/next":66,"../internal/prev":70,"../internal/tail":74}],84:[function(_dereq_,module,exports){
+},{"../internal/head":65,"../internal/next":68,"../internal/prev":72,"../internal/tail":76}],86:[function(_dereq_,module,exports){
 module.exports = {
     setPathSetsAsJSON: _dereq_('./set-json-values-as-json-dense'),
     setPathSetsAsJSONG: _dereq_('./set-json-values-as-json-graph'),
@@ -3982,11 +4026,11 @@ module.exports = {
     setCache: _dereq_('./set-cache')
 };
 
-},{"./set-cache":85,"./set-json-graph-as-json-dense":86,"./set-json-graph-as-json-graph":87,"./set-json-graph-as-json-sparse":88,"./set-json-graph-as-json-values":89,"./set-json-sparse-as-json-dense":90,"./set-json-sparse-as-json-graph":91,"./set-json-sparse-as-json-sparse":92,"./set-json-sparse-as-json-values":93,"./set-json-values-as-json-dense":94,"./set-json-values-as-json-graph":95,"./set-json-values-as-json-sparse":96,"./set-json-values-as-json-values":97}],85:[function(_dereq_,module,exports){
+},{"./set-cache":87,"./set-json-graph-as-json-dense":88,"./set-json-graph-as-json-graph":89,"./set-json-graph-as-json-sparse":90,"./set-json-graph-as-json-values":91,"./set-json-sparse-as-json-dense":92,"./set-json-sparse-as-json-graph":93,"./set-json-sparse-as-json-sparse":94,"./set-json-sparse-as-json-values":95,"./set-json-values-as-json-dense":96,"./set-json-values-as-json-graph":97,"./set-json-values-as-json-sparse":98,"./set-json-values-as-json-values":99}],87:[function(_dereq_,module,exports){
 module.exports = set_cache;
 
 var $error = _dereq_("../types/error");
-var $sentinel = _dereq_("../types/sentinel");
+var $atom = _dereq_("../types/atom");
 
 var clone = _dereq_("../support/clone-dense-json");
 var array_clone = _dereq_("../support/array-clone");
@@ -4062,7 +4106,7 @@ function onNode(pathmap, roots, parents, nodes, requested, optimized, is_top_lev
 
     type = is_object(mess) && mess.$type || undefined;
     mess = wrap_node(mess, type, !!type ? mess.value : mess);
-    type || (type = $sentinel);
+    type || (type = $atom);
 
     if (type == $error && !!selector) {
         mess = selector(requested, mess);
@@ -4077,7 +4121,7 @@ function onNode(pathmap, roots, parents, nodes, requested, optimized, is_top_lev
 function onEdge(pathmap, keys_stack, depth, roots, parents, nodes, requested, optimized, key, keyset) {
 
 }
-},{"../lru/collect":81,"../support/array-clone":99,"../support/clone-dense-json":101,"../support/create-branch":109,"../support/get-valid-key":111,"../support/graph-node":112,"../support/inc-generation":113,"../support/is-object":117,"../support/options":122,"../support/replace-node":125,"../support/update-back-refs":131,"../support/update-graph":132,"../support/wrap-node":133,"../types/error":134,"../types/sentinel":136,"../walk/walk-path-map":140}],86:[function(_dereq_,module,exports){
+},{"../lru/collect":83,"../support/array-clone":101,"../support/clone-dense-json":103,"../support/create-branch":111,"../support/get-valid-key":113,"../support/graph-node":114,"../support/inc-generation":115,"../support/is-object":119,"../support/options":124,"../support/replace-node":127,"../support/update-back-refs":133,"../support/update-graph":134,"../support/wrap-node":135,"../types/atom":136,"../types/error":137,"../walk/walk-path-map":142}],88:[function(_dereq_,module,exports){
 module.exports = set_json_graph_as_json_dense;
 
 var $path = _dereq_("../types/path");
@@ -4234,7 +4278,7 @@ function onEdge(pathset, depth, roots, parents, nodes, requested, optimized, key
     }
 }
 
-},{"../lru/collect":81,"../support/array-clone":99,"../support/clone-dense-json":101,"../support/clone-success-paths":107,"../support/get-valid-key":111,"../support/is-object":117,"../support/merge-node":120,"../support/options":122,"../support/treat-node-as-error":127,"../support/treat-node-as-missing-path-set":129,"../types/path":135,"../walk/walk-path-set-soft-link":141}],87:[function(_dereq_,module,exports){
+},{"../lru/collect":83,"../support/array-clone":101,"../support/clone-dense-json":103,"../support/clone-success-paths":109,"../support/get-valid-key":113,"../support/is-object":119,"../support/merge-node":122,"../support/options":124,"../support/treat-node-as-error":129,"../support/treat-node-as-missing-path-set":131,"../types/path":138,"../walk/walk-path-set-soft-link":143}],89:[function(_dereq_,module,exports){
 module.exports = set_json_graph_as_json_graph;
 
 var $path = _dereq_("../types/path");
@@ -4388,7 +4432,7 @@ function onEdge(pathset, depth, roots, parents, nodes, requested, optimized, key
     }
 }
 
-},{"../lru/collect":81,"../lru/promote":82,"../support/array-clone":99,"../support/clone-graph-json":102,"../support/clone-success-paths":107,"../support/get-valid-key":111,"../support/is-object":117,"../support/merge-node":120,"../support/options":122,"../support/treat-node-as-error":127,"../support/treat-node-as-missing-path-set":129,"../types/path":135,"../walk/walk-path-set-soft-link":141}],88:[function(_dereq_,module,exports){
+},{"../lru/collect":83,"../lru/promote":84,"../support/array-clone":101,"../support/clone-graph-json":104,"../support/clone-success-paths":109,"../support/get-valid-key":113,"../support/is-object":119,"../support/merge-node":122,"../support/options":124,"../support/treat-node-as-error":129,"../support/treat-node-as-missing-path-set":131,"../types/path":138,"../walk/walk-path-set-soft-link":143}],90:[function(_dereq_,module,exports){
 module.exports = set_json_graph_as_json_sparse;
 
 var $path = _dereq_("../types/path");
@@ -4538,7 +4582,7 @@ function onEdge(pathset, depth, roots, parents, nodes, requested, optimized, key
     }
 }
 
-},{"../lru/collect":81,"../support/array-clone":99,"../support/clone-dense-json":101,"../support/clone-success-paths":107,"../support/get-valid-key":111,"../support/is-object":117,"../support/merge-node":120,"../support/options":122,"../support/treat-node-as-error":127,"../support/treat-node-as-missing-path-set":129,"../types/path":135,"../walk/walk-path-set-soft-link":141}],89:[function(_dereq_,module,exports){
+},{"../lru/collect":83,"../support/array-clone":101,"../support/clone-dense-json":103,"../support/clone-success-paths":109,"../support/get-valid-key":113,"../support/is-object":119,"../support/merge-node":122,"../support/options":124,"../support/treat-node-as-error":129,"../support/treat-node-as-missing-path-set":131,"../types/path":138,"../walk/walk-path-set-soft-link":143}],91:[function(_dereq_,module,exports){
 module.exports = set_json_graph_as_json_values;
 
 var $path = _dereq_("../types/path");
@@ -4660,12 +4704,12 @@ function onEdge(pathset, depth, roots, parents, nodes, requested, optimized, key
     }
 }
 
-},{"../lru/collect":81,"../support/array-clone":99,"../support/array-slice":100,"../support/clone-dense-json":101,"../support/clone-success-paths":107,"../support/get-valid-key":111,"../support/is-object":117,"../support/merge-node":120,"../support/options":122,"../support/treat-node-as-error":127,"../support/treat-node-as-missing-path-set":129,"../types/path":135,"../walk/walk-path-set-soft-link":141}],90:[function(_dereq_,module,exports){
+},{"../lru/collect":83,"../support/array-clone":101,"../support/array-slice":102,"../support/clone-dense-json":103,"../support/clone-success-paths":109,"../support/get-valid-key":113,"../support/is-object":119,"../support/merge-node":122,"../support/options":124,"../support/treat-node-as-error":129,"../support/treat-node-as-missing-path-set":131,"../types/path":138,"../walk/walk-path-set-soft-link":143}],92:[function(_dereq_,module,exports){
 module.exports = set_json_sparse_as_json_dense;
 
 var $path = _dereq_("../types/path");
 var $error = _dereq_("../types/error");
-var $sentinel = _dereq_("../types/sentinel");
+var $atom = _dereq_("../types/atom");
 
 var clone = _dereq_("../support/clone-dense-json");
 var array_clone = _dereq_("../support/array-clone");
@@ -4797,7 +4841,7 @@ function onNode(pathmap, roots, parents, nodes, requested, optimized, is_top_lev
 
     type = is_object(mess) && mess.$type || undefined;
     mess = wrap_node(mess, type, !!type ? mess.value : mess);
-    type || (type = $sentinel);
+    type || (type = $atom);
 
     if (type == $error && !!selector) {
         mess = selector(requested, mess);
@@ -4827,12 +4871,12 @@ function onEdge(pathmap, keys_stack, depth, roots, parents, nodes, requested, op
         }
     }
 }
-},{"../lru/collect":81,"../support/array-clone":99,"../support/clone-dense-json":101,"../support/clone-success-paths":107,"../support/create-branch":109,"../support/get-valid-key":111,"../support/graph-node":112,"../support/inc-generation":113,"../support/is-object":117,"../support/options":122,"../support/replace-node":125,"../support/treat-node-as-error":127,"../support/treat-node-as-missing-path-map":128,"../support/update-back-refs":131,"../support/update-graph":132,"../support/wrap-node":133,"../types/error":134,"../types/path":135,"../types/sentinel":136,"../walk/walk-path-map":140}],91:[function(_dereq_,module,exports){
+},{"../lru/collect":83,"../support/array-clone":101,"../support/clone-dense-json":103,"../support/clone-success-paths":109,"../support/create-branch":111,"../support/get-valid-key":113,"../support/graph-node":114,"../support/inc-generation":115,"../support/is-object":119,"../support/options":124,"../support/replace-node":127,"../support/treat-node-as-error":129,"../support/treat-node-as-missing-path-map":130,"../support/update-back-refs":133,"../support/update-graph":134,"../support/wrap-node":135,"../types/atom":136,"../types/error":137,"../types/path":138,"../walk/walk-path-map":142}],93:[function(_dereq_,module,exports){
 module.exports = set_json_sparse_as_json_graph;
 
 var $path = _dereq_("../types/path");
 var $error = _dereq_("../types/error");
-var $sentinel = _dereq_("../types/sentinel");
+var $atom = _dereq_("../types/atom");
 
 var clone = _dereq_("../support/clone-graph-json");
 var array_clone = _dereq_("../support/array-clone");
@@ -4965,7 +5009,7 @@ function onNode(pathmap, roots, parents, nodes, requested, optimized, is_top_lev
 
     type = is_object(mess) && mess.$type || undefined;
     mess = wrap_node(mess, type, !!type ? mess.value : mess);
-    type || (type = $sentinel);
+    type || (type = $atom);
 
     if (type == $error && !!selector) {
         mess = selector(requested, mess);
@@ -4998,12 +5042,12 @@ function onEdge(pathmap, keys_stack, depth, roots, parents, nodes, requested, op
         roots.hasValue = true;
     }
 }
-},{"../lru/collect":81,"../lru/promote":82,"../support/array-clone":99,"../support/clone-graph-json":102,"../support/clone-success-paths":107,"../support/create-branch":109,"../support/get-valid-key":111,"../support/graph-node":112,"../support/inc-generation":113,"../support/is-object":117,"../support/options":122,"../support/replace-node":125,"../support/treat-node-as-error":127,"../support/treat-node-as-missing-path-map":128,"../support/update-back-refs":131,"../support/update-graph":132,"../support/wrap-node":133,"../types/error":134,"../types/path":135,"../types/sentinel":136,"../walk/walk-path-map-soft-link":139}],92:[function(_dereq_,module,exports){
+},{"../lru/collect":83,"../lru/promote":84,"../support/array-clone":101,"../support/clone-graph-json":104,"../support/clone-success-paths":109,"../support/create-branch":111,"../support/get-valid-key":113,"../support/graph-node":114,"../support/inc-generation":115,"../support/is-object":119,"../support/options":124,"../support/replace-node":127,"../support/treat-node-as-error":129,"../support/treat-node-as-missing-path-map":130,"../support/update-back-refs":133,"../support/update-graph":134,"../support/wrap-node":135,"../types/atom":136,"../types/error":137,"../types/path":138,"../walk/walk-path-map-soft-link":141}],94:[function(_dereq_,module,exports){
 module.exports = set_json_sparse_as_json_sparse;
 
 var $path = _dereq_("../types/path");
 var $error = _dereq_("../types/error");
-var $sentinel = _dereq_("../types/sentinel");
+var $atom = _dereq_("../types/atom");
 
 var clone = _dereq_("../support/clone-dense-json");
 var array_clone = _dereq_("../support/array-clone");
@@ -5122,7 +5166,7 @@ function onNode(pathmap, roots, parents, nodes, requested, optimized, is_top_lev
 
     type = is_object(mess) && mess.$type || undefined;
     mess = wrap_node(mess, type, !!type ? mess.value : mess);
-    type || (type = $sentinel);
+    type || (type = $atom);
 
     if (type == $error && !!selector) {
         mess = selector(requested, mess);
@@ -5156,11 +5200,11 @@ function onEdge(pathmap, keys_stack, depth, roots, parents, nodes, requested, op
         }
     }
 }
-},{"../lru/collect":81,"../support/array-clone":99,"../support/clone-dense-json":101,"../support/clone-success-paths":107,"../support/create-branch":109,"../support/get-valid-key":111,"../support/graph-node":112,"../support/inc-generation":113,"../support/is-object":117,"../support/options":122,"../support/replace-node":125,"../support/treat-node-as-error":127,"../support/treat-node-as-missing-path-map":128,"../support/update-back-refs":131,"../support/update-graph":132,"../support/wrap-node":133,"../types/error":134,"../types/path":135,"../types/sentinel":136,"../walk/walk-path-map":140}],93:[function(_dereq_,module,exports){
+},{"../lru/collect":83,"../support/array-clone":101,"../support/clone-dense-json":103,"../support/clone-success-paths":109,"../support/create-branch":111,"../support/get-valid-key":113,"../support/graph-node":114,"../support/inc-generation":115,"../support/is-object":119,"../support/options":124,"../support/replace-node":127,"../support/treat-node-as-error":129,"../support/treat-node-as-missing-path-map":130,"../support/update-back-refs":133,"../support/update-graph":134,"../support/wrap-node":135,"../types/atom":136,"../types/error":137,"../types/path":138,"../walk/walk-path-map":142}],95:[function(_dereq_,module,exports){
 module.exports = set_path_map_as_json_values;
 
 var $error = _dereq_("../types/error");
-var $sentinel = _dereq_("../types/sentinel");
+var $atom = _dereq_("../types/atom");
 
 var clone = _dereq_("../support/clone-dense-json");
 var array_clone = _dereq_("../support/array-clone");
@@ -5261,7 +5305,7 @@ function onNode(pathmap, roots, parents, nodes, requested, optimized, is_top_lev
 
     type = is_object(mess) && mess.$type || undefined;
     mess = wrap_node(mess, type, !!type ? mess.value : mess);
-    type || (type = $sentinel);
+    type || (type = $atom);
 
     if (type == $error && !!selector) {
         mess = selector(requested, mess);
@@ -5288,12 +5332,12 @@ function onEdge(pathmap, keys_stack, depth, roots, parents, nodes, requested, op
         }
     }
 }
-},{"../lru/collect":81,"../support/array-clone":99,"../support/clone-dense-json":101,"../support/clone-success-paths":107,"../support/create-branch":109,"../support/get-valid-key":111,"../support/graph-node":112,"../support/inc-generation":113,"../support/is-object":117,"../support/options":122,"../support/replace-node":125,"../support/treat-node-as-error":127,"../support/treat-node-as-missing-path-map":128,"../support/update-back-refs":131,"../support/update-graph":132,"../support/wrap-node":133,"../types/error":134,"../types/sentinel":136,"../walk/walk-path-map":140}],94:[function(_dereq_,module,exports){
+},{"../lru/collect":83,"../support/array-clone":101,"../support/clone-dense-json":103,"../support/clone-success-paths":109,"../support/create-branch":111,"../support/get-valid-key":113,"../support/graph-node":114,"../support/inc-generation":115,"../support/is-object":119,"../support/options":124,"../support/replace-node":127,"../support/treat-node-as-error":129,"../support/treat-node-as-missing-path-map":130,"../support/update-back-refs":133,"../support/update-graph":134,"../support/wrap-node":135,"../types/atom":136,"../types/error":137,"../walk/walk-path-map":142}],96:[function(_dereq_,module,exports){
 module.exports = set_json_values_as_json_dense;
 
 var $path = _dereq_("../types/path");
 var $error = _dereq_("../types/error");
-var $sentinel = _dereq_("../types/sentinel");
+var $atom = _dereq_("../types/atom");
 
 var clone = _dereq_("../support/clone-dense-json");
 var array_clone = _dereq_("../support/array-clone");
@@ -5433,7 +5477,7 @@ function onNode(pathset, roots, parents, nodes, requested, optimized, is_top_lev
     } else {
         type = is_object(mess) && mess.$type || undefined;
         mess = wrap_node(mess, type, !!type ? mess.value : mess);
-        type || (type = $sentinel);
+        type || (type = $atom);
 
         if (type == $error && !!selector) {
             mess = selector(requested, mess);
@@ -5466,12 +5510,12 @@ function onEdge(pathset, depth, roots, parents, nodes, requested, optimized, key
     }
 }
 
-},{"../lru/collect":81,"../support/array-clone":99,"../support/clone-dense-json":101,"../support/clone-success-paths":107,"../support/create-branch":109,"../support/get-valid-key":111,"../support/graph-node":112,"../support/inc-generation":113,"../support/invalidate-node":115,"../support/is-object":117,"../support/options":122,"../support/replace-node":125,"../support/treat-node-as-error":127,"../support/treat-node-as-missing-path-set":129,"../support/update-back-refs":131,"../support/update-graph":132,"../support/wrap-node":133,"../types/error":134,"../types/path":135,"../types/sentinel":136,"../walk/walk-path-set":142}],95:[function(_dereq_,module,exports){
+},{"../lru/collect":83,"../support/array-clone":101,"../support/clone-dense-json":103,"../support/clone-success-paths":109,"../support/create-branch":111,"../support/get-valid-key":113,"../support/graph-node":114,"../support/inc-generation":115,"../support/invalidate-node":117,"../support/is-object":119,"../support/options":124,"../support/replace-node":127,"../support/treat-node-as-error":129,"../support/treat-node-as-missing-path-set":131,"../support/update-back-refs":133,"../support/update-graph":134,"../support/wrap-node":135,"../types/atom":136,"../types/error":137,"../types/path":138,"../walk/walk-path-set":144}],97:[function(_dereq_,module,exports){
 module.exports = set_json_values_as_json_graph;
 
 var $path = _dereq_("../types/path");
 var $error = _dereq_("../types/error");
-var $sentinel = _dereq_("../types/sentinel");
+var $atom = _dereq_("../types/atom");
 
 var clone = _dereq_("../support/clone-graph-json");
 var array_clone = _dereq_("../support/array-clone");
@@ -5614,7 +5658,7 @@ function onNode(pathset, roots, parents, nodes, requested, optimized, is_top_lev
     } else {
         type = is_object(mess) && mess.$type || undefined;
         mess = wrap_node(mess, type, !!type ? mess.value : mess);
-        type || (type = $sentinel);
+        type || (type = $atom);
 
         if (type == $error && !!selector) {
             mess = selector(requested, mess);
@@ -5649,12 +5693,12 @@ function onEdge(pathset, depth, roots, parents, nodes, requested, optimized, key
     }
 }
 
-},{"../lru/collect":81,"../lru/promote":82,"../support/array-clone":99,"../support/clone-graph-json":102,"../support/clone-success-paths":107,"../support/create-branch":109,"../support/get-valid-key":111,"../support/graph-node":112,"../support/inc-generation":113,"../support/invalidate-node":115,"../support/is-object":117,"../support/options":122,"../support/replace-node":125,"../support/treat-node-as-error":127,"../support/treat-node-as-missing-path-set":129,"../support/update-back-refs":131,"../support/update-graph":132,"../support/wrap-node":133,"../types/error":134,"../types/path":135,"../types/sentinel":136,"../walk/walk-path-set-soft-link":141}],96:[function(_dereq_,module,exports){
+},{"../lru/collect":83,"../lru/promote":84,"../support/array-clone":101,"../support/clone-graph-json":104,"../support/clone-success-paths":109,"../support/create-branch":111,"../support/get-valid-key":113,"../support/graph-node":114,"../support/inc-generation":115,"../support/invalidate-node":117,"../support/is-object":119,"../support/options":124,"../support/replace-node":127,"../support/treat-node-as-error":129,"../support/treat-node-as-missing-path-set":131,"../support/update-back-refs":133,"../support/update-graph":134,"../support/wrap-node":135,"../types/atom":136,"../types/error":137,"../types/path":138,"../walk/walk-path-set-soft-link":143}],98:[function(_dereq_,module,exports){
 module.exports = set_json_values_as_json_sparse;
 
 var $path = _dereq_("../types/path");
 var $error = _dereq_("../types/error");
-var $sentinel = _dereq_("../types/sentinel");
+var $atom = _dereq_("../types/atom");
 
 var clone = _dereq_("../support/clone-dense-json");
 var array_clone = _dereq_("../support/array-clone");
@@ -5783,7 +5827,7 @@ function onNode(pathset, roots, parents, nodes, requested, optimized, is_top_lev
     } else {
         type = is_object(mess) && mess.$type || undefined;
         mess = wrap_node(mess, type, !!type ? mess.value : mess);
-        type || (type = $sentinel);
+        type || (type = $atom);
 
         if (type == $error && !!selector) {
             mess = selector(requested, mess);
@@ -5819,11 +5863,11 @@ function onEdge(pathset, depth, roots, parents, nodes, requested, optimized, key
     }
 }
 
-},{"../lru/collect":81,"../support/array-clone":99,"../support/clone-dense-json":101,"../support/clone-success-paths":107,"../support/create-branch":109,"../support/get-valid-key":111,"../support/graph-node":112,"../support/inc-generation":113,"../support/invalidate-node":115,"../support/is-object":117,"../support/options":122,"../support/replace-node":125,"../support/treat-node-as-error":127,"../support/treat-node-as-missing-path-set":129,"../support/update-back-refs":131,"../support/update-graph":132,"../support/wrap-node":133,"../types/error":134,"../types/path":135,"../types/sentinel":136,"../walk/walk-path-set":142}],97:[function(_dereq_,module,exports){
+},{"../lru/collect":83,"../support/array-clone":101,"../support/clone-dense-json":103,"../support/clone-success-paths":109,"../support/create-branch":111,"../support/get-valid-key":113,"../support/graph-node":114,"../support/inc-generation":115,"../support/invalidate-node":117,"../support/is-object":119,"../support/options":124,"../support/replace-node":127,"../support/treat-node-as-error":129,"../support/treat-node-as-missing-path-set":131,"../support/update-back-refs":133,"../support/update-graph":134,"../support/wrap-node":135,"../types/atom":136,"../types/error":137,"../types/path":138,"../walk/walk-path-set":144}],99:[function(_dereq_,module,exports){
 module.exports = set_json_values_as_json_values;
 
 var $error = _dereq_("../types/error");
-var $sentinel = _dereq_("../types/sentinel");
+var $atom = _dereq_("../types/atom");
 
 var clone = _dereq_("../support/clone-dense-json");
 var array_clone = _dereq_("../support/array-clone");
@@ -5932,7 +5976,7 @@ function onNode(pathset, roots, parents, nodes, requested, optimized, is_top_lev
     } else {
         type = is_object(mess) && mess.$type || undefined;
         mess = wrap_node(mess, type, !!type ? mess.value : mess);
-        type || (type = $sentinel);
+        type || (type = $atom);
 
         if (type == $error && !!selector) {
             mess = selector(requested, mess);
@@ -5961,7 +6005,7 @@ function onEdge(pathset, depth, roots, parents, nodes, requested, optimized, key
     }
 }
 
-},{"../lru/collect":81,"../support/array-clone":99,"../support/clone-dense-json":101,"../support/clone-success-paths":107,"../support/create-branch":109,"../support/get-valid-key":111,"../support/graph-node":112,"../support/inc-generation":113,"../support/invalidate-node":115,"../support/is-object":117,"../support/options":122,"../support/replace-node":125,"../support/treat-node-as-error":127,"../support/treat-node-as-missing-path-set":129,"../support/update-back-refs":131,"../support/update-graph":132,"../support/wrap-node":133,"../types/error":134,"../types/sentinel":136,"../walk/walk-path-set":142}],98:[function(_dereq_,module,exports){
+},{"../lru/collect":83,"../support/array-clone":101,"../support/clone-dense-json":103,"../support/clone-success-paths":109,"../support/create-branch":111,"../support/get-valid-key":113,"../support/graph-node":114,"../support/inc-generation":115,"../support/invalidate-node":117,"../support/is-object":119,"../support/options":124,"../support/replace-node":127,"../support/treat-node-as-error":129,"../support/treat-node-as-missing-path-set":131,"../support/update-back-refs":133,"../support/update-graph":134,"../support/wrap-node":135,"../types/atom":136,"../types/error":137,"../walk/walk-path-set":144}],100:[function(_dereq_,module,exports){
 module.exports = function(array, value) {
     var i = -1;
     var n = array.length;
@@ -5970,7 +6014,7 @@ module.exports = function(array, value) {
     array2[i] = value;
     return array2;
 };
-},{}],99:[function(_dereq_,module,exports){
+},{}],101:[function(_dereq_,module,exports){
 module.exports = function(array) {
     var i = -1;
     var n = array.length;
@@ -5978,21 +6022,21 @@ module.exports = function(array) {
     while(++i < n) { array2[i] = array[i]; }
     return array2;
 };
-},{}],100:[function(_dereq_,module,exports){
+},{}],102:[function(_dereq_,module,exports){
 module.exports = function(array, index) {
     var i = -1;
-    var n = array.length - index;
+    var n = Math.max(array.length - index, 0);
     var array2 = new Array(n);
     while(++i < n) { array2[i] = array[i + index]; }
     return array2;
 };
-},{}],101:[function(_dereq_,module,exports){
-var $sentinel = _dereq_("../types/sentinel");
+},{}],103:[function(_dereq_,module,exports){
+var $atom = _dereq_("../types/atom");
 var clone = _dereq_("./clone");
 module.exports = function(roots, node, type, value) {
 
     if(node == null || value === undefined) {
-        return { $type: $sentinel };
+        return { $type: $atom };
     }
 
     if(roots.boxed == true) {
@@ -6002,28 +6046,28 @@ module.exports = function(roots, node, type, value) {
     return value;
 }
 
-},{"../types/sentinel":136,"./clone":108}],102:[function(_dereq_,module,exports){
-var $sentinel = _dereq_("../types/sentinel");
+},{"../types/atom":136,"./clone":110}],104:[function(_dereq_,module,exports){
+var $atom = _dereq_("../types/atom");
 var clone = _dereq_("./clone");
 var is_primitive = _dereq_("./is-primitive");
 module.exports = function(roots, node, type, value) {
 
     if(node == null || value === undefined) {
-        return { $type: $sentinel };
+        return { $type: $atom };
     }
 
     if(roots.boxed == true) {
         return !!type && clone(node) || node;
     }
 
-    if(!type || (type === $sentinel && is_primitive(value))) {
+    if(!type || (type === $atom && is_primitive(value))) {
         return value;
     }
 
     return clone(node);
 }
 
-},{"../types/sentinel":136,"./clone":108,"./is-primitive":118}],103:[function(_dereq_,module,exports){
+},{"../types/atom":136,"./clone":110,"./is-primitive":120}],105:[function(_dereq_,module,exports){
 var clone_requested = _dereq_("./clone-requested-path");
 var clone_optimized = _dereq_("./clone-optimized-path");
 var walk_path_map   = _dereq_("../walk/walk-path-map-soft-link");
@@ -6059,14 +6103,14 @@ function explode_keys(pathmap, keys_stack, depth) {
     }
     return keys_stack;
 }
-},{"../walk/walk-path-map-soft-link":139,"./clone-optimized-path":105,"./clone-requested-path":106,"./is-object":117}],104:[function(_dereq_,module,exports){
+},{"../walk/walk-path-map-soft-link":141,"./clone-optimized-path":107,"./clone-requested-path":108,"./is-object":119}],106:[function(_dereq_,module,exports){
 var clone_requested_path = _dereq_("./clone-requested-path");
 var clone_optimized_path = _dereq_("./clone-optimized-path");
 module.exports = function(roots, pathset, depth, requested, optimized) {
     roots.requestedMissingPaths.push(clone_requested_path(roots.bound, requested, pathset, depth, roots.index));
     roots.optimizedMissingPaths.push(clone_optimized_path(optimized, pathset, depth));
 }
-},{"./clone-optimized-path":105,"./clone-requested-path":106}],105:[function(_dereq_,module,exports){
+},{"./clone-optimized-path":107,"./clone-requested-path":108}],107:[function(_dereq_,module,exports){
 module.exports = function(optimized, pathset, depth) {
     var x;
     var i = -1;
@@ -6084,7 +6128,7 @@ module.exports = function(optimized, pathset, depth) {
     }
     return array2;
 }
-},{}],106:[function(_dereq_,module,exports){
+},{}],108:[function(_dereq_,module,exports){
 var is_object = _dereq_("./is-object");
 module.exports = function(bound, requested, pathset, depth, index) {
     var x;
@@ -6115,14 +6159,14 @@ module.exports = function(bound, requested, pathset, depth, index) {
     }
     return array2;
 }
-},{"./is-object":117}],107:[function(_dereq_,module,exports){
+},{"./is-object":119}],109:[function(_dereq_,module,exports){
 var array_slice = _dereq_("./array-slice");
 var array_clone = _dereq_("./array-clone");
 module.exports = function(roots, requested, optimized) {
     roots.requestedPaths.push(array_slice(requested, roots.offset));
     roots.optimizedPaths.push(array_clone(optimized));
 }
-},{"./array-clone":99,"./array-slice":100}],108:[function(_dereq_,module,exports){
+},{"./array-clone":101,"./array-slice":102}],110:[function(_dereq_,module,exports){
 var is_object = _dereq_("./is-object");
 var prefix = _dereq_("../internal/prefix");
 
@@ -6141,7 +6185,7 @@ module.exports = function(value) {
     }
     return dest;
 }
-},{"../internal/prefix":69,"./is-object":117}],109:[function(_dereq_,module,exports){
+},{"../internal/prefix":71,"./is-object":119}],111:[function(_dereq_,module,exports){
 var $path = _dereq_("../types/path");
 var $expired = "expired";
 var replace_node = _dereq_("./replace-node");
@@ -6164,7 +6208,7 @@ module.exports = function(roots, parent, node, type, key) {
     return node;
 }
 
-},{"../types/path":135,"./graph-node":112,"./is-expired":116,"./is-primitive":118,"./replace-node":125,"./update-back-refs":131}],110:[function(_dereq_,module,exports){
+},{"../types/path":138,"./graph-node":114,"./is-expired":118,"./is-primitive":120,"./replace-node":127,"./update-back-refs":133}],112:[function(_dereq_,module,exports){
 var __ref = _dereq_("../internal/ref");
 var __context = _dereq_("../internal/context");
 var __ref_index = _dereq_("../internal/ref-index");
@@ -6179,7 +6223,7 @@ module.exports = function(node) {
     }
     node[__refs_length] = undefined
 }
-},{"../internal/context":61,"../internal/ref":72,"../internal/ref-index":71,"../internal/refs-length":73}],111:[function(_dereq_,module,exports){
+},{"../internal/context":63,"../internal/ref":74,"../internal/ref-index":73,"../internal/refs-length":75}],113:[function(_dereq_,module,exports){
 module.exports = function(path) {
     var key, index = path.length - 1;
     do {
@@ -6189,7 +6233,7 @@ module.exports = function(path) {
     } while(--index > -1);
     return null;
 }
-},{}],112:[function(_dereq_,module,exports){
+},{}],114:[function(_dereq_,module,exports){
 var __parent = _dereq_("../internal/parent");
 var __key = _dereq_("../internal/key");
 var __generation = _dereq_("../internal/generation");
@@ -6200,13 +6244,13 @@ module.exports = function(root, parent, node, key, generation) {
     node[__generation] = generation;
     return node;
 }
-},{"../internal/generation":62,"../internal/key":65,"../internal/parent":68}],113:[function(_dereq_,module,exports){
+},{"../internal/generation":64,"../internal/key":67,"../internal/parent":70}],115:[function(_dereq_,module,exports){
 var generation = 0;
 module.exports = function() { return generation++; }
-},{}],114:[function(_dereq_,module,exports){
+},{}],116:[function(_dereq_,module,exports){
 var version = 0;
 module.exports = function() { return version++; }
-},{}],115:[function(_dereq_,module,exports){
+},{}],117:[function(_dereq_,module,exports){
 module.exports = invalidate;
 
 var is_object = _dereq_("./is-object");
@@ -6229,7 +6273,7 @@ function invalidate(parent, node, key, lru) {
     }
     return false;
 }
-},{"../internal/prefix":69,"./is-object":117,"./remove-node":124}],116:[function(_dereq_,module,exports){
+},{"../internal/prefix":71,"./is-object":119,"./remove-node":126}],118:[function(_dereq_,module,exports){
 var $expires_now = _dereq_("../values/expires-now");
 var $expires_never = _dereq_("../values/expires-never");
 var __invalidated = _dereq_("../internal/invalidated");
@@ -6251,17 +6295,17 @@ module.exports = function(roots, node) {
     return false;
 }
 
-},{"../internal/invalidated":64,"../lru/splice":83,"../values/expires-never":137,"../values/expires-now":138,"./now":121}],117:[function(_dereq_,module,exports){
+},{"../internal/invalidated":66,"../lru/splice":85,"../values/expires-never":139,"../values/expires-now":140,"./now":123}],119:[function(_dereq_,module,exports){
 var obj_typeof = "object";
 module.exports = function(value) {
     return value != null && typeof value == obj_typeof;
 }
-},{}],118:[function(_dereq_,module,exports){
+},{}],120:[function(_dereq_,module,exports){
 var obj_typeof = "object";
 module.exports = function(value) {
     return value == null || typeof value != obj_typeof;
 }
-},{}],119:[function(_dereq_,module,exports){
+},{}],121:[function(_dereq_,module,exports){
 module.exports = key_to_keyset;
 
 var __offset = _dereq_("../internal/offset");
@@ -6281,11 +6325,11 @@ function key_to_keyset(key, iskeyset) {
 }
 
 
-},{"../internal/offset":67,"./is-object":117}],120:[function(_dereq_,module,exports){
+},{"../internal/offset":69,"./is-object":119}],122:[function(_dereq_,module,exports){
 
 var $self = "./";
 var $path = _dereq_("../types/path");
-var $sentinel = _dereq_("../types/sentinel");
+var $atom = _dereq_("../types/atom");
 var $expires_now = _dereq_("../values/expires-now");
 
 var is_object = _dereq_("./is-object");
@@ -6438,7 +6482,7 @@ module.exports = function(roots, parent, node, messageParent, message, key) {
             update_graph(parent, offset, roots.version, roots.lru);
             node = graph_node(roots[0], parent, node, key, inc_generation());
         }
-        // Otherwise, cache and message are the same primitive value. Wrap in a sentinel and insert.
+        // Otherwise, cache and message are the same primitive value. Wrap in a atom and insert.
         else {
             node = parent[key] = wrap_node(node, type, node);
             offset = -node.$size;
@@ -6462,9 +6506,9 @@ module.exports = function(roots, parent, node, messageParent, message, key) {
     return node;
 }
 
-},{"../lru/promote":82,"../support/replace-node":125,"../support/update-graph":132,"../types/path":135,"../types/sentinel":136,"../values/expires-now":138,"./graph-node":112,"./inc-generation":113,"./invalidate-node":115,"./is-expired":116,"./is-object":117,"./is-primitive":118,"./wrap-node":133}],121:[function(_dereq_,module,exports){
+},{"../lru/promote":84,"../support/replace-node":127,"../support/update-graph":134,"../types/atom":136,"../types/path":138,"../values/expires-now":140,"./graph-node":114,"./inc-generation":115,"./invalidate-node":117,"./is-expired":118,"./is-object":119,"./is-primitive":120,"./wrap-node":135}],123:[function(_dereq_,module,exports){
 module.exports = Date.now;
-},{}],122:[function(_dereq_,module,exports){
+},{}],124:[function(_dereq_,module,exports){
 var inc_version = _dereq_("../support/inc-version");
 var getBoundValue = _dereq_('../get/getBoundValue');
 
@@ -6497,7 +6541,7 @@ module.exports = function(options, model, error_selector) {
     
     return options;
 };
-},{"../get/getBoundValue":44,"../support/inc-version":114}],123:[function(_dereq_,module,exports){
+},{"../get/getBoundValue":46,"../support/inc-version":116}],125:[function(_dereq_,module,exports){
 module.exports = permute_keyset;
 
 var __offset = _dereq_("../internal/offset");
@@ -6506,15 +6550,16 @@ var is_object = _dereq_("./is-object");
 
 function permute_keyset(key) {
     if(is_array(key)) {
-        
-        if(key[__offset] === undefined) {
-            key[__offset] = -1;
-            if(key.length == 0) {
-                return false;
-            }
+        if(key.length == 0) {
+            return false;
         }
-        if(++key[__offset] >= key.length) {
-            return permute_keyset(key[key[__offset] = -1]);
+        if(key[__offset] === undefined) {
+            return permute_keyset(key[key[__offset] = 0]) || true;
+        } else if(permute_keyset(key[key[__offset]])) {
+            return true;
+        } else if(++key[__offset] >= key.length) {
+            key[__offset] = undefined;
+            return false;
         } else {
             return true;
         }
@@ -6543,7 +6588,7 @@ function permute_keyset(key) {
 }
 
 
-},{"../internal/offset":67,"./is-object":117}],124:[function(_dereq_,module,exports){
+},{"../internal/offset":69,"./is-object":119}],126:[function(_dereq_,module,exports){
 var $path = _dereq_("../types/path");
 var __parent = _dereq_("../internal/parent");
 var unlink = _dereq_("./unlink");
@@ -6565,7 +6610,7 @@ module.exports = function(parent, node, key, lru) {
     return false;
 }
 
-},{"../internal/parent":68,"../lru/splice":83,"../types/path":135,"./delete-back-refs":110,"./is-object":117,"./unlink":130}],125:[function(_dereq_,module,exports){
+},{"../internal/parent":70,"../lru/splice":85,"../types/path":138,"./delete-back-refs":112,"./is-object":119,"./unlink":132}],127:[function(_dereq_,module,exports){
 var transfer_back_refs = _dereq_("./transfer-back-refs");
 var invalidate_node = _dereq_("./invalidate-node");
 
@@ -6576,7 +6621,7 @@ module.exports = function(parent, node, replacement, key, lru) {
     }
     return parent[key] = replacement;
 }
-},{"./invalidate-node":115,"./transfer-back-refs":126}],126:[function(_dereq_,module,exports){
+},{"./invalidate-node":117,"./transfer-back-refs":128}],128:[function(_dereq_,module,exports){
 var __ref = _dereq_("../internal/ref");
 var __context = _dereq_("../internal/context");
 var __refs_length = _dereq_("../internal/refs-length");
@@ -6596,7 +6641,7 @@ module.exports = function(node, dest) {
     dest[__refs_length] = nodeRefsLength + destRefsLength;
     node[__refs_length] = ref = undefined;
 }
-},{"../internal/context":61,"../internal/ref":72,"../internal/refs-length":73}],127:[function(_dereq_,module,exports){
+},{"../internal/context":63,"../internal/ref":74,"../internal/refs-length":75}],129:[function(_dereq_,module,exports){
 var $error = _dereq_("../types/error");
 var promote = _dereq_("../lru/promote");
 var array_clone = _dereq_("./array-clone");
@@ -6612,8 +6657,8 @@ module.exports = function(roots, node, type, path) {
     return true;
 };
 
-},{"../lru/promote":82,"../types/error":134,"./array-clone":99}],128:[function(_dereq_,module,exports){
-var $sentinel = _dereq_("../types/sentinel");
+},{"../lru/promote":84,"../types/error":137,"./array-clone":101}],130:[function(_dereq_,module,exports){
+var $atom = _dereq_("../types/atom");
 var clone_misses = _dereq_("./clone-missing-path-maps");
 var is_expired = _dereq_("./is-expired");
 
@@ -6623,7 +6668,7 @@ module.exports = function(roots, node, type, pathmap, keys_stack, depth, request
         clone_misses(roots, pathmap, keys_stack, depth, requested, optimized);
         return true;
     } else if(!!type) {
-        if(type == $sentinel && node.value === undefined && dematerialized && !roots.boxed) {
+        if(type == $atom && node.value === undefined && dematerialized && !roots.boxed) {
             return true;
         } else if(is_expired(roots, node)) {
             clone_misses(roots, pathmap, keys_stack, depth, requested, optimized);
@@ -6632,8 +6677,8 @@ module.exports = function(roots, node, type, pathmap, keys_stack, depth, request
     }
     return false;
 };
-},{"../types/sentinel":136,"./clone-missing-path-maps":103,"./is-expired":116}],129:[function(_dereq_,module,exports){
-var $sentinel = _dereq_("../types/sentinel");
+},{"../types/atom":136,"./clone-missing-path-maps":105,"./is-expired":118}],131:[function(_dereq_,module,exports){
+var $atom = _dereq_("../types/atom");
 var clone_misses = _dereq_("./clone-missing-path-sets");
 var is_expired = _dereq_("./is-expired");
 
@@ -6643,7 +6688,7 @@ module.exports = function(roots, node, type, pathset, depth, requested, optimize
         clone_misses(roots, pathset, depth, requested, optimized);
         return true;
     } else if(!!type) {
-        if(type == $sentinel && node.value === undefined && dematerialized && !roots.boxed) {
+        if(type == $atom && node.value === undefined && dematerialized && !roots.boxed) {
             return true;
         } else if(is_expired(roots, node)) {
             clone_misses(roots, pathset, depth, requested, optimized);
@@ -6653,7 +6698,7 @@ module.exports = function(roots, node, type, pathset, depth, requested, optimize
     return false;
 };
 
-},{"../types/sentinel":136,"./clone-missing-path-sets":104,"./is-expired":116}],130:[function(_dereq_,module,exports){
+},{"../types/atom":136,"./clone-missing-path-sets":106,"./is-expired":118}],132:[function(_dereq_,module,exports){
 var __ref = _dereq_("../internal/ref");
 var __context = _dereq_("../internal/context");
 var __ref_index = _dereq_("../internal/ref-index");
@@ -6671,7 +6716,7 @@ module.exports = function(ref) {
         ref[__ref_index] = ref[__context] = destination = undefined;
     }
 }
-},{"../internal/context":61,"../internal/ref":72,"../internal/ref-index":71,"../internal/refs-length":73}],131:[function(_dereq_,module,exports){
+},{"../internal/context":63,"../internal/ref":74,"../internal/ref-index":73,"../internal/refs-length":75}],133:[function(_dereq_,module,exports){
 module.exports = update_back_refs;
 
 var __ref = _dereq_("../internal/ref");
@@ -6695,7 +6740,7 @@ function update_back_refs(node, version) {
     return node;
 }
 
-},{"../internal/generation":62,"../internal/parent":68,"../internal/ref":72,"../internal/refs-length":73,"../internal/version":75,"./inc-generation":113}],132:[function(_dereq_,module,exports){
+},{"../internal/generation":64,"../internal/parent":70,"../internal/ref":74,"../internal/refs-length":75,"../internal/version":77,"./inc-generation":115}],134:[function(_dereq_,module,exports){
 var __key = _dereq_("../internal/key");
 var __version = _dereq_("../internal/version");
 var __parent = _dereq_("../internal/parent");
@@ -6713,10 +6758,10 @@ module.exports = function(node, offset, version, lru) {
         }
     }
 }
-},{"../internal/key":65,"../internal/parent":68,"../internal/version":75,"./remove-node":124,"./update-back-refs":131}],133:[function(_dereq_,module,exports){
+},{"../internal/key":67,"../internal/parent":70,"../internal/version":77,"./remove-node":126,"./update-back-refs":133}],135:[function(_dereq_,module,exports){
 var $path = _dereq_("../types/path");
 var $error = _dereq_("../types/error");
-var $sentinel = _dereq_("../types/sentinel");
+var $atom = _dereq_("../types/atom");
 
 var now = _dereq_("./now");
 var clone = _dereq_("./clone");
@@ -6739,7 +6784,7 @@ module.exports = function(node, type, value) {
     //     size = dest.$size;
     } else {
         dest = { value: value };
-        type = $sentinel;
+        type = $atom;
     }
 
     if(size <= 0 || size == null) {
@@ -6770,17 +6815,17 @@ module.exports = function(node, type, value) {
     return dest;
 }
 
-},{"../types/error":134,"../types/path":135,"../types/sentinel":136,"./clone":108,"./is-object":117,"./now":121}],134:[function(_dereq_,module,exports){
-module.exports = "error";
-},{}],135:[function(_dereq_,module,exports){
-module.exports = "ref";
-},{}],136:[function(_dereq_,module,exports){
-module.exports = "sentinel";
+},{"../types/atom":136,"../types/error":137,"../types/path":138,"./clone":110,"./is-object":119,"./now":123}],136:[function(_dereq_,module,exports){
+module.exports = "atom";
 },{}],137:[function(_dereq_,module,exports){
-module.exports = 1;
+module.exports = "error";
 },{}],138:[function(_dereq_,module,exports){
-module.exports = 0;
+module.exports = "ref";
 },{}],139:[function(_dereq_,module,exports){
+module.exports = 1;
+},{}],140:[function(_dereq_,module,exports){
+module.exports = 0;
+},{}],141:[function(_dereq_,module,exports){
 module.exports = walk_path_map;
 
 var prefix = _dereq_("../internal/prefix");
@@ -6903,7 +6948,7 @@ function walk_path_map(onNode, onEdge, pathmap, keys_stack, depth, roots, parent
     }
 }
 
-},{"../internal/prefix":69,"../lru/promote":82,"../support/array-append":98,"../support/array-clone":99,"../support/array-slice":100,"../support/is-expired":116,"../support/is-object":117,"../support/is-primitive":118,"../types/path":135,"./walk-reference":143}],140:[function(_dereq_,module,exports){
+},{"../internal/prefix":71,"../lru/promote":84,"../support/array-append":100,"../support/array-clone":101,"../support/array-slice":102,"../support/is-expired":118,"../support/is-object":119,"../support/is-primitive":120,"../types/path":138,"./walk-reference":145}],142:[function(_dereq_,module,exports){
 module.exports = walk_path_map;
 
 var prefix = _dereq_("../internal/prefix");
@@ -7033,7 +7078,7 @@ function walk_path_map(onNode, onEdge, pathmap, keys_stack, depth, roots, parent
     }
 }
 
-},{"../internal/context":61,"../internal/prefix":69,"../lru/promote":82,"../support/array-append":98,"../support/array-clone":99,"../support/array-slice":100,"../support/is-expired":116,"../support/is-object":117,"../support/is-primitive":118,"../types/path":135,"./walk-reference":143}],141:[function(_dereq_,module,exports){
+},{"../internal/context":63,"../internal/prefix":71,"../lru/promote":84,"../support/array-append":100,"../support/array-clone":101,"../support/array-slice":102,"../support/is-expired":118,"../support/is-object":119,"../support/is-primitive":120,"../types/path":138,"./walk-reference":145}],143:[function(_dereq_,module,exports){
 module.exports = walk_path_set;
 
 var $path = _dereq_("../types/path");
@@ -7139,7 +7184,7 @@ function walk_path_set(onNode, onEdge, pathset, depth, roots, parents, nodes, re
     }
 }
 
-},{"../lru/promote":82,"../support/array-append":98,"../support/array-clone":99,"../support/array-slice":100,"../support/is-expired":116,"../support/is-object":117,"../support/is-primitive":118,"../support/keyset-to-key":119,"../support/permute-keyset":123,"../types/path":135,"./walk-reference":143}],142:[function(_dereq_,module,exports){
+},{"../lru/promote":84,"../support/array-append":100,"../support/array-clone":101,"../support/array-slice":102,"../support/is-expired":118,"../support/is-object":119,"../support/is-primitive":120,"../support/keyset-to-key":121,"../support/permute-keyset":125,"../types/path":138,"./walk-reference":145}],144:[function(_dereq_,module,exports){
 module.exports = walk_path_set;
 
 var prefix = _dereq_("../internal/prefix");
@@ -7256,7 +7301,7 @@ function walk_path_set(onNode, onEdge, pathset, depth, roots, parents, nodes, re
     }
 }
 
-},{"../internal/context":61,"../internal/prefix":69,"../lru/promote":82,"../support/array-append":98,"../support/array-clone":99,"../support/array-slice":100,"../support/is-expired":116,"../support/is-object":117,"../support/is-primitive":118,"../support/keyset-to-key":119,"../support/permute-keyset":123,"../types/path":135,"./walk-reference":143}],143:[function(_dereq_,module,exports){
+},{"../internal/context":63,"../internal/prefix":71,"../lru/promote":84,"../support/array-append":100,"../support/array-clone":101,"../support/array-slice":102,"../support/is-expired":118,"../support/is-object":119,"../support/is-primitive":120,"../support/keyset-to-key":121,"../support/permute-keyset":125,"../types/path":138,"./walk-reference":145}],145:[function(_dereq_,module,exports){
 module.exports = walk_reference;
 
 var prefix = _dereq_("../internal/prefix");
@@ -7313,7 +7358,299 @@ function walk_reference(onNode, container, reference, roots, parents, nodes, req
     return nodes;
 }
 
-},{"../internal/context":61,"../internal/prefix":69,"../internal/ref":72,"../internal/ref-index":71,"../internal/refs-length":73,"../support/array-append":98,"../support/array-slice":100,"../support/is-object":117,"../support/is-primitive":118}],144:[function(_dereq_,module,exports){
+},{"../internal/context":63,"../internal/prefix":71,"../internal/ref":74,"../internal/ref-index":73,"../internal/refs-length":75,"../support/array-append":100,"../support/array-slice":102,"../support/is-object":119,"../support/is-primitive":120}],146:[function(_dereq_,module,exports){
+"use strict";
+
+// rawAsap provides everything we need except exception management.
+var rawAsap = _dereq_("./raw");
+// RawTasks are recycled to reduce GC churn.
+var freeTasks = [];
+// We queue errors to ensure they are thrown in right order (FIFO).
+// Array-as-queue is good enough here, since we are just dealing with exceptions.
+var pendingErrors = [];
+var requestErrorThrow = rawAsap.makeRequestCallFromTimer(throwFirstError);
+
+function throwFirstError() {
+    if (pendingErrors.length) {
+        throw pendingErrors.shift();
+    }
+}
+
+/**
+ * Calls a task as soon as possible after returning, in its own event, with priority
+ * over other events like animation, reflow, and repaint. An error thrown from an
+ * event will not interrupt, nor even substantially slow down the processing of
+ * other events, but will be rather postponed to a lower priority event.
+ * @param {{call}} task A callable object, typically a function that takes no
+ * arguments.
+ */
+module.exports = asap;
+function asap(task) {
+    var rawTask;
+    if (freeTasks.length) {
+        rawTask = freeTasks.pop();
+    } else {
+        rawTask = new RawTask();
+    }
+    rawTask.task = task;
+    rawAsap(rawTask);
+}
+
+// We wrap tasks with recyclable task objects.  A task object implements
+// `call`, just like a function.
+function RawTask() {
+    this.task = null;
+}
+
+// The sole purpose of wrapping the task is to catch the exception and recycle
+// the task object after its single use.
+RawTask.prototype.call = function () {
+    try {
+        this.task.call();
+    } catch (error) {
+        if (asap.onerror) {
+            // This hook exists purely for testing purposes.
+            // Its name will be periodically randomized to break any code that
+            // depends on its existence.
+            asap.onerror(error);
+        } else {
+            // In a web browser, exceptions are not fatal. However, to avoid
+            // slowing down the queue of pending tasks, we rethrow the error in a
+            // lower priority turn.
+            pendingErrors.push(error);
+            requestErrorThrow();
+        }
+    } finally {
+        this.task = null;
+        freeTasks[freeTasks.length] = this;
+    }
+};
+
+},{"./raw":147}],147:[function(_dereq_,module,exports){
+(function (global){
+"use strict";
+
+// Use the fastest means possible to execute a task in its own turn, with
+// priority over other events including IO, animation, reflow, and redraw
+// events in browsers.
+//
+// An exception thrown by a task will permanently interrupt the processing of
+// subsequent tasks. The higher level `asap` function ensures that if an
+// exception is thrown by a task, that the task queue will continue flushing as
+// soon as possible, but if you use `rawAsap` directly, you are responsible to
+// either ensure that no exceptions are thrown from your task, or to manually
+// call `rawAsap.requestFlush` if an exception is thrown.
+module.exports = rawAsap;
+function rawAsap(task) {
+    if (!queue.length) {
+        requestFlush();
+        flushing = true;
+    }
+    // Equivalent to push, but avoids a function call.
+    queue[queue.length] = task;
+}
+
+var queue = [];
+// Once a flush has been requested, no further calls to `requestFlush` are
+// necessary until the next `flush` completes.
+var flushing = false;
+// `requestFlush` is an implementation-specific method that attempts to kick
+// off a `flush` event as quickly as possible. `flush` will attempt to exhaust
+// the event queue before yielding to the browser's own event loop.
+var requestFlush;
+// The position of the next task to execute in the task queue. This is
+// preserved between calls to `flush` so that it can be resumed if
+// a task throws an exception.
+var index = 0;
+// If a task schedules additional tasks recursively, the task queue can grow
+// unbounded. To prevent memory exhaustion, the task queue will periodically
+// truncate already-completed tasks.
+var capacity = 1024;
+
+// The flush function processes all tasks that have been scheduled with
+// `rawAsap` unless and until one of those tasks throws an exception.
+// If a task throws an exception, `flush` ensures that its state will remain
+// consistent and will resume where it left off when called again.
+// However, `flush` does not make any arrangements to be called again if an
+// exception is thrown.
+function flush() {
+    while (index < queue.length) {
+        var currentIndex = index;
+        // Advance the index before calling the task. This ensures that we will
+        // begin flushing on the next task the task throws an error.
+        index = index + 1;
+        queue[currentIndex].call();
+        // Prevent leaking memory for long chains of recursive calls to `asap`.
+        // If we call `asap` within tasks scheduled by `asap`, the queue will
+        // grow, but to avoid an O(n) walk for every task we execute, we don't
+        // shift tasks off the queue after they have been executed.
+        // Instead, we periodically shift 1024 tasks off the queue.
+        if (index > capacity) {
+            // Manually shift all values starting at the index back to the
+            // beginning of the queue.
+            for (var scan = 0, newLength = queue.length - index; scan < newLength; scan++) {
+                queue[scan] = queue[scan + index];
+            }
+            queue.length -= index;
+            index = 0;
+        }
+    }
+    queue.length = 0;
+    index = 0;
+    flushing = false;
+}
+
+// `requestFlush` is implemented using a strategy based on data collected from
+// every available SauceLabs Selenium web driver worker at time of writing.
+// https://docs.google.com/spreadsheets/d/1mG-5UYGup5qxGdEMWkhP6BWCz053NUb2E1QoUTU16uA/edit#gid=783724593
+
+// Safari 6 and 6.1 for desktop, iPad, and iPhone are the only browsers that
+// have WebKitMutationObserver but not un-prefixed MutationObserver.
+// Must use `global` instead of `window` to work in both frames and web
+// workers. `global` is a provision of Browserify, Mr, Mrs, or Mop.
+var BrowserMutationObserver = global.MutationObserver || global.WebKitMutationObserver;
+
+// MutationObservers are desirable because they have high priority and work
+// reliably everywhere they are implemented.
+// They are implemented in all modern browsers.
+//
+// - Android 4-4.3
+// - Chrome 26-34
+// - Firefox 14-29
+// - Internet Explorer 11
+// - iPad Safari 6-7.1
+// - iPhone Safari 7-7.1
+// - Safari 6-7
+if (typeof BrowserMutationObserver === "function") {
+    requestFlush = makeRequestCallFromMutationObserver(flush);
+
+// MessageChannels are desirable because they give direct access to the HTML
+// task queue, are implemented in Internet Explorer 10, Safari 5.0-1, and Opera
+// 11-12, and in web workers in many engines.
+// Although message channels yield to any queued rendering and IO tasks, they
+// would be better than imposing the 4ms delay of timers.
+// However, they do not work reliably in Internet Explorer or Safari.
+
+// Internet Explorer 10 is the only browser that has setImmediate but does
+// not have MutationObservers.
+// Although setImmediate yields to the browser's renderer, it would be
+// preferrable to falling back to setTimeout since it does not have
+// the minimum 4ms penalty.
+// Unfortunately there appears to be a bug in Internet Explorer 10 Mobile (and
+// Desktop to a lesser extent) that renders both setImmediate and
+// MessageChannel useless for the purposes of ASAP.
+// https://github.com/kriskowal/q/issues/396
+
+// Timers are implemented universally.
+// We fall back to timers in workers in most engines, and in foreground
+// contexts in the following browsers.
+// However, note that even this simple case requires nuances to operate in a
+// broad spectrum of browsers.
+//
+// - Firefox 3-13
+// - Internet Explorer 6-9
+// - iPad Safari 4.3
+// - Lynx 2.8.7
+} else {
+    requestFlush = makeRequestCallFromTimer(flush);
+}
+
+// `requestFlush` requests that the high priority event queue be flushed as
+// soon as possible.
+// This is useful to prevent an error thrown in a task from stalling the event
+// queue if the exception handled by Node.js’s
+// `process.on("uncaughtException")` or by a domain.
+rawAsap.requestFlush = requestFlush;
+
+// To request a high priority event, we induce a mutation observer by toggling
+// the text of a text node between "1" and "-1".
+function makeRequestCallFromMutationObserver(callback) {
+    var toggle = 1;
+    var observer = new BrowserMutationObserver(callback);
+    var node = document.createTextNode("");
+    observer.observe(node, {characterData: true});
+    return function requestCall() {
+        toggle = -toggle;
+        node.data = toggle;
+    };
+}
+
+// The message channel technique was discovered by Malte Ubl and was the
+// original foundation for this library.
+// http://www.nonblocking.io/2011/06/windownexttick.html
+
+// Safari 6.0.5 (at least) intermittently fails to create message ports on a
+// page's first load. Thankfully, this version of Safari supports
+// MutationObservers, so we don't need to fall back in that case.
+
+// function makeRequestCallFromMessageChannel(callback) {
+//     var channel = new MessageChannel();
+//     channel.port1.onmessage = callback;
+//     return function requestCall() {
+//         channel.port2.postMessage(0);
+//     };
+// }
+
+// For reasons explained above, we are also unable to use `setImmediate`
+// under any circumstances.
+// Even if we were, there is another bug in Internet Explorer 10.
+// It is not sufficient to assign `setImmediate` to `requestFlush` because
+// `setImmediate` must be called *by name* and therefore must be wrapped in a
+// closure.
+// Never forget.
+
+// function makeRequestCallFromSetImmediate(callback) {
+//     return function requestCall() {
+//         setImmediate(callback);
+//     };
+// }
+
+// Safari 6.0 has a problem where timers will get lost while the user is
+// scrolling. This problem does not impact ASAP because Safari 6.0 supports
+// mutation observers, so that implementation is used instead.
+// However, if we ever elect to use timers in Safari, the prevalent work-around
+// is to add a scroll event listener that calls for a flush.
+
+// `setTimeout` does not call the passed callback if the delay is less than
+// approximately 7 in web workers in Firefox 8 through 18, and sometimes not
+// even then.
+
+function makeRequestCallFromTimer(callback) {
+    return function requestCall() {
+        // We dispatch a timeout with a specified delay of 0 for engines that
+        // can reliably accommodate that request. This will usually be snapped
+        // to a 4 milisecond delay, but once we're flushing, there's no delay
+        // between events.
+        var timeoutHandle = setTimeout(handleTimer, 0);
+        // However, since this timer gets frequently dropped in Firefox
+        // workers, we enlist an interval handle that will try to fire
+        // an event 20 times per second until it succeeds.
+        var intervalHandle = setInterval(handleTimer, 50);
+
+        function handleTimer() {
+            // Whichever timer succeeds will cancel both timers and
+            // execute the callback.
+            clearTimeout(timeoutHandle);
+            clearInterval(intervalHandle);
+            callback();
+        }
+    };
+}
+
+// This is for `asap.js` only.
+// Its name will be periodically randomized to break any code that depends on
+// its existence.
+rawAsap.makeRequestCallFromTimer = makeRequestCallFromTimer;
+
+// ASAP was originally a nextTick shim included in Q. This was factored out
+// into this ASAP package. It was later adapted to RSVP which made further
+// amendments. These decisions, particularly to marginalize MessageChannel and
+// to capture the MutationObserver implementation in a closure, were integrated
+// back into ASAP proper.
+// https://github.com/tildeio/rsvp.js/blob/cddf7232546a9cf858524b75cde6f9edf72620a7/lib/rsvp/asap.js
+
+}).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
+},{}],148:[function(_dereq_,module,exports){
 /*global define:false require:false */
 module.exports = (function(){
 	// Import Events
@@ -7381,7 +7718,7 @@ module.exports = (function(){
 	};
 	return domain
 }).call(this)
-},{"events":145}],145:[function(_dereq_,module,exports){
+},{"events":149}],149:[function(_dereq_,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -7684,7 +8021,7 @@ function isUndefined(arg) {
   return arg === void 0;
 }
 
-},{}],146:[function(_dereq_,module,exports){
+},{}],150:[function(_dereq_,module,exports){
 // shim for using process in browser
 
 var process = module.exports = {};
@@ -7749,7 +8086,7 @@ process.chdir = function (dir) {
     throw new Error('process.chdir is not supported');
 };
 
-},{}],147:[function(_dereq_,module,exports){
+},{}],151:[function(_dereq_,module,exports){
 var Disposable = module.exports = function Disposable(a) {
     this.action = a;
 };
@@ -7766,19 +8103,31 @@ Disposable.prototype.dispose = function() {
     }
 };
 
-},{}],148:[function(_dereq_,module,exports){
+},{}],152:[function(_dereq_,module,exports){
 module.exports = function(x) {
     return x;
 };
 
-},{}],149:[function(_dereq_,module,exports){
+},{}],153:[function(_dereq_,module,exports){
 var Observer = _dereq_('./Observer');
+var Disposable = _dereq_('./Disposable');
+
 var Observable = module.exports = function Observable(s) {
     this._subscribe = s;
 };
 
 Observable.create = Observable.createWithDisposable = function(s) {
-    return new Observable(s);
+    function subscribe(observer) {
+        var subscription = s(observer);
+        if (!subscription) {
+            return Disposable.empty;
+        } else if (typeof subscription === 'function') {
+            return new Disposable(subscription);
+        } else {
+            return subscription;
+        }
+    }
+    return new Observable(subscribe);
 };
 
 Observable.fastCreateWithDisposable = Observable.create;
@@ -7787,6 +8136,12 @@ Observable.fastReturnValue = function fastReturnValue(value) {
     return Observable.create(function(observer) {
         observer.onNext(value);
         observer.onCompleted();
+    });
+};
+
+Observable.empty = function empty() {
+    return Observable.create(function(observer) {
+        observer.onCompleted();        
     });
 };
 
@@ -7903,7 +8258,7 @@ Observable.prototype = {
 
 Observable.prototype.forEach = Observable.prototype.subscribe;
 
-},{"./Observer":150}],150:[function(_dereq_,module,exports){
+},{"./Disposable":151,"./Observer":154}],154:[function(_dereq_,module,exports){
 var I = _dereq_('./I');
 var Observer = module.exports = function Observer(n, e, c) {
     this.onNext =       n || I;
@@ -7916,7 +8271,7 @@ Observer.create = function(n, e, c) {
 };
 
 
-},{"./I":148}],151:[function(_dereq_,module,exports){
+},{"./I":152}],155:[function(_dereq_,module,exports){
 var Subject = module.exports = function Subject() {
     this.observers = [];
 };
@@ -7954,7 +8309,7 @@ Subject.prototype.onCompleted = function() {
     }
 };
 
-},{}],152:[function(_dereq_,module,exports){
+},{}],156:[function(_dereq_,module,exports){
 (function (global){
 var Rx;
 
@@ -7986,7 +8341,14 @@ if (Rx === undefined) {
 module.exports = Rx;
 
 }).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./Disposable":147,"./Observable":149,"./Observer":150,"./Subject":151}],153:[function(_dereq_,module,exports){
+},{"./Disposable":151,"./Observable":153,"./Observer":154,"./Subject":155}],157:[function(_dereq_,module,exports){
+module.exports = {
+    integers: 'integers',
+    ranges: 'ranges',
+    keys: 'keys'
+};
+
+},{}],158:[function(_dereq_,module,exports){
 var TokenTypes = {
     token: 'token',
     dotSeparator: '.',
@@ -7997,13 +8359,14 @@ var TokenTypes = {
     closingBrace: '}',
     escape: '\\',
     space: ' ',
+    colon: ':',
     quote: 'quote',
     unknown: 'unknown'
 };
 
 module.exports = TokenTypes;
 
-},{}],154:[function(_dereq_,module,exports){
+},{}],159:[function(_dereq_,module,exports){
 module.exports = {
     indexer: {
         nested: 'Indexers cannot be nested.',
@@ -8011,29 +8374,37 @@ module.exports = {
         empty: 'cannot have empty indexers.',
         leadingDot: 'Indexers cannot have leading dots.',
         leadingComma: 'Indexers cannot have leading comma.',
-        requiresComma: 'Indexers require commas between indexer args.'
+        requiresComma: 'Indexers require commas between indexer args.',
+        routedTokens: 'Only one token can be used per indexer when specifying routed tokens.'
     },
     range: {
         precedingNaN: 'ranges must be preceded by numbers.',
         suceedingNaN: 'ranges must be suceeded by numbers.'
+    },
+    routed: {
+        invalid: 'Invalid routed token.  only integers|ranges|keys are supported.'
     },
     quote: {
         empty: 'cannot have empty quoted keys.',
         illegalEscape: 'Invalid escape character.  Only quotes are escapable.'
     },
     unexpectedToken: 'Unexpected token.',
-    throwError: function(err, state, token) {
+    invalidIdentifier: 'Invalid Identifier.',
+    invalidPath: 'Please provide a valid path.',
+    throwError: function(err, tokenizer, token) {
         if (token) {
-            throw err + ' -- ' + state.parseString + ' with next token: ' + token;
+            throw err + ' -- ' + tokenizer.parseString + ' with next token: ' + token;
         }
-        throw err + ' -- ' + state.parseString;
+        throw err + ' -- ' + tokenizer.parseString;
     }
 };
 
 
-},{}],155:[function(_dereq_,module,exports){
+},{}],160:[function(_dereq_,module,exports){
 var Tokenizer = _dereq_('./tokenizer');
 var head = _dereq_('./parse-tree/head');
+var RoutedTokens = _dereq_('./RoutedTokens');
+
 var parser = function parser(string, extendedRules) {
     return head(new Tokenizer(string, extendedRules));
 };
@@ -8077,9 +8448,12 @@ parser.fromPath = function(path, ext) {
     return path;
 };
 
-},{"./parse-tree/head":156,"./tokenizer":160}],156:[function(_dereq_,module,exports){
+// Potential routed tokens.
+parser.RoutedTokens = RoutedTokens;
+
+},{"./RoutedTokens":157,"./parse-tree/head":161,"./tokenizer":166}],161:[function(_dereq_,module,exports){
 var TokenTypes = _dereq_('./../TokenTypes');
-var Expections = _dereq_('./../exceptions');
+var E = _dereq_('./../exceptions');
 var indexer = _dereq_('./indexer');
 
 /**
@@ -8088,27 +8462,24 @@ var indexer = _dereq_('./indexer');
  */
 module.exports = function head(tokenizer) {
     var token = tokenizer.next();
-    var first = true;
-    var state = {
-        parseString: ''
-    };
+    var state = {};
     var out = [];
 
     while (!token.done) {
 
-        // continue to build the parse string.
-        state.parseString += token.token;
-
         switch (token.type) {
             case TokenTypes.token:
+                var first = +token.token[0];
+                if (!isNaN(first)) {
+                    E.throwError(E.invalidIdentifier, tokenizer);
+                }
                 out[out.length] = token.token;
                 break;
 
             // dotSeparators at the top level have no meaning
             case TokenTypes.dotSeparator:
-                if (first) {
-                    // TODO: Fix me
-                    throw 'ohh no!';
+                if (out.length === 0) {
+                    E.throwError(E.unexpectedToken, tokenizer);
                 }
                 break;
 
@@ -8124,32 +8495,30 @@ module.exports = function head(tokenizer) {
                 indexer(tokenizer, token, state, out);
                 break;
 
-            // TODO: Fix me
             default:
-                throw 'ohh no!';
+                E.throwError(E.unexpectedToken, tokenizer);
+                break;
         }
-
-        first = false;
 
         // Keep cycling through the tokenizer.
         token = tokenizer.next();
     }
 
-    if (first) {
-        // TODO: Ohh no! Fix me
-        throw 'ohh no!';
+    if (out.length === 0) {
+        E.throwError(E.invalidPath, tokenizer);
     }
 
     return out;
 };
 
 
-},{"./../TokenTypes":153,"./../exceptions":154,"./indexer":157}],157:[function(_dereq_,module,exports){
+},{"./../TokenTypes":158,"./../exceptions":159,"./indexer":162}],162:[function(_dereq_,module,exports){
 var TokenTypes = _dereq_('./../TokenTypes');
 var E = _dereq_('./../exceptions');
 var idxE = E.indexer;
 var range = _dereq_('./range');
 var quote = _dereq_('./quote');
+var routed = _dereq_('./routed');
 
 /**
  * The indexer is all the logic that happens in between
@@ -8159,30 +8528,36 @@ module.exports = function indexer(tokenizer, openingToken, state, out) {
     var token = tokenizer.next();
     var done = false;
     var allowedMaxLength = 1;
+    var routedIndexer = false;
 
     // State variables
     state.indexer = [];
 
     while (!token.done) {
 
-        // continue to build the parse string.
-        state.parseString += token.token;
         switch (token.type) {
             case TokenTypes.token:
             case TokenTypes.quote:
 
                 // ensures that token adders are properly delimited.
                 if (state.indexer.length === allowedMaxLength) {
-                    E.throwError(idxE.requiresComma, state);
+                    E.throwError(idxE.requiresComma, tokenizer);
                 }
                 break;
         }
 
         switch (token.type) {
+            // Extended syntax case
+            case TokenTypes.openingBrace:
+                routedIndexer = true;
+                routed(tokenizer, token, state, out);
+                break;
+
+
             case TokenTypes.token:
                 var t = +token.token;
                 if (isNaN(t)) {
-                    E.throwError(idxE.needQuotes, state);
+                    E.throwError(idxE.needQuotes, tokenizer);
                 }
                 state.indexer[state.indexer.length] = t;
                 break;
@@ -8190,7 +8565,7 @@ module.exports = function indexer(tokenizer, openingToken, state, out) {
             // dotSeparators at the top level have no meaning
             case TokenTypes.dotSeparator:
                 if (!state.indexer.length) {
-                    E.throwError(idxE.leadingDot, state);
+                    E.throwError(idxE.leadingDot, tokenizer);
                 }
                 range(tokenizer, token, state, out);
                 break;
@@ -8212,7 +8587,7 @@ module.exports = function indexer(tokenizer, openingToken, state, out) {
 
             // Its time to decend the parse tree.
             case TokenTypes.openingBracket:
-                E.throwError(idxE.nested, state);
+                E.throwError(idxE.nested, tokenizer);
                 break;
 
             case TokenTypes.commaSeparator:
@@ -8220,7 +8595,7 @@ module.exports = function indexer(tokenizer, openingToken, state, out) {
                 break;
 
             default:
-                E.throwError(idxE.unexpectedToken, state);
+                E.throwError(idxE.unexpectedToken, tokenizer);
         }
 
         // If done, leave loop
@@ -8233,7 +8608,11 @@ module.exports = function indexer(tokenizer, openingToken, state, out) {
     }
 
     if (state.indexer.length === 0) {
-        E.throwError(idxE.empty, state);
+        E.throwError(idxE.empty, tokenizer);
+    }
+
+    if (state.indexer.length > 1 && routedIndexer) {
+        E.throwError(idxE.routedTokens, tokenizer);
     }
 
     // Remember, if an array of 1, keySets will be generated.
@@ -8248,14 +8627,17 @@ module.exports = function indexer(tokenizer, openingToken, state, out) {
 };
 
 
-},{"./../TokenTypes":153,"./../exceptions":154,"./quote":158,"./range":159}],158:[function(_dereq_,module,exports){
+},{"./../TokenTypes":158,"./../exceptions":159,"./quote":163,"./range":164,"./routed":165}],163:[function(_dereq_,module,exports){
 var TokenTypes = _dereq_('./../TokenTypes');
 var E = _dereq_('./../exceptions');
 var quoteE = E.quote;
 
 /**
- * The indexer is all the logic that happens in between
- * the '[', opening bracket, and ']' closing bracket.
+ * quote is all the parse tree in between quotes.  This includes the only
+ * escaping logic.
+ *
+ * parse-tree:
+ * <opening-quote>(.|(<escape><opening-quote>))*<opening-quote>
  */
 module.exports = function quote(tokenizer, openingToken, state, out) {
     var token = tokenizer.next();
@@ -8265,9 +8647,6 @@ module.exports = function quote(tokenizer, openingToken, state, out) {
     var done = false;
 
     while (!token.done) {
-
-        // continue to build the parse string.
-        state.parseString += token.token;
 
         switch (token.type) {
             case TokenTypes.token:
@@ -8281,7 +8660,7 @@ module.exports = function quote(tokenizer, openingToken, state, out) {
             case TokenTypes.openingBrace:
             case TokenTypes.closingBrace:
                 if (escaping) {
-                    E.throwError(quoteE.illegalEscape, state);
+                    E.throwError(quoteE.illegalEscape, tokenizer);
                 }
 
                 innerToken += token.token;
@@ -8312,7 +8691,7 @@ module.exports = function quote(tokenizer, openingToken, state, out) {
                 break;
 
             default:
-                E.throwError(E.unexpectedToken, state);
+                E.throwError(E.unexpectedToken, tokenizer);
         }
 
         // If done, leave loop
@@ -8325,14 +8704,14 @@ module.exports = function quote(tokenizer, openingToken, state, out) {
     }
 
     if (innerToken.length === 0) {
-        E.throwError(quoteE.empty, state);
+        E.throwError(quoteE.empty, tokenizer);
     }
 
     state.indexer[state.indexer.length] = innerToken;
 };
 
 
-},{"./../TokenTypes":153,"./../exceptions":154}],159:[function(_dereq_,module,exports){
+},{"./../TokenTypes":158,"./../exceptions":159}],164:[function(_dereq_,module,exports){
 var Tokenizer = _dereq_('./../tokenizer');
 var TokenTypes = _dereq_('./../TokenTypes');
 var E = _dereq_('./../exceptions');
@@ -8353,7 +8732,7 @@ module.exports = function range(tokenizer, openingToken, state, out) {
     var to;
 
     if (isNaN(from)) {
-        E.throwError(E.range.precedingNaN, state);
+        E.throwError(E.range.precedingNaN, tokenizer);
     }
 
     // Why is number checking so difficult in javascript.
@@ -8365,7 +8744,7 @@ module.exports = function range(tokenizer, openingToken, state, out) {
             // dotSeparators at the top level have no meaning
             case TokenTypes.dotSeparator:
                 if (dotCount === 3) {
-                    E.throwError(E.unexpectedToken, state);
+                    E.throwError(E.unexpectedToken, tokenizer);
                 }
                 ++dotCount;
 
@@ -8378,12 +8757,9 @@ module.exports = function range(tokenizer, openingToken, state, out) {
                 // move the tokenizer forward and save to.
                 to = Tokenizer.toNumber(tokenizer.next().token);
 
-                // continue to build the parse string.
-                state.parseString += token.token;
-
                 // throw potential error.
                 if (isNaN(to)) {
-                    E.throwError(E.range.suceedingNaN, state);
+                    E.throwError(E.range.suceedingNaN, tokenizer);
                 }
 
                 done = true;
@@ -8400,9 +8776,6 @@ module.exports = function range(tokenizer, openingToken, state, out) {
         if (!done) {
             tokenizer.next();
 
-            // continue to build the parse string.
-            state.parseString += token.token;
-
             // go to the next token without consuming.
             token = tokenizer.peek();
         }
@@ -8417,7 +8790,73 @@ module.exports = function range(tokenizer, openingToken, state, out) {
 };
 
 
-},{"./../TokenTypes":153,"./../exceptions":154,"./../tokenizer":160}],160:[function(_dereq_,module,exports){
+},{"./../TokenTypes":158,"./../exceptions":159,"./../tokenizer":166}],165:[function(_dereq_,module,exports){
+var TokenTypes = _dereq_('./../TokenTypes');
+var RoutedTokens = _dereq_('./../RoutedTokens');
+var E = _dereq_('./../exceptions');
+var routedE = E.routed;
+
+/**
+ * The routing logic.
+ *
+ * parse-tree:
+ * <opening-brace><routed-token>(:<token>)<closing-brace>
+ */
+module.exports = function routed(tokenizer, openingToken, state, out) {
+    var routeToken = tokenizer.next();
+    var named = false;
+    var name = '';
+
+    // ensure the routed token is a valid ident.
+    switch (routeToken.token) {
+        case RoutedTokens.integers:
+        case RoutedTokens.ranges:
+        case RoutedTokens.keys:
+            //valid
+            break;
+        default:
+            E.throwError(routedE.invalid, tokenizer);
+            break;
+    }
+
+    // Now its time for colon or ending brace.
+    var next = tokenizer.next();
+
+    // we are parsing a named identifier.
+    if (next.type === TokenTypes.colon) {
+        named = true;
+
+        // Get the token name.
+        next = tokenizer.next();
+        if (next.type !== TokenTypes.token) {
+            E.throwError(routedE.invalid, tokenizer);
+        }
+        name = next.token;
+
+        // move to the closing brace.
+        next = tokenizer.next();
+    }
+
+    // must close with a brace.
+
+    if (next.type === TokenTypes.closingBrace) {
+        var outputToken = {
+            type: routeToken.token,
+            named: named,
+            name: name
+        };
+        state.indexer[state.indexer.length] = outputToken;
+    }
+
+    // closing brace expected
+    else {
+        E.throwError(routedE.invalid, tokenizer);
+    }
+
+};
+
+
+},{"./../RoutedTokens":157,"./../TokenTypes":158,"./../exceptions":159}],166:[function(_dereq_,module,exports){
 var TokenTypes = _dereq_('./../TokenTypes');
 var DOT_SEPARATOR = '.';
 var COMMA_SEPARATOR = ',';
@@ -8425,17 +8864,19 @@ var OPENING_BRACKET = '[';
 var CLOSING_BRACKET = ']';
 var OPENING_BRACE = '{';
 var CLOSING_BRACE = '}';
+var COLON = ':';
 var ESCAPE = '\\';
 var DOUBLE_OUOTES = '"';
 var SINGE_OUOTES = "'";
 var SPACE = " ";
 var SPECIAL_CHARACTERS = '\\\'"[]., ';
-var EXT_SPECIAL_CHARACTERS = '\\{}\'"[]., ';
+var EXT_SPECIAL_CHARACTERS = '\\{}\'"[]., :';
 
 var Tokenizer = module.exports = function(string, ext) {
     this._string = string;
     this._idx = -1;
     this._extended = ext;
+    this.parseString = '';
 };
 
 Tokenizer.prototype = {
@@ -8449,6 +8890,7 @@ Tokenizer.prototype = {
 
         this._idx = nextToken.idx;
         this._nextToken = false;
+        this.parseString += nextToken.token.token;
 
         return nextToken.token;
     },
@@ -8539,6 +8981,9 @@ function getNext(string, idx, ext) {
             case ESCAPE:
                 type = TokenTypes.escape;
                 break;
+            case COLON:
+                type = TokenTypes.colon;
+                break;
             default:
                 type = TokenTypes.unknown;
                 break;
@@ -8563,12 +9008,12 @@ function getNext(string, idx, ext) {
 
 
 
-},{"./../TokenTypes":153}],161:[function(_dereq_,module,exports){
+},{"./../TokenTypes":158}],167:[function(_dereq_,module,exports){
 'use strict';
 
 module.exports = _dereq_('./lib')
 
-},{"./lib":166}],162:[function(_dereq_,module,exports){
+},{"./lib":172}],168:[function(_dereq_,module,exports){
 'use strict';
 
 var asap = _dereq_('asap/raw')
@@ -8740,7 +9185,7 @@ function doResolve(fn, promise) {
     promise._67(LAST_ERROR)
   }
 }
-},{"asap/raw":170}],163:[function(_dereq_,module,exports){
+},{"asap/raw":176}],169:[function(_dereq_,module,exports){
 'use strict';
 
 var Promise = _dereq_('./core.js')
@@ -8754,7 +9199,7 @@ Promise.prototype.done = function (onFulfilled, onRejected) {
     }, 0)
   })
 }
-},{"./core.js":162}],164:[function(_dereq_,module,exports){
+},{"./core.js":168}],170:[function(_dereq_,module,exports){
 'use strict';
 
 //This file contains the ES6 extensions to the core Promises/A+ API
@@ -8860,7 +9305,7 @@ Promise.prototype['catch'] = function (onRejected) {
   return this.then(null, onRejected);
 }
 
-},{"./core.js":162,"asap/raw":170}],165:[function(_dereq_,module,exports){
+},{"./core.js":168,"asap/raw":176}],171:[function(_dereq_,module,exports){
 'use strict';
 
 var Promise = _dereq_('./core.js')
@@ -8878,7 +9323,7 @@ Promise.prototype['finally'] = function (f) {
   })
 }
 
-},{"./core.js":162}],166:[function(_dereq_,module,exports){
+},{"./core.js":168}],172:[function(_dereq_,module,exports){
 'use strict';
 
 module.exports = _dereq_('./core.js')
@@ -8887,7 +9332,7 @@ _dereq_('./finally.js')
 _dereq_('./es6-extensions.js')
 _dereq_('./node-extensions.js')
 
-},{"./core.js":162,"./done.js":163,"./es6-extensions.js":164,"./finally.js":165,"./node-extensions.js":167}],167:[function(_dereq_,module,exports){
+},{"./core.js":168,"./done.js":169,"./es6-extensions.js":170,"./finally.js":171,"./node-extensions.js":173}],173:[function(_dereq_,module,exports){
 'use strict';
 
 //This file contains then/promise specific extensions that are only useful for node.js interop
@@ -8952,300 +9397,11 @@ Promise.prototype.nodeify = function (callback, ctx) {
   })
 }
 
-},{"./core.js":162,"asap":168}],168:[function(_dereq_,module,exports){
-"use strict";
-
-// rawAsap provides everything we need except exception management.
-var rawAsap = _dereq_("./raw");
-// RawTasks are recycled to reduce GC churn.
-var freeTasks = [];
-// We queue errors to ensure they are thrown in right order (FIFO).
-// Array-as-queue is good enough here, since we are just dealing with exceptions.
-var pendingErrors = [];
-var requestErrorThrow = rawAsap.makeRequestCallFromTimer(throwFirstError);
-
-function throwFirstError() {
-    if (pendingErrors.length) {
-        throw pendingErrors.shift();
-    }
-}
-
-/**
- * Calls a task as soon as possible after returning, in its own event, with priority
- * over other events like animation, reflow, and repaint. An error thrown from an
- * event will not interrupt, nor even substantially slow down the processing of
- * other events, but will be rather postponed to a lower priority event.
- * @param {{call}} task A callable object, typically a function that takes no
- * arguments.
- */
-module.exports = asap;
-function asap(task) {
-    var rawTask;
-    if (freeTasks.length) {
-        rawTask = freeTasks.pop();
-    } else {
-        rawTask = new RawTask();
-    }
-    rawTask.task = task;
-    rawAsap(rawTask);
-}
-
-// We wrap tasks with recyclable task objects.  A task object implements
-// `call`, just like a function.
-function RawTask() {
-    this.task = null;
-}
-
-// The sole purpose of wrapping the task is to catch the exception and recycle
-// the task object after its single use.
-RawTask.prototype.call = function () {
-    try {
-        this.task.call();
-    } catch (error) {
-        if (asap.onerror) {
-            // This hook exists purely for testing purposes.
-            // Its name will be periodically randomized to break any code that
-            // depends on its existence.
-            asap.onerror(error);
-        } else {
-            // In a web browser, exceptions are not fatal. However, to avoid
-            // slowing down the queue of pending tasks, we rethrow the error in a
-            // lower priority turn.
-            pendingErrors.push(error);
-            requestErrorThrow();
-        }
-    } finally {
-        this.task = null;
-        freeTasks[freeTasks.length] = this;
-    }
-};
-
-},{"./raw":169}],169:[function(_dereq_,module,exports){
-(function (global){
-"use strict";
-
-// Use the fastest means possible to execute a task in its own turn, with
-// priority over other events including IO, animation, reflow, and redraw
-// events in browsers.
-//
-// An exception thrown by a task will permanently interrupt the processing of
-// subsequent tasks. The higher level `asap` function ensures that if an
-// exception is thrown by a task, that the task queue will continue flushing as
-// soon as possible, but if you use `rawAsap` directly, you are responsible to
-// either ensure that no exceptions are thrown from your task, or to manually
-// call `rawAsap.requestFlush` if an exception is thrown.
-module.exports = rawAsap;
-function rawAsap(task) {
-    if (!queue.length) {
-        requestFlush();
-        flushing = true;
-    }
-    // Equivalent to push, but avoids a function call.
-    queue[queue.length] = task;
-}
-
-var queue = [];
-// Once a flush has been requested, no further calls to `requestFlush` are
-// necessary until the next `flush` completes.
-var flushing = false;
-// `requestFlush` is an implementation-specific method that attempts to kick
-// off a `flush` event as quickly as possible. `flush` will attempt to exhaust
-// the event queue before yielding to the browser's own event loop.
-var requestFlush;
-// The position of the next task to execute in the task queue. This is
-// preserved between calls to `flush` so that it can be resumed if
-// a task throws an exception.
-var index = 0;
-// If a task schedules additional tasks recursively, the task queue can grow
-// unbounded. To prevent memory exhaustion, the task queue will periodically
-// truncate already-completed tasks.
-var capacity = 1024;
-
-// The flush function processes all tasks that have been scheduled with
-// `rawAsap` unless and until one of those tasks throws an exception.
-// If a task throws an exception, `flush` ensures that its state will remain
-// consistent and will resume where it left off when called again.
-// However, `flush` does not make any arrangements to be called again if an
-// exception is thrown.
-function flush() {
-    while (index < queue.length) {
-        var currentIndex = index;
-        // Advance the index before calling the task. This ensures that we will
-        // begin flushing on the next task the task throws an error.
-        index = index + 1;
-        queue[currentIndex].call();
-        // Prevent leaking memory for long chains of recursive calls to `asap`.
-        // If we call `asap` within tasks scheduled by `asap`, the queue will
-        // grow, but to avoid an O(n) walk for every task we execute, we don't
-        // shift tasks off the queue after they have been executed.
-        // Instead, we periodically shift 1024 tasks off the queue.
-        if (index > capacity) {
-            // Manually shift all values starting at the index back to the
-            // beginning of the queue.
-            for (var scan = 0; scan < index; scan++) {
-                queue[scan] = queue[scan + index];
-            }
-            queue.length -= index;
-            index = 0;
-        }
-    }
-    queue.length = 0;
-    index = 0;
-    flushing = false;
-}
-
-// `requestFlush` is implemented using a strategy based on data collected from
-// every available SauceLabs Selenium web driver worker at time of writing.
-// https://docs.google.com/spreadsheets/d/1mG-5UYGup5qxGdEMWkhP6BWCz053NUb2E1QoUTU16uA/edit#gid=783724593
-
-// Safari 6 and 6.1 for desktop, iPad, and iPhone are the only browsers that
-// have WebKitMutationObserver but not un-prefixed MutationObserver.
-// Must use `global` instead of `window` to work in both frames and web
-// workers. `global` is a provision of Browserify, Mr, Mrs, or Mop.
-var BrowserMutationObserver = global.MutationObserver || global.WebKitMutationObserver;
-
-// MutationObservers are desirable because they have high priority and work
-// reliably everywhere they are implemented.
-// They are implemented in all modern browsers.
-//
-// - Android 4-4.3
-// - Chrome 26-34
-// - Firefox 14-29
-// - Internet Explorer 11
-// - iPad Safari 6-7.1
-// - iPhone Safari 7-7.1
-// - Safari 6-7
-if (typeof BrowserMutationObserver === "function") {
-    requestFlush = makeRequestCallFromMutationObserver(flush);
-
-// MessageChannels are desirable because they give direct access to the HTML
-// task queue, are implemented in Internet Explorer 10, Safari 5.0-1, and Opera
-// 11-12, and in web workers in many engines.
-// Although message channels yield to any queued rendering and IO tasks, they
-// would be better than imposing the 4ms delay of timers.
-// However, they do not work reliably in Internet Explorer or Safari.
-
-// Internet Explorer 10 is the only browser that has setImmediate but does
-// not have MutationObservers.
-// Although setImmediate yields to the browser's renderer, it would be
-// preferrable to falling back to setTimeout since it does not have
-// the minimum 4ms penalty.
-// Unfortunately there appears to be a bug in Internet Explorer 10 Mobile (and
-// Desktop to a lesser extent) that renders both setImmediate and
-// MessageChannel useless for the purposes of ASAP.
-// https://github.com/kriskowal/q/issues/396
-
-// Timers are implemented universally.
-// We fall back to timers in workers in most engines, and in foreground
-// contexts in the following browsers.
-// However, note that even this simple case requires nuances to operate in a
-// broad spectrum of browsers.
-//
-// - Firefox 3-13
-// - Internet Explorer 6-9
-// - iPad Safari 4.3
-// - Lynx 2.8.7
-} else {
-    requestFlush = makeRequestCallFromTimer(flush);
-}
-
-// `requestFlush` requests that the high priority event queue be flushed as
-// soon as possible.
-// This is useful to prevent an error thrown in a task from stalling the event
-// queue if the exception handled by Node.js’s
-// `process.on("uncaughtException")` or by a domain.
-rawAsap.requestFlush = requestFlush;
-
-// To request a high priority event, we induce a mutation observer by toggling
-// the text of a text node between "1" and "-1".
-function makeRequestCallFromMutationObserver(callback) {
-    var toggle = 1;
-    var observer = new BrowserMutationObserver(callback);
-    var node = document.createTextNode("");
-    observer.observe(node, {characterData: true});
-    return function requestCall() {
-        toggle = -toggle;
-        node.data = toggle;
-    };
-}
-
-// The message channel technique was discovered by Malte Ubl and was the
-// original foundation for this library.
-// http://www.nonblocking.io/2011/06/windownexttick.html
-
-// Safari 6.0.5 (at least) intermittently fails to create message ports on a
-// page's first load. Thankfully, this version of Safari supports
-// MutationObservers, so we don't need to fall back in that case.
-
-// function makeRequestCallFromMessageChannel(callback) {
-//     var channel = new MessageChannel();
-//     channel.port1.onmessage = callback;
-//     return function requestCall() {
-//         channel.port2.postMessage(0);
-//     };
-// }
-
-// For reasons explained above, we are also unable to use `setImmediate`
-// under any circumstances.
-// Even if we were, there is another bug in Internet Explorer 10.
-// It is not sufficient to assign `setImmediate` to `requestFlush` because
-// `setImmediate` must be called *by name* and therefore must be wrapped in a
-// closure.
-// Never forget.
-
-// function makeRequestCallFromSetImmediate(callback) {
-//     return function requestCall() {
-//         setImmediate(callback);
-//     };
-// }
-
-// Safari 6.0 has a problem where timers will get lost while the user is
-// scrolling. This problem does not impact ASAP because Safari 6.0 supports
-// mutation observers, so that implementation is used instead.
-// However, if we ever elect to use timers in Safari, the prevalent work-around
-// is to add a scroll event listener that calls for a flush.
-
-// `setTimeout` does not call the passed callback if the delay is less than
-// approximately 7 in web workers in Firefox 8 through 18, and sometimes not
-// even then.
-
-function makeRequestCallFromTimer(callback) {
-    return function requestCall() {
-        // We dispatch a timeout with a specified delay of 0 for engines that
-        // can reliably accommodate that request. This will usually be snapped
-        // to a 4 milisecond delay, but once we're flushing, there's no delay
-        // between events.
-        var timeoutHandle = setTimeout(handleTimer, 0);
-        // However, since this timer gets frequently dropped in Firefox
-        // workers, we enlist an interval handle that will try to fire
-        // an event 20 times per second until it succeeds.
-        var intervalHandle = setInterval(handleTimer, 50);
-
-        function handleTimer() {
-            // Whichever timer succeeds will cancel both timers and
-            // execute the callback.
-            clearTimeout(timeoutHandle);
-            clearInterval(intervalHandle);
-            callback();
-        }
-    };
-}
-
-// This is for `asap.js` only.
-// Its name will be periodically randomized to break any code that depends on
-// its existence.
-rawAsap.makeRequestCallFromTimer = makeRequestCallFromTimer;
-
-// ASAP was originally a nextTick shim included in Q. This was factored out
-// into this ASAP package. It was later adapted to RSVP which made further
-// amendments. These decisions, particularly to marginalize MessageChannel and
-// to capture the MutationObserver implementation in a closure, were integrated
-// back into ASAP proper.
-// https://github.com/tildeio/rsvp.js/blob/cddf7232546a9cf858524b75cde6f9edf72620a7/lib/rsvp/asap.js
-
-
-}).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],170:[function(_dereq_,module,exports){
+},{"./core.js":168,"asap":174}],174:[function(_dereq_,module,exports){
+module.exports=_dereq_(146)
+},{"./raw":175}],175:[function(_dereq_,module,exports){
+module.exports=_dereq_(147)
+},{}],176:[function(_dereq_,module,exports){
 (function (process){
 "use strict";
 
@@ -9279,7 +9435,7 @@ var flushing = false;
 // preserved between calls to `flush` so that it can be resumed if
 // a task throws an exception.
 var index = 0;
-// If a task schedules additional tasks recursively, the task queue can grown
+// If a task schedules additional tasks recursively, the task queue can grow
 // unbounded. To prevent memory excaustion, the task queue will periodically
 // truncate already-completed tasks.
 var capacity = 1024;
@@ -9305,7 +9461,7 @@ function flush() {
         if (index > capacity) {
             // Manually shift all values starting at the index back to the
             // beginning of the queue.
-            for (var scan = 0; scan < index; scan++) {
+            for (var scan = 0, newLength = queue.length - index; scan < newLength; scan++) {
                 queue[scan] = queue[scan + index];
             }
             queue.length -= index;
@@ -9349,8 +9505,7 @@ function requestFlush() {
     }
 }
 
-
 }).call(this,_dereq_("FWaASH"))
-},{"FWaASH":146,"domain":144}]},{},[1])
+},{"FWaASH":150,"domain":148}]},{},[1])
 (1)
 });
