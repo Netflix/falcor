@@ -147,57 +147,5 @@ describe('DataSource Only', function() {
                      'OnError should of been called.');
             });
     });
-    it('should get sentinels of undefined out of the cache.', function(done) {
-        var counter = 0;
-        var datasource = {
-            get: function (pathSets) {
-                if (counter === 0) {
-                    counter++;
-                    return Observable.of({
-                        "jsong": {
-                            "ProffersList": {
-                                "-1": {
-                                    "$type": "atom"
-                                },
-                                "0": {
-                                    "$type": "ref",
-                                    "value": ["ProffersById", 1],
-                                    "$size": 52
-                                },
-                                "1": {"$type": "ref", "value": ["ProffersById", 2], "$size": 52}
-                            }
-                        },
-                        "paths":[["ProffersList", -1], ["ProffersList", 0], ["ProffersList", 1]]
-                    });
-                } else {
-                    return Observable.of({
-                        "jsong": {
-                            "ProffersById": {
-                                "1": {"Title": "New For You"},
-                                "2": {"Title": "More Top Picks For You"}
-                            }
-                        },
-                        "paths":[["ProffersById", 1, "Title"], ["ProffersById", 2, "Title"]]
-                    });
-                }
-            }
-        };
-
-        var model = new falcor.Model({source: datasource});
-
-        model.
-            get(["ProffersList", {from: -1, to: 1}, "Title"]).
-            toJSONG().
-            subscribe(
-                function (jsong) {
-                    console.log(JSON.stringify(jsong, null, 4));
-                },
-                function () {
-                },
-                function () {
-                    var m = model;
-                    console.log("Cache  ", JSON.stringify(model.getCache(), null, 4));
-                });
-    });
 });
 
