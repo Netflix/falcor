@@ -6,7 +6,7 @@ var expect = chai.expect;
 var Cache = require("./data/Cache");
 var LocalDataSource = require("./data/LocalDataSource");
 var _ = require("lodash");
-var noOp = function() {};
+var noOp = function(x) { return x; };
 var Rx = require('rx');
 
 var __key = require("../lib/internal/key");
