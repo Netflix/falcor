@@ -6,9 +6,8 @@ First make sure you are using NPM v 2.7.5+. Some versions of NPM contain bugs wh
 
 First build:
 ```
-npm install falcor
-npm install gulp -g
-gulp dist
+npm install
+npm run dist
 ```
 Now set up a simple webpage and import the newly-generated falcor library:
 ```html
