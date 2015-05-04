@@ -10,11 +10,23 @@ var Observable = Rx.Observable;
 var falcor = {Model: Model, Observable:Observable};
 var LocalDataSource = require('../../data/LocalDataSource');
 
-describe.only('DataSource compare to Cache', function() {
+describe('DataSource compare to Cache', function() {
     describe('toJSONG', function() {
         it('should get a set of values including a materialized node.', function(done) {
             test(
                 ['misc', 'uatom'],
+                'toJSONG'
+            ).subscribe(noOp, done, done);
+        });
+        it('should get a value', function(done) {
+            test(
+                ['videos', 1234, 'summary'],
+                'toJSONG'
+            ).subscribe(noOp, done, done);
+        });
+        it('should get through a reference.', function(done) {
+            test(
+                ['genreList', 0, 0, 'summary'],
                 'toJSONG'
             ).subscribe(noOp, done, done);
         });
@@ -43,6 +55,7 @@ function test(query, format) {
             }).
         doAction(
             a(function(cache, source) {
+                called = true;
                 testRunner.compare(cache, source);
             }),
             noOp,

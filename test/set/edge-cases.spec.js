@@ -1,9 +1,11 @@
 var jsong = require("../../index");
 var Model = jsong.Model;
+var Cache = require('../data/Cache');
 var expect = require('chai').expect;
 var $path = require("../../lib/types/path");
 var $atom = require("../../lib/types/atom");
 var testRunner = require('../testRunner');
+var LocalDataSource = require('../data/LocalDataSource');
 
 describe("Special Cases", function() {
     it('should set the cache in.', function() {
@@ -125,6 +127,33 @@ describe("Special Cases", function() {
             0: 0,
             1: 75
         });
+    });
+    it.only('should setJSONGsAsJSONG with undefined values.', function() {
+        var model = new Model({source: new LocalDataSource(Cache())});
+        var out = model._setJSONGsAsJSONG(model, [{
+            jsong: {
+                test: {
+                    u: {
+                        $type: $atom,
+                    }
+                }
+            },
+            paths: [['test', 'u']]
+        }], [{}]);
+        testRunner.compare({
+            requestedPaths: [['test', 'u']],
+            optimizedPaths: [['test', 'u']],
+            requestedMissingPaths: [],
+            optimizedMissingPaths: [],
+            value: [{
+                jsong: {
+                    test: {
+                        u: { $type: $atom }
+                    }
+                },
+                paths: [['test', 'u']]
+            }]
+        }, out);
     });
 });
 
