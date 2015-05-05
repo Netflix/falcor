@@ -227,7 +227,7 @@ Model.prototype = {
     getCache: function() {
         var pathmaps = [{}];
         var tmpCache = this.boxValues().treatErrorsAsValues().materialize();
-        tmpCache._getPathMapsAsPathMap(tmpCache, [tmpCache._cache], pathmaps);
+        tmpCache._getPathMapsAsPathMap(tmpCache, [{ json: tmpCache._cache }], pathmaps);
         return pathmaps[0].json;
     },
     getValueSync: function(path) {
@@ -2034,7 +2034,9 @@ module.exports = function(walk) {
                     optimizedPath[j] = boundOptimizedPath[j];
                 }
             }
-            if (pathSet.path) {
+            if(inputFormat == 'JSON') {
+                pathSet = pathSet.json;
+            } else if (pathSet.path) {
                 pathSet = pathSet.path;
             }
 
@@ -2079,7 +2081,9 @@ module.exports = function(walk) {
 
         for (var i = 0, len = paths.length; i < len; i++) {
             var pathSet = paths[i];
-            if (pathSet.path) {
+            if(inputFormat == 'JSON') {
+                pathSet = pathSet.json;
+            } else if (pathSet.path) {
                 pathSet = pathSet.path;
             }
             walk(model, cache, currentCachePosition, pathSet, 0, values[0], [], results, [], [], inputFormat, 'JSONG');
@@ -2129,7 +2133,9 @@ module.exports = function(walk) {
                 }
             }
             var pathSet = paths[i];
-            if (pathSet.path) {
+            if(inputFormat == 'JSON') {
+                pathSet = pathSet.json;
+            } else if (pathSet.path) {
                 pathSet = pathSet.path;
             }
             walk(model, cache, currentCachePosition, pathSet, 0, valueNode, [], results, optimizedPath, [], inputFormat, 'PathMap');
@@ -2174,7 +2180,9 @@ module.exports = function(walk) {
                 }
             }
             var pathSet = paths[i];
-            if (pathSet.path) {
+            if(inputFormat == 'JSON') {
+                pathSet = pathSet.json;
+            } else if (pathSet.path) {
                 pathSet = pathSet.path;
             }
             walk(model, cache, currentCachePosition, pathSet, 0, onNext, null, results, optimizedPath, [], inputFormat, 'Values');
@@ -4723,7 +4731,7 @@ function set_json_sparse_as_json_dense(model, pathmaps, values, error_selector) 
             roots.json = roots[3] = parents[3] = nodes[3] = undefined;
         }
 
-        var pathmap = pathmaps[index];
+        var pathmap = pathmaps[index].json;
         roots.index = index;
 
         walk_path_map(onNode, onEdge, pathmap, keys_stack, 0, roots, parents, nodes, requested, optimized);
@@ -4876,7 +4884,7 @@ function set_json_sparse_as_json_graph(model, pathmaps, values, error_selector) 
     roots.requestedPaths = json.paths || (json.paths = roots.requestedPaths);
 
     while (++index < count) {
-        var pathmap = pathmaps[index];
+        var pathmap = pathmaps[index].json;
         walk_path_map(onNode, onEdge, pathmap, keys_stack, 0, roots, parents, nodes, requested, optimized);
     }
 
@@ -5034,7 +5042,7 @@ function set_json_sparse_as_json_sparse(model, pathmaps, values, error_selector)
     roots[3] = parents[3] = nodes[3] = json.json || (json.json = {});
 
     while (++index < count) {
-        var pathmap = pathmaps[index];
+        var pathmap = pathmaps[index].json;
         walk_path_map(onNode, onEdge, pathmap, keys_stack, 0, roots, parents, nodes, requested, optimized);
     }
 
@@ -5177,7 +5185,7 @@ function set_path_map_as_json_values(model, pathmaps, onNext, error_selector) {
     roots.onNext = onNext;
 
     while (++index < count) {
-        var pathmap = pathmaps[index];
+        var pathmap = pathmaps[index].json;
         walk_path_map(onNode, onEdge, pathmap, keys_stack, 0, roots, parents, nodes, requested, optimized);
     }
 
