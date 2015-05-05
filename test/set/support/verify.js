@@ -2,6 +2,7 @@ module.exports = verify;
 
 var slice = Array.prototype.slice;
 var expect = require('chai').expect;
+var collect = require("../../../lib/lru/collect");
 var get_seeds = require("./get-seeds");
 var get_pathsets = require("./get-pathsets");
 var inspect = require("util").inspect;
@@ -9,6 +10,15 @@ var testRunner = require("../../testRunner");
 
 function verify(suffix) {
     return function(model, input) {
+        
+        collect(
+            model._root,
+            model._root.expired,
+            model._version,
+            model._cache.$size || 0,
+            model._maxSize,
+            model._collectRatio
+        );
         
         var message = this.fullTitle();
         var checks  = [
