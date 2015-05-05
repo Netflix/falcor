@@ -183,11 +183,11 @@ describe('Specific Cases', function() {
     it('should be able to ask with non-nulls in the pathMap when missing.', function() {
         var model = new Model({cache: Cache()});
         var queries = [
-            [{videos: {1234: 'string'}}],
-            [{videos: {1234: 5}}],
-            [{videos: {1234: {
+            [{json: {videos: {1234: 'string'}}}],
+            [{json: {videos: {1234: 5}}}],
+            [{json: {videos: {1234: {
                 $type: 'test'
-            }}}]
+            }}}}]
         ];
         queries.forEach(function(q) {
             var result = model._getPathMapsAsJSON(model, q, [{}]);
@@ -199,9 +199,9 @@ describe('Specific Cases', function() {
     it('should be able to ask with non-nulls in the pathMap when missing in materialize.', function() {
         var model = new Model({cache: Cache()}).materialize();
         var queries = [
-            [{videos: {1234: 'string'}}],
-            [{videos: {1234: ['arr']}}],
-            [{videos: {1234: 5}}]
+            [{json: {videos: {1234: 'string'}}}],
+            [{json: {videos: {1234: ['arr']}}}],
+            [{json: {videos: {1234: 5}}}]
         ];
         queries.forEach(function(q) {
             var result = model._getPathMapsAsJSON(model, q, [{}]);
@@ -229,7 +229,7 @@ describe('Specific Cases', function() {
         var model = new Model({cache: Cache()});
         var queries = [
             [['videos', 1234, null, 'summary']],
-            [{'videos': {1234: {'__null':{ 'summary': null}}}}]
+            [{json:{'videos': {1234: {'__null':{ 'summary': null}}}}}]
         ];
         var expected = Values().direct.AsJSON.values;
         queries.forEach(function(q) {

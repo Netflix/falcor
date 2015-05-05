@@ -23,7 +23,7 @@ function set_and_verify_json_sparse(test, suffix, pathvalues, options) {
     }
     var set_tuple = set_pathvalues(pathvalues, "PathMap", pv_options);
     var pathmaps  = set_tuple[1].values.map(function(container) {
-        return container.json;
+        return { json: container.json };
     });
     return verify(suffix).
         apply(test, set_pathmaps(pathmaps, suffix, clone(options))).

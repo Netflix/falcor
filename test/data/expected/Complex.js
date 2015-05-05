@@ -12,15 +12,17 @@ module.exports = function() {
 
             getPathMaps: {
                 query: [{
-                    "genreList": {
-                        "0": {
+                    json: {
+                        "genreList": {
                             "0": {
-                                "summary": null
-                            }
-                        },
-                        "1": {
-                            "0": {
-                                "summary": null
+                                "0": {
+                                    "summary": null
+                                }
+                            },
+                            "1": {
+                                "0": {
+                                    "summary": null
+                                }
                             }
                         }
                     }
@@ -165,21 +167,23 @@ module.exports = function() {
 
             getPathMaps: {
                 query: [{
-                    "genreList": {
-                        "0": {
+                    json: {
+                        "genreList": {
                             "0": {
-                                "summary": null
+                                "0": {
+                                    "summary": null
+                                },
+                                "1": {
+                                    "summary": null
+                                }
                             },
                             "1": {
-                                "summary": null
-                            }
-                        },
-                        "1": {
-                            "0": {
-                                "summary": null
-                            },
-                            "1": {
-                                "summary": null
+                                "0": {
+                                    "summary": null
+                                },
+                                "1": {
+                                    "summary": null
+                                }
                             }
                         }
                     }
@@ -390,13 +394,15 @@ module.exports = function() {
 
             getPathMaps: {
                 query: [{
-                    "genreList": {
-                        "0": {
+                    json: {
+                        "genreList": {
                             "0": {
-                                "summary": null
-                            },
-                            "1": {
-                                "summary": null
+                                "0": {
+                                    "summary": null
+                                },
+                                "1": {
+                                    "summary": null
+                                }
                             }
                         }
                     }
@@ -1171,11 +1177,12 @@ module.exports = function() {
             },
 
             getPathMaps: {
-
                 query: [{
-                    "genreList": {
-                        "0": null,
-                        "1": null
+                    json: {
+                        "genreList": {
+                            "0": null,
+                            "1": null
+                        }
                     }
                 }]
             },

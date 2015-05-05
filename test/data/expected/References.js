@@ -12,10 +12,12 @@ module.exports = function() {
 
             getPathMaps: {
                 query: [{
-                    genreList: {
-                        0: {
+                    json: {
+                        genreList: {
                             0: {
-                                summary: null
+                                0: {
+                                    summary: null
+                                }
                             }
                         }
                     }
@@ -144,10 +146,12 @@ module.exports = function() {
 
             getPathMaps: {
                 query: [{
-                    genreList: {
-                        0: {
-                            1: {
-                                summary: null
+                    json: {
+                        genreList: {
+                            0: {
+                                1: {
+                                    summary: null
+                                }
                             }
                         }
                     }
@@ -284,10 +288,12 @@ module.exports = function() {
 
             getPathMaps: {
                 query: [{
-                    genreList: {
-                        0: {
-                            2: {
-                                summary: null
+                    json: {
+                        genreList: {
+                            0: {
+                                2: {
+                                    summary: null
+                                }
                             }
                         }
                     }
@@ -424,10 +430,12 @@ module.exports = function() {
 
             getPathMaps: {
                 query: [{
-                    genreList: {
-                        0: {
-                            3: {
-                                summary: null
+                    json: {
+                        genreList: {
+                            0: {
+                                3: {
+                                    summary: null
+                                }
                             }
                         }
                     }
@@ -521,9 +529,11 @@ module.exports = function() {
 
             getPathMaps: {
                 query: [{
-                    "genreList": {
-                        10: {
-                            "__null": null
+                    json: {
+                        "genreList": {
+                            10: {
+                                "__null": null
+                            }
                         }
                     }
                 }]
@@ -605,10 +615,12 @@ module.exports = function() {
 
             getPathMaps: {
                 query: [{
-                    genreList: {
-                        1: {
-                            0: {
-                                summary: null
+                    json: {
+                        genreList: {
+                            1: {
+                                0: {
+                                    summary: null
+                                }
                             }
                         }
                     }
@@ -707,10 +719,12 @@ module.exports = function() {
 
             getPathMaps: {
                 query: [{
-                    genreList: {
-                        1: {
-                            0: {
-                                summary: null
+                    json: {
+                        genreList: {
+                            1: {
+                                0: {
+                                    summary: null
+                                }
                             }
                         }
                     }
@@ -820,9 +834,11 @@ module.exports = function() {
 
             getPathMaps: {
                 query: [{
-                    genreList: {
-                        1: {
-                            0: null
+                    json: {
+                        genreList: {
+                            1: {
+                                0: null
+                            }
                         }
                     }
                 }]
@@ -899,9 +915,11 @@ module.exports = function() {
 
             getPathMaps: {
                 query: [{
-                    "genreList": {
-                        5: {
-                            "__null": null
+                    json: {
+                        "genreList": {
+                            5: {
+                                "__null": null
+                            }
                         }
                     }
                 }]
@@ -958,10 +976,12 @@ module.exports = function() {
         errorReferenceInBranchKey: {
             getPathMaps: {
                 query: [{
-                    "genreList": {
-                        2: {
-                            0: {
-                                summary: null
+                    json: {
+                        "genreList": {
+                            2: {
+                                0: {
+                                    summary: null
+                                }
                             }
                         }
                     }
@@ -1022,9 +1042,11 @@ module.exports = function() {
         innerReference: {
             getPathMaps: {
                 query: [{
-                    "genreList": {
-                        'inner-reference': {
-                            "summary": null
+                    json: {
+                        "genreList": {
+                            'inner-reference': {
+                                "summary": null
+                            }
                         }
                     }
                 }]
@@ -1082,9 +1104,11 @@ module.exports = function() {
         errorReference: {
             getPathMaps: {
                 query: [{
-                    "genreList": {
-                        2: {
-                            "__null": null
+                    json: {
+                        "genreList": {
+                            2: {
+                                "__null": null
+                            }
                         }
                     }
                 }]
@@ -1148,10 +1172,12 @@ module.exports = function() {
 
             getPathMaps: {
                 query: [{
-                    "genreList": {
-                        4: {
-                            0: {
-                                "summary": null
+                    json: {
+                        "genreList": {
+                            4: {
+                                0: {
+                                    "summary": null
+                                }
                             }
                         }
                     }
@@ -1204,10 +1230,12 @@ module.exports = function() {
 
             getPathMaps: {
                 query: [{
-                    "genreList": {
-                        6: {
-                            0: {
-                                "summary": null
+                    json: {
+                        "genreList": {
+                            6: {
+                                0: {
+                                    "summary": null
+                                }
                             }
                         }
                     }
@@ -1265,10 +1293,12 @@ module.exports = function() {
 
             getPathMaps: {
                 query: [{
-                    "genreList": {
-                        11: {
-                            0: {
-                                "__null": null
+                    json: {
+                        "genreList": {
+                            11: {
+                                0: {
+                                    "__null": null
+                                }
                             }
                         }
                     }
@@ -1319,10 +1349,12 @@ module.exports = function() {
 
             getPathMaps: {
                 query: [{
-                    "genreList": {
-                        9: {
-                            0: {
-                                "summary": null
+                    json: {
+                        "genreList": {
+                            9: {
+                                0: {
+                                    "summary": null
+                                }
                             }
                         }
                     }
@@ -1379,10 +1411,12 @@ module.exports = function() {
 
             getPathMaps: {
                 query: [{
-                    "genreList": {
-                        "branch-missing": {
-                            0: {
-                                "summary": null
+                    json: {
+                        "genreList": {
+                            "branch-missing": {
+                                0: {
+                                    "summary": null
+                                }
                             }
                         }
                     }
@@ -1421,10 +1455,12 @@ module.exports = function() {
 
             getPathMaps: {
                 query: [{
-                    "genreList": {
-                        12: {
-                            0: {
-                                "summary": null
+                    json: {
+                        "genreList": {
+                            12: {
+                                0: {
+                                    "summary": null
+                                }
                             }
                         }
                     }
