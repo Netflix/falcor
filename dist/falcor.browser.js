@@ -233,7 +233,7 @@ Model.prototype = {
     getCache: function() {
         var pathmaps = [{}];
         var tmpCache = this.boxValues().treatErrorsAsValues().materialize();
-        tmpCache._getPathMapsAsPathMap(tmpCache, [tmpCache._cache], pathmaps);
+        tmpCache._getPathMapsAsPathMap(tmpCache, [{ json: tmpCache._cache }], pathmaps);
         return pathmaps[0].json;
     },
     getValueSync: function(path) {
@@ -2040,7 +2040,9 @@ module.exports = function(walk) {
                     optimizedPath[j] = boundOptimizedPath[j];
                 }
             }
-            if (pathSet.path) {
+            if(inputFormat == 'JSON') {
+                pathSet = pathSet.json;
+            } else if (pathSet.path) {
                 pathSet = pathSet.path;
             }
 
@@ -2085,7 +2087,9 @@ module.exports = function(walk) {
 
         for (var i = 0, len = paths.length; i < len; i++) {
             var pathSet = paths[i];
-            if (pathSet.path) {
+            if(inputFormat == 'JSON') {
+                pathSet = pathSet.json;
+            } else if (pathSet.path) {
                 pathSet = pathSet.path;
             }
             walk(model, cache, currentCachePosition, pathSet, 0, values[0], [], results, [], [], inputFormat, 'JSONG');
@@ -2135,7 +2139,9 @@ module.exports = function(walk) {
                 }
             }
             var pathSet = paths[i];
-            if (pathSet.path) {
+            if(inputFormat == 'JSON') {
+                pathSet = pathSet.json;
+            } else if (pathSet.path) {
                 pathSet = pathSet.path;
             }
             walk(model, cache, currentCachePosition, pathSet, 0, valueNode, [], results, optimizedPath, [], inputFormat, 'PathMap');
@@ -2180,7 +2186,9 @@ module.exports = function(walk) {
                 }
             }
             var pathSet = paths[i];
-            if (pathSet.path) {
+            if(inputFormat == 'JSON') {
+                pathSet = pathSet.json;
+            } else if (pathSet.path) {
                 pathSet = pathSet.path;
             }
             walk(model, cache, currentCachePosition, pathSet, 0, onNext, null, results, optimizedPath, [], inputFormat, 'Values');
@@ -4729,7 +4737,7 @@ function set_json_sparse_as_json_dense(model, pathmaps, values, error_selector) 
             roots.json = roots[3] = parents[3] = nodes[3] = undefined;
         }
 
-        var pathmap = pathmaps[index];
+        var pathmap = pathmaps[index].json;
         roots.index = index;
 
         walk_path_map(onNode, onEdge, pathmap, keys_stack, 0, roots, parents, nodes, requested, optimized);
@@ -4882,7 +4890,7 @@ function set_json_sparse_as_json_graph(model, pathmaps, values, error_selector) 
     roots.requestedPaths = json.paths || (json.paths = roots.requestedPaths);
 
     while (++index < count) {
-        var pathmap = pathmaps[index];
+        var pathmap = pathmaps[index].json;
         walk_path_map(onNode, onEdge, pathmap, keys_stack, 0, roots, parents, nodes, requested, optimized);
     }
 
@@ -5040,7 +5048,7 @@ function set_json_sparse_as_json_sparse(model, pathmaps, values, error_selector)
     roots[3] = parents[3] = nodes[3] = json.json || (json.json = {});
 
     while (++index < count) {
-        var pathmap = pathmaps[index];
+        var pathmap = pathmaps[index].json;
         walk_path_map(onNode, onEdge, pathmap, keys_stack, 0, roots, parents, nodes, requested, optimized);
     }
 
@@ -5183,7 +5191,7 @@ function set_path_map_as_json_values(model, pathmaps, onNext, error_selector) {
     roots.onNext = onNext;
 
     while (++index < count) {
-        var pathmap = pathmaps[index];
+        var pathmap = pathmaps[index].json;
         walk_path_map(onNode, onEdge, pathmap, keys_stack, 0, roots, parents, nodes, requested, optimized);
     }
 
@@ -7979,13 +7987,307 @@ arguments[4][2][0].apply(exports,arguments)
 },{"./lib/falcor":158,"./lib/get":201,"./lib/invalidate":230,"./lib/set":238}],154:[function(_dereq_,module,exports){
 module.exports=_dereq_(3)
 },{"falcor-observable":303}],155:[function(_dereq_,module,exports){
-arguments[4][4][0].apply(exports,arguments)
+var falcor = _dereq_('./Falcor');
+var RequestQueue = _dereq_('./request/RequestQueue');
+var ImmediateScheduler = _dereq_('./scheduler/ImmediateScheduler');
+var ASAPScheduler = _dereq_('./scheduler/ASAPScheduler');
+var TimeoutScheduler = _dereq_('./scheduler/TimeoutScheduler');
+var ERROR = _dereq_("../types/error");
+var ModelResponse = _dereq_('./ModelResponse');
+var ModelDataSourceAdapter = _dereq_('./ModelDataSourceAdapter');
+var call = _dereq_('./operations/call');
+var operations = _dereq_('./operations');
+var pathSyntax = _dereq_('falcor-path-syntax');
+var getBoundValue = _dereq_('./../get/getBoundValue');
+var slice = Array.prototype.slice;
+var $ref = _dereq_('./../types/path');
+var $error = _dereq_('./../types/error');
+var $atom = _dereq_('./../types/atom');
+
+var Model = module.exports = falcor.Model = function Model(options) {
+
+    if (!options) {
+        options = {};
+    }
+
+    this._materialized = options.materialized || false;
+    this._boxed = options.boxed || false;
+    this._treatErrorsAsValues = options.treatErrorsAsValues || false;
+
+    this._dataSource = options.source;
+    this._maxSize = options.maxSize || Math.pow(2, 53) - 1;
+    this._collectRatio = options.collectRatio || 0.75;
+    this._scheduler = new ImmediateScheduler();
+    this._request = new RequestQueue(this, this._scheduler);
+    this._errorSelector = options.errorSelector || Model.prototype._errorSelector;
+    this._router = options.router;
+
+    this._root = options.root || {
+        expired: [],
+        allowSync: 0,
+        unsafeMode: false
+    };
+    if (options.cache && typeof options.cache === "object") {
+        this.setCache(options.cache);
+    } else {
+        this._cache = {};
+    }
+    this._path = [];
+};
+
+Model.EXPIRES_NOW = falcor.EXPIRES_NOW;
+Model.EXPIRES_NEVER = falcor.EXPIRES_NEVER;
+
+Model.ref = function(path) {
+    if (typeof path === 'string') {
+        path = pathSyntax(path);
+    }
+    return {$type: $ref, value: path};
+};
+
+Model.error = function(error) {
+    return {$type: $error, value: error};
+};
+
+Model.atom = function(value) {
+    return {$type: $atom, value: value};
+};
+
+Model.prototype = {
+    _boxed: false,
+    _progressive: false,
+    _errorSelector: function(x, y) { return y; },
+    get: operations("get"),
+    set: operations("set"),
+    invalidate: operations("invalidate"),
+    call: call,
+    getValue: function(path) {
+        return this.get(path, function(x) { return x; });
+    },
+    setValue: function(path, value) {
+        path = pathSyntax.fromPath(path);
+        return this.set(Array.isArray(path) ?
+        {path: path, value: value} :
+            path, function(x) { return x; });
+    },
+    bind: function(boundPath) {
+
+        var model = this, root = model._root,
+            paths = new Array(arguments.length - 1),
+            i = -1, n = arguments.length - 1;
+
+        boundPath = pathSyntax.fromPath(boundPath);
+
+        while(++i < n) {
+            paths[i] = pathSyntax.fromPath(arguments[i + 1]);
+        }
+
+        if(n === 0) { throw new Error("Model#bind requires at least one value path."); }
+
+        return falcor.Observable.create(function(observer) {
+
+            var boundModel;
+            root.allowSync++;
+            try {
+                boundModel = model.bindSync(model._path.concat(boundPath));
+
+                if (!boundModel) {
+                    throw false;
+                }
+                observer.onNext(boundModel);
+                observer.onCompleted();
+            } catch (e) {
+                return model.get.apply(model, paths.map(function(path) {
+                    return boundPath.concat(path);
+                }).concat(function(){})).subscribe(
+                    function onNext() {},
+                    function onError(err)  { observer.onError(err); },
+                    function onCompleted() {
+                        root.allowSync++;
+                        try {
+
+                            boundModel = model.bindSync(boundPath);
+                            if(boundModel) {
+                                observer.onNext(boundModel);
+                            }
+                            observer.onCompleted();
+                        } catch(e) {
+                            observer.onError(e);
+                        }
+
+                        // remove the inc
+                        finally {
+                            root.allowSync--;
+                        }
+                    });
+            }
+
+            // remove the inc
+            finally {
+                root.allowSync--;
+            }
+        });
+    },
+    setCache: function(cache) {
+        return (this._cache = {}) && this._setCache(this, cache);
+    },
+    getCache: function() {
+        var pathmaps = [{}];
+        var tmpCache = this.boxValues().treatErrorsAsValues().materialize();
+        tmpCache._getPathMapsAsPathMap(tmpCache, [tmpCache._cache], pathmaps);
+        return pathmaps[0].json;
+    },
+    getValueSync: function(path) {
+        path = pathSyntax.fromPath(path);
+        if (Array.isArray(path) === false) {
+            throw new Error("Model#getValueSync must be called with an Array path.");
+        }
+        if (this._path.length) {
+            path = this._path.concat(path);
+        }
+        return this.syncCheck("getValueSync") && this._getValueSync(this, path).value;
+    },
+    setValueSync: function(path, value, errorSelector) {
+        path = pathSyntax.fromPath(path);
+
+        if(Array.isArray(path) === false) {
+            if(typeof errorSelector !== "function") {
+                errorSelector = value || this._errorSelector;
+            }
+            value = path.value;
+            path  = path.path;
+        }
+
+        if(Array.isArray(path) === false) {
+            throw new Error("Model#setValueSync must be called with an Array path.");
+        }
+
+        if(this.syncCheck("setValueSync")) {
+
+            var json = {};
+            var tEeAV = this._treatErrorsAsValues;
+            var boxed = this._boxed;
+
+            this._treatErrorsAsValues = true;
+            this._boxed = true;
+
+            this._setPathSetsAsJSON(this, [{path: path, value: value}], [json], errorSelector);
+
+            this._treatErrorsAsValues = tEeAV;
+            this._boxed = boxed;
+
+            json = json.json;
+
+            if(json && json.$type === ERROR && !this._treatErrorsAsValues) {
+                if(this._boxed) {
+                    throw json;
+                } else {
+                    throw json.value;
+                }
+            } else if(this._boxed) {
+                return json;
+            }
+
+            return json && json.value;
+        }
+    },
+    bindSync: function(path) {
+        path = pathSyntax.fromPath(path);
+        if(Array.isArray(path) === false) {
+            throw new Error("Model#bindSync must be called with an Array path.");
+        }
+        var boundValue = this.syncCheck("bindSync") && getBoundValue(this, this._path.concat(path));
+        var node = boundValue.value;
+        path = boundValue.path;
+        if(boundValue.shorted) {
+            if(!!node) {
+                if(node.$type === ERROR) {
+                    if(this._boxed) {
+                        throw node;
+                    }
+                    throw node.value;
+                    // throw new Error("Model#bindSync can\'t bind to or beyond an error: " + boundValue.toString());
+                }
+            }
+            return undefined;
+        } else if(!!node && node.$type === ERROR) {
+            if(this._boxed) {
+                throw node;
+            }
+            throw node.value;
+        }
+        return this.clone(["_path", boundValue.path]);
+    },
+    clone: function() {
+
+        var self = this;
+        var clone = new Model();
+
+        var key, keyValue;
+
+        var keys = Object.keys(self);
+        var keysIdx = -1;
+        var keysLen = keys.length;
+        while(++keysIdx < keysLen) {
+            key = keys[keysIdx];
+            clone[key] = self[key];
+        }
+
+        var argsIdx = -1;
+        var argsLen = arguments.length;
+        while(++argsIdx < argsLen) {
+            keyValue = arguments[argsIdx];
+            clone[keyValue[0]] = keyValue[1];
+        }
+
+        return clone;
+    },
+    batch: function(schedulerOrDelay) {
+        if(typeof schedulerOrDelay === "number") {
+            schedulerOrDelay = new TimeoutScheduler(Math.round(Math.abs(schedulerOrDelay)));
+        } else if(!schedulerOrDelay || !schedulerOrDelay.schedule) {
+            schedulerOrDelay = new ASAPScheduler();
+        }
+        return this.clone(["_request", new RequestQueue(this, schedulerOrDelay)]);
+    },
+    unbatch: function() {
+        return this.clone(["_request", new RequestQueue(this, new ImmediateScheduler())]);
+    },
+    treatErrorsAsValues: function() {
+        return this.clone(["_treatErrorsAsValues", true]);
+    },
+    asDataSource: function() {
+        return new ModelDataSourceAdapter(this);
+    },
+    materialize: function() {
+        return this.clone(["_materialized", true]);
+    },
+    boxValues: function() {
+        return this.clone(["_boxed", true]);
+    },
+    unboxValues: function() {
+        return this.clone(["_boxed", false]);
+    },
+    withoutDataSource: function() {
+        return this.clone(["_dataSource", null]);
+    },
+    syncCheck: function(name) {
+        if (!!this._dataSource && this._root.allowSync <= 0 && this._root.unsafeMode === false) {
+            throw new Error("Model#" + name + " may only be called within the context of a request selector.");
+        }
+        return true;
+    },
+    toJSON: function() {
+        return this._path;
+    }
+};
+
 },{"../types/error":289,"./../get/getBoundValue":198,"./../types/atom":288,"./../types/error":289,"./../types/path":290,"./Falcor":154,"./ModelDataSourceAdapter":156,"./ModelResponse":157,"./operations":164,"./operations/call":159,"./request/RequestQueue":189,"./scheduler/ASAPScheduler":190,"./scheduler/ImmediateScheduler":191,"./scheduler/TimeoutScheduler":192,"falcor-path-syntax":307}],156:[function(_dereq_,module,exports){
 module.exports=_dereq_(5)
 },{}],157:[function(_dereq_,module,exports){
 module.exports=_dereq_(6)
 },{"./Falcor":154,"falcor-path-syntax":307,"promise":331}],158:[function(_dereq_,module,exports){
-module.exports=_dereq_(7)
+arguments[4][7][0].apply(exports,arguments)
 },{"./Falcor":154,"./Model":155}],159:[function(_dereq_,module,exports){
 module.exports=_dereq_(8)
 },{"../../Falcor":154,"./../../ModelResponse":157}],160:[function(_dereq_,module,exports){
@@ -8175,13 +8477,203 @@ module.exports=_dereq_(42)
 },{}],193:[function(_dereq_,module,exports){
 module.exports=_dereq_(43)
 },{"../internal/context":215,"./../types/path.js":290,"./onValue":205,"./util/hardlink":207,"./util/isExpired":208}],194:[function(_dereq_,module,exports){
-arguments[4][44][0].apply(exports,arguments)
+var getBoundValue = _dereq_('./getBoundValue');
+var isPathValue = _dereq_('./util/isPathValue');
+module.exports = function(walk) {
+    return function getAsJSON(model, paths, values) {
+        var results = {
+            values: [],
+            errors: [],
+            requestedPaths: [],
+            optimizedPaths: [],
+            requestedMissingPaths: [],
+            optimizedMissingPaths: []
+        };
+        var requestedMissingPaths = results.requestedMissingPaths;
+        var inputFormat = Array.isArray(paths[0]) || isPathValue(paths[0]) ?
+            'Paths' : 'JSON';
+        var cache = model._cache;
+        var boundPath = model._path;
+        var currentCachePosition;
+        var missingIdx = 0;
+        var boundOptimizedPath, optimizedPath;
+        var i, j, len, bLen;
+
+        results.values = values;
+        if (!values) {
+            values = [];
+        }
+        if (boundPath.length) {
+            var boundValue = getBoundValue(model, boundPath);
+            currentCachePosition = boundValue.value;
+            optimizedPath = boundOptimizedPath = boundValue.path;
+        } else {
+            currentCachePosition = cache;
+            optimizedPath = boundOptimizedPath = [];
+        }
+
+        for (i = 0, len = paths.length; i < len; i++) {
+            var valueNode = undefined;
+            var pathSet = paths[i];
+            if (values[i]) {
+                valueNode = values[i];
+            }
+            if (len > 1) {
+                optimizedPath = [];
+                for (j = 0, bLen = boundOptimizedPath.length; j < bLen; j++) {
+                    optimizedPath[j] = boundOptimizedPath[j];
+                }
+            }
+            if (pathSet.path) {
+                pathSet = pathSet.path;
+            }
+
+            walk(model, cache, currentCachePosition, pathSet, 0, valueNode, [], results, optimizedPath, [], inputFormat, 'JSON');
+            if (missingIdx < requestedMissingPaths.length) {
+                for (j = missingIdx, length = requestedMissingPaths.length; j < length; j++) {
+                    requestedMissingPaths[j].pathSetIndex = i;
+                }
+                missingIdx = length;
+            }
+        }
+
+        return results;
+    };
+};
+
+
 },{"./getBoundValue":198,"./util/isPathValue":210}],195:[function(_dereq_,module,exports){
-arguments[4][45][0].apply(exports,arguments)
+var getBoundValue = _dereq_('./getBoundValue');
+var isPathValue = _dereq_('./util/isPathValue');
+module.exports = function(walk) {
+    return function getAsJSONG(model, paths, values) {
+        var results = {
+            values: [],
+            errors: [],
+            requestedPaths: [],
+            optimizedPaths: [],
+            requestedMissingPaths: [],
+            optimizedMissingPaths: []
+        };
+        var inputFormat = Array.isArray(paths[0]) || isPathValue(paths[0]) ?
+            'Paths' : 'JSON';
+        results.values = values;
+        var cache = model._cache;
+        var boundPath = model._path;
+        var currentCachePosition;
+        if (boundPath.length) {
+            throw 'It is not legal to use the JSON Graph format from a bound Model. JSON Graph format can only be used from a root model.';
+        } else {
+            currentCachePosition = cache;
+        }
+
+        for (var i = 0, len = paths.length; i < len; i++) {
+            var pathSet = paths[i];
+            if (pathSet.path) {
+                pathSet = pathSet.path;
+            }
+            walk(model, cache, currentCachePosition, pathSet, 0, values[0], [], results, [], [], inputFormat, 'JSONG');
+        }
+        return results;
+    };
+};
+
+
 },{"./getBoundValue":198,"./util/isPathValue":210}],196:[function(_dereq_,module,exports){
-arguments[4][46][0].apply(exports,arguments)
+var getBoundValue = _dereq_('./getBoundValue');
+var isPathValue = _dereq_('./util/isPathValue');
+module.exports = function(walk) {
+    return function getAsPathMap(model, paths, values) {
+        var valueNode;
+        var results = {
+            values: [],
+            errors: [],
+            requestedPaths: [],
+            optimizedPaths: [],
+            requestedMissingPaths: [],
+            optimizedMissingPaths: []
+        };
+        var inputFormat = Array.isArray(paths[0]) || isPathValue(paths[0]) ?
+            'Paths' : 'JSON';
+        valueNode = values[0];
+        results.values = values;
+
+        var cache = model._cache;
+        var boundPath = model._path;
+        var currentCachePosition;
+        var optimizedPath, boundOptimizedPath;
+        if (boundPath.length) {
+            var boundValue = getBoundValue(model, boundPath);
+            currentCachePosition = boundValue.value;
+            optimizedPath = boundOptimizedPath = boundValue.path;
+        } else {
+            currentCachePosition = cache;
+            optimizedPath = boundOptimizedPath = [];
+        }
+
+        for (var i = 0, len = paths.length; i < len; i++) {
+            if (len > 1) {
+                optimizedPath = [];
+                for (j = 0, bLen = boundOptimizedPath.length; j < bLen; j++) {
+                    optimizedPath[j] = boundOptimizedPath[j];
+                }
+            }
+            var pathSet = paths[i];
+            if (pathSet.path) {
+                pathSet = pathSet.path;
+            }
+            walk(model, cache, currentCachePosition, pathSet, 0, valueNode, [], results, optimizedPath, [], inputFormat, 'PathMap');
+        }
+        return results;
+    };
+};
+
 },{"./getBoundValue":198,"./util/isPathValue":210}],197:[function(_dereq_,module,exports){
-arguments[4][47][0].apply(exports,arguments)
+var getBoundValue = _dereq_('./getBoundValue');
+var isPathValue = _dereq_('./util/isPathValue');
+module.exports = function(walk) {
+    return function getAsValues(model, paths, onNext) {
+        var results = {
+            values: [],
+            errors: [],
+            requestedPaths: [],
+            optimizedPaths: [],
+            requestedMissingPaths: [],
+            optimizedMissingPaths: []
+        };
+        var inputFormat = Array.isArray(paths[0]) || isPathValue(paths[0]) ?
+            'Paths' : 'JSON';
+        var cache = model._cache;
+        var boundPath = model._path;
+        var currentCachePosition;
+        var optimizedPath, boundOptimizedPath;
+        if (boundPath.length) {
+            var boundValue = getBoundValue(model, boundPath);
+            currentCachePosition = boundValue.value;
+            optimizedPath = boundOptimizedPath = boundValue.path;
+        } else {
+            currentCachePosition = cache;
+            optimizedPath = boundOptimizedPath = [];
+        }
+
+        for (var i = 0, len = paths.length; i < len; i++) {
+            if (len > 1) {
+                optimizedPath = [];
+                for (j = 0, bLen = boundOptimizedPath.length; j < bLen; j++) {
+                    optimizedPath[j] = boundOptimizedPath[j];
+                }
+            }
+            var pathSet = paths[i];
+            if (pathSet.path) {
+                pathSet = pathSet.path;
+            }
+            walk(model, cache, currentCachePosition, pathSet, 0, onNext, null, results, optimizedPath, [], inputFormat, 'Values');
+        }
+        return results;
+    };
+};
+
+
 },{"./getBoundValue":198,"./util/isPathValue":210}],198:[function(_dereq_,module,exports){
 arguments[4][48][0].apply(exports,arguments)
 },{"./getValueSync":199}],199:[function(_dereq_,module,exports){

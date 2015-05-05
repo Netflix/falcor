@@ -1,1 +1,0 @@
-macro SENTINEL_SIZE { rule { } => { 50 } }
