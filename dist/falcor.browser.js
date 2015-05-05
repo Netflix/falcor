@@ -19,7 +19,7 @@ var HttpDataSource = _dereq_('falcor-browser');
 falcor.HttpDataSource = HttpDataSource;
 module.exports = falcor;
 
-},{"./index":2,"falcor-browser":313}],2:[function(_dereq_,module,exports){
+},{"./index":2,"falcor-browser":314}],2:[function(_dereq_,module,exports){
 var falcor = _dereq_('./lib/falcor');
 var get = _dereq_('./lib/get');
 var set = _dereq_('./lib/set');
@@ -63,7 +63,7 @@ prototype._setCache = set.setCache;
 module.exports = falcor;
 
 
-},{"./lib/falcor":7,"./lib/get":50,"./lib/invalidate":79,"./lib/set":87}],3:[function(_dereq_,module,exports){
+},{"./lib/falcor":7,"./lib/get":51,"./lib/invalidate":80,"./lib/set":88}],3:[function(_dereq_,module,exports){
 if (typeof falcor === 'undefined') {
     var falcor = {};
 }
@@ -85,7 +85,7 @@ falcor.NOOP = function() {};
 
 module.exports = falcor;
 
-},{"falcor-observable":319}],4:[function(_dereq_,module,exports){
+},{"falcor-observable":320}],4:[function(_dereq_,module,exports){
 var falcor = _dereq_('./Falcor');
 var RequestQueue = _dereq_('./request/RequestQueue');
 var ImmediateScheduler = _dereq_('./scheduler/ImmediateScheduler');
@@ -381,7 +381,7 @@ Model.prototype = {
     }
 };
 
-},{"../types/error":138,"./../get/getBoundValue":47,"./../types/atom":137,"./../types/error":138,"./../types/path":139,"./Falcor":3,"./ModelDataSourceAdapter":5,"./ModelResponse":6,"./operations":13,"./operations/call":8,"./request/RequestQueue":38,"./scheduler/ASAPScheduler":39,"./scheduler/ImmediateScheduler":40,"./scheduler/TimeoutScheduler":41,"falcor-path-syntax":323}],5:[function(_dereq_,module,exports){
+},{"../types/error":139,"./../get/getBoundValue":48,"./../types/atom":138,"./../types/error":139,"./../types/path":140,"./Falcor":3,"./ModelDataSourceAdapter":5,"./ModelResponse":6,"./operations":13,"./operations/call":8,"./request/RequestQueue":39,"./scheduler/ASAPScheduler":40,"./scheduler/ImmediateScheduler":41,"./scheduler/TimeoutScheduler":42,"falcor-path-syntax":324}],5:[function(_dereq_,module,exports){
 function ModelDataSourceAdapter(model) {
     this._model = model.materialize().boxValues().treatErrorsAsValues();
 }
@@ -494,7 +494,7 @@ ModelResponse.prototype.then = function(onNext, onError) {
 
 module.exports = ModelResponse;
 
-},{"./Falcor":3,"falcor-path-syntax":323,"promise":330}],7:[function(_dereq_,module,exports){
+},{"./Falcor":3,"falcor-path-syntax":324,"promise":331}],7:[function(_dereq_,module,exports){
 var falcor = _dereq_('./Falcor');
 var Model = _dereq_('./Model');
 falcor.Model = Model;
@@ -616,7 +616,7 @@ module.exports = function getInitialArgs(options, seeds, onNext) {
     return [operations];
 };
 
-},{"./../support/combineOperations":24,"./../support/setSeedsOrOnNext":37}],10:[function(_dereq_,module,exports){
+},{"./../support/combineOperations":25,"./../support/setSeedsOrOnNext":38}],10:[function(_dereq_,module,exports){
 var getSourceObserver = _dereq_('./../support/getSourceObserever');
 var partitionOperations = _dereq_('./../support/partitionOperations');
 var mergeBoundPath = _dereq_('./../support/mergeBoundPath');
@@ -662,7 +662,7 @@ function getSourceRequest(
 }
 
 
-},{"./../support/getSourceObserever":25,"./../support/mergeBoundPath":29,"./../support/partitionOperations":32}],11:[function(_dereq_,module,exports){
+},{"./../support/getSourceObserever":26,"./../support/mergeBoundPath":30,"./../support/partitionOperations":33}],11:[function(_dereq_,module,exports){
 var getInitialArgs = _dereq_('./getInitialArgs');
 var getSourceRequest = _dereq_('./getSourceRequest');
 var shouldRequest = _dereq_('./shouldRequest');
@@ -676,7 +676,7 @@ var get = request(
 
 module.exports = get;
 
-},{"./../request":16,"./../support/processOperations":34,"./getInitialArgs":9,"./getSourceRequest":10,"./shouldRequest":12}],12:[function(_dereq_,module,exports){
+},{"./../request":16,"./../support/processOperations":35,"./getInitialArgs":9,"./getSourceRequest":10,"./shouldRequest":12}],12:[function(_dereq_,module,exports){
 module.exports = function(model, combinedResults) {
     return model._dataSource && combinedResults.requestedMissingPaths.length > 0;
 };
@@ -718,7 +718,7 @@ module.exports = function modelOperation(name) {
     };
 };
 
-},{"../ModelResponse":6,"./get":11,"./invalidate":14,"./set":17}],14:[function(_dereq_,module,exports){
+},{"../ModelResponse":6,"./get":11,"./invalidate":14,"./set":18}],14:[function(_dereq_,module,exports){
 var invalidateInitialArgs = _dereq_('./invalidateInitialArgs');
 var request = _dereq_('./../request');
 var processOperations = _dereq_('./../support/processOperations');
@@ -729,7 +729,7 @@ var invalidate = request(
 
 module.exports = invalidate;
 
-},{"./../request":16,"./../support/processOperations":34,"./invalidateInitialArgs":15}],15:[function(_dereq_,module,exports){
+},{"./../request":16,"./../support/processOperations":35,"./invalidateInitialArgs":15}],15:[function(_dereq_,module,exports){
 var combineOperations = _dereq_('./../support/combineOperations');
 var setSeedsOrOnNext = _dereq_('./../support/setSeedsOrOnNext');
 module.exports = function getInitialArgs(options, seeds, onNext) {
@@ -743,7 +743,7 @@ module.exports = function getInitialArgs(options, seeds, onNext) {
     return [operations, seeds];
 };
 
-},{"./../support/combineOperations":24,"./../support/setSeedsOrOnNext":37}],16:[function(_dereq_,module,exports){
+},{"./../support/combineOperations":25,"./../support/setSeedsOrOnNext":38}],16:[function(_dereq_,module,exports){
 var setSeedsOrOnNext = _dereq_('./support/setSeedsOrOnNext');
 var onNextValues = _dereq_('./support/onNextValue');
 var onCompletedOrError = _dereq_('./support/onCompletedOrError');
@@ -752,9 +752,12 @@ var autoFalse = function() { return false; };
 
 module.exports = request;
 
-function request(initialArgs, sourceRequest, processOperations, shouldRequestFn) {
+function request(initialArgs, sourceRequest, processOperations, shouldRequestFn, finalize) {
     if (!shouldRequestFn) {
         shouldRequestFn = autoFalse;
+    }
+    if(!finalize) {
+        finalize = onCompletedOrError;
     }
     return function innerRequest(options) {
         var selector = options.operationSelector;
@@ -829,7 +832,7 @@ function request(initialArgs, sourceRequest, processOperations, shouldRequestFn)
                 if (!toPathValues && !isProgressive && foundValue) {
                     onNextValues(model, onNext, seeds, selector);
                 }
-                onCompletedOrError(onCompleted, onError, errors);
+                finalize(model, onCompleted, onError, errors);
             }
         }
 
@@ -839,26 +842,45 @@ function request(initialArgs, sourceRequest, processOperations, shouldRequestFn)
         } catch(e) {
             debugger;
             errors = [e];
-            onCompletedOrError(onCompleted, onError, errors);
+            finalize(model, onCompleted, onError, errors);
         }
     };
 }
 
-},{"./support/onCompletedOrError":30,"./support/onNextValue":31,"./support/primeSeeds":33,"./support/setSeedsOrOnNext":37}],17:[function(_dereq_,module,exports){
+},{"./support/onCompletedOrError":31,"./support/onNextValue":32,"./support/primeSeeds":34,"./support/setSeedsOrOnNext":38}],17:[function(_dereq_,module,exports){
+var collect = _dereq_('../../../lru/collect');
+var onCompletedOrError = _dereq_('../support/onCompletedOrError');
+
+module.exports = function finalizeAndCollect(model, onCompleted, onError, errors) {
+    onCompletedOrError(model, onCompleted, onError, errors);
+    collect(
+        model._root,
+        model._root.expired,
+        model._version,
+        model._cache.$size || 0,
+        model._maxSize,
+        model._collectRatio
+    );
+};
+
+},{"../../../lru/collect":85,"../support/onCompletedOrError":31}],18:[function(_dereq_,module,exports){
 var setInitialArgs = _dereq_('./setInitialArgs');
 var setSourceRequest = _dereq_('./setSourceRequest');
 var request = _dereq_('./../request');
 var setProcessOperations = _dereq_('./setProcessOperations');
 var shouldRequest = _dereq_('./shouldRequest');
+var finalize = _dereq_('./finalizeAndCollect');
 var set = request(
     setInitialArgs,
     setSourceRequest,
     setProcessOperations,
-    shouldRequest);
+    shouldRequest,
+    finalize
+);
 
 module.exports = set;
 
-},{"./../request":16,"./setInitialArgs":18,"./setProcessOperations":19,"./setSourceRequest":20,"./shouldRequest":21}],18:[function(_dereq_,module,exports){
+},{"./../request":16,"./finalizeAndCollect":17,"./setInitialArgs":19,"./setProcessOperations":20,"./setSourceRequest":21,"./shouldRequest":22}],19:[function(_dereq_,module,exports){
 var combineOperations = _dereq_('./../support/combineOperations');
 var setSeedsOrOnNext = _dereq_('./../support/setSeedsOrOnNext');
 var Formats = _dereq_('./../support/Formats');
@@ -916,7 +938,7 @@ module.exports = function setInitialArgs(options, seeds, onNext) {
     return [operations, requestOptions];
 };
 
-},{"./../support/Formats":22,"./../support/combineOperations":24,"./../support/setSeedsOrOnNext":37}],19:[function(_dereq_,module,exports){
+},{"./../support/Formats":23,"./../support/combineOperations":25,"./../support/setSeedsOrOnNext":38}],20:[function(_dereq_,module,exports){
 var processOperations = _dereq_('./../support/processOperations');
 var combineOperations = _dereq_('./../support/combineOperations');
 var mergeBoundPath = _dereq_('./../support/mergeBoundPath');
@@ -978,7 +1000,7 @@ function setProcessOperations(model, operations, errorSelector, requestOptions) 
     return results;
 }
 
-},{"./../support/Formats":22,"./../support/combineOperations":24,"./../support/mergeBoundPath":29,"./../support/processOperations":34}],20:[function(_dereq_,module,exports){
+},{"./../support/Formats":23,"./../support/combineOperations":25,"./../support/mergeBoundPath":30,"./../support/processOperations":35}],21:[function(_dereq_,module,exports){
 var getSourceObserver = _dereq_('./../support/getSourceObserever');
 var combineOperations = _dereq_('./../support/combineOperations');
 var setSeedsOrOnNext = _dereq_('./../support/setSeedsOrOnNext');
@@ -1019,7 +1041,7 @@ function setSourceRequest(
 }
 
 
-},{"./../support/Formats":22,"./../support/combineOperations":24,"./../support/getSourceObserever":25,"./../support/setSeedsOrOnNext":37}],21:[function(_dereq_,module,exports){
+},{"./../support/Formats":23,"./../support/combineOperations":25,"./../support/getSourceObserever":26,"./../support/setSeedsOrOnNext":38}],22:[function(_dereq_,module,exports){
 // Set differs from get in the sense that the first time through
 // the recurse loop a server operation must be performed if it can be.
 module.exports = function(model, combinedResults, loopCount) {
@@ -1028,7 +1050,7 @@ module.exports = function(model, combinedResults, loopCount) {
         loopCount === 0);
 };
 
-},{}],22:[function(_dereq_,module,exports){
+},{}],23:[function(_dereq_,module,exports){
 module.exports = {
     toPathValues: 'AsValues',
     toJSON: 'AsPathMap',
@@ -1036,7 +1058,7 @@ module.exports = {
     selector: 'AsJSON',
 };
 
-},{}],23:[function(_dereq_,module,exports){
+},{}],24:[function(_dereq_,module,exports){
 module.exports = function buildJSONGOperation(format, seeds, jsongOp, seedOffset, onNext) {
     return {
         methodName: '_setJSONGs' + format,
@@ -1049,7 +1071,7 @@ module.exports = function buildJSONGOperation(format, seeds, jsongOp, seedOffset
     };
 };
 
-},{}],24:[function(_dereq_,module,exports){
+},{}],25:[function(_dereq_,module,exports){
 var isSeedRequired = _dereq_('./seedRequired');
 var isJSONG = _dereq_('./isJSONG');
 var isPathOrPathValue = _dereq_('./isPathOrPathValue');
@@ -1092,7 +1114,7 @@ module.exports = function combineOperations(args, format, name, spread, isProgre
         }, []);
 };
 
-},{"./Formats":22,"./isJSONG":27,"./isPathOrPathValue":28,"./seedRequired":35}],25:[function(_dereq_,module,exports){
+},{"./Formats":23,"./isJSONG":28,"./isPathOrPathValue":29,"./seedRequired":36}],26:[function(_dereq_,module,exports){
 var insertErrors = _dereq_('./insertErrors.js');
 /**
  * creates the model source observer
@@ -1120,7 +1142,7 @@ function getSourceObserver(model, requestedMissingPaths, cb) {
 
 module.exports = getSourceObserver;
 
-},{"./insertErrors.js":26}],26:[function(_dereq_,module,exports){
+},{"./insertErrors.js":27}],27:[function(_dereq_,module,exports){
 /**
  * will insert the error provided for every requestedPath.
  * @param {Model} model
@@ -1144,18 +1166,18 @@ module.exports = function insertErrors(model, requestedPaths, err) {
 };
 
 
-},{}],27:[function(_dereq_,module,exports){
+},{}],28:[function(_dereq_,module,exports){
 module.exports = function isJSONG(x) {
     return x.hasOwnProperty("jsong");
 };
 
-},{}],28:[function(_dereq_,module,exports){
+},{}],29:[function(_dereq_,module,exports){
 module.exports = function isPathOrPathValue(x) {
     return !!(Array.isArray(x)) || (
         x.hasOwnProperty("path") && x.hasOwnProperty("value"));
 };
 
-},{}],29:[function(_dereq_,module,exports){
+},{}],30:[function(_dereq_,module,exports){
 var isJSONG = _dereq_('./isJSONG');
 var isPathValue = _dereq_('./isPathOrPathValue');
 
@@ -1200,8 +1222,8 @@ function mergeBoundPathIntoPathValue(arg, boundPath) {
     };
 }
 
-},{"./isJSONG":27,"./isPathOrPathValue":28}],30:[function(_dereq_,module,exports){
-module.exports = function onCompletedOrError(onCompleted, onError, errors) {
+},{"./isJSONG":28,"./isPathOrPathValue":29}],31:[function(_dereq_,module,exports){
+module.exports = function onCompletedOrError(model, onCompleted, onError, errors) {
     if (errors.length) {
         onError(errors);
     } else {
@@ -1209,7 +1231,7 @@ module.exports = function onCompletedOrError(onCompleted, onError, errors) {
     }
 };
 
-},{}],31:[function(_dereq_,module,exports){
+},{}],32:[function(_dereq_,module,exports){
 /**
  * will onNext the observer with the seeds provided.
  * @param {Model} model
@@ -1244,7 +1266,7 @@ module.exports = function onNextValues(model, onNext, seeds, selector) {
     }
 };
 
-},{}],32:[function(_dereq_,module,exports){
+},{}],33:[function(_dereq_,module,exports){
 var buildJSONGOperation = _dereq_('./buildJSONGOperation');
 
 /**
@@ -1296,7 +1318,7 @@ function partitionOperations(
 }
 
 
-},{"./buildJSONGOperation":23}],33:[function(_dereq_,module,exports){
+},{"./buildJSONGOperation":24}],34:[function(_dereq_,module,exports){
 module.exports = function primeSeeds(selector, selectorLength) {
     var seeds = [];
     if (selector) {
@@ -1309,7 +1331,7 @@ module.exports = function primeSeeds(selector, selectorLength) {
     return seeds;
 };
 
-},{}],34:[function(_dereq_,module,exports){
+},{}],35:[function(_dereq_,module,exports){
 module.exports = function processOperations(model, operations, errorSelector, boundPath) {
     return operations.reduce(function(memo, operation) {
 
@@ -1347,12 +1369,12 @@ module.exports = function processOperations(model, operations, errorSelector, bo
     });
 }
 
-},{}],35:[function(_dereq_,module,exports){
+},{}],36:[function(_dereq_,module,exports){
 module.exports = function isSeedRequired(format) {
     return format === 'AsJSON' || format === 'AsJSONG' || format === 'AsPathMap';
 };
 
-},{}],36:[function(_dereq_,module,exports){
+},{}],37:[function(_dereq_,module,exports){
 module.exports = function setSeedsOnGroups(groups, seeds, hasSelector) {
     var valueIndex = 0;
     var seedsLength = seeds.length;
@@ -1372,7 +1394,7 @@ module.exports = function setSeedsOnGroups(groups, seeds, hasSelector) {
     }
 }
 
-},{}],37:[function(_dereq_,module,exports){
+},{}],38:[function(_dereq_,module,exports){
 var setSeedsOnGroups = _dereq_('./setSeedsOnGroups');
 module.exports = function setSeedsOrOnNext(operations, seedRequired, seeds, onNext, selector) {
     if (seedRequired) {
@@ -1384,7 +1406,7 @@ module.exports = function setSeedsOrOnNext(operations, seedRequired, seeds, onNe
     }
 };
 
-},{"./setSeedsOnGroups":36}],38:[function(_dereq_,module,exports){
+},{"./setSeedsOnGroups":37}],39:[function(_dereq_,module,exports){
 var falcor = _dereq_('./../Falcor');
 var NOOP = falcor.NOOP;
 var RequestQueue = function(jsongModel, scheduler) {
@@ -1847,7 +1869,7 @@ falcor.__Internals.buildQueries = buildQueries;
 
 module.exports = RequestQueue;
 
-},{"./../Falcor":3}],39:[function(_dereq_,module,exports){
+},{"./../Falcor":3}],40:[function(_dereq_,module,exports){
 var asap = _dereq_('asap');
 
 
@@ -1862,7 +1884,7 @@ ASAPScheduler.prototype = {
 
 module.exports = ASAPScheduler;
 
-},{"asap":147}],40:[function(_dereq_,module,exports){
+},{"asap":148}],41:[function(_dereq_,module,exports){
 function ImmediateScheduler() {
 }
 
@@ -1874,7 +1896,7 @@ ImmediateScheduler.prototype = {
 
 module.exports = ImmediateScheduler;
 
-},{}],41:[function(_dereq_,module,exports){
+},{}],42:[function(_dereq_,module,exports){
 function TimeoutScheduler(delay) {
     this.delay = delay;
 }
@@ -1887,7 +1909,7 @@ TimeoutScheduler.prototype = {
 
 module.exports = TimeoutScheduler;
 
-},{}],42:[function(_dereq_,module,exports){
+},{}],43:[function(_dereq_,module,exports){
 var hardLink = _dereq_('./util/hardlink');
 var createHardlink = hardLink.create;
 var onValue = _dereq_('./onValue');
@@ -1970,7 +1992,7 @@ function followReference(model, root, node, referenceContainer, reference, seed,
 
 module.exports = followReference;
 
-},{"../internal/context":64,"./../types/path.js":139,"./onValue":54,"./util/hardlink":56,"./util/isExpired":57}],43:[function(_dereq_,module,exports){
+},{"../internal/context":65,"./../types/path.js":140,"./onValue":55,"./util/hardlink":57,"./util/isExpired":58}],44:[function(_dereq_,module,exports){
 var getBoundValue = _dereq_('./getBoundValue');
 var isPathValue = _dereq_('./util/isPathValue');
 module.exports = function(walk) {
@@ -2036,7 +2058,7 @@ module.exports = function(walk) {
 };
 
 
-},{"./getBoundValue":47,"./util/isPathValue":59}],44:[function(_dereq_,module,exports){
+},{"./getBoundValue":48,"./util/isPathValue":60}],45:[function(_dereq_,module,exports){
 var getBoundValue = _dereq_('./getBoundValue');
 var isPathValue = _dereq_('./util/isPathValue');
 module.exports = function(walk) {
@@ -2073,7 +2095,7 @@ module.exports = function(walk) {
 };
 
 
-},{"./getBoundValue":47,"./util/isPathValue":59}],45:[function(_dereq_,module,exports){
+},{"./getBoundValue":48,"./util/isPathValue":60}],46:[function(_dereq_,module,exports){
 var getBoundValue = _dereq_('./getBoundValue');
 var isPathValue = _dereq_('./util/isPathValue');
 module.exports = function(walk) {
@@ -2122,7 +2144,7 @@ module.exports = function(walk) {
     };
 };
 
-},{"./getBoundValue":47,"./util/isPathValue":59}],46:[function(_dereq_,module,exports){
+},{"./getBoundValue":48,"./util/isPathValue":60}],47:[function(_dereq_,module,exports){
 var getBoundValue = _dereq_('./getBoundValue');
 var isPathValue = _dereq_('./util/isPathValue');
 module.exports = function(walk) {
@@ -2168,7 +2190,7 @@ module.exports = function(walk) {
 };
 
 
-},{"./getBoundValue":47,"./util/isPathValue":59}],47:[function(_dereq_,module,exports){
+},{"./getBoundValue":48,"./util/isPathValue":60}],48:[function(_dereq_,module,exports){
 var getValueSync = _dereq_('./getValueSync');
 module.exports = function getBoundValue(model, path) {
     var boxed, value, shorted;
@@ -2192,7 +2214,7 @@ module.exports = function getBoundValue(model, path) {
 };
 
 
-},{"./getValueSync":48}],48:[function(_dereq_,module,exports){
+},{"./getValueSync":49}],49:[function(_dereq_,module,exports){
 var followReference = _dereq_('./followReference');
 var clone = _dereq_('./util/clone');
 var isExpired = _dereq_('./util/isExpired');
@@ -2297,7 +2319,7 @@ module.exports = function getValueSync(model, simplePath) {
     };
 };
 
-},{"./../types/atom.js":137,"./../types/error.js":138,"./../types/path.js":139,"./followReference":42,"./util/clone":55,"./util/isExpired":57,"./util/lru":60}],49:[function(_dereq_,module,exports){
+},{"./../types/atom.js":138,"./../types/error.js":139,"./../types/path.js":140,"./followReference":43,"./util/clone":56,"./util/isExpired":58,"./util/lru":61}],50:[function(_dereq_,module,exports){
 var followReference = _dereq_('./followReference');
 var onError = _dereq_('./onError');
 var onMissing = _dereq_('./onMissing');
@@ -2519,7 +2541,7 @@ function evaluateNode(model, curr, pathOrJSON, depth, seedOrFunction, requestedP
 
 module.exports = walk;
 
-},{"../internal/invalidated":67,"./../internal/prefix":72,"./../types/error":138,"./../types/path":139,"./followReference":42,"./onError":52,"./onMissing":53,"./onValue":54,"./util/hardlink":56,"./util/isExpired":57,"./util/isMaterialzed":58,"./util/lru":60,"./util/permuteKey":61}],50:[function(_dereq_,module,exports){
+},{"../internal/invalidated":68,"./../internal/prefix":73,"./../types/error":139,"./../types/path":140,"./followReference":43,"./onError":53,"./onMissing":54,"./onValue":55,"./util/hardlink":57,"./util/isExpired":58,"./util/isMaterialzed":59,"./util/lru":61,"./util/permuteKey":62}],51:[function(_dereq_,module,exports){
 var walk = _dereq_('./getWalk');
 module.exports = {
     getAsJSON: _dereq_('./getAsJSON')(walk),
@@ -2532,7 +2554,7 @@ module.exports = {
 };
 
 
-},{"./getAsJSON":43,"./getAsJSONG":44,"./getAsPathMap":45,"./getAsValues":46,"./getBoundValue":47,"./getValueSync":48,"./getWalk":49,"./legacy_setCache":51}],51:[function(_dereq_,module,exports){
+},{"./getAsJSON":44,"./getAsJSONG":45,"./getAsPathMap":46,"./getAsValues":47,"./getBoundValue":48,"./getValueSync":49,"./getWalk":50,"./legacy_setCache":52}],52:[function(_dereq_,module,exports){
 /* istanbul ignore next */
 var NOOP = function NOOP() {},
     __GENERATION_GUID = 0,
@@ -2963,7 +2985,7 @@ module.exports = function setCache(model, map) {
     return nodeRoot;
 }
 
-},{}],52:[function(_dereq_,module,exports){
+},{}],53:[function(_dereq_,module,exports){
 var lru = _dereq_('./util/lru');
 var clone = _dereq_('./util/clone');
 var promote = lru.promote;
@@ -2979,7 +3001,7 @@ module.exports = function onError(model, node, permuteRequested, permuteOptimize
 };
 
 
-},{"./util/clone":55,"./util/lru":60}],53:[function(_dereq_,module,exports){
+},{"./util/clone":56,"./util/lru":61}],54:[function(_dereq_,module,exports){
 var support = _dereq_('./util/support');
 var fastCat = support.fastCat,
     fastCatSkipNulls = support.fastCatSkipNulls,
@@ -3033,7 +3055,7 @@ function concatAndInsertMissing(remainingPath, results, permuteRequested, permut
 }
 
 
-},{"./util/clone":55,"./util/isExpired":57,"./util/spreadJSON":62,"./util/support":63}],54:[function(_dereq_,module,exports){
+},{"./util/clone":56,"./util/isExpired":58,"./util/spreadJSON":63,"./util/support":64}],55:[function(_dereq_,module,exports){
 var lru = _dereq_('./util/lru');
 var clone = _dereq_('./util/clone');
 var promote = lru.promote;
@@ -3180,7 +3202,7 @@ module.exports = function onValue(model, node, seedOrFunction, outerResults, per
 
 
 
-},{"./../types/atom":137,"./../types/error":138,"./../types/path":139,"./util/clone":55,"./util/lru":60}],55:[function(_dereq_,module,exports){
+},{"./../types/atom":138,"./../types/error":139,"./../types/path":140,"./util/clone":56,"./util/lru":61}],56:[function(_dereq_,module,exports){
 // Copies the node
 var prefix = _dereq_("../../internal/prefix");
 module.exports = function clone(node) {
@@ -3199,7 +3221,7 @@ module.exports = function clone(node) {
 };
 
 
-},{"../../internal/prefix":72}],56:[function(_dereq_,module,exports){
+},{"../../internal/prefix":73}],57:[function(_dereq_,module,exports){
 var __ref = _dereq_("../../internal/ref");
 var __context = _dereq_("../../internal/context");
 var __ref_index = _dereq_("../../internal/ref-index");
@@ -3239,23 +3261,23 @@ module.exports = {
     remove: removeHardlink
 };
 
-},{"../../internal/context":64,"../../internal/ref":75,"../../internal/ref-index":74,"../../internal/refs-length":76}],57:[function(_dereq_,module,exports){
+},{"../../internal/context":65,"../../internal/ref":76,"../../internal/ref-index":75,"../../internal/refs-length":77}],58:[function(_dereq_,module,exports){
 var now = _dereq_('../../support/now');
 module.exports = function isExpired(node) {
     var $expires = node.$expires === undefined && -1 || node.$expires;
     return $expires !== -1 && $expires !== 1 && ($expires === 0 || $expires < now());
 };
 
-},{"../../support/now":124}],58:[function(_dereq_,module,exports){
+},{"../../support/now":125}],59:[function(_dereq_,module,exports){
 module.exports = function isMaterialized(model) {
     return model._materialized && !(model._router || model._dataSource);
 };
 
-},{}],59:[function(_dereq_,module,exports){
+},{}],60:[function(_dereq_,module,exports){
 module.exports = function(x) {
     return x.path && x.value;
 };
-},{}],60:[function(_dereq_,module,exports){
+},{}],61:[function(_dereq_,module,exports){
 var __head = _dereq_("../../internal/head");
 var __tail = _dereq_("../../internal/tail");
 var __next = _dereq_("../../internal/next");
@@ -3333,7 +3355,7 @@ module.exports = {
     promote: lruPromote,
     splice: lruSplice
 };
-},{"../../internal/head":66,"../../internal/invalidated":67,"../../internal/next":69,"../../internal/prev":73,"../../internal/tail":77}],61:[function(_dereq_,module,exports){
+},{"../../internal/head":67,"../../internal/invalidated":68,"../../internal/next":70,"../../internal/prev":74,"../../internal/tail":78}],62:[function(_dereq_,module,exports){
 module.exports = function permuteKey(key, memo) {
     if (memo.isArray) {
         if (memo.loaded && memo.rangeOffset > memo.to) {
@@ -3381,7 +3403,7 @@ module.exports = function permuteKey(key, memo) {
 };
 
 
-},{}],62:[function(_dereq_,module,exports){
+},{}],63:[function(_dereq_,module,exports){
 var fastCopy = _dereq_('./support').fastCopy;
 module.exports = function spreadJSON(root, bins, bin) {
     bin = bin || [];
@@ -3406,7 +3428,7 @@ module.exports = function spreadJSON(root, bins, bin) {
     }
 };
 
-},{"./support":63}],63:[function(_dereq_,module,exports){
+},{"./support":64}],64:[function(_dereq_,module,exports){
 
 
 function fastCopy(arr, i) {
@@ -3449,45 +3471,45 @@ module.exports = {
     fastCopy: fastCopy
 };
 
-},{}],64:[function(_dereq_,module,exports){
+},{}],65:[function(_dereq_,module,exports){
 module.exports = _dereq_("./prefix") + "context";
-},{"./prefix":72}],65:[function(_dereq_,module,exports){
+},{"./prefix":73}],66:[function(_dereq_,module,exports){
 module.exports = _dereq_("./prefix") + "generation";
-},{"./prefix":72}],66:[function(_dereq_,module,exports){
+},{"./prefix":73}],67:[function(_dereq_,module,exports){
 module.exports = _dereq_("./prefix") + "head";
-},{"./prefix":72}],67:[function(_dereq_,module,exports){
+},{"./prefix":73}],68:[function(_dereq_,module,exports){
 module.exports = _dereq_("./prefix") + "invalidated";
-},{"./prefix":72}],68:[function(_dereq_,module,exports){
+},{"./prefix":73}],69:[function(_dereq_,module,exports){
 module.exports = _dereq_("./prefix") + "key";
-},{"./prefix":72}],69:[function(_dereq_,module,exports){
+},{"./prefix":73}],70:[function(_dereq_,module,exports){
 module.exports = _dereq_("./prefix") + "next";
-},{"./prefix":72}],70:[function(_dereq_,module,exports){
+},{"./prefix":73}],71:[function(_dereq_,module,exports){
 module.exports = _dereq_("./prefix") + "offset";
-},{"./prefix":72}],71:[function(_dereq_,module,exports){
+},{"./prefix":73}],72:[function(_dereq_,module,exports){
 module.exports = _dereq_("./prefix") + "parent";
-},{"./prefix":72}],72:[function(_dereq_,module,exports){
+},{"./prefix":73}],73:[function(_dereq_,module,exports){
 // This may look like an empty string, but it's actually a single zero-width-space character.
 module.exports = "​";
-},{}],73:[function(_dereq_,module,exports){
+},{}],74:[function(_dereq_,module,exports){
 module.exports = _dereq_("./prefix") + "prev";
-},{"./prefix":72}],74:[function(_dereq_,module,exports){
+},{"./prefix":73}],75:[function(_dereq_,module,exports){
 module.exports = _dereq_("./prefix") + "ref-index";
-},{"./prefix":72}],75:[function(_dereq_,module,exports){
+},{"./prefix":73}],76:[function(_dereq_,module,exports){
 module.exports = _dereq_("./prefix") + "ref";
-},{"./prefix":72}],76:[function(_dereq_,module,exports){
+},{"./prefix":73}],77:[function(_dereq_,module,exports){
 module.exports = _dereq_("./prefix") + "refs-length";
-},{"./prefix":72}],77:[function(_dereq_,module,exports){
+},{"./prefix":73}],78:[function(_dereq_,module,exports){
 module.exports = _dereq_("./prefix") + "tail";
-},{"./prefix":72}],78:[function(_dereq_,module,exports){
+},{"./prefix":73}],79:[function(_dereq_,module,exports){
 module.exports = _dereq_("./prefix") + "version";
-},{"./prefix":72}],79:[function(_dereq_,module,exports){
+},{"./prefix":73}],80:[function(_dereq_,module,exports){
 module.exports = {
     invPathSetsAsJSON: _dereq_("./invalidate-path-sets-as-json-dense"),
     invPathSetsAsJSONG: _dereq_("./invalidate-path-sets-as-json-graph"),
     invPathSetsAsPathMap: _dereq_("./invalidate-path-sets-as-json-sparse"),
     invPathSetsAsValues: _dereq_("./invalidate-path-sets-as-json-values")
 };
-},{"./invalidate-path-sets-as-json-dense":80,"./invalidate-path-sets-as-json-graph":81,"./invalidate-path-sets-as-json-sparse":82,"./invalidate-path-sets-as-json-values":83}],80:[function(_dereq_,module,exports){
+},{"./invalidate-path-sets-as-json-dense":81,"./invalidate-path-sets-as-json-graph":82,"./invalidate-path-sets-as-json-sparse":83,"./invalidate-path-sets-as-json-values":84}],81:[function(_dereq_,module,exports){
 module.exports = invalidate_path_sets_as_json_dense;
 
 var clone = _dereq_("../support/clone-dense-json");
@@ -3613,7 +3635,7 @@ function onEdge(pathset, depth, roots, parents, nodes, requested, optimized, key
     roots.hasValue = true;
     roots.requestedPaths.push(array_slice(requested, roots.offset));
 }
-},{"../lru/collect":84,"../support/array-clone":102,"../support/array-slice":103,"../support/clone-dense-json":104,"../support/get-valid-key":114,"../support/invalidate-node":118,"../support/is-object":120,"../support/options":125,"../support/update-graph":135,"../walk/walk-path-set":145}],81:[function(_dereq_,module,exports){
+},{"../lru/collect":85,"../support/array-clone":103,"../support/array-slice":104,"../support/clone-dense-json":105,"../support/get-valid-key":115,"../support/invalidate-node":119,"../support/is-object":121,"../support/options":126,"../support/update-graph":136,"../walk/walk-path-set":146}],82:[function(_dereq_,module,exports){
 module.exports = invalidate_path_sets_as_json_graph;
 
 var $path = _dereq_("../types/path");
@@ -3728,7 +3750,7 @@ function onEdge(pathset, depth, roots, parents, nodes, requested, optimized, key
     roots.hasValue = true;
 }
 
-},{"../lru/collect":84,"../support/array-clone":102,"../support/clone-dense-json":104,"../support/clone-success-paths":110,"../support/get-valid-key":114,"../support/invalidate-node":118,"../support/is-object":120,"../support/options":125,"../support/update-graph":135,"../types/path":139,"../walk/walk-path-set-soft-link":144}],82:[function(_dereq_,module,exports){
+},{"../lru/collect":85,"../support/array-clone":103,"../support/clone-dense-json":105,"../support/clone-success-paths":111,"../support/get-valid-key":115,"../support/invalidate-node":119,"../support/is-object":121,"../support/options":126,"../support/update-graph":136,"../types/path":140,"../walk/walk-path-set-soft-link":145}],83:[function(_dereq_,module,exports){
 module.exports = invalidate_path_sets_as_json_sparse;
 
 var clone = _dereq_("../support/clone-dense-json");
@@ -3834,7 +3856,7 @@ function onEdge(pathset, depth, roots, parents, nodes, requested, optimized, key
     roots.hasValue = true;
     roots.requestedPaths.push(array_slice(requested, roots.offset));
 }
-},{"../lru/collect":84,"../support/array-clone":102,"../support/array-slice":103,"../support/clone-dense-json":104,"../support/get-valid-key":114,"../support/invalidate-node":118,"../support/is-object":120,"../support/options":125,"../support/update-graph":135,"../walk/walk-path-set":145}],83:[function(_dereq_,module,exports){
+},{"../lru/collect":85,"../support/array-clone":103,"../support/array-slice":104,"../support/clone-dense-json":105,"../support/get-valid-key":115,"../support/invalidate-node":119,"../support/is-object":121,"../support/options":126,"../support/update-graph":136,"../walk/walk-path-set":146}],84:[function(_dereq_,module,exports){
 module.exports = invalidate_path_sets_as_json_values;
 
 var clone = _dereq_("../support/clone-dense-json");
@@ -3936,7 +3958,7 @@ function onEdge(pathset, depth, roots, parents, nodes, requested, optimized, key
     }
     roots.requestedPaths.push(array_slice(requested, roots.offset));
 }
-},{"../lru/collect":84,"../support/array-clone":102,"../support/array-slice":103,"../support/clone-dense-json":104,"../support/get-valid-key":114,"../support/invalidate-node":118,"../support/is-object":120,"../support/options":125,"../support/update-graph":135,"../walk/walk-path-set":145}],84:[function(_dereq_,module,exports){
+},{"../lru/collect":85,"../support/array-clone":103,"../support/array-slice":104,"../support/clone-dense-json":105,"../support/get-valid-key":115,"../support/invalidate-node":119,"../support/is-object":121,"../support/options":126,"../support/update-graph":136,"../walk/walk-path-set":146}],85:[function(_dereq_,module,exports){
 var __head = _dereq_("../internal/head");
 var __tail = _dereq_("../internal/tail");
 var __next = _dereq_("../internal/next");
@@ -3970,7 +3992,7 @@ module.exports = function(lru, expired, version, total, max, ratio) {
         }
     }
 };
-},{"../internal/head":66,"../internal/next":69,"../internal/prev":73,"../internal/tail":77,"../support/update-graph":135}],85:[function(_dereq_,module,exports){
+},{"../internal/head":67,"../internal/next":70,"../internal/prev":74,"../internal/tail":78,"../support/update-graph":136}],86:[function(_dereq_,module,exports){
 var $expires_never = _dereq_("../values/expires-never");
 var __head = _dereq_("../internal/head");
 var __tail = _dereq_("../internal/tail");
@@ -3996,7 +4018,7 @@ module.exports = function(root, node) {
     }
     return node;
 };
-},{"../internal/head":66,"../internal/next":69,"../internal/prev":73,"../internal/tail":77,"../support/is-object":120,"../values/expires-never":140}],86:[function(_dereq_,module,exports){
+},{"../internal/head":67,"../internal/next":70,"../internal/prev":74,"../internal/tail":78,"../support/is-object":121,"../values/expires-never":141}],87:[function(_dereq_,module,exports){
 var __head = _dereq_("../internal/head");
 var __tail = _dereq_("../internal/tail");
 var __next = _dereq_("../internal/next");
@@ -4012,7 +4034,7 @@ module.exports = function(root, node) {
     node[__next] = node[__prev] = undefined;
     head = tail = next = prev = undefined;
 };
-},{"../internal/head":66,"../internal/next":69,"../internal/prev":73,"../internal/tail":77}],87:[function(_dereq_,module,exports){
+},{"../internal/head":67,"../internal/next":70,"../internal/prev":74,"../internal/tail":78}],88:[function(_dereq_,module,exports){
 module.exports = {
     setPathSetsAsJSON: _dereq_('./set-json-values-as-json-dense'),
     setPathSetsAsJSONG: _dereq_('./set-json-values-as-json-graph'),
@@ -4032,7 +4054,7 @@ module.exports = {
     setCache: _dereq_('./set-cache')
 };
 
-},{"./set-cache":88,"./set-json-graph-as-json-dense":89,"./set-json-graph-as-json-graph":90,"./set-json-graph-as-json-sparse":91,"./set-json-graph-as-json-values":92,"./set-json-sparse-as-json-dense":93,"./set-json-sparse-as-json-graph":94,"./set-json-sparse-as-json-sparse":95,"./set-json-sparse-as-json-values":96,"./set-json-values-as-json-dense":97,"./set-json-values-as-json-graph":98,"./set-json-values-as-json-sparse":99,"./set-json-values-as-json-values":100}],88:[function(_dereq_,module,exports){
+},{"./set-cache":89,"./set-json-graph-as-json-dense":90,"./set-json-graph-as-json-graph":91,"./set-json-graph-as-json-sparse":92,"./set-json-graph-as-json-values":93,"./set-json-sparse-as-json-dense":94,"./set-json-sparse-as-json-graph":95,"./set-json-sparse-as-json-sparse":96,"./set-json-sparse-as-json-values":97,"./set-json-values-as-json-dense":98,"./set-json-values-as-json-graph":99,"./set-json-values-as-json-sparse":100,"./set-json-values-as-json-values":101}],89:[function(_dereq_,module,exports){
 module.exports = set_cache;
 
 var $error = _dereq_("../types/error");
@@ -4055,8 +4077,6 @@ var update_back_refs = _dereq_("../support/update-back-refs");
 var update_graph = _dereq_("../support/update-graph");
 var inc_generation = _dereq_("../support/inc-generation");
 
-var collect = _dereq_("../lru/collect");
-
 function set_cache(model, pathmap, error_selector) {
 
     var roots = options([], model, error_selector);
@@ -4069,15 +4089,6 @@ function set_cache(model, pathmap, error_selector) {
     roots[0] = roots.root;
 
     walk_path_map(onNode, onEdge, pathmap, keys_stack, 0, roots, parents, nodes, requested, optimized);
-
-    collect(
-        roots.lru,
-        roots.expired,
-        roots.version,
-        roots.root.$size || 0,
-        model._maxSize,
-        model._collectRatio
-    );
 
     return model;
 }
@@ -4127,7 +4138,7 @@ function onNode(pathmap, roots, parents, nodes, requested, optimized, is_top_lev
 function onEdge(pathmap, keys_stack, depth, roots, parents, nodes, requested, optimized, key, keyset) {
 
 }
-},{"../lru/collect":84,"../support/array-clone":102,"../support/clone-dense-json":104,"../support/create-branch":112,"../support/get-valid-key":114,"../support/graph-node":115,"../support/inc-generation":116,"../support/is-object":120,"../support/options":125,"../support/replace-node":128,"../support/update-back-refs":134,"../support/update-graph":135,"../support/wrap-node":136,"../types/atom":137,"../types/error":138,"../walk/walk-path-map":143}],89:[function(_dereq_,module,exports){
+},{"../support/array-clone":103,"../support/clone-dense-json":105,"../support/create-branch":113,"../support/get-valid-key":115,"../support/graph-node":116,"../support/inc-generation":117,"../support/is-object":121,"../support/options":126,"../support/replace-node":129,"../support/update-back-refs":135,"../support/update-graph":136,"../support/wrap-node":137,"../types/atom":138,"../types/error":139,"../walk/walk-path-map":144}],90:[function(_dereq_,module,exports){
 module.exports = set_json_graph_as_json_dense;
 
 var $path = _dereq_("../types/path");
@@ -4146,8 +4157,6 @@ var merge_node = _dereq_("../support/merge-node");
 var node_as_miss = _dereq_("../support/treat-node-as-missing-path-set");
 var node_as_error = _dereq_("../support/treat-node-as-error");
 var clone_success = _dereq_("../support/clone-success-paths");
-
-var collect = _dereq_("../lru/collect");
 
 function set_json_graph_as_json_dense(model, envelopes, values, error_selector) {
 
@@ -4202,15 +4211,6 @@ function set_json_graph_as_json_dense(model, envelopes, values, error_selector) 
             }
         }
     }
-
-    collect(
-        roots.lru,
-        roots.expired,
-        roots.version,
-        roots.root.$size || 0,
-        model._maxSize,
-        model._collectRatio
-    );
 
     return {
         values: values,
@@ -4284,7 +4284,7 @@ function onEdge(pathset, depth, roots, parents, nodes, requested, optimized, key
     }
 }
 
-},{"../lru/collect":84,"../support/array-clone":102,"../support/clone-dense-json":104,"../support/clone-success-paths":110,"../support/get-valid-key":114,"../support/is-object":120,"../support/merge-node":123,"../support/options":125,"../support/treat-node-as-error":130,"../support/treat-node-as-missing-path-set":132,"../types/path":139,"../walk/walk-path-set-soft-link":144}],90:[function(_dereq_,module,exports){
+},{"../support/array-clone":103,"../support/clone-dense-json":105,"../support/clone-success-paths":111,"../support/get-valid-key":115,"../support/is-object":121,"../support/merge-node":124,"../support/options":126,"../support/treat-node-as-error":131,"../support/treat-node-as-missing-path-set":133,"../types/path":140,"../walk/walk-path-set-soft-link":145}],91:[function(_dereq_,module,exports){
 module.exports = set_json_graph_as_json_graph;
 
 var $path = _dereq_("../types/path");
@@ -4305,7 +4305,6 @@ var node_as_error = _dereq_("../support/treat-node-as-error");
 var clone_success = _dereq_("../support/clone-success-paths");
 
 var promote = _dereq_("../lru/promote");
-var collect = _dereq_("../lru/collect");
 
 function set_json_graph_as_json_graph(model, envelopes, values, error_selector) {
 
@@ -4348,15 +4347,6 @@ function set_json_graph_as_json_graph(model, envelopes, values, error_selector) 
         delete json.jsong;
         delete json.paths;
     }
-
-    collect(
-        roots.lru,
-        roots.expired,
-        roots.version,
-        roots.root.$size || 0,
-        model._maxSize,
-        model._collectRatio
-    );
 
     return {
         values: values,
@@ -4438,7 +4428,7 @@ function onEdge(pathset, depth, roots, parents, nodes, requested, optimized, key
     }
 }
 
-},{"../lru/collect":84,"../lru/promote":85,"../support/array-clone":102,"../support/clone-graph-json":105,"../support/clone-success-paths":110,"../support/get-valid-key":114,"../support/is-object":120,"../support/merge-node":123,"../support/options":125,"../support/treat-node-as-error":130,"../support/treat-node-as-missing-path-set":132,"../types/path":139,"../walk/walk-path-set-soft-link":144}],91:[function(_dereq_,module,exports){
+},{"../lru/promote":86,"../support/array-clone":103,"../support/clone-graph-json":106,"../support/clone-success-paths":111,"../support/get-valid-key":115,"../support/is-object":121,"../support/merge-node":124,"../support/options":126,"../support/treat-node-as-error":131,"../support/treat-node-as-missing-path-set":133,"../types/path":140,"../walk/walk-path-set-soft-link":145}],92:[function(_dereq_,module,exports){
 module.exports = set_json_graph_as_json_sparse;
 
 var $path = _dereq_("../types/path");
@@ -4457,8 +4447,6 @@ var merge_node = _dereq_("../support/merge-node");
 var node_as_miss = _dereq_("../support/treat-node-as-missing-path-set");
 var node_as_error = _dereq_("../support/treat-node-as-error");
 var clone_success = _dereq_("../support/clone-success-paths");
-
-var collect = _dereq_("../lru/collect");
 
 function set_json_graph_as_json_sparse(model, envelopes, values, error_selector) {
 
@@ -4499,15 +4487,6 @@ function set_json_graph_as_json_sparse(model, envelopes, values, error_selector)
     } else {
         delete json.json;
     }
-
-    collect(
-        roots.lru,
-        roots.expired,
-        roots.version,
-        roots.root.$size || 0,
-        model._maxSize,
-        model._collectRatio
-    );
 
     return {
         values: values,
@@ -4588,7 +4567,7 @@ function onEdge(pathset, depth, roots, parents, nodes, requested, optimized, key
     }
 }
 
-},{"../lru/collect":84,"../support/array-clone":102,"../support/clone-dense-json":104,"../support/clone-success-paths":110,"../support/get-valid-key":114,"../support/is-object":120,"../support/merge-node":123,"../support/options":125,"../support/treat-node-as-error":130,"../support/treat-node-as-missing-path-set":132,"../types/path":139,"../walk/walk-path-set-soft-link":144}],92:[function(_dereq_,module,exports){
+},{"../support/array-clone":103,"../support/clone-dense-json":105,"../support/clone-success-paths":111,"../support/get-valid-key":115,"../support/is-object":121,"../support/merge-node":124,"../support/options":126,"../support/treat-node-as-error":131,"../support/treat-node-as-missing-path-set":133,"../types/path":140,"../walk/walk-path-set-soft-link":145}],93:[function(_dereq_,module,exports){
 module.exports = set_json_graph_as_json_values;
 
 var $path = _dereq_("../types/path");
@@ -4608,8 +4587,6 @@ var merge_node = _dereq_("../support/merge-node");
 var node_as_miss = _dereq_("../support/treat-node-as-missing-path-set");
 var node_as_error = _dereq_("../support/treat-node-as-error");
 var clone_success = _dereq_("../support/clone-success-paths");
-
-var collect = _dereq_("../lru/collect");
 
 function set_json_graph_as_json_values(model, envelopes, onNext, error_selector) {
 
@@ -4641,15 +4618,6 @@ function set_json_graph_as_json_values(model, envelopes, onNext, error_selector)
             walk_path_set(onNode, onEdge, pathset, 0, roots, parents, nodes, requested, optimized);
         }
     }
-
-    collect(
-        roots.lru,
-        roots.expired,
-        roots.version,
-        roots.root.$size || 0,
-        model._maxSize,
-        model._collectRatio
-    );
 
     return {
         values: null,
@@ -4710,7 +4678,7 @@ function onEdge(pathset, depth, roots, parents, nodes, requested, optimized, key
     }
 }
 
-},{"../lru/collect":84,"../support/array-clone":102,"../support/array-slice":103,"../support/clone-dense-json":104,"../support/clone-success-paths":110,"../support/get-valid-key":114,"../support/is-object":120,"../support/merge-node":123,"../support/options":125,"../support/treat-node-as-error":130,"../support/treat-node-as-missing-path-set":132,"../types/path":139,"../walk/walk-path-set-soft-link":144}],93:[function(_dereq_,module,exports){
+},{"../support/array-clone":103,"../support/array-slice":104,"../support/clone-dense-json":105,"../support/clone-success-paths":111,"../support/get-valid-key":115,"../support/is-object":121,"../support/merge-node":124,"../support/options":126,"../support/treat-node-as-error":131,"../support/treat-node-as-missing-path-set":133,"../types/path":140,"../walk/walk-path-set-soft-link":145}],94:[function(_dereq_,module,exports){
 module.exports = set_json_sparse_as_json_dense;
 
 var $path = _dereq_("../types/path");
@@ -4737,8 +4705,6 @@ var inc_generation = _dereq_("../support/inc-generation");
 var node_as_miss = _dereq_("../support/treat-node-as-missing-path-map");
 var node_as_error = _dereq_("../support/treat-node-as-error");
 var clone_success = _dereq_("../support/clone-success-paths");
-
-var collect = _dereq_("../lru/collect");
 
 function set_json_sparse_as_json_dense(model, pathmaps, values, error_selector) {
 
@@ -4780,15 +4746,6 @@ function set_json_sparse_as_json_dense(model, pathmaps, values, error_selector) 
             delete json.json;
         }
     }
-
-    collect(
-        roots.lru,
-        roots.expired,
-        roots.version,
-        roots.root.$size || 0,
-        model._maxSize,
-        model._collectRatio
-    );
 
     return {
         values: values,
@@ -4877,7 +4834,7 @@ function onEdge(pathmap, keys_stack, depth, roots, parents, nodes, requested, op
         }
     }
 }
-},{"../lru/collect":84,"../support/array-clone":102,"../support/clone-dense-json":104,"../support/clone-success-paths":110,"../support/create-branch":112,"../support/get-valid-key":114,"../support/graph-node":115,"../support/inc-generation":116,"../support/is-object":120,"../support/options":125,"../support/replace-node":128,"../support/treat-node-as-error":130,"../support/treat-node-as-missing-path-map":131,"../support/update-back-refs":134,"../support/update-graph":135,"../support/wrap-node":136,"../types/atom":137,"../types/error":138,"../types/path":139,"../walk/walk-path-map":143}],94:[function(_dereq_,module,exports){
+},{"../support/array-clone":103,"../support/clone-dense-json":105,"../support/clone-success-paths":111,"../support/create-branch":113,"../support/get-valid-key":115,"../support/graph-node":116,"../support/inc-generation":117,"../support/is-object":121,"../support/options":126,"../support/replace-node":129,"../support/treat-node-as-error":131,"../support/treat-node-as-missing-path-map":132,"../support/update-back-refs":135,"../support/update-graph":136,"../support/wrap-node":137,"../types/atom":138,"../types/error":139,"../types/path":140,"../walk/walk-path-map":144}],95:[function(_dereq_,module,exports){
 module.exports = set_json_sparse_as_json_graph;
 
 var $path = _dereq_("../types/path");
@@ -4906,7 +4863,6 @@ var node_as_error = _dereq_("../support/treat-node-as-error");
 var clone_success = _dereq_("../support/clone-success-paths");
 
 var promote = _dereq_("../lru/promote");
-var collect = _dereq_("../lru/collect");
 
 function set_json_sparse_as_json_graph(model, pathmaps, values, error_selector) {
 
@@ -4937,15 +4893,6 @@ function set_json_sparse_as_json_graph(model, pathmaps, values, error_selector) 
         delete json.jsong;
         delete json.paths;
     }
-
-    collect(
-        roots.lru,
-        roots.expired,
-        roots.version,
-        roots.root.$size || 0,
-        model._maxSize,
-        model._collectRatio
-    );
 
     return {
         values: values,
@@ -5048,7 +4995,7 @@ function onEdge(pathmap, keys_stack, depth, roots, parents, nodes, requested, op
         roots.hasValue = true;
     }
 }
-},{"../lru/collect":84,"../lru/promote":85,"../support/array-clone":102,"../support/clone-graph-json":105,"../support/clone-success-paths":110,"../support/create-branch":112,"../support/get-valid-key":114,"../support/graph-node":115,"../support/inc-generation":116,"../support/is-object":120,"../support/options":125,"../support/replace-node":128,"../support/treat-node-as-error":130,"../support/treat-node-as-missing-path-map":131,"../support/update-back-refs":134,"../support/update-graph":135,"../support/wrap-node":136,"../types/atom":137,"../types/error":138,"../types/path":139,"../walk/walk-path-map-soft-link":142}],95:[function(_dereq_,module,exports){
+},{"../lru/promote":86,"../support/array-clone":103,"../support/clone-graph-json":106,"../support/clone-success-paths":111,"../support/create-branch":113,"../support/get-valid-key":115,"../support/graph-node":116,"../support/inc-generation":117,"../support/is-object":121,"../support/options":126,"../support/replace-node":129,"../support/treat-node-as-error":131,"../support/treat-node-as-missing-path-map":132,"../support/update-back-refs":135,"../support/update-graph":136,"../support/wrap-node":137,"../types/atom":138,"../types/error":139,"../types/path":140,"../walk/walk-path-map-soft-link":143}],96:[function(_dereq_,module,exports){
 module.exports = set_json_sparse_as_json_sparse;
 
 var $path = _dereq_("../types/path");
@@ -5075,8 +5022,6 @@ var inc_generation = _dereq_("../support/inc-generation");
 var node_as_miss = _dereq_("../support/treat-node-as-missing-path-map");
 var node_as_error = _dereq_("../support/treat-node-as-error");
 var clone_success = _dereq_("../support/clone-success-paths");
-
-var collect = _dereq_("../lru/collect");
 
 function set_json_sparse_as_json_sparse(model, pathmaps, values, error_selector) {
 
@@ -5105,15 +5050,6 @@ function set_json_sparse_as_json_sparse(model, pathmaps, values, error_selector)
     } else {
         delete json.json;
     }
-
-    collect(
-        roots.lru,
-        roots.expired,
-        roots.version,
-        roots.root.$size || 0,
-        model._maxSize,
-        model._collectRatio
-    );
 
     return {
         values: values,
@@ -5206,7 +5142,7 @@ function onEdge(pathmap, keys_stack, depth, roots, parents, nodes, requested, op
         }
     }
 }
-},{"../lru/collect":84,"../support/array-clone":102,"../support/clone-dense-json":104,"../support/clone-success-paths":110,"../support/create-branch":112,"../support/get-valid-key":114,"../support/graph-node":115,"../support/inc-generation":116,"../support/is-object":120,"../support/options":125,"../support/replace-node":128,"../support/treat-node-as-error":130,"../support/treat-node-as-missing-path-map":131,"../support/update-back-refs":134,"../support/update-graph":135,"../support/wrap-node":136,"../types/atom":137,"../types/error":138,"../types/path":139,"../walk/walk-path-map":143}],96:[function(_dereq_,module,exports){
+},{"../support/array-clone":103,"../support/clone-dense-json":105,"../support/clone-success-paths":111,"../support/create-branch":113,"../support/get-valid-key":115,"../support/graph-node":116,"../support/inc-generation":117,"../support/is-object":121,"../support/options":126,"../support/replace-node":129,"../support/treat-node-as-error":131,"../support/treat-node-as-missing-path-map":132,"../support/update-back-refs":135,"../support/update-graph":136,"../support/wrap-node":137,"../types/atom":138,"../types/error":139,"../types/path":140,"../walk/walk-path-map":144}],97:[function(_dereq_,module,exports){
 module.exports = set_path_map_as_json_values;
 
 var $error = _dereq_("../types/error");
@@ -5233,8 +5169,6 @@ var node_as_miss = _dereq_("../support/treat-node-as-missing-path-map");
 var node_as_error = _dereq_("../support/treat-node-as-error");
 var clone_success = _dereq_("../support/clone-success-paths");
 
-var collect = _dereq_("../lru/collect");
-
 function set_path_map_as_json_values(model, pathmaps, onNext, error_selector) {
 
     var roots = options([], model, error_selector);
@@ -5252,15 +5186,6 @@ function set_path_map_as_json_values(model, pathmaps, onNext, error_selector) {
         var pathmap = pathmaps[index];
         walk_path_map(onNode, onEdge, pathmap, keys_stack, 0, roots, parents, nodes, requested, optimized);
     }
-
-    collect(
-        roots.lru,
-        roots.expired,
-        roots.version,
-        roots.root.$size || 0,
-        model._maxSize,
-        model._collectRatio
-    );
 
     return {
         values: null,
@@ -5338,7 +5263,7 @@ function onEdge(pathmap, keys_stack, depth, roots, parents, nodes, requested, op
         }
     }
 }
-},{"../lru/collect":84,"../support/array-clone":102,"../support/clone-dense-json":104,"../support/clone-success-paths":110,"../support/create-branch":112,"../support/get-valid-key":114,"../support/graph-node":115,"../support/inc-generation":116,"../support/is-object":120,"../support/options":125,"../support/replace-node":128,"../support/treat-node-as-error":130,"../support/treat-node-as-missing-path-map":131,"../support/update-back-refs":134,"../support/update-graph":135,"../support/wrap-node":136,"../types/atom":137,"../types/error":138,"../walk/walk-path-map":143}],97:[function(_dereq_,module,exports){
+},{"../support/array-clone":103,"../support/clone-dense-json":105,"../support/clone-success-paths":111,"../support/create-branch":113,"../support/get-valid-key":115,"../support/graph-node":116,"../support/inc-generation":117,"../support/is-object":121,"../support/options":126,"../support/replace-node":129,"../support/treat-node-as-error":131,"../support/treat-node-as-missing-path-map":132,"../support/update-back-refs":135,"../support/update-graph":136,"../support/wrap-node":137,"../types/atom":138,"../types/error":139,"../walk/walk-path-map":144}],98:[function(_dereq_,module,exports){
 module.exports = set_json_values_as_json_dense;
 
 var $path = _dereq_("../types/path");
@@ -5366,8 +5291,6 @@ var inc_generation = _dereq_("../support/inc-generation");
 var node_as_miss = _dereq_("../support/treat-node-as-missing-path-set");
 var node_as_error = _dereq_("../support/treat-node-as-error");
 var clone_success = _dereq_("../support/clone-success-paths");
-
-var collect = _dereq_("../lru/collect");
 
 function set_json_values_as_json_dense(model, pathvalues, values, error_selector) {
 
@@ -5410,15 +5333,6 @@ function set_json_values_as_json_dense(model, pathvalues, values, error_selector
             delete json.json;
         }
     }
-
-    collect(
-        roots.lru,
-        roots.expired,
-        roots.version,
-        roots.root.$size || 0,
-        model._maxSize,
-        model._collectRatio
-    );
 
     return {
         values: values,
@@ -5516,7 +5430,7 @@ function onEdge(pathset, depth, roots, parents, nodes, requested, optimized, key
     }
 }
 
-},{"../lru/collect":84,"../support/array-clone":102,"../support/clone-dense-json":104,"../support/clone-success-paths":110,"../support/create-branch":112,"../support/get-valid-key":114,"../support/graph-node":115,"../support/inc-generation":116,"../support/invalidate-node":118,"../support/is-object":120,"../support/options":125,"../support/replace-node":128,"../support/treat-node-as-error":130,"../support/treat-node-as-missing-path-set":132,"../support/update-back-refs":134,"../support/update-graph":135,"../support/wrap-node":136,"../types/atom":137,"../types/error":138,"../types/path":139,"../walk/walk-path-set":145}],98:[function(_dereq_,module,exports){
+},{"../support/array-clone":103,"../support/clone-dense-json":105,"../support/clone-success-paths":111,"../support/create-branch":113,"../support/get-valid-key":115,"../support/graph-node":116,"../support/inc-generation":117,"../support/invalidate-node":119,"../support/is-object":121,"../support/options":126,"../support/replace-node":129,"../support/treat-node-as-error":131,"../support/treat-node-as-missing-path-set":133,"../support/update-back-refs":135,"../support/update-graph":136,"../support/wrap-node":137,"../types/atom":138,"../types/error":139,"../types/path":140,"../walk/walk-path-set":146}],99:[function(_dereq_,module,exports){
 module.exports = set_json_values_as_json_graph;
 
 var $path = _dereq_("../types/path");
@@ -5546,7 +5460,6 @@ var node_as_error = _dereq_("../support/treat-node-as-error");
 var clone_success = _dereq_("../support/clone-success-paths");
 
 var promote = _dereq_("../lru/promote");
-var collect = _dereq_("../lru/collect");
 
 function set_json_values_as_json_graph(model, pathvalues, values, error_selector) {
 
@@ -5580,15 +5493,6 @@ function set_json_values_as_json_graph(model, pathvalues, values, error_selector
         delete json.jsong;
         delete json.paths;
     }
-
-    collect(
-        roots.lru,
-        roots.expired,
-        roots.version,
-        roots.root.$size || 0,
-        model._maxSize,
-        model._collectRatio
-    );
 
     return {
         values: values,
@@ -5699,7 +5603,7 @@ function onEdge(pathset, depth, roots, parents, nodes, requested, optimized, key
     }
 }
 
-},{"../lru/collect":84,"../lru/promote":85,"../support/array-clone":102,"../support/clone-graph-json":105,"../support/clone-success-paths":110,"../support/create-branch":112,"../support/get-valid-key":114,"../support/graph-node":115,"../support/inc-generation":116,"../support/invalidate-node":118,"../support/is-object":120,"../support/options":125,"../support/replace-node":128,"../support/treat-node-as-error":130,"../support/treat-node-as-missing-path-set":132,"../support/update-back-refs":134,"../support/update-graph":135,"../support/wrap-node":136,"../types/atom":137,"../types/error":138,"../types/path":139,"../walk/walk-path-set-soft-link":144}],99:[function(_dereq_,module,exports){
+},{"../lru/promote":86,"../support/array-clone":103,"../support/clone-graph-json":106,"../support/clone-success-paths":111,"../support/create-branch":113,"../support/get-valid-key":115,"../support/graph-node":116,"../support/inc-generation":117,"../support/invalidate-node":119,"../support/is-object":121,"../support/options":126,"../support/replace-node":129,"../support/treat-node-as-error":131,"../support/treat-node-as-missing-path-set":133,"../support/update-back-refs":135,"../support/update-graph":136,"../support/wrap-node":137,"../types/atom":138,"../types/error":139,"../types/path":140,"../walk/walk-path-set-soft-link":145}],100:[function(_dereq_,module,exports){
 module.exports = set_json_values_as_json_sparse;
 
 var $path = _dereq_("../types/path");
@@ -5727,8 +5631,6 @@ var inc_generation = _dereq_("../support/inc-generation");
 var node_as_miss = _dereq_("../support/treat-node-as-missing-path-set");
 var node_as_error = _dereq_("../support/treat-node-as-error");
 var clone_success = _dereq_("../support/clone-success-paths");
-
-var collect = _dereq_("../lru/collect");
 
 function set_json_values_as_json_sparse(model, pathvalues, values, error_selector) {
 
@@ -5760,15 +5662,6 @@ function set_json_values_as_json_sparse(model, pathvalues, values, error_selecto
     } else {
         delete json.json;
     }
-
-    collect(
-        roots.lru,
-        roots.expired,
-        roots.version,
-        roots.root.$size || 0,
-        model._maxSize,
-        model._collectRatio
-    );
 
     return {
         values: values,
@@ -5869,7 +5762,7 @@ function onEdge(pathset, depth, roots, parents, nodes, requested, optimized, key
     }
 }
 
-},{"../lru/collect":84,"../support/array-clone":102,"../support/clone-dense-json":104,"../support/clone-success-paths":110,"../support/create-branch":112,"../support/get-valid-key":114,"../support/graph-node":115,"../support/inc-generation":116,"../support/invalidate-node":118,"../support/is-object":120,"../support/options":125,"../support/replace-node":128,"../support/treat-node-as-error":130,"../support/treat-node-as-missing-path-set":132,"../support/update-back-refs":134,"../support/update-graph":135,"../support/wrap-node":136,"../types/atom":137,"../types/error":138,"../types/path":139,"../walk/walk-path-set":145}],100:[function(_dereq_,module,exports){
+},{"../support/array-clone":103,"../support/clone-dense-json":105,"../support/clone-success-paths":111,"../support/create-branch":113,"../support/get-valid-key":115,"../support/graph-node":116,"../support/inc-generation":117,"../support/invalidate-node":119,"../support/is-object":121,"../support/options":126,"../support/replace-node":129,"../support/treat-node-as-error":131,"../support/treat-node-as-missing-path-set":133,"../support/update-back-refs":135,"../support/update-graph":136,"../support/wrap-node":137,"../types/atom":138,"../types/error":139,"../types/path":140,"../walk/walk-path-set":146}],101:[function(_dereq_,module,exports){
 module.exports = set_json_values_as_json_values;
 
 var $error = _dereq_("../types/error");
@@ -5897,8 +5790,6 @@ var node_as_miss = _dereq_("../support/treat-node-as-missing-path-set");
 var node_as_error = _dereq_("../support/treat-node-as-error");
 var clone_success = _dereq_("../support/clone-success-paths");
 
-var collect = _dereq_("../lru/collect");
-
 function set_json_values_as_json_values(model, pathvalues, onNext, error_selector) {
 
     var roots = options([], model, error_selector);
@@ -5919,15 +5810,6 @@ function set_json_values_as_json_values(model, pathvalues, onNext, error_selecto
         walk_path_set(onNode, onEdge, pathset, 0, roots, parents, nodes, requested, optimized);
     }
 
-    collect(
-        roots.lru,
-        roots.expired,
-        roots.version,
-        roots.root.$size || 0,
-        model._maxSize,
-        model._collectRatio
-    );
-
     return {
         values: null,
         errors: roots.errors,
@@ -5943,7 +5825,7 @@ function onNode(pathset, roots, parents, nodes, requested, optimized, is_top_lev
     var parent;
 
     if (key == null) {
-        if ((key = get_valid_key(optimized, nodes)) == null) {
+        if ((key = get_valid_key(optimized)) == null) {
             return;
         }
         parent = parents[0];
@@ -6011,7 +5893,7 @@ function onEdge(pathset, depth, roots, parents, nodes, requested, optimized, key
     }
 }
 
-},{"../lru/collect":84,"../support/array-clone":102,"../support/clone-dense-json":104,"../support/clone-success-paths":110,"../support/create-branch":112,"../support/get-valid-key":114,"../support/graph-node":115,"../support/inc-generation":116,"../support/invalidate-node":118,"../support/is-object":120,"../support/options":125,"../support/replace-node":128,"../support/treat-node-as-error":130,"../support/treat-node-as-missing-path-set":132,"../support/update-back-refs":134,"../support/update-graph":135,"../support/wrap-node":136,"../types/atom":137,"../types/error":138,"../walk/walk-path-set":145}],101:[function(_dereq_,module,exports){
+},{"../support/array-clone":103,"../support/clone-dense-json":105,"../support/clone-success-paths":111,"../support/create-branch":113,"../support/get-valid-key":115,"../support/graph-node":116,"../support/inc-generation":117,"../support/invalidate-node":119,"../support/is-object":121,"../support/options":126,"../support/replace-node":129,"../support/treat-node-as-error":131,"../support/treat-node-as-missing-path-set":133,"../support/update-back-refs":135,"../support/update-graph":136,"../support/wrap-node":137,"../types/atom":138,"../types/error":139,"../walk/walk-path-set":146}],102:[function(_dereq_,module,exports){
 module.exports = function(array, value) {
     var i = -1;
     var n = array.length;
@@ -6020,7 +5902,7 @@ module.exports = function(array, value) {
     array2[i] = value;
     return array2;
 };
-},{}],102:[function(_dereq_,module,exports){
+},{}],103:[function(_dereq_,module,exports){
 module.exports = function(array) {
     var i = -1;
     var n = array.length;
@@ -6028,7 +5910,7 @@ module.exports = function(array) {
     while(++i < n) { array2[i] = array[i]; }
     return array2;
 };
-},{}],103:[function(_dereq_,module,exports){
+},{}],104:[function(_dereq_,module,exports){
 module.exports = function(array, index) {
     var i = -1;
     var n = Math.max(array.length - index, 0);
@@ -6036,7 +5918,7 @@ module.exports = function(array, index) {
     while(++i < n) { array2[i] = array[i + index]; }
     return array2;
 };
-},{}],104:[function(_dereq_,module,exports){
+},{}],105:[function(_dereq_,module,exports){
 var $atom = _dereq_("../types/atom");
 var clone = _dereq_("./clone");
 module.exports = function(roots, node, type, value) {
@@ -6052,7 +5934,7 @@ module.exports = function(roots, node, type, value) {
     return value;
 }
 
-},{"../types/atom":137,"./clone":111}],105:[function(_dereq_,module,exports){
+},{"../types/atom":138,"./clone":112}],106:[function(_dereq_,module,exports){
 var $atom = _dereq_("../types/atom");
 var clone = _dereq_("./clone");
 var is_primitive = _dereq_("./is-primitive");
@@ -6073,7 +5955,7 @@ module.exports = function(roots, node, type, value) {
     return clone(node);
 }
 
-},{"../types/atom":137,"./clone":111,"./is-primitive":121}],106:[function(_dereq_,module,exports){
+},{"../types/atom":138,"./clone":112,"./is-primitive":122}],107:[function(_dereq_,module,exports){
 var clone_requested = _dereq_("./clone-requested-path");
 var clone_optimized = _dereq_("./clone-optimized-path");
 var walk_path_map   = _dereq_("../walk/walk-path-map-soft-link");
@@ -6109,14 +5991,14 @@ function explode_keys(pathmap, keys_stack, depth) {
     }
     return keys_stack;
 }
-},{"../walk/walk-path-map-soft-link":142,"./clone-optimized-path":108,"./clone-requested-path":109,"./is-object":120}],107:[function(_dereq_,module,exports){
+},{"../walk/walk-path-map-soft-link":143,"./clone-optimized-path":109,"./clone-requested-path":110,"./is-object":121}],108:[function(_dereq_,module,exports){
 var clone_requested_path = _dereq_("./clone-requested-path");
 var clone_optimized_path = _dereq_("./clone-optimized-path");
 module.exports = function(roots, pathset, depth, requested, optimized) {
     roots.requestedMissingPaths.push(clone_requested_path(roots.bound, requested, pathset, depth, roots.index));
     roots.optimizedMissingPaths.push(clone_optimized_path(optimized, pathset, depth));
 }
-},{"./clone-optimized-path":108,"./clone-requested-path":109}],108:[function(_dereq_,module,exports){
+},{"./clone-optimized-path":109,"./clone-requested-path":110}],109:[function(_dereq_,module,exports){
 module.exports = function(optimized, pathset, depth) {
     var x;
     var i = -1;
@@ -6134,7 +6016,7 @@ module.exports = function(optimized, pathset, depth) {
     }
     return array2;
 }
-},{}],109:[function(_dereq_,module,exports){
+},{}],110:[function(_dereq_,module,exports){
 var is_object = _dereq_("./is-object");
 module.exports = function(bound, requested, pathset, depth, index) {
     var x;
@@ -6165,14 +6047,14 @@ module.exports = function(bound, requested, pathset, depth, index) {
     }
     return array2;
 }
-},{"./is-object":120}],110:[function(_dereq_,module,exports){
+},{"./is-object":121}],111:[function(_dereq_,module,exports){
 var array_slice = _dereq_("./array-slice");
 var array_clone = _dereq_("./array-clone");
 module.exports = function(roots, requested, optimized) {
     roots.requestedPaths.push(array_slice(requested, roots.offset));
     roots.optimizedPaths.push(array_clone(optimized));
 }
-},{"./array-clone":102,"./array-slice":103}],111:[function(_dereq_,module,exports){
+},{"./array-clone":103,"./array-slice":104}],112:[function(_dereq_,module,exports){
 var is_object = _dereq_("./is-object");
 var prefix = _dereq_("../internal/prefix");
 
@@ -6191,7 +6073,7 @@ module.exports = function(value) {
     }
     return dest;
 }
-},{"../internal/prefix":72,"./is-object":120}],112:[function(_dereq_,module,exports){
+},{"../internal/prefix":73,"./is-object":121}],113:[function(_dereq_,module,exports){
 var $path = _dereq_("../types/path");
 var $expired = "expired";
 var replace_node = _dereq_("./replace-node");
@@ -6214,7 +6096,7 @@ module.exports = function(roots, parent, node, type, key) {
     return node;
 }
 
-},{"../types/path":139,"./graph-node":115,"./is-expired":119,"./is-primitive":121,"./replace-node":128,"./update-back-refs":134}],113:[function(_dereq_,module,exports){
+},{"../types/path":140,"./graph-node":116,"./is-expired":120,"./is-primitive":122,"./replace-node":129,"./update-back-refs":135}],114:[function(_dereq_,module,exports){
 var __ref = _dereq_("../internal/ref");
 var __context = _dereq_("../internal/context");
 var __ref_index = _dereq_("../internal/ref-index");
@@ -6229,7 +6111,7 @@ module.exports = function(node) {
     }
     node[__refs_length] = undefined
 }
-},{"../internal/context":64,"../internal/ref":75,"../internal/ref-index":74,"../internal/refs-length":76}],114:[function(_dereq_,module,exports){
+},{"../internal/context":65,"../internal/ref":76,"../internal/ref-index":75,"../internal/refs-length":77}],115:[function(_dereq_,module,exports){
 module.exports = function(path) {
     var key, index = path.length - 1;
     do {
@@ -6239,7 +6121,7 @@ module.exports = function(path) {
     } while(--index > -1);
     return null;
 }
-},{}],115:[function(_dereq_,module,exports){
+},{}],116:[function(_dereq_,module,exports){
 var __parent = _dereq_("../internal/parent");
 var __key = _dereq_("../internal/key");
 var __generation = _dereq_("../internal/generation");
@@ -6250,13 +6132,13 @@ module.exports = function(root, parent, node, key, generation) {
     node[__generation] = generation;
     return node;
 }
-},{"../internal/generation":65,"../internal/key":68,"../internal/parent":71}],116:[function(_dereq_,module,exports){
+},{"../internal/generation":66,"../internal/key":69,"../internal/parent":72}],117:[function(_dereq_,module,exports){
 var generation = 0;
 module.exports = function() { return generation++; }
-},{}],117:[function(_dereq_,module,exports){
+},{}],118:[function(_dereq_,module,exports){
 var version = 0;
 module.exports = function() { return version++; }
-},{}],118:[function(_dereq_,module,exports){
+},{}],119:[function(_dereq_,module,exports){
 module.exports = invalidate;
 
 var is_object = _dereq_("./is-object");
@@ -6279,7 +6161,7 @@ function invalidate(parent, node, key, lru) {
     }
     return false;
 }
-},{"../internal/prefix":72,"./is-object":120,"./remove-node":127}],119:[function(_dereq_,module,exports){
+},{"../internal/prefix":73,"./is-object":121,"./remove-node":128}],120:[function(_dereq_,module,exports){
 var $expires_now = _dereq_("../values/expires-now");
 var $expires_never = _dereq_("../values/expires-never");
 var __invalidated = _dereq_("../internal/invalidated");
@@ -6301,17 +6183,17 @@ module.exports = function(roots, node) {
     return false;
 }
 
-},{"../internal/invalidated":67,"../lru/splice":86,"../values/expires-never":140,"../values/expires-now":141,"./now":124}],120:[function(_dereq_,module,exports){
+},{"../internal/invalidated":68,"../lru/splice":87,"../values/expires-never":141,"../values/expires-now":142,"./now":125}],121:[function(_dereq_,module,exports){
 var obj_typeof = "object";
 module.exports = function(value) {
     return value != null && typeof value == obj_typeof;
 }
-},{}],121:[function(_dereq_,module,exports){
+},{}],122:[function(_dereq_,module,exports){
 var obj_typeof = "object";
 module.exports = function(value) {
     return value == null || typeof value != obj_typeof;
 }
-},{}],122:[function(_dereq_,module,exports){
+},{}],123:[function(_dereq_,module,exports){
 module.exports = key_to_keyset;
 
 var __offset = _dereq_("../internal/offset");
@@ -6331,7 +6213,7 @@ function key_to_keyset(key, iskeyset) {
 }
 
 
-},{"../internal/offset":70,"./is-object":120}],123:[function(_dereq_,module,exports){
+},{"../internal/offset":71,"./is-object":121}],124:[function(_dereq_,module,exports){
 
 var $self = "./";
 var $path = _dereq_("../types/path");
@@ -6512,9 +6394,9 @@ module.exports = function(roots, parent, node, messageParent, message, key) {
     return node;
 }
 
-},{"../lru/promote":85,"../support/replace-node":128,"../support/update-graph":135,"../types/atom":137,"../types/path":139,"../values/expires-now":141,"./graph-node":115,"./inc-generation":116,"./invalidate-node":118,"./is-expired":119,"./is-object":120,"./is-primitive":121,"./wrap-node":136}],124:[function(_dereq_,module,exports){
+},{"../lru/promote":86,"../support/replace-node":129,"../support/update-graph":136,"../types/atom":138,"../types/path":140,"../values/expires-now":142,"./graph-node":116,"./inc-generation":117,"./invalidate-node":119,"./is-expired":120,"./is-object":121,"./is-primitive":122,"./wrap-node":137}],125:[function(_dereq_,module,exports){
 module.exports = Date.now;
-},{}],125:[function(_dereq_,module,exports){
+},{}],126:[function(_dereq_,module,exports){
 var inc_version = _dereq_("../support/inc-version");
 var getBoundValue = _dereq_('../get/getBoundValue');
 
@@ -6534,7 +6416,7 @@ module.exports = function(options, model, error_selector) {
     options.materialized = model._materialized;
     options.errorsAsValues = model._treatErrorsAsValues || false;
     options.headless = model._dataSource == null;
-    options.version = inc_version();
+    options.version = model._version = inc_version();
     
     options.offset || (options.offset = 0);
     options.error_selector = error_selector || model._errorSelector;
@@ -6547,7 +6429,7 @@ module.exports = function(options, model, error_selector) {
     
     return options;
 };
-},{"../get/getBoundValue":47,"../support/inc-version":117}],126:[function(_dereq_,module,exports){
+},{"../get/getBoundValue":48,"../support/inc-version":118}],127:[function(_dereq_,module,exports){
 module.exports = permute_keyset;
 
 var __offset = _dereq_("../internal/offset");
@@ -6594,7 +6476,7 @@ function permute_keyset(key) {
 }
 
 
-},{"../internal/offset":70,"./is-object":120}],127:[function(_dereq_,module,exports){
+},{"../internal/offset":71,"./is-object":121}],128:[function(_dereq_,module,exports){
 var $path = _dereq_("../types/path");
 var __parent = _dereq_("../internal/parent");
 var unlink = _dereq_("./unlink");
@@ -6616,7 +6498,7 @@ module.exports = function(parent, node, key, lru) {
     return false;
 }
 
-},{"../internal/parent":71,"../lru/splice":86,"../types/path":139,"./delete-back-refs":113,"./is-object":120,"./unlink":133}],128:[function(_dereq_,module,exports){
+},{"../internal/parent":72,"../lru/splice":87,"../types/path":140,"./delete-back-refs":114,"./is-object":121,"./unlink":134}],129:[function(_dereq_,module,exports){
 var transfer_back_refs = _dereq_("./transfer-back-refs");
 var invalidate_node = _dereq_("./invalidate-node");
 
@@ -6627,7 +6509,7 @@ module.exports = function(parent, node, replacement, key, lru) {
     }
     return parent[key] = replacement;
 }
-},{"./invalidate-node":118,"./transfer-back-refs":129}],129:[function(_dereq_,module,exports){
+},{"./invalidate-node":119,"./transfer-back-refs":130}],130:[function(_dereq_,module,exports){
 var __ref = _dereq_("../internal/ref");
 var __context = _dereq_("../internal/context");
 var __refs_length = _dereq_("../internal/refs-length");
@@ -6647,7 +6529,7 @@ module.exports = function(node, dest) {
     dest[__refs_length] = nodeRefsLength + destRefsLength;
     node[__refs_length] = ref = undefined;
 }
-},{"../internal/context":64,"../internal/ref":75,"../internal/refs-length":76}],130:[function(_dereq_,module,exports){
+},{"../internal/context":65,"../internal/ref":76,"../internal/refs-length":77}],131:[function(_dereq_,module,exports){
 var $error = _dereq_("../types/error");
 var promote = _dereq_("../lru/promote");
 var array_clone = _dereq_("./array-clone");
@@ -6663,7 +6545,7 @@ module.exports = function(roots, node, type, path) {
     return true;
 };
 
-},{"../lru/promote":85,"../types/error":138,"./array-clone":102}],131:[function(_dereq_,module,exports){
+},{"../lru/promote":86,"../types/error":139,"./array-clone":103}],132:[function(_dereq_,module,exports){
 var $atom = _dereq_("../types/atom");
 var clone_misses = _dereq_("./clone-missing-path-maps");
 var is_expired = _dereq_("./is-expired");
@@ -6683,7 +6565,7 @@ module.exports = function(roots, node, type, pathmap, keys_stack, depth, request
     }
     return false;
 };
-},{"../types/atom":137,"./clone-missing-path-maps":106,"./is-expired":119}],132:[function(_dereq_,module,exports){
+},{"../types/atom":138,"./clone-missing-path-maps":107,"./is-expired":120}],133:[function(_dereq_,module,exports){
 var $atom = _dereq_("../types/atom");
 var clone_misses = _dereq_("./clone-missing-path-sets");
 var is_expired = _dereq_("./is-expired");
@@ -6704,7 +6586,7 @@ module.exports = function(roots, node, type, pathset, depth, requested, optimize
     return false;
 };
 
-},{"../types/atom":137,"./clone-missing-path-sets":107,"./is-expired":119}],133:[function(_dereq_,module,exports){
+},{"../types/atom":138,"./clone-missing-path-sets":108,"./is-expired":120}],134:[function(_dereq_,module,exports){
 var __ref = _dereq_("../internal/ref");
 var __context = _dereq_("../internal/context");
 var __ref_index = _dereq_("../internal/ref-index");
@@ -6722,7 +6604,7 @@ module.exports = function(ref) {
         ref[__ref_index] = ref[__context] = destination = undefined;
     }
 }
-},{"../internal/context":64,"../internal/ref":75,"../internal/ref-index":74,"../internal/refs-length":76}],134:[function(_dereq_,module,exports){
+},{"../internal/context":65,"../internal/ref":76,"../internal/ref-index":75,"../internal/refs-length":77}],135:[function(_dereq_,module,exports){
 module.exports = update_back_refs;
 
 var __ref = _dereq_("../internal/ref");
@@ -6746,7 +6628,7 @@ function update_back_refs(node, version) {
     return node;
 }
 
-},{"../internal/generation":65,"../internal/parent":71,"../internal/ref":75,"../internal/refs-length":76,"../internal/version":78,"./inc-generation":116}],135:[function(_dereq_,module,exports){
+},{"../internal/generation":66,"../internal/parent":72,"../internal/ref":76,"../internal/refs-length":77,"../internal/version":79,"./inc-generation":117}],136:[function(_dereq_,module,exports){
 var __key = _dereq_("../internal/key");
 var __version = _dereq_("../internal/version");
 var __parent = _dereq_("../internal/parent");
@@ -6764,7 +6646,7 @@ module.exports = function(node, offset, version, lru) {
         }
     }
 }
-},{"../internal/key":68,"../internal/parent":71,"../internal/version":78,"./remove-node":127,"./update-back-refs":134}],136:[function(_dereq_,module,exports){
+},{"../internal/key":69,"../internal/parent":72,"../internal/version":79,"./remove-node":128,"./update-back-refs":135}],137:[function(_dereq_,module,exports){
 var $path = _dereq_("../types/path");
 var $error = _dereq_("../types/error");
 var $atom = _dereq_("../types/atom");
@@ -6821,17 +6703,17 @@ module.exports = function(node, type, value) {
     return dest;
 }
 
-},{"../types/atom":137,"../types/error":138,"../types/path":139,"./clone":111,"./is-object":120,"./now":124}],137:[function(_dereq_,module,exports){
+},{"../types/atom":138,"../types/error":139,"../types/path":140,"./clone":112,"./is-object":121,"./now":125}],138:[function(_dereq_,module,exports){
 module.exports = "atom";
-},{}],138:[function(_dereq_,module,exports){
-module.exports = "error";
 },{}],139:[function(_dereq_,module,exports){
-module.exports = "ref";
+module.exports = "error";
 },{}],140:[function(_dereq_,module,exports){
-module.exports = 1;
+module.exports = "ref";
 },{}],141:[function(_dereq_,module,exports){
-module.exports = 0;
+module.exports = 1;
 },{}],142:[function(_dereq_,module,exports){
+module.exports = 0;
+},{}],143:[function(_dereq_,module,exports){
 module.exports = walk_path_map;
 
 var prefix = _dereq_("../internal/prefix");
@@ -6954,7 +6836,7 @@ function walk_path_map(onNode, onEdge, pathmap, keys_stack, depth, roots, parent
     }
 }
 
-},{"../internal/prefix":72,"../lru/promote":85,"../support/array-append":101,"../support/array-clone":102,"../support/array-slice":103,"../support/is-expired":119,"../support/is-object":120,"../support/is-primitive":121,"../types/path":139,"./walk-reference":146}],143:[function(_dereq_,module,exports){
+},{"../internal/prefix":73,"../lru/promote":86,"../support/array-append":102,"../support/array-clone":103,"../support/array-slice":104,"../support/is-expired":120,"../support/is-object":121,"../support/is-primitive":122,"../types/path":140,"./walk-reference":147}],144:[function(_dereq_,module,exports){
 module.exports = walk_path_map;
 
 var prefix = _dereq_("../internal/prefix");
@@ -7084,7 +6966,7 @@ function walk_path_map(onNode, onEdge, pathmap, keys_stack, depth, roots, parent
     }
 }
 
-},{"../internal/context":64,"../internal/prefix":72,"../lru/promote":85,"../support/array-append":101,"../support/array-clone":102,"../support/array-slice":103,"../support/is-expired":119,"../support/is-object":120,"../support/is-primitive":121,"../types/path":139,"./walk-reference":146}],144:[function(_dereq_,module,exports){
+},{"../internal/context":65,"../internal/prefix":73,"../lru/promote":86,"../support/array-append":102,"../support/array-clone":103,"../support/array-slice":104,"../support/is-expired":120,"../support/is-object":121,"../support/is-primitive":122,"../types/path":140,"./walk-reference":147}],145:[function(_dereq_,module,exports){
 module.exports = walk_path_set;
 
 var $path = _dereq_("../types/path");
@@ -7190,7 +7072,7 @@ function walk_path_set(onNode, onEdge, pathset, depth, roots, parents, nodes, re
     }
 }
 
-},{"../lru/promote":85,"../support/array-append":101,"../support/array-clone":102,"../support/array-slice":103,"../support/is-expired":119,"../support/is-object":120,"../support/is-primitive":121,"../support/keyset-to-key":122,"../support/permute-keyset":126,"../types/path":139,"./walk-reference":146}],145:[function(_dereq_,module,exports){
+},{"../lru/promote":86,"../support/array-append":102,"../support/array-clone":103,"../support/array-slice":104,"../support/is-expired":120,"../support/is-object":121,"../support/is-primitive":122,"../support/keyset-to-key":123,"../support/permute-keyset":127,"../types/path":140,"./walk-reference":147}],146:[function(_dereq_,module,exports){
 module.exports = walk_path_set;
 
 var prefix = _dereq_("../internal/prefix");
@@ -7307,7 +7189,7 @@ function walk_path_set(onNode, onEdge, pathset, depth, roots, parents, nodes, re
     }
 }
 
-},{"../internal/context":64,"../internal/prefix":72,"../lru/promote":85,"../support/array-append":101,"../support/array-clone":102,"../support/array-slice":103,"../support/is-expired":119,"../support/is-object":120,"../support/is-primitive":121,"../support/keyset-to-key":122,"../support/permute-keyset":126,"../types/path":139,"./walk-reference":146}],146:[function(_dereq_,module,exports){
+},{"../internal/context":65,"../internal/prefix":73,"../lru/promote":86,"../support/array-append":102,"../support/array-clone":103,"../support/array-slice":104,"../support/is-expired":120,"../support/is-object":121,"../support/is-primitive":122,"../support/keyset-to-key":123,"../support/permute-keyset":127,"../types/path":140,"./walk-reference":147}],147:[function(_dereq_,module,exports){
 module.exports = walk_reference;
 
 var prefix = _dereq_("../internal/prefix");
@@ -7364,7 +7246,7 @@ function walk_reference(onNode, container, reference, roots, parents, nodes, req
     return nodes;
 }
 
-},{"../internal/context":64,"../internal/prefix":72,"../internal/ref":75,"../internal/ref-index":74,"../internal/refs-length":76,"../support/array-append":101,"../support/array-slice":103,"../support/is-object":120,"../support/is-primitive":121}],147:[function(_dereq_,module,exports){
+},{"../internal/context":65,"../internal/prefix":73,"../internal/ref":76,"../internal/ref-index":75,"../internal/refs-length":77,"../support/array-append":102,"../support/array-slice":104,"../support/is-object":121,"../support/is-primitive":122}],148:[function(_dereq_,module,exports){
 "use strict";
 
 // rawAsap provides everything we need except exception management.
@@ -7432,7 +7314,7 @@ RawTask.prototype.call = function () {
     }
 };
 
-},{"./raw":148}],148:[function(_dereq_,module,exports){
+},{"./raw":149}],149:[function(_dereq_,module,exports){
 (function (global){
 "use strict";
 
@@ -7656,7 +7538,7 @@ rawAsap.makeRequestCallFromTimer = makeRequestCallFromTimer;
 // https://github.com/tildeio/rsvp.js/blob/cddf7232546a9cf858524b75cde6f9edf72620a7/lib/rsvp/asap.js
 
 }).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],149:[function(_dereq_,module,exports){
+},{}],150:[function(_dereq_,module,exports){
 /*global define:false require:false */
 module.exports = (function(){
 	// Import Events
@@ -7724,7 +7606,7 @@ module.exports = (function(){
 	};
 	return domain
 }).call(this)
-},{"events":150}],150:[function(_dereq_,module,exports){
+},{"events":151}],151:[function(_dereq_,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -8027,7 +7909,7 @@ function isUndefined(arg) {
   return arg === void 0;
 }
 
-},{}],151:[function(_dereq_,module,exports){
+},{}],152:[function(_dereq_,module,exports){
 // shim for using process in browser
 
 var process = module.exports = {};
@@ -8092,71 +7974,187 @@ process.chdir = function (dir) {
     throw new Error('process.chdir is not supported');
 };
 
-},{}],152:[function(_dereq_,module,exports){
+},{}],153:[function(_dereq_,module,exports){
 arguments[4][2][0].apply(exports,arguments)
-},{"./lib/falcor":157,"./lib/get":200,"./lib/invalidate":229,"./lib/set":237}],153:[function(_dereq_,module,exports){
+},{"./lib/falcor":158,"./lib/get":201,"./lib/invalidate":230,"./lib/set":238}],154:[function(_dereq_,module,exports){
 module.exports=_dereq_(3)
-},{"falcor-observable":302}],154:[function(_dereq_,module,exports){
+},{"falcor-observable":303}],155:[function(_dereq_,module,exports){
 arguments[4][4][0].apply(exports,arguments)
-},{"../types/error":288,"./../get/getBoundValue":197,"./../types/atom":287,"./../types/error":288,"./../types/path":289,"./Falcor":153,"./ModelDataSourceAdapter":155,"./ModelResponse":156,"./operations":163,"./operations/call":158,"./request/RequestQueue":188,"./scheduler/ASAPScheduler":189,"./scheduler/ImmediateScheduler":190,"./scheduler/TimeoutScheduler":191,"falcor-path-syntax":306}],155:[function(_dereq_,module,exports){
+},{"../types/error":289,"./../get/getBoundValue":198,"./../types/atom":288,"./../types/error":289,"./../types/path":290,"./Falcor":154,"./ModelDataSourceAdapter":156,"./ModelResponse":157,"./operations":164,"./operations/call":159,"./request/RequestQueue":189,"./scheduler/ASAPScheduler":190,"./scheduler/ImmediateScheduler":191,"./scheduler/TimeoutScheduler":192,"falcor-path-syntax":307}],156:[function(_dereq_,module,exports){
 module.exports=_dereq_(5)
-},{}],156:[function(_dereq_,module,exports){
+},{}],157:[function(_dereq_,module,exports){
 module.exports=_dereq_(6)
-},{"./Falcor":153,"falcor-path-syntax":306,"promise":330}],157:[function(_dereq_,module,exports){
+},{"./Falcor":154,"falcor-path-syntax":307,"promise":331}],158:[function(_dereq_,module,exports){
 module.exports=_dereq_(7)
-},{"./Falcor":153,"./Model":154}],158:[function(_dereq_,module,exports){
+},{"./Falcor":154,"./Model":155}],159:[function(_dereq_,module,exports){
 module.exports=_dereq_(8)
-},{"../../Falcor":153,"./../../ModelResponse":156}],159:[function(_dereq_,module,exports){
+},{"../../Falcor":154,"./../../ModelResponse":157}],160:[function(_dereq_,module,exports){
 module.exports=_dereq_(9)
-},{"./../support/combineOperations":174,"./../support/setSeedsOrOnNext":187}],160:[function(_dereq_,module,exports){
+},{"./../support/combineOperations":175,"./../support/setSeedsOrOnNext":188}],161:[function(_dereq_,module,exports){
 module.exports=_dereq_(10)
-},{"./../support/getSourceObserever":175,"./../support/mergeBoundPath":179,"./../support/partitionOperations":182}],161:[function(_dereq_,module,exports){
-module.exports=_dereq_(11)
-},{"./../request":166,"./../support/processOperations":184,"./getInitialArgs":159,"./getSourceRequest":160,"./shouldRequest":162}],162:[function(_dereq_,module,exports){
+},{"./../support/getSourceObserever":176,"./../support/mergeBoundPath":180,"./../support/partitionOperations":183}],162:[function(_dereq_,module,exports){
+arguments[4][11][0].apply(exports,arguments)
+},{"./../request":167,"./../support/processOperations":185,"./getInitialArgs":160,"./getSourceRequest":161,"./shouldRequest":163}],163:[function(_dereq_,module,exports){
 module.exports=_dereq_(12)
-},{}],163:[function(_dereq_,module,exports){
-module.exports=_dereq_(13)
-},{"../ModelResponse":156,"./get":161,"./invalidate":164,"./set":167}],164:[function(_dereq_,module,exports){
-module.exports=_dereq_(14)
-},{"./../request":166,"./../support/processOperations":184,"./invalidateInitialArgs":165}],165:[function(_dereq_,module,exports){
+},{}],164:[function(_dereq_,module,exports){
+arguments[4][13][0].apply(exports,arguments)
+},{"../ModelResponse":157,"./get":162,"./invalidate":165,"./set":168}],165:[function(_dereq_,module,exports){
+arguments[4][14][0].apply(exports,arguments)
+},{"./../request":167,"./../support/processOperations":185,"./invalidateInitialArgs":166}],166:[function(_dereq_,module,exports){
 module.exports=_dereq_(15)
-},{"./../support/combineOperations":174,"./../support/setSeedsOrOnNext":187}],166:[function(_dereq_,module,exports){
-module.exports=_dereq_(16)
-},{"./support/onCompletedOrError":180,"./support/onNextValue":181,"./support/primeSeeds":183,"./support/setSeedsOrOnNext":187}],167:[function(_dereq_,module,exports){
-module.exports=_dereq_(17)
-},{"./../request":166,"./setInitialArgs":168,"./setProcessOperations":169,"./setSourceRequest":170,"./shouldRequest":171}],168:[function(_dereq_,module,exports){
-module.exports=_dereq_(18)
-},{"./../support/Formats":172,"./../support/combineOperations":174,"./../support/setSeedsOrOnNext":187}],169:[function(_dereq_,module,exports){
+},{"./../support/combineOperations":175,"./../support/setSeedsOrOnNext":188}],167:[function(_dereq_,module,exports){
+var setSeedsOrOnNext = _dereq_('./support/setSeedsOrOnNext');
+var onNextValues = _dereq_('./support/onNextValue');
+var onCompletedOrError = _dereq_('./support/onCompletedOrError');
+var primeSeeds = _dereq_('./support/primeSeeds');
+var autoFalse = function() { return false; };
+
+module.exports = request;
+
+function request(initialArgs, sourceRequest, processOperations, shouldRequestFn) {
+    if (!shouldRequestFn) {
+        shouldRequestFn = autoFalse;
+    }
+    return function innerRequest(options) {
+        var selector = options.operationSelector;
+        var model = options.operationModel;
+        var args = options.operationArgs;
+        var onNext = options.onNext.bind(options);
+        var onError = options.onError.bind(options);
+        var onCompleted = options.onCompleted.bind(options);
+        var isProgressive = options.operationIsProgressive;
+        var errorSelector = model._errorSelector;
+        var selectorLength = selector && selector.length || 0;
+
+        // State variables
+        var errors = [];
+        var format = options.format = selector && 'AsJSON' ||
+            options.format || 'AsPathMap';
+        var toJSONG = format === 'AsJSONG';
+        var toJSON = format === 'AsPathMap';
+        var toPathValues = format === 'AsValues';
+        var seedRequired = toJSON || toJSONG || selector;
+        var boundPath = model._path;
+        var i, len;
+        var foundValue = false;
+        var seeds = primeSeeds(selector, selectorLength);
+        var loopCount = 0;
+
+        function recurse(operations, opts) {
+            if (loopCount > 50) {
+                throw 'Loop Kill switch thrown.';
+            }
+            var combinedResults = processOperations(
+                model,
+                operations,
+                errorSelector,
+                opts);
+
+            foundValue = foundValue || combinedResults.valuesReceived;
+            if (combinedResults.errors.length) {
+                errors = errors.concat(combinedResults.errors);
+            }
+
+            // if in progressiveMode, values are emitted
+            // each time through the recurse loop.  This may have
+            // to change when the router is considered.
+            if (isProgressive && !toPathValues) {
+                onNextValues(model, onNext, seeds, selector);
+            }
+
+            // Performs the recursing via dataSource
+            if (shouldRequestFn(model, combinedResults, loopCount)) {
+                sourceRequest(
+                    options,
+                    onNext,
+                    seeds,
+                    combinedResults,
+                    opts,
+                    function onCompleteFromSourceSet(err, results) {
+                        if (err) {
+                            errors = errors.concat(err);
+                            recurse([], seeds);
+                            return;
+                        }
+                        ++loopCount;
+
+                        // We continue to string the opts through
+                        recurse(results, opts);
+                    });
+            }
+
+            // Else we need to onNext values and complete/error.
+            else {
+                if (!toPathValues && !isProgressive && foundValue) {
+                    onNextValues(model, onNext, seeds, selector);
+                }
+                onCompletedOrError(onCompleted, onError, errors);
+            }
+        }
+
+        try {
+            recurse.apply(null,
+                initialArgs(options, seeds, onNext));
+        } catch(e) {
+            debugger;
+            errors = [e];
+            onCompletedOrError(onCompleted, onError, errors);
+        }
+    };
+}
+
+},{"./support/onCompletedOrError":181,"./support/onNextValue":182,"./support/primeSeeds":184,"./support/setSeedsOrOnNext":188}],168:[function(_dereq_,module,exports){
+var setInitialArgs = _dereq_('./setInitialArgs');
+var setSourceRequest = _dereq_('./setSourceRequest');
+var request = _dereq_('./../request');
+var setProcessOperations = _dereq_('./setProcessOperations');
+var shouldRequest = _dereq_('./shouldRequest');
+var set = request(
+    setInitialArgs,
+    setSourceRequest,
+    setProcessOperations,
+    shouldRequest);
+
+module.exports = set;
+
+},{"./../request":167,"./setInitialArgs":169,"./setProcessOperations":170,"./setSourceRequest":171,"./shouldRequest":172}],169:[function(_dereq_,module,exports){
 module.exports=_dereq_(19)
-},{"./../support/Formats":172,"./../support/combineOperations":174,"./../support/mergeBoundPath":179,"./../support/processOperations":184}],170:[function(_dereq_,module,exports){
+},{"./../support/Formats":173,"./../support/combineOperations":175,"./../support/setSeedsOrOnNext":188}],170:[function(_dereq_,module,exports){
 module.exports=_dereq_(20)
-},{"./../support/Formats":172,"./../support/combineOperations":174,"./../support/getSourceObserever":175,"./../support/setSeedsOrOnNext":187}],171:[function(_dereq_,module,exports){
+},{"./../support/Formats":173,"./../support/combineOperations":175,"./../support/mergeBoundPath":180,"./../support/processOperations":185}],171:[function(_dereq_,module,exports){
 module.exports=_dereq_(21)
-},{}],172:[function(_dereq_,module,exports){
+},{"./../support/Formats":173,"./../support/combineOperations":175,"./../support/getSourceObserever":176,"./../support/setSeedsOrOnNext":188}],172:[function(_dereq_,module,exports){
 module.exports=_dereq_(22)
 },{}],173:[function(_dereq_,module,exports){
 module.exports=_dereq_(23)
 },{}],174:[function(_dereq_,module,exports){
 module.exports=_dereq_(24)
-},{"./Formats":172,"./isJSONG":177,"./isPathOrPathValue":178,"./seedRequired":185}],175:[function(_dereq_,module,exports){
+},{}],175:[function(_dereq_,module,exports){
 module.exports=_dereq_(25)
-},{"./insertErrors.js":176}],176:[function(_dereq_,module,exports){
+},{"./Formats":173,"./isJSONG":178,"./isPathOrPathValue":179,"./seedRequired":186}],176:[function(_dereq_,module,exports){
 module.exports=_dereq_(26)
-},{}],177:[function(_dereq_,module,exports){
+},{"./insertErrors.js":177}],177:[function(_dereq_,module,exports){
 module.exports=_dereq_(27)
 },{}],178:[function(_dereq_,module,exports){
 module.exports=_dereq_(28)
 },{}],179:[function(_dereq_,module,exports){
 module.exports=_dereq_(29)
-},{"./isJSONG":177,"./isPathOrPathValue":178}],180:[function(_dereq_,module,exports){
+},{}],180:[function(_dereq_,module,exports){
 module.exports=_dereq_(30)
-},{}],181:[function(_dereq_,module,exports){
-module.exports=_dereq_(31)
+},{"./isJSONG":178,"./isPathOrPathValue":179}],181:[function(_dereq_,module,exports){
+module.exports = function onCompletedOrError(onCompleted, onError, errors) {
+    if (errors.length) {
+        onError(errors);
+    } else {
+        onCompleted();
+    }
+};
+
 },{}],182:[function(_dereq_,module,exports){
 module.exports=_dereq_(32)
-},{"./buildJSONGOperation":173}],183:[function(_dereq_,module,exports){
+},{}],183:[function(_dereq_,module,exports){
 module.exports=_dereq_(33)
-},{}],184:[function(_dereq_,module,exports){
+},{"./buildJSONGOperation":174}],184:[function(_dereq_,module,exports){
 module.exports=_dereq_(34)
 },{}],185:[function(_dereq_,module,exports){
 module.exports=_dereq_(35)
@@ -8164,27 +8162,29 @@ module.exports=_dereq_(35)
 module.exports=_dereq_(36)
 },{}],187:[function(_dereq_,module,exports){
 module.exports=_dereq_(37)
-},{"./setSeedsOnGroups":186}],188:[function(_dereq_,module,exports){
+},{}],188:[function(_dereq_,module,exports){
 module.exports=_dereq_(38)
-},{"./../Falcor":153}],189:[function(_dereq_,module,exports){
+},{"./setSeedsOnGroups":187}],189:[function(_dereq_,module,exports){
 module.exports=_dereq_(39)
-},{"asap":147}],190:[function(_dereq_,module,exports){
+},{"./../Falcor":154}],190:[function(_dereq_,module,exports){
 module.exports=_dereq_(40)
-},{}],191:[function(_dereq_,module,exports){
+},{"asap":148}],191:[function(_dereq_,module,exports){
 module.exports=_dereq_(41)
 },{}],192:[function(_dereq_,module,exports){
 module.exports=_dereq_(42)
-},{"../internal/context":214,"./../types/path.js":289,"./onValue":204,"./util/hardlink":206,"./util/isExpired":207}],193:[function(_dereq_,module,exports){
-arguments[4][43][0].apply(exports,arguments)
-},{"./getBoundValue":197,"./util/isPathValue":209}],194:[function(_dereq_,module,exports){
+},{}],193:[function(_dereq_,module,exports){
+module.exports=_dereq_(43)
+},{"../internal/context":215,"./../types/path.js":290,"./onValue":205,"./util/hardlink":207,"./util/isExpired":208}],194:[function(_dereq_,module,exports){
 arguments[4][44][0].apply(exports,arguments)
-},{"./getBoundValue":197,"./util/isPathValue":209}],195:[function(_dereq_,module,exports){
+},{"./getBoundValue":198,"./util/isPathValue":210}],195:[function(_dereq_,module,exports){
 arguments[4][45][0].apply(exports,arguments)
-},{"./getBoundValue":197,"./util/isPathValue":209}],196:[function(_dereq_,module,exports){
+},{"./getBoundValue":198,"./util/isPathValue":210}],196:[function(_dereq_,module,exports){
 arguments[4][46][0].apply(exports,arguments)
-},{"./getBoundValue":197,"./util/isPathValue":209}],197:[function(_dereq_,module,exports){
+},{"./getBoundValue":198,"./util/isPathValue":210}],197:[function(_dereq_,module,exports){
 arguments[4][47][0].apply(exports,arguments)
-},{"./getValueSync":198}],198:[function(_dereq_,module,exports){
+},{"./getBoundValue":198,"./util/isPathValue":210}],198:[function(_dereq_,module,exports){
+arguments[4][48][0].apply(exports,arguments)
+},{"./getValueSync":199}],199:[function(_dereq_,module,exports){
 var followReference = _dereq_('./followReference');
 var clone = _dereq_('./util/clone');
 var isExpired = _dereq_('./util/isExpired');
@@ -8289,185 +8289,2167 @@ module.exports = function getValueSync(model, simplePath) {
     };
 };
 
-},{"./../types/atom.js":287,"./../types/error.js":288,"./../types/path.js":289,"./followReference":192,"./util/clone":205,"./util/isExpired":207,"./util/lru":210}],199:[function(_dereq_,module,exports){
-module.exports=_dereq_(49)
-},{"../internal/invalidated":217,"./../internal/prefix":222,"./../types/error":288,"./../types/path":289,"./followReference":192,"./onError":202,"./onMissing":203,"./onValue":204,"./util/hardlink":206,"./util/isExpired":207,"./util/isMaterialzed":208,"./util/lru":210,"./util/permuteKey":211}],200:[function(_dereq_,module,exports){
-arguments[4][50][0].apply(exports,arguments)
-},{"./getAsJSON":193,"./getAsJSONG":194,"./getAsPathMap":195,"./getAsValues":196,"./getBoundValue":197,"./getValueSync":198,"./getWalk":199,"./legacy_setCache":201}],201:[function(_dereq_,module,exports){
-module.exports=_dereq_(51)
-},{}],202:[function(_dereq_,module,exports){
+},{"./../types/atom.js":288,"./../types/error.js":289,"./../types/path.js":290,"./followReference":193,"./util/clone":206,"./util/isExpired":208,"./util/lru":211}],200:[function(_dereq_,module,exports){
+module.exports=_dereq_(50)
+},{"../internal/invalidated":218,"./../internal/prefix":223,"./../types/error":289,"./../types/path":290,"./followReference":193,"./onError":203,"./onMissing":204,"./onValue":205,"./util/hardlink":207,"./util/isExpired":208,"./util/isMaterialzed":209,"./util/lru":211,"./util/permuteKey":212}],201:[function(_dereq_,module,exports){
+arguments[4][51][0].apply(exports,arguments)
+},{"./getAsJSON":194,"./getAsJSONG":195,"./getAsPathMap":196,"./getAsValues":197,"./getBoundValue":198,"./getValueSync":199,"./getWalk":200,"./legacy_setCache":202}],202:[function(_dereq_,module,exports){
 module.exports=_dereq_(52)
-},{"./util/clone":205,"./util/lru":210}],203:[function(_dereq_,module,exports){
+},{}],203:[function(_dereq_,module,exports){
 module.exports=_dereq_(53)
-},{"./util/clone":205,"./util/isExpired":207,"./util/spreadJSON":212,"./util/support":213}],204:[function(_dereq_,module,exports){
+},{"./util/clone":206,"./util/lru":211}],204:[function(_dereq_,module,exports){
 module.exports=_dereq_(54)
-},{"./../types/atom":287,"./../types/error":288,"./../types/path":289,"./util/clone":205,"./util/lru":210}],205:[function(_dereq_,module,exports){
+},{"./util/clone":206,"./util/isExpired":208,"./util/spreadJSON":213,"./util/support":214}],205:[function(_dereq_,module,exports){
 module.exports=_dereq_(55)
-},{"../../internal/prefix":222}],206:[function(_dereq_,module,exports){
+},{"./../types/atom":288,"./../types/error":289,"./../types/path":290,"./util/clone":206,"./util/lru":211}],206:[function(_dereq_,module,exports){
 module.exports=_dereq_(56)
-},{"../../internal/context":214,"../../internal/ref":225,"../../internal/ref-index":224,"../../internal/refs-length":226}],207:[function(_dereq_,module,exports){
+},{"../../internal/prefix":223}],207:[function(_dereq_,module,exports){
 module.exports=_dereq_(57)
-},{"../../support/now":274}],208:[function(_dereq_,module,exports){
+},{"../../internal/context":215,"../../internal/ref":226,"../../internal/ref-index":225,"../../internal/refs-length":227}],208:[function(_dereq_,module,exports){
 module.exports=_dereq_(58)
-},{}],209:[function(_dereq_,module,exports){
+},{"../../support/now":275}],209:[function(_dereq_,module,exports){
 module.exports=_dereq_(59)
 },{}],210:[function(_dereq_,module,exports){
 module.exports=_dereq_(60)
-},{"../../internal/head":216,"../../internal/invalidated":217,"../../internal/next":219,"../../internal/prev":223,"../../internal/tail":227}],211:[function(_dereq_,module,exports){
+},{}],211:[function(_dereq_,module,exports){
 module.exports=_dereq_(61)
-},{}],212:[function(_dereq_,module,exports){
+},{"../../internal/head":217,"../../internal/invalidated":218,"../../internal/next":220,"../../internal/prev":224,"../../internal/tail":228}],212:[function(_dereq_,module,exports){
 module.exports=_dereq_(62)
-},{"./support":213}],213:[function(_dereq_,module,exports){
+},{}],213:[function(_dereq_,module,exports){
 module.exports=_dereq_(63)
-},{}],214:[function(_dereq_,module,exports){
+},{"./support":214}],214:[function(_dereq_,module,exports){
 module.exports=_dereq_(64)
-},{"./prefix":222}],215:[function(_dereq_,module,exports){
+},{}],215:[function(_dereq_,module,exports){
 module.exports=_dereq_(65)
-},{"./prefix":222}],216:[function(_dereq_,module,exports){
+},{"./prefix":223}],216:[function(_dereq_,module,exports){
 module.exports=_dereq_(66)
-},{"./prefix":222}],217:[function(_dereq_,module,exports){
+},{"./prefix":223}],217:[function(_dereq_,module,exports){
 module.exports=_dereq_(67)
-},{"./prefix":222}],218:[function(_dereq_,module,exports){
+},{"./prefix":223}],218:[function(_dereq_,module,exports){
 module.exports=_dereq_(68)
-},{"./prefix":222}],219:[function(_dereq_,module,exports){
+},{"./prefix":223}],219:[function(_dereq_,module,exports){
 module.exports=_dereq_(69)
-},{"./prefix":222}],220:[function(_dereq_,module,exports){
+},{"./prefix":223}],220:[function(_dereq_,module,exports){
 module.exports=_dereq_(70)
-},{"./prefix":222}],221:[function(_dereq_,module,exports){
+},{"./prefix":223}],221:[function(_dereq_,module,exports){
 module.exports=_dereq_(71)
-},{"./prefix":222}],222:[function(_dereq_,module,exports){
+},{"./prefix":223}],222:[function(_dereq_,module,exports){
 module.exports=_dereq_(72)
-},{}],223:[function(_dereq_,module,exports){
+},{"./prefix":223}],223:[function(_dereq_,module,exports){
 module.exports=_dereq_(73)
-},{"./prefix":222}],224:[function(_dereq_,module,exports){
+},{}],224:[function(_dereq_,module,exports){
 module.exports=_dereq_(74)
-},{"./prefix":222}],225:[function(_dereq_,module,exports){
+},{"./prefix":223}],225:[function(_dereq_,module,exports){
 module.exports=_dereq_(75)
-},{"./prefix":222}],226:[function(_dereq_,module,exports){
+},{"./prefix":223}],226:[function(_dereq_,module,exports){
 module.exports=_dereq_(76)
-},{"./prefix":222}],227:[function(_dereq_,module,exports){
+},{"./prefix":223}],227:[function(_dereq_,module,exports){
 module.exports=_dereq_(77)
-},{"./prefix":222}],228:[function(_dereq_,module,exports){
+},{"./prefix":223}],228:[function(_dereq_,module,exports){
 module.exports=_dereq_(78)
-},{"./prefix":222}],229:[function(_dereq_,module,exports){
+},{"./prefix":223}],229:[function(_dereq_,module,exports){
 module.exports=_dereq_(79)
-},{"./invalidate-path-sets-as-json-dense":230,"./invalidate-path-sets-as-json-graph":231,"./invalidate-path-sets-as-json-sparse":232,"./invalidate-path-sets-as-json-values":233}],230:[function(_dereq_,module,exports){
-module.exports=_dereq_(80)
-},{"../lru/collect":234,"../support/array-clone":252,"../support/array-slice":253,"../support/clone-dense-json":254,"../support/get-valid-key":264,"../support/invalidate-node":268,"../support/is-object":270,"../support/options":275,"../support/update-graph":285,"../walk/walk-path-set":295}],231:[function(_dereq_,module,exports){
-module.exports=_dereq_(81)
-},{"../lru/collect":234,"../support/array-clone":252,"../support/clone-dense-json":254,"../support/clone-success-paths":260,"../support/get-valid-key":264,"../support/invalidate-node":268,"../support/is-object":270,"../support/options":275,"../support/update-graph":285,"../types/path":289,"../walk/walk-path-set-soft-link":294}],232:[function(_dereq_,module,exports){
-module.exports=_dereq_(82)
-},{"../lru/collect":234,"../support/array-clone":252,"../support/array-slice":253,"../support/clone-dense-json":254,"../support/get-valid-key":264,"../support/invalidate-node":268,"../support/is-object":270,"../support/options":275,"../support/update-graph":285,"../walk/walk-path-set":295}],233:[function(_dereq_,module,exports){
-module.exports=_dereq_(83)
-},{"../lru/collect":234,"../support/array-clone":252,"../support/array-slice":253,"../support/clone-dense-json":254,"../support/get-valid-key":264,"../support/invalidate-node":268,"../support/is-object":270,"../support/options":275,"../support/update-graph":285,"../walk/walk-path-set":295}],234:[function(_dereq_,module,exports){
-module.exports=_dereq_(84)
-},{"../internal/head":216,"../internal/next":219,"../internal/prev":223,"../internal/tail":227,"../support/update-graph":285}],235:[function(_dereq_,module,exports){
+},{"./prefix":223}],230:[function(_dereq_,module,exports){
+arguments[4][80][0].apply(exports,arguments)
+},{"./invalidate-path-sets-as-json-dense":231,"./invalidate-path-sets-as-json-graph":232,"./invalidate-path-sets-as-json-sparse":233,"./invalidate-path-sets-as-json-values":234}],231:[function(_dereq_,module,exports){
+arguments[4][81][0].apply(exports,arguments)
+},{"../lru/collect":235,"../support/array-clone":253,"../support/array-slice":254,"../support/clone-dense-json":255,"../support/get-valid-key":265,"../support/invalidate-node":269,"../support/is-object":271,"../support/options":276,"../support/update-graph":286,"../walk/walk-path-set":296}],232:[function(_dereq_,module,exports){
+arguments[4][82][0].apply(exports,arguments)
+},{"../lru/collect":235,"../support/array-clone":253,"../support/clone-dense-json":255,"../support/clone-success-paths":261,"../support/get-valid-key":265,"../support/invalidate-node":269,"../support/is-object":271,"../support/options":276,"../support/update-graph":286,"../types/path":290,"../walk/walk-path-set-soft-link":295}],233:[function(_dereq_,module,exports){
+arguments[4][83][0].apply(exports,arguments)
+},{"../lru/collect":235,"../support/array-clone":253,"../support/array-slice":254,"../support/clone-dense-json":255,"../support/get-valid-key":265,"../support/invalidate-node":269,"../support/is-object":271,"../support/options":276,"../support/update-graph":286,"../walk/walk-path-set":296}],234:[function(_dereq_,module,exports){
+arguments[4][84][0].apply(exports,arguments)
+},{"../lru/collect":235,"../support/array-clone":253,"../support/array-slice":254,"../support/clone-dense-json":255,"../support/get-valid-key":265,"../support/invalidate-node":269,"../support/is-object":271,"../support/options":276,"../support/update-graph":286,"../walk/walk-path-set":296}],235:[function(_dereq_,module,exports){
 module.exports=_dereq_(85)
-},{"../internal/head":216,"../internal/next":219,"../internal/prev":223,"../internal/tail":227,"../support/is-object":270,"../values/expires-never":290}],236:[function(_dereq_,module,exports){
+},{"../internal/head":217,"../internal/next":220,"../internal/prev":224,"../internal/tail":228,"../support/update-graph":286}],236:[function(_dereq_,module,exports){
 module.exports=_dereq_(86)
-},{"../internal/head":216,"../internal/next":219,"../internal/prev":223,"../internal/tail":227}],237:[function(_dereq_,module,exports){
+},{"../internal/head":217,"../internal/next":220,"../internal/prev":224,"../internal/tail":228,"../support/is-object":271,"../values/expires-never":291}],237:[function(_dereq_,module,exports){
 module.exports=_dereq_(87)
-},{"./set-cache":238,"./set-json-graph-as-json-dense":239,"./set-json-graph-as-json-graph":240,"./set-json-graph-as-json-sparse":241,"./set-json-graph-as-json-values":242,"./set-json-sparse-as-json-dense":243,"./set-json-sparse-as-json-graph":244,"./set-json-sparse-as-json-sparse":245,"./set-json-sparse-as-json-values":246,"./set-json-values-as-json-dense":247,"./set-json-values-as-json-graph":248,"./set-json-values-as-json-sparse":249,"./set-json-values-as-json-values":250}],238:[function(_dereq_,module,exports){
-module.exports=_dereq_(88)
-},{"../lru/collect":234,"../support/array-clone":252,"../support/clone-dense-json":254,"../support/create-branch":262,"../support/get-valid-key":264,"../support/graph-node":265,"../support/inc-generation":266,"../support/is-object":270,"../support/options":275,"../support/replace-node":278,"../support/update-back-refs":284,"../support/update-graph":285,"../support/wrap-node":286,"../types/atom":287,"../types/error":288,"../walk/walk-path-map":293}],239:[function(_dereq_,module,exports){
-module.exports=_dereq_(89)
-},{"../lru/collect":234,"../support/array-clone":252,"../support/clone-dense-json":254,"../support/clone-success-paths":260,"../support/get-valid-key":264,"../support/is-object":270,"../support/merge-node":273,"../support/options":275,"../support/treat-node-as-error":280,"../support/treat-node-as-missing-path-set":282,"../types/path":289,"../walk/walk-path-set-soft-link":294}],240:[function(_dereq_,module,exports){
-module.exports=_dereq_(90)
-},{"../lru/collect":234,"../lru/promote":235,"../support/array-clone":252,"../support/clone-graph-json":255,"../support/clone-success-paths":260,"../support/get-valid-key":264,"../support/is-object":270,"../support/merge-node":273,"../support/options":275,"../support/treat-node-as-error":280,"../support/treat-node-as-missing-path-set":282,"../types/path":289,"../walk/walk-path-set-soft-link":294}],241:[function(_dereq_,module,exports){
-module.exports=_dereq_(91)
-},{"../lru/collect":234,"../support/array-clone":252,"../support/clone-dense-json":254,"../support/clone-success-paths":260,"../support/get-valid-key":264,"../support/is-object":270,"../support/merge-node":273,"../support/options":275,"../support/treat-node-as-error":280,"../support/treat-node-as-missing-path-set":282,"../types/path":289,"../walk/walk-path-set-soft-link":294}],242:[function(_dereq_,module,exports){
-module.exports=_dereq_(92)
-},{"../lru/collect":234,"../support/array-clone":252,"../support/array-slice":253,"../support/clone-dense-json":254,"../support/clone-success-paths":260,"../support/get-valid-key":264,"../support/is-object":270,"../support/merge-node":273,"../support/options":275,"../support/treat-node-as-error":280,"../support/treat-node-as-missing-path-set":282,"../types/path":289,"../walk/walk-path-set-soft-link":294}],243:[function(_dereq_,module,exports){
-module.exports=_dereq_(93)
-},{"../lru/collect":234,"../support/array-clone":252,"../support/clone-dense-json":254,"../support/clone-success-paths":260,"../support/create-branch":262,"../support/get-valid-key":264,"../support/graph-node":265,"../support/inc-generation":266,"../support/is-object":270,"../support/options":275,"../support/replace-node":278,"../support/treat-node-as-error":280,"../support/treat-node-as-missing-path-map":281,"../support/update-back-refs":284,"../support/update-graph":285,"../support/wrap-node":286,"../types/atom":287,"../types/error":288,"../types/path":289,"../walk/walk-path-map":293}],244:[function(_dereq_,module,exports){
-module.exports=_dereq_(94)
-},{"../lru/collect":234,"../lru/promote":235,"../support/array-clone":252,"../support/clone-graph-json":255,"../support/clone-success-paths":260,"../support/create-branch":262,"../support/get-valid-key":264,"../support/graph-node":265,"../support/inc-generation":266,"../support/is-object":270,"../support/options":275,"../support/replace-node":278,"../support/treat-node-as-error":280,"../support/treat-node-as-missing-path-map":281,"../support/update-back-refs":284,"../support/update-graph":285,"../support/wrap-node":286,"../types/atom":287,"../types/error":288,"../types/path":289,"../walk/walk-path-map-soft-link":292}],245:[function(_dereq_,module,exports){
-module.exports=_dereq_(95)
-},{"../lru/collect":234,"../support/array-clone":252,"../support/clone-dense-json":254,"../support/clone-success-paths":260,"../support/create-branch":262,"../support/get-valid-key":264,"../support/graph-node":265,"../support/inc-generation":266,"../support/is-object":270,"../support/options":275,"../support/replace-node":278,"../support/treat-node-as-error":280,"../support/treat-node-as-missing-path-map":281,"../support/update-back-refs":284,"../support/update-graph":285,"../support/wrap-node":286,"../types/atom":287,"../types/error":288,"../types/path":289,"../walk/walk-path-map":293}],246:[function(_dereq_,module,exports){
-module.exports=_dereq_(96)
-},{"../lru/collect":234,"../support/array-clone":252,"../support/clone-dense-json":254,"../support/clone-success-paths":260,"../support/create-branch":262,"../support/get-valid-key":264,"../support/graph-node":265,"../support/inc-generation":266,"../support/is-object":270,"../support/options":275,"../support/replace-node":278,"../support/treat-node-as-error":280,"../support/treat-node-as-missing-path-map":281,"../support/update-back-refs":284,"../support/update-graph":285,"../support/wrap-node":286,"../types/atom":287,"../types/error":288,"../walk/walk-path-map":293}],247:[function(_dereq_,module,exports){
-module.exports=_dereq_(97)
-},{"../lru/collect":234,"../support/array-clone":252,"../support/clone-dense-json":254,"../support/clone-success-paths":260,"../support/create-branch":262,"../support/get-valid-key":264,"../support/graph-node":265,"../support/inc-generation":266,"../support/invalidate-node":268,"../support/is-object":270,"../support/options":275,"../support/replace-node":278,"../support/treat-node-as-error":280,"../support/treat-node-as-missing-path-set":282,"../support/update-back-refs":284,"../support/update-graph":285,"../support/wrap-node":286,"../types/atom":287,"../types/error":288,"../types/path":289,"../walk/walk-path-set":295}],248:[function(_dereq_,module,exports){
-module.exports=_dereq_(98)
-},{"../lru/collect":234,"../lru/promote":235,"../support/array-clone":252,"../support/clone-graph-json":255,"../support/clone-success-paths":260,"../support/create-branch":262,"../support/get-valid-key":264,"../support/graph-node":265,"../support/inc-generation":266,"../support/invalidate-node":268,"../support/is-object":270,"../support/options":275,"../support/replace-node":278,"../support/treat-node-as-error":280,"../support/treat-node-as-missing-path-set":282,"../support/update-back-refs":284,"../support/update-graph":285,"../support/wrap-node":286,"../types/atom":287,"../types/error":288,"../types/path":289,"../walk/walk-path-set-soft-link":294}],249:[function(_dereq_,module,exports){
-module.exports=_dereq_(99)
-},{"../lru/collect":234,"../support/array-clone":252,"../support/clone-dense-json":254,"../support/clone-success-paths":260,"../support/create-branch":262,"../support/get-valid-key":264,"../support/graph-node":265,"../support/inc-generation":266,"../support/invalidate-node":268,"../support/is-object":270,"../support/options":275,"../support/replace-node":278,"../support/treat-node-as-error":280,"../support/treat-node-as-missing-path-set":282,"../support/update-back-refs":284,"../support/update-graph":285,"../support/wrap-node":286,"../types/atom":287,"../types/error":288,"../types/path":289,"../walk/walk-path-set":295}],250:[function(_dereq_,module,exports){
-module.exports=_dereq_(100)
-},{"../lru/collect":234,"../support/array-clone":252,"../support/clone-dense-json":254,"../support/clone-success-paths":260,"../support/create-branch":262,"../support/get-valid-key":264,"../support/graph-node":265,"../support/inc-generation":266,"../support/invalidate-node":268,"../support/is-object":270,"../support/options":275,"../support/replace-node":278,"../support/treat-node-as-error":280,"../support/treat-node-as-missing-path-set":282,"../support/update-back-refs":284,"../support/update-graph":285,"../support/wrap-node":286,"../types/atom":287,"../types/error":288,"../walk/walk-path-set":295}],251:[function(_dereq_,module,exports){
-module.exports=_dereq_(101)
-},{}],252:[function(_dereq_,module,exports){
+},{"../internal/head":217,"../internal/next":220,"../internal/prev":224,"../internal/tail":228}],238:[function(_dereq_,module,exports){
+arguments[4][88][0].apply(exports,arguments)
+},{"./set-cache":239,"./set-json-graph-as-json-dense":240,"./set-json-graph-as-json-graph":241,"./set-json-graph-as-json-sparse":242,"./set-json-graph-as-json-values":243,"./set-json-sparse-as-json-dense":244,"./set-json-sparse-as-json-graph":245,"./set-json-sparse-as-json-sparse":246,"./set-json-sparse-as-json-values":247,"./set-json-values-as-json-dense":248,"./set-json-values-as-json-graph":249,"./set-json-values-as-json-sparse":250,"./set-json-values-as-json-values":251}],239:[function(_dereq_,module,exports){
+module.exports = set_cache;
+
+var $error = _dereq_("../types/error");
+var $atom = _dereq_("../types/atom");
+
+var clone = _dereq_("../support/clone-dense-json");
+var array_clone = _dereq_("../support/array-clone");
+
+var options = _dereq_("../support/options");
+var walk_path_map = _dereq_("../walk/walk-path-map");
+
+var is_object = _dereq_("../support/is-object");
+
+var get_valid_key = _dereq_("../support/get-valid-key");
+var create_branch = _dereq_("../support/create-branch");
+var wrap_node = _dereq_("../support/wrap-node");
+var replace_node = _dereq_("../support/replace-node");
+var graph_node = _dereq_("../support/graph-node");
+var update_back_refs = _dereq_("../support/update-back-refs");
+var update_graph = _dereq_("../support/update-graph");
+var inc_generation = _dereq_("../support/inc-generation");
+
+var collect = _dereq_("../lru/collect");
+
+function set_cache(model, pathmap, error_selector) {
+
+    var roots = options([], model, error_selector);
+    var nodes = roots.nodes;
+    var parents = array_clone(nodes);
+    var requested = [];
+    var optimized = [];
+    var keys_stack = [];
+    
+    roots[0] = roots.root;
+
+    walk_path_map(onNode, onEdge, pathmap, keys_stack, 0, roots, parents, nodes, requested, optimized);
+
+    collect(
+        roots.lru,
+        roots.expired,
+        roots.version,
+        roots.root.$size || 0,
+        model._maxSize,
+        model._collectRatio
+    );
+
+    return model;
+}
+
+function onNode(pathmap, roots, parents, nodes, requested, optimized, is_top_level, is_branch, key, keyset, is_keyset) {
+
+    var parent;
+
+    if (key == null) {
+        if ((key = get_valid_key(optimized)) == null) {
+            return;
+        }
+        parent = parents[0];
+    } else {
+        parent = nodes[0];
+    }
+
+    var node = parent[key],
+        type;
+
+    if (is_branch) {
+        type = is_object(node) && node.$type || undefined;
+        node = create_branch(roots, parent, node, type, key);
+        parents[0] = nodes[0] = node;
+        return;
+    }
+
+    var selector = roots.error_selector;
+    var root = roots[0];
+    var size = is_object(node) && node.$size || 0;
+    var mess = pathmap;
+
+    type = is_object(mess) && mess.$type || undefined;
+    mess = wrap_node(mess, type, !!type ? mess.value : mess);
+    type || (type = $atom);
+
+    if (type == $error && !!selector) {
+        mess = selector(requested, mess);
+    }
+
+    node = replace_node(parent, node, mess, key, roots.lru);
+    node = graph_node(root, parent, node, key, inc_generation());
+    update_graph(parent, size - node.$size, roots.version, roots.lru);
+    nodes[0] = node;
+}
+
+function onEdge(pathmap, keys_stack, depth, roots, parents, nodes, requested, optimized, key, keyset) {
+
+}
+},{"../lru/collect":235,"../support/array-clone":253,"../support/clone-dense-json":255,"../support/create-branch":263,"../support/get-valid-key":265,"../support/graph-node":266,"../support/inc-generation":267,"../support/is-object":271,"../support/options":276,"../support/replace-node":279,"../support/update-back-refs":285,"../support/update-graph":286,"../support/wrap-node":287,"../types/atom":288,"../types/error":289,"../walk/walk-path-map":294}],240:[function(_dereq_,module,exports){
+module.exports = set_json_graph_as_json_dense;
+
+var $path = _dereq_("../types/path");
+
+var clone = _dereq_("../support/clone-dense-json");
+var array_clone = _dereq_("../support/array-clone");
+
+var options = _dereq_("../support/options");
+var walk_path_set = _dereq_("../walk/walk-path-set-soft-link");
+
+var is_object = _dereq_("../support/is-object");
+
+var get_valid_key = _dereq_("../support/get-valid-key");
+var merge_node = _dereq_("../support/merge-node");
+
+var node_as_miss = _dereq_("../support/treat-node-as-missing-path-set");
+var node_as_error = _dereq_("../support/treat-node-as-error");
+var clone_success = _dereq_("../support/clone-success-paths");
+
+var collect = _dereq_("../lru/collect");
+
+function set_json_graph_as_json_dense(model, envelopes, values, error_selector) {
+
+    var roots = [];
+    roots.offset = model._path.length;
+    roots.bound = [];
+    roots = options(roots, model, error_selector);
+    
+    var index = -1;
+    var index2 = -1;
+    var count = envelopes.length;
+    var nodes = roots.nodes;
+    var parents = array_clone(nodes);
+    var requested = [];
+    var optimized = [];
+    var json, hasValue, hasValues;
+
+    roots[0] = roots.root;
+
+    while (++index < count) {
+        var envelope = envelopes[index];
+        var pathsets = envelope.paths;
+        var jsong = envelope.jsong || envelope.values || envelope.value;
+        var index3 = -1;
+        var count2 = pathsets.length;
+        roots[2] = jsong;
+        nodes[2] = jsong;
+        while (++index3 < count2) {
+
+            json = values && values[++index2];
+            if (is_object(json)) {
+                roots.json = roots[3] = parents[3] = nodes[3] = json.json || (json.json = {});
+            } else {
+                roots.json = roots[3] = parents[3] = nodes[3] = undefined;
+            }
+
+            var pathset = pathsets[index3];
+            roots.index = index3;
+
+            walk_path_set(onNode, onEdge, pathset, 0, roots, parents, nodes, requested, optimized);
+
+            hasValue = roots.hasValue;
+            if (!!hasValue) {
+                hasValues = true;
+                if (is_object(json)) {
+                    json.json = roots.json;
+                }
+                delete roots.json;
+                delete roots.hasValue;
+            } else if (is_object(json)) {
+                delete json.json;
+            }
+        }
+    }
+
+    collect(
+        roots.lru,
+        roots.expired,
+        roots.version,
+        roots.root.$size || 0,
+        model._maxSize,
+        model._collectRatio
+    );
+
+    return {
+        values: values,
+        errors: roots.errors,
+        requestedPaths: roots.requestedPaths,
+        optimizedPaths: roots.optimizedPaths,
+        requestedMissingPaths: roots.requestedMissingPaths,
+        optimizedMissingPaths: roots.optimizedMissingPaths
+    };
+}
+
+function onNode(pathset, roots, parents, nodes, requested, optimized, is_top_level, is_branch, key, keyset, is_keyset) {
+
+    var parent, messageParent, json;
+
+    if (key == null) {
+        if ((key = get_valid_key(optimized)) == null) {
+            return;
+        }
+        json = parents[3];
+        parent = parents[0];
+        messageParent = parents[2];
+    } else {
+        json = is_keyset && nodes[3] || parents[3];
+        parent = nodes[0];
+        messageParent = nodes[2];
+    }
+
+    var node = parent[key];
+    var message = messageParent && messageParent[key];
+
+    nodes[2] = message;
+    nodes[0] = node = merge_node(roots, parent, node, messageParent, message, key);
+
+    if (!is_top_level) {
+        parents[0] = parent;
+        parents[2] = messageParent;
+        return;
+    }
+
+    var length = requested.length;
+    var offset = roots.offset;
+    
+    parents[3] = json;
+    
+    if (is_branch) {
+        parents[0] = node;
+        parents[2] = message;
+        if ((length > offset) && is_keyset && !!json) {
+            nodes[3] = json[keyset] || (json[keyset] = {});
+        }
+    }
+}
+
+function onEdge(pathset, depth, roots, parents, nodes, requested, optimized, key, keyset) {
+
+    var json;
+    var node = nodes[0];
+    var type = is_object(node) && node.$type || (node = undefined);
+
+    if (node_as_miss(roots, node, type, pathset, depth, requested, optimized) === false) {
+        clone_success(roots, requested, optimized);
+        if (node_as_error(roots, node, type, requested) === false) {
+            if(keyset == null) {
+                roots.json = clone(roots, node, type, node && node.value);
+            } else if(!!(json = parents[3])) {
+                json[keyset] = clone(roots, node, type, node && node.value);
+            }
+            roots.hasValue = true;
+        }
+    }
+}
+
+},{"../lru/collect":235,"../support/array-clone":253,"../support/clone-dense-json":255,"../support/clone-success-paths":261,"../support/get-valid-key":265,"../support/is-object":271,"../support/merge-node":274,"../support/options":276,"../support/treat-node-as-error":281,"../support/treat-node-as-missing-path-set":283,"../types/path":290,"../walk/walk-path-set-soft-link":295}],241:[function(_dereq_,module,exports){
+module.exports = set_json_graph_as_json_graph;
+
+var $path = _dereq_("../types/path");
+
+var clone = _dereq_("../support/clone-graph-json");
+var array_clone = _dereq_("../support/array-clone");
+
+var options = _dereq_("../support/options");
+var walk_path_set = _dereq_("../walk/walk-path-set-soft-link");
+
+var is_object = _dereq_("../support/is-object");
+
+var get_valid_key = _dereq_("../support/get-valid-key");
+var merge_node = _dereq_("../support/merge-node");
+
+var node_as_miss = _dereq_("../support/treat-node-as-missing-path-set");
+var node_as_error = _dereq_("../support/treat-node-as-error");
+var clone_success = _dereq_("../support/clone-success-paths");
+
+var promote = _dereq_("../lru/promote");
+var collect = _dereq_("../lru/collect");
+
+function set_json_graph_as_json_graph(model, envelopes, values, error_selector) {
+
+    var roots = [];
+    roots.offset = 0;
+    roots.bound = [];
+    roots = options(roots, model, error_selector);
+
+    var index = -1;
+    var count = envelopes.length;
+    var nodes = roots.nodes;
+    var parents = array_clone(nodes);
+    var requested = [];
+    var optimized = [];
+    var json = values[0];
+    var hasValue;
+
+    roots[0] = roots.root;
+    roots[1] = parents[1] = nodes[1] = json.jsong || (json.jsong = {});
+    roots.requestedPaths = json.paths || (json.paths = roots.requestedPaths);
+
+    while (++index < count) {
+        var envelope = envelopes[index];
+        var pathsets = envelope.paths;
+        var jsong = envelope.jsong || envelope.values || envelope.value;
+        var index2 = -1;
+        var count2 = pathsets.length;
+        roots[2] = jsong;
+        nodes[2] = jsong;
+        while (++index2 < count2) {
+            var pathset = pathsets[index2];
+            walk_path_set(onNode, onEdge, pathset, 0, roots, parents, nodes, requested, optimized);
+        }
+    }
+
+    hasValue = roots.hasValue;
+    if(hasValue) {
+        json.jsong = roots[1];
+    } else {
+        delete json.jsong;
+        delete json.paths;
+    }
+
+    collect(
+        roots.lru,
+        roots.expired,
+        roots.version,
+        roots.root.$size || 0,
+        model._maxSize,
+        model._collectRatio
+    );
+
+    return {
+        values: values,
+        errors: roots.errors,
+        requestedPaths: roots.requestedPaths,
+        optimizedPaths: roots.optimizedPaths,
+        requestedMissingPaths: roots.requestedMissingPaths,
+        optimizedMissingPaths: roots.optimizedMissingPaths
+    };
+}
+
+function onNode(pathset, roots, parents, nodes, requested, optimized, is_top_level, is_branch, key, keyset, is_keyset) {
+
+    var parent, messageParent, json, jsonkey;
+
+    if (key == null) {
+        if ((key = get_valid_key(optimized)) == null) {
+            return;
+        }
+        json = parents[1];
+        parent = parents[0];
+        messageParent = parents[2];
+    } else {
+        json = nodes[1];
+        parent = nodes[0];
+        messageParent = nodes[2];
+    }
+
+    var jsonkey = key;
+    var node = parent[key];
+    var message = messageParent && messageParent[key];
+
+    nodes[2] = message;
+    nodes[0] = node = merge_node(roots, parent, node, messageParent, message, key);
+
+    if (!is_top_level) {
+        parents[0] = parent;
+        parents[2] = messageParent;
+        parents[1] = json;
+        nodes[1] = json[jsonkey] || (json[jsonkey] = {});
+        return;
+    }
+
+    var type = is_object(node) && node.$type || undefined;
+
+    if (is_branch) {
+        parents[0] = node;
+        parents[2] = message;
+        parents[1] = json;
+        if (type == $path) {
+            json[jsonkey] = clone(roots, node, type, node.value);
+            roots.hasValue = true;
+        } else {
+            nodes[1] = json[jsonkey] || (json[jsonkey] = {});
+        }
+        return;
+    }
+
+    json[jsonkey] = clone(roots, node, type, node && node.value);
+    roots.hasValue = true;
+}
+
+function onEdge(pathset, depth, roots, parents, nodes, requested, optimized, key, keyset) {
+
+    var json;
+    var node = nodes[0];
+    var type = is_object(node) && node.$type || (node = undefined);
+
+    if (node_as_miss(roots, node, type, pathset, depth, requested, optimized) === false) {
+        clone_success(roots, requested, optimized);
+        promote(roots.lru, node);
+        if (keyset == null && !roots.hasValue && (keyset = get_valid_key(optimized)) == null) {
+            node = clone(roots, node, type, node && node.value);
+            json = roots[1];
+            json.$type = node.$type;
+            json.value = node.value;
+        }
+        roots.hasValue = true;
+    }
+}
+
+},{"../lru/collect":235,"../lru/promote":236,"../support/array-clone":253,"../support/clone-graph-json":256,"../support/clone-success-paths":261,"../support/get-valid-key":265,"../support/is-object":271,"../support/merge-node":274,"../support/options":276,"../support/treat-node-as-error":281,"../support/treat-node-as-missing-path-set":283,"../types/path":290,"../walk/walk-path-set-soft-link":295}],242:[function(_dereq_,module,exports){
+module.exports = set_json_graph_as_json_sparse;
+
+var $path = _dereq_("../types/path");
+
+var clone = _dereq_("../support/clone-dense-json");
+var array_clone = _dereq_("../support/array-clone");
+
+var options = _dereq_("../support/options");
+var walk_path_set = _dereq_("../walk/walk-path-set-soft-link");
+
+var is_object = _dereq_("../support/is-object");
+
+var get_valid_key = _dereq_("../support/get-valid-key");
+var merge_node = _dereq_("../support/merge-node");
+
+var node_as_miss = _dereq_("../support/treat-node-as-missing-path-set");
+var node_as_error = _dereq_("../support/treat-node-as-error");
+var clone_success = _dereq_("../support/clone-success-paths");
+
+var collect = _dereq_("../lru/collect");
+
+function set_json_graph_as_json_sparse(model, envelopes, values, error_selector) {
+
+    var roots = [];
+    roots.offset = model._path.length;
+    roots.bound = [];
+    roots = options(roots, model, error_selector);
+
+    var index = -1;
+    var count = envelopes.length;
+    var nodes = roots.nodes;
+    var parents = array_clone(nodes);
+    var requested = [];
+    var optimized = [];
+    var json = values[0];
+    var hasValue;
+
+    roots[0] = roots.root;
+    roots[3] = parents[3] = nodes[3] = json.json || (json.json = {});
+
+    while (++index < count) {
+        var envelope = envelopes[index];
+        var pathsets = envelope.paths;
+        var jsong = envelope.jsong || envelope.values || envelope.value;
+        var index2 = -1;
+        var count2 = pathsets.length;
+        roots[2] = jsong;
+        nodes[2] = jsong;
+        while (++index2 < count2) {
+            var pathset = pathsets[index2];
+            walk_path_set(onNode, onEdge, pathset, 0, roots, parents, nodes, requested, optimized);
+        }
+    }
+
+    hasValue = roots.hasValue;
+    if(hasValue) {
+        json.json = roots[3];
+    } else {
+        delete json.json;
+    }
+
+    collect(
+        roots.lru,
+        roots.expired,
+        roots.version,
+        roots.root.$size || 0,
+        model._maxSize,
+        model._collectRatio
+    );
+
+    return {
+        values: values,
+        errors: roots.errors,
+        requestedPaths: roots.requestedPaths,
+        optimizedPaths: roots.optimizedPaths,
+        requestedMissingPaths: roots.requestedMissingPaths,
+        optimizedMissingPaths: roots.optimizedMissingPaths
+    };
+}
+
+function onNode(pathset, roots, parents, nodes, requested, optimized, is_top_level, is_branch, key, keyset, is_keyset) {
+
+    var parent, messageParent, json, jsonkey;
+
+    if (key == null) {
+        if ((key = get_valid_key(optimized)) == null) {
+            return;
+        }
+        jsonkey = get_valid_key(requested);
+        json = parents[3];
+        parent = parents[0];
+        messageParent = parents[2];
+    } else {
+        jsonkey = key;
+        json = nodes[3];
+        parent = nodes[0];
+        messageParent = nodes[2];
+    }
+
+    var node = parent[key];
+    var message = messageParent && messageParent[key];
+
+    nodes[2] = message;
+    nodes[0] = node = merge_node(roots, parent, node, messageParent, message, key);
+
+    if (!is_top_level) {
+        parents[0] = parent;
+        parents[2] = messageParent;
+        return;
+    }
+
+    parents[3] = json;
+
+    if (is_branch) {
+        var length = requested.length;
+        var offset = roots.offset;
+        var type = is_object(node) && node.$type || undefined;
+
+        parents[0] = node;
+        parents[2] = message;
+        if ((length > offset) && (!type || type == $path)) {
+            nodes[3] = json[jsonkey] || (json[jsonkey] = {});
+        }
+    }
+}
+
+function onEdge(pathset, depth, roots, parents, nodes, requested, optimized, key, keyset) {
+
+    var json;
+    var node = nodes[0];
+    var type = is_object(node) && node.$type || (node = undefined);
+
+    if (node_as_miss(roots, node, type, pathset, depth, requested, optimized) === false) {
+        clone_success(roots, requested, optimized);
+        if (node_as_error(roots, node, type, requested) === false) {
+            if (keyset == null && !roots.hasValue && (keyset = get_valid_key(optimized)) == null) {
+                node = clone(roots, node, type, node && node.value);
+                json = roots[3];
+                json.$type = node.$type;
+                json.value = node.value;
+            } else {
+                json = parents[3];
+                json[key] = clone(roots, node, type, node && node.value);
+            }
+            roots.hasValue = true;
+        }
+    }
+}
+
+},{"../lru/collect":235,"../support/array-clone":253,"../support/clone-dense-json":255,"../support/clone-success-paths":261,"../support/get-valid-key":265,"../support/is-object":271,"../support/merge-node":274,"../support/options":276,"../support/treat-node-as-error":281,"../support/treat-node-as-missing-path-set":283,"../types/path":290,"../walk/walk-path-set-soft-link":295}],243:[function(_dereq_,module,exports){
+module.exports = set_json_graph_as_json_values;
+
+var $path = _dereq_("../types/path");
+
+var clone = _dereq_("../support/clone-dense-json");
+var array_clone = _dereq_("../support/array-clone");
+var array_slice = _dereq_("../support/array-slice");
+
+var options = _dereq_("../support/options");
+var walk_path_set = _dereq_("../walk/walk-path-set-soft-link");
+
+var is_object = _dereq_("../support/is-object");
+
+var get_valid_key = _dereq_("../support/get-valid-key");
+var merge_node = _dereq_("../support/merge-node");
+
+var node_as_miss = _dereq_("../support/treat-node-as-missing-path-set");
+var node_as_error = _dereq_("../support/treat-node-as-error");
+var clone_success = _dereq_("../support/clone-success-paths");
+
+var collect = _dereq_("../lru/collect");
+
+function set_json_graph_as_json_values(model, envelopes, onNext, error_selector) {
+
+    var roots = [];
+    roots.offset = model._path.length;
+    roots.bound = [];
+    roots = options(roots, model, error_selector);
+
+    var index = -1;
+    var count = envelopes.length;
+    var nodes = roots.nodes;
+    var parents = array_clone(nodes);
+    var requested = [];
+    var optimized = [];
+
+    roots[0] = roots.root;
+    roots.onNext = onNext;
+
+    while (++index < count) {
+        var envelope = envelopes[index];
+        var pathsets = envelope.paths;
+        var jsong = envelope.jsong || envelope.values || envelope.value;
+        var index2 = -1;
+        var count2 = pathsets.length;
+        roots[2] = jsong;
+        nodes[2] = jsong;
+        while (++index2 < count2) {
+            var pathset = pathsets[index2];
+            walk_path_set(onNode, onEdge, pathset, 0, roots, parents, nodes, requested, optimized);
+        }
+    }
+
+    collect(
+        roots.lru,
+        roots.expired,
+        roots.version,
+        roots.root.$size || 0,
+        model._maxSize,
+        model._collectRatio
+    );
+
+    return {
+        values: null,
+        errors: roots.errors,
+        requestedPaths: roots.requestedPaths,
+        optimizedPaths: roots.optimizedPaths,
+        requestedMissingPaths: roots.requestedMissingPaths,
+        optimizedMissingPaths: roots.optimizedMissingPaths
+    };
+}
+
+function onNode(pathset, roots, parents, nodes, requested, optimized, is_top_level, is_branch, key, keyset) {
+
+    var parent, messageParent;
+
+    if (key == null) {
+        if ((key = get_valid_key(optimized)) == null) {
+            return;
+        }
+        parent = parents[0];
+        messageParent = parents[2];
+    } else {
+        parent = nodes[0];
+        messageParent = nodes[2];
+    }
+
+    var node = parent[key];
+    var message = messageParent && messageParent[key];
+
+    nodes[2] = message;
+    nodes[0] = node = merge_node(roots, parent, node, messageParent, message, key);
+
+    if (!is_top_level) {
+        parents[0] = parent;
+        parents[2] = messageParent;
+        return;
+    }
+
+    if (is_branch) {
+        parents[0] = node;
+        parents[2] = message;
+    }
+}
+
+function onEdge(pathset, depth, roots, parents, nodes, requested, optimized, key, keyset, is_keyset) {
+
+    var node = nodes[0];
+    var type = is_object(node) && node.$type || (node = undefined);
+
+    if (node_as_miss(roots, node, type, pathset, depth, requested, optimized) === false) {
+        clone_success(roots, requested, optimized);
+        if (node_as_error(roots, node, type, requested) === false) {
+            roots.onNext({
+                path: array_slice(requested, roots.offset),
+                value: clone(roots, node, type, node && node.value)
+            });
+        }
+    }
+}
+
+},{"../lru/collect":235,"../support/array-clone":253,"../support/array-slice":254,"../support/clone-dense-json":255,"../support/clone-success-paths":261,"../support/get-valid-key":265,"../support/is-object":271,"../support/merge-node":274,"../support/options":276,"../support/treat-node-as-error":281,"../support/treat-node-as-missing-path-set":283,"../types/path":290,"../walk/walk-path-set-soft-link":295}],244:[function(_dereq_,module,exports){
+module.exports = set_json_sparse_as_json_dense;
+
+var $path = _dereq_("../types/path");
+var $error = _dereq_("../types/error");
+var $atom = _dereq_("../types/atom");
+
+var clone = _dereq_("../support/clone-dense-json");
+var array_clone = _dereq_("../support/array-clone");
+
+var options = _dereq_("../support/options");
+var walk_path_map = _dereq_("../walk/walk-path-map");
+
+var is_object = _dereq_("../support/is-object");
+
+var get_valid_key = _dereq_("../support/get-valid-key");
+var create_branch = _dereq_("../support/create-branch");
+var wrap_node = _dereq_("../support/wrap-node");
+var replace_node = _dereq_("../support/replace-node");
+var graph_node = _dereq_("../support/graph-node");
+var update_back_refs = _dereq_("../support/update-back-refs");
+var update_graph = _dereq_("../support/update-graph");
+var inc_generation = _dereq_("../support/inc-generation");
+
+var node_as_miss = _dereq_("../support/treat-node-as-missing-path-map");
+var node_as_error = _dereq_("../support/treat-node-as-error");
+var clone_success = _dereq_("../support/clone-success-paths");
+
+var collect = _dereq_("../lru/collect");
+
+function set_json_sparse_as_json_dense(model, pathmaps, values, error_selector) {
+
+    var roots = options([], model, error_selector);
+    var index = -1;
+    var count = pathmaps.length;
+    var nodes = roots.nodes;
+    var parents = array_clone(nodes);
+    var requested = [];
+    var optimized = [];
+    var keys_stack = [];
+    var json, hasValue, hasValues;
+
+    roots[0] = roots.root;
+
+    while (++index < count) {
+
+        json = values && values[index];
+        if (is_object(json)) {
+            roots.json = roots[3] = parents[3] = nodes[3] = json.json || (json.json = {})
+        } else {
+            roots.json = roots[3] = parents[3] = nodes[3] = undefined;
+        }
+
+        var pathmap = pathmaps[index];
+        roots.index = index;
+
+        walk_path_map(onNode, onEdge, pathmap, keys_stack, 0, roots, parents, nodes, requested, optimized);
+
+        hasValue = roots.hasValue;
+        if (!!hasValue) {
+            hasValues = true;
+            if (is_object(json)) {
+                json.json = roots.json;
+            }
+            delete roots.json;
+            delete roots.hasValue;
+        } else if (is_object(json)) {
+            delete json.json;
+        }
+    }
+
+    collect(
+        roots.lru,
+        roots.expired,
+        roots.version,
+        roots.root.$size || 0,
+        model._maxSize,
+        model._collectRatio
+    );
+
+    return {
+        values: values,
+        errors: roots.errors,
+        hasValue: hasValues,
+        requestedPaths: roots.requestedPaths,
+        optimizedPaths: roots.optimizedPaths,
+        requestedMissingPaths: roots.requestedMissingPaths,
+        optimizedMissingPaths: roots.optimizedMissingPaths
+    };
+}
+
+function onNode(pathmap, roots, parents, nodes, requested, optimized, is_top_level, is_branch, key, keyset, is_keyset) {
+
+    var parent, json;
+
+    if (key == null) {
+        if ((key = get_valid_key(optimized)) == null) {
+            return;
+        }
+        json = parents[3];
+        parent = parents[0];
+    } else {
+        json = is_keyset && nodes[3] || parents[3];
+        parent = nodes[0];
+    }
+
+    var node = parent[key],
+        type;
+
+    if (!is_top_level) {
+        type = is_object(node) && node.$type || undefined;
+        type = type && is_branch && "." || type;
+        node = create_branch(roots, parent, node, type, key);
+        parents[0] = parent;
+        nodes[0] = node;
+        return;
+    }
+
+    parents[3] = json;
+
+    if (is_branch) {
+        type = is_object(node) && node.$type || undefined;
+        node = create_branch(roots, parent, node, type, key);
+        parents[0] = nodes[0] = node;
+        if (is_keyset && !!json) {
+            nodes[3] = json[keyset] || (json[keyset] = {});
+        }
+        return;
+    }
+
+    var selector = roots.error_selector;
+    var root = roots[0];
+    var size = is_object(node) && node.$size || 0;
+    var mess = pathmap;
+
+    type = is_object(mess) && mess.$type || undefined;
+    mess = wrap_node(mess, type, !!type ? mess.value : mess);
+    type || (type = $atom);
+
+    if (type == $error && !!selector) {
+        mess = selector(requested, mess);
+    }
+
+    node = replace_node(parent, node, mess, key, roots.lru);
+    node = graph_node(root, parent, node, key, inc_generation());
+    update_graph(parent, size - node.$size, roots.version, roots.lru);
+    nodes[0] = node;
+}
+
+function onEdge(pathmap, keys_stack, depth, roots, parents, nodes, requested, optimized, key, keyset) {
+
+    var json;
+    var node = nodes[0];
+    var type = is_object(node) && node.$type || (node = undefined);
+
+    if (node_as_miss(roots, node, type, pathmap, keys_stack, depth, requested, optimized) === false) {
+        clone_success(roots, requested, optimized);
+        if (node_as_error(roots, node, type, requested) === false) {
+            if(keyset == null) {
+                roots.json = clone(roots, node, type, node && node.value);
+            } else if(!!(json = parents[3])) {
+                json[keyset] = clone(roots, node, type, node && node.value);
+            }
+            roots.hasValue = true;
+        }
+    }
+}
+},{"../lru/collect":235,"../support/array-clone":253,"../support/clone-dense-json":255,"../support/clone-success-paths":261,"../support/create-branch":263,"../support/get-valid-key":265,"../support/graph-node":266,"../support/inc-generation":267,"../support/is-object":271,"../support/options":276,"../support/replace-node":279,"../support/treat-node-as-error":281,"../support/treat-node-as-missing-path-map":282,"../support/update-back-refs":285,"../support/update-graph":286,"../support/wrap-node":287,"../types/atom":288,"../types/error":289,"../types/path":290,"../walk/walk-path-map":294}],245:[function(_dereq_,module,exports){
+module.exports = set_json_sparse_as_json_graph;
+
+var $path = _dereq_("../types/path");
+var $error = _dereq_("../types/error");
+var $atom = _dereq_("../types/atom");
+
+var clone = _dereq_("../support/clone-graph-json");
+var array_clone = _dereq_("../support/array-clone");
+
+var options = _dereq_("../support/options");
+var walk_path_map = _dereq_("../walk/walk-path-map-soft-link");
+
+var is_object = _dereq_("../support/is-object");
+
+var get_valid_key = _dereq_("../support/get-valid-key");
+var create_branch = _dereq_("../support/create-branch");
+var wrap_node = _dereq_("../support/wrap-node");
+var replace_node = _dereq_("../support/replace-node");
+var graph_node = _dereq_("../support/graph-node");
+var update_back_refs = _dereq_("../support/update-back-refs");
+var update_graph = _dereq_("../support/update-graph");
+var inc_generation = _dereq_("../support/inc-generation");
+
+var node_as_miss = _dereq_("../support/treat-node-as-missing-path-map");
+var node_as_error = _dereq_("../support/treat-node-as-error");
+var clone_success = _dereq_("../support/clone-success-paths");
+
+var promote = _dereq_("../lru/promote");
+var collect = _dereq_("../lru/collect");
+
+function set_json_sparse_as_json_graph(model, pathmaps, values, error_selector) {
+
+    var roots = options([], model, error_selector);
+    var index = -1;
+    var count = pathmaps.length;
+    var nodes = roots.nodes;
+    var parents = array_clone(nodes);
+    var requested = [];
+    var optimized = [];
+    var keys_stack = [];
+    var json = values[0];
+    var hasValue;
+
+    roots[0] = roots.root;
+    roots[1] = parents[1] = nodes[1] = json.jsong || (json.jsong = {});
+    roots.requestedPaths = json.paths || (json.paths = roots.requestedPaths);
+
+    while (++index < count) {
+        var pathmap = pathmaps[index];
+        walk_path_map(onNode, onEdge, pathmap, keys_stack, 0, roots, parents, nodes, requested, optimized);
+    }
+
+    hasValue = roots.hasValue;
+    if(hasValue) {
+        json.jsong = roots[1];
+    } else {
+        delete json.jsong;
+        delete json.paths;
+    }
+
+    collect(
+        roots.lru,
+        roots.expired,
+        roots.version,
+        roots.root.$size || 0,
+        model._maxSize,
+        model._collectRatio
+    );
+
+    return {
+        values: values,
+        errors: roots.errors,
+        hasValue: hasValue,
+        requestedPaths: roots.requestedPaths,
+        optimizedPaths: roots.optimizedPaths,
+        requestedMissingPaths: roots.requestedMissingPaths,
+        optimizedMissingPaths: roots.optimizedMissingPaths
+    };
+}
+
+function onNode(pathmap, roots, parents, nodes, requested, optimized, is_top_level, is_branch, key, keyset, is_keyset) {
+
+    var parent, json;
+
+    if (key == null) {
+        if ((key = get_valid_key(optimized)) == null) {
+            return;
+        }
+        json = parents[1];
+        parent = parents[0];
+    } else {
+        json = nodes[1];
+        parent = nodes[0];
+    }
+
+    var jsonkey = key;
+    var node = parent[key],
+        type;
+
+    if (!is_top_level) {
+        type = is_object(node) && node.$type || undefined;
+        type = type && is_branch && "." || type;
+        node = create_branch(roots, parent, node, type, key);
+        parents[0] = parent;
+        nodes[0] = node;
+        parents[1] = json;
+        if (type == $path) {
+            json[jsonkey] = clone(roots, node, type, node.value);
+            roots.hasValue = true;
+        } else {
+            nodes[1] = json[jsonkey] || (json[jsonkey] = {});
+        }
+        return;
+    }
+
+    if (is_branch) {
+        type = is_object(node) && node.$type || undefined;
+        node = create_branch(roots, parent, node, type, key);
+        type = node.$type;
+        parents[0] = nodes[0] = node;
+        parents[1] = json;
+        if (type == $path) {
+            json[jsonkey] = clone(roots, node, type, node.value);
+            roots.hasValue = true;
+        } else {
+            nodes[1] = json[jsonkey] || (json[jsonkey] = {});
+        }
+        return;
+    }
+
+    var selector = roots.error_selector;
+    var root = roots[0];
+    var size = is_object(node) && node.$size || 0;
+    var mess = pathmap;
+
+    type = is_object(mess) && mess.$type || undefined;
+    mess = wrap_node(mess, type, !!type ? mess.value : mess);
+    type || (type = $atom);
+
+    if (type == $error && !!selector) {
+        mess = selector(requested, mess);
+    }
+
+    node = replace_node(parent, node, mess, key, roots.lru);
+    node = graph_node(root, parent, node, key, inc_generation());
+    update_graph(parent, size - node.$size, roots.version, roots.lru);
+    nodes[0] = node;
+
+    json[jsonkey] = clone(roots, node, type, node && node.value);
+    roots.hasValue = true;
+}
+
+function onEdge(pathmap, keys_stack, depth, roots, parents, nodes, requested, optimized, key, keyset) {
+
+    var json;
+    var node = nodes[0];
+    var type = is_object(node) && node.$type || (node = undefined);
+
+    if (node_as_miss(roots, node, type, pathmap, keys_stack, depth, requested, optimized) === false) {
+        clone_success(roots, requested, optimized);
+        promote(roots.lru, node);
+        if (keyset == null && !roots.hasValue && (keyset = get_valid_key(optimized)) == null) {
+            node = clone(roots, node, type, node && node.value);
+            json = roots[1];
+            json.$type = node.$type;
+            json.value = node.value;
+        }
+        roots.hasValue = true;
+    }
+}
+},{"../lru/collect":235,"../lru/promote":236,"../support/array-clone":253,"../support/clone-graph-json":256,"../support/clone-success-paths":261,"../support/create-branch":263,"../support/get-valid-key":265,"../support/graph-node":266,"../support/inc-generation":267,"../support/is-object":271,"../support/options":276,"../support/replace-node":279,"../support/treat-node-as-error":281,"../support/treat-node-as-missing-path-map":282,"../support/update-back-refs":285,"../support/update-graph":286,"../support/wrap-node":287,"../types/atom":288,"../types/error":289,"../types/path":290,"../walk/walk-path-map-soft-link":293}],246:[function(_dereq_,module,exports){
+module.exports = set_json_sparse_as_json_sparse;
+
+var $path = _dereq_("../types/path");
+var $error = _dereq_("../types/error");
+var $atom = _dereq_("../types/atom");
+
+var clone = _dereq_("../support/clone-dense-json");
+var array_clone = _dereq_("../support/array-clone");
+
+var options = _dereq_("../support/options");
+var walk_path_map = _dereq_("../walk/walk-path-map");
+
+var is_object = _dereq_("../support/is-object");
+
+var get_valid_key = _dereq_("../support/get-valid-key");
+var create_branch = _dereq_("../support/create-branch");
+var wrap_node = _dereq_("../support/wrap-node");
+var replace_node = _dereq_("../support/replace-node");
+var graph_node = _dereq_("../support/graph-node");
+var update_back_refs = _dereq_("../support/update-back-refs");
+var update_graph = _dereq_("../support/update-graph");
+var inc_generation = _dereq_("../support/inc-generation");
+
+var node_as_miss = _dereq_("../support/treat-node-as-missing-path-map");
+var node_as_error = _dereq_("../support/treat-node-as-error");
+var clone_success = _dereq_("../support/clone-success-paths");
+
+var collect = _dereq_("../lru/collect");
+
+function set_json_sparse_as_json_sparse(model, pathmaps, values, error_selector) {
+
+    var roots = options([], model, error_selector);
+    var index = -1;
+    var count = pathmaps.length;
+    var nodes = roots.nodes;
+    var parents = array_clone(nodes);
+    var requested = [];
+    var optimized = [];
+    var keys_stack = [];
+    var json = values[0];
+    var hasValue;
+
+    roots[0] = roots.root;
+    roots[3] = parents[3] = nodes[3] = json.json || (json.json = {});
+
+    while (++index < count) {
+        var pathmap = pathmaps[index];
+        walk_path_map(onNode, onEdge, pathmap, keys_stack, 0, roots, parents, nodes, requested, optimized);
+    }
+
+    hasValue = roots.hasValue;
+    if(hasValue) {
+        json.json = roots[3];
+    } else {
+        delete json.json;
+    }
+
+    collect(
+        roots.lru,
+        roots.expired,
+        roots.version,
+        roots.root.$size || 0,
+        model._maxSize,
+        model._collectRatio
+    );
+
+    return {
+        values: values,
+        errors: roots.errors,
+        hasValue: hasValue,
+        requestedPaths: roots.requestedPaths,
+        optimizedPaths: roots.optimizedPaths,
+        requestedMissingPaths: roots.requestedMissingPaths,
+        optimizedMissingPaths: roots.optimizedMissingPaths
+    };
+}
+
+function onNode(pathmap, roots, parents, nodes, requested, optimized, is_top_level, is_branch, key, keyset, is_keyset) {
+
+    var parent, json, jsonkey;
+
+    if (key == null) {
+        if ((key = get_valid_key(optimized)) == null) {
+            return;
+        }
+        jsonkey = get_valid_key(requested);
+        json = parents[3];
+        parent = parents[0];
+    } else {
+        jsonkey = key;
+        json = nodes[3];
+        parent = nodes[0];
+    }
+
+    var node = parent[key],
+        type;
+
+    if (!is_top_level) {
+        type = is_object(node) && node.$type || undefined;
+        type = type && is_branch && "." || type;
+        node = create_branch(roots, parent, node, type, key);
+        parents[0] = parent;
+        nodes[0] = node;
+        return;
+    }
+    
+    parents[3] = json;
+    
+    if (is_branch) {
+        type = is_object(node) && node.$type || undefined;
+        node = create_branch(roots, parent, node, type, key);
+        parents[0] = nodes[0] = node;
+        nodes[3] = json[jsonkey] || (json[jsonkey] = {});
+        return;
+    }
+
+    var selector = roots.error_selector;
+    var root = roots[0];
+    var size = is_object(node) && node.$size || 0;
+    var mess = pathmap;
+
+    type = is_object(mess) && mess.$type || undefined;
+    mess = wrap_node(mess, type, !!type ? mess.value : mess);
+    type || (type = $atom);
+
+    if (type == $error && !!selector) {
+        mess = selector(requested, mess);
+    }
+
+    node = replace_node(parent, node, mess, key, roots.lru);
+    node = graph_node(root, parent, node, key, inc_generation());
+    update_graph(parent, size - node.$size, roots.version, roots.lru);
+    nodes[0] = node;
+}
+
+function onEdge(pathmap, keys_stack, depth, roots, parents, nodes, requested, optimized, key, keyset) {
+
+    var json;
+    var node = nodes[0];
+    var type = is_object(node) && node.$type || (node = undefined);
+
+    if (node_as_miss(roots, node, type, pathmap, keys_stack, depth, requested, optimized) === false) {
+        clone_success(roots, requested, optimized);
+        if (node_as_error(roots, node, type, requested) === false) {
+            if (keyset == null && !roots.hasValue && (keyset = get_valid_key(optimized)) == null) {
+                node = clone(roots, node, type, node && node.value);
+                json = roots[3];
+                json.$type = node.$type;
+                json.value = node.value;
+            } else {
+                json = parents[3];
+                json[key] = clone(roots, node, type, node && node.value);
+            }
+            roots.hasValue = true;
+        }
+    }
+}
+},{"../lru/collect":235,"../support/array-clone":253,"../support/clone-dense-json":255,"../support/clone-success-paths":261,"../support/create-branch":263,"../support/get-valid-key":265,"../support/graph-node":266,"../support/inc-generation":267,"../support/is-object":271,"../support/options":276,"../support/replace-node":279,"../support/treat-node-as-error":281,"../support/treat-node-as-missing-path-map":282,"../support/update-back-refs":285,"../support/update-graph":286,"../support/wrap-node":287,"../types/atom":288,"../types/error":289,"../types/path":290,"../walk/walk-path-map":294}],247:[function(_dereq_,module,exports){
+module.exports = set_path_map_as_json_values;
+
+var $error = _dereq_("../types/error");
+var $atom = _dereq_("../types/atom");
+
+var clone = _dereq_("../support/clone-dense-json");
+var array_clone = _dereq_("../support/array-clone");
+
+var options = _dereq_("../support/options");
+var walk_path_map = _dereq_("../walk/walk-path-map");
+
+var is_object = _dereq_("../support/is-object");
+
+var get_valid_key = _dereq_("../support/get-valid-key");
+var create_branch = _dereq_("../support/create-branch");
+var wrap_node = _dereq_("../support/wrap-node");
+var replace_node = _dereq_("../support/replace-node");
+var graph_node = _dereq_("../support/graph-node");
+var update_back_refs = _dereq_("../support/update-back-refs");
+var update_graph = _dereq_("../support/update-graph");
+var inc_generation = _dereq_("../support/inc-generation");
+
+var node_as_miss = _dereq_("../support/treat-node-as-missing-path-map");
+var node_as_error = _dereq_("../support/treat-node-as-error");
+var clone_success = _dereq_("../support/clone-success-paths");
+
+var collect = _dereq_("../lru/collect");
+
+function set_path_map_as_json_values(model, pathmaps, onNext, error_selector) {
+
+    var roots = options([], model, error_selector);
+    var index = -1;
+    var count = pathmaps.length;
+    var nodes = roots.nodes;
+    var parents = array_clone(nodes);
+    var requested = [];
+    var optimized = [];
+    var keys_stack = [];
+    roots[0] = roots.root;
+    roots.onNext = onNext;
+
+    while (++index < count) {
+        var pathmap = pathmaps[index];
+        walk_path_map(onNode, onEdge, pathmap, keys_stack, 0, roots, parents, nodes, requested, optimized);
+    }
+
+    collect(
+        roots.lru,
+        roots.expired,
+        roots.version,
+        roots.root.$size || 0,
+        model._maxSize,
+        model._collectRatio
+    );
+
+    return {
+        values: null,
+        errors: roots.errors,
+        requestedPaths: roots.requestedPaths,
+        optimizedPaths: roots.optimizedPaths,
+        requestedMissingPaths: roots.requestedMissingPaths,
+        optimizedMissingPaths: roots.optimizedMissingPaths
+    };
+}
+
+function onNode(pathmap, roots, parents, nodes, requested, optimized, is_top_level, is_branch, key, keyset, is_keyset) {
+
+    var parent;
+
+    if (key == null) {
+        if ((key = get_valid_key(optimized)) == null) {
+            return;
+        }
+        parent = parents[0];
+    } else {
+        parent = nodes[0];
+    }
+
+    var node = parent[key],
+        type;
+
+    if (!is_top_level) {
+        type = is_object(node) && node.$type || undefined;
+        type = type && is_branch && "." || type;
+        node = create_branch(roots, parent, node, type, key);
+        parents[0] = parent;
+        nodes[0] = node;
+        return;
+    }
+
+    if (is_branch) {
+        type = is_object(node) && node.$type || undefined;
+        node = create_branch(roots, parent, node, type, key);
+        parents[0] = nodes[0] = node;
+        return;
+    }
+
+    var selector = roots.error_selector;
+    var root = roots[0];
+    var size = is_object(node) && node.$size || 0;
+    var mess = pathmap;
+
+    type = is_object(mess) && mess.$type || undefined;
+    mess = wrap_node(mess, type, !!type ? mess.value : mess);
+    type || (type = $atom);
+
+    if (type == $error && !!selector) {
+        mess = selector(requested, mess);
+    }
+
+    node = replace_node(parent, node, mess, key, roots.lru);
+    node = graph_node(root, parent, node, key, inc_generation());
+    update_graph(parent, size - node.$size, roots.version, roots.lru);
+    nodes[0] = node;
+}
+
+function onEdge(pathmap, keys_stack, depth, roots, parents, nodes, requested, optimized, key, keyset) {
+
+    var node = nodes[0];
+    var type = is_object(node) && node.$type || (node = undefined);
+
+    if (node_as_miss(roots, node, type, pathmap, keys_stack, depth, requested, optimized) === false) {
+        clone_success(roots, requested, optimized);
+        if (node_as_error(roots, node, type, requested) === false) {
+            roots.onNext({
+                path: array_clone(requested),
+                value: clone(roots, node, type, node && node.value)
+            });
+        }
+    }
+}
+},{"../lru/collect":235,"../support/array-clone":253,"../support/clone-dense-json":255,"../support/clone-success-paths":261,"../support/create-branch":263,"../support/get-valid-key":265,"../support/graph-node":266,"../support/inc-generation":267,"../support/is-object":271,"../support/options":276,"../support/replace-node":279,"../support/treat-node-as-error":281,"../support/treat-node-as-missing-path-map":282,"../support/update-back-refs":285,"../support/update-graph":286,"../support/wrap-node":287,"../types/atom":288,"../types/error":289,"../walk/walk-path-map":294}],248:[function(_dereq_,module,exports){
+module.exports = set_json_values_as_json_dense;
+
+var $path = _dereq_("../types/path");
+var $error = _dereq_("../types/error");
+var $atom = _dereq_("../types/atom");
+
+var clone = _dereq_("../support/clone-dense-json");
+var array_clone = _dereq_("../support/array-clone");
+
+var options = _dereq_("../support/options");
+var walk_path_set = _dereq_("../walk/walk-path-set");
+
+var is_object = _dereq_("../support/is-object");
+
+var get_valid_key = _dereq_("../support/get-valid-key");
+var create_branch = _dereq_("../support/create-branch");
+var wrap_node = _dereq_("../support/wrap-node");
+var invalidate_node = _dereq_("../support/invalidate-node");
+var replace_node = _dereq_("../support/replace-node");
+var graph_node = _dereq_("../support/graph-node");
+var update_back_refs = _dereq_("../support/update-back-refs");
+var update_graph = _dereq_("../support/update-graph");
+var inc_generation = _dereq_("../support/inc-generation");
+
+var node_as_miss = _dereq_("../support/treat-node-as-missing-path-set");
+var node_as_error = _dereq_("../support/treat-node-as-error");
+var clone_success = _dereq_("../support/clone-success-paths");
+
+var collect = _dereq_("../lru/collect");
+
+function set_json_values_as_json_dense(model, pathvalues, values, error_selector) {
+
+    var roots = options([], model, error_selector);
+    var index = -1;
+    var count = pathvalues.length;
+    var nodes = roots.nodes;
+    var parents = array_clone(nodes);
+    var requested = [];
+    var optimized = [];
+    var json, hasValue, hasValues;
+
+    roots[0] = roots.root;
+
+    while (++index < count) {
+
+        json = values && values[index];
+        if (is_object(json)) {
+            roots.json = roots[3] = parents[3] = nodes[3] = json.json || (json.json = {})
+        } else {
+            roots.json = roots[3] = parents[3] = nodes[3] = undefined;
+        }
+
+        var pv = pathvalues[index];
+        var pathset = pv.path;
+        roots.value = pv.value;
+        roots.index = index;
+
+        walk_path_set(onNode, onEdge, pathset, 0, roots, parents, nodes, requested, optimized);
+
+        hasValue = roots.hasValue;
+        if (!!hasValue) {
+            hasValues = true;
+            if (is_object(json)) {
+                json.json = roots.json;
+            }
+            delete roots.json;
+            delete roots.hasValue;
+        } else if (is_object(json)) {
+            delete json.json;
+        }
+    }
+
+    collect(
+        roots.lru,
+        roots.expired,
+        roots.version,
+        roots.root.$size || 0,
+        model._maxSize,
+        model._collectRatio
+    );
+
+    return {
+        values: values,
+        errors: roots.errors,
+        hasValue: hasValues,
+        requestedPaths: roots.requestedPaths,
+        optimizedPaths: roots.optimizedPaths,
+        requestedMissingPaths: roots.requestedMissingPaths,
+        optimizedMissingPaths: roots.optimizedMissingPaths
+    };
+}
+
+function onNode(pathset, roots, parents, nodes, requested, optimized, is_top_level, is_branch, key, keyset, is_keyset) {
+
+    var parent, json;
+
+    if (key == null) {
+        if ((key = get_valid_key(optimized)) == null) {
+            return;
+        }
+        json = parents[3];
+        parent = parents[0];
+    } else {
+        json = is_keyset && nodes[3] || parents[3];
+        parent = nodes[0];
+    }
+
+    var node = parent[key],
+        type;
+
+    if (!is_top_level) {
+        type = is_object(node) && node.$type || undefined;
+        type = type && is_branch && "." || type;
+        node = create_branch(roots, parent, node, type, key);
+        parents[0] = parent;
+        nodes[0] = node;
+        return;
+    }
+
+    parents[3] = json;
+
+    if (is_branch) {
+        type = is_object(node) && node.$type || undefined;
+        node = create_branch(roots, parent, node, type, key);
+        parents[0] = parent;
+        nodes[0] = node;
+        if (is_keyset && !!json) {
+            nodes[3] = json[keyset] || (json[keyset] = {});
+        }
+        return;
+    }
+
+    var selector = roots.error_selector;
+    var root = roots[0];
+    var size = is_object(node) && node.$size || 0;
+    var mess = roots.value;
+
+    if(mess === undefined && roots.headless) {
+        invalidate_node(parent, node, key, roots.lru);
+        update_graph(parent, size, roots.version, roots.lru);
+        node = undefined;
+    } else {
+        type = is_object(mess) && mess.$type || undefined;
+        mess = wrap_node(mess, type, !!type ? mess.value : mess);
+        type || (type = $atom);
+
+        if (type == $error && !!selector) {
+            mess = selector(requested, mess);
+        }
+
+        node = replace_node(parent, node, mess, key, roots.lru);
+        node = graph_node(root, parent, node, key, inc_generation());
+        update_graph(parent, size - node.$size, roots.version, roots.lru);
+    }
+    
+    nodes[0] = node;
+}
+
+function onEdge(pathset, depth, roots, parents, nodes, requested, optimized, key, keyset) {
+
+    var json;
+    var node = nodes[0];
+    var type = is_object(node) && node.$type || (node = undefined);
+
+    if (node_as_miss(roots, node, type, pathset, depth, requested, optimized) === false) {
+        clone_success(roots, requested, optimized);
+        if (node_as_error(roots, node, type, requested) === false) {
+            if(keyset == null) {
+                roots.json = clone(roots, node, type, node && node.value);
+            } else if(!!(json = parents[3])) {
+                json[keyset] = clone(roots, node, type, node && node.value);
+            }
+            roots.hasValue = true;
+        }
+    }
+}
+
+},{"../lru/collect":235,"../support/array-clone":253,"../support/clone-dense-json":255,"../support/clone-success-paths":261,"../support/create-branch":263,"../support/get-valid-key":265,"../support/graph-node":266,"../support/inc-generation":267,"../support/invalidate-node":269,"../support/is-object":271,"../support/options":276,"../support/replace-node":279,"../support/treat-node-as-error":281,"../support/treat-node-as-missing-path-set":283,"../support/update-back-refs":285,"../support/update-graph":286,"../support/wrap-node":287,"../types/atom":288,"../types/error":289,"../types/path":290,"../walk/walk-path-set":296}],249:[function(_dereq_,module,exports){
+module.exports = set_json_values_as_json_graph;
+
+var $path = _dereq_("../types/path");
+var $error = _dereq_("../types/error");
+var $atom = _dereq_("../types/atom");
+
+var clone = _dereq_("../support/clone-graph-json");
+var array_clone = _dereq_("../support/array-clone");
+
+var options = _dereq_("../support/options");
+var walk_path_set = _dereq_("../walk/walk-path-set-soft-link");
+
+var is_object = _dereq_("../support/is-object");
+
+var get_valid_key = _dereq_("../support/get-valid-key");
+var create_branch = _dereq_("../support/create-branch");
+var wrap_node = _dereq_("../support/wrap-node");
+var invalidate_node = _dereq_("../support/invalidate-node");
+var replace_node = _dereq_("../support/replace-node");
+var graph_node = _dereq_("../support/graph-node");
+var update_back_refs = _dereq_("../support/update-back-refs");
+var update_graph = _dereq_("../support/update-graph");
+var inc_generation = _dereq_("../support/inc-generation");
+
+var node_as_miss = _dereq_("../support/treat-node-as-missing-path-set");
+var node_as_error = _dereq_("../support/treat-node-as-error");
+var clone_success = _dereq_("../support/clone-success-paths");
+
+var promote = _dereq_("../lru/promote");
+var collect = _dereq_("../lru/collect");
+
+function set_json_values_as_json_graph(model, pathvalues, values, error_selector) {
+
+    var roots = options([], model, error_selector);
+    var index = -1;
+    var count = pathvalues.length;
+    var nodes = roots.nodes;
+    var parents = array_clone(nodes);
+    var requested = [];
+    var optimized = [];
+    var json = values[0];
+    var hasValue;
+
+    roots[0] = roots.root;
+    roots[1] = parents[1] = nodes[1] = json.jsong || (json.jsong = {});
+    roots.requestedPaths = json.paths || (json.paths = roots.requestedPaths);
+
+    while (++index < count) {
+
+        var pv = pathvalues[index];
+        var pathset = pv.path;
+        roots.value = pv.value;
+
+        walk_path_set(onNode, onEdge, pathset, 0, roots, parents, nodes, requested, optimized);
+    }
+
+    hasValue = roots.hasValue;
+    if(hasValue) {
+        json.jsong = roots[1];
+    } else {
+        delete json.jsong;
+        delete json.paths;
+    }
+
+    collect(
+        roots.lru,
+        roots.expired,
+        roots.version,
+        roots.root.$size || 0,
+        model._maxSize,
+        model._collectRatio
+    );
+
+    return {
+        values: values,
+        errors: roots.errors,
+        hasValue: hasValue,
+        requestedPaths: roots.requestedPaths,
+        optimizedPaths: roots.optimizedPaths,
+        requestedMissingPaths: roots.requestedMissingPaths,
+        optimizedMissingPaths: roots.optimizedMissingPaths
+    };
+}
+
+function onNode(pathset, roots, parents, nodes, requested, optimized, is_top_level, is_branch, key, keyset, is_keyset) {
+
+    var parent, json;
+
+    if (key == null) {
+        if ((key = get_valid_key(optimized)) == null) {
+            return;
+        }
+        json = parents[1];
+        parent = parents[0];
+    } else {
+        json = nodes[1];
+        parent = nodes[0];
+    }
+
+    var jsonkey = key;
+    var node = parent[key],
+        type;
+
+    if (!is_top_level) {
+        type = is_object(node) && node.$type || undefined;
+        type = type && is_branch && "." || type;
+        node = create_branch(roots, parent, node, type, key);
+        parents[0] = parent;
+        nodes[0] = node;
+        parents[1] = json;
+        if (type == $path) {
+            json[jsonkey] = clone(roots, node, type, node.value);
+            roots.hasValue = true;
+        } else {
+            nodes[1] = json[jsonkey] || (json[jsonkey] = {});
+        }
+        return;
+    }
+
+    if (is_branch) {
+        type = is_object(node) && node.$type || undefined;
+        node = create_branch(roots, parent, node, type, key);
+        type = node.$type;
+        parents[0] = parent;
+        nodes[0] = node;
+        parents[1] = json;
+        if (type == $path) {
+            json[jsonkey] = clone(roots, node, type, node.value);
+            roots.hasValue = true;
+        } else {
+            nodes[1] = json[jsonkey] || (json[jsonkey] = {});
+        }
+        return;
+    }
+
+    var selector = roots.error_selector;
+    var root = roots[0];
+    var size = is_object(node) && node.$size || 0;
+    var mess = roots.value;
+
+    if(mess === undefined && roots.headless) {
+        invalidate_node(parent, node, key, roots.lru);
+        update_graph(parent, size, roots.version, roots.lru);
+        node = undefined;
+    } else {
+        type = is_object(mess) && mess.$type || undefined;
+        mess = wrap_node(mess, type, !!type ? mess.value : mess);
+        type || (type = $atom);
+
+        if (type == $error && !!selector) {
+            mess = selector(requested, mess);
+        }
+
+        node = replace_node(parent, node, mess, key, roots.lru);
+        node = graph_node(root, parent, node, key, inc_generation());
+        update_graph(parent, size - node.$size, roots.version, roots.lru);
+    }
+    nodes[0] = node;
+
+    json[jsonkey] = clone(roots, node, type, node && node.value);
+    roots.hasValue = true;
+}
+
+function onEdge(pathset, depth, roots, parents, nodes, requested, optimized, key, keyset) {
+
+    var json;
+    var node = nodes[0];
+    var type = is_object(node) && node.$type || (node = undefined);
+
+    if (node_as_miss(roots, node, type, pathset, depth, requested, optimized) === false) {
+        clone_success(roots, requested, optimized);
+        promote(roots.lru, node);
+        if (keyset == null && !roots.hasValue && (keyset = get_valid_key(optimized)) == null) {
+            node = clone(roots, node, type, node && node.value);
+            json = roots[1];
+            json.$type = node.$type;
+            json.value = node.value;
+        }
+        roots.hasValue = true;
+    }
+}
+
+},{"../lru/collect":235,"../lru/promote":236,"../support/array-clone":253,"../support/clone-graph-json":256,"../support/clone-success-paths":261,"../support/create-branch":263,"../support/get-valid-key":265,"../support/graph-node":266,"../support/inc-generation":267,"../support/invalidate-node":269,"../support/is-object":271,"../support/options":276,"../support/replace-node":279,"../support/treat-node-as-error":281,"../support/treat-node-as-missing-path-set":283,"../support/update-back-refs":285,"../support/update-graph":286,"../support/wrap-node":287,"../types/atom":288,"../types/error":289,"../types/path":290,"../walk/walk-path-set-soft-link":295}],250:[function(_dereq_,module,exports){
+module.exports = set_json_values_as_json_sparse;
+
+var $path = _dereq_("../types/path");
+var $error = _dereq_("../types/error");
+var $atom = _dereq_("../types/atom");
+
+var clone = _dereq_("../support/clone-dense-json");
+var array_clone = _dereq_("../support/array-clone");
+
+var options = _dereq_("../support/options");
+var walk_path_set = _dereq_("../walk/walk-path-set");
+
+var is_object = _dereq_("../support/is-object");
+
+var get_valid_key = _dereq_("../support/get-valid-key");
+var create_branch = _dereq_("../support/create-branch");
+var wrap_node = _dereq_("../support/wrap-node");
+var invalidate_node = _dereq_("../support/invalidate-node");
+var replace_node = _dereq_("../support/replace-node");
+var graph_node = _dereq_("../support/graph-node");
+var update_back_refs = _dereq_("../support/update-back-refs");
+var update_graph = _dereq_("../support/update-graph");
+var inc_generation = _dereq_("../support/inc-generation");
+
+var node_as_miss = _dereq_("../support/treat-node-as-missing-path-set");
+var node_as_error = _dereq_("../support/treat-node-as-error");
+var clone_success = _dereq_("../support/clone-success-paths");
+
+var collect = _dereq_("../lru/collect");
+
+function set_json_values_as_json_sparse(model, pathvalues, values, error_selector) {
+
+    var roots = options([], model, error_selector);
+    var index = -1;
+    var count = pathvalues.length;
+    var nodes = roots.nodes;
+    var parents = array_clone(nodes);
+    var requested = [];
+    var optimized = [];
+    var json = values[0];
+    var hasValue;
+
+    roots[0] = roots.root;
+    roots[3] = parents[3] = nodes[3] = json.json || (json.json = {});
+
+    while (++index < count) {
+
+        var pv = pathvalues[index];
+        var pathset = pv.path;
+        roots.value = pv.value;
+
+        walk_path_set(onNode, onEdge, pathset, 0, roots, parents, nodes, requested, optimized);
+    }
+
+    hasValue = roots.hasValue;
+    if(hasValue) {
+        json.json = roots[3];
+    } else {
+        delete json.json;
+    }
+
+    collect(
+        roots.lru,
+        roots.expired,
+        roots.version,
+        roots.root.$size || 0,
+        model._maxSize,
+        model._collectRatio
+    );
+
+    return {
+        values: values,
+        errors: roots.errors,
+        hasValue: hasValue,
+        requestedPaths: roots.requestedPaths,
+        optimizedPaths: roots.optimizedPaths,
+        requestedMissingPaths: roots.requestedMissingPaths,
+        optimizedMissingPaths: roots.optimizedMissingPaths
+    };
+}
+
+function onNode(pathset, roots, parents, nodes, requested, optimized, is_top_level, is_branch, key, keyset, is_keyset) {
+
+    var parent, json, jsonkey;
+
+    if (key == null) {
+        if ((key = get_valid_key(optimized)) == null) {
+            return;
+        }
+        jsonkey = get_valid_key(requested);
+        json = parents[3];
+        parent = parents[0];
+    } else {
+        jsonkey = key;
+        json = nodes[3];
+        parent = nodes[0];
+    }
+
+    var node = parent[key],
+        type;
+
+    if (!is_top_level) {
+        type = is_object(node) && node.$type || undefined;
+        type = type && is_branch && "." || type;
+        node = create_branch(roots, parent, node, type, key);
+        parents[0] = parent;
+        nodes[0] = node;
+        return;
+    }
+
+    parents[3] = json;
+
+    if (is_branch) {
+        type = is_object(node) && node.$type || undefined;
+        node = create_branch(roots, parent, node, type, key);
+        parents[0] = parent;
+        nodes[0] = node;
+        nodes[3] = json[jsonkey] || (json[jsonkey] = {});
+        return;
+    }
+
+    var selector = roots.error_selector;
+    var root = roots[0];
+    var size = is_object(node) && node.$size || 0;
+    var mess = roots.value;
+
+    if(mess === undefined && roots.headless) {
+        invalidate_node(parent, node, key, roots.lru);
+        update_graph(parent, size, roots.version, roots.lru);
+        node = undefined;
+    } else {
+        type = is_object(mess) && mess.$type || undefined;
+        mess = wrap_node(mess, type, !!type ? mess.value : mess);
+        type || (type = $atom);
+
+        if (type == $error && !!selector) {
+            mess = selector(requested, mess);
+        }
+
+        node = replace_node(parent, node, mess, key, roots.lru);
+        node = graph_node(root, parent, node, key, inc_generation());
+        update_graph(parent, size - node.$size, roots.version, roots.lru);
+    }
+    nodes[0] = node;
+}
+
+function onEdge(pathset, depth, roots, parents, nodes, requested, optimized, key, keyset) {
+
+    var json;
+    var node = nodes[0];
+    var type = is_object(node) && node.$type || (node = undefined);
+
+    if (node_as_miss(roots, node, type, pathset, depth, requested, optimized) === false) {
+        clone_success(roots, requested, optimized);
+        if (node_as_error(roots, node, type, requested) === false) {
+            if (keyset == null && !roots.hasValue && (keyset = get_valid_key(optimized)) == null) {
+                node = clone(roots, node, type, node && node.value);
+                json = roots[3];
+                json.$type = node.$type;
+                json.value = node.value;
+            } else {
+                json = parents[3];
+                json[key] = clone(roots, node, type, node && node.value);
+            }
+            roots.hasValue = true;
+        }
+    }
+}
+
+},{"../lru/collect":235,"../support/array-clone":253,"../support/clone-dense-json":255,"../support/clone-success-paths":261,"../support/create-branch":263,"../support/get-valid-key":265,"../support/graph-node":266,"../support/inc-generation":267,"../support/invalidate-node":269,"../support/is-object":271,"../support/options":276,"../support/replace-node":279,"../support/treat-node-as-error":281,"../support/treat-node-as-missing-path-set":283,"../support/update-back-refs":285,"../support/update-graph":286,"../support/wrap-node":287,"../types/atom":288,"../types/error":289,"../types/path":290,"../walk/walk-path-set":296}],251:[function(_dereq_,module,exports){
+module.exports = set_json_values_as_json_values;
+
+var $error = _dereq_("../types/error");
+var $atom = _dereq_("../types/atom");
+
+var clone = _dereq_("../support/clone-dense-json");
+var array_clone = _dereq_("../support/array-clone");
+
+var options = _dereq_("../support/options");
+var walk_path_set = _dereq_("../walk/walk-path-set");
+
+var is_object = _dereq_("../support/is-object");
+
+var get_valid_key = _dereq_("../support/get-valid-key");
+var create_branch = _dereq_("../support/create-branch");
+var wrap_node = _dereq_("../support/wrap-node");
+var invalidate_node = _dereq_("../support/invalidate-node");
+var replace_node = _dereq_("../support/replace-node");
+var graph_node = _dereq_("../support/graph-node");
+var update_back_refs = _dereq_("../support/update-back-refs");
+var update_graph = _dereq_("../support/update-graph");
+var inc_generation = _dereq_("../support/inc-generation");
+
+var node_as_miss = _dereq_("../support/treat-node-as-missing-path-set");
+var node_as_error = _dereq_("../support/treat-node-as-error");
+var clone_success = _dereq_("../support/clone-success-paths");
+
+var collect = _dereq_("../lru/collect");
+
+function set_json_values_as_json_values(model, pathvalues, onNext, error_selector) {
+
+    var roots = options([], model, error_selector);
+    var index = -1;
+    var count = pathvalues.length;
+    var nodes = roots.nodes;
+    var parents = array_clone(nodes);
+    var requested = [];
+    var optimized = [];
+
+    roots[0] = roots.root;
+    roots.onNext = onNext;
+
+    while (++index < count) {
+        var pv = pathvalues[index];
+        var pathset = pv.path;
+        roots.value = pv.value;
+        walk_path_set(onNode, onEdge, pathset, 0, roots, parents, nodes, requested, optimized);
+    }
+
+    collect(
+        roots.lru,
+        roots.expired,
+        roots.version,
+        roots.root.$size || 0,
+        model._maxSize,
+        model._collectRatio
+    );
+
+    return {
+        values: null,
+        errors: roots.errors,
+        requestedPaths: roots.requestedPaths,
+        optimizedPaths: roots.optimizedPaths,
+        requestedMissingPaths: roots.requestedMissingPaths,
+        optimizedMissingPaths: roots.optimizedMissingPaths
+    };
+}
+
+function onNode(pathset, roots, parents, nodes, requested, optimized, is_top_level, is_branch, key, keyset, is_keyset) {
+
+    var parent;
+
+    if (key == null) {
+        if ((key = get_valid_key(optimized, nodes)) == null) {
+            return;
+        }
+        parent = parents[0];
+    } else {
+        parent = nodes[0];
+    }
+
+    var node = parent[key], type;
+
+    if (!is_top_level) {
+        type = is_object(node) && node.$type || undefined;
+        type = type && is_branch && "." || type;
+        node = create_branch(roots, parent, node, type, key);
+        parents[0] = parent;
+        nodes[0] = node;
+        return;
+    }
+
+    if (is_branch) {
+        type = is_object(node) && node.$type || undefined;
+        node = create_branch(roots, parent, node, type, key);
+        parents[0] = parent;
+        nodes[0] = node;
+        return;
+    }
+
+    var selector = roots.error_selector;
+    var root = roots[0];
+    var size = is_object(node) && node.$size || 0;
+    var mess = roots.value;
+    
+    if(mess === undefined && roots.headless) {
+        invalidate_node(parent, node, key, roots.lru);
+        update_graph(parent, size, roots.version, roots.lru);
+        node = undefined;
+    } else {
+        type = is_object(mess) && mess.$type || undefined;
+        mess = wrap_node(mess, type, !!type ? mess.value : mess);
+        type || (type = $atom);
+
+        if (type == $error && !!selector) {
+            mess = selector(requested, mess);
+        }
+
+        node = replace_node(parent, node, mess, key, roots.lru);
+        node = graph_node(root, parent, node, key, inc_generation());
+        update_graph(parent, size - node.$size, roots.version, roots.lru);
+    }
+    nodes[0] = node;
+}
+
+function onEdge(pathset, depth, roots, parents, nodes, requested, optimized, key, keyset) {
+
+    var node = nodes[0];
+    var type = is_object(node) && node.$type || (node = undefined);
+
+    if (node_as_miss(roots, node, type, pathset, depth, requested, optimized) === false) {
+        clone_success(roots, requested, optimized);
+        if (node_as_error(roots, node, type, requested) === false) {
+            roots.onNext({
+                path: array_clone(requested),
+                value: clone(roots, node, type, node && node.value)
+            });
+        }
+    }
+}
+
+},{"../lru/collect":235,"../support/array-clone":253,"../support/clone-dense-json":255,"../support/clone-success-paths":261,"../support/create-branch":263,"../support/get-valid-key":265,"../support/graph-node":266,"../support/inc-generation":267,"../support/invalidate-node":269,"../support/is-object":271,"../support/options":276,"../support/replace-node":279,"../support/treat-node-as-error":281,"../support/treat-node-as-missing-path-set":283,"../support/update-back-refs":285,"../support/update-graph":286,"../support/wrap-node":287,"../types/atom":288,"../types/error":289,"../walk/walk-path-set":296}],252:[function(_dereq_,module,exports){
 module.exports=_dereq_(102)
 },{}],253:[function(_dereq_,module,exports){
 module.exports=_dereq_(103)
 },{}],254:[function(_dereq_,module,exports){
 module.exports=_dereq_(104)
-},{"../types/atom":287,"./clone":261}],255:[function(_dereq_,module,exports){
+},{}],255:[function(_dereq_,module,exports){
 module.exports=_dereq_(105)
-},{"../types/atom":287,"./clone":261,"./is-primitive":271}],256:[function(_dereq_,module,exports){
+},{"../types/atom":288,"./clone":262}],256:[function(_dereq_,module,exports){
 module.exports=_dereq_(106)
-},{"../walk/walk-path-map-soft-link":292,"./clone-optimized-path":258,"./clone-requested-path":259,"./is-object":270}],257:[function(_dereq_,module,exports){
+},{"../types/atom":288,"./clone":262,"./is-primitive":272}],257:[function(_dereq_,module,exports){
 module.exports=_dereq_(107)
-},{"./clone-optimized-path":258,"./clone-requested-path":259}],258:[function(_dereq_,module,exports){
+},{"../walk/walk-path-map-soft-link":293,"./clone-optimized-path":259,"./clone-requested-path":260,"./is-object":271}],258:[function(_dereq_,module,exports){
 module.exports=_dereq_(108)
-},{}],259:[function(_dereq_,module,exports){
+},{"./clone-optimized-path":259,"./clone-requested-path":260}],259:[function(_dereq_,module,exports){
 module.exports=_dereq_(109)
-},{"./is-object":270}],260:[function(_dereq_,module,exports){
+},{}],260:[function(_dereq_,module,exports){
 module.exports=_dereq_(110)
-},{"./array-clone":252,"./array-slice":253}],261:[function(_dereq_,module,exports){
+},{"./is-object":271}],261:[function(_dereq_,module,exports){
 module.exports=_dereq_(111)
-},{"../internal/prefix":222,"./is-object":270}],262:[function(_dereq_,module,exports){
+},{"./array-clone":253,"./array-slice":254}],262:[function(_dereq_,module,exports){
 module.exports=_dereq_(112)
-},{"../types/path":289,"./graph-node":265,"./is-expired":269,"./is-primitive":271,"./replace-node":278,"./update-back-refs":284}],263:[function(_dereq_,module,exports){
+},{"../internal/prefix":223,"./is-object":271}],263:[function(_dereq_,module,exports){
 module.exports=_dereq_(113)
-},{"../internal/context":214,"../internal/ref":225,"../internal/ref-index":224,"../internal/refs-length":226}],264:[function(_dereq_,module,exports){
+},{"../types/path":290,"./graph-node":266,"./is-expired":270,"./is-primitive":272,"./replace-node":279,"./update-back-refs":285}],264:[function(_dereq_,module,exports){
 module.exports=_dereq_(114)
-},{}],265:[function(_dereq_,module,exports){
+},{"../internal/context":215,"../internal/ref":226,"../internal/ref-index":225,"../internal/refs-length":227}],265:[function(_dereq_,module,exports){
 module.exports=_dereq_(115)
-},{"../internal/generation":215,"../internal/key":218,"../internal/parent":221}],266:[function(_dereq_,module,exports){
+},{}],266:[function(_dereq_,module,exports){
 module.exports=_dereq_(116)
-},{}],267:[function(_dereq_,module,exports){
+},{"../internal/generation":216,"../internal/key":219,"../internal/parent":222}],267:[function(_dereq_,module,exports){
 module.exports=_dereq_(117)
 },{}],268:[function(_dereq_,module,exports){
 module.exports=_dereq_(118)
-},{"../internal/prefix":222,"./is-object":270,"./remove-node":277}],269:[function(_dereq_,module,exports){
+},{}],269:[function(_dereq_,module,exports){
 module.exports=_dereq_(119)
-},{"../internal/invalidated":217,"../lru/splice":236,"../values/expires-never":290,"../values/expires-now":291,"./now":274}],270:[function(_dereq_,module,exports){
+},{"../internal/prefix":223,"./is-object":271,"./remove-node":278}],270:[function(_dereq_,module,exports){
 module.exports=_dereq_(120)
-},{}],271:[function(_dereq_,module,exports){
+},{"../internal/invalidated":218,"../lru/splice":237,"../values/expires-never":291,"../values/expires-now":292,"./now":275}],271:[function(_dereq_,module,exports){
 module.exports=_dereq_(121)
 },{}],272:[function(_dereq_,module,exports){
 module.exports=_dereq_(122)
-},{"../internal/offset":220,"./is-object":270}],273:[function(_dereq_,module,exports){
+},{}],273:[function(_dereq_,module,exports){
 module.exports=_dereq_(123)
-},{"../lru/promote":235,"../support/replace-node":278,"../support/update-graph":285,"../types/atom":287,"../types/path":289,"../values/expires-now":291,"./graph-node":265,"./inc-generation":266,"./invalidate-node":268,"./is-expired":269,"./is-object":270,"./is-primitive":271,"./wrap-node":286}],274:[function(_dereq_,module,exports){
+},{"../internal/offset":221,"./is-object":271}],274:[function(_dereq_,module,exports){
 module.exports=_dereq_(124)
-},{}],275:[function(_dereq_,module,exports){
-arguments[4][125][0].apply(exports,arguments)
-},{"../get/getBoundValue":197,"../support/inc-version":267}],276:[function(_dereq_,module,exports){
-module.exports=_dereq_(126)
-},{"../internal/offset":220,"./is-object":270}],277:[function(_dereq_,module,exports){
+},{"../lru/promote":236,"../support/replace-node":279,"../support/update-graph":286,"../types/atom":288,"../types/path":290,"../values/expires-now":292,"./graph-node":266,"./inc-generation":267,"./invalidate-node":269,"./is-expired":270,"./is-object":271,"./is-primitive":272,"./wrap-node":287}],275:[function(_dereq_,module,exports){
+module.exports=_dereq_(125)
+},{}],276:[function(_dereq_,module,exports){
+var inc_version = _dereq_("../support/inc-version");
+var getBoundValue = _dereq_('../get/getBoundValue');
+
+module.exports = function(options, model, error_selector) {
+    
+    var bound = options.bound     || (options.bound                 = model._path || []);
+    var root  = options.root      || (options.root                  = model._cache);
+    var nodes = options.nodes     || (options.nodes                 = []);
+    var lru   = options.lru       || (options.lru                   = model._root);
+    options.expired               || (options.expired               = lru.expired);
+    options.errors                || (options.errors                = []);
+    options.requestedPaths        || (options.requestedPaths        = []);
+    options.optimizedPaths        || (options.optimizedPaths        = []);
+    options.requestedMissingPaths || (options.requestedMissingPaths = []);
+    options.optimizedMissingPaths || (options.optimizedMissingPaths = []);
+    options.boxed  = model._boxed || false;
+    options.materialized = model._materialized;
+    options.errorsAsValues = model._treatErrorsAsValues || false;
+    options.headless = model._dataSource == null;
+    options.version = inc_version();
+    
+    options.offset || (options.offset = 0);
+    options.error_selector = error_selector || model._errorSelector;
+    
+    if(bound.length) {
+        nodes[0] = getBoundValue(model, bound).value;
+    } else {
+        nodes[0] = root;
+    }
+    
+    return options;
+};
+},{"../get/getBoundValue":198,"../support/inc-version":268}],277:[function(_dereq_,module,exports){
 module.exports=_dereq_(127)
-},{"../internal/parent":221,"../lru/splice":236,"../types/path":289,"./delete-back-refs":263,"./is-object":270,"./unlink":283}],278:[function(_dereq_,module,exports){
+},{"../internal/offset":221,"./is-object":271}],278:[function(_dereq_,module,exports){
 module.exports=_dereq_(128)
-},{"./invalidate-node":268,"./transfer-back-refs":279}],279:[function(_dereq_,module,exports){
+},{"../internal/parent":222,"../lru/splice":237,"../types/path":290,"./delete-back-refs":264,"./is-object":271,"./unlink":284}],279:[function(_dereq_,module,exports){
 module.exports=_dereq_(129)
-},{"../internal/context":214,"../internal/ref":225,"../internal/refs-length":226}],280:[function(_dereq_,module,exports){
+},{"./invalidate-node":269,"./transfer-back-refs":280}],280:[function(_dereq_,module,exports){
 module.exports=_dereq_(130)
-},{"../lru/promote":235,"../types/error":288,"./array-clone":252}],281:[function(_dereq_,module,exports){
+},{"../internal/context":215,"../internal/ref":226,"../internal/refs-length":227}],281:[function(_dereq_,module,exports){
 module.exports=_dereq_(131)
-},{"../types/atom":287,"./clone-missing-path-maps":256,"./is-expired":269}],282:[function(_dereq_,module,exports){
+},{"../lru/promote":236,"../types/error":289,"./array-clone":253}],282:[function(_dereq_,module,exports){
 module.exports=_dereq_(132)
-},{"../types/atom":287,"./clone-missing-path-sets":257,"./is-expired":269}],283:[function(_dereq_,module,exports){
+},{"../types/atom":288,"./clone-missing-path-maps":257,"./is-expired":270}],283:[function(_dereq_,module,exports){
 module.exports=_dereq_(133)
-},{"../internal/context":214,"../internal/ref":225,"../internal/ref-index":224,"../internal/refs-length":226}],284:[function(_dereq_,module,exports){
+},{"../types/atom":288,"./clone-missing-path-sets":258,"./is-expired":270}],284:[function(_dereq_,module,exports){
 module.exports=_dereq_(134)
-},{"../internal/generation":215,"../internal/parent":221,"../internal/ref":225,"../internal/refs-length":226,"../internal/version":228,"./inc-generation":266}],285:[function(_dereq_,module,exports){
+},{"../internal/context":215,"../internal/ref":226,"../internal/ref-index":225,"../internal/refs-length":227}],285:[function(_dereq_,module,exports){
 module.exports=_dereq_(135)
-},{"../internal/key":218,"../internal/parent":221,"../internal/version":228,"./remove-node":277,"./update-back-refs":284}],286:[function(_dereq_,module,exports){
+},{"../internal/generation":216,"../internal/parent":222,"../internal/ref":226,"../internal/refs-length":227,"../internal/version":229,"./inc-generation":267}],286:[function(_dereq_,module,exports){
 module.exports=_dereq_(136)
-},{"../types/atom":287,"../types/error":288,"../types/path":289,"./clone":261,"./is-object":270,"./now":274}],287:[function(_dereq_,module,exports){
+},{"../internal/key":219,"../internal/parent":222,"../internal/version":229,"./remove-node":278,"./update-back-refs":285}],287:[function(_dereq_,module,exports){
 module.exports=_dereq_(137)
-},{}],288:[function(_dereq_,module,exports){
+},{"../types/atom":288,"../types/error":289,"../types/path":290,"./clone":262,"./is-object":271,"./now":275}],288:[function(_dereq_,module,exports){
 module.exports=_dereq_(138)
 },{}],289:[function(_dereq_,module,exports){
 module.exports=_dereq_(139)
@@ -8477,15 +10459,17 @@ module.exports=_dereq_(140)
 module.exports=_dereq_(141)
 },{}],292:[function(_dereq_,module,exports){
 module.exports=_dereq_(142)
-},{"../internal/prefix":222,"../lru/promote":235,"../support/array-append":251,"../support/array-clone":252,"../support/array-slice":253,"../support/is-expired":269,"../support/is-object":270,"../support/is-primitive":271,"../types/path":289,"./walk-reference":296}],293:[function(_dereq_,module,exports){
+},{}],293:[function(_dereq_,module,exports){
 module.exports=_dereq_(143)
-},{"../internal/context":214,"../internal/prefix":222,"../lru/promote":235,"../support/array-append":251,"../support/array-clone":252,"../support/array-slice":253,"../support/is-expired":269,"../support/is-object":270,"../support/is-primitive":271,"../types/path":289,"./walk-reference":296}],294:[function(_dereq_,module,exports){
+},{"../internal/prefix":223,"../lru/promote":236,"../support/array-append":252,"../support/array-clone":253,"../support/array-slice":254,"../support/is-expired":270,"../support/is-object":271,"../support/is-primitive":272,"../types/path":290,"./walk-reference":297}],294:[function(_dereq_,module,exports){
 module.exports=_dereq_(144)
-},{"../lru/promote":235,"../support/array-append":251,"../support/array-clone":252,"../support/array-slice":253,"../support/is-expired":269,"../support/is-object":270,"../support/is-primitive":271,"../support/keyset-to-key":272,"../support/permute-keyset":276,"../types/path":289,"./walk-reference":296}],295:[function(_dereq_,module,exports){
+},{"../internal/context":215,"../internal/prefix":223,"../lru/promote":236,"../support/array-append":252,"../support/array-clone":253,"../support/array-slice":254,"../support/is-expired":270,"../support/is-object":271,"../support/is-primitive":272,"../types/path":290,"./walk-reference":297}],295:[function(_dereq_,module,exports){
 module.exports=_dereq_(145)
-},{"../internal/context":214,"../internal/prefix":222,"../lru/promote":235,"../support/array-append":251,"../support/array-clone":252,"../support/array-slice":253,"../support/is-expired":269,"../support/is-object":270,"../support/is-primitive":271,"../support/keyset-to-key":272,"../support/permute-keyset":276,"../types/path":289,"./walk-reference":296}],296:[function(_dereq_,module,exports){
+},{"../lru/promote":236,"../support/array-append":252,"../support/array-clone":253,"../support/array-slice":254,"../support/is-expired":270,"../support/is-object":271,"../support/is-primitive":272,"../support/keyset-to-key":273,"../support/permute-keyset":277,"../types/path":290,"./walk-reference":297}],296:[function(_dereq_,module,exports){
 module.exports=_dereq_(146)
-},{"../internal/context":214,"../internal/prefix":222,"../internal/ref":225,"../internal/ref-index":224,"../internal/refs-length":226,"../support/array-append":251,"../support/array-slice":253,"../support/is-object":270,"../support/is-primitive":271}],297:[function(_dereq_,module,exports){
+},{"../internal/context":215,"../internal/prefix":223,"../lru/promote":236,"../support/array-append":252,"../support/array-clone":253,"../support/array-slice":254,"../support/is-expired":270,"../support/is-object":271,"../support/is-primitive":272,"../support/keyset-to-key":273,"../support/permute-keyset":277,"../types/path":290,"./walk-reference":297}],297:[function(_dereq_,module,exports){
+module.exports=_dereq_(147)
+},{"../internal/context":215,"../internal/prefix":223,"../internal/ref":226,"../internal/ref-index":225,"../internal/refs-length":227,"../support/array-append":252,"../support/array-slice":254,"../support/is-object":271,"../support/is-primitive":272}],298:[function(_dereq_,module,exports){
 var Disposable = module.exports = function Disposable(a) {
     this.action = a;
 };
@@ -8502,12 +10486,12 @@ Disposable.prototype.dispose = function() {
     }
 };
 
-},{}],298:[function(_dereq_,module,exports){
+},{}],299:[function(_dereq_,module,exports){
 module.exports = function(x) {
     return x;
 };
 
-},{}],299:[function(_dereq_,module,exports){
+},{}],300:[function(_dereq_,module,exports){
 var Observer = _dereq_('./Observer');
 var Disposable = _dereq_('./Disposable');
 
@@ -8657,7 +10641,7 @@ Observable.prototype = {
 
 Observable.prototype.forEach = Observable.prototype.subscribe;
 
-},{"./Disposable":297,"./Observer":300}],300:[function(_dereq_,module,exports){
+},{"./Disposable":298,"./Observer":301}],301:[function(_dereq_,module,exports){
 var I = _dereq_('./I');
 var Observer = module.exports = function Observer(n, e, c) {
     this.onNext =       n || I;
@@ -8670,7 +10654,7 @@ Observer.create = function(n, e, c) {
 };
 
 
-},{"./I":298}],301:[function(_dereq_,module,exports){
+},{"./I":299}],302:[function(_dereq_,module,exports){
 var Subject = module.exports = function Subject() {
     this.observers = [];
 };
@@ -8708,7 +10692,7 @@ Subject.prototype.onCompleted = function() {
     }
 };
 
-},{}],302:[function(_dereq_,module,exports){
+},{}],303:[function(_dereq_,module,exports){
 (function (global){
 var Rx;
 
@@ -8740,14 +10724,14 @@ if (Rx === undefined) {
 module.exports = Rx;
 
 }).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./Disposable":297,"./Observable":299,"./Observer":300,"./Subject":301}],303:[function(_dereq_,module,exports){
+},{"./Disposable":298,"./Observable":300,"./Observer":301,"./Subject":302}],304:[function(_dereq_,module,exports){
 module.exports = {
     integers: 'integers',
     ranges: 'ranges',
     keys: 'keys'
 };
 
-},{}],304:[function(_dereq_,module,exports){
+},{}],305:[function(_dereq_,module,exports){
 var TokenTypes = {
     token: 'token',
     dotSeparator: '.',
@@ -8765,7 +10749,7 @@ var TokenTypes = {
 
 module.exports = TokenTypes;
 
-},{}],305:[function(_dereq_,module,exports){
+},{}],306:[function(_dereq_,module,exports){
 module.exports = {
     indexer: {
         nested: 'Indexers cannot be nested.',
@@ -8799,7 +10783,7 @@ module.exports = {
 };
 
 
-},{}],306:[function(_dereq_,module,exports){
+},{}],307:[function(_dereq_,module,exports){
 var Tokenizer = _dereq_('./tokenizer');
 var head = _dereq_('./parse-tree/head');
 var RoutedTokens = _dereq_('./RoutedTokens');
@@ -8850,7 +10834,7 @@ parser.fromPath = function(path, ext) {
 // Potential routed tokens.
 parser.RoutedTokens = RoutedTokens;
 
-},{"./RoutedTokens":303,"./parse-tree/head":307,"./tokenizer":312}],307:[function(_dereq_,module,exports){
+},{"./RoutedTokens":304,"./parse-tree/head":308,"./tokenizer":313}],308:[function(_dereq_,module,exports){
 var TokenTypes = _dereq_('./../TokenTypes');
 var E = _dereq_('./../exceptions');
 var indexer = _dereq_('./indexer');
@@ -8911,7 +10895,7 @@ module.exports = function head(tokenizer) {
 };
 
 
-},{"./../TokenTypes":304,"./../exceptions":305,"./indexer":308}],308:[function(_dereq_,module,exports){
+},{"./../TokenTypes":305,"./../exceptions":306,"./indexer":309}],309:[function(_dereq_,module,exports){
 var TokenTypes = _dereq_('./../TokenTypes');
 var E = _dereq_('./../exceptions');
 var idxE = E.indexer;
@@ -9026,7 +11010,7 @@ module.exports = function indexer(tokenizer, openingToken, state, out) {
 };
 
 
-},{"./../TokenTypes":304,"./../exceptions":305,"./quote":309,"./range":310,"./routed":311}],309:[function(_dereq_,module,exports){
+},{"./../TokenTypes":305,"./../exceptions":306,"./quote":310,"./range":311,"./routed":312}],310:[function(_dereq_,module,exports){
 var TokenTypes = _dereq_('./../TokenTypes');
 var E = _dereq_('./../exceptions');
 var quoteE = E.quote;
@@ -9110,7 +11094,7 @@ module.exports = function quote(tokenizer, openingToken, state, out) {
 };
 
 
-},{"./../TokenTypes":304,"./../exceptions":305}],310:[function(_dereq_,module,exports){
+},{"./../TokenTypes":305,"./../exceptions":306}],311:[function(_dereq_,module,exports){
 var Tokenizer = _dereq_('./../tokenizer');
 var TokenTypes = _dereq_('./../TokenTypes');
 var E = _dereq_('./../exceptions');
@@ -9189,7 +11173,7 @@ module.exports = function range(tokenizer, openingToken, state, out) {
 };
 
 
-},{"./../TokenTypes":304,"./../exceptions":305,"./../tokenizer":312}],311:[function(_dereq_,module,exports){
+},{"./../TokenTypes":305,"./../exceptions":306,"./../tokenizer":313}],312:[function(_dereq_,module,exports){
 var TokenTypes = _dereq_('./../TokenTypes');
 var RoutedTokens = _dereq_('./../RoutedTokens');
 var E = _dereq_('./../exceptions');
@@ -9255,7 +11239,7 @@ module.exports = function routed(tokenizer, openingToken, state, out) {
 };
 
 
-},{"./../RoutedTokens":303,"./../TokenTypes":304,"./../exceptions":305}],312:[function(_dereq_,module,exports){
+},{"./../RoutedTokens":304,"./../TokenTypes":305,"./../exceptions":306}],313:[function(_dereq_,module,exports){
 var TokenTypes = _dereq_('./../TokenTypes');
 var DOT_SEPARATOR = '.';
 var COMMA_SEPARATOR = ',';
@@ -9407,7 +11391,7 @@ function getNext(string, idx, ext) {
 
 
 
-},{"./../TokenTypes":304}],313:[function(_dereq_,module,exports){
+},{"./../TokenTypes":305}],314:[function(_dereq_,module,exports){
 var falcor = _dereq_('falcor');
 Observable = falcor.Observable;
 
@@ -9599,44 +11583,44 @@ function buildQueryObject(url, method, queryData) {
 }
 module.exports = XMLHttpSource;
 
-},{"falcor":152}],314:[function(_dereq_,module,exports){
-module.exports=_dereq_(297)
-},{}],315:[function(_dereq_,module,exports){
+},{"falcor":153}],315:[function(_dereq_,module,exports){
 module.exports=_dereq_(298)
 },{}],316:[function(_dereq_,module,exports){
 module.exports=_dereq_(299)
-},{"./Disposable":314,"./Observer":317}],317:[function(_dereq_,module,exports){
+},{}],317:[function(_dereq_,module,exports){
 module.exports=_dereq_(300)
-},{"./I":315}],318:[function(_dereq_,module,exports){
+},{"./Disposable":315,"./Observer":318}],318:[function(_dereq_,module,exports){
 module.exports=_dereq_(301)
-},{}],319:[function(_dereq_,module,exports){
+},{"./I":316}],319:[function(_dereq_,module,exports){
 module.exports=_dereq_(302)
-},{"./Disposable":314,"./Observable":316,"./Observer":317,"./Subject":318}],320:[function(_dereq_,module,exports){
+},{}],320:[function(_dereq_,module,exports){
 module.exports=_dereq_(303)
-},{}],321:[function(_dereq_,module,exports){
+},{"./Disposable":315,"./Observable":317,"./Observer":318,"./Subject":319}],321:[function(_dereq_,module,exports){
 module.exports=_dereq_(304)
 },{}],322:[function(_dereq_,module,exports){
 module.exports=_dereq_(305)
 },{}],323:[function(_dereq_,module,exports){
 module.exports=_dereq_(306)
-},{"./RoutedTokens":320,"./parse-tree/head":324,"./tokenizer":329}],324:[function(_dereq_,module,exports){
+},{}],324:[function(_dereq_,module,exports){
 module.exports=_dereq_(307)
-},{"./../TokenTypes":321,"./../exceptions":322,"./indexer":325}],325:[function(_dereq_,module,exports){
+},{"./RoutedTokens":321,"./parse-tree/head":325,"./tokenizer":330}],325:[function(_dereq_,module,exports){
 module.exports=_dereq_(308)
-},{"./../TokenTypes":321,"./../exceptions":322,"./quote":326,"./range":327,"./routed":328}],326:[function(_dereq_,module,exports){
+},{"./../TokenTypes":322,"./../exceptions":323,"./indexer":326}],326:[function(_dereq_,module,exports){
 module.exports=_dereq_(309)
-},{"./../TokenTypes":321,"./../exceptions":322}],327:[function(_dereq_,module,exports){
+},{"./../TokenTypes":322,"./../exceptions":323,"./quote":327,"./range":328,"./routed":329}],327:[function(_dereq_,module,exports){
 module.exports=_dereq_(310)
-},{"./../TokenTypes":321,"./../exceptions":322,"./../tokenizer":329}],328:[function(_dereq_,module,exports){
+},{"./../TokenTypes":322,"./../exceptions":323}],328:[function(_dereq_,module,exports){
 module.exports=_dereq_(311)
-},{"./../RoutedTokens":320,"./../TokenTypes":321,"./../exceptions":322}],329:[function(_dereq_,module,exports){
+},{"./../TokenTypes":322,"./../exceptions":323,"./../tokenizer":330}],329:[function(_dereq_,module,exports){
 module.exports=_dereq_(312)
-},{"./../TokenTypes":321}],330:[function(_dereq_,module,exports){
+},{"./../RoutedTokens":321,"./../TokenTypes":322,"./../exceptions":323}],330:[function(_dereq_,module,exports){
+module.exports=_dereq_(313)
+},{"./../TokenTypes":322}],331:[function(_dereq_,module,exports){
 'use strict';
 
 module.exports = _dereq_('./lib')
 
-},{"./lib":335}],331:[function(_dereq_,module,exports){
+},{"./lib":336}],332:[function(_dereq_,module,exports){
 'use strict';
 
 var asap = _dereq_('asap/raw')
@@ -9808,7 +11792,7 @@ function doResolve(fn, promise) {
     promise._67(LAST_ERROR)
   }
 }
-},{"asap/raw":339}],332:[function(_dereq_,module,exports){
+},{"asap/raw":340}],333:[function(_dereq_,module,exports){
 'use strict';
 
 var Promise = _dereq_('./core.js')
@@ -9822,7 +11806,7 @@ Promise.prototype.done = function (onFulfilled, onRejected) {
     }, 0)
   })
 }
-},{"./core.js":331}],333:[function(_dereq_,module,exports){
+},{"./core.js":332}],334:[function(_dereq_,module,exports){
 'use strict';
 
 //This file contains the ES6 extensions to the core Promises/A+ API
@@ -9928,7 +11912,7 @@ Promise.prototype['catch'] = function (onRejected) {
   return this.then(null, onRejected);
 }
 
-},{"./core.js":331,"asap/raw":339}],334:[function(_dereq_,module,exports){
+},{"./core.js":332,"asap/raw":340}],335:[function(_dereq_,module,exports){
 'use strict';
 
 var Promise = _dereq_('./core.js')
@@ -9946,7 +11930,7 @@ Promise.prototype['finally'] = function (f) {
   })
 }
 
-},{"./core.js":331}],335:[function(_dereq_,module,exports){
+},{"./core.js":332}],336:[function(_dereq_,module,exports){
 'use strict';
 
 module.exports = _dereq_('./core.js')
@@ -9955,7 +11939,7 @@ _dereq_('./finally.js')
 _dereq_('./es6-extensions.js')
 _dereq_('./node-extensions.js')
 
-},{"./core.js":331,"./done.js":332,"./es6-extensions.js":333,"./finally.js":334,"./node-extensions.js":336}],336:[function(_dereq_,module,exports){
+},{"./core.js":332,"./done.js":333,"./es6-extensions.js":334,"./finally.js":335,"./node-extensions.js":337}],337:[function(_dereq_,module,exports){
 'use strict';
 
 //This file contains then/promise specific extensions that are only useful for node.js interop
@@ -10020,11 +12004,11 @@ Promise.prototype.nodeify = function (callback, ctx) {
   })
 }
 
-},{"./core.js":331,"asap":337}],337:[function(_dereq_,module,exports){
-module.exports=_dereq_(147)
-},{"./raw":338}],338:[function(_dereq_,module,exports){
+},{"./core.js":332,"asap":338}],338:[function(_dereq_,module,exports){
 module.exports=_dereq_(148)
-},{}],339:[function(_dereq_,module,exports){
+},{"./raw":339}],339:[function(_dereq_,module,exports){
+module.exports=_dereq_(149)
+},{}],340:[function(_dereq_,module,exports){
 (function (process){
 "use strict";
 
@@ -10129,6 +12113,6 @@ function requestFlush() {
 }
 
 }).call(this,_dereq_("FWaASH"))
-},{"FWaASH":151,"domain":149}]},{},[1])
+},{"FWaASH":152,"domain":150}]},{},[1])
 (1)
 });
