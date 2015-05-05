@@ -20,11 +20,13 @@ module.exports = function() {
             },
             setPathMaps: {
                 query: [{
-                    videos: {
-                        1234: {
-                            summary: {
-                                "title": "House of Cards",
-                                "url": "/movies/1234"
+                    json: {
+                        videos: {
+                            1234: {
+                                summary: {
+                                    "title": "House of Cards",
+                                    "url": "/movies/1234"
+                                }
                             }
                         }
                     }
@@ -47,9 +49,11 @@ module.exports = function() {
             },
             getPathMaps: {
                 query: [{
-                    videos: {
-                        1234: {
-                            summary: null
+                    json: {
+                        videos: {
+                            1234: {
+                                summary: null
+                            }
                         }
                     }
                 }]
@@ -122,11 +126,13 @@ module.exports = function() {
             },
             setPathMaps: {
                 query: [{
-                    videos: {
-                        553: {
-                            summary: {
-                                "title": "Running Man",
-                                "url": "/movies/553"
+                    json: {
+                        videos: {
+                            553: {
+                                summary: {
+                                    "title": "Running Man",
+                                    "url": "/movies/553"
+                                }
                             }
                         }
                     }
@@ -149,9 +155,11 @@ module.exports = function() {
             },
             getPathMaps: {
                 query: [{
-                    videos: {
-                        553: {
-                            summary: null
+                    json: {
+                        videos: {
+                            553: {
+                                summary: null
+                            }
                         }
                     }
                 }]
@@ -223,8 +231,10 @@ module.exports = function() {
 
             setPathMaps: {
                 query: [{
-                    genreList: {
-                        0: ["lists", "abcd"]
+                    json: {
+                        genreList: {
+                            0: ["lists", "abcd"]
+                        }
                     }
                 }]
             },
@@ -247,8 +257,10 @@ module.exports = function() {
 
             getPathMaps: {
                 query: [{
-                    genreList: {
-                        0: null
+                    json: {
+                        genreList: {
+                            0: null
+                        }
                     }
                 }]
             },
@@ -313,11 +325,13 @@ module.exports = function() {
             },
             setPathMaps: {
                 query: [{
-                    videos: {
-                        1234: {
-                            summary: {
-                                "title": "House of Cards",
-                                "url": "/movies/1234"
+                    json: {
+                        videos: {
+                            1234: {
+                                summary: {
+                                    "title": "House of Cards",
+                                    "url": "/movies/1234"
+                                }
                             }
                         }
                     }
@@ -340,9 +354,11 @@ module.exports = function() {
             },
             getPathMaps: {
                 query: [{
-                    videos: {
-                        1234: {
-                            summary: null
+                    json: {
+                        videos: {
+                            1234: {
+                                summary: null
+                            }
                         }
                     }
                 }]
@@ -405,9 +421,11 @@ module.exports = function() {
 
             getPathMaps: {
                 query: [{
-                    videos: {
-                        expiredLeafByTimestamp: {
-                            summary: null
+                    json: {
+                        videos: {
+                            expiredLeafByTimestamp: {
+                                summary: null
+                            }
                         }
                     }
                 }]
@@ -431,14 +449,16 @@ module.exports = function() {
 
             setPathMaps: {
                 query: [{
-                    videos: {
-                        expiredLeafByTimestamp: {
-                            summary: {
-                                "$type": $atom,
-                                "$expires": Date.now() - 100,
-                                "value": {
-                                    "title": "Marco Polo",
-                                    "url": "/movies/atom"
+                    json: {
+                        videos: {
+                            expiredLeafByTimestamp: {
+                                summary: {
+                                    "$type": $atom,
+                                    "$expires": Date.now() - 100,
+                                    "value": {
+                                        "title": "Marco Polo",
+                                        "url": "/movies/atom"
+                                    }
                                 }
                             }
                         }
@@ -491,9 +511,11 @@ module.exports = function() {
 
             getPathMaps: {
                 query: [{
-                    videos: {
-                        expiredLeafBy0: {
-                            summary: null
+                    json: {
+                        videos: {
+                            expiredLeafBy0: {
+                                summary: null
+                            }
                         }
                     }
                 }]
@@ -517,14 +539,16 @@ module.exports = function() {
 
             setPathMaps: {
                 query: [{
-                    videos: {
-                        expiredLeafBy0: {
-                            summary: {
-                                "$expires": 0,
-                                "$size": 51,
-                                "$type": $atom,
-                                "value": {
-                                    "sad": "tunafish"
+                    json: {
+                        videos: {
+                            expiredLeafBy0: {
+                                summary: {
+                                    "$expires": 0,
+                                    "$size": 51,
+                                    "$type": $atom,
+                                    "value": {
+                                        "sad": "tunafish"
+                                    }
                                 }
                             }
                         }
@@ -576,9 +600,11 @@ module.exports = function() {
 
             getPathMaps: {
                 query: [{
-                    videos: {
-                        expiredBranchByTimestamp: {
-                            summary: null
+                    json: {
+                        videos: {
+                            expiredBranchByTimestamp: {
+                                summary: null
+                            }
                         }
                     }
                 }]
@@ -609,9 +635,11 @@ module.exports = function() {
 
             getPathMaps: {
                 query: [{
-                    videos: {
-                        expiredBranchBy0: {
-                            summary: null
+                    json: {
+                        videos: {
+                            expiredBranchBy0: {
+                                summary: null
+                            }
                         }
                     }
                 }]
@@ -641,9 +669,11 @@ module.exports = function() {
             },
             getPathMaps: {
                 query: [{
-                    videos: {
-                        errorBranch: {
-                            summary: null
+                    json: {
+                        videos: {
+                            errorBranch: {
+                                summary: null
+                            }
                         }
                     }
                 }]
@@ -689,9 +719,11 @@ module.exports = function() {
             },
             getPathMaps: {
                 query: [{
-                    genreList: {
-                        2: {
-                            __null: null
+                    json: {
+                        genreList: {
+                            2: {
+                                __null: null
+                            }
                         }
                     }
                 }]
@@ -745,9 +777,11 @@ module.exports = function() {
 
             getPathMaps: {
                 query: [{
-                    videos: {
-                        missingBranch: {
-                            summary: null
+                    json: {
+                        videos: {
+                            missingBranch: {
+                                summary: null
+                            }
                         }
                     }
                 }]
@@ -782,9 +816,11 @@ module.exports = function() {
 
             getPathMaps: {
                 query: [{
-                    videos: {
-                        missingLeaf: {
-                            summary: null
+                    json: {
+                        videos: {
+                            missingLeaf: {
+                                summary: null
+                            }
                         }
                     }
                 }]

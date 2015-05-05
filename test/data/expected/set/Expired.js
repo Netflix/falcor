@@ -9,10 +9,12 @@ module.exports = function() {
             },
             setPathMaps: {
                 query: [{
-                    genreList: {
-                        9: {
-                            0: {
-                                summary: "should be expired"
+                    json: {
+                        genreList: {
+                            9: {
+                                0: {
+                                    summary: "should be expired"
+                                }
                             }
                         }
                     }
@@ -83,9 +85,11 @@ module.exports = function() {
             },
             setPathMaps: {
                 query: [{
-                    videos: {
-                        expiredLeafByTimestamp: {
-                            summary: "should be expired"
+                    json: {
+                        videos: {
+                            expiredLeafByTimestamp: {
+                                summary: "should be expired"
+                            }
                         }
                     }
                 }]
@@ -138,9 +142,11 @@ module.exports = function() {
             },
             setPathMaps: {
                 query: [{
-                    videos: {
-                        expiredLeafBy0: {
-                            summary: "should be expired"
+                    json: {
+                        videos: {
+                            expiredLeafBy0: {
+                                summary: "should be expired"
+                            }
                         }
                     }
                 }]
@@ -193,9 +199,11 @@ module.exports = function() {
             },
             setPathMaps: {
                 query: [{
-                    videos: {
-                        expiredBranchByTimestamp: {
-                            summary: "should be expired"
+                    json: {
+                        videos: {
+                            expiredBranchByTimestamp: {
+                                summary: "should be expired"
+                            }
                         }
                     }
                 }]
@@ -248,9 +256,11 @@ module.exports = function() {
             },
             setPathMaps: {
                 query: [{
-                    videos: {
-                        expiredBranchBy0: {
-                            summary: "should be expired"
+                    json: {
+                        videos: {
+                            expiredBranchBy0: {
+                                summary: "should be expired"
+                            }
                         }
                     }
                 }]

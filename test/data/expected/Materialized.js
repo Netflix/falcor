@@ -10,9 +10,11 @@ module.exports = function() {
             },
             getPathMaps: {
                 query: [{
-                    videos: {
-                        missingBranch: {
-                            summary: null
+                    json: {
+                        videos: {
+                            missingBranch: {
+                                summary: null
+                            }
                         }
                     }
                 }]
@@ -36,9 +38,11 @@ module.exports = function() {
             },
             getPathMaps: {
                 query: [{
-                    videos: {
-                        missingBranch: {
-                            summary: null
+                    json: {
+                        videos: {
+                            missingBranch: {
+                                summary: null
+                            }
                         }
                     }
                 }]
@@ -72,9 +76,11 @@ module.exports = function() {
             },
             getPathMaps: {
                 query: [{
-                    videos: {
-                        1234: {
-                            missingLeaf: null
+                    json: {
+                        videos: {
+                            1234: {
+                                missingLeaf: null
+                            }
                         }
                     }
                 }]
@@ -108,8 +114,10 @@ module.exports = function() {
             },
             getPathMaps: {
                 query: [{
-                    misc: {
-                        uatom: null
+                    json: {
+                        misc: {
+                            uatom: null
+                        }
                     }
                 }]
             },

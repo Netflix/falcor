@@ -7,7 +7,7 @@ module.exports = function() {
             },
             getPathMaps: {
                 count: 2,
-                query: [{summary: null}, {art: null}]
+                query: [{json: {summary: null}}, {json: {art: null}}]
             },
             AsValues: {
                 values: [{
@@ -55,7 +55,7 @@ module.exports = function() {
                 query: [['summary']]
             },
             getPathMaps: {
-                query: [{summary: null}]
+                query: [{json: {summary: null}}]
             },
 
             AsValues: {
@@ -93,7 +93,7 @@ module.exports = function() {
                 query: [[4, 'summary']]
             },
             getPathMaps: {
-                query: [{4: {summary: null}}]
+                query: [{json: {4: {summary: null}}}]
             },
 
             optimizedMissingPaths: [
@@ -117,7 +117,7 @@ module.exports = function() {
                 query: [['summary']]
             },
             getPathMaps: {
-                query: [{summary: null}]
+                query: [{json:{summary: null}}]
             },
 
             optimizedMissingPaths: [
@@ -141,7 +141,7 @@ module.exports = function() {
                 query: [[]]
             },
             getPathMaps: {
-                query: [{}]
+                query: [{json:{}}]
             },
 
             optimizedPaths: [

@@ -11,12 +11,14 @@ module.exports = function() {
             setPathMaps: {
                 count: 2,
                 query: [{
-                    v: {
-                        0: {
-                            s: "Arnold"
-                        },
-                        1: {
-                            s: "Arnold"
+                    json: {
+                        v: {
+                            0: {
+                                s: "Arnold"
+                            },
+                            1: {
+                                s: "Arnold"
+                            }
                         }
                     }
                 }]
@@ -336,9 +338,11 @@ module.exports = function() {
             setPathMaps: {
                 count: 2,
                 query: [{
-                    v: {
-                        0: "Arnold",
-                        1: "Arnold"
+                    json: {
+                        v: {
+                            0: "Arnold",
+                            1: "Arnold"
+                        }
                     }
                 }]
             },

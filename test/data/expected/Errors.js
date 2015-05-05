@@ -11,9 +11,11 @@ module.exports = function() {
             },
             getPathMaps: {
                 query: [{
-                    videos: {
-                        errorBranch: {
-                            summary: null
+                    json: {
+                        videos: {
+                            errorBranch: {
+                                summary: null
+                            }
                         }
                     }
                 }]
@@ -61,9 +63,11 @@ module.exports = function() {
             },
             getPathMaps: {
                 query: [{
-                    genreList: {
-                        2: {
-                            __null: null
+                    json: {
+                        genreList: {
+                            2: {
+                                __null: null
+                            }
                         }
                     }
                 }]

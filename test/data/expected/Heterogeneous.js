@@ -10,15 +10,15 @@ module.exports = function() {
                 ]
             },
             getPathMaps: {
-                query: [
-                    {
+                query: [{
+                    json: {
                         videos: {
                             errorBranch: {
                                 summary: null
                             }
                         }
                     }
-                ]
+                }]
             },
             AsValues: {
                 values: [
