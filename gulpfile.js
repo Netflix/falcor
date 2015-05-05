@@ -23,7 +23,12 @@ gulp.task('hint', ['build'], function() {
 
 gulp.task('lint', function() {
     return gulp.src(srcDir + '/**/*.js').
-        pipe(eslint()).
+        pipe(eslint({
+            globals: {
+                'require': false,
+                'module': false
+            }
+        })).
         pipe(eslint.format()).
         pipe(eslint.failAfterError());
 });
