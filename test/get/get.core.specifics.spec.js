@@ -14,6 +14,7 @@ var Materialized = Expected.Materialized;
 var Boxed = Expected.Boxed;
 var Errors = Expected.Errors;
 var $atom = require("../../lib/types/atom");
+var noOp = function() {};
 
 describe('Specific Cases', function() {
     describe('Selector Missing PathSet Index', function() {
@@ -272,11 +273,121 @@ describe('Specific Cases', function() {
         var model = new Model({cache: JSONG.jsong});
         var out = [{}];
 
-        debugger
         model._getPathSetsAsJSON(model, JSONG.paths, out);
         testRunner.compare({
             0: 0,
             1: 75
         }, out[0].json);
+    });
+    describe('Materialized', function() {
+        it('should not report an atom with undefined in non-materialize mode.', function(done) {
+            var model = new Model({cache: Cache(), source: {}});
+            var called = false;
+            model.
+                get('misc.uatom').
+                toPathValues().
+                doAction(function(res) {
+                    called = true;
+                },
+                noOp,
+                function() {
+                    testRunner.compare(false, called);
+                }).
+                subscribe(noOp, done, done);
+        });
+        it('should report an atom with undefined in non-materialize mode but with box mode.', function(done) {
+            var model = new Model({cache: Cache(), source: {}}).boxValues();
+            var called = false;
+            model.
+                get('misc.uatom').
+                toPathValues().
+                doAction(function(res) {
+                    called = true;
+                    testRunner.compare({
+                        path: ['misc', 'uatom'],
+                        value: {
+                            $type: $atom,
+                            $size: 51,
+                            value: undefined
+                        }
+                    }, res);
+                },
+                noOp,
+                function() {
+                    testRunner.compare(true, called);
+                }).
+                subscribe(noOp, done, done);
+        });
+        it('should ensure that falsey values do not get removed.', function(done) {
+            var model = new Model({cache: {
+                misc: {
+                    atomU: Model.atom(undefined),
+                    atom0: Model.atom(0),
+                    atomFalse: Model.atom(false),
+                    atomEmpty: Model.atom('')
+                }
+            }});
+            var called = 0;
+            var expected = [{
+                path: ['misc', 'atom0'],
+                value: 0
+            }, {
+                path: ['misc', 'atomFalse'],
+                value: false
+            }, {
+                path: ['misc', 'atomEmpty'],
+                value: ''
+            }];
+            model.
+                // since we are using cache, order is guarenteed
+                get(['misc', ['atomU', 'atom0', 'atomFalse', 'atomEmpty']]).
+                toPathValues().
+                doAction(function(res) {
+                    testRunner.compare(expected[called], res);
+                    ++called;
+                },
+                noOp,
+                function() {
+                    testRunner.compare(3, called);
+                }).
+                subscribe(noOp, done, done);
+        });
+        it('should ensure that falsey values do not get removed in materialize.', function(done) {
+            var model = new Model({cache: {
+                misc: {
+                    atomU: Model.atom(undefined),
+                    atom0: Model.atom(0),
+                    atomFalse: Model.atom(false),
+                    atomEmpty: Model.atom('')
+                }
+            }}).materialize();
+            var called = 0;
+            var expected = [{
+                path: ['misc', 'atomU'],
+                value: {$type: $atom}
+            }, {
+                path: ['misc', 'atom0'],
+                value: 0
+            }, {
+                path: ['misc', 'atomFalse'],
+                value: false
+            }, {
+                path: ['misc', 'atomEmpty'],
+                value: ''
+            }];
+            model.
+                // since we are using cache, order is guarenteed
+                get(['misc', ['atomU', 'atom0', 'atomFalse', 'atomEmpty']]).
+                toPathValues().
+                doAction(function(res) {
+                    testRunner.compare(expected[called], res);
+                    ++called;
+                },
+                noOp,
+                function() {
+                    testRunner.compare(4, called);
+                }).
+                subscribe(noOp, done, done);
+        });
     });
 });
