@@ -174,7 +174,6 @@ function testMultiplePaths(output) {
 }
 
 function getQueryPath(model) {
-    debugger
     if (model._root[__head].value === 'i am 1') {
         return _.cloneDeep(getPaths2);
     }

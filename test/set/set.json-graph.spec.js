@@ -50,13 +50,6 @@ function execute(output, suffix, opts) {
     describe("Build " + output + " from JSON-Graph Envelopes", function() {
         // set new values
         describe("by setting", function() {
-            // Michael TODO: make sure get is returning the same output as set
-            xit("nothing, hopefully", function() {
-                set_and_verify_json_graph(this.test, suffix, [{
-                    paths: [[null, null, null, null], [null, null, null, null]],
-                    jsong: {}
-                }], opts);
-            });
             // set a primitive value
             describe("a primitive value", function() {
                 describe("in one place", function() {
@@ -373,6 +366,37 @@ function execute(output, suffix, opts) {
                                         }
                                     },
                                     "movies": {
+                                        "kill-bill-1": {
+                                            "director": "Quentin Tarantino"
+                                        },
+                                        "reservior-dogs": {
+                                            "director": "Quentin Tarantino"
+                                        }
+                                    }
+                                }
+                            }], opts);
+                        });
+                        it("[length:3]", function() {
+                            set_and_verify_json_graph(this.test, suffix, [{
+                                paths: [["grid", 0, [{length:3}], "director"]],
+                                jsong: {
+                                    "grid": { $type: $path, value: ["grids", "grid-1234"] },
+                                    "grids": {
+                                        "grid-1234": {
+                                            "0": { $type: $path, value: ["rows", "row-0"] }
+                                        }
+                                    },
+                                    "rows": {
+                                        "row-0": {
+                                            "0": { $type: $path, value: ["movies", "pulp-fiction"] },
+                                            "1": { $type: $path, value: ["movies", "kill-bill-1"] },
+                                            "2": { $type: $path, value: ["movies", "reservior-dogs"] }
+                                        }
+                                    },
+                                    "movies": {
+                                        "pulp-fiction": {
+                                            "director": "Quentin Tarantino"
+                                        },
                                         "kill-bill-1": {
                                             "director": "Quentin Tarantino"
                                         },
@@ -722,6 +746,46 @@ function execute(output, suffix, opts) {
                                         }
                                     },
                                     "movies": {
+                                        "kill-bill-1": {
+                                            "genres": {
+                                                $type: $atom,
+                                                value: ["Crime", "Drama", "Thriller"]
+                                            }
+                                        },
+                                        "reservior-dogs": {
+                                            "genres": {
+                                                $type: $atom,
+                                                value: ["Crime", "Drama", "Thriller"]
+                                            }
+                                        }
+                                    }
+                                }
+                            }], opts);
+                        });
+                        it("[length:3]", function() {
+                            set_and_verify_json_graph(this.test, suffix, [{
+                                paths: [["grid", 0, [{length:3}], "genres"]],
+                                jsong: {
+                                    "grid": { $type: $path, value: ["grids", "grid-1234"] },
+                                    "grids": {
+                                        "grid-1234": {
+                                            "0": { $type: $path, value: ["rows", "row-0"] }
+                                        }
+                                    },
+                                    "rows": {
+                                        "row-0": {
+                                            "0": { $type: $path, value: ["movies", "pulp-fiction"] },
+                                            "1": { $type: $path, value: ["movies", "kill-bill-1"] },
+                                            "2": { $type: $path, value: ["movies", "reservior-dogs"] }
+                                        }
+                                    },
+                                    "movies": {
+                                        "pulp-fiction": {
+                                            "genres": {
+                                                $type: $atom,
+                                                value: ["Crime", "Drama", "Thriller"]
+                                            }
+                                        },
                                         "kill-bill-1": {
                                             "genres": {
                                                 $type: $atom,

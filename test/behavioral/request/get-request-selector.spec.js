@@ -21,7 +21,6 @@ function getDataModel(cache) {
 
 describe("Selector", function() {
     it("should get a value from the dataSource", function(done) {
-        debugger;
         var expected = References().simpleReference0;
         var dataModel = getDataModel();
         var obs = dataModel.
