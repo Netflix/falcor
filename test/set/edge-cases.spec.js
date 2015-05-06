@@ -57,8 +57,6 @@ describe("Special Cases", function() {
                 }},
                 paths: [["genreList", 1, 0, "summary"]]
             },
-
-            // TODO: Paul, this is the one the makes _cache.lists = undefined
             {
                 jsong: {"lists": {"1x5x": {
                     "0": { "$type": $path, "value": ["videos", 553] }
@@ -97,7 +95,6 @@ describe("Special Cases", function() {
         });
     });
 
-    // TODO: Paul, consider making this a part of you super set tests.
     it('should return the ranged items when ranges in array.', function() {
         var JSONG = {
             jsong: {
@@ -119,7 +116,6 @@ describe("Special Cases", function() {
         var model = new Model();
         var out = [{}];
 
-        debugger;
         model._setJSONGsAsJSON(model, [JSONG], out);
         expect(out[0].json).to.deep.equals({
             0: 0,

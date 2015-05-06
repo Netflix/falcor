@@ -71,7 +71,6 @@ describe("PathValues", function() {
             Routes().Lists.byIdx).
             concat(
             Routes().GenreList.Ranges);
-        debugger;
         var r = new R(routes);
         var model = new jsong.Model({router: r});
         var count = 0;

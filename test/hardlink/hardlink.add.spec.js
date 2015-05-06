@@ -109,7 +109,6 @@ function getTest(query, output) {
     
     return testRunner.get(model, _.cloneDeep(query), output).
         do(noOp, noOp, function() {
-            debugger;
             expect(lhs[__ref_index]).to.equal(0);
             expect(rhs[__refs_length]).to.equal(1);
             expect(rhs[__ref + lhs[__ref_index]]).to.equal(lhs);
@@ -128,7 +127,6 @@ function setTest(query, output) {
 
     return testRunner.set(model, _.cloneDeep(query), output).
         do(noOp, noOp, function() {
-            debugger;
             expect(lhs[__ref_index]).to.equal(0);
             expect(rhs[__refs_length]).to.equal(1);
             expect(rhs[__ref + lhs[__ref_index]]).to.equal(lhs);

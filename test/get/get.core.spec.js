@@ -199,7 +199,6 @@ describe('Core', function() {
 
         it('should bind to a value and get multiple paths.', function () {
             var model = new Model({cache: Cache()}).bindSync(['videos', 3355]);
-            debugger
             getTestRunner(Bound().multipleQueries, {model: model});
         });
 

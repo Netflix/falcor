@@ -47,7 +47,7 @@ function fillInReferences(model, pathTo, prefix) {
         c = followReference(cache, c);
     }
 
-    // TODO: Should i do the -1?  I don"t think i should set the last value.
+    // TODO: Should I do the -1?  I don't think i should set the last value.
     for (var i = 0; i < pathTo.length - 1; i++) {
         // no complex keys yet.
         var k = pathTo[i];

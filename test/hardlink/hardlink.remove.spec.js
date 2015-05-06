@@ -222,7 +222,6 @@ function setExpireyAndGet(query, output, get) {
         get(['genreList', 0, 0, 'summary']).
         delay(100).
         do(function() {
-            debugger
             var lhs = model._cache.genreList[0];
             var rhs = model._cache.lists.abcd;
             expect(lhs[__ref_index]).to.equal(0);
@@ -232,13 +231,11 @@ function setExpireyAndGet(query, output, get) {
         }, noOp, noOp).
         flatMap(function() {
             if (get) {
-                debugger;
                 return testRunner.get(model, _.cloneDeep(query), output);
             }
             return testRunner.set(model, _.cloneDeep(query), output);
         }).
         do(noOp, noOp, function() {
-            debugger
             var lhs = model._cache.genreList[0];
             var rhs = model._cache.lists.abcd;
             expect(lhs[__ref_index]).to.not.be.ok;
@@ -258,7 +255,6 @@ function getTest(query, output) {
 
     return testRunner.get(model, _.cloneDeep(query), output).
         do(noOp, noOp, function() {
-            debugger;
             expect(lhs[__ref_index]).to.equal(0);
             expect(rhs[__refs_length]).to.equal(1);
             expect(rhs[__ref + lhs[__ref_index]]).to.equal(lhs);
@@ -273,7 +269,6 @@ function setTest(query, output) {
 
     return testRunner.set(model, _.cloneDeep(query), output).
         do(noOp, noOp, function() {
-            debugger;
             expect(lhs[__ref_index]).to.not.be.ok;
             expect(rhs[__refs_length]).to.not.be.ok;
             expect(lhs[__context]).to.not.equal(rhs);

@@ -52,16 +52,6 @@ function execute(output, suffix, opts) {
     describe("Build " + output + " from JSON values", function() {
         // set new values
         describe("by setting", function() {
-            // Michael TODO: make sure get is returning the same output as set
-            xit("nothing, hopefully", function() {
-                set_and_verify_json_values(this.test, suffix, [{
-                    path: [null, null, null, null],
-                    value: "Shouldn't be in the cache."
-                }, {
-                    path: [null, null, null, null],
-                    value: "Shouldn't be in the cache."
-                }], opts);
-            });
             // set a primitive value
             describe("a primitive value", function() {
                 describe("in one place", function() {
@@ -133,6 +123,12 @@ function execute(output, suffix, opts) {
                         it("from:1, length:2", function() {
                             set_and_verify_json_values(this.test, suffix, [{
                                 path: ["grid", 0, {from:1, length:2}, "director"],
+                                value: "Quentin Tarantino"
+                            }], opts);
+                        });
+                        it("[length:3]", function() {
+                            set_and_verify_json_values(this.test, suffix, [{
+                                path: ["grid", 0, [{length:3}], "director"],
                                 value: "Quentin Tarantino"
                             }], opts);
                         });
@@ -254,6 +250,15 @@ function execute(output, suffix, opts) {
                         it("from:1, length:2", function() {
                             set_and_verify_json_values(this.test, suffix, [{
                                 path: ["grid", 0, {from:1, length:2}, "genres"],
+                                value: {
+                                    $type: $atom,
+                                    value: ["Crime", "Drama", "Thriller"]
+                                }
+                            }], opts);
+                        });
+                        it("[length:3]", function() {
+                            set_and_verify_json_values(this.test, suffix, [{
+                                path: ["grid", 0, [{length:3}], "genres"],
                                 value: {
                                     $type: $atom,
                                     value: ["Crime", "Drama", "Thriller"]

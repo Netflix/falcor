@@ -136,7 +136,6 @@ describe('Cache Only', function() {
                 get(['videos', 1234, 'summary']).
                 toPathValues().
                 doAction(function(x) {
-                    debugger;
                     testRunner.compare(expected, x);
                     ++next;
                 }, noOp, function() {
