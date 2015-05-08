@@ -31,6 +31,39 @@ describe('getCache', function() {
                 }
             });
     });
+    
+    it("should serialize part of the cache", function(done) {
+        var model = new Model({ cache: {
+            "list": {
+                "0": "foo",
+                "1": "bar",
+                "2": Model.ref("lists.baz")
+            },
+            "lists": {
+                "baz": {
+                    "bam": "bam"
+                }
+            }
+        }});
+        
+        var partial = model.getCache(["list", [0, 1]], ["list", 2, "bam"]);
+        testRunner.compare({
+            "list": {
+                "0": Model.atom("foo"),
+                "1": Model.atom("bar"),
+                "2": Model.ref("lists.baz")
+            },
+            "lists": {
+                "baz": {
+                    "bam": Model.atom("bam")
+                }
+            } },
+            partial,
+            "Serialized cache should be value equal to the original.",
+            {strip: ["$size"]}
+        );
+        done();
+    });
 
     it('should test the cache again against the example by jafar.', function() {
          var $ref = falcor.Model.ref;
