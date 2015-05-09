@@ -46,7 +46,7 @@ gulp.task('doc-d', ['clean.doc', 'doc-p'], function() {
 */
 
 gulp.task('doc-d', gulpShell.task([
-    './node_modules/.bin/jsdoc ./lib/docs.js -d doc'
+    './node_modules/.bin/jsdoc ./lib/docs.js -d doc -c ./build/jsdoc.json'
 ]));
 
 // Run in serial to fail build if lint fails.

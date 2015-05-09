@@ -20,7 +20,8 @@
   "scripts": {
     "test": "gulp test-coverage",
     "dist": "gulp build",
-    "doc": "gulp doc"
+    "doc": "gulp doc",
+    "deploy-ghpages": "./build/deploy-ghpages.sh"
   },
   "files": [
     "build",
@@ -52,7 +53,7 @@
     "gulp-plumber": "~0.6.5",
     "gulp-rename": "~1.2.0",
     "gulp-sweetjs": "~0.5.2",
-    "gulp-shell": "^0.4.1",
+    "gulp-shell": "~0.4.1",
     "istanbul": "~0.3.2",
     "lodash": "~2.4.1",
     "minifyify": "~2.4.1",
