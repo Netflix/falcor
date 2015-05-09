@@ -36,7 +36,7 @@ if [ "$TRAVIS_PULL_REQUEST" == "false" ]; then
   rsync -r $FALCOR_DOCS_DIR/ doc/
 
   git add .
-  git commit -m "Travic build $TRAVIS_BUILD_NUMBER pushed to gh-pages"
+  git commit -m "Travis build $TRAVIS_BUILD_NUMBER pushed to gh-pages"
   git push origin gh-pages
 
   echo -e "Deployed docs to gh-pages\n"
