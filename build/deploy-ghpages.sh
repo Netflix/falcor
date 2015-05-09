@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# if [ "$TRAVIS_PULL_REQUEST" == "false" ]; then
+if [ "$TRAVIS_PULL_REQUEST" == "false" ]; then
   echo -e "Starting to update gh-pages\n"
 
   TEMP_DIR=$HOME/tmp
@@ -40,4 +40,4 @@
   git push origin gh-pages
 
   echo -e "Deployed docs to gh-pages\n"
-# fi
+fi
