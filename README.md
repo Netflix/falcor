@@ -118,7 +118,7 @@ Upon receiving the requested data, the client merges the JSON fragment with a te
 
 ```hbs
 <script id="person-template" type="text/x-handlebars-template">
-  <span{{name}} lives at {{location.address}}, {{location.city}}</span>
+  <span>{{name}} lives at {{location.address}}, {{location.city}}</span>
 </script>
 ```
 
@@ -163,7 +163,7 @@ person.
 
 ### Building the Virtual Model on the Server
 
-The reason that the server model is called "virtual" is that the server JSON Object typically does not exist in memory or on disk. *A Falcor virtual model is like a little application server hosted at a single URL.* Instead of matching URL paths, the virtual model router matches one or more paths through a a single JSON model. The virtual model generates the requested subset of the JSON model on-demand by loading the data from one or more backend data stores.
+The reason that the server model is called "virtual" is that the server JSON Object typically does not exist in memory or on disk. *A Falcor virtual model is like a little application server hosted at a single URL.* Instead of matching URL paths, the virtual model router matches one or more paths through a single JSON model. The virtual model generates the requested subset of the JSON model on-demand by loading the data from one or more backend data stores.
 
 The following virtual model simulates a person model on the server:
 
