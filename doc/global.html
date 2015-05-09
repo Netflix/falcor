@@ -1,0 +1,2211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Global</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Global</h1>
+
+    
+
+
+
+
+<section>
+
+<header>
+    
+        <h2>
+        
+        </h2>
+        
+    
+</header>
+
+<article>
+    <div class="container-overview">
+    
+        
+
+        
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+        
+    
+    </div>
+
+    
+
+    
+
+    
+
+     
+
+    
+
+    
+
+    
+
+    
+        <h3 class="subsection-title">Type Definitions</h3>
+
+        
+                
+<h4 class="name" id="Atom">Atom</h4>
+
+
+
+
+<div class="description">
+    In addition to the usual JSON value types (string, number, boolean), <a href="global.html#JSONGraph">JSONGraph</a> introduces three additional value types: ref, error, and atom. An Atom "boxes" a value, causing that value to be treated as atomic regardless of whether it is a JSON value or a JSON object like a Map or an Array. Atoms behave like values, meaning they are always returned whole and must be replaced completely. 
+
+ In addition to being treated as values by Models, the values within Atoms are automatically "unboxed" when retrieved from a Model. This means that if a Model encounters an Atom while evaluating a path, the Model returns the Atom's value instead of the entire Atom object.
+
+```JavaScript
+var model = new falcor.Model({
+    cache: {
+        titlesById: {
+            99: {
+                name: "House of Cards",
+                rating: {
+                    $type: "atom", 
+                    value: 5
+                }
+            }
+        }
+    }
+});
+
+// The following code prints 5 to the console instead of {$type: "atom", value: 5}, because the value of the Atom is unboxed before being returned by the Model.
+model.
+    getValue('titlesById[99].rating').
+    then(function(rating) { console.log(rating); });
+```
+
+JSON Objects and Arrays boxed in Atoms are treated as atomic values by the Model, just like strings, numbers, and booleans. Boxing JSON objects in Atoms allows you to ensure that a JSON Object or Array will always be returned from the Model (and by extension the server) in their entirety. 
+
+In the example below the array of a Netflix title's supported languages are boxed in an Atom, ensuring that they are always returned whole from the Model.
+```JavaScript
+var model = new falcor.Model({
+    cache: {
+        titlesById: {
+            99: {
+                name: "House of Cards",
+                supportedLanguages: {
+                    $type: "atom", 
+                    value: ["en", "fr"]
+                }
+            }
+        }
+    }
+});
+
+// Note the attempt to retrieve the first item in the title's supported languages array.
+model.
+    get('titlesById[99].supportedLanguages[0]').
+    then(function(json) { console.log(JSON.stringify(json, null, 4)); });
+
+// If the code above is run the following will be printed to the console:
+// {
+//     json: {
+//         titlesById: {
+//            99: {
+//                 supportedLanguages: ["en", "fr"]
+//            }
+//         }
+//     }
+// }
+
+// Note that entire supported language array was retrieved rather
+// than the first item in the array, because the Model treats the 
+// values of an atom as atomic.
+```
+
+In addition to being used to force Model's to treat JSON objects and Array as atomic values, Atoms can be used to associate metadata with a value. As Atoms are maps, they can include metadata keys that can be used by Falcor Models or Applications to influence the way values are handled once downloaded to the client. In the example below, we use an atom to set a cache expiration time for the rating of a Netflix title. 
+
+```JavaScript
+var model = new falcor.Model({
+    cache: {
+        titlesById: {
+            99: {
+                name: "House of Cards",
+                rating: {
+                    $type: "atom", 
+                    value: 5, 
+                    // expires two seconds from now
+                    $expires: -2000
+                }
+            }
+        }
+    }
+});
+
+// prints "5"
+model.
+    getValue('titlesById[99].rating').
+    then(function(rating) { console.log(rating); });
+
+setTimeout(function() {
+    // prints undefined
+    model.
+        getValue('titlesById[99].rating').
+        then(function(rating) { console.log(rating); });
+        
+}, 3000);
+```
+
+If you wish to turn off unboxing behavior and retrieve the Atom from a Model, you can use {@Model.prototype.boxValues}.
+
+```JavaScript
+var model = new falcor.Model({
+    cache: {
+        titlesById: {
+            99: {
+                name: "House of Cards",
+                rating: {
+                    $type: "atom", 
+                    value: 5
+                }
+            }
+        }
+    }
+});
+
+// The following code prints {$type: "atom", value: 5}, because
+// because the Atom value is unboxed before the Model returns it.
+model.
+    boxValues().
+    getValue('titlesById[99].rating').
+    then(function(rating) { console.log(JSON.stringify(rating)); });
+
+```
+</div>
+
+
+
+    <h5>Type:</h5>
+    <ul>
+        <li>
+            
+<span class="param-type">Object</span>
+
+
+        </li>
+    </ul>
+
+
+
+
+
+    <h5 class="subsection-title">Properties:</h5>
+
+    
+
+<table class="props">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>$type</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">String</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">A $type property with a value of "atom".</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>value</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The value wrapped by the Atom.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="docs.js.html">docs.js</a>, <a href="docs.js.html#line469">line 469</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+    <dt class="tag-see">See:</dt>
+    <dd class="tag-see">
+        <ul>
+            <li><a href="global.html#Atom">Atom</a></li>
+        </ul>
+    </dd>
+    
+
+    
+</dl>
+
+
+
+
+
+    <h5>Example</h5>
+    
+    <pre class="prettyprint"><code>var model = new falcor.Model({
+    cache: {
+        user: {
+            name: {
+                // Metadata that indicates this object is a Atom
+                $type: "atom",
+                // The value property contains the value box by the Atom
+                value: "Jim Parsons",
+                // Metadata that dictates that this value should be purged from the <a href="Model.html">Model</a>'s cache after two minutes. Negative numbers imply that expiration occurs relative to the current time.
+                $expires: -(1000 * 60 * 2)
+            }
+        }
+    }
+});
+
+model.getValue(["user", "name"]).subscribe(function(value) {
+    console.log(value);
+});
+
+// The code above outputs the following text to the console.
+// Jim Parsons
+// Note that the value property within the Atom rather than the Atom object itself is returned.</code></pre>
+
+
+
+            
+                
+<h4 class="name" id="JSONEnvelope">JSONEnvelope</h4>
+
+
+
+
+<div class="description">
+    A JSONEnvelope is an envelope that wraps a JSON fragment. In addition to <a href="global.html#PathValue">PathValue</a>s and <a href="global.html#JSONGraphEnvelope">JSONGraphEnvelope</a>s, <a href="Model.html">Model</a>s can accept and return JSONEnvelopes. In addition to a JSON fragment, a <a href="global.html#JSONEnvelope">JSONEnvelope</a> may contain an array of errors that occurred while an operation was being executed on a JSON Model. In the event a function was executed on a Model, the JSONEnvelope may also contain a list of paths to invalidate in the <a href="Model.html">Model</a>'s local cache.
+</div>
+
+
+
+    <h5>Type:</h5>
+    <ul>
+        <li>
+            
+<span class="param-type">Object</span>
+
+
+        </li>
+    </ul>
+
+
+
+
+
+    <h5 class="subsection-title">Properties:</h5>
+
+    
+
+<table class="props">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>paths</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Array.&lt;<a href="global.html#PathSet">PathSet</a>></span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+                    &lt;nullable><br>
+                
+                </td>
+            
+
+            
+
+            <td class="description last">The paths to the values stored in the JSON fragment.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>json</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">JSON</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">a JSON object containing all of the values.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>errors</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Array.&lt;Error></span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+                    &lt;nullable><br>
+                
+                </td>
+            
+
+            
+
+            <td class="description last">one or more errors that occurred while evaluating paths on a <a href="Model.html">Model</a>.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>invalidated</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Array.&lt;<a href="global.html#PathSet">PathSet</a>></span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+                    &lt;nullable><br>
+                
+                </td>
+            
+
+            
+
+            <td class="description last">the paths to be removed from the <a href="Model.html">Model</a>'s local cache.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="docs.js.html">docs.js</a>, <a href="docs.js.html#line460">line 460</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+            
+                
+<h4 class="name" id="JSONGraph">JSONGraph</h4>
+
+
+
+
+<div class="description">
+    JavaScript Object Notation Graph (JSONGraph) is a notation for expressing graphs in JSON. JSON is a hierarchical data format, capable of modeling trees. Here's an example of a JSON document containing a list of genres, each containing a list of titles:
+</div>
+
+
+
+    <h5>Type:</h5>
+    <ul>
+        <li>
+            
+<span class="param-type">Object</span>
+
+
+        </li>
+    </ul>
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="docs.js.html">docs.js</a>, <a href="docs.js.html#line930">line 930</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+    <h5>Example</h5>
+    
+    <pre class="prettyprint"><code>// JSONGraph model modeling a list of film genres, each of which contains the same title.
+ {
+    // list of user's genres, modeled as a map with ordinal keys
+    "genreLists": {
+        "0": $ref('genresById[123]'),
+        "1": $ref('genresById[522]'),
+        "length": 2
+    },
+    // map of all genres, organized by ID
+    "genresById": {
+        // genre list modeled as map with ordinal keys
+        "123": {
+            "name": "Drama",
+            "0": $ref('titlesById[23]'),
+            "1": $ref('titlesById[99]'),
+            "length": 2
+        },
+        // genre list modeled as map with ordinal keys
+        "522": {
+            "name": "Comedy",
+            "0": $ref('titlesById[23]'),
+            "1": $ref('titlesById[44]'),
+            "length": 2           
+        }
+    },
+    // map of all titles, organized by ID
+    "titlesById": {
+       "99": {
+            "name": "House of Cards",
+            "rating": 5
+        },
+        "23": {
+            "name": "Orange is the New Black",
+            "rating": 5
+        },
+        "44": {
+            "name": "Arrested Development",
+            "rating": 5            
+        }
+    }
+}</code></pre>
+
+
+
+            
+                
+<h4 class="name" id="JSONGraphEnvelope">JSONGraphEnvelope</h4>
+
+
+
+
+<div class="description">
+    A JSONGraphEnvelope is an envelope that wraps a JSONGraph fragment. In addition to <a href="global.html#PathValue">PathValue</a>s and <a href="global.html#JSONEnvelope">JSONEnvelope</a>s, <a href="Model.html">Model</a>s can accept and return JSONGraphEnvelopes. In addition to a JSONGraph fragment, a <a href="global.html#JSONGraphEnvelope">JSONGraphEnvelope</a> may contain an array of errors that occurred while an operation was being executed on a JSONGraph Model. In the event a function was executed on a Model, the JSONGraphEnvelope may also contain a list of paths to invalidate in the <a href="Model.html">Model</a>'s local cache.
+</div>
+
+
+
+    <h5>Type:</h5>
+    <ul>
+        <li>
+            
+<span class="param-type">Object</span>
+
+
+        </li>
+    </ul>
+
+
+
+
+
+    <h5 class="subsection-title">Properties:</h5>
+
+    
+
+<table class="props">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>paths</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Array.&lt;<a href="global.html#PathSet">PathSet</a>></span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+                    &lt;nullable><br>
+                
+                </td>
+            
+
+            
+
+            <td class="description last">The paths to the values stored in the JSONGraph fragment.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>jsonGraph</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="global.html#JSONGraph">JSONGraph</a></span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">a JSONGraph object containing all of the values.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>errors</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Array.&lt;Error></span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+                    &lt;nullable><br>
+                
+                </td>
+            
+
+            
+
+            <td class="description last">one or more errors that occurred while evaluating paths on a <a href="Model.html">Model</a>.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>invalidated</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Array.&lt;<a href="global.html#PathSet">PathSet</a>></span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+                    &lt;nullable><br>
+                
+                </td>
+            
+
+            
+
+            <td class="description last">the paths to be removed from the <a href="Model.html">Model</a>'s local cache.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="docs.js.html">docs.js</a>, <a href="docs.js.html#line451">line 451</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+            
+                
+<h4 class="name" id="Key">Key</h4>
+
+
+
+
+<div class="description">
+    <a href="global.html#Key">Key</a>s are values that can be included in <a href="global.html#Path">Path</a> expressions. A Key can be any JSON value type including a string, number, boolean, or null. When evaluated all keys are coerced to strings except null. This means that looking up the number 1 and the string "1" will have the same effect. All strings are allowed with the exception of those beginning with "__", which are illegal to use as key names in a JSONGraph model.
+</div>
+
+
+
+    <h5>Type:</h5>
+    <ul>
+        <li>
+            
+<span class="param-type">string</span>
+|
+
+<span class="param-type">number</span>
+|
+
+<span class="param-type">boolean</span>
+|
+
+<span class="param-type">null</span>
+
+
+        </li>
+    </ul>
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="docs.js.html">docs.js</a>, <a href="docs.js.html#line695">line 695</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+            
+                
+<h4 class="name" id="KeySet">KeySet</h4>
+
+
+
+
+<div class="description">
+    <a href="global.html#KeySet">KeySet</a>s are included inside of <a href="global.html#PathSet">PathSet</a> expressions. A <a href="global.html#KeySet">KeySet</a> can either be a <a href="global.html#Key">Key</a>, a <a href="global.html#Range">Range</a>, or an Array of either.
+</div>
+
+
+
+    <h5>Type:</h5>
+    <ul>
+        <li>
+            
+<span class="param-type"><a href="global.html#Key">Key</a></span>
+|
+
+<span class="param-type"><a href="global.html#Range">Range</a></span>
+|
+
+<span class="param-type">Array.&lt;(<a href="global.html#Key">Key</a>|<a href="global.html#Range">Range</a>)></span>
+
+
+        </li>
+    </ul>
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="docs.js.html">docs.js</a>, <a href="docs.js.html#line757">line 757</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+            
+                
+<h4 class="name" id="ModelOptions">ModelOptions</h4>
+
+
+
+
+<div class="description">
+    A set of options used to customize the behaviour of the <a href="Model.html">Model</a>.
+</div>
+
+
+
+    <h5>Type:</h5>
+    <ul>
+        <li>
+            
+<span class="param-type">Object</span>
+
+
+        </li>
+    </ul>
+
+
+
+
+
+    <h5 class="subsection-title">Properties:</h5>
+
+    
+
+<table class="props">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>source</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="DataSource.html">DataSource</a></span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+                    &lt;nullable><br>
+                
+                </td>
+            
+
+            
+
+            <td class="description last">the DataSource the Model uses to access the JSONGraph object.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>cache</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="global.html#JSONGraph">JSONGraph</a></span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+                    &lt;nullable><br>
+                
+                </td>
+            
+
+            
+
+            <td class="description last">the initial state of the Model cache.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>maxSize</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+                    &lt;nullable><br>
+                
+                </td>
+            
+
+            
+
+            <td class="description last">the maximum size of the cache.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>collectRatio</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+                    &lt;nullable><br>
+                
+                </td>
+            
+
+            
+
+            <td class="description last">the ratio of the maximum size to collect when the maximum size is exceeded.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>errorSelector</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="Model.html#~errorSelector">Model~errorSelector</a></span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+                    &lt;nullable><br>
+                
+                </td>
+            
+
+            
+
+            <td class="description last">A function used to translate errors that occur during <a href="Model.html">Model</a> operations before they are returned from the <a href="Model.html">Model</a>.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="docs.js.html">docs.js</a>, <a href="docs.js.html#line2999">line 2999</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+            
+                
+<h4 class="name" id="Path">Path</h4>
+
+
+
+
+<div class="description">
+    <a href="global.html#Path">Path</a>s are an ordered list of keys describing a location in a JSONGraph model. Paths can be provided to <a href="Model.html">Model</a>s to describe the location of data in the JSONGraph model. <a href="Model.html">Model</a>s also emit <a href="global.html#Path">Path</a> objects alongside values retrieved from the JSONGraph model in order to provide additional context.
+</div>
+
+
+
+    <h5>Type:</h5>
+    <ul>
+        <li>
+            
+<span class="param-type">Array.&lt;<a href="global.html#Key">Key</a>></span>
+
+
+        </li>
+    </ul>
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="docs.js.html">docs.js</a>, <a href="docs.js.html#line700">line 700</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+    <h5>Example</h5>
+    
+    <pre class="prettyprint"><code>var $ref = falcor.Model.ref;
+var model = new falcor.Model({
+    cache: {
+        // list of user's genres, modeled as a map with ordinal keys
+        "genreLists": {
+            "0": $ref('genresById[123]'),
+            "length": 1
+        },
+        // map of all genres, organized by ID
+        "genresById": {
+            // genre list modeled as map with ordinal keys
+            "123": {
+                "name": "Drama",
+                "0": $ref('titlesById[23]'),
+                "1": $ref('titlesById[99]'),
+                "length": 2
+            }
+        },
+        // map of all titles, organized by ID
+        "titlesById": {
+           "99": {
+                "name": "House of Cards",
+                "rating": 5
+            },
+            "23": {
+                "name": "Orange is the New Black",
+                "rating": 5
+            }
+        }
+    }
+});
+
+// Attempt to retrieve three individual paths from the JSONGraph model
+var values = 
+    model.
+        get(
+            'genreLists[0][0].name',
+            'genreLists[0][0].rating',
+            'genreLists[0][1].name').
+        toPathValues();
+
+values.forEach(function(pathValue) { 
+    console.log(JSON.stringify(pathValue));
+});
+
+// The code above outputs the following <a href="global.html#PathValue">PathValue</a>s to the console in non-deterministic order.
+// {"path":["genreLists",0,1,"name"],"value":"Orange is the New Black"}
+// {"path":["genreLists",0,0,"rating"],"value":5}
+// {"path":["genreLists",0,0,"name"],"value":"House of Cards"}</code></pre>
+
+
+
+            
+                
+<h4 class="name" id="PathSet">PathSet</h4>
+
+
+
+
+<div class="description">
+    <a href="global.html#PathSet">PathSet</a> Expressions are a human-readable compression format that is equivalent to a set of <a href="global.html#Path">Path</a> expressions. Unlike <a href="global.html#Path">Path</a> expressions, <a href="global.html#PathSet">PathSet</a>s can contain <a href="global.html#KeySet">KeySet</a> objects like <a href="global.html#Range">Range</a>s and Arrays of keys. 
+ In addition to being a more terse than specifying multiple <a href="global.html#Path">Path</a> objects, <a href="global.html#PathSet">PathSet</a>s are generally more efficient to evaluate.
+</div>
+
+
+
+    <h5>Type:</h5>
+    <ul>
+        <li>
+            
+<span class="param-type">Array.&lt;<a href="global.html#KeySet">KeySet</a>></span>
+
+
+        </li>
+    </ul>
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="docs.js.html">docs.js</a>, <a href="docs.js.html#line762">line 762</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+    <h5>Example</h5>
+    
+    <pre class="prettyprint"><code>var model = new falcor.Model();
+var $ref = falcor.Model.ref;
+
+// Loading a JSONGraph object into the model's cache.
+model.setCache(
+    {
+        // list of user's genres, modeled as a map with ordinal keys
+        "genreLists": {
+            "0": $ref('genresById[123]'),
+            "1": $ref('genresById[522]'),
+            "length": 2
+        },
+        // map of all genres, organized by ID
+        "genresById": {
+            // genre list modeled as map with ordinal keys
+            "123": {
+                "name": "Drama",
+                "0": $ref('titlesById[23]'),
+                "1": $ref('titlesById[99]'),
+                "length": 2
+            },
+            // genre list modeled as map with ordinal keys
+            "522": {
+                "name": "Comedy",
+                "0": $ref('titlesById[23]'),
+                "1": $ref('titlesById[44]'),
+                "length": 2           
+            }
+        },
+        // map of all titles, organized by ID
+        "titlesById": {
+           "99": {
+                "name": "House of Cards",
+                "rating": 5
+            },
+            "23": {
+                "name": "Orange is the New Black",
+                "rating": 5
+            },
+            "44": {
+                "name": "Arrested Development",
+                "rating": 5            
+            }
+        }
+    });
+
+// Use a path set containing ranges and arrays to retrieve the name and rating of the first two titles in the first two genre lists.
+var values = model.get('genreLists[0..1][0..1]["name", "rating"]');
+
+// The path evaluator expands the path set above to a set of 8 <a href="global.html#Path">Path</a> objects.
+// In other words the code below produces the same dataset as the code above:
+// var values = model.get(
+//     ["genreLists", 0, 0, "name"],
+//     ["genreLists", 0, 0, "rating"],
+//     ["genreLists", 0, 1, "name"],
+//     ["genreLists", 0, 1, "rating"],
+//     ["genreLists", 1, 0, "name"],
+//     ["genreLists", 1, 0, "rating"],
+//     ["genreLists", 1, 1, "name"],
+//     ["genreLists", 1, 1, "rating"]);
+
+values.then(function(json) {
+    console.log(JSON.stringify(json, null, 4));
+});
+
+//  The code above prints the following to the console:
+// {
+//     "json": {
+//         "genreLists": {
+//             "0": {
+//                 "0": {
+//                     "name": "Orange is the New Black",
+//                     "rating": 5
+//                 },
+//                 "1": {
+//                     "name": "House of Cards",
+//                     "rating": 5
+//                 }
+//             },
+//             "1": {
+//                 "0": {
+//                     "name": "Orange is the New Black",
+//                     "rating": 5
+//                 },
+//                 "1": {
+//                     "name": "Arrested Development",
+//                     "rating": 5
+//                 }
+//             }
+//         }
+//     }
+// } </code></pre>
+
+
+
+            
+                
+<h4 class="name" id="PathValue">PathValue</h4>
+
+
+
+
+<div class="description">
+    A PathValue is made up of a path and a value. In addition to the value, each <a href="global.html#PathValue">PathValue</a> includes the <a href="global.html#Path">Path</a> to the value in the JSONGraph model.
+</div>
+
+
+
+    <h5>Type:</h5>
+    <ul>
+        <li>
+            
+<span class="param-type">Object</span>
+
+
+        </li>
+    </ul>
+
+
+
+
+
+    <h5 class="subsection-title">Properties:</h5>
+
+    
+
+<table class="props">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>path</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="global.html#PathSet">PathSet</a></span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>value</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+                    &lt;nullable><br>
+                
+                </td>
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="docs.js.html">docs.js</a>, <a href="docs.js.html#line861">line 861</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+    <h5>Example</h5>
+    
+    <pre class="prettyprint"><code>var model = new falcor.Model();
+var $ref = falcor.Model.ref;
+
+// Loading a JSONGraph object into the model's cache.
+model.setCache(
+    {
+        // list of user's genres, modeled as a map with ordinal keys
+        "genreLists": {
+            "0": $ref('genresById[123]'),
+            "1": $ref('genresById[522]'),
+            "length": 2
+        },
+        // map of all genres, organized by ID
+        "genresById": {
+            // genre list modeled as map with ordinal keys
+            "123": {
+                "name": "Drama",
+                "0": $ref('titlesById[23]'),
+                "1": $ref('titlesById[99]'),
+                "length": 2
+            },
+            // genre list modeled as map with ordinal keys
+            "522": {
+                "name": "Comedy",
+                "0": $ref('titlesById[23]'),
+                "1": $ref('titlesById[44]'),
+                "length": 2           
+            }
+        },
+        // map of all titles, organized by ID
+        "titlesById": {
+           "99": {
+                "name": "House of Cards",
+                "rating": 5
+            },
+            "23": {
+                "name": "Orange is the New Black",
+                "rating": 5
+            },
+            "44": {
+                "name": "Arrested Development",
+                "rating": 5            
+            }
+        }
+    });
+
+var pathValues = 
+    model.
+        get(
+            ["genreLists", 0, 0, "name"], 
+            ["genreLists", 0, 0, "rating"]).
+        toPathValues();
+
+pathValues.forEach(function(pathValue) { 
+    console.log(JSON.stringify(pathValue)); 
+});
+
+// The code above outputs the following <a href="global.html#PathValue">PathValue</a>s to the console in non-deterministic order.
+// {"path":["genreLists",0,0,"rating"],"value":5}
+// {"path":["genreLists",0,0,"name"],"value":"Orange is the New Black"}</code></pre>
+
+
+
+            
+                
+<h4 class="name" id="Range">Range</h4>
+
+
+
+
+<div class="description">
+    A range object describes a range of integers. The range object must contain either a "to" or "length" property.
+</div>
+
+
+
+    <h5>Type:</h5>
+    <ul>
+        <li>
+            
+<span class="param-type">Object</span>
+
+
+        </li>
+    </ul>
+
+
+
+
+
+    <h5 class="subsection-title">Properties:</h5>
+
+    
+
+<table class="props">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
+        
+        <th>Default</th>
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>from</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    0
+                
+                </td>
+            
+
+            <td class="description last">the lower bound of the range (inclusive).</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>to</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+                    &lt;nullable><br>
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last">the upper bound of the range (inclusive). Must be >= to the "from" value.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>length</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+                    &lt;nullable><br>
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last">the length of the range. Must be >= 0.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="docs.js.html">docs.js</a>, <a href="docs.js.html#line624">line 624</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+    <h5>Examples</h5>
+    
+    <pre class="prettyprint"><code>// Example that uses the "to" property in a range.
+var model = new falcor.Model({
+    cache: {
+        friends: {
+            "0": {
+                name: "Jim"
+            },
+            "1": {
+                name: "Ted"
+            },
+            "2": {
+                name: "Don"
+            },
+            length: 23
+        }
+    }
+});
+
+// The following range specifies the numbers 0, 1, and 2.
+var range = {from: 0, to: 2};
+
+var results = model.get(["friends", range, "name"]).toPathValues();
+results.forEach(function(pathValue) {
+    console.log(JSON.stringify(pathValue));
+})
+
+// The code above outputs the following <a href="global.html#PathValue">PathValue</a>s to the console in non-deterministic order.
+// {"path":["friends",0,"name"],"value":"Jim"}
+// {"path":["friends",2,"name"],"value":"Don"}
+// {"path":["friends",1,"name"],"value":"Ted"}</code></pre>
+
+    <pre class="prettyprint"><code>// Example that uses the "length" property in a range.
+var model = new falcor.Model({
+    cache: {
+        friends: {
+            "0": {
+                name: "Jim"
+            },
+            "1": {
+                name: "Ted"
+            },
+            "2": {
+                name: "Don"
+            },
+            length: 23
+        }
+    }
+});
+
+// The following range specifies the numbers 1 and 2.
+var range = {from: 1, length: 2};
+
+var results = model.get(["friends", range, "name"]).toPathValues();
+results.forEach(function(pathValue) {
+    console.log(JSON.stringify(pathValue));
+})
+
+// The code above outputs the following <a href="global.html#PathValue">PathValue</a>s to the console in non-deterministic order.
+// {"path":["friends",2,"name"],"value":"Don"}
+// {"path":["friends",1,"name"],"value":"Ted"}</code></pre>
+
+
+
+            
+    
+
+    
+</article>
+
+</section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="DataSource.html">DataSource</a></li><li><a href="HttpDataSource.html">HttpDataSource</a></li><li><a href="Model.html">Model</a></li><li><a href="ModelResponse.html">ModelResponse</a></li><li><a href="Observable.html">Observable</a></li><li><a href="Subscription.html">Subscription</a></li></ul><h3><a href="global.html">Global</a></h3>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-beta3</a> on Fri May 08 2015 11:32:29 GMT-0700 (PDT)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>
