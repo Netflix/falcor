@@ -22,6 +22,7 @@ before_script: npm run dist;
 
 after_script:
     - cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js
+    - npm run deploy-ghpages
 
 notifications:
     email:

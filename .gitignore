@@ -1,12 +1,13 @@
 node_modules
 .DS_Store
 bin/
+tmp/
 performance/bin/
+doc/
 !tasks/bin
 *.iml
 coverage
 .idea
-tmp/
 *.tar.gz
 cTestFinal.js
 bin2
