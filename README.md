@@ -299,11 +299,11 @@ In the example above, virtual model provides a "byRating" key on the titleList w
 
 (Example router code showing how to build a list sorted by by rating)
 
-It is rarely efficient to download all of the data on the server onto the client and perform transformations locally. Instead of trying to enable client-side transformations, Falcor clients rely on the virtual model to do all the data transformation. Falkor clients focus only on data retrieval.
+It is rarely efficient to download all of the data on the server onto the client and perform transformations locally. Instead of trying to enable client-side transformations, Falcor clients rely on the virtual model to do all the data transformation. Falcor clients focus only on data retrieval.
 
 # Asynchronous MVC
 
-The Falkor model is asynchronous. This makes it possible for applications to use the Async MVC pattern (AMVC). The AMTC pattern can be used in any MVC framework. 
+The Falcor model is asynchronous. This makes it possible for applications to use the Async MVC pattern (AMVC). The AMTC pattern can be used in any MVC framework. 
 
 ## Local MVC
 
