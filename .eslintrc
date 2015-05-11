@@ -109,7 +109,6 @@
         "generator-star-spacing": [ 2, "after" ],
 
         // stylistic
-	/* COMMENTING THESE OUT UNTIL WE GET CONCENSUS ON THEM        
         "camelcase": [ 2, { "properties": "always" } ],
         "eol-last": [ 2 ],
         "key-spacing": [ 0 ],
@@ -131,6 +130,5 @@
         "spaced-line-comment": [ 2, "always", { "exceptions": [ "-", "+" ] } ],
         "quotes": [ 2, "single", "avoid-escape" ],
         "wrap-regex": [ 2 ]
-        */
     }
 }
