@@ -6,7 +6,7 @@
     },
     "rules": {
         // possible errors
-        "comma-dangle": [ 2 ],
+        "comma-dangle": [ 2 ]/*,
         "no-cond-assign": [ 2 ],
         "no-console": [ 2 ],
         "no-constant-condition": [ 2 ],
@@ -129,6 +129,6 @@
         "space-unary-ops": [ 2, { "words": true, "nonwords": false } ],
         "spaced-line-comment": [ 2, "always", { "exceptions": [ "-", "+" ] } ],
         "quotes": [ 2, "single", "avoid-escape" ],
-        "wrap-regex": [ 2 ]
+        "wrap-regex": [ 2 ]*/
     }
 }
