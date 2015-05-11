@@ -789,7 +789,7 @@ model.
 <div class="description">
     This method creates a new <a href="Model.html">Model</a> that refers to the object found at a particular path. Binding is useful if multiple operations are going to be performed on the object found at one particular location in the JSONGraph Model. Once a Model is bound to a particular path in the JSON Graph, any paths evaluated on the Model will be relative to the bound path.
 
-The bindSync method is metaphorically similar to assigning a variable to an object within a JSON object. This method can only be invoked within a selector function, such as the one passed to Model.prototype.get, Model.prototype.get, Model.prototype.getProgressively, or {@link Model.prototype.getValues}. For more information on the when this method can be called, see Model.prototype.get.
+The bindSync method is metaphorically similar to assigning a variable to an object within a JSON object. This method can only be invoked within a selector function, such as the one passed to Model.prototype.get, Model.prototype.get, Model.prototype.getProgressively, or Model.prototype.getValues. For more information on the when this method can be called, see Model.prototype.get.
 </div>
 
 
@@ -1028,7 +1028,7 @@ nameAndRatings.forEach(function(html) {
 
 
 <div class="description">
-    Returns a copy of the <a href="Model.html">Model</a> that does not unbox Atom values values before returning them. Returning <a href="global.html#Atom">Atom</a>s, References, or {@link Error}s rather than their values allows any metadata attached to the value to be inspected.
+    Returns a copy of the <a href="Model.html">Model</a> that does not unbox Atom values values before returning them. Returning <a href="global.html#Atom">Atom</a>s, References, or Errors rather than their values allows any metadata attached to the value to be inspected.
 </div>
 
 
@@ -1166,7 +1166,7 @@ model.boxValues().getValue(["user", "name"]).subscribe(function(value) {
 
 <div class="description">
     Invokes a Function in the JSONGraph model and returns the result as a JSON object. JSONGraph models can contain Function objects, just like JavaScript objects. Function objects cannot be retrieved from a model. However Functions can be invoked using the Model.prototype.callValues or Model.prototype.call or Model.prototype.call. 
-The call method executes one or more functions and makes the results available in the local cache. The call function is a memory-efficient alternative to the {@link Model.prototype.call} function, because call does not convert the requested data from JSONGraph to JSON. Instead the call function attempts to ensure that the function's results are locally available in the cache when it invokes a selector function. Within the selector function, data is synchronously retrieved from the local cache and translated into another form - usually a view object. Within the selector function you can use helper methods like Model.prototype.getValueSync, {@link Model.prototype.setValueSync}, Model.prototype.bindSync to synchronously retrieve data from the cache. These methods are only valid within a selector function, and will throw if executed anywhere else.
+The call method executes one or more functions and makes the results available in the local cache. The call function is a memory-efficient alternative to the Model.prototype.call function, because call does not convert the requested data from JSONGraph to JSON. Instead the call function attempts to ensure that the function's results are locally available in the cache when it invokes a selector function. Within the selector function, data is synchronously retrieved from the local cache and translated into another form - usually a view object. Within the selector function you can use helper methods like Model.prototype.getValueSync, Model.prototype.setValueSync, Model.prototype.bindSync to synchronously retrieve data from the cache. These methods are only valid within a selector function, and will throw if executed anywhere else.
 </div>
 
 
@@ -3099,7 +3099,7 @@ The getValueSync method differs from the asynchronous get methods (ex. get, getV
 
 
 <div class="description">
-    Returns a copy of the <a href="Model.html">Model</a> does not allow synchronous access to the cache outside of a selector function. In safe mode, Model.prototype.getValueSync, {@link Model.prototype.setValueSync}, and Model.prototype.bind is only allowed within the selector functions passed to Model methods. Selector functions are guaranteed to execute once the requested data has been downloaded into the cache, and therefore allowing synchronous access to the Model's cache is safe. Outside of a selector function, synchronous access to the cache is inherently unsafe as there is no way of knowing whether data is undefined or simply not present in the cache at the moment. In safe mode (the default) an attempt to synchronously acces cache data outside of a selector method will throw.
+    Returns a copy of the <a href="Model.html">Model</a> does not allow synchronous access to the cache outside of a selector function. In safe mode, Model.prototype.getValueSync, Model.prototype.setValueSync, and Model.prototype.bind is only allowed within the selector functions passed to Model methods. Selector functions are guaranteed to execute once the requested data has been downloaded into the cache, and therefore allowing synchronous access to the Model's cache is safe. Outside of a selector function, synchronous access to the cache is inherently unsafe as there is no way of knowing whether data is undefined or simply not present in the cache at the moment. In safe mode (the default) an attempt to synchronously acces cache data outside of a selector method will throw.
 </div>
 
 
@@ -3674,7 +3674,7 @@ nameAndRatings.forEach(function(html) {
 
 
 <div class="description">
-    Synchronously sets a single value from the local cache. This method can only be invoked within a selector function, such as the one passed to Model.prototype.get, {@link Model.prototype.getProgressively}, Model.prototype.get, or {@link Model.prototype.getValues}. For more information on the correct usage of this method see Model.prototype.get.
+    Synchronously sets a single value from the local cache. This method can only be invoked within a selector function, such as the one passed to Model.prototype.get, Model.prototype.getProgressively, Model.prototype.get, or Model.prototype.getValues. For more information on the correct usage of this method see Model.prototype.get.
 </div>
 
 
@@ -3927,7 +3927,7 @@ nameAndRatings.forEach(function(html) {
 
  // create an object that mocks a <a href="DataSource.html">DataSource</a>, an object typically used to retrieve
  // information from the network.
- // Even though multiple calls to {@link Model.prototype.get} will be made on the 
+ // Even though multiple calls to Model.prototype.get will be made on the 
  // batched <a href="Model.html">Model</a>, we expect that only one request will be sent to the
  // server.
  var mockDataSource = {
@@ -4198,7 +4198,7 @@ ratings.subscribe(function(jsonEnvelope) {
 
 
 <div class="description">
-    Returns a copy of the <a href="Model.html">Model</a> that allows synchronous access to the cache outside of a selector function. In safe mode, Model.prototype.getValueSync, {@link Model.prototype.setValueSync}, and Model.prototype.bind is only allowed within the selector functions passed to Model methods. Selector functions are guaranteed to execute once the requested data has been downloaded into the cache, and therefore allowing synchronous access to the Model's cache is safe. Outside of a selector function, synchronous access to the cache is inherently unsafe as there is no way of knowing whether data is undefined or simply not present in the cache at the moment. In unsafe mode an attempt to synchronously acces cache data outside of a selector method will not throw. This API is inherently unsafe and should only be used if you know what you're doing.
+    Returns a copy of the <a href="Model.html">Model</a> that allows synchronous access to the cache outside of a selector function. In safe mode, Model.prototype.getValueSync, Model.prototype.setValueSync, and Model.prototype.bind is only allowed within the selector functions passed to Model methods. Selector functions are guaranteed to execute once the requested data has been downloaded into the cache, and therefore allowing synchronous access to the Model's cache is safe. Outside of a selector function, synchronous access to the cache is inherently unsafe as there is no way of knowing whether data is undefined or simply not present in the cache at the moment. In unsafe mode an attempt to synchronously acces cache data outside of a selector method will not throw. This API is inherently unsafe and should only be used if you know what you're doing.
 </div>
 
 
@@ -4573,7 +4573,7 @@ ratings.subscribe(function(jsonEnvelope) {
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-beta3</a>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0</a>
 </footer>
 
 <script> prettyPrint(); </script>
