@@ -1026,11 +1026,11 @@ function execute(output, suffix, opts) {
 
                 function get_cache(from, to) {
                     return _.range(from, to).reduce(function(cache, i) {
-                        return cache["grid"]["grid-1234"][i] = {
+                        return (cache["grid"]["grid-1234"][i] = {
                             $type: $atom,
                             $size: $size,
                             value: undefined
-                        } && cache;
+                        }) && cache;
                     }, {grid:{"grid-1234":{}}});
                 }
             });

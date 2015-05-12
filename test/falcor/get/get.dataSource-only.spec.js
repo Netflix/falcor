@@ -143,8 +143,8 @@ describe('DataSource Only', function() {
                     done(err);
                 }
             }, function() {
-                done('On Completed was called.  ' +
-                     'OnError should of been called.');
+                done('On Completed was called. ' +
+                     'OnError should have been called.');
             });
     });
 });
