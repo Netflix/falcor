@@ -4,6 +4,7 @@ Falcor provides a Model object, which is intended to be the "M" in your MVC. An 
 
 ```
 var log = console.log.bind(console)
+
 var model = {
     todos: [
         {
@@ -19,8 +20,13 @@ var model = {
 
 console.log(model.todos[0].name);
 
+// This outputs the following to the console:
+// get milk from corner store 
+
 
 // Working with JSON indirectly through a Falcor Model.
+
+var log = console.log.bind(console)
 
 var model = new falcor.Model({cache: {
     todos: [
@@ -36,15 +42,20 @@ var model = new falcor.Model({cache: {
 }});
 
 model.getValue('todos[0].name').then(log);
+
+// This outputs the following to the console:
+// get milk from corner store 
 ```
 
 
 Note that in the example above that uses a model to retrieve information, the value is pushed to a call back.
  
-The main advantage of using a push API is that you can code against JSON data using the same way regardless of whether the data is local or remote. This makes it very easy to begin coding your application against mocked data at first, and then work against the server data later on without changing any other client code.
+The main advantage of using a push API is that you can code against JSON data the same way regardless of whether the data is local or remote. This makes it very easy to begin coding your application against mocked data at first, and then work against the server data later on without changing any other client code.
  
 ```
+TODO: this example will not work without a server.
 var log = console.log.bind(console)
+
 var model = new falcor.Model({cache: {
     todos: [
         {
@@ -59,8 +70,6 @@ var model = new falcor.Model({cache: {
 }});
 
 model.getValue('todos[0].name').then(log);
-
-
 
 var model = new falcor.Model({source: new falcor.HttpDataSource('/model.json')});
 
@@ -70,15 +79,13 @@ model.getValue('todos[0].name').then(log);
 Another advantage of using a Falcor model is that it caches the JSON data it retrieves from the server in-memory. As a result, you don't need to maintain a cache of the data that you retrieve from a Falcor model. Whenever you need data, just ask the Model for it. If the model finds the data in its cache, it will push the data to you immediately. Otherwise the model will retrieve your data from the server, insert it into the cache, and push it to you asynchronously.
  
 ```
+TODO: this example will not work without a server.
 var model = new falcor.Model({source: new falcor.HttpDataSource('/model.json')});
 
 model.getValue('todos[0].name').then(function() {
 	// This request is served out of the local cache:
 	model.getValue('todos[0].name').then(log);
 });
-
-// This outputs the following to the console:
-
 ```
 
 In addition to JSON data the Falcor model also supports JSON Graph. JSON Graph is a convention for modeling graph information in JSON. JSON graph can help you ensure that the same object never appears more than once in either server responses or the Model cache. This means you never need to worry about propagating changes to multiple copies of the same object.
@@ -86,6 +93,7 @@ In addition to JSON data the Falcor model also supports JSON Graph. JSON Graph i
 ```
 var log = console.log.bind(console)
 var $ref = falcor.Model.ref;
+
 var model = new falcor.Model({cache: {
     todos: [
         $ref('todosById[44]'),
@@ -109,7 +117,7 @@ model.setValue('todos[1].done', true).then(function(x) {
 })
 
 // This outputs the following to the console:
-true
+// true
 ```
  
 In addition to using JSON graph to make sure that objects don't appear more than once in the models cache, the model uses the references in JSON graph to optimize server requests. For more information on JSON graph, see "JSON graph."
@@ -130,6 +138,8 @@ You can implement the data source interface to allow a Model to communicate with
 If you do not specify a data source, all model operations will be performed on the models local JSON cache. When you initialize the model, you can provide it with JSON Data to prime its local cache.
  
 ```
+var log = console.log.bind(console)
+
 var model = new falcor.Model({
 	cache: {
 	    todos: [
@@ -145,11 +155,16 @@ var model = new falcor.Model({
 	}});
 
 model.getValue('todos[0].name').then(log);
+
+// This outputs the following to the console:
+// get milk from corner store
 ```
  
 It is common practice to begin working against mock data in a model cache, and then replace it with a data source once the server is finished.
  
 ```
+var log = console.log.bind(console)
+
 var model = new falcor.Model({
 	source: new falcor.HttpDataSource('/model.json'),
 });
@@ -165,6 +180,8 @@ Retrieving Data from a model
 Every model is associated with one JSON object. The Falcor model provides a get API to allow developers to retrieve information from their JSON object. To retrieve information from a model, you pass a JavaScript path from the root of the models JSON object to the get method.
  
 ```
+var log = console.log.bind(console)
+
 var model = new falcor.Model({
 	cache: {
 	    todos: [
@@ -180,12 +197,19 @@ var model = new falcor.Model({
 	}});
 
 model.getValue('todos[0].name').then(log);
+
+// This outputs the following to the console:
+// get milk from corner store
 ```
  
 When you retrieve a path from a working model, the result is a model response. A model response object provides a variety of options that allow you to customize both how you would like the data to be delivered, and in what format you would like the data to arrive. By default the output format is JSON.
  
 There is one important difference between working with a JSON object directly and working with that same JSON object through a model: you can only retrieve value types from a model.  JSON objects can contain the following value types:  string, Boolean, number, null. In the JSON object below, the value types surrounded by underscores.
+
 ```
+var log = console.log.bind(console)
+var $ref = falcor.Model.ref;
+
 var model = {
     todos: [
         {
@@ -205,8 +229,11 @@ var model = {
         }        
     ]
 };
+```
 
 Models can also operate on JSON Graph documents:
+
+```
 var $ref = falcor.Model.ref;
 var model = {
 	todos: [
@@ -254,6 +281,7 @@ When working with a JSON object you can retrieve an array or an object by lookin
 
 ```
 var log = console.log.bind(console)
+
 var model = {
     todos: [
         {
@@ -269,12 +297,25 @@ var model = {
 
 var todos = model.todos;
 log(JSON.stringify(todos, null, 4))
+
+// This outputs the following to the console:
+// [
+//     {
+//         "name": "get milk from corner store",
+//         "done": false
+//     },
+//     {
+//         "name": "withdraw money from ATM",
+//         "done": true
+//     }
+// ] 
 ```
 
-However model objects do not allow you to retrieve objects or arrays from JSON The JSON data source. 
+However model objects do not allow you to retrieve objects or arrays from the JSON data source. 
 
-(Same example document inside of a model, and an attempt to get the same array)
 ```
+var log = console.log.bind(console)
+
 var model = new falcor.Model({cache: {
     todos: [
         {
@@ -296,18 +337,13 @@ The code above will not work, because an Array is not a value type.
 
 "Why can't I retrieve arrays and objects from Model?"
 
-
-
-
 Instead you must be explicit, and request all of the value types that you need.
- 
- 
+  
 In addition to the JavaScript path syntax, models can also process paths with ranges in indexers:
- 
-(Example of using range to pull that out of the model)
+
 ```
-var log = console.log.bind(console)
 var $ref = falcor.Model.ref;
+
 var model = new falcor.Model({cache: {
     todos: [
         $ref('todosById[44]'),
@@ -326,7 +362,23 @@ var model = new falcor.Model({cache: {
     }
 }});
 
-model.get('todos[0..1].name').then(log);
+model.get('todos[0..1].name').then(function(x) {
+    console.log(JSON.stringify(x, null, 4));
+});
+
+// This outputs the following to the console:
+// {
+//     "json": {
+//         "todos": {
+//             "0": {
+//                 "name": "get milk from corner store"
+//             },
+//             "1": {
+//                 "name": "withdraw money from ATM"
+//             }
+//         }
+//     }
+// }
 ```
  
 Models allow you to select as many paths as you want in a single network request.
