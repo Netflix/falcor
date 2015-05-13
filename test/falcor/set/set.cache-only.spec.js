@@ -117,7 +117,7 @@ describe('Cache Only', function() {
             var model = new Model({cache: Cache()});
             model.
                 set({ path: ["genreList", 0], value: Model.ref(["lists", "abcd"]) }).
-                withComparator(function(a, b) {
+                withComparator(function(path, a, b) {
                     var aRef = a.value;
                     var bRef = b.value;
                     if(aRef.length !== bRef.length) {
