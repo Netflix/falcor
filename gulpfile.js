@@ -19,10 +19,12 @@ gulp.task('lint', function() {
             globals: {
                 'require': false,
                 'module': false
-            }
+            },
+            reset: true, // dz: remove me after linting is finished, else i can't do one at the time
+            useEslintrc: true,
         })).
         pipe(eslint.format()).
-        pipe(eslint.failAfterError());
+        pipe(eslint.failOnError()); // dz: change back after finishing to failAfterError
 });
 
 gulp.task('doc', ['clean.doc', 'doc-d']);
