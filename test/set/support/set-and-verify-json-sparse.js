@@ -14,6 +14,7 @@ function set_and_verify_json_sparse(test, suffix, pathvalues, options) {
             boxValues().
             materialize().
             treatErrorsAsValues();
+        pv_options.model._cache = {};
     } else {
         pv_options = {
             boxed: true,
@@ -22,9 +23,7 @@ function set_and_verify_json_sparse(test, suffix, pathvalues, options) {
         };
     }
     var set_tuple = set_pathvalues(pathvalues, "PathMap", pv_options);
-    var pathmaps  = set_tuple[1].values.map(function(container) {
-        return { json: container.json };
-    });
+    var pathmaps  = set_tuple[1].values;
     return verify(suffix).
         apply(test, set_pathmaps(pathmaps, suffix, clone(options))).
         apply(test, pathmaps);

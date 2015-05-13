@@ -35,7 +35,6 @@ prototype._invPathSetsAsJSONG = inv.invPathSetsAsJSONG;
 prototype._invPathSetsAsPathMap = inv.invPathSetsAsPathMap;
 prototype._invPathSetsAsValues = inv.invPathSetsAsValues;
 
-// prototype._setCache = get.setCache;
 prototype._setCache = set.setCache;
 
 module.exports = falcor;

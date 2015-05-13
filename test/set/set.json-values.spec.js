@@ -67,7 +67,7 @@ function execute(output, suffix, opts) {
                             value: "Pulp Fiction"
                         }], opts);
                     });
-                    it("through a reference that lands on a atom", function() {
+                    it("through a reference that lands on an atom", function() {
                         set_and_verify_json_values(this.test, suffix, [{
                             path: ["grid", 0, 1, "title"],
                             value: "Kill Bill: Vol. 1"
@@ -137,8 +137,8 @@ function execute(output, suffix, opts) {
             });
             // end set primitive value
 
-            // set a atom value
-            describe("a $atom", function() {
+            // set an atom value
+            describe("an $atom", function() {
                 describe("in one place", function() {
                     it("directly", function() {
                         set_and_verify_json_values(this.test, suffix, [{
@@ -164,7 +164,7 @@ function execute(output, suffix, opts) {
                             }
                         }], opts);
                     });
-                    it("through a reference that lands on a atom", function() {
+                    it("through a reference that lands on an atom", function() {
                         set_and_verify_json_values(this.test, suffix, [{
                             path: ["grid", 0, 1, "summary"],
                             value: {
@@ -456,8 +456,8 @@ function execute(output, suffix, opts) {
 
         // replace existing values
         describe("by replacing", function() {
-            // replace a atom with a primitive
-            describe("a $atom with a primitive", function() {
+            // replace an atom with a primitive
+            describe("an $atom with a primitive", function() {
                 it("directly", function() {
                     set_and_verify_json_values(this.test, suffix, [{
                         path: ["movies", "pulp-fiction", "movie-id"],
