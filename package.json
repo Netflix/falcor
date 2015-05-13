@@ -61,7 +61,6 @@
     "minimist": "~1.1.0",
     "mocha": "~1.21.4",
     "run-sequence": "^1.0.2",
-    "sweet.js": "git://github.com/trxcllnt/sweet.js.git#nflx",
     "through2": "~0.6.1",
     "uglifyify": "~2.1.1",
     "underscore": "~1.6.0",

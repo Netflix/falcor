@@ -6,6 +6,7 @@ var Rx = require('rx');
 var getTestRunner = require('./../../getTestRunner');
 var testRunner = require('./../../testRunner');
 var noOp = function() {};
+var expect = require('chai').expect;
 
 describe('Cache Only', function() {
     describe('Selector Functions', function() {
@@ -111,6 +112,30 @@ describe('Cache Only', function() {
                     testRunner.compare(true, next > 0, 'Expect to be onNext to be called at least 1 time.');
                 }).
                 subscribe(noOp, done, done);
+        });
+        it('should dedupe values with a comparator', function(done) {
+            var model = new Model({cache: Cache()});
+            model.
+                set({ path: ["genreList", 0], value: Model.ref(["lists", "abcd"]) }).
+                withComparator(function(path, a, b) {
+                    var aRef = a.value;
+                    var bRef = b.value;
+                    if(aRef.length !== bRef.length) {
+                        return false;
+                    }
+                    var count = aRef.length;
+                    while(--count >= 0) {
+                        if(aRef[count] !== bRef[count]) {
+                            return false;
+                        }
+                    }
+                    return true;
+                }).
+                toPathValues().
+                count().
+                subscribe(function(total) {
+                    expect(total === 0, "Total should be zero.");
+                }, noOp, done)
         });
     });
 });
