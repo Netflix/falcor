@@ -715,7 +715,7 @@ namesAndRatings.subscribe(function(jsonEnvelope) {
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="docs.js.html">docs.js</a>, <a href="docs.js.html#line430">line 430</a>
+        <a href="docs.js.html">docs.js</a>, <a href="docs.js.html#line410">line 410</a>
     </li></ul></dd>
     
 
@@ -993,35 +993,14 @@ model.call(
 
     <h5>Example</h5>
     
-    <pre class="prettyprint"><code>// In this example we set the rating of a netflix title stored in a remote Model. We mock the server by defining a model source. The mocked server coerces the rating from 10 to 5.
- 
-// Mock the server by creatng a mock Model Source.
-var source = {
-    set: function(jsonGraphEnvelope) {
-        // when a server receives the expected set operation, it mocks the response:
-        // a JSON Graph Envelope containing the post-set values of all paths
-        return falcor.Observable.of({
-            paths: jsonGraphEnvelope.paths,
-            jsong: {
-                "titlesById": {           
-                    "99": {
-                        "name": "House of Cards",
-                        // coerce the rating to a maximum number of 5
-                        "rating": 5
-                    }
-                }    
-            }
-        });
-    }
-};
-
-var $ref = falcor.Model.ref;
-var model = new falcor.Model({ source: source });
+    <pre class="prettyprint"><code>var $ref = falcor.Model.ref;
+var source = new falcor.HttpDataSource("/model.json");
 
 // attempt to set 'titlesById[99].name' to "House of Cards" and 
 // 'titlesById[99].rating' to 10
-var result = model.set({
-    json: {
+var result = source.set({
+    paths: [["titlesById", 99, ["name", "rating"]],
+    jsong: {
         "titlesById": {           
             "99": {
                 "name": "House of Cards",
@@ -1031,13 +1010,14 @@ var result = model.set({
     }
 });
 
-result.subscribe(function(json) {
-    console.log(JSON.stringify(json, null, 4));
+result.subscribe(function(jsong) {
+    console.log(JSON.stringify(jsong, null, 4));
 });
 
 //The following is printed to the console:
 //{
-//    json: {
+//    paths: [["titlesById", 99, ["name", "rating"]],
+//    jsong: {
 //        "titlesById": {           
 //            "99": {
 //               "name": "House of Cards",
