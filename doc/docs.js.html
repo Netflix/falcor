@@ -27,6 +27,18 @@
     <section>
         <article>
             <pre class="prettyprint source linenums"><code>/**
+ * Attendees: @trxcllnt, @sdesai, @jhusain, @steveorsomethin, @ktrott
+
+* Move docs into the actual code.
+* Some quick way of jumping to the individual methods when you're on a class -- would expect a sub-navigation under the class when you're under it.
+* Consider writing a template for JSDoc generation
+* Move long examples out into separate examples folder: falcor/examples/model/get for example
+* Mixed quotes
+* Don't make scroll in examples
+* Change remote model object to JSONGraph object
+*/
+/**
+ * TODO: Start with The DataSource is an interface
  * A Falcor Model allows you to access the data in a JSON object the same way everywhere, regardless of where the data is stored is on the network. If a Model has a {@link DataSource} it is acting as a proxy for a remote Model. A Proxy Model uses the {@link DataSource} to access the data in another Model, usually located across a network. The {@link DataSource} is an interface which you can implement to allow Proxy Models to communicate across different network protocols than HTTP, such as a Web Socket or simple TCP. A {@link DataSource} is used by a Proxy Model on the client, and that DataSource communicates with a Model Server which translates its requests into commands and executes them on the Model located on the server. The server counterpart then serializes the remote Model's output in a response that the DataSource expects. The DataSource deserializes the data in the response, passes it back to the Proxy Model, and the Proxy Model caches the data locally.
  * The browser distribution of Falcor ships with {@link XmlHttpSource}, which communicates over HTTP with the FalcorEndpoint object available in Falcor's Node distribution.
  * @constructor DataSource
@@ -210,6 +222,7 @@ model.
 /**
  * The get method retrieves an array of {@link PathSet}s from a remote Model object.
  * @name get
+ * @function
  * @arg {Array.&lt;PathSet>} pathSets the path(s) to retrieve
  * @returns {Observable.&lt;JSONGraphEnvelope>} jsonGraphEnvelope the response returned from the server.
  * @memberof DataSource.prototype
@@ -372,6 +385,7 @@ namesAndRatings.subscribe(function(jsonEnvelope) {
 
 
 /**
+ * TODO: Just simplify this down to this allows you 
  * The DataSource interface includes a set method which can be called to modify a remote model. The set method accepts a {@link JSONGraphEnvelope}, which includes an Array of {@link Path}s to set, and a fragment of {@link JSONGraph} containing the values to set for each {@link Path}. The set method returns an Observable.&lt;JSONGraphraphEnvelope> which contains the response of the Remote model. The remote Model’s response contains values of each path after the set operation.  It is necessary to include these values, because set operations may not always be successful. Attempts to set invalid values may fail, or values maybe coerced into valid ranges.
  * @name set
  * @function
@@ -438,6 +452,8 @@ result.subscribe(function(jsong) {
  * @example
 var source = new falcor.HttpDataSource("http://netflix.com/model.json");
 var $ref = falcor.Model.ref;
+
+TODO: Change this to walk through the code step by step as a flow instead of all inline in the code snippet. Annotated source like underscore possibly for long-term.
 
 // In this example we add invoke the add function on a "persons" array in the JSON Graph
 // exposed by this {@link DataSource}. Then we retrieve the several properties from the 
@@ -514,7 +530,7 @@ source.call(
  */
 
 /**
- * A HttpDataSource object is a {@link DataSource} can be used to retrieve data from a remote JSONGraph model using the browser's {@link HttpDataSource} object. 
+ * A HttpDataSource object is a {@link DataSource} can be used to retrieve data from a remote JSONGraph object using the browser's XMLHttpRequest. 
  * @constructor HttpDataSource
  * @augments DataSource
  * @param jsonGraphUrl the URL of the JSONGraph model.
@@ -3113,6 +3129,8 @@ pathValues.forEach(function(pathValue) {
  */
 
 /**
+ * TODO: collectRatio needs better clearer docs
+ * TODO: Rename cache to data
  * A set of options used to customize the behaviour of the {@link Model}.
  * @typedef {Object} ModelOptions
  * @property {?DataSource} source - the DataSource the Model uses to access the JSONGraph object.
@@ -3123,6 +3141,9 @@ pathValues.forEach(function(pathValue) {
  */
 
 /**
+ * TODO: Add a matrix for modes and combinations
+ * TODO: Model constructor needs to document about the cache.
+ * TODO: Document that Models are immutable
  * A Model object is used to execute commands against a {@link JSONGraph} object. {@link Model}s can work with a local JSONGraph cache, or it can work with a remote {@link JSONGraph} object through a {@link DataSource}.
  * @constructor
  * @name Model

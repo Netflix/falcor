@@ -49,7 +49,10 @@
 
 
 <div class="description">
-    <p>A Model object is used to execute commands against a <a href="global.html#JSONGraph">JSONGraph</a> object. <a href="Model.html">Model</a>s can work with a local JSONGraph cache, or it can work with a remote <a href="global.html#JSONGraph">JSONGraph</a> object through a <a href="DataSource.html">DataSource</a>.</p>
+    <p>TODO: Add a matrix for modes and combinations
+TODO: Model constructor needs to document about the cache.
+TODO: Document that Models are immutable
+A Model object is used to execute commands against a <a href="global.html#JSONGraph">JSONGraph</a> object. <a href="Model.html">Model</a>s can work with a local JSONGraph cache, or it can work with a remote <a href="global.html#JSONGraph">JSONGraph</a> object through a <a href="DataSource.html">DataSource</a>.</p>
 </div>
 
 
@@ -154,7 +157,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="docs.js.html">docs.js</a>, <a href="docs.js.html#line3097">line 3097</a>
+        <a href="docs.js.html">docs.js</a>, <a href="docs.js.html#line3115">line 3115</a>
     </li></ul></dd>
     
 
@@ -306,7 +309,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="docs.js.html">docs.js</a>, <a href="docs.js.html#line2116">line 2116</a>
+        <a href="docs.js.html">docs.js</a>, <a href="docs.js.html#line2132">line 2132</a>
     </li></ul></dd>
     
 
@@ -645,7 +648,7 @@ ratings.subscribe(function(jsonEnvelope) {
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="docs.js.html">docs.js</a>, <a href="docs.js.html#line2646">line 2646</a>
+        <a href="docs.js.html">docs.js</a>, <a href="docs.js.html#line2662">line 2662</a>
     </li></ul></dd>
     
 
@@ -882,7 +885,7 @@ only be invoked within a selector function, such as the one passed to Model.prot
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="docs.js.html">docs.js</a>, <a href="docs.js.html#line2741">line 2741</a>
+        <a href="docs.js.html">docs.js</a>, <a href="docs.js.html#line2757">line 2757</a>
     </li></ul></dd>
     
 
@@ -1070,7 +1073,7 @@ nameAndRatings.forEach(function(html) {
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="docs.js.html">docs.js</a>, <a href="docs.js.html#line2477">line 2477</a>
+        <a href="docs.js.html">docs.js</a>, <a href="docs.js.html#line2493">line 2493</a>
     </li></ul></dd>
     
 
@@ -1391,7 +1394,7 @@ model.boxValues().getValue("user.name").subscribe(function(value) {
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="docs.js.html">docs.js</a>, <a href="docs.js.html#line2858">line 2858</a>
+        <a href="docs.js.html">docs.js</a>, <a href="docs.js.html#line2874">line 2874</a>
     </li></ul></dd>
     
 
@@ -1683,7 +1686,7 @@ model.call(
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="docs.js.html">docs.js</a>, <a href="docs.js.html#line1383">line 1383</a>
+        <a href="docs.js.html">docs.js</a>, <a href="docs.js.html#line1399">line 1399</a>
     </li></ul></dd>
     
 
@@ -2313,7 +2316,7 @@ the entire cache is returned.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="docs.js.html">docs.js</a>, <a href="docs.js.html#line2522">line 2522</a>
+        <a href="docs.js.html">docs.js</a>, <a href="docs.js.html#line2538">line 2538</a>
     </li></ul></dd>
     
 
@@ -2519,7 +2522,7 @@ If an error is encountered when attempting to retrieve a <a href="global.html#Pa
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="docs.js.html">docs.js</a>, <a href="docs.js.html#line1981">line 1981</a>
+        <a href="docs.js.html">docs.js</a>, <a href="docs.js.html#line1997">line 1997</a>
     </li></ul></dd>
     
 
@@ -2786,7 +2789,7 @@ nameAndRatings.forEach(function(data) {
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="docs.js.html">docs.js</a>, <a href="docs.js.html#line1364">line 1364</a>
+        <a href="docs.js.html">docs.js</a>, <a href="docs.js.html#line1380">line 1380</a>
     </li></ul></dd>
     
 
@@ -2953,7 +2956,7 @@ The getValueSync method differs from the asynchronous get methods (ex. get, getV
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="docs.js.html">docs.js</a>, <a href="docs.js.html#line2508">line 2508</a>
+        <a href="docs.js.html">docs.js</a>, <a href="docs.js.html#line2524">line 2524</a>
     </li></ul></dd>
     
 
@@ -3057,7 +3060,7 @@ The getValueSync method differs from the asynchronous get methods (ex. get, getV
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="docs.js.html">docs.js</a>, <a href="docs.js.html#line2420">line 2420</a>
+        <a href="docs.js.html">docs.js</a>, <a href="docs.js.html#line2436">line 2436</a>
     </li></ul></dd>
     
 
@@ -3228,7 +3231,7 @@ The getValueSync method differs from the asynchronous get methods (ex. get, getV
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="docs.js.html">docs.js</a>, <a href="docs.js.html#line2957">line 2957</a>
+        <a href="docs.js.html">docs.js</a>, <a href="docs.js.html#line2973">line 2973</a>
     </li></ul></dd>
     
 
@@ -3451,7 +3454,7 @@ pathValues.forEach(function(pathValue) {
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="docs.js.html">docs.js</a>, <a href="docs.js.html#line2539">line 2539</a>
+        <a href="docs.js.html">docs.js</a>, <a href="docs.js.html#line2555">line 2555</a>
     </li></ul></dd>
     
 
@@ -3637,7 +3640,7 @@ the <a href="Observable.html#~onErrorCallback">Observable~onErrorCallback</a> ca
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="docs.js.html">docs.js</a>, <a href="docs.js.html#line2436">line 2436</a>
+        <a href="docs.js.html">docs.js</a>, <a href="docs.js.html#line2452">line 2452</a>
     </li></ul></dd>
     
 
@@ -3741,7 +3744,7 @@ the <a href="Observable.html#~onErrorCallback">Observable~onErrorCallback</a> ca
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="docs.js.html">docs.js</a>, <a href="docs.js.html#line2258">line 2258</a>
+        <a href="docs.js.html">docs.js</a>, <a href="docs.js.html#line2274">line 2274</a>
     </li></ul></dd>
     
 
@@ -4001,7 +4004,7 @@ ratings.subscribe(function(jsonEnvelope) {
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="docs.js.html">docs.js</a>, <a href="docs.js.html#line2446">line 2446</a>
+        <a href="docs.js.html">docs.js</a>, <a href="docs.js.html#line2462">line 2462</a>
     </li></ul></dd>
     
 
@@ -4137,7 +4140,7 @@ model.unboxValues().getValue("user.name").subscribe(function(value) {
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="docs.js.html">docs.js</a>, <a href="docs.js.html#line2428">line 2428</a>
+        <a href="docs.js.html">docs.js</a>, <a href="docs.js.html#line2444">line 2444</a>
     </li></ul></dd>
     
 
@@ -4241,7 +4244,7 @@ model.unboxValues().getValue("user.name").subscribe(function(value) {
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="docs.js.html">docs.js</a>, <a href="docs.js.html#line2108">line 2108</a>
+        <a href="docs.js.html">docs.js</a>, <a href="docs.js.html#line2124">line 2124</a>
     </li></ul></dd>
     
 
@@ -4400,7 +4403,7 @@ model.unboxValues().getValue("user.name").subscribe(function(value) {
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="docs.js.html">docs.js</a>, <a href="docs.js.html#line3079">line 3079</a>
+        <a href="docs.js.html">docs.js</a>, <a href="docs.js.html#line3095">line 3095</a>
     </li></ul></dd>
     
 

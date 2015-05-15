@@ -49,7 +49,8 @@
 
 
 <div class="description">
-    <p>A Falcor Model allows you to access the data in a JSON object the same way everywhere, regardless of where the data is stored is on the network. If a Model has a <a href="DataSource.html">DataSource</a> it is acting as a proxy for a remote Model. A Proxy Model uses the <a href="DataSource.html">DataSource</a> to access the data in another Model, usually located across a network. The <a href="DataSource.html">DataSource</a> is an interface which you can implement to allow Proxy Models to communicate across different network protocols than HTTP, such as a Web Socket or simple TCP. A <a href="DataSource.html">DataSource</a> is used by a Proxy Model on the client, and that DataSource communicates with a Model Server which translates its requests into commands and executes them on the Model located on the server. The server counterpart then serializes the remote Model's output in a response that the DataSource expects. The DataSource deserializes the data in the response, passes it back to the Proxy Model, and the Proxy Model caches the data locally.
+    <p>TODO: Start with The DataSource is an interface
+A Falcor Model allows you to access the data in a JSON object the same way everywhere, regardless of where the data is stored is on the network. If a Model has a <a href="DataSource.html">DataSource</a> it is acting as a proxy for a remote Model. A Proxy Model uses the <a href="DataSource.html">DataSource</a> to access the data in another Model, usually located across a network. The <a href="DataSource.html">DataSource</a> is an interface which you can implement to allow Proxy Models to communicate across different network protocols than HTTP, such as a Web Socket or simple TCP. A <a href="DataSource.html">DataSource</a> is used by a Proxy Model on the client, and that DataSource communicates with a Model Server which translates its requests into commands and executes them on the Model located on the server. The server counterpart then serializes the remote Model's output in a response that the DataSource expects. The DataSource deserializes the data in the response, passes it back to the Proxy Model, and the Proxy Model caches the data locally.
 The browser distribution of Falcor ships with XmlHttpSource, which communicates over HTTP with the FalcorEndpoint object available in Falcor's Node distribution.</p>
 </div>
 
@@ -94,7 +95,7 @@ The browser distribution of Falcor ships with XmlHttpSource, which communicates 
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="docs.js.html">docs.js</a>, <a href="docs.js.html#line1">line 1</a>
+        <a href="docs.js.html">docs.js</a>, <a href="docs.js.html#line12">line 12</a>
     </li></ul></dd>
     
 
@@ -311,222 +312,6 @@ model.
     
 
     
-        <h3 class="subsection-title">Members</h3>
-
-        
-            
-<h4 class="name" id="get"><span class="type-signature"></span>get<span class="type-signature"></span></h4>
-
-
-
-
-<div class="description">
-    <p>The get method retrieves an array of <a href="global.html#PathSet">PathSet</a>s from a remote Model object.</p>
-</div>
-
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="docs.js.html">docs.js</a>, <a href="docs.js.html#line182">line 182</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-    <h5>Example</h5>
-    
-    <pre class="prettyprint"><code>// The <a href="Model.html">Model</a> and its <a href="DataSource.html">DataSource</a> work together to optimize and hide network access from developers. In this example we will create a mock implementation of a DataSource to demonstrate how the <a href="Model.html">Model</a> and <a href="DataSource.html">DataSource</a> interact.
-
- // Create an object that mocks a <a href="DataSource.html">DataSource</a> with a get method. Model's use 
- // <a href="DataSource.html">DataSource</a>'s to retrieve information from the network.
- var mockDataSource = {
-    // In the example below, the path 'genreLists[0][1]["name","rating"]' will be
-    // requested from the model. The Model's cache contains a reference to 'titlesById[99]'
-    // at the path 'genreLists[0][1]', but the Model's cache does not contain a title at 
-    // 'titlesById[99]'. As a result the Model will request the more optimized path
-    // 'titlesById[99]["name","rating"]' from the data source. The Data source belows
-    // mocks the server response for this path.
-    get: function(pathSets) {
-        console.log("Paths requested from DataSource:");
-        console.log(JSON.stringify(pathSets));
-
-        // return an Observable stream of the <a href="global.html#JSONGraphEnvelope">JSONGraphEnvelope</a> that a server might 
-        // send in response to a request for 'titlesById[99]["name", "rating"]'
-        return falcor.Observable.of({
-            paths: pathSets,
-            value: {
-                "titlesById": {           
-                    "99": {
-                        "name": "House of Cards",
-                        "rating": 5
-                    }
-                }
-            }
-        })
-    }
- };
-
- var $ref = falcor.Model.ref;
- // Create a Model that uses the mock <a href="DataSource.html">DataSource</a> for remove retrieval
- var model = new falcor.Model({
-    source: mockDataSource,
-
-    // Loading a fragment of the JSONGraph object into the model's cache.
-    cache: {
-        // list of user's genres, modeled as a map with ordinal keys
-        "genreLists": {
-            "0": $ref('genresById[123]'),
-            "length": 1
-        },
-        // map of all genres, organized by ID
-        "genresById": {
-            // genre list modeled as map with ordinal keys
-            "123": {
-                "name": "Drama",
-                "0": $ref('titlesById[23]'),
-                "1": $ref('titlesById[99]'),
-                "length": 2
-            }
-        },
-        "titlesById": {
-            "23": {
-                "name": "Orange is the New Black",
-                "rating": 5
-            }
-        }
-    }
-});
-
-// Creating an Observable stream of a JSON object that contains the names and ratings of the first two titles in the first genre list
-var namesAndRatings = model.get('genreLists[0][0..1]["name","rating"]');
-
-// retrieving the JSON object with the ratings from the stream
-namesAndRatings.subscribe(function(jsonEnvelope) {
-    console.log("JSON retrieved from Model:")
-    console.log(JSON.stringify(jsonEnvelope));
-
-    // output the contents of the <a href="Model.html">Model</a>'s' local cache to the console.
-    var jsonGraph = model.getCache();
-
-    console.log("Contents of <a href="Model.html">Model</a>'s local cache after get operation:")
-    console.log(JSON.stringify(jsonGraph, null, 4));
-        
-});
-
-// Attempting to retrieve the <a href="global.html#PathSet">PathSet</a> 'genreLists[0][0..1]["name", "rating"]'
-// from the Model will cause the paths to be first evaluated against the local
-// cache. Based on <a href="global.html#Path">Path</a>s found in the local JSONGraph cache, the requested <a href="global.html#PathSet">PathSet</a>s 
-// will be optimized into the following PathSets:
-
-// 'genreLists[0][0]["name", "rating"]' -> 'titlesById[23]["name", "rating"]'
-// 'genreLists[0][1]["name", "rating"]' -> 'titlesById[99]["name", "rating"]'
-
-// Of these optimized <a href="global.html#PathSet">PathSet</a>s, only the following <a href="global.html#PathSet">PathSet</a> cannot
-// be found in the cache: 'titlesById[99]["name", "rating"]'. A request is 
-// then issued to the DataSource.prototype.get method to retrieve this path.
-// Usually this would result in a call to the server, but in this case the call is handled
-// by our the mock <a href="DataSource.html">DataSource</a>. Once the <a href="DataSource.html">DataSource</a> retrieves the missing 
-// JSONGraph fragment, it is sent to the <a href="Model.html">Model</a>. The <a href="Model.html">Model</a> adds the
-// missing data retrieved from the <a href="DataSource.html">DataSource</a> to the local cache and returns all
-// of the requested paths in a JSON envelope.
-
-// The code above prints the following to the console:
-
-
-
-
-// Paths requested from DataSource: ["titlesById", 99, ["name", "rating"]]
-// JSON retrieved from Model:
-// {
-//     "json": {
-//         "genreLists": {
-//             "0": {
-//                 "0": {
-//                     name: "Orange is the New Black",
-//                     rating: 5
-//                 },
-//                 "1": {
-//                     name: "House of Cards",
-//                     rating: 5
-//                 }
-//             }
-//         }
-//     }
-// }
-// Contents of <a href="Model.html">Model</a>'s local cache after get operation:
-// {
-//     "genreLists": {
-//         "0": $ref('genresById[123]'),
-//         "length": 1
-//     },
-//     "genresById": {
-//         "123": {
-//             "name": "Drama",
-//             "0": $ref('titlesById[23]'),
-//             "1": $ref('titlesById[99]'),
-//             "length": 2
-//         }
-//     },
-//     "titlesById": {
-//         "23": {
-//             "name": "Orange is the New Black",
-//             "rating": 5
-//         },
-//         "99": {
-//             "name": "House of Cards",
-//             "rating": 5
-//         }        
-//     }
-// }
-
-// Note that the <a href="Model.html">Model</a>'s local cache now contains the additional information
-// returned by the <a href="DataSource.html">DataSource</a>.</code></pre>
-
-
-
-        
-    
 
     
         <h3 class="subsection-title">Methods</h3>
@@ -705,7 +490,7 @@ namesAndRatings.subscribe(function(jsonEnvelope) {
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="docs.js.html">docs.js</a>, <a href="docs.js.html#line400">line 400</a>
+        <a href="docs.js.html">docs.js</a>, <a href="docs.js.html#line414">line 414</a>
     </li></ul></dd>
     
 
@@ -756,6 +541,8 @@ namesAndRatings.subscribe(function(jsonEnvelope) {
     
     <pre class="prettyprint"><code>var source = new falcor.HttpDataSource("http://netflix.com/model.json");
 var $ref = falcor.Model.ref;
+
+TODO: Change this to walk through the code step by step as a flow instead of all inline in the code snippet. Annotated source like underscore possibly for long-term.
 
 // In this example we add invoke the add function on a "persons" array in the JSON Graph
 // exposed by this <a href="DataSource.html">DataSource</a>. Then we retrieve the several properties from the 
@@ -836,6 +623,309 @@ source.call(
 
     
 
+    <h4 class="name" id="get"><span class="type-signature"></span>get<span class="signature">(pathSets)</span><span class="type-signature"> &rarr; {<a href="Observable.html">Observable</a>.&lt;<a href="global.html#JSONGraphEnvelope">JSONGraphEnvelope</a>>}</span></h4>
+
+    
+
+
+
+<div class="description">
+    <p>The get method retrieves an array of <a href="global.html#PathSet">PathSet</a>s from a remote Model object.</p>
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>pathSets</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Array.&lt;<a href="global.html#PathSet">PathSet</a>></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>the path(s) to retrieve</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="docs.js.html">docs.js</a>, <a href="docs.js.html#line194">line 194</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    <p>jsonGraphEnvelope the response returned from the server.</p>
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type"><a href="Observable.html">Observable</a>.&lt;<a href="global.html#JSONGraphEnvelope">JSONGraphEnvelope</a>></span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+    <h5>Example</h5>
+    
+    <pre class="prettyprint"><code>// The <a href="Model.html">Model</a> and its <a href="DataSource.html">DataSource</a> work together to optimize and hide network access from developers. In this example we will create a mock implementation of a DataSource to demonstrate how the <a href="Model.html">Model</a> and <a href="DataSource.html">DataSource</a> interact.
+
+ // Create an object that mocks a <a href="DataSource.html">DataSource</a> with a get method. Model's use 
+ // <a href="DataSource.html">DataSource</a>'s to retrieve information from the network.
+ var mockDataSource = {
+    // In the example below, the path 'genreLists[0][1]["name","rating"]' will be
+    // requested from the model. The Model's cache contains a reference to 'titlesById[99]'
+    // at the path 'genreLists[0][1]', but the Model's cache does not contain a title at 
+    // 'titlesById[99]'. As a result the Model will request the more optimized path
+    // 'titlesById[99]["name","rating"]' from the data source. The Data source belows
+    // mocks the server response for this path.
+    get: function(pathSets) {
+        console.log("Paths requested from DataSource:");
+        console.log(JSON.stringify(pathSets));
+
+        // return an Observable stream of the <a href="global.html#JSONGraphEnvelope">JSONGraphEnvelope</a> that a server might 
+        // send in response to a request for 'titlesById[99]["name", "rating"]'
+        return falcor.Observable.of({
+            paths: pathSets,
+            value: {
+                "titlesById": {           
+                    "99": {
+                        "name": "House of Cards",
+                        "rating": 5
+                    }
+                }
+            }
+        })
+    }
+ };
+
+ var $ref = falcor.Model.ref;
+ // Create a Model that uses the mock <a href="DataSource.html">DataSource</a> for remove retrieval
+ var model = new falcor.Model({
+    source: mockDataSource,
+
+    // Loading a fragment of the JSONGraph object into the model's cache.
+    cache: {
+        // list of user's genres, modeled as a map with ordinal keys
+        "genreLists": {
+            "0": $ref('genresById[123]'),
+            "length": 1
+        },
+        // map of all genres, organized by ID
+        "genresById": {
+            // genre list modeled as map with ordinal keys
+            "123": {
+                "name": "Drama",
+                "0": $ref('titlesById[23]'),
+                "1": $ref('titlesById[99]'),
+                "length": 2
+            }
+        },
+        "titlesById": {
+            "23": {
+                "name": "Orange is the New Black",
+                "rating": 5
+            }
+        }
+    }
+});
+
+// Creating an Observable stream of a JSON object that contains the names and ratings of the first two titles in the first genre list
+var namesAndRatings = model.get('genreLists[0][0..1]["name","rating"]');
+
+// retrieving the JSON object with the ratings from the stream
+namesAndRatings.subscribe(function(jsonEnvelope) {
+    console.log("JSON retrieved from Model:")
+    console.log(JSON.stringify(jsonEnvelope));
+
+    // output the contents of the <a href="Model.html">Model</a>'s' local cache to the console.
+    var jsonGraph = model.getCache();
+
+    console.log("Contents of <a href="Model.html">Model</a>'s local cache after get operation:")
+    console.log(JSON.stringify(jsonGraph, null, 4));
+        
+});
+
+// Attempting to retrieve the <a href="global.html#PathSet">PathSet</a> 'genreLists[0][0..1]["name", "rating"]'
+// from the Model will cause the paths to be first evaluated against the local
+// cache. Based on <a href="global.html#Path">Path</a>s found in the local JSONGraph cache, the requested <a href="global.html#PathSet">PathSet</a>s 
+// will be optimized into the following PathSets:
+
+// 'genreLists[0][0]["name", "rating"]' -> 'titlesById[23]["name", "rating"]'
+// 'genreLists[0][1]["name", "rating"]' -> 'titlesById[99]["name", "rating"]'
+
+// Of these optimized <a href="global.html#PathSet">PathSet</a>s, only the following <a href="global.html#PathSet">PathSet</a> cannot
+// be found in the cache: 'titlesById[99]["name", "rating"]'. A request is 
+// then issued to the DataSource.prototype.get method to retrieve this path.
+// Usually this would result in a call to the server, but in this case the call is handled
+// by our the mock <a href="DataSource.html">DataSource</a>. Once the <a href="DataSource.html">DataSource</a> retrieves the missing 
+// JSONGraph fragment, it is sent to the <a href="Model.html">Model</a>. The <a href="Model.html">Model</a> adds the
+// missing data retrieved from the <a href="DataSource.html">DataSource</a> to the local cache and returns all
+// of the requested paths in a JSON envelope.
+
+// The code above prints the following to the console:
+
+
+
+
+// Paths requested from DataSource: ["titlesById", 99, ["name", "rating"]]
+// JSON retrieved from Model:
+// {
+//     "json": {
+//         "genreLists": {
+//             "0": {
+//                 "0": {
+//                     name: "Orange is the New Black",
+//                     rating: 5
+//                 },
+//                 "1": {
+//                     name: "House of Cards",
+//                     rating: 5
+//                 }
+//             }
+//         }
+//     }
+// }
+// Contents of <a href="Model.html">Model</a>'s local cache after get operation:
+// {
+//     "genreLists": {
+//         "0": $ref('genresById[123]'),
+//         "length": 1
+//     },
+//     "genresById": {
+//         "123": {
+//             "name": "Drama",
+//             "0": $ref('titlesById[23]'),
+//             "1": $ref('titlesById[99]'),
+//             "length": 2
+//         }
+//     },
+//     "titlesById": {
+//         "23": {
+//             "name": "Orange is the New Black",
+//             "rating": 5
+//         },
+//         "99": {
+//             "name": "House of Cards",
+//             "rating": 5
+//         }        
+//     }
+// }
+
+// Note that the <a href="Model.html">Model</a>'s local cache now contains the additional information
+// returned by the <a href="DataSource.html">DataSource</a>.</code></pre>
+
+
+
+        
+            
+
+    
+
     <h4 class="name" id="set"><span class="type-signature"></span>set<span class="signature">(jsonGraphEnvelope)</span><span class="type-signature"> &rarr; {<a href="Observable.html">Observable</a>.&lt;<a href="global.html#JSONGraphEnvelope">JSONGraphEnvelope</a>>}</span></h4>
 
     
@@ -843,7 +933,8 @@ source.call(
 
 
 <div class="description">
-    <p>The DataSource interface includes a set method which can be called to modify a remote model. The set method accepts a <a href="global.html#JSONGraphEnvelope">JSONGraphEnvelope</a>, which includes an Array of <a href="global.html#Path">Path</a>s to set, and a fragment of <a href="global.html#JSONGraph">JSONGraph</a> containing the values to set for each <a href="global.html#Path">Path</a>. The set method returns an Observable.<JSONGraphraphEnvelope> which contains the response of the Remote model. The remote Model’s response contains values of each path after the set operation.  It is necessary to include these values, because set operations may not always be successful. Attempts to set invalid values may fail, or values maybe coerced into valid ranges.</p>
+    <p>TODO: Just simplify this down to this allows you 
+The DataSource interface includes a set method which can be called to modify a remote model. The set method accepts a <a href="global.html#JSONGraphEnvelope">JSONGraphEnvelope</a>, which includes an Array of <a href="global.html#Path">Path</a>s to set, and a fragment of <a href="global.html#JSONGraph">JSONGraph</a> containing the values to set for each <a href="global.html#Path">Path</a>. The set method returns an Observable.<JSONGraphraphEnvelope> which contains the response of the Remote model. The remote Model’s response contains values of each path after the set operation.  It is necessary to include these values, because set operations may not always be successful. Attempts to set invalid values may fail, or values maybe coerced into valid ranges.</p>
 </div>
 
 
@@ -936,7 +1027,7 @@ source.call(
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="docs.js.html">docs.js</a>, <a href="docs.js.html#line346">line 346</a>
+        <a href="docs.js.html">docs.js</a>, <a href="docs.js.html#line359">line 359</a>
     </li></ul></dd>
     
 
