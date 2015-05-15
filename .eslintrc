@@ -7,7 +7,6 @@
     "rules": {
         // possible errors
         "comma-dangle": [ 2 ],
-        "no-cond-assign": [ 2 ],
         "no-console": [ 2 ],
         "no-constant-condition": [ 2 ],
         "no-control-regex": [ 2 ],
@@ -19,6 +18,7 @@
         "no-empty-class": [ 2 ],
         "no-ex-assign": [ 2 ],
         "no-extra-boolean-cast": [ 2 ]/*,
+        "no-cond-assign": [ 2, "always" ],
         "no-extra-semi": [ 2 ],
         "no-func-assign": [ 2 ],
         // this is for variable hoisting, not necessary if we use block scoped declarations
