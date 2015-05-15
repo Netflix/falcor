@@ -154,7 +154,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="docs.js.html">docs.js</a>, <a href="docs.js.html#line3065">line 3065</a>
+        <a href="docs.js.html">docs.js</a>, <a href="docs.js.html#line3058">line 3058</a>
     </li></ul></dd>
     
 
@@ -647,7 +647,7 @@ ratings.subscribe(function(jsonEnvelope) {
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="docs.js.html">docs.js</a>, <a href="docs.js.html#line2619">line 2619</a>
+        <a href="docs.js.html">docs.js</a>, <a href="docs.js.html#line2616">line 2616</a>
     </li></ul></dd>
     
 
@@ -884,7 +884,7 @@ only be invoked within a selector function, such as the one passed to Model.prot
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="docs.js.html">docs.js</a>, <a href="docs.js.html#line2714">line 2714</a>
+        <a href="docs.js.html">docs.js</a>, <a href="docs.js.html#line2711">line 2711</a>
     </li></ul></dd>
     
 
@@ -1128,8 +1128,7 @@ nameAndRatings.forEach(function(html) {
 
     <h5>Example</h5>
     
-    <pre class="prettyprint"><code>//TODO: atom &lt;-> sentinel ?  $expires value wtf?
-var model = new falcor.Model();
+    <pre class="prettyprint"><code>var model = new falcor.Model();
 model.setCache({
     user: {
         name: {
@@ -1143,7 +1142,7 @@ model.setCache({
     }
 });
 
-model.boxValues().getValue(["user", "name"]).subscribe(function(value) {
+model.boxValues().getValue("user.name").subscribe(function(value) {
     console.log(value.$type, value.value, value.$expires);
 })
 
@@ -1351,7 +1350,7 @@ The call method executes one or more functions and makes the results available i
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="docs.js.html">docs.js</a>, <a href="docs.js.html#line2831">line 2831</a>
+        <a href="docs.js.html">docs.js</a>, <a href="docs.js.html#line2828">line 2828</a>
     </li></ul></dd>
     
 
@@ -3039,7 +3038,7 @@ The getValueSync method differs from the asynchronous get methods (ex. get, getV
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="docs.js.html">docs.js</a>, <a href="docs.js.html#line2490">line 2490</a>
+        <a href="docs.js.html">docs.js</a>, <a href="docs.js.html#line2489">line 2489</a>
     </li></ul></dd>
     
 
@@ -3308,7 +3307,7 @@ The getValueSync method differs from the asynchronous get methods (ex. get, getV
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="docs.js.html">docs.js</a>, <a href="docs.js.html#line2921">line 2921</a>
+        <a href="docs.js.html">docs.js</a>, <a href="docs.js.html#line2918">line 2918</a>
     </li></ul></dd>
     
 
@@ -3401,14 +3400,10 @@ var pathValues =
     model.
         set(
             {
-                //TODO: verify conversion:
-                path: 'genreLists[0][0].rating',
                 path: ["genreLists", 0, 0, "rating"],
                 value: 5
             }, 
             {
-                //TODO: verify conversion:
-                path: 'genreLists[0][1].rating',
                 path: ["genreLists", 0, 1, "rating"],                
                 value: 4
             }).
@@ -3532,7 +3527,7 @@ pathValues.forEach(function(pathValue) {
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="docs.js.html">docs.js</a>, <a href="docs.js.html#line2500">line 2500</a>
+        <a href="docs.js.html">docs.js</a>, <a href="docs.js.html#line2499">line 2499</a>
     </li></ul></dd>
     
 
@@ -3627,9 +3622,7 @@ function getStars(num) {
 // result in a request to the server for ["genreLists", 0, 2, ["name","rating"]] because the third title 
 // is not in the cache. When all of the data has been retrieved, the selector function is invoked and the data in the cache is converted into HTML.
 var nameAndRatings = model.get(
-    //TODO: verify conversion:
     'genreLists[0][0..2]["name", "rating"]', 'genreLists[0].name',
-    ["genreLists", 0, {to:2}, ["name","rating"]], ["genreLists", 0, "name"],
     // When this function is invoked all of the data should be available in the cache, except for those paths that caused an error to occur
     function() {
         var firstGenreList = this.bindSync(["genreLists",0]);
@@ -3767,7 +3760,7 @@ nameAndRatings.forEach(function(html) {
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="docs.js.html">docs.js</a>, <a href="docs.js.html#line2610">line 2610</a>
+        <a href="docs.js.html">docs.js</a>, <a href="docs.js.html#line2607">line 2607</a>
     </li></ul></dd>
     
 
@@ -4505,7 +4498,7 @@ ratings.subscribe(function(jsonEnvelope) {
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="docs.js.html">docs.js</a>, <a href="docs.js.html#line3047">line 3047</a>
+        <a href="docs.js.html">docs.js</a>, <a href="docs.js.html#line3040">line 3040</a>
     </li></ul></dd>
     
 
