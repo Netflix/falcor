@@ -154,7 +154,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="docs.js.html">docs.js</a>, <a href="docs.js.html#line3084">line 3084</a>
+        <a href="docs.js.html">docs.js</a>, <a href="docs.js.html#line3065">line 3065</a>
     </li></ul></dd>
     
 
@@ -306,7 +306,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="docs.js.html">docs.js</a>, <a href="docs.js.html#line2125">line 2125</a>
+        <a href="docs.js.html">docs.js</a>, <a href="docs.js.html#line2116">line 2116</a>
     </li></ul></dd>
     
 
@@ -647,7 +647,7 @@ ratings.subscribe(function(jsonEnvelope) {
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="docs.js.html">docs.js</a>, <a href="docs.js.html#line2633">line 2633</a>
+        <a href="docs.js.html">docs.js</a>, <a href="docs.js.html#line2614">line 2614</a>
     </li></ul></dd>
     
 
@@ -884,7 +884,7 @@ only be invoked within a selector function, such as the one passed to Model.prot
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="docs.js.html">docs.js</a>, <a href="docs.js.html#line2728">line 2728</a>
+        <a href="docs.js.html">docs.js</a>, <a href="docs.js.html#line2709">line 2709</a>
     </li></ul></dd>
     
 
@@ -1072,7 +1072,7 @@ nameAndRatings.forEach(function(html) {
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="docs.js.html">docs.js</a>, <a href="docs.js.html#line2454">line 2454</a>
+        <a href="docs.js.html">docs.js</a>, <a href="docs.js.html#line2445">line 2445</a>
     </li></ul></dd>
     
 
@@ -1393,7 +1393,7 @@ model.boxValues().getValue("user.name").subscribe(function(value) {
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="docs.js.html">docs.js</a>, <a href="docs.js.html#line2845">line 2845</a>
+        <a href="docs.js.html">docs.js</a>, <a href="docs.js.html#line2826">line 2826</a>
     </li></ul></dd>
     
 
@@ -1685,7 +1685,7 @@ model.call(
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="docs.js.html">docs.js</a>, <a href="docs.js.html#line1392">line 1392</a>
+        <a href="docs.js.html">docs.js</a>, <a href="docs.js.html#line1383">line 1383</a>
     </li></ul></dd>
     
 
@@ -2315,7 +2315,7 @@ the entire cache is returned.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="docs.js.html">docs.js</a>, <a href="docs.js.html#line2499">line 2499</a>
+        <a href="docs.js.html">docs.js</a>, <a href="docs.js.html#line2490">line 2490</a>
     </li></ul></dd>
     
 
@@ -2521,7 +2521,7 @@ If an error is encountered when attempting to retrieve a <a href="global.html#Pa
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="docs.js.html">docs.js</a>, <a href="docs.js.html#line1990">line 1990</a>
+        <a href="docs.js.html">docs.js</a>, <a href="docs.js.html#line1981">line 1981</a>
     </li></ul></dd>
     
 
@@ -2837,15 +2837,7 @@ nameAndRatings.forEach(function(data) {
 
     <h5>Example</h5>
     
-    <pre class="prettyprint"><code>var model = new falcor.Model();
-
-// Loading a JSONGraph object into the model's cache.
-model.setCache(
-    {
-        user: {
-            name: "Jim"
-        }
-    });
+    <pre class="prettyprint"><code>var model = new falcor.Model({source: new falcor.HttpDataSource("/model.json") });
 
 model.
     getValue('user.name').
@@ -2963,7 +2955,7 @@ The getValueSync method differs from the asynchronous get methods (ex. get, getV
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="docs.js.html">docs.js</a>, <a href="docs.js.html#line2485">line 2485</a>
+        <a href="docs.js.html">docs.js</a>, <a href="docs.js.html#line2476">line 2476</a>
     </li></ul></dd>
     
 
@@ -3067,7 +3059,7 @@ The getValueSync method differs from the asynchronous get methods (ex. get, getV
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="docs.js.html">docs.js</a>, <a href="docs.js.html#line2429">line 2429</a>
+        <a href="docs.js.html">docs.js</a>, <a href="docs.js.html#line2420">line 2420</a>
     </li></ul></dd>
     
 
@@ -3238,7 +3230,7 @@ The getValueSync method differs from the asynchronous get methods (ex. get, getV
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="docs.js.html">docs.js</a>, <a href="docs.js.html#line2944">line 2944</a>
+        <a href="docs.js.html">docs.js</a>, <a href="docs.js.html#line2925">line 2925</a>
     </li></ul></dd>
     
 
@@ -3461,7 +3453,7 @@ pathValues.forEach(function(pathValue) {
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="docs.js.html">docs.js</a>, <a href="docs.js.html#line2516">line 2516</a>
+        <a href="docs.js.html">docs.js</a>, <a href="docs.js.html#line2507">line 2507</a>
     </li></ul></dd>
     
 
@@ -3594,159 +3586,6 @@ nameAndRatings.forEach(function(html) {
 
     
 
-    <h4 class="name" id="setValueSync"><span class="type-signature"></span>setValueSync<span class="signature">(path)</span><span class="type-signature"> &rarr; {<a href="global.html#Path">Path</a>}</span></h4>
-
-    
-
-
-
-<div class="description">
-    Synchronously sets a single value from the local cache. This method can only be invoked within a selector function, such as the one passed to Model.prototype.get, Model.prototype.getProgressively, Model.prototype.get, or Model.prototype.getValues. For more information on the correct usage of this method see Model.prototype.get.
-</div>
-
-
-
-
-
-
-
-
-
-    <h5>Parameters:</h5>
-    
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>path</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type"><a href="global.html#Path">Path</a></span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">the path(s) to retrieve synchronously from the local cache.</td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="docs.js.html">docs.js</a>, <a href="docs.js.html#line2624">line 2624</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<h5>Returns:</h5>
-
-        
-<div class="param-desc">
-    the value found at the path.
-</div>
-
-
-
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type"><a href="global.html#Path">Path</a></span>
-
-
-    </dd>
-</dl>
-
-    
-
-
-
-        
-            
-
-    
-
     <h4 class="name" id="unbatch"><span class="type-signature"></span>unbatch<span class="signature">()</span><span class="type-signature"> &rarr; {<a href="Model.html">Model</a>}</span></h4>
 
     
@@ -3798,7 +3637,7 @@ nameAndRatings.forEach(function(html) {
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="docs.js.html">docs.js</a>, <a href="docs.js.html#line2267">line 2267</a>
+        <a href="docs.js.html">docs.js</a>, <a href="docs.js.html#line2258">line 2258</a>
     </li></ul></dd>
     
 
@@ -4058,7 +3897,7 @@ ratings.subscribe(function(jsonEnvelope) {
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="docs.js.html">docs.js</a>, <a href="docs.js.html#line2445">line 2445</a>
+        <a href="docs.js.html">docs.js</a>, <a href="docs.js.html#line2436">line 2436</a>
     </li></ul></dd>
     
 
@@ -4169,7 +4008,7 @@ ratings.subscribe(function(jsonEnvelope) {
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="docs.js.html">docs.js</a>, <a href="docs.js.html#line2437">line 2437</a>
+        <a href="docs.js.html">docs.js</a>, <a href="docs.js.html#line2428">line 2428</a>
     </li></ul></dd>
     
 
@@ -4273,7 +4112,7 @@ ratings.subscribe(function(jsonEnvelope) {
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="docs.js.html">docs.js</a>, <a href="docs.js.html#line2117">line 2117</a>
+        <a href="docs.js.html">docs.js</a>, <a href="docs.js.html#line2108">line 2108</a>
     </li></ul></dd>
     
 
@@ -4432,7 +4271,7 @@ ratings.subscribe(function(jsonEnvelope) {
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="docs.js.html">docs.js</a>, <a href="docs.js.html#line3066">line 3066</a>
+        <a href="docs.js.html">docs.js</a>, <a href="docs.js.html#line3047">line 3047</a>
     </li></ul></dd>
     
 
