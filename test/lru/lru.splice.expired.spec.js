@@ -23,25 +23,25 @@ describe('Expired', function() {
     describe('Input Paths', function() {
         describe('AsJSONG', function() {
             it('should splice expired item.', function(done) {
-                spliceExpired(['expired'], 'toJSONG').
+                spliceExpired(['expireSoon', 'summary'], 'toJSONG').
                     subscribe(noOp, done, done);
             });
         });
         describe('AsPathValues', function() {
             it('should splice expired item.', function(done) {
-                spliceExpired(['expired'], 'toPathValues').
+                spliceExpired(['expireSoon', 'summary'], 'toPathValues').
                     subscribe(noOp, done, done);
             });
         });
         describe('AsJSON', function() {
             it('should splice expired item.', function(done) {
-                spliceExpired(['expired'], 'toJSON').
+                spliceExpired(['expireSoon', 'summary'], 'toJSON').
                     subscribe(noOp, done, done);
             });
         });
         describe('Selector', function() {
             it('should splice expired item.', function(done) {
-                spliceExpired(['expired'], 'selector').
+                spliceExpired(['expireSoon', 'summary'], 'selector').
                     subscribe(noOp, done, done);
             });
         });
@@ -49,25 +49,25 @@ describe('Expired', function() {
     describe('Input PathMaps', function() {
         describe('AsJSONG', function() {
             it('should splice expired item.', function(done) {
-                spliceExpired({expired: null}, 'toJSONG').
+                spliceExpired({ json: { expireSoon: { summary: null } } }, 'toJSONG').
                     subscribe(noOp, done, done);
             });
         });
         describe('AsPathValues', function() {
             it('should splice expired item.', function(done) {
-                spliceExpired({expired: null}, 'toPathValues').
+                spliceExpired({ json: { expireSoon: { summary: null } } }, 'toPathValues').
                     subscribe(noOp, done, done);
             });
         });
         describe('AsJSON', function() {
             it('should splice expired item.', function(done) {
-                spliceExpired({expired: null}, 'toJSON').
+                spliceExpired({ json: { expireSoon: { summary: null } } }, 'toJSON').
                     subscribe(noOp, done, done);
             });
         });
         describe('Selector', function() {
             it('should splice expired item.', function(done) {
-                spliceExpired({expired: null}, 'selector').
+                spliceExpired({ json: { expireSoon: { summary: null } } }, 'selector').
                     subscribe(noOp, done, done);
             });
         });
