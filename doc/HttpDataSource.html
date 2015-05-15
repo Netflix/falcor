@@ -137,7 +137,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="docs.js.html">docs.js</a>, <a href="docs.js.html#line441">line 441</a>
+        <a href="docs.js.html">docs.js</a>, <a href="docs.js.html#line516">line 516</a>
     </li></ul></dd>
     
 
@@ -424,11 +424,15 @@ namesAndRatings.subscribe(function(jsonEnvelope) {
 
     
 
-    <h4 class="name" id="call"><span class="type-signature"></span>call<span class="signature">(functionPath, args, pathSuffixes, paths)</span><span class="type-signature"> &rarr; {<a href="Observable.html">Observable</a>.&lt;<a href="global.html#JSONGraphEnvelope">JSONGraphEnvelope</a>>}</span></h4>
+    <h4 class="name" id="call"><span class="type-signature"></span>call<span class="signature">(functionPath, args, pathSuffixes, calleePaths)</span><span class="type-signature"> &rarr; {<a href="Observable.html">Observable</a>.&lt;<a href="global.html#JSONGraphEnvelope">JSONGraphEnvelope</a>>}</span></h4>
 
     
 
 
+
+<div class="description">
+    Invokes a function in the JSON Graph object exposed by the <a href="DataSource.html">DataSource</a>.
+</div>
 
 
 
@@ -532,7 +536,7 @@ namesAndRatings.subscribe(function(jsonEnvelope) {
 
         <tr>
             
-                <td class="name"><code>paths</code></td>
+                <td class="name"><code>calleePaths</code></td>
             
 
             <td class="type">
@@ -548,7 +552,7 @@ namesAndRatings.subscribe(function(jsonEnvelope) {
 
             
 
-            <td class="description last">paths to retrieve after successful Function execution</td>
+            <td class="description last">paths to retrieve from function callee after successful Function execution</td>
         </tr>
 
     
@@ -639,6 +643,82 @@ namesAndRatings.subscribe(function(jsonEnvelope) {
 </dl>
 
     
+
+
+    <h5>Example</h5>
+    
+    <pre class="prettyprint"><code>var model = new falcor.Model({source: new falcor.HttpDataSource("http://netflix.com/model.json")});
+var $ref = falcor.Model.ref;
+
+// In this example we add invoke the add function on a "persons" array in the JSON Graph
+// exposed by this <a href="DataSource.html">DataSource</a>. Then we retrieve the several properties from the 
+// newly-created person as well as the new length of the list.
+model.call(
+ // the path to the function which adds a person object to the persons list.
+ ["persons", "add"], 
+ // The arguments to the function.
+ ["Jim", "Parsons"], 
+ // This function creates a person in the "personsById" map and adds a reference to that
+ // person to the next available index in the "persons" list. This function call internally
+ // generates a <a href="global.html#JSONGraphEnvelope">JSONGraphEnvelope</a> response which contains the reference at the new 
+ // index in the list. The response also indicates that length property of the "persons"
+ // list has been invalidated. This will cause any <a href="Model.html">Model</a> connected to this 
+ // <a href="DataSource.html">DataSource</a> to purge ["persons", "length"] from its cache as soon as it receives
+ // the response.
+ // {
+ //   paths: [["persons", 7]],
+ //   jsong: {
+ //    persons: {
+ //     7: { $type: "ref", value: ["personsById", 22] }
+ //    }
+ //   },
+ //   invalidated: [["persons", "length"]]
+ // }
+ // Once the JSON Graph function has completed successfully, the call method 
+ // continues by evaluating a get operation on the path created by appending 
+ // each path suffix onto each path in the <a href="global.html#JSONGraphEnvelope">JSONGraphEnvelope</a>'s paths
+ // array.
+ // In this instance, there is only one path suffix containing three keys...
+ [["name", "surname", "createdAt"]], 
+ // ... therefore the call method evaluates a get operation 
+ // on ["persons", 7, ["name", "surname", "createdAt"]] and adds the 
+ // results to the <a href="global.html#JSONGraphEnvelope">JSONGraphEnvelope</a>. This yields the following
+ // result:
+ // {
+ //   paths: [["persons", 7, ["name","age", "createdAt"]]],
+ //   jsong: {
+ //    persons: {
+ //     7: { $type: "ref", value: ["personsById", 22] }
+ //    },
+ //    personsById: {
+ //     22: { name: "Jim", surname: "Parsons", createdAt: 2348723423 }
+ //    }
+ //   }
+ // } 
+ // At this point the function appends the calleePaths to the path 
+ // to the function callee object. The path to the function callee object is 
+ // callPath.splice(0, callPath.length - 1).
+ // In this instance there is only one path specified...
+ [["length"]]).
+ // ...which means that the call function evaluates a get operation for
+ // the path ["persons", "length"]. The results of this get operation are 
+ // added to the <a href="global.html#JSONGraphEnvelope">JSONGraphEnvelope</a>, producing the following
+ // result:
+ // {
+ //   paths: [["persons", 7, ["name","age", "createdAt"]], ["persons", 7, "length"]],
+ //   jsong: {
+ //    persons: {
+ //     7: { $type: "ref", value: ["personsById", 22] },
+ //     "length": 8
+ //    },
+ //    personsById: {
+ //     22: { name: "Jim", surname: "Parsons", createdAt: 2348723423 }
+ //    }
+ //   }
+ // }  
+  subscribe(function(jsonGraph) {
+   console.log(JSON.stringify(jsonGraph, null, 4));
+  });</code></pre>
 
 
 
@@ -938,7 +1018,7 @@ result.subscribe(function(json) {
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="docs.js.html">docs.js</a>, <a href="docs.js.html#line2948">line 2948</a>
+        <a href="docs.js.html">docs.js</a>, <a href="docs.js.html#line3023">line 3023</a>
     </li></ul></dd>
     
 
@@ -1215,11 +1295,15 @@ namesAndRatings.subscribe(function(jsonEnvelope) {
 
     
 
-    <h4 class="name" id="call"><span class="type-signature"></span>call<span class="signature">(functionPath, args, pathSuffixes, paths)</span><span class="type-signature"> &rarr; {<a href="Observable.html">Observable</a>.&lt;<a href="global.html#JSONGraphEnvelope">JSONGraphEnvelope</a>>}</span></h4>
+    <h4 class="name" id="call"><span class="type-signature"></span>call<span class="signature">(functionPath, args, pathSuffixes, calleePaths)</span><span class="type-signature"> &rarr; {<a href="Observable.html">Observable</a>.&lt;<a href="global.html#JSONGraphEnvelope">JSONGraphEnvelope</a>>}</span></h4>
 
     
 
 
+
+<div class="description">
+    Invokes a function in the JSON Graph object exposed by the <a href="DataSource.html">DataSource</a>.
+</div>
 
 
 
@@ -1323,7 +1407,7 @@ namesAndRatings.subscribe(function(jsonEnvelope) {
 
         <tr>
             
-                <td class="name"><code>paths</code></td>
+                <td class="name"><code>calleePaths</code></td>
             
 
             <td class="type">
@@ -1339,7 +1423,7 @@ namesAndRatings.subscribe(function(jsonEnvelope) {
 
             
 
-            <td class="description last">paths to retrieve after successful Function execution</td>
+            <td class="description last">paths to retrieve from function callee after successful Function execution</td>
         </tr>
 
     
@@ -1430,6 +1514,82 @@ namesAndRatings.subscribe(function(jsonEnvelope) {
 </dl>
 
     
+
+
+    <h5>Example</h5>
+    
+    <pre class="prettyprint"><code>var model = new falcor.Model({source: new falcor.HttpDataSource("http://netflix.com/model.json")});
+var $ref = falcor.Model.ref;
+
+// In this example we add invoke the add function on a "persons" array in the JSON Graph
+// exposed by this <a href="DataSource.html">DataSource</a>. Then we retrieve the several properties from the 
+// newly-created person as well as the new length of the list.
+model.call(
+ // the path to the function which adds a person object to the persons list.
+ ["persons", "add"], 
+ // The arguments to the function.
+ ["Jim", "Parsons"], 
+ // This function creates a person in the "personsById" map and adds a reference to that
+ // person to the next available index in the "persons" list. This function call internally
+ // generates a <a href="global.html#JSONGraphEnvelope">JSONGraphEnvelope</a> response which contains the reference at the new 
+ // index in the list. The response also indicates that length property of the "persons"
+ // list has been invalidated. This will cause any <a href="Model.html">Model</a> connected to this 
+ // <a href="DataSource.html">DataSource</a> to purge ["persons", "length"] from its cache as soon as it receives
+ // the response.
+ // {
+ //   paths: [["persons", 7]],
+ //   jsong: {
+ //    persons: {
+ //     7: { $type: "ref", value: ["personsById", 22] }
+ //    }
+ //   },
+ //   invalidated: [["persons", "length"]]
+ // }
+ // Once the JSON Graph function has completed successfully, the call method 
+ // continues by evaluating a get operation on the path created by appending 
+ // each path suffix onto each path in the <a href="global.html#JSONGraphEnvelope">JSONGraphEnvelope</a>'s paths
+ // array.
+ // In this instance, there is only one path suffix containing three keys...
+ [["name", "surname", "createdAt"]], 
+ // ... therefore the call method evaluates a get operation 
+ // on ["persons", 7, ["name", "surname", "createdAt"]] and adds the 
+ // results to the <a href="global.html#JSONGraphEnvelope">JSONGraphEnvelope</a>. This yields the following
+ // result:
+ // {
+ //   paths: [["persons", 7, ["name","age", "createdAt"]]],
+ //   jsong: {
+ //    persons: {
+ //     7: { $type: "ref", value: ["personsById", 22] }
+ //    },
+ //    personsById: {
+ //     22: { name: "Jim", surname: "Parsons", createdAt: 2348723423 }
+ //    }
+ //   }
+ // } 
+ // At this point the function appends the calleePaths to the path 
+ // to the function callee object. The path to the function callee object is 
+ // callPath.splice(0, callPath.length - 1).
+ // In this instance there is only one path specified...
+ [["length"]]).
+ // ...which means that the call function evaluates a get operation for
+ // the path ["persons", "length"]. The results of this get operation are 
+ // added to the <a href="global.html#JSONGraphEnvelope">JSONGraphEnvelope</a>, producing the following
+ // result:
+ // {
+ //   paths: [["persons", 7, ["name","age", "createdAt"]], ["persons", 7, "length"]],
+ //   jsong: {
+ //    persons: {
+ //     7: { $type: "ref", value: ["personsById", 22] },
+ //     "length": 8
+ //    },
+ //    personsById: {
+ //     22: { name: "Jim", surname: "Parsons", createdAt: 2348723423 }
+ //    }
+ //   }
+ // }  
+  subscribe(function(jsonGraph) {
+   console.log(JSON.stringify(jsonGraph, null, 4));
+  });</code></pre>
 
 
 
