@@ -647,13 +647,13 @@ namesAndRatings.subscribe(function(jsonEnvelope) {
 
     <h5>Example</h5>
     
-    <pre class="prettyprint"><code>var model = new falcor.Model({source: new falcor.HttpDataSource("http://netflix.com/model.json")});
+    <pre class="prettyprint"><code>var source = new falcor.HttpDataSource("http://netflix.com/model.json");
 var $ref = falcor.Model.ref;
 
 // In this example we add invoke the add function on a "persons" array in the JSON Graph
 // exposed by this <a href="DataSource.html">DataSource</a>. Then we retrieve the several properties from the 
 // newly-created person as well as the new length of the list.
-model.call(
+source.call(
  // the path to the function which adds a person object to the persons list.
  ["persons", "add"], 
  // The arguments to the function.
@@ -998,7 +998,7 @@ result.subscribe(function(jsong) {
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="docs.js.html">docs.js</a>, <a href="docs.js.html#line2987">line 2987</a>
+        <a href="docs.js.html">docs.js</a>, <a href="docs.js.html#line2994">line 2994</a>
     </li></ul></dd>
     
 
@@ -1498,13 +1498,13 @@ namesAndRatings.subscribe(function(jsonEnvelope) {
 
     <h5>Example</h5>
     
-    <pre class="prettyprint"><code>var model = new falcor.Model({source: new falcor.HttpDataSource("http://netflix.com/model.json")});
+    <pre class="prettyprint"><code>var source = new falcor.HttpDataSource("http://netflix.com/model.json");
 var $ref = falcor.Model.ref;
 
 // In this example we add invoke the add function on a "persons" array in the JSON Graph
 // exposed by this <a href="DataSource.html">DataSource</a>. Then we retrieve the several properties from the 
 // newly-created person as well as the new length of the list.
-model.call(
+source.call(
  // the path to the function which adds a person object to the persons list.
  ["persons", "add"], 
  // The arguments to the function.
