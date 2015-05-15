@@ -800,7 +800,8 @@ source.call(
  //    personsById: {
  //     22: { name: "Jim", surname: "Parsons", createdAt: 2348723423 }
  //    }
- //   }
+ //   },
+ //   invalidated: [["persons", "length"]]
  // } 
  // At this point the function appends the calleePaths to the path 
  // to the function callee object. The path to the function callee object is 
@@ -821,7 +822,8 @@ source.call(
  //    personsById: {
  //     22: { name: "Jim", surname: "Parsons", createdAt: 2348723423 }
  //    }
- //   }
+ //   },
+ //   invalidated: [["persons", "length"]]
  // }  
   subscribe(function(jsonGraph) {
    console.log(JSON.stringify(jsonGraph, null, 4));

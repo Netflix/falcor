@@ -93,7 +93,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="docs.js.html">docs.js</a>, <a href="docs.js.html#line1022">line 1022</a>
+        <a href="docs.js.html">docs.js</a>, <a href="docs.js.html#line1024">line 1024</a>
     </li></ul></dd>
     
 
@@ -440,7 +440,7 @@ modelResponse.toJSON().forEach(function(json) {
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="docs.js.html">docs.js</a>, <a href="docs.js.html#line3020">line 3020</a>
+        <a href="docs.js.html">docs.js</a>, <a href="docs.js.html#line3028">line 3028</a>
     </li></ul></dd>
     
 
@@ -481,6 +481,313 @@ modelResponse.toJSON().forEach(function(json) {
 </dl>
 
     
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="progressively"><span class="type-signature"></span>progressively<span class="signature">(&hellip;path, selector)</span><span class="type-signature"> &rarr; {<a href="ModelResponse.html">ModelResponse</a>.&lt;<a href="global.html#JSONEnvelope">JSONEnvelope</a>>}</span></h4>
+
+    
+
+
+
+<div class="description">
+    The progressive method retrieves several <a href="global.html#Path">Path</a>s or <a href="global.html#PathSet">PathSet</a>s from the JSONGraph object, and makes them
+available in the local cache. Like the Model.prototype.getProgressively function, getProgressively invokes a 
+selector function every time is available, creating a stream of objects where each new object is a more populated version 
+of the one before. The getProgressively function is a memory-efficient alternative to the getProgressively function, because get does not convert the requested data from JSONGraph to JSON. Instead the getProgressively function attempts to ensure that the requested paths are locally available in the cache when it invokes a selector function. Within the selector function, data is synchronously retrieved from the local cache and translated into another form - usually a view object. Within the selector function you can use helper methods like getValueSync and setValueSync to synchronously retrieve data from the cache. These methods are only valid within the selector function, and will throw if executed anywhere else.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>path</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="global.html#PathSet">PathSet</a></span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                    &lt;repeatable><br>
+                
+                </td>
+            
+
+            
+
+            <td class="description last">the path(s) to retrieve</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>selector</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">the callback that runs once all of the values have been loaded into cache</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="docs.js.html">docs.js</a>, <a href="docs.js.html#line1872">line 1872</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    the values found at the requested paths.
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type"><a href="ModelResponse.html">ModelResponse</a>.&lt;<a href="global.html#JSONEnvelope">JSONEnvelope</a>></span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+    <h5>Example</h5>
+    
+    <pre class="prettyprint"><code>// In this example we will retrieve data from the model and convert it into an HTML representation.
+// Creating a model and passing a data source that connects it to a remote JSONGraph model.
+var model = new falcor.Model();
+var $ref = falcor.Model.ref;
+
+// Loading a JSONGraph object into the model's cache. This JSONGraph object models a list of genres, each of which contains several titles.
+model.setCache(
+    {
+        // list of user's genres, modeled as a map with ordinal keys
+        "genreLists": {
+            "0": $ref('genresById[123]'),
+            "1": $ref('genresById[522]'),
+            "length": 2
+        },
+        // map of all genres, organized by ID
+        "genresById": {
+            // genre list modeled as map with ordinal keys
+            "123": {
+                "name": "Drama",
+                "0": $ref('titlesById[23]'),
+                "1": $ref('titlesById[99]'),
+                "length": 2
+            },
+            // genre list modeled as map with ordinal keys
+            "522": {
+                "name": "Comedy",
+                "0": $ref('titlesById[23]'),
+                "1": $ref('titlesById[44]'),
+                "length": 2           
+            }
+        },
+        // map of all titles by ID
+        "titlesById": {
+           "99": {
+                "name": "House of Cards",
+                "rating": 5
+            },
+            "23": {
+                "name": "Orange is the New Black",
+                "rating": 5
+            },
+            "44": {
+                "name": "Arrested Development",
+                "rating": 5            
+            }
+        }
+    });
+
+// Converts a integer into a string of stars
+function getStars(num) {
+    var stars = "",
+        counter;
+
+    if (num !== undefined) {
+        for(counter = 0; counter &lt; num; counter++) {
+            stars += "*";
+        }
+    }
+
+    return stars;
+}
+
+// Note that in the example below we ask for the first three titles in the first genre list. This will 
+// result in a request to the server for ["genreLists", 0, 2, ["name","rating"]] because the third title 
+// is not in the cache. The selector function passed to getProgressively will be called twice. The first time, the only data available in the cache will be the data that was already present. The second time the cache will also contain the additional data downloaded from the server.
+// Each time the selector function is invoked, there is more data. The selector function converts the 
+// data present into an HTML representation. The result is a stream of progressively larger HTML strings.
+var nameAndRatings = model.progressive().get(
+    'genreLists[0][0..2]["name", "rating"]', 'genreLists[0].name',
+    // When this function is invoked all of the data should be available in the cache, except for those paths that caused an error to occur
+    function() {
+        var firstGenreList = model.bindSync('genreLists[0]');
+        return "&lt;h1>" + firstGenreList.getValueSync('name') + "&lt;/h1>\n" +
+            "&lt;ul>\n" + 
+            [0,1,2].
+                // filter out indexes that have not been retrieved from the server yet
+                filter(function(index) {
+                    // when retrieving values from the local cache, it is possible to retrieve objects as well as values.
+                    return firstGenreList.getValueSync([index]) !== undefined;
+                }).
+                map(function(index) {
+                    var nameAndRating = firstGenreList.bindSync([index]);
+                    return "&lt;li>" + nameAndRating.getValueSync('name') + " " + getStars(nameAndRating.getValueSync('rating')) + "&lt;/li>\n";
+                }).join("") + 
+            "&lt;/ul>";
+    });
+
+nameAndRatings.forEach(function(html) { 
+    console.log(html); 
+});
+
+// The code above outputs the following two HTML fragments to the console.
+// &lt;h1>Drama&lt;/h1>
+// &lt;ul>
+// &lt;li>Orange is the New Black *****&lt;/li>
+// &lt;li>House of cards *****&lt;/li>
+// &lt;/ul>
+// &lt;h1>Drama&lt;/h1>
+// &lt;ul>
+// &lt;li>Orange is the New Black *****&lt;/li>
+// &lt;li>House of Cards *****&lt;/li>
+// &lt;li>Hemlock Grove *****&lt;/li>
+// &lt;/ul>
+// Notice that the first HTML Fragment does not contain the "Hemlock Grove" title. However the second time around the title has been downloaded from the remote model and is present in the results.</code></pre>
 
 
 
@@ -540,7 +847,7 @@ modelResponse.toJSON().forEach(function(json) {
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="docs.js.html">docs.js</a>, <a href="docs.js.html#line1285">line 1285</a>
+        <a href="docs.js.html">docs.js</a>, <a href="docs.js.html#line1287">line 1287</a>
     </li></ul></dd>
     
 
@@ -703,7 +1010,7 @@ response.toJSON().forEach(function(jsonEnvelope) {
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="docs.js.html">docs.js</a>, <a href="docs.js.html#line1199">line 1199</a>
+        <a href="docs.js.html">docs.js</a>, <a href="docs.js.html#line1201">line 1201</a>
     </li></ul></dd>
     
 
@@ -876,7 +1183,7 @@ response.toJSONG().forEach(function(jsonGraphEnvelope) {
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="docs.js.html">docs.js</a>, <a href="docs.js.html#line1130">line 1130</a>
+        <a href="docs.js.html">docs.js</a>, <a href="docs.js.html#line1132">line 1132</a>
     </li></ul></dd>
     
 

@@ -137,7 +137,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="docs.js.html">docs.js</a>, <a href="docs.js.html#line486">line 486</a>
+        <a href="docs.js.html">docs.js</a>, <a href="docs.js.html#line488">line 488</a>
     </li></ul></dd>
     
 
@@ -693,7 +693,8 @@ source.call(
  //    personsById: {
  //     22: { name: "Jim", surname: "Parsons", createdAt: 2348723423 }
  //    }
- //   }
+ //   },
+ //   invalidated: [["persons", "length"]]
  // } 
  // At this point the function appends the calleePaths to the path 
  // to the function callee object. The path to the function callee object is 
@@ -714,7 +715,8 @@ source.call(
  //    personsById: {
  //     22: { name: "Jim", surname: "Parsons", createdAt: 2348723423 }
  //    }
- //   }
+ //   },
+ //   invalidated: [["persons", "length"]]
  // }  
   subscribe(function(jsonGraph) {
    console.log(JSON.stringify(jsonGraph, null, 4));
@@ -998,7 +1000,7 @@ result.subscribe(function(jsong) {
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="docs.js.html">docs.js</a>, <a href="docs.js.html#line3015">line 3015</a>
+        <a href="docs.js.html">docs.js</a>, <a href="docs.js.html#line3023">line 3023</a>
     </li></ul></dd>
     
 
@@ -1544,7 +1546,8 @@ source.call(
  //    personsById: {
  //     22: { name: "Jim", surname: "Parsons", createdAt: 2348723423 }
  //    }
- //   }
+ //   },
+ //   invalidated: [["persons", "length"]]
  // } 
  // At this point the function appends the calleePaths to the path 
  // to the function callee object. The path to the function callee object is 
@@ -1565,7 +1568,8 @@ source.call(
  //    personsById: {
  //     22: { name: "Jim", surname: "Parsons", createdAt: 2348723423 }
  //    }
- //   }
+ //   },
+ //   invalidated: [["persons", "length"]]
  // }  
   subscribe(function(jsonGraph) {
    console.log(JSON.stringify(jsonGraph, null, 4));
