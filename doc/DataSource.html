@@ -49,8 +49,8 @@
 
 
 <div class="description">
-    A Falcor Model allows you to access the data in a JSON object the same way everywhere, regardless of where the data is stored is on the network. If a Model has a <a href="DataSource.html">DataSource</a> it is acting as a proxy for a remote Model. A Proxy Model uses the <a href="DataSource.html">DataSource</a> to access the data in another Model, usually located across a network. The <a href="DataSource.html">DataSource</a> is an interface which you can implement to allow Proxy Models to communicate across different network protocols than HTTP, such as a Web Socket or simple TCP. A <a href="DataSource.html">DataSource</a> is used by a Proxy Model on the client, and that DataSource communicates with a Model Server which translates its requests into commands and executes them on the Model located on the server. The server counterpart then serializes the remote Model's output in a response that the DataSource expects. The DataSource deserializes the data in the response, passes it back to the Proxy Model, and the Proxy Model caches the data locally.
-The browser distribution of Falcor ships with XmlHttpSource, which communicates over HTTP with the FalcorEndpoint object available in Falcor's Node distribution.
+    <p>A Falcor Model allows you to access the data in a JSON object the same way everywhere, regardless of where the data is stored is on the network. If a Model has a <a href="DataSource.html">DataSource</a> it is acting as a proxy for a remote Model. A Proxy Model uses the <a href="DataSource.html">DataSource</a> to access the data in another Model, usually located across a network. The <a href="DataSource.html">DataSource</a> is an interface which you can implement to allow Proxy Models to communicate across different network protocols than HTTP, such as a Web Socket or simple TCP. A <a href="DataSource.html">DataSource</a> is used by a Proxy Model on the client, and that DataSource communicates with a Model Server which translates its requests into commands and executes them on the Model located on the server. The server counterpart then serializes the remote Model's output in a response that the DataSource expects. The DataSource deserializes the data in the response, passes it back to the Proxy Model, and the Proxy Model caches the data locally.
+The browser distribution of Falcor ships with XmlHttpSource, which communicates over HTTP with the FalcorEndpoint object available in Falcor's Node distribution.</p>
 </div>
 
 
@@ -321,7 +321,7 @@ model.
 
 
 <div class="description">
-    The get method retrieves an array of <a href="global.html#PathSet">PathSet</a>s from a remote Model object.
+    <p>The get method retrieves an array of <a href="global.html#PathSet">PathSet</a>s from a remote Model object.</p>
 </div>
 
 
@@ -543,7 +543,7 @@ namesAndRatings.subscribe(function(jsonEnvelope) {
 
 
 <div class="description">
-    Invokes a function in the JSON Graph object exposed by the <a href="DataSource.html">DataSource</a>.
+    <p>Invokes a function in the JSON Graph object exposed by the <a href="DataSource.html">DataSource</a>.</p>
 </div>
 
 
@@ -595,7 +595,7 @@ namesAndRatings.subscribe(function(jsonEnvelope) {
 
             
 
-            <td class="description last">the path to the function to invoke</td>
+            <td class="description last"><p>the path to the function to invoke</p></td>
         </tr>
 
     
@@ -618,7 +618,7 @@ namesAndRatings.subscribe(function(jsonEnvelope) {
 
             
 
-            <td class="description last">the arguments to pass to the function</td>
+            <td class="description last"><p>the arguments to pass to the function</p></td>
         </tr>
 
     
@@ -641,7 +641,7 @@ namesAndRatings.subscribe(function(jsonEnvelope) {
 
             
 
-            <td class="description last">paths to retrieve from objects returned from the Function</td>
+            <td class="description last"><p>paths to retrieve from objects returned from the Function</p></td>
         </tr>
 
     
@@ -664,7 +664,7 @@ namesAndRatings.subscribe(function(jsonEnvelope) {
 
             
 
-            <td class="description last">paths to retrieve from function callee after successful Function execution</td>
+            <td class="description last"><p>paths to retrieve from function callee after successful Function execution</p></td>
         </tr>
 
     
@@ -732,7 +732,7 @@ namesAndRatings.subscribe(function(jsonEnvelope) {
 
         
 <div class="param-desc">
-    jsonGraphEnvelope the response returned from the server.
+    <p>jsonGraphEnvelope the response returned from the server.</p>
 </div>
 
 
@@ -843,7 +843,7 @@ source.call(
 
 
 <div class="description">
-    The DataSource interface includes a set method which can be called to modify a remote model. The set method accepts a <a href="global.html#JSONGraphEnvelope">JSONGraphEnvelope</a>, which includes an Array of <a href="global.html#Path">Path</a>s to set, and a fragment of <a href="global.html#JSONGraph">JSONGraph</a> containing the values to set for each <a href="global.html#Path">Path</a>. The set method returns an Observable.<JSONGraphraphEnvelope> which contains the response of the Remote model. The remote Model’s response contains values of each path after the set operation.  It is necessary to include these values, because set operations may not always be successful. Attempts to set invalid values may fail, or values maybe coerced into valid ranges.
+    <p>The DataSource interface includes a set method which can be called to modify a remote model. The set method accepts a <a href="global.html#JSONGraphEnvelope">JSONGraphEnvelope</a>, which includes an Array of <a href="global.html#Path">Path</a>s to set, and a fragment of <a href="global.html#JSONGraph">JSONGraph</a> containing the values to set for each <a href="global.html#Path">Path</a>. The set method returns an Observable.<JSONGraphraphEnvelope> which contains the response of the Remote model. The remote Model’s response contains values of each path after the set operation.  It is necessary to include these values, because set operations may not always be successful. Attempts to set invalid values may fail, or values maybe coerced into valid ranges.</p>
 </div>
 
 
@@ -895,7 +895,7 @@ source.call(
 
             
 
-            <td class="description last">the series of path and value pairs to set on the remote JSONGraph model.</td>
+            <td class="description last"><p>the series of path and value pairs to set on the remote JSONGraph model.</p></td>
         </tr>
 
     
@@ -963,7 +963,7 @@ source.call(
 
         
 <div class="param-desc">
-    the response returned from the server.
+    <p>the response returned from the server.</p>
 </div>
 
 

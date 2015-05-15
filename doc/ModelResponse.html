@@ -49,7 +49,7 @@
 
 
 <div class="description">
-    A ModelResponse is a container for the results of a get, set, or call operation performed on a Model. A ModelResponse can convert the data in the container into any of the following formats: JSON, <a href="global.html#JSONGraph">JSONGraph</a>, a stream of <a href="global.html#PathValue">PathValue</a>s, or a scalar value. Once the data format is determined, the ModelResponse container can be converted into any of the following container types: Observable (default), or a Promise. A ModelResponse can also push data to a node-style callback.
+    <p>A ModelResponse is a container for the results of a get, set, or call operation performed on a Model. A ModelResponse can convert the data in the container into any of the following formats: JSON, <a href="global.html#JSONGraph">JSONGraph</a>, a stream of <a href="global.html#PathValue">PathValue</a>s, or a scalar value. Once the data format is determined, the ModelResponse container can be converted into any of the following container types: Observable (default), or a Promise. A ModelResponse can also push data to a node-style callback.</p>
 </div>
 
 
@@ -264,7 +264,7 @@ modelResponse.toJSON().forEach(function(json) {
 
 
 <div class="description">
-    The forEach method triggers the execution of the Observable, causing the values within to be pushed to a callback. An Observable is like a pipe of water that is closed. When forEach is called, we open the valve and the values within are pushed at us.  These values can be received using either callbacks or an Observer object.
+    <p>The forEach method triggers the execution of the Observable, causing the values within to be pushed to a callback. An Observable is like a pipe of water that is closed. When forEach is called, we open the valve and the values within are pushed at us.  These values can be received using either callbacks or an Observer object.</p>
 </div>
 
 
@@ -328,7 +328,7 @@ modelResponse.toJSON().forEach(function(json) {
 
             
 
-            <td class="description last">a callback that accepts the next value in the stream of values.</td>
+            <td class="description last"><p>a callback that accepts the next value in the stream of values.</p></td>
         </tr>
 
     
@@ -361,7 +361,7 @@ modelResponse.toJSON().forEach(function(json) {
 
             
 
-            <td class="description last">a callback that accepts an error that occurred while evaluating the operation underlying the <a href="Observable.html">Observable</a> stream.</td>
+            <td class="description last"><p>a callback that accepts an error that occurred while evaluating the operation underlying the <a href="Observable.html">Observable</a> stream.</p></td>
         </tr>
 
     
@@ -394,7 +394,7 @@ modelResponse.toJSON().forEach(function(json) {
 
             
 
-            <td class="description last">a callback that is invoked the <a href="Observable.html">Observable</a> stream has ended, and the <a href="Observable.html#~onNextCallback">Observable~onNextCallback</a> will not receive any more values.</td>
+            <td class="description last"><p>a callback that is invoked the <a href="Observable.html">Observable</a> stream has ended, and the <a href="Observable.html#~onNextCallback">Observable~onNextCallback</a> will not receive any more values.</p></td>
         </tr>
 
     
@@ -496,10 +496,10 @@ modelResponse.toJSON().forEach(function(json) {
 
 
 <div class="description">
-    The progressive method retrieves several <a href="global.html#Path">Path</a>s or <a href="global.html#PathSet">PathSet</a>s from the JSONGraph object, and makes them
+    <p>The progressive method retrieves several <a href="global.html#Path">Path</a>s or <a href="global.html#PathSet">PathSet</a>s from the JSONGraph object, and makes them
 available in the local cache. Like the Model.prototype.getProgressively function, getProgressively invokes a 
 selector function every time is available, creating a stream of objects where each new object is a more populated version 
-of the one before. The getProgressively function is a memory-efficient alternative to the getProgressively function, because get does not convert the requested data from JSONGraph to JSON. Instead the getProgressively function attempts to ensure that the requested paths are locally available in the cache when it invokes a selector function. Within the selector function, data is synchronously retrieved from the local cache and translated into another form - usually a view object. Within the selector function you can use helper methods like getValueSync and setValueSync to synchronously retrieve data from the cache. These methods are only valid within the selector function, and will throw if executed anywhere else.
+of the one before. The getProgressively function is a memory-efficient alternative to the getProgressively function, because get does not convert the requested data from JSONGraph to JSON. Instead the getProgressively function attempts to ensure that the requested paths are locally available in the cache when it invokes a selector function. Within the selector function, data is synchronously retrieved from the local cache and translated into another form - usually a view object. Within the selector function you can use helper methods like getValueSync and setValueSync to synchronously retrieve data from the cache. These methods are only valid within the selector function, and will throw if executed anywhere else.</p>
 </div>
 
 
@@ -563,7 +563,7 @@ of the one before. The getProgressively function is a memory-efficient alternati
 
             
 
-            <td class="description last">the path(s) to retrieve</td>
+            <td class="description last"><p>the path(s) to retrieve</p></td>
         </tr>
 
     
@@ -594,7 +594,7 @@ of the one before. The getProgressively function is a memory-efficient alternati
 
             
 
-            <td class="description last">the callback that runs once all of the values have been loaded into cache</td>
+            <td class="description last"><p>the callback that runs once all of the values have been loaded into cache</p></td>
         </tr>
 
     
@@ -662,7 +662,7 @@ of the one before. The getProgressively function is a memory-efficient alternati
 
         
 <div class="param-desc">
-    the values found at the requested paths.
+    <p>the values found at the requested paths.</p>
 </div>
 
 
@@ -803,7 +803,7 @@ nameAndRatings.forEach(function(html) {
 
 
 <div class="description">
-    Converts the data format of the results to JSON.
+    <p>Converts the data format of the results to JSON.</p>
 </div>
 
 
@@ -874,7 +874,7 @@ nameAndRatings.forEach(function(html) {
 
         
 <div class="param-desc">
-    ModelResponse.<JSONEnvelope>
+    <p>ModelResponse.<JSONEnvelope></p>
 </div>
 
 
@@ -966,7 +966,7 @@ response.toJSON().forEach(function(jsonEnvelope) {
 
 
 <div class="description">
-    Converts the data format of the data returned in a Model Response to JSONGraph.
+    <p>Converts the data format of the data returned in a Model Response to JSONGraph.</p>
 </div>
 
 
@@ -1037,7 +1037,7 @@ response.toJSON().forEach(function(jsonEnvelope) {
 
         
 <div class="param-desc">
-    ModelResponse.<JSONGraphEnvelope>
+    <p>ModelResponse.<JSONGraphEnvelope></p>
 </div>
 
 
@@ -1139,7 +1139,7 @@ response.toJSONG().forEach(function(jsonGraphEnvelope) {
 
 
 <div class="description">
-    Converts the data format of the data in a JSONGraph Model response to a stream of path values.
+    <p>Converts the data format of the data in a JSONGraph Model response to a stream of path values.</p>
 </div>
 
 
@@ -1210,7 +1210,7 @@ response.toJSONG().forEach(function(jsonGraphEnvelope) {
 
         
 <div class="param-desc">
-    ModelResponse.<PathValue>
+    <p>ModelResponse.<PathValue></p>
 </div>
 
 

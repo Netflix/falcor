@@ -49,7 +49,7 @@
 
 
 <div class="description">
-    A Model object is used to execute commands against a <a href="global.html#JSONGraph">JSONGraph</a> object. <a href="Model.html">Model</a>s can work with a local JSONGraph cache, or it can work with a remote <a href="global.html#JSONGraph">JSONGraph</a> object through a <a href="DataSource.html">DataSource</a>.
+    <p>A Model object is used to execute commands against a <a href="global.html#JSONGraph">JSONGraph</a> object. <a href="Model.html">Model</a>s can work with a local JSONGraph cache, or it can work with a remote <a href="global.html#JSONGraph">JSONGraph</a> object through a <a href="DataSource.html">DataSource</a>.</p>
 </div>
 
 
@@ -113,7 +113,7 @@
 
             
 
-            <td class="description last">A set of options used to customize the behaviour of the <a href="Model.html">Model</a>.</td>
+            <td class="description last"><p>A set of options used to customize the behaviour of the <a href="Model.html">Model</a>.</p></td>
         </tr>
 
     
@@ -210,7 +210,7 @@
 
 
 <div class="description">
-    Returns a copy of the <a href="Model.html">Model</a> that attempts to batch concurrent requests of the same type. If two requests for different paths are made to a batched <a href="Model.html">Model</a> within a time slice defined by a Scheduler or a number of milliseconds, a single request for both paths will be made to the <a href="Model.html">Model</a>'s <a href="DataSource.html">DataSource</a>. If no scheduler or time is specified, the batch will be formed as soon as possible. Enabling batching on a <a href="Model.html">Model</a> can make more efficient use of the network by reducing the number of requests to the server.
+    <p>Returns a copy of the <a href="Model.html">Model</a> that attempts to batch concurrent requests of the same type. If two requests for different paths are made to a batched <a href="Model.html">Model</a> within a time slice defined by a Scheduler or a number of milliseconds, a single request for both paths will be made to the <a href="Model.html">Model</a>'s <a href="DataSource.html">DataSource</a>. If no scheduler or time is specified, the batch will be formed as soon as possible. Enabling batching on a <a href="Model.html">Model</a> can make more efficient use of the network by reducing the number of requests to the server.</p>
 </div>
 
 
@@ -265,7 +265,7 @@
 
             
 
-            <td class="description last">either a scheduler object that determines when a batch of requests is sent to a <a href="DataSource.html">DataSource</a>, or the number of milliseconds to spend collecting a batch before sending a request to the <a href="DataSource.html">DataSource</a>. If this parameter is omitted, then batch collection ends at the end of the next tick.</td>
+            <td class="description last"><p>either a scheduler object that determines when a batch of requests is sent to a <a href="DataSource.html">DataSource</a>, or the number of milliseconds to spend collecting a batch before sending a request to the <a href="DataSource.html">DataSource</a>. If this parameter is omitted, then batch collection ends at the end of the next tick.</p></td>
         </tr>
 
     
@@ -333,7 +333,7 @@
 
         
 <div class="param-desc">
-    a <a href="Model.html">Model</a> that batches requests of the same type and sends them to the data source together.
+    <p>a <a href="Model.html">Model</a> that batches requests of the same type and sends them to the data source together.</p>
 </div>
 
 
@@ -502,16 +502,14 @@ ratings.subscribe(function(jsonEnvelope) {
 
 
 <div class="description">
-    The bind method is metaphorically similar to binding a variable to an object within a JSON object.  Bind allows you to pass around references to objects within the JSONGraph without exposing the entire graph to application components. Binding Models also allows you to hide the location of a model within a JSON Graph from the components that are coupled to the model.
-
- The bind method creates a new <a href="Model.html">Model</a> that refers to the JSONGraph value found at a particular path. Binding is useful if multiple operations are going to be performed on the object found at one particular location in the JSONGraph Model. Once a Model is bound to a particular path in the JSON Graph, any paths evaluated on the Model will be relative to the bound path.
-
- The bind method accepts a path and returns an observable stream containing a single <a href="Model.html">Model</a> bound to that path.  If no object is found at the path, the observable stream will be empty.
+    <p>The bind method is metaphorically similar to binding a variable to an object within a JSON object.  Bind allows you to pass around references to objects within the JSONGraph without exposing the entire graph to application components. Binding Models also allows you to hide the location of a model within a JSON Graph from the components that are coupled to the model.</p>
+<p> The bind method creates a new <a href="Model.html">Model</a> that refers to the JSONGraph value found at a particular path. Binding is useful if multiple operations are going to be performed on the object found at one particular location in the JSONGraph Model. Once a Model is bound to a particular path in the JSON Graph, any paths evaluated on the Model will be relative to the bound path.</p>
+<p> The bind method accepts a path and returns an observable stream containing a single <a href="Model.html">Model</a> bound to that path.  If no object is found at the path, the observable stream will be empty.
  A bound <a href="Model.html">Model</a> begins evaluating paths at its bound path.  For example, if a <a href="Model.html">Model</a> is bound to 'genreLists[0]' and the path 'name' is requested from the Model, the path 'genreLists[0].name' is requested from the DataSource.
  When a <a href="Model.html">Model</a> is bound, one or more JSONGraph references may be encountered along the bound path.  When a JSONGraph reference is encountered while evaluating the bound path, the bound path prefix is replaced with the target of the reference.
- In other words, if a Model is bound to 'genreLists[0]' and the reference "listsById[49]" is discovered at the bound path, the bound path of the Model will be 'listsById[49]'.  A subsequent attempt to retrieve 'name' from the bound Model would send the path 'listsById[49].name' to the DataSource.
+ In other words, if a Model is bound to 'genreLists[0]' and the reference &quot;listsById[49]&quot; is discovered at the bound path, the bound path of the Model will be 'listsById[49]'.  A subsequent attempt to retrieve 'name' from the bound Model would send the path 'listsById[49].name' to the DataSource.
  It is necessary to provide the bind method with at least one additional path to a value beyond the bound path.  The reason for this is that while bind allows you to bind to a JSONGraph object, it is not possible to retrieve JSONGraph objects from a Model <a href="DataSource.html">DataSource</a>.
- Therefore in order to determine whether a JSONGraph object exists at the bound path, the model needs to be able to retrieve a value nested within the bound JSONGraph object from the DataSource.  All of the values specified beyond the bound path are guaranteed to be loaded into the model cache before the bound model is created.
+ Therefore in order to determine whether a JSONGraph object exists at the bound path, the model needs to be able to retrieve a value nested within the bound JSONGraph object from the DataSource.  All of the values specified beyond the bound path are guaranteed to be loaded into the model cache before the bound model is created.</p>
 </div>
 
 
@@ -573,7 +571,7 @@ ratings.subscribe(function(jsonEnvelope) {
 
             
 
-            <td class="description last">the path to the value to which the model should be bound.</td>
+            <td class="description last"><p>the path to the value to which the model should be bound.</p></td>
         </tr>
 
     
@@ -606,7 +604,7 @@ ratings.subscribe(function(jsonEnvelope) {
 
             
 
-            <td class="description last">paths to values to preload before Model is created. These paths are relative to the bound path.</td>
+            <td class="description last"><p>paths to values to preload before Model is created. These paths are relative to the bound path.</p></td>
         </tr>
 
     
@@ -674,7 +672,7 @@ ratings.subscribe(function(jsonEnvelope) {
 
         
 <div class="param-desc">
-    an Observable stream containing either the bound model, or nothing if no object was found at the bound path.
+    <p>an Observable stream containing either the bound model, or nothing if no object was found at the bound path.</p>
 </div>
 
 
@@ -786,12 +784,12 @@ model.
 
 
 <div class="description">
-    This method creates a new <a href="Model.html">Model</a> that refers to the object found at a particular path. Binding is useful if 
+    <p>This method creates a new <a href="Model.html">Model</a> that refers to the object found at a particular path. Binding is useful if 
 multiple operations are going to be performed on the object found at one particular location in the JSONGraph Model. 
 Once a Model is bound to a particular path in the JSON Graph, any paths evaluated on the Model will be relative to the 
 bound path.
 The bindSync method is metaphorically similar to assigning a variable to an object within a JSON object. This method can 
-only be invoked within a selector function, such as the one passed to Model.prototype.get.
+only be invoked within a selector function, such as the one passed to Model.prototype.get.</p>
 </div>
 
 
@@ -843,7 +841,7 @@ only be invoked within a selector function, such as the one passed to Model.prot
 
             
 
-            <td class="description last">the path to the object that the new Model should proxy.</td>
+            <td class="description last"><p>the path to the object that the new Model should proxy.</p></td>
         </tr>
 
     
@@ -1028,7 +1026,7 @@ nameAndRatings.forEach(function(html) {
 
 
 <div class="description">
-    Returns a copy of the <a href="Model.html">Model</a> that does not unbox Atom values values before returning them. Returning <a href="global.html#Atom">Atom</a>s, References, or Errors rather than their values allows any metadata attached to the value to be inspected.
+    <p>Returns a copy of the <a href="Model.html">Model</a> that does not unbox Atom values values before returning them. Returning <a href="global.html#Atom">Atom</a>s, References, or Errors rather than their values allows any metadata attached to the value to be inspected.</p>
 </div>
 
 
@@ -1106,7 +1104,7 @@ nameAndRatings.forEach(function(html) {
 
         
 <div class="param-desc">
-    a <a href="Model.html">Model</a> that returns sentinel values rather than the value inside them.
+    <p>a <a href="Model.html">Model</a> that returns sentinel values rather than the value inside them.</p>
 </div>
 
 
@@ -1164,7 +1162,7 @@ model.boxValues().getValue("user.name").subscribe(function(value) {
 
 
 <div class="description">
-    Invokes a Function in the JSONGraph model and returns the result in a <a href="ModelResponse.html">ModelResponse</a>.
+    <p>Invokes a Function in the JSONGraph model and returns the result in a <a href="ModelResponse.html">ModelResponse</a>.</p>
 </div>
 
 
@@ -1226,7 +1224,7 @@ model.boxValues().getValue("user.name").subscribe(function(value) {
 
             
 
-            <td class="description last">the path to the function to invoke</td>
+            <td class="description last"><p>the path to the function to invoke</p></td>
         </tr>
 
     
@@ -1257,7 +1255,7 @@ model.boxValues().getValue("user.name").subscribe(function(value) {
 
             
 
-            <td class="description last">the arguments to pass to the function</td>
+            <td class="description last"><p>the arguments to pass to the function</p></td>
         </tr>
 
     
@@ -1288,7 +1286,7 @@ model.boxValues().getValue("user.name").subscribe(function(value) {
 
             
 
-            <td class="description last">paths to retrieve from objects returned from the Function</td>
+            <td class="description last"><p>paths to retrieve from objects returned from the Function</p></td>
         </tr>
 
     
@@ -1321,7 +1319,7 @@ model.boxValues().getValue("user.name").subscribe(function(value) {
 
             
 
-            <td class="description last">paths to retrieve from function callee after successful Function execution</td>
+            <td class="description last"><p>paths to retrieve from function callee after successful Function execution</p></td>
         </tr>
 
     
@@ -1352,7 +1350,7 @@ model.boxValues().getValue("user.name").subscribe(function(value) {
 
             
 
-            <td class="description last">the selector function that retrieves the loaded data from the cache and converts it into the object that appears in the stream</td>
+            <td class="description last"><p>the selector function that retrieves the loaded data from the cache and converts it into the object that appears in the stream</p></td>
         </tr>
 
     
@@ -1420,7 +1418,7 @@ model.boxValues().getValue("user.name").subscribe(function(value) {
 
         
 <div class="param-desc">
-    either a ModelResponse containing the results of the call operation, or an Observable stream containing the results of the selector function if a selector function is provided.
+    <p>either a ModelResponse containing the results of the call operation, or an Observable stream containing the results of the selector function if a selector function is provided.</p>
 </div>
 
 
@@ -1545,9 +1543,9 @@ model.call(
 
 
 <div class="description">
-    The get method retrieves several <a href="global.html#Path">Path</a>s or <a href="global.html#PathSet">PathSet</a>s from a <a href="Model.html">Model</a>. The get method is versatile and may be called in several different ways, allowing you to make different trade-offs between performance and expressiveness. The simplest invocation returns an ModelResponse stream that contains a JSON object with all of the requested values. An optional selector function can also be passed in order to translate the retrieved data before it appears in the Observable stream. If a selector function is provided, the output will be an Observable stream with the result of the selector function invocation instead of a ModelResponse stream.
+    <p>The get method retrieves several <a href="global.html#Path">Path</a>s or <a href="global.html#PathSet">PathSet</a>s from a <a href="Model.html">Model</a>. The get method is versatile and may be called in several different ways, allowing you to make different trade-offs between performance and expressiveness. The simplest invocation returns an ModelResponse stream that contains a JSON object with all of the requested values. An optional selector function can also be passed in order to translate the retrieved data before it appears in the Observable stream. If a selector function is provided, the output will be an Observable stream with the result of the selector function invocation instead of a ModelResponse stream.
  If you intend to transform the JSON data into another form, specifying a selector function may be more efficient. The selector function is run once all of the requested path values are available. In the body of the selector function, you can read data from the Model's cache using Model.prototype.getValueSync and transform it directly into its final representation (ex. an HTML string). This technique can reduce allocations by preventing the get method from copying the data in <a href="Model.html">Model</a>'s cache into an intermediary JSON representation.
- Instead of directly accessing the cache within the selector function, you can optionally pass arguments to the selector function and they will be automatically bound to the corresponding <a href="global.html#Path">Path</a> or <a href="global.html#PathSet">PathSet</a> passed to the get method. If a <a href="global.html#Path">Path</a> is bound to a selector function argument, the function argument will contain the value found at that path. However if a <a href="global.html#PathSet">PathSet</a> is bound to a selector function argument, the function argument will be a JSON structure containing all of the path values. Using argument binding can provide a good balance between allocations and expressiveness. For more detail on how <a href="global.html#Path">Path</a>s and <a href="global.html#PathSet">PathSet</a>s are bound to selector function arguments, see the examples below.
+ Instead of directly accessing the cache within the selector function, you can optionally pass arguments to the selector function and they will be automatically bound to the corresponding <a href="global.html#Path">Path</a> or <a href="global.html#PathSet">PathSet</a> passed to the get method. If a <a href="global.html#Path">Path</a> is bound to a selector function argument, the function argument will contain the value found at that path. However if a <a href="global.html#PathSet">PathSet</a> is bound to a selector function argument, the function argument will be a JSON structure containing all of the path values. Using argument binding can provide a good balance between allocations and expressiveness. For more detail on how <a href="global.html#Path">Path</a>s and <a href="global.html#PathSet">PathSet</a>s are bound to selector function arguments, see the examples below.</p>
 </div>
 
 
@@ -1611,7 +1609,7 @@ model.call(
 
             
 
-            <td class="description last">the path(s) to retrieve</td>
+            <td class="description last"><p>the path(s) to retrieve</p></td>
         </tr>
 
     
@@ -1644,7 +1642,7 @@ model.call(
 
             
 
-            <td class="description last">the callback that runs once all of the values have been loaded into cache</td>
+            <td class="description last"><p>the callback that runs once all of the values have been loaded into cache</p></td>
         </tr>
 
     
@@ -1712,7 +1710,7 @@ model.call(
 
         
 <div class="param-desc">
-    the requested data as JSON, or the result of the optional selector function.
+    <p>the requested data as JSON, or the result of the optional selector function.</p>
 </div>
 
 
@@ -2208,9 +2206,9 @@ userHtml.subscribe(
 
 
 <div class="description">
-    Get the <a href="Model.html">Model</a>'s local cache as a <a href="global.html#JSONGraph">value</a>. This method can be a useful when storing state to 
+    <p>Get the <a href="Model.html">Model</a>'s local cache as a <a href="global.html#JSONGraph">value</a>. This method can be a useful when storing state to 
 local storage. This method accepts <a href="global.html#PathSet">PathSet</a>s to retrieve from the <a href="Model.html">Model</a> cache. If no paths are specified, 
-the entire cache is returned.
+the entire cache is returned.</p>
 </div>
 
 
@@ -2274,7 +2272,7 @@ the entire cache is returned.
 
             
 
-            <td class="description last">the path(s) to retrieve</td>
+            <td class="description last"><p>the path(s) to retrieve</p></td>
         </tr>
 
     
@@ -2342,7 +2340,7 @@ the entire cache is returned.
 
         
 <div class="param-desc">
-    jsonGraph a JSONGraph object to use as the local cache.
+    <p>jsonGraph a JSONGraph object to use as the local cache.</p>
 </div>
 
 
@@ -2381,9 +2379,9 @@ the entire cache is returned.
 
 
 <div class="description">
-    The getProgressively method retrieves several <a href="global.html#Path">Path</a>s or <a href="global.html#PathSet">PathSet</a>s from the JSONGraph object, and returns the requested data as an <a href="Observable.html">Observable</a> sequence of JSON tree. Returning the requested data as a JSON tree rather than a JSONGraph object makes it easy to send the data into a template. The method is called getProgressively because the JSON tree is progressively populated as data arrives. In this regard this method differs from the Model.prototype.get method, which waits until all the data is present before returning a result in the <a href="Observable.html">Observable</a> stream. Each time a new <a href="global.html#JSONGraphEnvelope">JSONGraphEnvelope</a> arrives, it is added to the tree, and the tree is added to the sequence again. This method is ideal if you want to render the data that is present in the local cache immediately and then rerender each time data arrives from the remote model on the server.
+    <p>The getProgressively method retrieves several <a href="global.html#Path">Path</a>s or <a href="global.html#PathSet">PathSet</a>s from the JSONGraph object, and returns the requested data as an <a href="Observable.html">Observable</a> sequence of JSON tree. Returning the requested data as a JSON tree rather than a JSONGraph object makes it easy to send the data into a template. The method is called getProgressively because the JSON tree is progressively populated as data arrives. In this regard this method differs from the Model.prototype.get method, which waits until all the data is present before returning a result in the <a href="Observable.html">Observable</a> stream. Each time a new <a href="global.html#JSONGraphEnvelope">JSONGraphEnvelope</a> arrives, it is added to the tree, and the tree is added to the sequence again. This method is ideal if you want to render the data that is present in the local cache immediately and then rerender each time data arrives from the remote model on the server.
 An optional selector function can be specified which receives an argument for each <a href="global.html#Path">Path</a> or <a href="global.html#PathSet">PathSet</a> passed to the method. For a PathSet, the value passed to the selector function will be a JSON value that starts at the first <a href="global.html#KeySet">KeySet</a> found in the <a href="global.html#PathSet">PathSet</a>. If a <a href="global.html#Path">Path</a> is passed, the value found at the path will be passed as the argument to the selector function.
-If an error is encountered when attempting to retrieve a <a href="global.html#Path">Path</a>, undefined is passed to the selector function in place of the <a href="global.html#Path">Path</a>'s value. If all attempts to retrieve <a href="global.html#Path">Path</a>s resulted in error, the selector function will not be invoked. Errors can be retrieved by passing an onError callback to the <a href="Observable.html">Observable</a>s forEach method. If multiple errors are encountered, a CompositeError object is sent.
+If an error is encountered when attempting to retrieve a <a href="global.html#Path">Path</a>, undefined is passed to the selector function in place of the <a href="global.html#Path">Path</a>'s value. If all attempts to retrieve <a href="global.html#Path">Path</a>s resulted in error, the selector function will not be invoked. Errors can be retrieved by passing an onError callback to the <a href="Observable.html">Observable</a>s forEach method. If multiple errors are encountered, a CompositeError object is sent.</p>
 </div>
 
 
@@ -2447,7 +2445,7 @@ If an error is encountered when attempting to retrieve a <a href="global.html#Pa
 
             
 
-            <td class="description last">the path(s) to retrieve</td>
+            <td class="description last"><p>the path(s) to retrieve</p></td>
         </tr>
 
     
@@ -2480,7 +2478,7 @@ If an error is encountered when attempting to retrieve a <a href="global.html#Pa
 
             
 
-            <td class="description last">an optional selector function that receives an argument for each specified PathSet. Each argument contains the value of that PathSet.</td>
+            <td class="description last"><p>an optional selector function that receives an argument for each specified PathSet. Each argument contains the value of that PathSet.</p></td>
         </tr>
 
     
@@ -2695,7 +2693,7 @@ nameAndRatings.forEach(function(data) {
 
 
 <div class="description">
-    The getValue method retrieves a single <a href="global.html#Path">Path</a> from a <a href="Model.html">Model</a>.
+    <p>The getValue method retrieves a single <a href="global.html#Path">Path</a> from a <a href="Model.html">Model</a>.</p>
 </div>
 
 
@@ -2747,7 +2745,7 @@ nameAndRatings.forEach(function(data) {
 
             
 
-            <td class="description last">the path to retrieve</td>
+            <td class="description last"><p>the path to retrieve</p></td>
         </tr>
 
     
@@ -2815,7 +2813,7 @@ nameAndRatings.forEach(function(data) {
 
         
 <div class="param-desc">
-    the requested value.
+    <p>the requested value.</p>
 </div>
 
 
@@ -2861,8 +2859,8 @@ model.
 
 
 <div class="description">
-    Synchronously retrieves a single value from the local cache. This method can only be invoked within a selector function passed to get, getProgressively, or call. For more information on the correct usage of this method see Model.prototype.get.
-The getValueSync method differs from the asynchronous get methods (ex. get, getValues) in that it can be used to retrieve objects in addition to JSONGraph values.
+    <p>Synchronously retrieves a single value from the local cache. This method can only be invoked within a selector function passed to get, getProgressively, or call. For more information on the correct usage of this method see Model.prototype.get.
+The getValueSync method differs from the asynchronous get methods (ex. get, getValues) in that it can be used to retrieve objects in addition to JSONGraph values.</p>
 </div>
 
 
@@ -2914,7 +2912,7 @@ The getValueSync method differs from the asynchronous get methods (ex. get, getV
 
             
 
-            <td class="description last">the path(s) to retrieve synchronously from the local cache.</td>
+            <td class="description last"><p>the path(s) to retrieve synchronously from the local cache.</p></td>
         </tr>
 
     
@@ -2982,7 +2980,7 @@ The getValueSync method differs from the asynchronous get methods (ex. get, getV
 
         
 <div class="param-desc">
-    the value found at the path.
+    <p>the value found at the path.</p>
 </div>
 
 
@@ -3015,7 +3013,7 @@ The getValueSync method differs from the asynchronous get methods (ex. get, getV
 
 
 <div class="description">
-    Returns a copy of the <a href="Model.html">Model</a> does not allow synchronous access to the cache outside of a selector function. In safe mode, Model.prototype.getValueSync, Model.prototype.setValueSync, and Model.prototype.bind is only allowed within the selector functions passed to Model methods. Selector functions are guaranteed to execute once the requested data has been downloaded into the cache, and therefore allowing synchronous access to the Model's cache is safe. Outside of a selector function, synchronous access to the cache is inherently unsafe as there is no way of knowing whether data is undefined or simply not present in the cache at the moment. In safe mode (the default) an attempt to synchronously acces cache data outside of a selector method will throw.
+    <p>Returns a copy of the <a href="Model.html">Model</a> does not allow synchronous access to the cache outside of a selector function. In safe mode, Model.prototype.getValueSync, Model.prototype.setValueSync, and Model.prototype.bind is only allowed within the selector functions passed to Model methods. Selector functions are guaranteed to execute once the requested data has been downloaded into the cache, and therefore allowing synchronous access to the Model's cache is safe. Outside of a selector function, synchronous access to the cache is inherently unsafe as there is no way of knowing whether data is undefined or simply not present in the cache at the moment. In safe mode (the default) an attempt to synchronously acces cache data outside of a selector method will throw.</p>
 </div>
 
 
@@ -3086,7 +3084,7 @@ The getValueSync method differs from the asynchronous get methods (ex. get, getV
 
         
 <div class="param-desc">
-    a <a href="Model.html">Model</a> that throws if an attempt is made to synchronously access the cache outside of a selector function.
+    <p>a <a href="Model.html">Model</a> that throws if an attempt is made to synchronously access the cache outside of a selector function.</p>
 </div>
 
 
@@ -3119,7 +3117,7 @@ The getValueSync method differs from the asynchronous get methods (ex. get, getV
 
 
 <div class="description">
-    Sets the value at one or more places in the JSONGraph model. The set method accepts one or more <a href="global.html#PathValue">PathValue</a>s, each of which is a combination of a location in the document and the value to place there.  In addition to accepting  <a href="global.html#PathValue">PathValue</a>s, the set method also returns the values after the set operation is complete.
+    <p>Sets the value at one or more places in the JSONGraph model. The set method accepts one or more <a href="global.html#PathValue">PathValue</a>s, each of which is a combination of a location in the document and the value to place there.  In addition to accepting  <a href="global.html#PathValue">PathValue</a>s, the set method also returns the values after the set operation is complete.</p>
 </div>
 
 
@@ -3189,7 +3187,7 @@ The getValueSync method differs from the asynchronous get methods (ex. get, getV
 
             
 
-            <td class="description last">A value or collection of values to set into the Model.</td>
+            <td class="description last"><p>A value or collection of values to set into the Model.</p></td>
         </tr>
 
     
@@ -3257,7 +3255,7 @@ The getValueSync method differs from the asynchronous get methods (ex. get, getV
 
         
 <div class="param-desc">
-    an <a href="Observable.html">Observable</a> stream containing the values in the JSONGraph model after the set was attempted.
+    <p>an <a href="Observable.html">Observable</a> stream containing the values in the JSONGraph model after the set was attempted.</p>
 </div>
 
 
@@ -3360,7 +3358,7 @@ pathValues.forEach(function(pathValue) {
 
 
 <div class="description">
-    Set the <a href="Model.html">Model</a>'s local cache to a JSONGraph value. This method can be a useful way of mocking a remote document, or restoring state previously saved to local storage.
+    <p>Set the <a href="Model.html">Model</a>'s local cache to a JSONGraph value. This method can be a useful way of mocking a remote document, or restoring state previously saved to local storage.</p>
 </div>
 
 
@@ -3412,7 +3410,7 @@ pathValues.forEach(function(pathValue) {
 
             
 
-            <td class="description last">a JSONGraph object to use as the local cache.</td>
+            <td class="description last"><p>a JSONGraph object to use as the local cache.</p></td>
         </tr>
 
     
@@ -3593,9 +3591,9 @@ nameAndRatings.forEach(function(html) {
 
 
 <div class="description">
-    Returns a copy of the <a href="Model.html">Model</a> that unboxes treats errors as values. This means that the <a href="Model.html">Model</a> will report 
+    <p>Returns a copy of the <a href="Model.html">Model</a> that unboxes treats errors as values. This means that the <a href="Model.html">Model</a> will report 
 errors in the same callback used to report data. Errors will appear as objects in responses, rather than being sent to 
-the <a href="Observable.html#~onErrorCallback">Observable~onErrorCallback</a> callback of the <a href="ModelResponse.html">ModelResponse</a>.
+the <a href="Observable.html#~onErrorCallback">Observable~onErrorCallback</a> callback of the <a href="ModelResponse.html">ModelResponse</a>.</p>
 </div>
 
 
@@ -3666,7 +3664,7 @@ the <a href="Observable.html#~onErrorCallback">Observable~onErrorCallback</a> ca
 
         
 <div class="param-desc">
-    a <a href="Model.html">Model</a> that the values inside of <a href="global.html#Atom">Atom</a>s rather than the sentinel instances themselves.
+    <p>a <a href="Model.html">Model</a> that the values inside of <a href="global.html#Atom">Atom</a>s rather than the sentinel instances themselves.</p>
 </div>
 
 
@@ -3699,7 +3697,7 @@ the <a href="Observable.html#~onErrorCallback">Observable~onErrorCallback</a> ca
 
 
 <div class="description">
-    Returns a copy of the <a href="Model.html">Model</a> that never attempts to batch concurrent requests of the same type. If two concurrent requests for different paths are made to an unbatched <a href="Model.html">Model</a>, two seperate requests will be made to the <a href="Model.html">Model</a>'s <a href="DataSource.html">DataSource</a> if they cannot be served from the local cache. This mode is the default.
+    <p>Returns a copy of the <a href="Model.html">Model</a> that never attempts to batch concurrent requests of the same type. If two concurrent requests for different paths are made to an unbatched <a href="Model.html">Model</a>, two seperate requests will be made to the <a href="Model.html">Model</a>'s <a href="DataSource.html">DataSource</a> if they cannot be served from the local cache. This mode is the default.</p>
 </div>
 
 
@@ -3770,7 +3768,7 @@ the <a href="Observable.html#~onErrorCallback">Observable~onErrorCallback</a> ca
 
         
 <div class="param-desc">
-    a <a href="Model.html">Model</a> that batches requests of the same type and sends them to the data source together.
+    <p>a <a href="Model.html">Model</a> that batches requests of the same type and sends them to the data source together.</p>
 </div>
 
 
@@ -3959,7 +3957,7 @@ ratings.subscribe(function(jsonEnvelope) {
 
 
 <div class="description">
-    Returns a copy of the <a href="Model.html">Model</a> that unboxes <a href="global.html#Atom">Atom</a> values before returning them. By default <a href="Model.html">Model</a>s unbox values before returning them.
+    <p>Returns a copy of the <a href="Model.html">Model</a> that unboxes <a href="global.html#Atom">Atom</a> values before returning them. By default <a href="Model.html">Model</a>s unbox values before returning them.</p>
 </div>
 
 
@@ -4037,7 +4035,7 @@ ratings.subscribe(function(jsonEnvelope) {
 
         
 <div class="param-desc">
-    a <a href="Model.html">Model</a> that the values inside of <a href="global.html#Atom">Atom</a>s rather than the sentinel instances themselves.
+    <p>a <a href="Model.html">Model</a> that the values inside of <a href="global.html#Atom">Atom</a>s rather than the sentinel instances themselves.</p>
 </div>
 
 
@@ -4095,7 +4093,7 @@ model.unboxValues().getValue("user.name").subscribe(function(value) {
 
 
 <div class="description">
-    Returns a copy of the <a href="Model.html">Model</a> that allows synchronous access to the cache outside of a selector function. In safe mode, Model.prototype.getValueSync, Model.prototype.setValueSync, and Model.prototype.bind is only allowed within the selector functions passed to Model methods. Selector functions are guaranteed to execute once the requested data has been downloaded into the cache, and therefore allowing synchronous access to the Model's cache is safe. Outside of a selector function, synchronous access to the cache is inherently unsafe as there is no way of knowing whether data is undefined or simply not present in the cache at the moment. In unsafe mode an attempt to synchronously acces cache data outside of a selector method will not throw. This API is inherently unsafe and should only be used if you know what you're doing.
+    <p>Returns a copy of the <a href="Model.html">Model</a> that allows synchronous access to the cache outside of a selector function. In safe mode, Model.prototype.getValueSync, Model.prototype.setValueSync, and Model.prototype.bind is only allowed within the selector functions passed to Model methods. Selector functions are guaranteed to execute once the requested data has been downloaded into the cache, and therefore allowing synchronous access to the Model's cache is safe. Outside of a selector function, synchronous access to the cache is inherently unsafe as there is no way of knowing whether data is undefined or simply not present in the cache at the moment. In unsafe mode an attempt to synchronously acces cache data outside of a selector method will not throw. This API is inherently unsafe and should only be used if you know what you're doing.</p>
 </div>
 
 
@@ -4166,7 +4164,7 @@ model.unboxValues().getValue("user.name").subscribe(function(value) {
 
         
 <div class="param-desc">
-    a <a href="Model.html">Model</a> that does not throw if an attempt is made to synchronously access the cache outside of a selector function.
+    <p>a <a href="Model.html">Model</a> that does not throw if an attempt is made to synchronously access the cache outside of a selector function.</p>
 </div>
 
 
@@ -4199,7 +4197,7 @@ model.unboxValues().getValue("user.name").subscribe(function(value) {
 
 
 <div class="description">
-    Returns a copy of the <a href="Model.html">Model</a> that uses only the data in the local cache. The new <a href="Model.html">Model</a> never makes a request to a remote JSONGraph model using a <a href="DataSource.html">DataSource</a> if data cannot be found in the local cache.
+    <p>Returns a copy of the <a href="Model.html">Model</a> that uses only the data in the local cache. The new <a href="Model.html">Model</a> never makes a request to a remote JSONGraph model using a <a href="DataSource.html">DataSource</a> if data cannot be found in the local cache.</p>
 </div>
 
 
@@ -4270,7 +4268,7 @@ model.unboxValues().getValue("user.name").subscribe(function(value) {
 
         
 <div class="param-desc">
-    a <a href="Model.html">Model</a> that uses only the data in the local cache, and never makes a request to a remote JSONGraph model if data cannot be found locally.
+    <p>a <a href="Model.html">Model</a> that uses only the data in the local cache, and never makes a request to a remote JSONGraph model if data cannot be found locally.</p>
 </div>
 
 
@@ -4309,7 +4307,7 @@ model.unboxValues().getValue("user.name").subscribe(function(value) {
 
 
 <div class="description">
-    The <a href="Model.html">Model</a>'s error selector is applied to any errors that occur during Model operations.  The return value of the error selector is substituted for the input error, giving clients the opportunity to translate error objects before they are returned from the <a href="Model.html">Model</a>.
+    <p>The <a href="Model.html">Model</a>'s error selector is applied to any errors that occur during Model operations.  The return value of the error selector is substituted for the input error, giving clients the opportunity to translate error objects before they are returned from the <a href="Model.html">Model</a>.</p>
 </div>
 
 
@@ -4361,7 +4359,7 @@ model.unboxValues().getValue("user.name").subscribe(function(value) {
 
             
 
-            <td class="description last">the requested path at which the error was found.</td>
+            <td class="description last"><p>the requested path at which the error was found.</p></td>
         </tr>
 
     
@@ -4429,7 +4427,7 @@ model.unboxValues().getValue("user.name").subscribe(function(value) {
 
         
 <div class="param-desc">
-    the translated error object.
+    <p>the translated error object.</p>
 </div>
 
 

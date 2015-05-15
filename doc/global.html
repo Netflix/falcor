@@ -108,18 +108,15 @@
 
 
 <div class="description">
-    In addition to the usual JSON value types (string, number, boolean), <a href="global.html#JSONGraph">JSONGraph</a> introduces three additional value types: ref, error, and atom. An Atom "boxes" a value, causing that value to be treated as atomic regardless of whether it is a JSON value or a JSON object like a Map or an Array. Atoms behave like values, meaning they are always returned whole and must be replaced completely. 
-
- In addition to being treated as values by Models, the values within Atoms are automatically "unboxed" when retrieved from a Model. This means that if a Model encounters an Atom while evaluating a path, the Model returns the Atom's value instead of the entire Atom object.
-
-```JavaScript
-var model = new falcor.Model({
+    <p>In addition to the usual JSON value types (string, number, boolean), <a href="global.html#JSONGraph">JSONGraph</a> introduces three additional value types: ref, error, and atom. An Atom &quot;boxes&quot; a value, causing that value to be treated as atomic regardless of whether it is a JSON value or a JSON object like a Map or an Array. Atoms behave like values, meaning they are always returned whole and must be replaced completely. </p>
+<p> In addition to being treated as values by Models, the values within Atoms are automatically &quot;unboxed&quot; when retrieved from a Model. This means that if a Model encounters an Atom while evaluating a path, the Model returns the Atom's value instead of the entire Atom object.</p>
+<pre class="prettyprint source lang-JavaScript"><code>var model = new falcor.Model({
     cache: {
         titlesById: {
             99: {
-                name: "House of Cards",
+                name: &quot;House of Cards&quot;,
                 rating: {
-                    $type: "atom", 
+                    $type: &quot;atom&quot;, 
                     value: 5
                 }
             }
@@ -127,24 +124,19 @@ var model = new falcor.Model({
     }
 });
 
-// The following code prints 5 to the console instead of {$type: "atom", value: 5}, because the value of the Atom is unboxed before being returned by the Model.
+// The following code prints 5 to the console instead of {$type: &quot;atom&quot;, value: 5}, because the value of the Atom is unboxed before being returned by the Model.
 model.
     getValue('titlesById[99].rating').
-    then(function(rating) { console.log(rating); });
-```
-
-JSON Objects and Arrays boxed in Atoms are treated as atomic values by the Model, just like strings, numbers, and booleans. Boxing JSON objects in Atoms allows you to ensure that a JSON Object or Array will always be returned from the Model (and by extension the server) in their entirety. 
-
-In the example below the array of a Netflix title's supported languages are boxed in an Atom, ensuring that they are always returned whole from the Model.
-```JavaScript
-var model = new falcor.Model({
+    then(function(rating) { console.log(rating); });</code></pre><p>JSON Objects and Arrays boxed in Atoms are treated as atomic values by the Model, just like strings, numbers, and booleans. Boxing JSON objects in Atoms allows you to ensure that a JSON Object or Array will always be returned from the Model (and by extension the server) in their entirety. </p>
+<p>In the example below the array of a Netflix title's supported languages are boxed in an Atom, ensuring that they are always returned whole from the Model.</p>
+<pre class="prettyprint source lang-JavaScript"><code>var model = new falcor.Model({
     cache: {
         titlesById: {
             99: {
-                name: "House of Cards",
+                name: &quot;House of Cards&quot;,
                 supportedLanguages: {
-                    $type: "atom", 
-                    value: ["en", "fr"]
+                    $type: &quot;atom&quot;, 
+                    value: [&quot;en&quot;, &quot;fr&quot;]
                 }
             }
         }
@@ -161,7 +153,7 @@ model.
 //     json: {
 //         titlesById: {
 //            99: {
-//                 supportedLanguages: ["en", "fr"]
+//                 supportedLanguages: [&quot;en&quot;, &quot;fr&quot;]
 //            }
 //         }
 //     }
@@ -169,19 +161,14 @@ model.
 
 // Note that entire supported language array was retrieved rather
 // than the first item in the array, because the Model treats the 
-// values of an atom as atomic.
-```
-
-In addition to being used to force Model's to treat JSON objects and Array as atomic values, Atoms can be used to associate metadata with a value. As Atoms are maps, they can include metadata keys that can be used by Falcor Models or Applications to influence the way values are handled once downloaded to the client. In the example below, we use an atom to set a cache expiration time for the rating of a Netflix title. 
-
-```JavaScript
-var model = new falcor.Model({
+// values of an atom as atomic.</code></pre><p>In addition to being used to force Model's to treat JSON objects and Array as atomic values, Atoms can be used to associate metadata with a value. As Atoms are maps, they can include metadata keys that can be used by Falcor Models or Applications to influence the way values are handled once downloaded to the client. In the example below, we use an atom to set a cache expiration time for the rating of a Netflix title. </p>
+<pre class="prettyprint source lang-JavaScript"><code>var model = new falcor.Model({
     cache: {
         titlesById: {
             99: {
-                name: "House of Cards",
+                name: &quot;House of Cards&quot;,
                 rating: {
-                    $type: "atom", 
+                    $type: &quot;atom&quot;, 
                     value: 5, 
                     // expires two seconds from now
                     $expires: -2000
@@ -191,7 +178,7 @@ var model = new falcor.Model({
     }
 });
 
-// prints "5"
+// prints &quot;5&quot;
 model.
     getValue('titlesById[99].rating').
     then(function(rating) { console.log(rating); });
@@ -201,20 +188,15 @@ setTimeout(function() {
     model.
         getValue('titlesById[99].rating').
         then(function(rating) { console.log(rating); });
-        
-}, 3000);
-```
 
-If you wish to turn off unboxing behavior and retrieve the Atom from a Model, you can use {@Model.prototype.boxValues}.
-
-```JavaScript
-var model = new falcor.Model({
+}, 3000);</code></pre><p>If you wish to turn off unboxing behavior and retrieve the Atom from a Model, you can use {@Model.prototype.boxValues}.</p>
+<pre class="prettyprint source lang-JavaScript"><code>var model = new falcor.Model({
     cache: {
         titlesById: {
             99: {
-                name: "House of Cards",
+                name: &quot;House of Cards&quot;,
                 rating: {
-                    $type: "atom", 
+                    $type: &quot;atom&quot;, 
                     value: 5
                 }
             }
@@ -222,14 +204,12 @@ var model = new falcor.Model({
     }
 });
 
-// The following code prints {$type: "atom", value: 5}, because
+// The following code prints {$type: &quot;atom&quot;, value: 5}, because
 // because the Atom value is unboxed before the Model returns it.
 model.
     boxValues().
     getValue('titlesById[99].rating').
-    then(function(rating) { console.log(JSON.stringify(rating)); });
-
-```
+    then(function(rating) { console.log(JSON.stringify(rating)); });</code></pre>
 </div>
 
 
@@ -290,7 +270,7 @@ model.
 
             
 
-            <td class="description last">A $type property with a value of "atom".</td>
+            <td class="description last"><p>A $type property with a value of &quot;atom&quot;.</p></td>
         </tr>
 
     
@@ -313,7 +293,7 @@ model.
 
             
 
-            <td class="description last">The value wrapped by the Atom.</td>
+            <td class="description last"><p>The value wrapped by the Atom.</p></td>
         </tr>
 
     
@@ -409,7 +389,7 @@ model.getValue(["user", "name"]).subscribe(function(value) {
 
 
 <div class="description">
-    A JSONEnvelope is an envelope that wraps a JSON fragment. In addition to <a href="global.html#PathValue">PathValue</a>s and <a href="global.html#JSONGraphEnvelope">JSONGraphEnvelope</a>s, <a href="Model.html">Model</a>s can accept and return JSONEnvelopes. In addition to a JSON fragment, a <a href="global.html#JSONEnvelope">JSONEnvelope</a> may contain an array of errors that occurred while an operation was being executed on a JSON Model. In the event a function was executed on a Model, the JSONEnvelope may also contain a list of paths to invalidate in the <a href="Model.html">Model</a>'s local cache.
+    <p>A JSONEnvelope is an envelope that wraps a JSON fragment. In addition to <a href="global.html#PathValue">PathValue</a>s and <a href="global.html#JSONGraphEnvelope">JSONGraphEnvelope</a>s, <a href="Model.html">Model</a>s can accept and return JSONEnvelopes. In addition to a JSON fragment, a <a href="global.html#JSONEnvelope">JSONEnvelope</a> may contain an array of errors that occurred while an operation was being executed on a JSON Model. In the event a function was executed on a Model, the JSONEnvelope may also contain a list of paths to invalidate in the <a href="Model.html">Model</a>'s local cache.</p>
 </div>
 
 
@@ -480,7 +460,7 @@ model.getValue(["user", "name"]).subscribe(function(value) {
 
             
 
-            <td class="description last">The paths to the values stored in the JSON fragment.</td>
+            <td class="description last"><p>The paths to the values stored in the JSON fragment.</p></td>
         </tr>
 
     
@@ -509,7 +489,7 @@ model.getValue(["user", "name"]).subscribe(function(value) {
 
             
 
-            <td class="description last">a JSON object containing all of the values.</td>
+            <td class="description last"><p>a JSON object containing all of the values.</p></td>
         </tr>
 
     
@@ -540,7 +520,7 @@ model.getValue(["user", "name"]).subscribe(function(value) {
 
             
 
-            <td class="description last">one or more errors that occurred while evaluating paths on a <a href="Model.html">Model</a>.</td>
+            <td class="description last"><p>one or more errors that occurred while evaluating paths on a <a href="Model.html">Model</a>.</p></td>
         </tr>
 
     
@@ -571,7 +551,7 @@ model.getValue(["user", "name"]).subscribe(function(value) {
 
             
 
-            <td class="description last">the paths to be removed from the <a href="Model.html">Model</a>'s local cache.</td>
+            <td class="description last"><p>the paths to be removed from the <a href="Model.html">Model</a>'s local cache.</p></td>
         </tr>
 
     
@@ -634,7 +614,7 @@ model.getValue(["user", "name"]).subscribe(function(value) {
 
 
 <div class="description">
-    JavaScript Object Notation Graph (JSONGraph) is a notation for expressing graphs in JSON. JSON is a hierarchical data format, capable of modeling trees. Here's an example of a JSON document containing a list of genres, each containing a list of titles:
+    <p>JavaScript Object Notation Graph (JSONGraph) is a notation for expressing graphs in JSON. JSON is a hierarchical data format, capable of modeling trees. Here's an example of a JSON document containing a list of genres, each containing a list of titles:</p>
 </div>
 
 
@@ -751,7 +731,7 @@ model.getValue(["user", "name"]).subscribe(function(value) {
 
 
 <div class="description">
-    A JSONGraphEnvelope is an envelope that wraps a JSONGraph fragment. In addition to <a href="global.html#PathValue">PathValue</a>s and <a href="global.html#JSONEnvelope">JSONEnvelope</a>s, <a href="Model.html">Model</a>s can accept and return JSONGraphEnvelopes. In addition to a JSONGraph fragment, a <a href="global.html#JSONGraphEnvelope">JSONGraphEnvelope</a> may contain an array of errors that occurred while an operation was being executed on a JSONGraph Model. In the event a function was executed on a Model, the JSONGraphEnvelope may also contain a list of paths to invalidate in the <a href="Model.html">Model</a>'s local cache.
+    <p>A JSONGraphEnvelope is an envelope that wraps a JSONGraph fragment. In addition to <a href="global.html#PathValue">PathValue</a>s and <a href="global.html#JSONEnvelope">JSONEnvelope</a>s, <a href="Model.html">Model</a>s can accept and return JSONGraphEnvelopes. In addition to a JSONGraph fragment, a <a href="global.html#JSONGraphEnvelope">JSONGraphEnvelope</a> may contain an array of errors that occurred while an operation was being executed on a JSONGraph Model. In the event a function was executed on a Model, the JSONGraphEnvelope may also contain a list of paths to invalidate in the <a href="Model.html">Model</a>'s local cache.</p>
 </div>
 
 
@@ -822,7 +802,7 @@ model.getValue(["user", "name"]).subscribe(function(value) {
 
             
 
-            <td class="description last">The paths to the values stored in the JSONGraph fragment.</td>
+            <td class="description last"><p>The paths to the values stored in the JSONGraph fragment.</p></td>
         </tr>
 
     
@@ -851,7 +831,7 @@ model.getValue(["user", "name"]).subscribe(function(value) {
 
             
 
-            <td class="description last">a JSONGraph object containing all of the values.</td>
+            <td class="description last"><p>a JSONGraph object containing all of the values.</p></td>
         </tr>
 
     
@@ -882,7 +862,7 @@ model.getValue(["user", "name"]).subscribe(function(value) {
 
             
 
-            <td class="description last">one or more errors that occurred while evaluating paths on a <a href="Model.html">Model</a>.</td>
+            <td class="description last"><p>one or more errors that occurred while evaluating paths on a <a href="Model.html">Model</a>.</p></td>
         </tr>
 
     
@@ -913,7 +893,7 @@ model.getValue(["user", "name"]).subscribe(function(value) {
 
             
 
-            <td class="description last">the paths to be removed from the <a href="Model.html">Model</a>'s local cache.</td>
+            <td class="description last"><p>the paths to be removed from the <a href="Model.html">Model</a>'s local cache.</p></td>
         </tr>
 
     
@@ -976,7 +956,7 @@ model.getValue(["user", "name"]).subscribe(function(value) {
 
 
 <div class="description">
-    <a href="global.html#Key">Key</a>s are values that can be included in <a href="global.html#Path">Path</a> expressions. A Key can be any JSON value type including a string, number, boolean, or null. When evaluated all keys are coerced to strings except null. This means that looking up the number 1 and the string "1" will have the same effect. All strings are allowed with the exception of those beginning with "__", which are illegal to use as key names in a JSONGraph model.
+    <p><a href="global.html#Key">Key</a>s are values that can be included in <a href="global.html#Path">Path</a> expressions. A Key can be any JSON value type including a string, number, boolean, or null. When evaluated all keys are coerced to strings except null. This means that looking up the number 1 and the string &quot;1&quot; will have the same effect. All strings are allowed with the exception of those beginning with &quot;__&quot;, which are illegal to use as key names in a JSONGraph model.</p>
 </div>
 
 
@@ -1057,7 +1037,7 @@ model.getValue(["user", "name"]).subscribe(function(value) {
 
 
 <div class="description">
-    <a href="global.html#KeySet">KeySet</a>s are included inside of <a href="global.html#PathSet">PathSet</a> expressions. A <a href="global.html#KeySet">KeySet</a> can either be a <a href="global.html#Key">Key</a>, a <a href="global.html#Range">Range</a>, or an Array of either.
+    <p><a href="global.html#KeySet">KeySet</a>s are included inside of <a href="global.html#PathSet">PathSet</a> expressions. A <a href="global.html#KeySet">KeySet</a> can either be a <a href="global.html#Key">Key</a>, a <a href="global.html#Range">Range</a>, or an Array of either.</p>
 </div>
 
 
@@ -1135,7 +1115,7 @@ model.getValue(["user", "name"]).subscribe(function(value) {
 
 
 <div class="description">
-    A set of options used to customize the behaviour of the <a href="Model.html">Model</a>.
+    <p>A set of options used to customize the behaviour of the <a href="Model.html">Model</a>.</p>
 </div>
 
 
@@ -1206,7 +1186,7 @@ model.getValue(["user", "name"]).subscribe(function(value) {
 
             
 
-            <td class="description last">the DataSource the Model uses to access the JSONGraph object.</td>
+            <td class="description last"><p>the DataSource the Model uses to access the JSONGraph object.</p></td>
         </tr>
 
     
@@ -1237,7 +1217,7 @@ model.getValue(["user", "name"]).subscribe(function(value) {
 
             
 
-            <td class="description last">the initial state of the Model cache.</td>
+            <td class="description last"><p>the initial state of the Model cache.</p></td>
         </tr>
 
     
@@ -1268,7 +1248,7 @@ model.getValue(["user", "name"]).subscribe(function(value) {
 
             
 
-            <td class="description last">the maximum size of the cache.</td>
+            <td class="description last"><p>the maximum size of the cache.</p></td>
         </tr>
 
     
@@ -1299,7 +1279,7 @@ model.getValue(["user", "name"]).subscribe(function(value) {
 
             
 
-            <td class="description last">the ratio of the maximum size to collect when the maximum size is exceeded.</td>
+            <td class="description last"><p>the ratio of the maximum size to collect when the maximum size is exceeded.</p></td>
         </tr>
 
     
@@ -1330,7 +1310,7 @@ model.getValue(["user", "name"]).subscribe(function(value) {
 
             
 
-            <td class="description last">A function used to translate errors that occur during <a href="Model.html">Model</a> operations before they are returned from the <a href="Model.html">Model</a>.</td>
+            <td class="description last"><p>A function used to translate errors that occur during <a href="Model.html">Model</a> operations before they are returned from the <a href="Model.html">Model</a>.</p></td>
         </tr>
 
     
@@ -1393,7 +1373,7 @@ model.getValue(["user", "name"]).subscribe(function(value) {
 
 
 <div class="description">
-    <a href="global.html#Path">Path</a>s are an ordered list of keys describing a location in a JSONGraph model. Paths can be provided to <a href="Model.html">Model</a>s to describe the location of data in the JSONGraph model. <a href="Model.html">Model</a>s also emit <a href="global.html#Path">Path</a> objects alongside values retrieved from the JSONGraph model in order to provide additional context.
+    <p><a href="global.html#Path">Path</a>s are an ordered list of keys describing a location in a JSONGraph model. Paths can be provided to <a href="Model.html">Model</a>s to describe the location of data in the JSONGraph model. <a href="Model.html">Model</a>s also emit <a href="global.html#Path">Path</a> objects alongside values retrieved from the JSONGraph model in order to provide additional context.</p>
 </div>
 
 
@@ -1518,8 +1498,8 @@ values.forEach(function(pathValue) {
 
 
 <div class="description">
-    <a href="global.html#PathSet">PathSet</a> Expressions are a human-readable compression format that is equivalent to a set of <a href="global.html#Path">Path</a> expressions. Unlike <a href="global.html#Path">Path</a> expressions, <a href="global.html#PathSet">PathSet</a>s can contain <a href="global.html#KeySet">KeySet</a> objects like <a href="global.html#Range">Range</a>s and Arrays of keys. 
- In addition to being a more terse than specifying multiple <a href="global.html#Path">Path</a> objects, <a href="global.html#PathSet">PathSet</a>s are generally more efficient to evaluate.
+    <p><a href="global.html#PathSet">PathSet</a> Expressions are a human-readable compression format that is equivalent to a set of <a href="global.html#Path">Path</a> expressions. Unlike <a href="global.html#Path">Path</a> expressions, <a href="global.html#PathSet">PathSet</a>s can contain <a href="global.html#KeySet">KeySet</a> objects like <a href="global.html#Range">Range</a>s and Arrays of keys. 
+ In addition to being a more terse than specifying multiple <a href="global.html#Path">Path</a> objects, <a href="global.html#PathSet">PathSet</a>s are generally more efficient to evaluate.</p>
 </div>
 
 
@@ -1687,7 +1667,7 @@ values.then(function(json) {
 
 
 <div class="description">
-    A PathValue is made up of a path and a value. In addition to the value, each <a href="global.html#PathValue">PathValue</a> includes the <a href="global.html#Path">Path</a> to the value in the JSONGraph model.
+    <p>A PathValue is made up of a path and a value. In addition to the value, each <a href="global.html#PathValue">PathValue</a> includes the <a href="global.html#Path">Path</a> to the value in the JSONGraph model.</p>
 </div>
 
 
@@ -1914,7 +1894,7 @@ pathValues.forEach(function(pathValue) {
 
 
 <div class="description">
-    A range object describes a range of integers. The range object must contain either a "to" or "length" property.
+    <p>A range object describes a range of integers. The range object must contain either a &quot;to&quot; or &quot;length&quot; property.</p>
 </div>
 
 
@@ -1993,7 +1973,7 @@ pathValues.forEach(function(pathValue) {
                 </td>
             
 
-            <td class="description last">the lower bound of the range (inclusive).</td>
+            <td class="description last"><p>the lower bound of the range (inclusive).</p></td>
         </tr>
 
     
@@ -2028,7 +2008,7 @@ pathValues.forEach(function(pathValue) {
                 </td>
             
 
-            <td class="description last">the upper bound of the range (inclusive). Must be >= to the "from" value.</td>
+            <td class="description last"><p>the upper bound of the range (inclusive). Must be &gt;= to the &quot;from&quot; value.</p></td>
         </tr>
 
     
@@ -2063,7 +2043,7 @@ pathValues.forEach(function(pathValue) {
                 </td>
             
 
-            <td class="description last">the length of the range. Must be >= 0.</td>
+            <td class="description last"><p>the length of the range. Must be &gt;= 0.</p></td>
         </tr>
 
     
