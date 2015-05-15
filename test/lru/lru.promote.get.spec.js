@@ -21,7 +21,7 @@ var __prev = require("../../lib/internal/prev");
 
 describe('Get', function () {
     describe('getPaths', function () {
-        it.only('should promote the get item to the head toPathValues.', function (done) {
+        it('should promote the get item to the head toPathValues.', function (done) {
             testPaths('toPathValues').
                 subscribe(noOp, done, done);
         });
@@ -122,8 +122,8 @@ function testPaths(output, model, q) {
     return testRunner.
         get(model, q, output).
         do(noOp, noOp, function() {
-            debugger
-            expect(model._root[__head].value).to.equal(cache[q[0]]);
+            debugger;
+            expect(model._root[__head].value).to.equal(cache[q[0]].value);
         });
 }
 function testJSON(output, model, q) {
@@ -132,7 +132,7 @@ function testJSON(output, model, q) {
     return testRunner.
         get(model, q, output).
         do(noOp, noOp, function() {
-            expect(model._root[__head].value).to.equal(cache[Object.keys(q)[0]]);
+            expect(model._root[__head].value).to.equal(cache[Object.keys(q)[0]].value);
         });
 }
 function testMultipleJSON(output) {
