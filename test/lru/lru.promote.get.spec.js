@@ -113,16 +113,16 @@ var cache = {
 var getPaths1 = ['1'];
 var getPaths2 = ['2'];
 var getPaths3 = ['3'];
-var getJSON1 = {1: null};
-var getJSON2 = {2: null};
-var getJSON3 = {3: null};
+var getJSON1 = { json: { 1: null } };
+var getJSON2 = { json: { 2: null } };
+var getJSON3 = { json: { 3: null } };
 function testPaths(output, model, q) {
     model = model || new Model({cache: _.cloneDeep(cache)});
     q = q || getQueryPath(model);
     return testRunner.
         get(model, q, output).
         do(noOp, noOp, function() {
-            expect(model._root[__head].value).to.equal(cache[q[0]]);
+            expect(model._root[__head].value).to.equal(cache[q[0]].value);
         });
 }
 function testJSON(output, model, q) {
@@ -131,7 +131,7 @@ function testJSON(output, model, q) {
     return testRunner.
         get(model, q, output).
         do(noOp, noOp, function() {
-            expect(model._root[__head].value).to.equal(cache[Object.keys(q)[0]]);
+            expect(model._root[__head].value).to.equal(cache[Object.keys(q.json)[0]].value);
         });
 }
 function testMultipleJSON(output) {
