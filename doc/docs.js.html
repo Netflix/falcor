@@ -2514,6 +2514,27 @@ model.boxValues().getValue("user.name").subscribe(function(value) {
  * @return {Object} the value found at the path.
  */
 
+
+
+
+
+/**
+ * Get the {@link Model}'s local cache as a {@link JSONGraph value}. This method can be a useful when storing state to 
+ * local storage. This method accepts {@link PathSet}s to retrieve from the {@link Model} cache. If no paths are specified, 
+ * the entire cache is returned.
+ * @name getCache
+ * @function
+ * @arg {...Array.&lt;PathSet>} pathSets the path(s) to retrieve
+ * @returns {JSONGraph} jsonGraph a JSONGraph object to use as the local cache.
+ * @memberof Model.prototype
+ * @example
+ // Storing the boxshot of the first 10 titles in the first 10 genreLists to local storage.
+ localStorage.setItem('cache', JSON.stringify(model.getCache("genreLists[0...10][0...10].boxshot")));
+ */ 
+ 
+ 
+ 
+ 
 /**
  * Set the {@link Model}'s local cache to a JSONGraph value. This method can be a useful way of mocking a remote document, or restoring state previously saved to local storage.
  * @name setCache
@@ -2851,7 +2872,7 @@ nameAndRatings.forEach(function(html) {
  * @arg {Path} functionPath the path to the function to invoke
  * @arg {Array.&lt;Object>} args the arguments to pass to the function
  * @arg {Array.&lt;PathSet>} pathSuffixes paths to retrieve from objects returned from the Function
- * @arg {...PathSet} paths paths to retrieve after successful Function execution
+ * @arg {...PathSet} calleePaths paths to retrieve from function callee after successful Function execution
  * @arg {Function} selector the selector function that retrieves the loaded data from the cache and converts it into the object that appears in the stream
  * @return {ModelResponse.&lt;Object>|Observable} either a ModelResponse containing the results of the call operation, or an Observable stream containing the results of the selector function if a selector function is provided.
  * @example

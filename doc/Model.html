@@ -154,7 +154,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="docs.js.html">docs.js</a>, <a href="docs.js.html#line3055">line 3055</a>
+        <a href="docs.js.html">docs.js</a>, <a href="docs.js.html#line3076">line 3076</a>
     </li></ul></dd>
     
 
@@ -647,7 +647,7 @@ ratings.subscribe(function(jsonEnvelope) {
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="docs.js.html">docs.js</a>, <a href="docs.js.html#line2606">line 2606</a>
+        <a href="docs.js.html">docs.js</a>, <a href="docs.js.html#line2627">line 2627</a>
     </li></ul></dd>
     
 
@@ -884,7 +884,7 @@ only be invoked within a selector function, such as the one passed to Model.prot
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="docs.js.html">docs.js</a>, <a href="docs.js.html#line2701">line 2701</a>
+        <a href="docs.js.html">docs.js</a>, <a href="docs.js.html#line2722">line 2722</a>
     </li></ul></dd>
     
 
@@ -1157,7 +1157,7 @@ model.boxValues().getValue("user.name").subscribe(function(value) {
 
     
 
-    <h4 class="name" id="call"><span class="type-signature"></span>call<span class="signature">(functionPath, args, pathSuffixes, &hellip;paths, selector)</span><span class="type-signature"> &rarr; {<a href="ModelResponse.html">ModelResponse</a>.&lt;Object>|<a href="Observable.html">Observable</a>}</span></h4>
+    <h4 class="name" id="call"><span class="type-signature"></span>call<span class="signature">(functionPath, args, pathSuffixes, &hellip;calleePaths, selector)</span><span class="type-signature"> &rarr; {<a href="ModelResponse.html">ModelResponse</a>.&lt;Object>|<a href="Observable.html">Observable</a>}</span></h4>
 
     
 
@@ -1295,7 +1295,7 @@ model.boxValues().getValue("user.name").subscribe(function(value) {
 
         <tr>
             
-                <td class="name"><code>paths</code></td>
+                <td class="name"><code>calleePaths</code></td>
             
 
             <td class="type">
@@ -1321,7 +1321,7 @@ model.boxValues().getValue("user.name").subscribe(function(value) {
 
             
 
-            <td class="description last">paths to retrieve after successful Function execution</td>
+            <td class="description last">paths to retrieve from function callee after successful Function execution</td>
         </tr>
 
     
@@ -1393,7 +1393,7 @@ model.boxValues().getValue("user.name").subscribe(function(value) {
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="docs.js.html">docs.js</a>, <a href="docs.js.html#line2818">line 2818</a>
+        <a href="docs.js.html">docs.js</a>, <a href="docs.js.html#line2839">line 2839</a>
     </li></ul></dd>
     
 
@@ -2191,6 +2191,179 @@ userHtml.subscribe(
 // The code above outputs the following to the console:
 // Name: Frank Underwood, Hometown: undefined, Country: undefined
 // [{"path":["user","hometown"],"value":"Could not be retrieved from server."},{"path":["user","country"],"value":"Could not be retrieved from server."}] </code></pre>
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="getCache"><span class="type-signature"></span>getCache<span class="signature">(&hellip;pathSets)</span><span class="type-signature"> &rarr; {<a href="global.html#JSONGraph">JSONGraph</a>}</span></h4>
+
+    
+
+
+
+<div class="description">
+    Get the <a href="Model.html">Model</a>'s local cache as a <a href="global.html#JSONGraph">value</a>. This method can be a useful when storing state to 
+local storage. This method accepts <a href="global.html#PathSet">PathSet</a>s to retrieve from the <a href="Model.html">Model</a> cache. If no paths are specified, 
+the entire cache is returned.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>pathSets</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Array.&lt;<a href="global.html#PathSet">PathSet</a>></span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                    &lt;repeatable><br>
+                
+                </td>
+            
+
+            
+
+            <td class="description last">the path(s) to retrieve</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="docs.js.html">docs.js</a>, <a href="docs.js.html#line2493">line 2493</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    jsonGraph a JSONGraph object to use as the local cache.
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type"><a href="global.html#JSONGraph">JSONGraph</a></span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+    <h5>Example</h5>
+    
+    <pre class="prettyprint"><code>// Storing the boxshot of the first 10 titles in the first 10 genreLists to local storage.
+ localStorage.setItem('cache', JSON.stringify(model.getCache("genreLists[0...10][0...10].boxshot")));</code></pre>
 
 
 
@@ -3361,7 +3534,7 @@ The getValueSync method differs from the asynchronous get methods (ex. get, getV
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="docs.js.html">docs.js</a>, <a href="docs.js.html#line2915">line 2915</a>
+        <a href="docs.js.html">docs.js</a>, <a href="docs.js.html#line2936">line 2936</a>
     </li></ul></dd>
     
 
@@ -3581,7 +3754,7 @@ pathValues.forEach(function(pathValue) {
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="docs.js.html">docs.js</a>, <a href="docs.js.html#line2489">line 2489</a>
+        <a href="docs.js.html">docs.js</a>, <a href="docs.js.html#line2510">line 2510</a>
     </li></ul></dd>
     
 
@@ -3814,7 +3987,7 @@ nameAndRatings.forEach(function(html) {
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="docs.js.html">docs.js</a>, <a href="docs.js.html#line2597">line 2597</a>
+        <a href="docs.js.html">docs.js</a>, <a href="docs.js.html#line2618">line 2618</a>
     </li></ul></dd>
     
 
@@ -4552,7 +4725,7 @@ ratings.subscribe(function(jsonEnvelope) {
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="docs.js.html">docs.js</a>, <a href="docs.js.html#line3037">line 3037</a>
+        <a href="docs.js.html">docs.js</a>, <a href="docs.js.html#line3058">line 3058</a>
     </li></ul></dd>
     
 
