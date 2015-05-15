@@ -21,39 +21,39 @@ var __prev = require("../../lib/internal/prev");
 
 describe('Get', function () {
     describe('getPaths', function () {
-        it('should promote the get item to the head toPathValues.', function (done) {
+        it.only('should promote the get item to the head toPathValues.', function (done) {
             testPaths('toPathValues').
-                subscribe(noOp, done, done)
+                subscribe(noOp, done, done);
         });
         it('should promote the get item to the head toJSON.', function (done) {
             testPaths('toJSON').
-                subscribe(noOp, done, done)
+                subscribe(noOp, done, done);
         });
         it('should promote the get item to the head toJSONG.', function (done) {
             testPaths('toJSONG').
-                subscribe(noOp, done, done)
+                subscribe(noOp, done, done);
         });
         it('should promote the get item to the head selector.', function (done) {
             testPaths('selector').
-                subscribe(noOp, done, done)
+                subscribe(noOp, done, done);
         });
     });
     describe('getJSON', function () {
         it('should promote the get item to the head toPathValues.', function (done) {
             testJSON('toPathValues').
-                subscribe(noOp, done, done)
+                subscribe(noOp, done, done);
         });
         it('should promote the get item to the head toJSON.', function (done) {
             testJSON('toJSON').
-                subscribe(noOp, done, done)
+                subscribe(noOp, done, done);
         });
         it('should promote the get item to the head toJSONG.', function (done) {
             testJSON('toJSONG').
-                subscribe(noOp, done, done)
+                subscribe(noOp, done, done);
         });
         it('should promote the get item to the head selector.', function (done) {
             testJSON('selector').
-                subscribe(noOp, done, done)
+                subscribe(noOp, done, done);
         });
     });
 });
@@ -61,37 +61,37 @@ describe('Multiple Gets', function () {
     describe('getPaths', function() {
         it('should promote the get item to the head toPathValues.', function (done) {
             testMultiplePaths('toPathValues').
-                subscribe(noOp, done, done)
+                subscribe(noOp, done, done);
         });
         it('should promote the get item to the head toJSON.', function (done) {
             testMultiplePaths('toJSON').
-                subscribe(noOp, done, done)
+                subscribe(noOp, done, done);
         });
         it('should promote the get item to the head toJSONG.', function (done) {
             testMultiplePaths('toJSONG').
-                subscribe(noOp, done, done)
+                subscribe(noOp, done, done);
         });
         it('should promote the get item to the head selector.', function (done) {
             testMultiplePaths('selector').
-                subscribe(noOp, done, done)
+                subscribe(noOp, done, done);
         });
     });
     describe('getJSON', function() {
         it('should promote the get item to the head toPathValues.', function (done) {
             testMultipleJSON('toPathValues').
-                subscribe(noOp, done, done)
+                subscribe(noOp, done, done);
         });
         it('should promote the get item to the head toJSON.', function (done) {
             testMultipleJSON('toJSON').
-                subscribe(noOp, done, done)
+                subscribe(noOp, done, done);
         });
         it('should promote the get item to the head toJSONG.', function (done) {
             testMultipleJSON('toJSONG').
-                subscribe(noOp, done, done)
+                subscribe(noOp, done, done);
         });
         it('should promote the get item to the head selector.', function (done) {
             testMultipleJSON('selector').
-                subscribe(noOp, done, done)
+                subscribe(noOp, done, done);
         });
     });
 });
@@ -122,6 +122,7 @@ function testPaths(output, model, q) {
     return testRunner.
         get(model, q, output).
         do(noOp, noOp, function() {
+            debugger
             expect(model._root[__head].value).to.equal(cache[q[0]]);
         });
 }
@@ -174,6 +175,7 @@ function testMultiplePaths(output) {
 }
 
 function getQueryPath(model) {
+    debugger
     if (model._root[__head].value === 'i am 1') {
         return _.cloneDeep(getPaths2);
     }
