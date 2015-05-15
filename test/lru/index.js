@@ -5,6 +5,7 @@ describe("LRU", function() {
     });
     describe('Splice', function() {
         require("./lru.splice.expired.spec");
+        require("./lru.splice.overwrite.spec");
     });
 });
 
