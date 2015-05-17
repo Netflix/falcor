@@ -1,4 +1,10 @@
 /**
+ *
+* TODO: Some quick way of jumping to the individual methods when you're on a class -- would expect a sub-navigation under the class when you're under it.
+* TODO: Consider writing a template for JSDoc generation
+ */
+
+/**
  * TODO: Jafar things in here do not exist in Falcor at this moment. Needs discussion
  */
 
