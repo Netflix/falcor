@@ -51,9 +51,9 @@ model.getValue('todos[0].name').then(log);
 Note that in the example above that uses a model to retrieve information, the value is pushed to a call back.
  
 The main advantage of using a push API is that you can code against JSON data the same way regardless of whether the data is local or remote. This makes it very easy to begin coding your application against mocked data at first, and then work against the server data later on without changing any other client code.
- 
+In this example we return the name of the first todo by pulling the name from an in memory object on the browser:
+
 ```
-TODO: this example will not work without a server.
 var log = console.log.bind(console)
 
 var model = new falcor.Model({cache: {
@@ -70,7 +70,11 @@ var model = new falcor.Model({cache: {
 }});
 
 model.getValue('todos[0].name').then(log);
+```
 
+In this code sample the data has been moved to the cloud but the client code which retrieves the data remains the same:
+
+```
 var model = new falcor.Model({source: new falcor.HttpDataSource('/model.json')});
 
 model.getValue('todos[0].name').then(log);
@@ -79,7 +83,6 @@ model.getValue('todos[0].name').then(log);
 Another advantage of using a Falcor model is that it caches the JSON data it retrieves from the server in-memory. As a result, you don't need to maintain a cache of the data that you retrieve from a Falcor model. Whenever you need data, just ask the Model for it. If the model finds the data in its cache, it will push the data to you immediately. Otherwise the model will retrieve your data from the server, insert it into the cache, and push it to you asynchronously.
  
 ```
-TODO: this example will not work without a server.
 var model = new falcor.Model({source: new falcor.HttpDataSource('/model.json')});
 
 model.getValue('todos[0].name').then(function() {
