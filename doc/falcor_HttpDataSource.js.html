@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>JSDoc: Home</title>
+    <title>JSDoc: Source: falcor/HttpDataSource.js</title>
 
     <script src="scripts/prettify/prettify.js"> </script>
     <script src="scripts/prettify/lang-css.js"> </script>
@@ -17,32 +17,30 @@
 
 <div id="main">
 
-    <h1 class="page-title">Home</h1>
+    <h1 class="page-title">Source: falcor/HttpDataSource.js</h1>
 
     
 
 
 
     
-
-
-    <h3> </h3>
-
-
-
-
-
-
-
-
-
-
-    
-
-
-
-
-
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>
+/**
+ * TODO: Move this into falcor-browser repo
+ * A HttpDataSource object is a {@link DataSource} can be used to retrieve data from a remote JSONGraph object using the browser's XMLHttpRequest. 
+ * @constructor HttpDataSource
+ * @augments DataSource
+ * @see {@link https://developer.mozilla.org/en-US/docs/Web/API/HttpDataSource}
+ * @param jsonGraphUrl the URL of the JSONGraph model.
+ * @example
+var model = new falcor.Model({source: new falcor.HttpDataSource("http://netflix.com/user.json")});
+var movieNames = model.get('genreLists[0...10][0...10].name').toPathValues();
+ */
+</code></pre>
+        </article>
+    </section>
 
 
 

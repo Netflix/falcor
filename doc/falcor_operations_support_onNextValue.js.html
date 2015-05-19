@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>JSDoc: Home</title>
+    <title>JSDoc: Source: falcor/operations/support/onNextValue.js</title>
 
     <script src="scripts/prettify/prettify.js"> </script>
     <script src="scripts/prettify/lang-css.js"> </script>
@@ -17,32 +17,51 @@
 
 <div id="main">
 
-    <h1 class="page-title">Home</h1>
+    <h1 class="page-title">Source: falcor/operations/support/onNextValue.js</h1>
 
     
 
 
 
     
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
+ * will onNext the observer with the seeds provided.
+ * @param {Model} model
+ * @param {Function} onNext
+ * @param {Array.&lt;Object>} seeds
+ * @param {Function} [selector]
+ */
+module.exports = function onNextValues(model, onNext, seeds, selector) {
+    var root = model._root;
 
-
-    <h3> </h3>
-
-
-
-
-
-
-
-
-
-
-    
-
-
-
-
-
+    root.allowSync++;
+    try {
+        if (selector) {
+            if (seeds.length) {
+                // they should be wrapped in json items
+                onNext(selector.apply(model, seeds.map(function(x, i) {
+                    return x.json;
+                })));
+            } else {
+                onNext(selector.call(model));
+            }
+        } else {
+            // this means there is an onNext function that is not AsValues or progressive,
+            // therefore there must only be one onNext call, which should only be the 0
+            // index of the values of the array
+            onNext(seeds[0]);
+        }
+    } catch (err) {
+        throw err;
+    } finally {
+        root.allowSync--;
+    }
+};
+</code></pre>
+        </article>
+    </section>
 
 
 

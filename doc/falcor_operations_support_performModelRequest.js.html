@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>JSDoc: Home</title>
+    <title>JSDoc: Source: falcor/operations/support/performModelRequest.js</title>
 
     <script src="scripts/prettify/prettify.js"> </script>
     <script src="scripts/prettify/lang-css.js"> </script>
@@ -17,32 +17,36 @@
 
 <div id="main">
 
-    <h1 class="page-title">Home</h1>
+    <h1 class="page-title">Source: falcor/operations/support/performModelRequest.js</h1>
 
     
 
 
 
     
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>var getSourceObserver = require('./getSourceObserever');
+/**
+ * Performs a get on the model source.  I have chosen to use a callback for the sake of
+ * simplicity in the code.
+ * If performance in the future is relaxed i would like to see Rx.
+ * @param {Model} model
+ * @param {Array.&lt;Array>} requestedMissingPaths
+ * @param {Array.&lt;Array>} optimizedMissingPaths
+ * @param {Function} cb
+ */
+function performGetOnModelSource(model, requestedMissingPaths, optimizedMissingPaths, cb) {
+    return model._request.get(
+        requestedMissingPaths,
+        optimizedMissingPaths,
+        getSourceObserver(model, requestedMissingPaths, cb));
+}
 
-
-    <h3> </h3>
-
-
-
-
-
-
-
-
-
-
-    
-
-
-
-
-
+module.exports = performGetOnModelSource;
+</code></pre>
+        </article>
+    </section>
 
 
 

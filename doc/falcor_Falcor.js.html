@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>JSDoc: Home</title>
+    <title>JSDoc: Source: falcor/Falcor.js</title>
 
     <script src="scripts/prettify/prettify.js"> </script>
     <script src="scripts/prettify/lang-css.js"> </script>
@@ -17,32 +17,38 @@
 
 <div id="main">
 
-    <h1 class="page-title">Home</h1>
+    <h1 class="page-title">Source: falcor/Falcor.js</h1>
 
     
 
 
 
     
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>if (typeof falcor === 'undefined') {
+    var falcor = {};
+}
+var Rx = require('falcor-observable');
 
+falcor.__Internals = {};
+falcor.Observable = Rx.Observable;
+falcor.EXPIRES_NOW = 0;
+falcor.EXPIRES_NEVER = 1;
+/**
+ * The current semVer'd data version of falcor.
+ */
+falcor.dataVersion = '0.1.0';
 
-    <h3> </h3>
+falcor.now = function now() {
+    return Date.now();
+};
+falcor.NOOP = function() {};
 
-
-
-
-
-
-
-
-
-
-    
-
-
-
-
-
+module.exports = falcor;
+</code></pre>
+        </article>
+    </section>
 
 
 

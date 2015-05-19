@@ -49,10 +49,7 @@
 
 
 <div class="description">
-    <p>TODO: Add a matrix for modes and combinations
-TODO: Model constructor needs to document about the cache.
-TODO: Document that Models are immutable
-A Model object is used to execute commands against a <a href="global.html#JSONGraph">JSONGraph</a> object. <a href="Model.html">Model</a>s can work with a local JSONGraph cache, or it can work with a remote <a href="global.html#JSONGraph">JSONGraph</a> object through a <a href="DataSource.html">DataSource</a>.</p>
+    <p>A Model object is used to execute commands against a <a href="global.html#JSONGraph">JSONGraph</a> object. <a href="Model.html">Model</a>s can work with a local JSONGraph cache, or it can work with a remote <a href="global.html#JSONGraph">JSONGraph</a> object through a <a href="DataSource.html">DataSource</a>.</p>
 </div>
 
 
@@ -96,7 +93,7 @@ A Model object is used to execute commands against a <a href="global.html#JSONGr
             <td class="type">
             
                 
-<span class="param-type"><a href="global.html#ModelOptions">ModelOptions</a></span>
+<span class="param-type">Object</span>
 
 
             
@@ -116,7 +113,200 @@ A Model object is used to execute commands against a <a href="global.html#JSONGr
 
             
 
-            <td class="description last"><p>A set of options used to customize the behaviour of the <a href="Model.html">Model</a>.</p></td>
+            <td class="description last"><p>A set of options to customize behavior</p>
+                <h6>Properties</h6>
+                
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>source</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="DataSource.html">DataSource</a></span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+                    &lt;nullable><br>
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>A data source to retrieve and manage the <a href="global.html#JSONGraph">JSONGraph</a></p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>cache</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="global.html#JSONGraph">JSONGraph</a></span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+                    &lt;nullable><br>
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>Initial state of the <a href="global.html#JSONGraph">JSONGraph</a></p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>maxSize</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+                    &lt;nullable><br>
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>The maximum size of the cache</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>collectRatio</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+                    &lt;nullable><br>
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>The ratio of the maximum size to collect when the maxSize is exceeded</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>errorSelector</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="Model.html#~errorSelector">Model~errorSelector</a></span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+                    &lt;nullable><br>
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>A function used to translate errors before they are returned</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+            </td>
         </tr>
 
     
@@ -157,7 +347,7 @@ A Model object is used to execute commands against a <a href="global.html#JSONGr
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="docs.js.html">docs.js</a>, <a href="docs.js.html#line3115">line 3115</a>
+        <a href="falcor_Model.js.html">falcor/Model.js</a>, <a href="falcor_Model.js.html#line31">line 31</a>
     </li></ul></dd>
     
 
@@ -213,7 +403,7 @@ A Model object is used to execute commands against a <a href="global.html#JSONGr
 
 
 <div class="description">
-    <p>Returns a copy of the <a href="Model.html">Model</a> that attempts to batch concurrent requests of the same type. If two requests for different paths are made to a batched <a href="Model.html">Model</a> within a time slice defined by a Scheduler or a number of milliseconds, a single request for both paths will be made to the <a href="Model.html">Model</a>'s <a href="DataSource.html">DataSource</a>. If no scheduler or time is specified, the batch will be formed as soon as possible. Enabling batching on a <a href="Model.html">Model</a> can make more efficient use of the network by reducing the number of requests to the server.</p>
+    <p>Returns a clone of the <a href="Model.html">Model</a> that eanbles batching. Within the configured time period, paths for operations of the same type are collected and executed on the <a href="DataSource.html">DataSource</a> in a batch. Batching can make more efficient use of the <a href="DataSource.html">DataSource</a> depending on its implementation, for example, reducing the number of HTTP requests to the server</p>
 </div>
 
 
@@ -268,7 +458,7 @@ A Model object is used to execute commands against a <a href="global.html#JSONGr
 
             
 
-            <td class="description last"><p>either a scheduler object that determines when a batch of requests is sent to a <a href="DataSource.html">DataSource</a>, or the number of milliseconds to spend collecting a batch before sending a request to the <a href="DataSource.html">DataSource</a>. If this parameter is omitted, then batch collection ends at the end of the next tick.</p></td>
+            <td class="description last"><p>Either a Scheduler that determines when to send a batch to the <a href="DataSource.html">DataSource</a>, or the number in milliseconds to collect a batch before sending to the <a href="DataSource.html">DataSource</a>. If this parameter is omitted, then batch collection ends at the end of the next tick.</p></td>
         </tr>
 
     
@@ -309,7 +499,7 @@ A Model object is used to execute commands against a <a href="global.html#JSONGr
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="docs.js.html">docs.js</a>, <a href="docs.js.html#line2132">line 2132</a>
+        <a href="falcor_Model.js.html">falcor/Model.js</a>, <a href="falcor_Model.js.html#line399">line 399</a>
     </li></ul></dd>
     
 
@@ -335,10 +525,6 @@ A Model object is used to execute commands against a <a href="global.html#JSONGr
 <h5>Returns:</h5>
 
         
-<div class="param-desc">
-    <p>a <a href="Model.html">Model</a> that batches requests of the same type and sends them to the data source together.</p>
-</div>
-
 
 
 <dl>
@@ -356,142 +542,6 @@ A Model object is used to execute commands against a <a href="global.html#JSONGr
     
 
 
-    <h5>Example</h5>
-    
-    <pre class="prettyprint"><code>// In this example we will demonstrate that multiple calls made to a batched JSONGraph model in a single tick will only result in a single request to the <a href="DataSource.html">DataSource</a> responsible for retrieving data from the server.
-
- // create a variable to track the number of requests sent to our mock <a href="DataSource.html">DataSource</a>.
- var requestCount = 0;
-
- // create an object that mocks a <a href="DataSource.html">DataSource</a>, an object typically used to retrieve
- // information from the network.
- // Even though multiple calls to Model.prototype.get will be made on the 
- // batched <a href="Model.html">Model</a>, we expect that only one request will be sent to the
- // server.
- var mockDataSource = {
-    // expecting one request for ["titlesById", [99, 23, 44], ["name", "rating"]]
-    get: function(paths) {
-        requestCount++;
-
-        // return an Observable stream of the <a href="global.html#JSONGraphEnvelope">JSONGraphEnvelope</a> that a server would return
-        return falcor.Observable.of({
-            paths: [["titlesById", [23, 44, 99], ["name", "rating"]]],
-            jsong: {
-                "titlesById": {
-                    "99": {
-                        "name": "House of Cards",
-                        "rating": 5
-                    },
-                    "23": {
-                        "name": "Orange is the New Black",
-                        "rating": 5
-                    },
-                    "44": {
-                        "name": "Arrested Development",
-                        "rating": 5            
-                    }
-                }
-            }
-        })
-    }
- };
-
-// Create a Model that uses the mock <a href="DataSource.html">DataSource</a> for data retrieval
-var model = new falcor.Model({source: mockDataSource});
-var $ref = falcor.Model.ref;
-
-// Loading a fragment of the JSONGraph object into the model's cache.
-model.setCache(
-    {
-        // list of user's genres, modeled as a map with ordinal keys
-        "genreLists": {
-            "0": $ref('genresById[123]'),
-            "1": $ref('genresById[522]'),
-            "length": 2
-        },
-        // map of all genres, organized by ID
-        "genresById": {
-            // genre list modeled as map with ordinal keys
-            "123": {
-                "name": "Drama",
-                "0": $ref('titlesById[23]'),
-                "1": $ref('titlesById[99]'),
-                "length": 2
-            },
-            // genre list modeled as map with ordinal keys
-            "522": {
-                "name": "Comedy",
-                "0": $ref('titlesById[23]'),
-                "1": $ref('titlesById[44]'),
-                "length": 2           
-            }
-        }
-    });
-
-// Create a batched <a href="Model.html">Model</a> that accumulates get and set 
-// requests into batches and sends them at the end of the current tick.
-//debugger;
-var batchedJsongModel = model.batch();
-
-// creating an Observable stream of a JSON object that contains the names of the first two titles in the first genre list
-//debugger;
-var names = batchedJsongModel.get('genreLists[0][0..1]["name"]');
-
-// creating an Observable stream of a JSON object that contains the ratings of the first two titles in the first genre list
-var ratings = batchedJsongModel.get('genreLists[0][0..1]["rating"]');
-
-// retrieving the JSON object with the ratings from the stream
-names.subscribe(function(jsonEnvelope) {
-    console.log("Names arrived:")
-    console.log(JSON.stringify(jsonEnvelope, null, 4));
-    console.log("Total number of data source requests:", requestCount);
-})
-
-// retrieving the JSON object with the ratings from the stream
-ratings.subscribe(function(jsonEnvelope) {
-    console.log("Ratings arrived:")
-    console.log(JSON.stringify(jsonEnvelope, null, 4));
-    console.log("Total number of data source requests:", requestCount);
-})
-
-
-// Both the requests for names and ratings should result in only one call to the
-// <a href="DataSource.html">DataSource</a>.
-// The code above prints the following to the console:
-// Names arrived:
-// {
-//     "json": {
-//         "genreLists": {
-//             "0": {
-//                 "0": {
-//                     name: "Orange is the New Black"
-//                 },
-//                 "1": {
-//                     name: "House of Cards"
-//                 }
-//             }
-//         }
-//     }
-// }
-// Total number of data source requests: 1
-// Ratings arrived:
-// {
-//     "json": {
-//         "genreLists": {
-//             "0": {
-//                 "0": {
-//                     rating: 5
-//                 },
-//                 "1": {
-//                     rating: 5
-//                 }
-//             }
-//         }
-//     }
-// }
-// Total number of data source requests: 1</code></pre>
-
-
 
         
             
@@ -505,14 +555,12 @@ ratings.subscribe(function(jsonEnvelope) {
 
 
 <div class="description">
-    <p>The bind method is metaphorically similar to binding a variable to an object within a JSON object.  Bind allows you to pass around references to objects within the JSONGraph without exposing the entire graph to application components. Binding Models also allows you to hide the location of a model within a JSON Graph from the components that are coupled to the model.</p>
-<p> The bind method creates a new <a href="Model.html">Model</a> that refers to the JSONGraph value found at a particular path. Binding is useful if multiple operations are going to be performed on the object found at one particular location in the JSONGraph Model. Once a Model is bound to a particular path in the JSON Graph, any paths evaluated on the Model will be relative to the bound path.</p>
-<p> The bind method accepts a path and returns an observable stream containing a single <a href="Model.html">Model</a> bound to that path.  If no object is found at the path, the observable stream will be empty.
- A bound <a href="Model.html">Model</a> begins evaluating paths at its bound path.  For example, if a <a href="Model.html">Model</a> is bound to 'genreLists[0]' and the path 'name' is requested from the Model, the path 'genreLists[0].name' is requested from the DataSource.
- When a <a href="Model.html">Model</a> is bound, one or more JSONGraph references may be encountered along the bound path.  When a JSONGraph reference is encountered while evaluating the bound path, the bound path prefix is replaced with the target of the reference.
- In other words, if a Model is bound to 'genreLists[0]' and the reference &quot;listsById[49]&quot; is discovered at the bound path, the bound path of the Model will be 'listsById[49]'.  A subsequent attempt to retrieve 'name' from the bound Model would send the path 'listsById[49].name' to the DataSource.
- It is necessary to provide the bind method with at least one additional path to a value beyond the bound path.  The reason for this is that while bind allows you to bind to a JSONGraph object, it is not possible to retrieve JSONGraph objects from a Model <a href="DataSource.html">DataSource</a>.
- Therefore in order to determine whether a JSONGraph object exists at the bound path, the model needs to be able to retrieve a value nested within the bound JSONGraph object from the DataSource.  All of the values specified beyond the bound path are guaranteed to be loaded into the model cache before the bound model is created.</p>
+    <p>Returns a clone of the <a href="Model.html">Model</a> bound to a location within the <a href="global.html#JSONGraph">JSONGraph</a>. The bound location is never a Reference: any References encountered while resolving the bound <a href="global.html#Path">Path</a> are always replaced with the References target value. For subsequent operations on the <a href="Model.html">Model</a>, all paths will be evaluated relative to the bound path. Bind allows you to:</p>
+<ul>
+<li>Expose only a fragment of the <a href="global.html#JSONGraph">JSONGraph</a> to components, rather than the entire graph</li>
+<li>Hide the location of a <a href="global.html#JSONGraph">JSONGraph</a> fragment from components</li>
+<li>Optimize for executing multiple operations and path looksup at/below the same location in the <a href="global.html#JSONGraph">JSONGraph</a></li>
+</ul>
 </div>
 
 
@@ -574,7 +622,7 @@ ratings.subscribe(function(jsonEnvelope) {
 
             
 
-            <td class="description last"><p>the path to the value to which the model should be bound.</p></td>
+            <td class="description last"><p>The path to bind to</p></td>
         </tr>
 
     
@@ -607,7 +655,7 @@ ratings.subscribe(function(jsonEnvelope) {
 
             
 
-            <td class="description last"><p>paths to values to preload before Model is created. These paths are relative to the bound path.</p></td>
+            <td class="description last"><p>Paths to preload before Model is created. These paths are relative to the bound path.</p></td>
         </tr>
 
     
@@ -648,7 +696,7 @@ ratings.subscribe(function(jsonEnvelope) {
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="docs.js.html">docs.js</a>, <a href="docs.js.html#line2662">line 2662</a>
+        <a href="falcor_Model.js.html">falcor/Model.js</a>, <a href="falcor_Model.js.html#line159">line 159</a>
     </li></ul></dd>
     
 
@@ -675,7 +723,9 @@ ratings.subscribe(function(jsonEnvelope) {
 
         
 <div class="param-desc">
-    <p>an Observable stream containing either the bound model, or nothing if no object was found at the bound path.</p>
+    <ul>
+<li>An Observable stream with a single value, the bound <a href="Model.html">Model</a>, or an empty stream if nothing is found at the path</li>
+</ul>
 </div>
 
 
@@ -695,104 +745,25 @@ ratings.subscribe(function(jsonEnvelope) {
     
 
 
-    <h5>Example</h5>
-    
-    <pre class="prettyprint"><code>// In this example we will demonstrate how bind can be used to create a Model that evaluates paths relative to a bound path
-var model = new falcor.Model();
-var $ref = falcor.Model.ref;
-
-//TODO: output printed twice?
-
-// Loading a JSONGraph object into the model's cache. This JSONGraph object models a list of genres, each of which contains several titles.
-model.setCache(
-    {
-        // list of user's genres, modeled as a map with ordinal keys
-        "genreLists": {
-            "0": $ref('genresById[123]'),
-            "1": $ref('genresById[522]'),
-            "length": 2
-        },
-        // map of all genres, organized by ID
-        "genresById": {
-            // genre list modeled as map with ordinal keys
-            "123": {
-                "name": "Drama",
-                "0": $ref('titlesById[23]'),
-                "1": $ref('titlesById[99]'),
-                "length": 2
-            },
-            // genre list modeled as map with ordinal keys
-            "522": {
-                "name": "Comedy",
-                "0": $ref('titlesById[23]'),
-                "1": $ref('titlesById[44]'),
-                "length": 2           
-            }
-        },
-        // map of all titles by ID
-        "titlesById": {
-           "99": {
-                "name": "House of Cards",
-                "rating": 5
-            },
-            "23": {
-                "name": "Orange is the New Black",
-                "rating": 5
-            },
-            "44": {
-                "name": "Arrested Development",
-                "rating": 5            
-            }
-        }
-    });
-
-// Retrieve a Model bound the first title in the first genre list
-// note that the "name" path is required because at least one value
-// must be preloaded under the bound path.
-model.
-    bind("genreLists[0][0]", "name").
-    // retrieve the bound Model from the stream. When the Model arrives
-    // it will be bound to the fully optimized path "titlesById[23]" rather than the 
-    // requested path "genreLists[0][0]".
-    subscribe(function(titleModel) {
-        
-        // set the rating of the first title in the first genre list
-        // Note that the path "rating" is relative to the bound
-        // path $ref("titlesById[23]").
-        titleModel.
-            set({path: ["rating"], value: 4.5}).
-            // receive output as a stream of <a href="global.html#PathValue">PathValue</a>s.
-            toPathValues().
-            // print all <a href="global.html#PathValue">PathValue</a>s to the console.
-            subscribe(function(pathValue) {
-                console.log(JSON.stringify(pathValue))
-            });
-    });
-
-// The code above prints the following to the console. Note that the path
-// in the <a href="global.html#PathValue">PathValue</a> is also relative to the titleModel's bound path.
-// {path:["rating"],value:4.5}</code></pre>
-
-
 
         
             
 
     
 
-    <h4 class="name" id="bindSync"><span class="type-signature"></span>bindSync<span class="signature">(path)</span><span class="type-signature"></span></h4>
+    <h4 class="name" id="bindSync"><span class="type-signature"></span>bindSync<span class="signature">(path)</span><span class="type-signature"> &rarr; {<a href="Model.html">Model</a>}</span></h4>
 
     
 
 
 
 <div class="description">
-    <p>This method creates a new <a href="Model.html">Model</a> that refers to the object found at a particular path. Binding is useful if 
-multiple operations are going to be performed on the object found at one particular location in the JSONGraph Model. 
-Once a Model is bound to a particular path in the JSON Graph, any paths evaluated on the Model will be relative to the 
-bound path.
-The bindSync method is metaphorically similar to assigning a variable to an object within a JSON object. This method can 
-only be invoked within a selector function, such as the one passed to Model.prototype.get.</p>
+    <p>Synchronously returns a clone of the <a href="Model.html">Model</a> bound to a location within the <a href="global.html#JSONGraph">JSONGraph</a>. The bound location is never a Reference: any References encountered while resolving the bound <a href="global.html#Path">Path</a> are always replaced with the References target value. For subsequent operations on the <a href="Model.html">Model</a>, all paths will be evaluated relative to the bound path. This method can only be invoked when the <a href="Model.html">Model</a> does not have a <a href="DataSource.html">DataSource</a> or from within a selector function. Bind allows you to:</p>
+<ul>
+<li>Expose only a fragment of the <a href="global.html#JSONGraph">JSONGraph</a> to components, rather than the entire graph</li>
+<li>Hide the location of a <a href="global.html#JSONGraph">JSONGraph</a> fragment from components</li>
+<li>Optimize for executing multiple operations and path looksup at/below the same location in the <a href="global.html#JSONGraph">JSONGraph</a></li>
+</ul>
 </div>
 
 
@@ -844,7 +815,7 @@ only be invoked within a selector function, such as the one passed to Model.prot
 
             
 
-            <td class="description last"><p>the path to the object that the new Model should proxy.</p></td>
+            <td class="description last"><p>The path to bind to</p></td>
         </tr>
 
     
@@ -885,207 +856,12 @@ only be invoked within a selector function, such as the one passed to Model.prot
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="docs.js.html">docs.js</a>, <a href="docs.js.html#line2757">line 2757</a>
+        <a href="falcor_Model.js.html">falcor/Model.js</a>, <a href="falcor_Model.js.html#line342">line 342</a>
     </li></ul></dd>
     
 
     
 
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    <h5>Example</h5>
-    
-    <pre class="prettyprint"><code>// In this example we will retrieve data from the model and converted it into an HTML representation.
-// Creating a model and passing a data source that connects it to a remote JSONGraph model.
-var model = new falcor.Model();
-var $ref = falcor.Model.ref;
-
-//TODO: Hemlock Grove?
-
-// Loading a JSONGraph object into the model's cache. This JSONGraph object models a list of genres, each of which contains several titles.
-model.setCache(
-    {
-        // list of user's genres, modeled as a map with ordinal keys
-        "genreLists": {
-            "0": $ref('genresById[123]'),
-            "1": $ref('genresById[522]'),
-            "length": 2
-        },
-        // map of all genres, organized by ID
-        "genresById": {
-            // genre list modeled as map with ordinal keys
-            "123": {
-                "name": "Drama",
-                "0": $ref('titlesById[23]'),
-                "1": $ref('titlesById[99]'),
-                "length": 2
-            },
-            // genre list modeled as map with ordinal keys
-            "522": {
-                "name": "Comedy",
-                "0": $ref('titlesById[23]'),
-                "1": $ref('titlesById[44]'),
-                "length": 2           
-            }
-        },
-        // map of all titles by ID
-        "titlesById": {
-           "99": {
-                "name": "House of Cards",
-                "rating": 5
-            },
-            "23": {
-                "name": "Orange is the New Black",
-                "rating": 5
-            },
-            "44": {
-                "name": "Arrested Development",
-                "rating": 5            
-            }
-        }
-    });
-
-// Converts a integer into a string of stars
-function getStars(num) {
-    var stars = "",
-        counter;
-
-    if (num !== undefined) {
-        for(counter = 0; counter &lt; num; counter++) {
-            stars += "*";
-        }
-    }
-
-    return stars;
-}
-
-// Note that in the example below we ask for the first three titles in the first genre list. This will 
-// result in a request to the server for "genreLists[0][2]["name","rating"]" because the third title 
-// is not in the cache. When all of the data has been retrieved, the selector function is invoked and the data in the cache is converted into HTML.
-var nameAndRatings = model.get(
-    'genreLists[0][0..2]["name", "rating"]', 'genreLists[0].name',
-    // When this function is invoked all of the data should be available in the cache, except for those paths that caused an error to occur
-    function() {
-        // Create a new Model bound to a specific location in the JSON Graph.
-        // Note that the bound path will be the optimized path "genresById[123]" rather
-        // than the requested path "genreLists[0]".
-        var firstGenreList = this.bindSync("genreLists[0]");
-
-        return "&lt;h1>" + firstGenreList.getValueSync("name") + "&lt;/h1>\n" +
-            "&lt;ul>\n" + 
-            [0,1,2].
-                // filter out indexes that have not been retrieved from the server yet
-                filter(function(index) {
-                    // when retrieving values from the local cache, it is possible to retrieve objects as well as values.
-                    return firstGenreList.getValueSync([index]) !== undefined;
-                }).
-                map(function(index) {
-                    var nameAndRating = firstGenreList.bindSync([index]);
-                    return "&lt;li>" + nameAndRating.getValueSync("name") + " " + getStars(nameAndRating.getValueSync("rating")) + "&lt;/li>\n";
-                }).join("") + 
-            "&lt;/ul>";
-    });
-
-nameAndRatings.forEach(function(html) { 
-    console.log(html); 
-});
-
-// The code above outputs the following HTML fragment to the console.
-// &lt;h1>Drama&lt;/h1>
-// &lt;ul>
-// &lt;li>Orange is the New Black *****&lt;/li>
-// &lt;li>House of Cards *****&lt;/li>
-// &lt;li>Hemlock Grove *****&lt;/li>
-// &lt;/ul></code></pre>
-
-
-
-        
-            
-
-    
-
-    <h4 class="name" id="boxValues"><span class="type-signature"></span>boxValues<span class="signature">()</span><span class="type-signature"> &rarr; {<a href="Model.html">Model</a>}</span></h4>
-
-    
-
-
-
-<div class="description">
-    <p>Returns a copy of the <a href="Model.html">Model</a> that does not unbox Atom values values before returning them. Returning <a href="global.html#Atom">Atom</a>s, References, or Errors rather than their values allows any metadata attached to the value to be inspected.</p>
-</div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="docs.js.html">docs.js</a>, <a href="docs.js.html#line2493">line 2493</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-    <dt class="tag-see">See:</dt>
-    <dd class="tag-see">
-        <ul>
-            <li><a href="global.html#Atom">Atom</a></li>
-        </ul>
-    </dd>
     
 
     
@@ -1106,10 +882,6 @@ nameAndRatings.forEach(function(html) {
 <h5>Returns:</h5>
 
         
-<div class="param-desc">
-    <p>a <a href="Model.html">Model</a> that returns sentinel values rather than the value inside them.</p>
-</div>
-
 
 
 <dl>
@@ -1127,45 +899,20 @@ nameAndRatings.forEach(function(html) {
     
 
 
-    <h5>Example</h5>
-    
-    <pre class="prettyprint"><code>var model = new falcor.Model();
-model.setCache({
-    user: {
-        name: {
-            // Metadata that indicates this object is a Atom
-            $type: "atom",
-            // The value property contains the value box by the Atom
-            value: "Jim Parsons",
-            // Metadata that dictates that this value should be purged from the <a href="Model.html">Model</a>'s cache after two minutes. Negative numbers imply that expiration occurs relative to the current time.
-            $expires: -(1000 * 60 * 2)
-        }
-    }
-});
-
-model.boxValues().getValue("user.name").subscribe(function(value) {
-    console.log(value.$type, value.value, value.$expires);
-})
-
-// The code above outputs the following text to the console:
-// sentinel Jim Parsons -120000
-// Note that the Atom object was returned rather than just the value "Jim Parsons."</code></pre>
-
-
 
         
             
 
     
 
-    <h4 class="name" id="call"><span class="type-signature"></span>call<span class="signature">(functionPath, args, pathSuffixes, &hellip;calleePaths, selector)</span><span class="type-signature"> &rarr; {<a href="ModelResponse.html">ModelResponse</a>.&lt;Object>|<a href="Observable.html">Observable</a>}</span></h4>
+    <h4 class="name" id="boxValues"><span class="type-signature"></span>boxValues<span class="signature">()</span><span class="type-signature"> &rarr; {<a href="Model.html">Model</a>}</span></h4>
 
     
 
 
 
 <div class="description">
-    <p>Invokes a Function in the JSONGraph model and returns the result in a <a href="ModelResponse.html">ModelResponse</a>.</p>
+    <p>Returns a clone of the <a href="Model.html">Model</a> that boxes values returning the wrapper (<a href="global.html#Atom">Atom</a>, Reference, or Error), rather than the value inside it. This allows any metadata attached to the wrapper to be inspected</p>
 </div>
 
 
@@ -1174,191 +921,6 @@ model.boxValues().getValue("user.name").subscribe(function(value) {
 
 
 
-
-
-    <h5>Parameters:</h5>
-    
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-        <th>Attributes</th>
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>functionPath</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type"><a href="global.html#Path">Path</a></span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-
-                
-
-                
-                </td>
-            
-
-            
-
-            <td class="description last"><p>the path to the function to invoke</p></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>args</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">Array.&lt;Object></span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-
-                
-
-                
-                </td>
-            
-
-            
-
-            <td class="description last"><p>the arguments to pass to the function</p></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>pathSuffixes</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">Array.&lt;<a href="global.html#PathSet">PathSet</a>></span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-
-                
-
-                
-                </td>
-            
-
-            
-
-            <td class="description last"><p>paths to retrieve from objects returned from the Function</p></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>calleePaths</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type"><a href="global.html#PathSet">PathSet</a></span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-
-                
-
-                
-                    &lt;repeatable><br>
-                
-                </td>
-            
-
-            
-
-            <td class="description last"><p>paths to retrieve from function callee after successful Function execution</p></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>selector</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">function</span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-
-                
-
-                
-                </td>
-            
-
-            
-
-            <td class="description last"><p>the selector function that retrieves the loaded data from the cache and converts it into the object that appears in the stream</p></td>
-        </tr>
-
-    
-    </tbody>
-</table>
 
 
 
@@ -1394,7 +956,7 @@ model.boxValues().getValue("user.name").subscribe(function(value) {
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="docs.js.html">docs.js</a>, <a href="docs.js.html#line2874">line 2874</a>
+        <a href="falcor_Model.js.html">falcor/Model.js</a>, <a href="falcor_Model.js.html#line435">line 435</a>
     </li></ul></dd>
     
 
@@ -1420,10 +982,6 @@ model.boxValues().getValue("user.name").subscribe(function(value) {
 <h5>Returns:</h5>
 
         
-<div class="param-desc">
-    <p>either a ModelResponse containing the results of the call operation, or an Observable stream containing the results of the selector function if a selector function is provided.</p>
-</div>
-
 
 
 <dl>
@@ -1432,105 +990,13 @@ model.boxValues().getValue("user.name").subscribe(function(value) {
     </dt>
     <dd>
         
-<span class="param-type"><a href="ModelResponse.html">ModelResponse</a>.&lt;Object></span>
-|
-
-<span class="param-type"><a href="Observable.html">Observable</a></span>
+<span class="param-type"><a href="Model.html">Model</a></span>
 
 
     </dd>
 </dl>
 
     
-
-
-    <h5>Example</h5>
-    
-    <pre class="prettyprint"><code>var model = new falcor.Model({source: new falcor.HttpDataSource("/model.json")});
-var $ref = falcor.Model.ref;
-// In this example we add invoke the add function on a "persons" array in the JSON Graph
-// exposed by the <a href="HttpDataSource.html">HttpDataSource</a>. Then we retrieve the several properties from the 
-// newly-created person as well as the new length of the list.
-model.call(
- // the path to the function which adds a person object to the persons list.
- "persons.add", 
- // The arguments to the function.
- ["Jim", "Parsons"], 
- // This function creates a person in the "personsById" map and adds a reference to that
- // person to the next available index in the "persons" list. This function call internally
- // generates a <a href="global.html#JSONGraphEnvelope">JSONGraphEnvelope</a> response which contains the reference at the new 
- // index in the list. The response also indicates that length property of the "persons"
- // list has been invalidated. This will cause any <a href="Model.html">Model</a> connected to this 
- // <a href="DataSource.html">DataSource</a> to purge ["persons", "length"] from its cache as soon as it receives
- // the response.
- // {
- //   paths: [["persons", 7]],
- //   jsong: {
- //    persons: {
- //     7: { $type: "ref", value: ["personsById", 22] }
- //    }
- //   },
- //   invalidated: [["persons", "length"]]
- // }
- // Once the JSON Graph function has completed successfully, the call method 
- // continues by evaluating a get operation on the path created by appending 
- // each path suffix onto each path in the <a href="global.html#JSONGraphEnvelope">JSONGraphEnvelope</a>'s paths
- // array.
- // In this instance, there is only one path suffix containing three keys...
- ["name","surname", "createdAt"],
- // ... therefore the call method evaluates a get operation 
- // on 'persons[7]["name", "surname", "createdAt"]' and adds the 
- // results to the <a href="global.html#JSONGraphEnvelope">JSONGraphEnvelope</a>. This yields the following
- // result:
- // {
- //   paths: [["persons", 7, ["name","age", "createdAt"]]],
- //   jsong: {
- //    persons: {
- //     7: { $type: "ref", value: ["personsById", 22] }
- //    },
- //    personsById: {
- //     22: { name: "Jim", surname: "Parsons", createdAt: 2348723423 }
- //    }
- //   },
- //   invalidated: [["persons", "length"]]
- // } 
- // At this point the function appends the calleePaths to the path 
- // to the function callee object. The path to the function callee object is 
- // callPath.splice(0, callPath.length - 1).
- // In this instance there is only one path specified...
- "length").
- // ...which means that the call function evaluates a get operation for
- // the path ["persons", "length"]. The results of this get operation are 
- // added to the <a href="global.html#JSONGraphEnvelope">JSONGraphEnvelope</a>, producing the following
- // result:
- // {
- //   paths: [["persons", 7, ["name","age", "createdAt"]], ["persons", 7, "length"]],
- //   jsong: {
- //    persons: {
- //     7: { $type: "ref", value: ["personsById", 22] },
- //     "length": 8
- //    },
- //    personsById: {
- //     22: { name: "Jim", surname: "Parsons", createdAt: 2348723423 }
- //    }
- //   },
- //   invalidated: [["persons", "length"]]
- // }  
-  subscribe(function(json) {
-   console.log(JSON.stringify(jsonGraph, null, 4));
-  });
- // The code above prints the following <a href="global.html#JSONEnvelope">JSONEnvelope</a> to the console:
- // {
- //   json: {
- //     persons: {
- //       "7": {
- //         "name": "Jim",
- //         "surname": "Parsons",
- //         "createdAt": 2348723423
- //       }
- //       "length": 8
- //    }
- //  }</code></pre>
 
 
 
@@ -1547,8 +1013,8 @@ model.call(
 
 <div class="description">
     <p>The get method retrieves several <a href="global.html#Path">Path</a>s or <a href="global.html#PathSet">PathSet</a>s from a <a href="Model.html">Model</a>. The get method is versatile and may be called in several different ways, allowing you to make different trade-offs between performance and expressiveness. The simplest invocation returns an ModelResponse stream that contains a JSON object with all of the requested values. An optional selector function can also be passed in order to translate the retrieved data before it appears in the Observable stream. If a selector function is provided, the output will be an Observable stream with the result of the selector function invocation instead of a ModelResponse stream.
- If you intend to transform the JSON data into another form, specifying a selector function may be more efficient. The selector function is run once all of the requested path values are available. In the body of the selector function, you can read data from the Model's cache using Model.prototype.getValueSync and transform it directly into its final representation (ex. an HTML string). This technique can reduce allocations by preventing the get method from copying the data in <a href="Model.html">Model</a>'s cache into an intermediary JSON representation.
- Instead of directly accessing the cache within the selector function, you can optionally pass arguments to the selector function and they will be automatically bound to the corresponding <a href="global.html#Path">Path</a> or <a href="global.html#PathSet">PathSet</a> passed to the get method. If a <a href="global.html#Path">Path</a> is bound to a selector function argument, the function argument will contain the value found at that path. However if a <a href="global.html#PathSet">PathSet</a> is bound to a selector function argument, the function argument will be a JSON structure containing all of the path values. Using argument binding can provide a good balance between allocations and expressiveness. For more detail on how <a href="global.html#Path">Path</a>s and <a href="global.html#PathSet">PathSet</a>s are bound to selector function arguments, see the examples below.</p>
+     If you intend to transform the JSON data into another form, specifying a selector function may be more efficient. The selector function is run once all of the requested path values are available. In the body of the selector function, you can read data from the Model's cache using Model.prototype.getValueSync and transform it directly into its final representation (ex. an HTML string). This technique can reduce allocations by preventing the get method from copying the data in <a href="Model.html">Model</a>'s cache into an intermediary JSON representation.
+     Instead of directly accessing the cache within the selector function, you can optionally pass arguments to the selector function and they will be automatically bound to the corresponding <a href="global.html#Path">Path</a> or <a href="global.html#PathSet">PathSet</a> passed to the get method. If a <a href="global.html#Path">Path</a> is bound to a selector function argument, the function argument will contain the value found at that path. However if a <a href="global.html#PathSet">PathSet</a> is bound to a selector function argument, the function argument will be a JSON structure containing all of the path values. Using argument binding can provide a good balance between allocations and expressiveness. For more detail on how <a href="global.html#Path">Path</a>s and <a href="global.html#PathSet">PathSet</a>s are bound to selector function arguments, see the examples below.</p>
 </div>
 
 
@@ -1612,7 +1078,7 @@ model.call(
 
             
 
-            <td class="description last"><p>the path(s) to retrieve</p></td>
+            <td class="description last"><p>The path(s) to retrieve</p></td>
         </tr>
 
     
@@ -1645,7 +1111,7 @@ model.call(
 
             
 
-            <td class="description last"><p>the callback that runs once all of the values have been loaded into cache</p></td>
+            <td class="description last"><p>The callback to execute once all of the paths have been retrieved</p></td>
         </tr>
 
     
@@ -1686,7 +1152,7 @@ model.call(
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="docs.js.html">docs.js</a>, <a href="docs.js.html#line1399">line 1399</a>
+        <a href="falcor_Model.js.html">falcor/Model.js</a>, <a href="falcor_Model.js.html#line105">line 105</a>
     </li></ul></dd>
     
 
@@ -1713,7 +1179,9 @@ model.call(
 
         
 <div class="param-desc">
-    <p>the requested data as JSON, or the result of the optional selector function.</p>
+    <ul>
+<li>The requested data as JSON, or the result of the optional selector function.</li>
+</ul>
 </div>
 
 
@@ -1736,482 +1204,20 @@ model.call(
     
 
 
-    <h5>Examples</h5>
-    
-    <pre class="prettyprint"><code>// In this example, we will create a JSONGraph model and populate its cache with a list of genres and titles to mock the server. Then we will request the name and rating of the first two titles in the first genre list. We will then retrieve the resulting JSON object from an observable stream and convert it into an HTML list.
-var model = new falcor.Model();
-var $ref = falcor.Model.ref;
-
-// Loading a JSONGraph object into the model's cache.
-model.setCache(
-    {
-        // list of user's genres, modeled as a map with ordinal keys
-        "genreLists": {
-            "0": $ref('genresById[123]'),
-            "1": $ref('genresById[522]'),
-            "length": 2
-        },
-        // map of all genres, organized by ID
-        "genresById": {
-            // genre list modeled as map with ordinal keys
-            "123": {
-                "name": "Drama",
-                "0": $ref('titlesById[23]'),
-                "1": $ref('titlesById[99]'),
-                "length": 2
-            },
-            // genre list modeled as map with ordinal keys
-            "522": {
-                "name": "Comedy",
-                "0": $ref('titlesById[23]'),
-                "1": $ref('titlesById[44]'),
-                "length": 2           
-            }
-        },
-        // map of all titles by ID
-        "titlesById": {
-           "99": {
-                "name": "House of Cards",
-                "rating": 5
-            },
-            "23": {
-                "name": "Orange is the New Black",
-                "rating": 5
-            },
-            "44": {
-                "name": "Arrested Development",
-                "rating": 5            
-            }
-        }
-    });
-
-var nameAndRatings = 
-    model.get('genreLists[0][0..1]["name", "rating"]', 'genreLists[0].name');
-
-// When we then to the Observable stream, we get the following JSON structure containing all of the requested paths:
-// {
-//    "json": {
-//        "genreLists": {
-//            "0": {
-//                "name": "Drama",
-//              "0": {
-//                  name: "Orange is the New Black",
-//                  rating: 5
-//              },
-//              "1": {
-//                  name: "House of Cards",
-//                  rating: 5
-//              }
-//          }
-//      }
-//   }
-// }
-
-// Converts a integer into a string of stars
-function getStars(num) {
-    var stars = "",
-        counter;
-
-    if (num !== undefined) {
-        for(counter = 0; counter &lt; num; counter++) {
-            stars += "*";
-        }
-    }
-
-    return stars;
-}
-
-nameAndRatings.subscribe(function(value) { 
-    // Convert the JSON data into an HTML list...
-    var html = "",
-        json = value.json;
-    if (json.genreLists &amp;&amp; json.genreLists[0]){
-        var genre = json.genreLists[0];
-        html += "&lt;h1>" + genre.name + "&lt;/h1>\n" +
-        "&lt;ul>\n";
-        for(var counter = 0; counter &lt; 2; counter++){
-            if (genre[counter]){
-                var title = genre[counter];
-                html += "&lt;li>" + title.name + ' ' + getStars(title.rating) + "&lt;/li>\n";
-            }
-        } 
-        html += "&lt;/ul>";
-    }
-    console.log(html);
-});
-
-// The code above outputs the following to the console:
-// &lt;h1>Drama&lt;/h1>
-// &lt;ul>
-// &lt;li>Orange is the New Black *****&lt;/li>
-// &lt;li>House of Cards *****&lt;/li>
-// &lt;/ul></code></pre>
-
-    <pre class="prettyprint"><code>// In this example, we will perform the same operation as the last example: we will retrieve data from a local JSONGraph model cache and convert it into an HTML list. In the previous example, we converted the JSONGraph in the cache to JSON and then subsequently into HTML. In this example, we will avoid this intermediary JSON transformation by providing a selector function to the get method. Within the selector function, we will access the JSONGraph data in the Model's local cache and transform it directly into HTML.
-
-// Creating a model and passing a data source that connects it to a remote JSONGraph model.
-var model = new falcor.Model();
-var $ref = falcor.Model.ref;
-
-// Loading a JSONGraph object into the model's cache. This JSONGraph object models a list of genres, each of which contains several titles.
-model.setCache(
-    {
-        // list of user's genres, modeled as a map with ordinal keys
-        "genreLists": {
-            "0": $ref('genresById[123]'),
-            "1": $ref('genresById[522]'),
-            "length": 2
-        },
-        // map of all genres, organized by ID
-        "genresById": {
-            // genre list modeled as map with ordinal keys
-            "123": {
-                "name": "Drama",
-                "0": $ref('titlesById[23]'),
-                "1": $ref('titlesById[99]'),
-                "length": 2
-            },
-            // genre list modeled as map with ordinal keys
-            "522": {
-                "name": "Comedy",
-                "0": $ref('titlesById[23]'),
-                "1": $ref('titlesById[44]'),
-                "length": 2           
-            }
-        },
-        // map of all titles by ID
-        "titlesById": {
-           "99": {
-                "name": "House of Cards",
-                "rating": 5
-            },
-            "23": {
-                "name": "Orange is the New Black",
-                "rating": 5
-            },
-            "44": {
-                "name": "Arrested Development",
-                "rating": 5            
-            }
-        }
-    });
-
-// Converts a integer into a string of stars
-function getStars(num) {
-    var stars = "",
-        counter;
-
-    if (num !== undefined) {
-        for(counter = 0; counter &lt; num; counter++) {
-            stars += "*";
-        }
-    }
-
-    return stars;
-}
-
-// Because we intend to transform the data directly into HTML, we specify a selector function to avoid allocating an intermediary JSON result.
-// Within the selector function we read data directly from the cache, and convert it directly into HTML.
-var html = model.get(
-    'genreLists[0][0..1]["name", "rating"]', 'genreLists[0].name',
-    // When this function is invoked all of the requested paths should be available in the cache, except for those paths that could not be retrieved due to an error.
-    function() {
-        var firstGenreList = model.bindSync('genreLists[0]');
-        return "&lt;h1>" + firstGenreList.getValueSync('name') + "&lt;/h1>\n" +
-            "&lt;ul>\n" + 
-            [0,1].
-                // filter out indexes that have not been retrieved from the server yet
-                filter(function(index) {
-                    // when retrieving values from the local cache, it is possible to retrieve objects as well as values.
-                    return firstGenreList.getValueSync([index]) !== undefined;
-                }).
-                map(function(index) {
-                    var nameAndRating = firstGenreList.bindSync([index]);
-                    return "&lt;li>" + nameAndRating.getValueSync('name') + " " + getStars(nameAndRating.getValueSync('rating')) + "&lt;/li>\n";
-                }).join("") + "&lt;/ul>";
-    });
-
-html.subscribe(function(html) { 
-    console.log(html); 
-});
-
-// The code above outputs the following HTML fragment to the console.
-// &lt;h1>Drama&lt;/h1>
-// &lt;ul>
-// &lt;li>Orange is the New Black *****&lt;/li>
-// &lt;li>House of Cards *****&lt;/li>
-// &lt;/ul></code></pre>
-
-    <pre class="prettyprint"><code>// In this example, we will perform the same operation as the last example: we will retrieve data from a local JSONGraph model cache and convert it into an HTML list. In the previous example, we passed a selector function to the get method and transformed the JSONGraph data in the cache directly into HTML. This improved performance by removing the need to create an intermediary JSON object, but required us to repeat the path twice: once in the method's argument list, and again in the body of the selector function. In this example, we will achieve a good balance between performance and expressiveness by passing arguments to the selector function. 
-
-// Creating a model and passing a data source that connects it to a remote JSONGraph model.
-var model = new falcor.Model();
-var $ref = falcor.Model.ref;
-// Loading a JSONGraph object into the model's cache. This JSONGraph object models a list of genres, each of which contains several titles.
-model.setCache(
-    {
-        // list of user's genres, modeled as a map with ordinal keys
-        "genreLists": {
-            "0": $ref('genresById[123]'),
-            "1": $ref('genresById[522]'),
-            "length": 2
-        },
-        // map of all genres, organized by ID
-        "genresById": {
-            // genre list modeled as map with ordinal keys
-            "123": {
-                "name": "Drama",
-                "0": $ref('titlesById[23]'),
-                "1": $ref('titlesById[99]'),
-                "length": 2
-            },
-            // genre list modeled as map with ordinal keys
-            "522": {
-                "name": "Comedy",
-                "0": $ref('titlesById[23]'),
-                "1": $ref('titlesById[44]'),
-                "length": 2           
-            }
-        },
-        // map of all titles by ID
-        "titlesById": {
-           "99": {
-                "name": "House of Cards",
-                "rating": 5
-            },
-            "23": {
-                "name": "Orange is the New Black",
-                "rating": 5
-            },
-            "44": {
-                "name": "Arrested Development",
-                "rating": 5            
-            }
-        }
-    });
-
-// Converts a integer into a string of stars
-function getStars(num) {
-    var stars = "",
-        counter;
-
-    if (num !== undefined) {
-        for(counter = 0; counter &lt; num; counter++) {
-            stars += "*";
-        }
-    }
-
-    return stars;
-}
-
-// Because we intend to transform the data directly into HTML, we specify a selector function to avoid allocating a JSON result.
-// We pass arguments to the selector function and they are bound to the values of the requested paths. We then convert the path values directly into HTML.
-var html = model.get(
-    'genreLists[0][0..1]["name", "rating"]', 'genreLists[0].name',
-    // Arguments passed to the selector function will be bound to the values of the paths.
-    // The process of binding path values to the arguments of selector functions works like this:
-    // If a selector function argument is specified for a <a href="global.html#PathSet">PathSet</a>, all <a href="global.html#Key">Key</a>s are removed from the JSON data structure, leaving behind only the keys in the <a href="global.html#KeySet">KeySet</a>s.
-    // nameAndRatings is bound to the value of ["genreName", 0, {to:1}, ["name","rating"]], which is:
-    // {
-    //     "0": {
-    //         "name": "Orange is the New Black",
-    //         "rating": 5
-    //     },
-    //     "1": {
-    //         "name": "House of Cards",
-    //         "rating": 5
-    //     }
-    // }
-    // Notice that the <a href="global.html#Key">Key</a>s ["genreLists",0] in the path are not present in the JSON object above, only the <a href="global.html#KeySet">KeySet</a>s [{to:1}, ["name","rating"]]. This optimization decreases allocations and repetitive boiler plate code.
-    // genreName is bound to the value of ["genreLists", 0, "name"], which is "Drama".
-    function(nameAndRatings, genreName) {
-        return "&lt;h1>" + genreName + "&lt;/h1>\n" +
-            "&lt;ul>\n" + 
-            [0,1].
-                // filter out indexes that are null or undefined
-                filter(function(index) {
-                    return nameAndRatings[index] != null;
-                }).
-                map(function(index) {
-                    var nameAndRating = nameAndRatings[index];
-                    return "&lt;li>" + nameAndRating["name"] + " " + getStars(nameAndRating["rating"]) + "&lt;/li>\n";
-                }).join("") + "&lt;/ul>";
-    });
-
-html.subscribe(function(html) { 
-    console.log(html); 
-});
-
-// The code above outputs the following HTML fragment to the console.
-// &lt;h1>Drama&lt;/h1>
-// &lt;ul>
-// &lt;li>Orange is the New Black *****&lt;/li>
-// &lt;li>House of Cards *****&lt;/li>
-// &lt;/ul></code></pre>
-
-    <pre class="prettyprint"><code>// In this example, we will perform the same operation as in the last example: we will retrieve data from a local JSONGraph model cache and convert it into an HTML list. In the previous example, we achieved a good balance between performance and expressiveness by binding the value of the requested paths to arguments in the selector function. In the code below, we will again pass arguments to the selector function to show another example of how <a href="global.html#PathSet">PathSet</a> values are bound to arguments. 
-// Creating a model and passing a data source that connects it to a remote JSONGraph model.
-var model = new falcor.Model();
-var $ref = falcor.Model.ref;
-// Loading a JSONGraph object into the model's cache. This JSONGraph object models a list of genres, each of which contains several titles.
-model.setCache(
-    {
-        // list of user's genres, modeled as a map with ordinal keys
-        "genreLists": {
-            "0": $ref('genresById[123]'),
-            "1": $ref('genresById[522]'),
-            "length": 2
-        },
-        // map of all genres, organized by ID
-        "genresById": {
-            // genre list modeled as map with ordinal keys
-            "123": {
-                "name": "Drama",
-                "0": $ref('titlesById[23]'),
-                "1": $ref('titlesById[99]'),
-                "length": 2
-            },
-            // genre list modeled as map with ordinal keys
-            "522": {
-                "name": "Comedy",
-                "0": $ref('titlesById[23]'),
-                "1": $ref('titlesById[44]'),
-                "length": 2           
-            }
-        },
-        // map of all titles by ID
-        "titlesById": {
-           "99": {
-                "name": "House of Cards",
-                "rating": 5
-            },
-            "23": {
-                "name": "Orange is the New Black",
-                "rating": 5
-            },
-            "44": {
-                "name": "Arrested Development",
-                "rating": 5            
-            }
-        }
-    });
-
-// Because we intend to transform the data directly into HTML, we specify a selector function to avoid allocating a JSON result.
-// Within the selector function we read data directly from the cache, and convert it directly into HTML.
-var html = model.get(
-    ["genreLists", {to:1}, {to:1}, "name"], ["genreLists", {to:1}, "name"],
-    // Arguments passed to the selector function will be bound to the values of the paths.
-    // The process of binding path values to the arguments of selector functions works like this:
-    // If a <a href="global.html#PathSet">PathSet</a> is bound to a selector function argument, all <a href="global.html#Key">Key</a>s are removed from the JSON data structure, leaving behind only the keys in the <a href="global.html#KeySet">KeySet</a>s.
-    // names is bound to the value of ["genreLists", {to:1}, {to:1}, "name"], which is:
-    // {
-    //     "0": {
-    //         "0": "Orange is the New Black",
-    //         "1": "House of Cards"
-    //     },
-    //     "1": {
-    //         "0": "Orange is the New Black",
-    //         "1": "Arrested Development"
-    //     }
-    // }
-    // Notice that of the path ["genreLists",{to:1},{to:1}, "name"] the <a href="global.html#Key">Key</a>s ["genreLists"] and ["name"] in the path are not present in the structure, only the <a href="global.html#KeySet">KeySet</a>s [{to:1},{to:1}]. This optimization decreases allocations and repetitive boiler plate code.
-    // genreNames is bound to the value of ["genreLists", {to:1}, "name"], which is:
-    // {
-    //     "0": "Drama",
-    //     "1": "Comedy"
-    // }
-    // Notice once again that the <a href="global.html#Key">Key</a>s ("genreLists","name") have been removed from the structure, leaving only the keys in the <a href="global.html#KeySet">KeySet</a> ({to:1}) in the data structure.
-    function(names, genreNames) {
-        return [0,1].
-            // filter out indexes that are null or undefined
-            filter(function(index) {
-                return genreNames[index] != null;
-            }).
-            map(function(genreIndex) {
-                var genreName = genreNames[genreIndex];
-                return "&lt;h1>" + genreName + "&lt;/h1>\n" +
-                "&lt;ul>\n" + 
-                    [0,1].
-                        // filter out indexes that are null or undefined
-                        filter(function(index) {
-                            return names[index] != null;
-                        }).
-                        map(function(index) {
-                            //var name = names[index][genreIndex];
-                            var name = names[genreIndex][index];
-                            return "&lt;li>" + name + "&lt;/li>\n";
-                        }).join("") + 
-                    "&lt;/ul>";
-            }).join("");
-    });
-
-html.subscribe(function(html) { 
-    console.log(html); 
-});
-
-// The code above outputs the following HTML fragment to the console.
-// &lt;h1>Drama&lt;/h1>
-// &lt;ul>
-// &lt;li>Orange is the New Black&lt;/li>
-// &lt;li>House of Cards&lt;/li>
-// &lt;/ul>
-// &lt;h1>Comedy&lt;/h1>
-// &lt;ul>
-// &lt;li>Orange is the New Black&lt;/li>
-// &lt;li>Arrested Development&lt;/li>
-// &lt;/ul></code></pre>
-
-    <pre class="prettyprint"><code>// In this example, we will demonstrate what happens when errors are encountered while evaluating paths. 
-var model = new falcor.Model();
-// Loading a JSONGraph object into the Model's cache to mock a server model locally.
-model.setCache(
-    {
-        user: {
-            name: "Frank Underwood",
-            hometown: {$type: 'error', value: 'Could not be retrieved from server.'},
-            // A JSONGraph Error is any map that contains a $type key of "error." Errors are JSONGraph Atoms, which are special maps that act like values in that they are always returned whole. Errors are handled differently than normal values by the Models. 
-            country: {$type: 'error', value: 'Could not be retrieved from server.'}
-        }
-    });
-
-// Because we intend to transform the data directly into HTML, we specify a selector function to avoid allocating a JSON result.
-// Within the selector function we read data directly from the cache, and convert it directly into HTML.
-var userHtml = model.get(
-    'user.name', 'user.hometown', 'user.country',
-    function(name, hometown, country) {
-        return "Name: " + name + ", Hometown: " + hometown + ", Country: " + country;
-    });
-
-// Use 
-userHtml.subscribe(
-    function(html) { 
-        console.log(html); 
-    },
-    function(e) {
-        console.error(JSON.stringify(e));
-    });
-
-// The code above outputs the following to the console:
-// Name: Frank Underwood, Hometown: undefined, Country: undefined
-// [{"path":["user","hometown"],"value":"Could not be retrieved from server."},{"path":["user","country"],"value":"Could not be retrieved from server."}] </code></pre>
-
-
 
         
             
 
     
 
-    <h4 class="name" id="getCache"><span class="type-signature"></span>getCache<span class="signature">(&hellip;pathSets)</span><span class="type-signature"> &rarr; {<a href="global.html#JSONGraph">JSONGraph</a>}</span></h4>
+    <h4 class="name" id="getCache"><span class="type-signature"></span>getCache<span class="signature">(&hellip;pathSets<span class="signature-attributes">opt</span>)</span><span class="type-signature"> &rarr; {<a href="global.html#JSONGraph">JSONGraph</a>}</span></h4>
 
     
 
 
 
 <div class="description">
-    <p>Get the <a href="Model.html">Model</a>'s local cache as a <a href="global.html#JSONGraph">value</a>. This method can be a useful when storing state to 
-local storage. This method accepts <a href="global.html#PathSet">PathSet</a>s to retrieve from the <a href="Model.html">Model</a> cache. If no paths are specified, 
-the entire cache is returned.</p>
+    <p>Get the local <a href="global.html#JSONGraph">JSONGraph</a> cache. This method can be a useful to store the state of the cache</p>
 </div>
 
 
@@ -2264,6 +1270,8 @@ the entire cache is returned.</p>
             
                 <td class="attributes">
                 
+                    &lt;optional><br>
+                
 
                 
 
@@ -2275,7 +1283,7 @@ the entire cache is returned.</p>
 
             
 
-            <td class="description last"><p>the path(s) to retrieve</p></td>
+            <td class="description last"><p>The path(s) to retrieve. If no paths are specified, the entire <a href="global.html#JSONGraph">JSONGraph</a> is returned</p></td>
         </tr>
 
     
@@ -2316,7 +1324,7 @@ the entire cache is returned.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="docs.js.html">docs.js</a>, <a href="docs.js.html#line2538">line 2538</a>
+        <a href="falcor_Model.js.html">falcor/Model.js</a>, <a href="falcor_Model.js.html#line243">line 243</a>
     </li></ul></dd>
     
 
@@ -2343,7 +1351,7 @@ the entire cache is returned.</p>
 
         
 <div class="param-desc">
-    <p>jsonGraph a JSONGraph object to use as the local cache.</p>
+    <p>jsonGraph - A <a href="global.html#JSONGraph">JSONGraph</a> fragment</p>
 </div>
 
 
@@ -2366,7 +1374,7 @@ the entire cache is returned.</p>
     <h5>Example</h5>
     
     <pre class="prettyprint"><code>// Storing the boxshot of the first 10 titles in the first 10 genreLists to local storage.
- localStorage.setItem('cache', JSON.stringify(model.getCache("genreLists[0...10][0...10].boxshot")));</code></pre>
+     localStorage.setItem('cache', JSON.stringify(model.getCache("genreLists[0...10][0...10].boxshot")));</code></pre>
 
 
 
@@ -2375,328 +1383,14 @@ the entire cache is returned.</p>
 
     
 
-    <h4 class="name" id="getProgressively"><span class="type-signature"></span>getProgressively<span class="signature">(&hellip;path, selector<span class="signature-attributes">nullable</span>)</span><span class="type-signature"> &rarr; {<a href="Observable.html">Observable</a>.&lt;Object>}</span></h4>
+    <h4 class="name" id="getValue"><span class="type-signature"></span>getValue<span class="signature">(path)</span><span class="type-signature"> &rarr; {<a href="Observable.html">Observable</a>.&lt;*>}</span></h4>
 
     
 
 
 
 <div class="description">
-    <p>The getProgressively method retrieves several <a href="global.html#Path">Path</a>s or <a href="global.html#PathSet">PathSet</a>s from the JSONGraph object, and returns the requested data as an <a href="Observable.html">Observable</a> sequence of JSON tree. Returning the requested data as a JSON tree rather than a JSONGraph object makes it easy to send the data into a template. The method is called getProgressively because the JSON tree is progressively populated as data arrives. In this regard this method differs from the Model.prototype.get method, which waits until all the data is present before returning a result in the <a href="Observable.html">Observable</a> stream. Each time a new <a href="global.html#JSONGraphEnvelope">JSONGraphEnvelope</a> arrives, it is added to the tree, and the tree is added to the sequence again. This method is ideal if you want to render the data that is present in the local cache immediately and then rerender each time data arrives from the remote model on the server.
-An optional selector function can be specified which receives an argument for each <a href="global.html#Path">Path</a> or <a href="global.html#PathSet">PathSet</a> passed to the method. For a PathSet, the value passed to the selector function will be a JSON value that starts at the first <a href="global.html#KeySet">KeySet</a> found in the <a href="global.html#PathSet">PathSet</a>. If a <a href="global.html#Path">Path</a> is passed, the value found at the path will be passed as the argument to the selector function.
-If an error is encountered when attempting to retrieve a <a href="global.html#Path">Path</a>, undefined is passed to the selector function in place of the <a href="global.html#Path">Path</a>'s value. If all attempts to retrieve <a href="global.html#Path">Path</a>s resulted in error, the selector function will not be invoked. Errors can be retrieved by passing an onError callback to the <a href="Observable.html">Observable</a>s forEach method. If multiple errors are encountered, a CompositeError object is sent.</p>
-</div>
-
-
-
-
-
-
-
-
-
-    <h5>Parameters:</h5>
-    
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-        <th>Attributes</th>
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>path</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type"><a href="global.html#PathSet">PathSet</a></span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-
-                
-
-                
-                    &lt;repeatable><br>
-                
-                </td>
-            
-
-            
-
-            <td class="description last"><p>the path(s) to retrieve</p></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>selector</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">function</span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-
-                
-                    &lt;nullable><br>
-                
-
-                
-                </td>
-            
-
-            
-
-            <td class="description last"><p>an optional selector function that receives an argument for each specified PathSet. Each argument contains the value of that PathSet.</p></td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="docs.js.html">docs.js</a>, <a href="docs.js.html#line1997">line 1997</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<h5>Returns:</h5>
-
-        
-
-
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type"><a href="Observable.html">Observable</a>.&lt;Object></span>
-
-
-    </dd>
-</dl>
-
-    
-
-
-    <h5>Example</h5>
-    
-    <pre class="prettyprint"><code>// In this example we will retrieve data from the model as a JSON tree and then display it to the console.
-var $ref = falcor.Model.ref;
-
-var mockServerModel = new falcor.Model({
-    cache: { 
-        genresById: {
-            "123": {
-                "2": $ref('titlesById[78]')
-            }
-        },
-        titlesById: {
-            "78": {
-                "name": "Daredevil",
-                "rating": 5
-            }
-        }
-    }
-})
-
-var model = new falcor.Model({source: mockServerModel.asDataSource() });
-
-// Loading a JSONGraph object into the model's cache. This JSONGraph object models a list of genres, each of which contains several titles.
-model.setCache(
-    {
-        // list of user's genres, modeled as a map with ordinal keys
-        "genreLists": {
-            "0": $ref('genresById[123]'),
-            "1": $ref('genresById[522]'),
-            "length": 2
-        },
-        // map of all genres, organized by ID
-        "genresById": {
-            // genre list modeled as map with ordinal keys
-            "123": {
-                "name": "Drama",
-                "0": $ref('titlesById[23]'),
-                "1": $ref('titlesById[99]'),
-                "length": 2
-            },
-            // genre list modeled as map with ordinal keys
-            "522": {
-                "name": "Comedy",
-                "0": $ref('titlesById[23]'),
-                "1": $ref('titlesById[44]'),
-                "length": 2           
-            }
-        },
-        // map of all titles by ID
-        "titlesById": {
-           "99": {
-                "name": "House of Cards",
-                "rating": 5
-            },
-            "23": {
-                "name": "Orange is the New Black",
-                "rating": 5
-            },
-            "44": {
-                "name": "Arrested Development",
-                "rating": 5            
-            }
-        }
-    });
-
-// Requesting the name of the first three titles in the first genre list.
-// Note that the first two titles will be found in the cache, whereas the last one will have to be requested from the data source.
-var nameAndRatings = model.get(
-    'genreLists[0][0..2].["name", "rating"]').
-    progressively();
-
-nameAndRatings.forEach(function(data) { 
-    console.log(JSON.stringify(data, null, 4)); 
-});
-
-
-// The code above outputs the following two trees to the console. 
-// {
-//     "json": {
-//         "genreLists": {
-//             "0": {
-//                 "0": {
-//                     "name": "Orange is the New Black",
-//                     "rating": 5
-//                 },
-//                 "1": {
-//                     "name": "House of Cards",
-//                     "rating": 5
-//                 }
-//             }
-//         }
-//     }
-// }
-// {
-//     "json": {
-//         "genreLists": {
-//             "0": {
-//                 "0": {
-//                     "name": "Orange is the New Black",
-//                     "rating": 5
-//                 },
-//                 "1": {
-//                     "name": "House of Cards",
-//                     "rating": 5
-//                 },
-//                 "2": {
-//                     "name": "Daredevil",
-//                     "rating": 5
-//                 }
-//             }
-//         }
-//     }
-// } 
-
-// Note that the first time the tree is output to the console it contains only the data in the cache. The second time it contains the new data that has arrived from the remote model on the server.</code></pre>
-
-
-
-        
-            
-
-    
-
-    <h4 class="name" id="getValue"><span class="type-signature"></span>getValue<span class="signature">(path)</span><span class="type-signature"> &rarr; {<a href="Observable.html">Observable</a>.&lt;Object>}</span></h4>
-
-    
-
-
-
-<div class="description">
-    <p>The getValue method retrieves a single <a href="global.html#Path">Path</a> from a <a href="Model.html">Model</a>.</p>
+    <p>Get data for a single <a href="global.html#Path">Path</a></p>
 </div>
 
 
@@ -2748,7 +1442,7 @@ nameAndRatings.forEach(function(data) {
 
             
 
-            <td class="description last"><p>the path to retrieve</p></td>
+            <td class="description last"><p>The path to retrieve</p></td>
         </tr>
 
     
@@ -2789,7 +1483,7 @@ nameAndRatings.forEach(function(data) {
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="docs.js.html">docs.js</a>, <a href="docs.js.html#line1380">line 1380</a>
+        <a href="falcor_Model.js.html">falcor/Model.js</a>, <a href="falcor_Model.js.html#line141">line 141</a>
     </li></ul></dd>
     
 
@@ -2816,7 +1510,9 @@ nameAndRatings.forEach(function(data) {
 
         
 <div class="param-desc">
-    <p>the requested value.</p>
+    <ul>
+<li>The value for the path</li>
+</ul>
 </div>
 
 
@@ -2827,7 +1523,7 @@ nameAndRatings.forEach(function(data) {
     </dt>
     <dd>
         
-<span class="param-type"><a href="Observable.html">Observable</a>.&lt;Object></span>
+<span class="param-type"><a href="Observable.html">Observable</a>.&lt;*></span>
 
 
     </dd>
@@ -2840,13 +1536,13 @@ nameAndRatings.forEach(function(data) {
     
     <pre class="prettyprint"><code>var model = new falcor.Model({source: new falcor.HttpDataSource("/model.json") });
 
-model.
-    getValue('user.name').
-    subscribe(function(name) {
-        console.log(name);
-    });
+     model.
+         getValue('user.name').
+         subscribe(function(name) {
+             console.log(name);
+         });
 
-// The code above prints "Jim" to the console.</code></pre>
+     // The code above prints "Jim" to the console.</code></pre>
 
 
 
@@ -2855,15 +1551,14 @@ model.
 
     
 
-    <h4 class="name" id="getValueSync"><span class="type-signature"></span>getValueSync<span class="signature">(path)</span><span class="type-signature"> &rarr; {Object}</span></h4>
+    <h4 class="name" id="getValueSync"><span class="type-signature"></span>getValueSync<span class="signature">(path)</span><span class="type-signature"> &rarr; {*}</span></h4>
 
     
 
 
 
 <div class="description">
-    <p>Synchronously retrieves a single value from the local cache. This method can only be invoked within a selector function passed to get, getProgressively, or call. For more information on the correct usage of this method see Model.prototype.get.
-The getValueSync method differs from the asynchronous get methods (ex. get, getValues) in that it can be used to retrieve objects in addition to JSONGraph values.</p>
+    <p>Synchronously retrieves a single path from the local <a href="Model.html">Model</a> only and will not retrieve missing paths from the <a href="DataSource.html">DataSource</a>. This method can only be invoked when the <a href="Model.html">Model</a> does not have a <a href="DataSource.html">DataSource</a> or from within a selector function. See Model.prototype.get. The getValueSync method differs from the asynchronous get methods (ex. get, getValues) in that it can be used to retrieve objects in addition to JSONGraph values.</p>
 </div>
 
 
@@ -2915,7 +1610,7 @@ The getValueSync method differs from the asynchronous get methods (ex. get, getV
 
             
 
-            <td class="description last"><p>the path(s) to retrieve synchronously from the local cache.</p></td>
+            <td class="description last"><p>The path to retrieve</p></td>
         </tr>
 
     
@@ -2956,7 +1651,7 @@ The getValueSync method differs from the asynchronous get methods (ex. get, getV
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="docs.js.html">docs.js</a>, <a href="docs.js.html#line2524">line 2524</a>
+        <a href="falcor_Model.js.html">falcor/Model.js</a>, <a href="falcor_Model.js.html#line279">line 279</a>
     </li></ul></dd>
     
 
@@ -2983,7 +1678,9 @@ The getValueSync method differs from the asynchronous get methods (ex. get, getV
 
         
 <div class="param-desc">
-    <p>the value found at the path.</p>
+    <ul>
+<li>The value for the specified path</li>
+</ul>
 </div>
 
 
@@ -2994,111 +1691,7 @@ The getValueSync method differs from the asynchronous get methods (ex. get, getV
     </dt>
     <dd>
         
-<span class="param-type">Object</span>
-
-
-    </dd>
-</dl>
-
-    
-
-
-
-        
-            
-
-    
-
-    <h4 class="name" id="safeMode"><span class="type-signature"></span>safeMode<span class="signature">()</span><span class="type-signature"> &rarr; {<a href="Model.html">Model</a>}</span></h4>
-
-    
-
-
-
-<div class="description">
-    <p>Returns a copy of the <a href="Model.html">Model</a> does not allow synchronous access to the cache outside of a selector function. In safe mode, Model.prototype.getValueSync, Model.prototype.setValueSync, and Model.prototype.bind is only allowed within the selector functions passed to Model methods. Selector functions are guaranteed to execute once the requested data has been downloaded into the cache, and therefore allowing synchronous access to the Model's cache is safe. Outside of a selector function, synchronous access to the cache is inherently unsafe as there is no way of knowing whether data is undefined or simply not present in the cache at the moment. In safe mode (the default) an attempt to synchronously acces cache data outside of a selector method will throw.</p>
-</div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="docs.js.html">docs.js</a>, <a href="docs.js.html#line2436">line 2436</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<h5>Returns:</h5>
-
-        
-<div class="param-desc">
-    <p>a <a href="Model.html">Model</a> that throws if an attempt is made to synchronously access the cache outside of a selector function.</p>
-</div>
-
-
-
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type"><a href="Model.html">Model</a></span>
+<span class="param-type">*</span>
 
 
     </dd>
@@ -3231,7 +1824,7 @@ The getValueSync method differs from the asynchronous get methods (ex. get, getV
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="docs.js.html">docs.js</a>, <a href="docs.js.html#line2973">line 2973</a>
+        <a href="falcor_Model.js.html">falcor/Model.js</a>, <a href="falcor_Model.js.html#line112">line 112</a>
     </li></ul></dd>
     
 
@@ -3258,7 +1851,9 @@ The getValueSync method differs from the asynchronous get methods (ex. get, getV
 
         
 <div class="param-desc">
-    <p>an <a href="Observable.html">Observable</a> stream containing the values in the JSONGraph model after the set was attempted.</p>
+    <ul>
+<li>An <a href="Observable.html">Observable</a> stream containing the values in the JSONGraph model after the set was attempted.</li>
+</ul>
 </div>
 
 
@@ -3281,73 +1876,6 @@ The getValueSync method differs from the asynchronous get methods (ex. get, getV
     
 
 
-    <h5>Example</h5>
-    
-    <pre class="prettyprint"><code>//  Example: set values in various locations in the JSONGraph model
-
-//TODO: verify?
-
-// Create a path evaluator
-var model = new falcor.Model();
-var $ref = falcor.Model.ref;
-
-// Loading a JSONGraph object into the model's cache.
-model.setCache(
-    {
-        // list of user's genres, modeled as a map with ordinal keys
-        "genreLists": {
-            "0": $ref('genresById[123]'),
-            "length": 1
-        },
-        // map of all genres, organized by ID
-        "genresById": {
-            // genre list modeled as map with ordinal keys
-            "123": {
-                "name": "Drama",
-                "0": $ref('titlesById[23]'),
-                "1": $ref('titlesById[99]'),
-                "length": 2
-            }
-        },
-        // map of all titles, organized by ID
-        "titlesById": {
-           "99": {
-                "name": "House of Cards",
-                "rating": 5
-            },
-            "23": {
-                "name": "Orange is the New Black",
-                "rating": 5
-            }
-        }
-    });
-
-// Create an <a href="Observable.html">Observable</a> stream of <a href="global.html#PathValue">PathValue</a>s containing the values in the JSONGraph model after the set was attempted. Note that the code below does not immediately trigger the set operation, because <a href="Observable.html">Observable</a>s are lazily-evaluated.  The set operation will be delayed until the next line of code, in which we attempt to retrieve the values from the <a href="Observable.html">Observable</a> using its Observable.prototype.forEach method.
-var pathValues = 
-    model.
-        set(
-            {
-                path: ["genreLists", 0, 0, "rating"],
-                value: 5
-            }, 
-            {
-                path: ["genreLists", 0, 1, "rating"],                
-                value: 4
-            }).
-        toPathValues();
-
-pathValues.forEach(function(pathValue) { 
-    console.log(JSON.stringify(pathValue)); 
-});
-
-// The code above outputs the following <a href="global.html#PathValue">PathValue</a>s to the console in non-deterministic order.
-// {"path":["genreLists",0,0,"rating"],"value":5}
-// {"path":["genreLists",0,1,"rating"],"value":4}
-// Note that the values above were returned out of order. This was possible 
-// because each PathValue provides sufficient context (ie the path) to 
-// differentiate which value is being sent.</code></pre>
-
-
 
         
             
@@ -3361,7 +1889,7 @@ pathValues.forEach(function(pathValue) {
 
 
 <div class="description">
-    <p>Set the <a href="Model.html">Model</a>'s local cache to a JSONGraph value. This method can be a useful way of mocking a remote document, or restoring state previously saved to local storage.</p>
+    <p>Set the local cache to a <a href="global.html#JSONGraph">JSONGraph</a> fragment. This method can be a useful way of mocking a remote document, or restoring the local cache from a previously stored state</p>
 </div>
 
 
@@ -3413,7 +1941,7 @@ pathValues.forEach(function(pathValue) {
 
             
 
-            <td class="description last"><p>a JSONGraph object to use as the local cache.</p></td>
+            <td class="description last"><p>The <a href="global.html#JSONGraph">JSONGraph</a> fragment to use as the local cache</p></td>
         </tr>
 
     
@@ -3454,7 +1982,7 @@ pathValues.forEach(function(pathValue) {
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="docs.js.html">docs.js</a>, <a href="docs.js.html#line2555">line 2555</a>
+        <a href="falcor_Model.js.html">falcor/Model.js</a>, <a href="falcor_Model.js.html#line222">line 222</a>
     </li></ul></dd>
     
 
@@ -3479,108 +2007,6 @@ pathValues.forEach(function(pathValue) {
 
 
 
-    <h5>Example</h5>
-    
-    <pre class="prettyprint"><code>// In this example we will retrieve data from the model and converted it into an HTML representation.
-// Creating a model and passing a data source that connects it to a remote JSONGraph model.
-var model = new falcor.Model();
-var $ref = falcor.Model.ref;
-
-//TODO: hemlock grove?
-
-// Loading a JSONGraph object into the model's cache. This JSONGraph object models a list of genres, each of which contains several titles.
-model.setCache(
-    {
-        // list of user's genres, modeled as a map with ordinal keys
-        "genreLists": {
-            "0": $ref('genresById[123]'),
-            "1": $ref('genresById[522]'),
-            "length": 2
-        },
-        // map of all genres, organized by ID
-        "genresById": {
-            // genre list modeled as map with ordinal keys
-            "123": {
-                "name": "Drama",
-                "0": $ref('titlesById[23]'),
-                "1": $ref('titlesById[99]'),
-                "length": 2
-            },
-            // genre list modeled as map with ordinal keys
-            "522": {
-                "name": "Comedy",
-                "0": $ref('titlesById[23]'),
-                "1": $ref('titlesById[44]'),
-                "length": 2           
-            }
-        },
-        // map of all titles by ID
-        "titlesById": {
-           "99": {
-                "name": "House of Cards",
-                "rating": 5
-            },
-            "23": {
-                "name": "Orange is the New Black",
-                "rating": 5
-            },
-            "44": {
-                "name": "Arrested Development",
-                "rating": 5            
-            }
-        }
-    });
-
-// Converts a integer into a string of stars
-function getStars(num) {
-    var stars = "",
-        counter;
-
-    if (num !== undefined) {
-        for(counter = 0; counter &lt; num; counter++) {
-            stars += "*";
-        }
-    }
-
-    return stars;
-}
-
-// Note that in the example below we ask for the first three titles in the first genre list. This will 
-// result in a request to the server for ["genreLists", 0, 2, ["name","rating"]] because the third title 
-// is not in the cache. When all of the data has been retrieved, the selector function is invoked and the data in the cache is converted into HTML.
-var nameAndRatings = model.get(
-    'genreLists[0][0..2]["name", "rating"]', 'genreLists[0].name',
-    // When this function is invoked all of the data should be available in the cache, except for those paths that caused an error to occur
-    function() {
-        var firstGenreList = this.bindSync(["genreLists",0]);
-        return "&lt;h1>" + firstGenreList.getValueSync(["name"]) + "&lt;/h1>\n" +
-            "&lt;ul>\n" + 
-            [0,1,2].
-                // filter out indexes that have not been retrieved from the server yet
-                filter(function(index) {
-                    // when retrieving values from the local cache, it is possible to retrieve objects as well as values.
-                    return firstGenreList.getValueSync([index]) !== undefined;
-                }).
-                map(function(index) {
-                    var nameAndRating = firstGenreList.bindSync([index]);
-                    return "&lt;li>" + nameAndRating.getValueSync(["name"]) + " " + getStars(nameAndRating.getValueSync(["rating"])) + "&lt;/li>\n";
-                }).join("") + 
-            "&lt;/ul>";
-    });
-
-nameAndRatings.forEach(function(html) { 
-    console.log(html); 
-});
-
-// The code above outputs the following HTML fragment to the console.
-// &lt;h1>Drama&lt;/h1>
-// &lt;ul>
-// &lt;li>Orange is the New Black *****&lt;/li>
-// &lt;li>House of Cards *****&lt;/li>
-// &lt;li>Hemlock Grove *****&lt;/li>
-// &lt;/ul></code></pre>
-
-
 
         
             
@@ -3594,9 +2020,7 @@ nameAndRatings.forEach(function(html) {
 
 
 <div class="description">
-    <p>Returns a copy of the <a href="Model.html">Model</a> that unboxes treats errors as values. This means that the <a href="Model.html">Model</a> will report 
-errors in the same callback used to report data. Errors will appear as objects in responses, rather than being sent to 
-the <a href="Observable.html#~onErrorCallback">Observable~onErrorCallback</a> callback of the <a href="ModelResponse.html">ModelResponse</a>.</p>
+    <p>Returns a clone of the <a href="Model.html">Model</a> that treats errors as values. Errors will be reported in the same callback used to report data. Errors will appear as objects in responses, rather than being sent to the <a href="Observable.html#~onErrorCallback">Observable~onErrorCallback</a> callback of the <a href="ModelResponse.html">ModelResponse</a>.</p>
 </div>
 
 
@@ -3640,7 +2064,7 @@ the <a href="Observable.html#~onErrorCallback">Observable~onErrorCallback</a> ca
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="docs.js.html">docs.js</a>, <a href="docs.js.html#line2452">line 2452</a>
+        <a href="falcor_Model.js.html">falcor/Model.js</a>, <a href="falcor_Model.js.html#line422">line 422</a>
     </li></ul></dd>
     
 
@@ -3666,10 +2090,6 @@ the <a href="Observable.html#~onErrorCallback">Observable~onErrorCallback</a> ca
 <h5>Returns:</h5>
 
         
-<div class="param-desc">
-    <p>a <a href="Model.html">Model</a> that the values inside of <a href="global.html#Atom">Atom</a>s rather than the sentinel instances themselves.</p>
-</div>
-
 
 
 <dl>
@@ -3700,7 +2120,7 @@ the <a href="Observable.html#~onErrorCallback">Observable~onErrorCallback</a> ca
 
 
 <div class="description">
-    <p>Returns a copy of the <a href="Model.html">Model</a> that never attempts to batch concurrent requests of the same type. If two concurrent requests for different paths are made to an unbatched <a href="Model.html">Model</a>, two seperate requests will be made to the <a href="Model.html">Model</a>'s <a href="DataSource.html">DataSource</a> if they cannot be served from the local cache. This mode is the default.</p>
+    <p>Returns a clone of the <a href="Model.html">Model</a> that disables batching. This is the default mode. Each operation will be executed on the <a href="DataSource.html">DataSource</a> separately</p>
 </div>
 
 
@@ -3744,7 +2164,7 @@ the <a href="Observable.html#~onErrorCallback">Observable~onErrorCallback</a> ca
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="docs.js.html">docs.js</a>, <a href="docs.js.html#line2274">line 2274</a>
+        <a href="falcor_Model.js.html">falcor/Model.js</a>, <a href="falcor_Model.js.html#line407">line 407</a>
     </li></ul></dd>
     
 
@@ -3791,162 +2211,6 @@ the <a href="Observable.html#~onErrorCallback">Observable~onErrorCallback</a> ca
     
 
 
-    <h5>Example</h5>
-    
-    <pre class="prettyprint"><code>// In this example we will demonstrate that multiple calls made to a batched JSONGraph model in a single tick will only result in a single request to the <a href="DataSource.html">DataSource</a> responsible for retrieving data from the server.
-
- // create a variable to track the number of requests sent to our mock <a href="DataSource.html">DataSource</a>.
- var requestCount = 0;
-
- // create an object that mocks a <a href="DataSource.html">DataSource</a>, an object typically used to retrieve
- // information from the network.
- // Even though multiple calls to Model.prototype.get will be made on the 
- // batched <a href="Model.html">Model</a>, we expect that only one request will be sent to the
- // server.
- var mockDataSource = {
-    // expecting two calls:
-    // 1. ["titlesById", [99, 23], "name"]
-    // 2. ["titlesById", [99, 23], "rating"]
-    get: function(pathSets) {
-        requestCount++;
-        // if path is ["titlesById", [99, 23], "name"]
-        if (pathSets[0][2] === "name") {
-
-            // return an Observable stream of the <a href="global.html#JSONGraphEnvelope">JSONGraphEnvelope</a> that the server would send
-            return falcor.Observable.of({
-                paths: [["titlesById", [23, 99], "name"]],
-                jsong: {
-                    "titlesById": {
-                        "99": {
-                            "name": "House of Cards"
-                        },
-                        "23": {
-                            "name": "Orange is the New Black"
-                        }
-                    }
-                }
-            })
-        }
-        // if path is ["titlesById", [99, 23], "rating"]
-        else {
-            // return an Observable stream of the <a href="global.html#JSONGraphEnvelope">JSONGraphEnvelope</a> that the server would send
-            return falcor.Observable.of({
-                paths: [["titlesById", [23, 99], "rating"]],
-                jsong: {
-                    "titlesById": {
-                        "99": {
-                            "rating": 5
-                        },
-                        "23": {
-                            "rating": 5
-                        }
-                    }
-                }
-            })
-        }
-    }
- };
-
-// Create a Model that uses the mock <a href="DataSource.html">DataSource</a> for data retrieval
-var model = new falcor.Model({source: mockDataSource});
-var $ref = falcor.Model.ref;
-
-// Loading a fragment of the JSONGraph object into the model's cache.
-model.setCache(
-    {
-        // list of user's genres, modeled as a map with ordinal keys
-        "genreLists": {
-            "0": $ref('genresById[123]'),
-            "1": $ref('genresById[522]'),
-            "length": 2
-        },
-        // map of all genres, organized by ID
-        "genresById": {
-            // genre list modeled as map with ordinal keys
-            "123": {
-                "name": "Drama",
-                "0": $ref('titlesById[23]'),
-                "1": $ref('titlesById[99]'),
-                "length": 2
-            },
-            // genre list modeled as map with ordinal keys
-            "522": {
-                "name": "Comedy",
-                "0": $ref('titlesById[23]'),
-                "1": $ref('titlesById[44]'),
-                "length": 2           
-            }
-        }
-    });
-
-// Create a batched <a href="Model.html">Model</a> that accumulates get and set 
-// requests into batches and sends them at the end of the current tick.
-var batchedJsongModel = model.batch();
-
-// Immediately unbatch the batched <a href="Model.html">Model</a>. Every attempt
-// to get or set paths on this <a href="Model.html">Model</a> should trigger a 
-// new <a href="DataSource.html">DataSource</a> request. In other words this <a href="Model.html">Model</a> should
-// behave the same way as the originally-created model.
-var unbatchedJsongModel = batchedJsongModel.unbatch();
-
-// creating an Observable stream of a JSON object that contains the names of the first two titles in the first genre list
-var names = unbatchedJsongModel.get('genreLists[0][0..1]["name"]');
-
-// creating an Observable stream of a JSON object that contains the ratings of the first two titles in the first genre list
-var ratings = unbatchedJsongModel.get('genreLists[0][0..1]["rating"]');
-
-// retrieving the JSON object with the ratings from the stream
-names.subscribe(function(jsonEnvelope) {
-    console.log("Names arrived:")
-    console.log(JSON.stringify(jsonEnvelope, null, 4));
-    console.log("Total number of data source requests:", requestCount);
-})
-
-// retrieving the JSON object with the ratings from the stream
-ratings.subscribe(function(jsonEnvelope) {
-    console.log("Ratings arrived:")
-    console.log(JSON.stringify(jsonEnvelope, null, 4));
-    console.log("Total number of data source requests:", requestCount);
-})
-
-
-// Each the requests for names and ratings should result in a call to the
-// <a href="DataSource.html">DataSource</a>.
-// The code above prints the following to the console:
-// Names arrived:
-// {
-//     "json": {
-//         "genreLists": {
-//             "0": {
-//                 "0": {
-//                     name: "Orange is the New Black"
-//                 },
-//                 "1": {
-//                     name: "House of Cards"
-//                 }
-//             }
-//         }
-//     }
-// }
-// Total number of data source requests: 1
-// Ratings arrived:
-// {
-//     "json": {
-//         "genreLists": {
-//             "0": {
-//                 "0": {
-//                     rating: 5
-//                 },
-//                 "1": {
-//                     rating: 5
-//                 }
-//             }
-//         }
-//     }
-// }
-// Total number of data source requests: 2</code></pre>
-
-
 
         
             
@@ -3960,7 +2224,7 @@ ratings.subscribe(function(jsonEnvelope) {
 
 
 <div class="description">
-    <p>Returns a copy of the <a href="Model.html">Model</a> that unboxes <a href="global.html#Atom">Atom</a> values before returning them. By default <a href="Model.html">Model</a>s unbox values before returning them.</p>
+    <p>Returns a clone of the <a href="Model.html">Model</a> that unboxes values, returning the value inside of the wrapper (<a href="global.html#Atom">Atom</a>, Reference, or Error), rather than the wrapper itself. This is the default mode.</p>
 </div>
 
 
@@ -4004,143 +2268,7 @@ ratings.subscribe(function(jsonEnvelope) {
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="docs.js.html">docs.js</a>, <a href="docs.js.html#line2462">line 2462</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-    <dt class="tag-see">See:</dt>
-    <dd class="tag-see">
-        <ul>
-            <li><a href="global.html#Atom">Atom</a></li>
-        </ul>
-    </dd>
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<h5>Returns:</h5>
-
-        
-<div class="param-desc">
-    <p>a <a href="Model.html">Model</a> that the values inside of <a href="global.html#Atom">Atom</a>s rather than the sentinel instances themselves.</p>
-</div>
-
-
-
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type"><a href="Model.html">Model</a></span>
-
-
-    </dd>
-</dl>
-
-    
-
-
-    <h5>Example</h5>
-    
-    <pre class="prettyprint"><code>var model = new falcor.Model();
-model.setCache({
-    user: {
-        name: {
-            // Metadata that indicates this object is a Atom
-            $type: "atom",
-            // The value property contains the value box by the Atom
-            value: "Jim Parsons",
-            // Metadata that dictates that this value should be purged from the <a href="Model.html">Model</a>'s cache after two minutes. Negative numbers imply that expiration occurs relative to the current time.
-            $expires: -(1000 * 60 * 2)
-        }
-    }
-});
-
-model.unboxValues().getValue("user.name").subscribe(function(value) {
-    console.log(value);
-});
-
-// The code above outputs the following text to the console:
-// Jim Parsons
-// Note that the value of the Atom object was returned rather than the entire Atom.</code></pre>
-
-
-
-        
-            
-
-    
-
-    <h4 class="name" id="unsafeMode"><span class="type-signature"></span>unsafeMode<span class="signature">()</span><span class="type-signature"> &rarr; {<a href="Model.html">Model</a>}</span></h4>
-
-    
-
-
-
-<div class="description">
-    <p>Returns a copy of the <a href="Model.html">Model</a> that allows synchronous access to the cache outside of a selector function. In safe mode, Model.prototype.getValueSync, Model.prototype.setValueSync, and Model.prototype.bind is only allowed within the selector functions passed to Model methods. Selector functions are guaranteed to execute once the requested data has been downloaded into the cache, and therefore allowing synchronous access to the Model's cache is safe. Outside of a selector function, synchronous access to the cache is inherently unsafe as there is no way of knowing whether data is undefined or simply not present in the cache at the moment. In unsafe mode an attempt to synchronously acces cache data outside of a selector method will not throw. This API is inherently unsafe and should only be used if you know what you're doing.</p>
-</div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="docs.js.html">docs.js</a>, <a href="docs.js.html#line2444">line 2444</a>
+        <a href="falcor_Model.js.html">falcor/Model.js</a>, <a href="falcor_Model.js.html#line442">line 442</a>
     </li></ul></dd>
     
 
@@ -4166,10 +2294,6 @@ model.unboxValues().getValue("user.name").subscribe(function(value) {
 <h5>Returns:</h5>
 
         
-<div class="param-desc">
-    <p>a <a href="Model.html">Model</a> that does not throw if an attempt is made to synchronously access the cache outside of a selector function.</p>
-</div>
-
 
 
 <dl>
@@ -4193,14 +2317,14 @@ model.unboxValues().getValue("user.name").subscribe(function(value) {
 
     
 
-    <h4 class="name" id="withoutSource"><span class="type-signature"></span>withoutSource<span class="signature">()</span><span class="type-signature"> &rarr; {<a href="Model.html">Model</a>}</span></h4>
+    <h4 class="name" id="withoutDataSource"><span class="type-signature"></span>withoutDataSource<span class="signature">()</span><span class="type-signature"> &rarr; {<a href="Model.html">Model</a>}</span></h4>
 
     
 
 
 
 <div class="description">
-    <p>Returns a copy of the <a href="Model.html">Model</a> that uses only the data in the local cache. The new <a href="Model.html">Model</a> never makes a request to a remote JSONGraph model using a <a href="DataSource.html">DataSource</a> if data cannot be found in the local cache.</p>
+    <p>Returns a clone of the <a href="Model.html">Model</a> that only uses the local <a href="global.html#JSONGraph">JSONGraph</a> and never uses a <a href="DataSource.html">DataSource</a> to retrieve missing paths</p>
 </div>
 
 
@@ -4244,7 +2368,7 @@ model.unboxValues().getValue("user.name").subscribe(function(value) {
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="docs.js.html">docs.js</a>, <a href="docs.js.html#line2124">line 2124</a>
+        <a href="falcor_Model.js.html">falcor/Model.js</a>, <a href="falcor_Model.js.html#line449">line 449</a>
     </li></ul></dd>
     
 
@@ -4270,10 +2394,6 @@ model.unboxValues().getValue("user.name").subscribe(function(value) {
 <h5>Returns:</h5>
 
         
-<div class="param-desc">
-    <p>a <a href="Model.html">Model</a> that uses only the data in the local cache, and never makes a request to a remote JSONGraph model if data cannot be found locally.</p>
-</div>
-
 
 
 <dl>
@@ -4403,7 +2523,7 @@ model.unboxValues().getValue("user.name").subscribe(function(value) {
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="docs.js.html">docs.js</a>, <a href="docs.js.html#line3095">line 3095</a>
+        <a href="falcor_Model.js.html">falcor/Model.js</a>, <a href="falcor_Model.js.html#line59">line 59</a>
     </li></ul></dd>
     
 
@@ -4465,7 +2585,7 @@ model.unboxValues().getValue("user.name").subscribe(function(value) {
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="DataSource.html">DataSource</a></li><li><a href="HttpDataSource.html">HttpDataSource</a></li><li><a href="Model.html">Model</a></li><li><a href="ModelResponse.html">ModelResponse</a></li><li><a href="Observable.html">Observable</a></li><li><a href="Subscription.html">Subscription</a></li></ul><h3><a href="global.html">Global</a></h3>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="HttpDataSource.html">HttpDataSource</a></li><li><a href="Model.html">Model</a></li><li><a href="ModelResponse.html">ModelResponse</a></li><li><a href="Observable.html">Observable</a></li><li><a href="Subscription.html">Subscription</a></li></ul><h3>Interfaces</h3><ul><li><a href="DataSource.html">DataSource</a></li></ul><h3>Global</h3><ul><li><a href="global.html#allUnique">allUnique</a></li><li><a href="global.html#charPattern">charPattern</a></li><li><a href="global.html#createKey">createKey</a></li><li><a href="global.html#getSourceObserver">getSourceObserver</a></li><li><a href="global.html#isNumber">isNumber</a></li><li><a href="global.html#performGetOnModelSource">performGetOnModelSource</a></li><li><a href="global.html#rangeCollapse">rangeCollapse</a></li><li><a href="global.html#set_json_values_as_json_values">set_json_values_as_json_values</a></li><li><a href="global.html#sortLol">sortLol</a></li></ul>
 </nav>
 
 <br class="clear">

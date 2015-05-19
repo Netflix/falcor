@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>JSDoc: Home</title>
+    <title>JSDoc: Source: falcor/operations/get/getInitialArgs.js</title>
 
     <script src="scripts/prettify/prettify.js"> </script>
     <script src="scripts/prettify/lang-css.js"> </script>
@@ -17,32 +17,38 @@
 
 <div id="main">
 
-    <h1 class="page-title">Home</h1>
+    <h1 class="page-title">Source: falcor/operations/get/getInitialArgs.js</h1>
 
     
 
 
 
     
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>var combineOperations = require('./../support/combineOperations');
+var setSeedsOrOnNext = require('./../support/setSeedsOrOnNext');
 
-
-    <h3> </h3>
-
-
-
-
-
-
-
-
-
-
-    
-
-
-
-
-
+/**
+ * The initial args that are passed into the async request pipeline.
+ * @see lib/falcor/operations/request.js for how initialArgs are used
+ */
+module.exports = function getInitialArgs(options, seeds, onNext) {
+    var seedRequired = options.format !== 'AsValues';
+    var isProgressive = options.operationIsProgressive;
+    var spreadOperations = false;
+    var operations =
+        combineOperations(
+            options.operationArgs, options.format, 'get',
+            spreadOperations, isProgressive);
+    setSeedsOrOnNext(
+        operations, seedRequired, seeds, onNext, options.operationSelector);
+    var requestOptions;
+    return [operations];
+};
+</code></pre>
+        </article>
+    </section>
 
 
 
