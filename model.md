@@ -215,13 +215,14 @@ model.get('todos[0].name').then(log);
 ```
 There is one important difference between working with a JSON object directly and working with that same JSON object through a Falcor Model: **you can only retrieve value types from a Model.**  
 
-The following JSON object contains an example of all the JSON value types: string, boolean, number, and null. 
+## Retrieving values from a Falcor Model
+
+When working with a JSON object you can retrieve an Array or an Object by looking up a key. Take the following JSON object which models a list of TODOs.
 
 ```
 var log = console.log.bind(console)
-var $ref = falcor.Model.ref;
 
-var model = new falcor.Model({cache:{
+var json = {
     todos: [
         {
             name: 'get milk from corner store',
@@ -239,7 +240,31 @@ var model = new falcor.Model({cache:{
  	    }
         }        
     ]
-}});
+};
+```
+
+When working with a JSON object in JavaScript you can retrieve an Object or an Array and print it to the console:
+
+```
+var customer = json.todos[1].customer;
+log(JSON.stringify(customer, null, 4))
+
+// This outputs the following to the console:
+// customer: {
+//    name: 'Jim Hobart'
+//    address: '123 pacifica ave., CA, US'
+// }
+```
+
+However when working with the same JSON object indirectly through a Falcor Model, you can only retrieve the value types like null, string, boolean, and Array.
+
+```
+var log = console.log.bind(console)
+var $ref = falcor.Model.ref;
+
+var model = new falcor.Model({cache:json});
+
+model.getValue("todos[1].customer").then(function(customer) { log(customer); }); // undefined behavior
 ```
 
 The only paths which can be retrieved from the Model above are those that retrieve the basic JSON value types. That means any of the following paths are legal to retrieve from a Model:
@@ -256,20 +281,36 @@ In contrast the following get operation has _undefined behavior_ because it atte
 model.getValue("todos").then(log); // undefined behavior
 ```
 
-Likewise of the following get operation also has undefined behavior, because it retrieves the entire "customer" Object:
+Likewise of the following get operation also has undefined behavior, because it retrieves an entire customer object:
 ```
 model.getValue("todos[1].customer").then(log);  // undefined behavior
 ```
 
+The requests above can not reliably be expected to return data. Therefore you should never request an Object or an Array from a Falcor Model.
+
+### "Why can't I request objects or Arrays from a Model"
+
+Falcor is optimized for displaying information to human beings in real-time. Both Arrays and Objects can contain an unbounded amount of data. This means it’s impossible to predict how much data will be retrieved from the server when you request them. Server requests that take seconds at first can become slower over time as more data is added to backend data stores.  As a result the performance of your application made degrade slowly, and eventually may even become unusable as more and more data finds its way into your persistent data stores.
+
+In order to ensure that backend requests for data have reasonably **predictable performance**, Falcor Model's force developers to be explicit. If your view will only be displaying a few properties, request those properties explicitly. 
+
+(Example of requesting properties and displaying them)
+
+Furthermore if you intend to display a list of items, request the first visible page of an array, and follow up with additional page requests as the user scrolls.
+
+(Example of retrieving first page of a list)
+
 ## Retrieving values from a JSON Graph
 
-Models can also operate on JSON Graph documents. JSON Graph is a convention for modeling graph information in JSON. JSON Graph introduces three additional value types to JSON which can also be retrieved using a Model.
+Models can also operate on JSON Graph documents. JSON Graph is a convention for modeling graph information in JSON. JSON Graph documents introduce references, allowing an object to be referenced from multiple places in the JSON while allowing it to appear only once in the object. 
+
+Let's say that we wanted to introduce a list of prerequisites to each TODO.  If we were to model this in JSON
 
 1. atom
 2. error
 3. reference
 
-In the example below, we have converted our TODO JSON model into a JSON Graph. JSON Graph documents allow graphs to be represented as JSON.
+
 
 ```
 var $ref = falcor.Model.ref;
@@ -302,70 +343,15 @@ var model = new falcor.Model({cache:{
 }});
 ```
 
-As atoms are treated as value types in JSON Graph, it is legal to retrieve them even though they are JSON objects:
+The following paths are legal to retrieve because although atoms, errors, and references are considered value types in JSON Graph:
 
 ```
-model.getValue("todos[0].customer").then(log);  // undefined behavior
+model.getValue("todos[0].customer").then(log); 
+// prints {name: "Jim Hobart", address:"123 pacifica ave., CA, US"} because the value of an Atom is considered a value
 ```
 
 
-When working with a JSON object you can retrieve an array or an object by looking up a key.
 
-```
-var log = console.log.bind(console)
-
-var model = {
-    todos: [
-        {
-            name: 'get milk from corner store',
-            done: false
-        },
-        {
-            name: 'withdraw money from ATM',
-            done: true
-        }
-    ]
-};
-
-var todos = model.todos;
-log(JSON.stringify(todos, null, 4))
-
-// This outputs the following to the console:
-// [
-//     {
-//         "name": "get milk from corner store",
-//         "done": false
-//     },
-//     {
-//         "name": "withdraw money from ATM",
-//         "done": true
-//     }
-// ] 
-```
-
-However model objects do not allow you to retrieve objects or arrays from the JSON data source. 
-
-```
-var log = console.log.bind(console)
-
-var model = new falcor.Model({cache: {
-    todos: [
-        {
-            name: 'get milk from corner store',
-            done: false
-        },
-        {
-            name: 'withdraw money from ATM',
-            done: true
-        }
-    ]
-}});
-
-// This code is illegal.
-model.getValue('todos').then(log)
-```
-
-The code above will not work, because an Array is not a value type.
 
 "Why can't I retrieve arrays and objects from Model?"
 
