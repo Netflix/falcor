@@ -1,6 +1,6 @@
 # The Falcor Model
  
-Falcor provides a Model object, which is intended to be the "M" in your MVC. An application that uses Falcor doesn't work with JSON data directly, but indirectly through the Model object. The model object provides a set of familiar JavaScript APIs for working with JSON data, including get, set, and call. The main difference between working with JSON data directly and working with it indirectly through a Model object, is that the Falcor Model has a push API.
+Falcor provides a Model object, which is intended to be the "M" in your MVC. An application that uses Falcor doesn't work with JSON data directly, but rather works with JSON data _indirectly_ through the Model object. The Model object provides a set of familiar JavaScript APIs for working with JSON data, including get, set, and call. The main difference between working with JSON data directly and working with it indirectly through a Model object, is that the Falcor Model has a push API.
 
 ```
 var log = console.log.bind(console)
@@ -47,11 +47,11 @@ model.getValue('todos[0].name').then(log);
 // get milk from corner store 
 ```
 
-Note that in the example above that uses a Model to retrieve information, the value is pushed to a call back.
+Note that in the example above, the name of the TODO is pushed to a call back.
  
-The main advantage of using a push API is that you can code against JSON data the same way regardless of whether the data is local or remote. This makes it very easy to begin coding your application against mocked data at first, and then work against the server data later on without changing any other client code.
+The main advantage of using a push API is that you can code against JSON data the same way regardless of whether the data is local or remote. This makes it very easy to begin coding your application against mocked data at first, and then work against server data later on without changing client code.
 
-In this example we return the name of the first todo by pulling the name from an in-memory object on the browser:
+In this example we retrieve the name of the first TODO from a JSON Object: 
 
 ```
 var log = console.log.bind(console)
