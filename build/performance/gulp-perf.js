@@ -1,5 +1,4 @@
 var gulp = require('gulp');
-var build = require('./../gulp-build');
 var rename = require('gulp-rename');
 var concat = require('gulp-concat');
 var browserify = require('browserify');
