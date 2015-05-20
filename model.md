@@ -123,13 +123,11 @@ model.setValue('todos[1].done', true).then(function(x) {
 // true
 ```
  
-In addition to using JSON graph to make sure that objects don't appear more than once in the models cache, the model uses the references in JSON graph to optimize server requests. For more information on JSON graph, see "JSON graph."
- 
-Using a model makes it easy to begin your development immediately before the server is finished, and frees you from having to worry about cacheing your data.
+In addition to using JSON graph to make sure that objects don't appear more than once in the Model's cache, the model uses the references in JSON graph to optimize server requests. For more information, see Path Optimization.
 
-## Working with JSON using a model
+## Working with JSON using a Model
  
-Every Falkor Model is associated with a JSON value. Model's use DataSources to retrieve the data from their associated JSON values. Falcor ships with HttpDataSource, an implementation of the DataSource interface that communicates with a remote DataSource over HTTP.
+Every Falcor Model is associated with a JSON value. Models use DataSources to retrieve the data from their associated JSON values. Falcor ships with HttpDataSource, an implementation of the DataSource interface that communicates with a remote DataSource over HTTP.
  
 ```
 var model = new falcor.Model({source: new falcor.HttpDataSource('/model.json')});
@@ -217,7 +215,7 @@ There is one important difference between working with a JSON object directly an
 
 ## Retrieving values from a Falcor Model
 
-When working with a JSON object you can retrieve an Array or an Object by looking up a key. Take the following JSON object which models a list of TODOs.
+The following JSON object contains a list of TODOs.
 
 ```
 var log = console.log.bind(console)
@@ -242,7 +240,7 @@ var json = {
 };
 ```
 
-When working with a JSON object in JavaScript you can retrieve an Object or an Array and print it to the console:
+When working with a JSON object directly in JavaScript you can retrieve an Object or an Array and print it to the console:
 
 ```
 var customer = json.todos[1].customer;
@@ -255,7 +253,7 @@ log(JSON.stringify(customer, null, 4))
 // }
 ```
 
-However when working with the same JSON object indirectly through a Falcor Model, you can only retrieve the value types like null, string, boolean, and Array.
+When working with the same JSON object indirectly through a Falcor Model, you can _not_ retrieve Arrays or Objects - only value types like null, string, boolean, and Array.
 
 ```
 var log = console.log.bind(console)
@@ -287,15 +285,15 @@ model.getValue("todos[1].customer").then(log);  // undefined behavior
 
 The requests above can not reliably be expected to return data. Therefore you should never request an Object or an Array from a Falcor Model.
 
-### "Why can't I request objects or Arrays from a Model"
+### "Why can't I request Objects or Arrays from a Model?"
 
-Falcor is optimized for displaying information to human beings in real-time. Both Arrays and Objects can contain an unbounded amount of data. This means it’s impossible to predict how much data will be retrieved from the server when you request them. Server requests that take seconds at first can become slower over time as more data is added to backend data stores.  As a result the performance of your application made degrade slowly, and eventually may even become unusable as more and more data finds its way into your persistent data stores.
+Falcor is optimized for displaying information to human beings in real-time. Both Arrays and Objects can contain an unbounded amount of data. This means it’s impossible to predict how much data will be retrieved from the server when you request them. Server requests that take less than a second at first can become slower over time as more data is added to backend data stores.  This can cause the performance of your application to degrade slowly, and eventually may even cause it to become unusable as more and more data finds its way into your persistent data stores.
 
-In order to ensure that backend requests for data have reasonably **predictable performance**, Falcor Model's force developers to be explicit. If your view will only be displaying a few properties, request those properties explicitly. 
+In order to ensure that backend requests for data have more **predictable performance** over time Falcor Models force developers to be explicit. If your view will only be displaying a few properties, you should those properties explicitly. 
 
 (Example of requesting properties and displaying them)
 
-Furthermore if you intend to display a list of items, request the first visible page of an array, and follow up with additional page requests as the user scrolls.
+Furthermore if you intend to display a list of items, request the first visible page of an array and follow up with additional page requests as the user scrolls.
 
 (Example of retrieving first page of a list)
 
@@ -364,13 +362,67 @@ console.log(JSON.stringify(json, null, 4));
 */
 ```
 
-This highlights one of the hazards of representing your data as JSON: stale data caused by duplicate objects.
-Most applications have a domain model which is a graph. However, JSON is designed to store trees. When application servers send subsets of the graph across the network as JSON, they typically use the *duplicate and identify strategy*. If the same object appears more than once in the JSON response, the application server includes a unique id within the object. The application client is expected to use the ids to de-dupe all copies of each object before storing the data in the local cache. Failing to de-dupe objects can lead to stale data being displayed to the user.
+This highlights one of the hazards of representing your data as JSON: **most application domains are Graphs and JSON models Trees.**
 
-Falcor attempts to solve this problem by introducing JSON Graph. JSON Graph is a convention for modeling graph information in JSON. JSON Graph introduces a new kind of value type: a reference. 
+When application servers send subsets of the graph across the network as JSON, they typically use the *duplicate and identify strategy*. If the same object appears more than once in the JSON response, the application server includes a unique ID within the object. The application client is expected to use the IDs to determine the two copies of an object represent the same entity. This code must often be specialized for each new type of message that comes back from the server. Failing to de-dupe objects can lead to stale data being displayed to the user.
 
-To convert a JSON object into a JSON Graph, you place every object at a unique location within the JSON object and replace all other occurences of that object with a reference to the object's unique location.
+Falcor attempts to solve this problem by introducing JSON Graph. JSON Graph is a convention for modeling graph information in JSON. You can convert any JSON object into a JSON Graph in two steps:
 
+1. Move all objects to a unique location within the cereal object
+2. Replace all other occurrences of the object with a **Reference** to that object's unique location
+
+We can use the task ID to create a unique location in the JSON for each task. We start by adding a map of all Tasks that is organized by Task ID to the root of the document:
+
+(Example of tasks by ID)
+
+Next we replace every other occurrence of each task with a Reference value. A Reference is a JSON object that contains a path to another location within an object. References can be constructed using the Model.ref factory function. 
+
+(Example that shows references)
+
+Although a Reference is a JSON object, it is treated as a value type by the Model. In other words it is legal to retrieve a reference from a Falcor Model.
+
+(Example that shows retrieving a reference for a Falcor model)
+
+Note that in the example above each TODO appears only once. If we use a Model to set a TODO to false we will observe that the new state will be reflected regardless of where in the JSON Graph we retrieve the TODO's information.
+
+(Example demonstrating that when we use set value to set the done property of the second two due to false, we get done:true when we read it from both places in the to do list)
+
+Note that in the example operations above we use a path which extends *beyond* the reference object in the cereal graph. However instead of short-circuiting and returning the reference, the Model *follows* the path in the reference and continues evaluating the remaining keys and the path at the location referred to by the path in the reference. In the next section we will explain how models evaluate paths against JSON and JSON Graph objects.
+
+### Path Evaluation and JSON Graph
+
+When evaluating paths against a serial object, the Falcor model starts at the root of its associated JSON object and continues looking up keys until it arrives at a value type.
+
+(Example of looking up a path using get value)
+
+If a value type is encountered before the path is fully evaluated, the path evaluation process is short-circuited and the value discovered is returned.
+
+(example of what I said above, this time running into a null at a branch node)
+
+The one exception to this rule is the case in which  a Model encounters a **Reference** value type. When a Model encounters a reference while evaluating a path, it behaves differently than does if it encounters any other value type. If a Model encounters a reference before evaluating all of the keys in a path, the unevaluated keys are appended to the path within the reference and evaluation is resumed from root of the JSON object.
+
+In the following piece of code, we attempt to retrieve the name of the first TODO:
+
+(Get value todos, 0, name)
+
+First the model evaluates the keys "todo" and "0" and encounters a reference value. However instead of short-circuiting and returning the reference value, the Model resumes evaluation from the location in the JSON referred to in the reference path. This is accomplished by dynamically rewriting the path from "todos[0].name" to "todosById[2692].name" and resuming evaluation from the root of the JSON object. 
+
+Note that **references are only followed if there are more keys in the path that have not yet been evaluated.** If we shorten the path to "todos[0]" the model returns the reference path rather than the object it refers to.
+
+(Example of what I said above printed to the console)
+
+The process of rewriting a path when a reference is encountered is known as *Path Optimization.* for more information on how Path Optimization can improve the efficiency of server-side data retrieval, see Path Optimization.
+
+### JSON Graph Atoms and Errorsa
+
+In addition to References, cereal graph introduces two additional value types which can be retrieved from the Model:
+
+1. Atoms
+2. Errors
+
+#### JSON Graph Atoms
+
+Cereal graph allows a  metadata to be attached to values to control how they are handled by the Model. For example, metadata can be attached to values to control how long they stay in the cache and also to indicate whether one value is a more recent version than another.
 
 Notice in the JSON document above
 1. atom
@@ -416,9 +468,6 @@ The following paths are legal to retrieve because although atoms, errors, and re
 model.getValue("todos[0].customer").then(log); 
 // prints {name: "Jim Hobart", address:"123 pacifica ave., CA, US"} because the value of an Atom is considered a value
 ```
-
-
-
 
 "Why can't I retrieve arrays and objects from Model?"
 
@@ -482,10 +531,19 @@ Do you get method also except optional selector function, which can be used to t
  
 One of the limitations of working with JSON data through a Falcor model is that you can only retrieve values.
  
- 
+ ## Supported Metadata
 
 ## Transactions
 
 ## Error Handling
 
 ## Cache Control
+
+## Path Optimization and the DataSource
+
+When you request a path from a Model, the Model first attempts to retrieve the data from an in-memory cache. If the model fails to find the data in its cache, the Model request the data from its data source.
+
+Typically a path that has been optimized can be retrieved more efficiently by the Model's DataSource because it requires fewer steps through the graph to retrieve the data. 
+
+
+When attempting to retrieve paths from the cache, Models optimize paths whenever they encounter references. This means that even if a model is not able to find the requested data in its local cash, it may be able to request a more optimized path from the data source.
