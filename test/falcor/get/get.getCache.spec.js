@@ -9,6 +9,9 @@ var Observable = Rx.Observable;
 var falcor = {Model: Model, Observable:Observable};
 var _ = require('lodash');
 var expect = require('chai').expect;
+var $ref = falcor.Model.ref;
+var $atom = falcor.Model.atom;
+var $error = falcor.Model.error;
 
 describe('getCache', function() {
     it("should serialize the cache", function(done) {
@@ -31,7 +34,7 @@ describe('getCache', function() {
                 }
             });
     });
-    
+
     it("should serialize part of the cache", function(done) {
         var model = new Model({ cache: {
             "list": {
@@ -45,7 +48,7 @@ describe('getCache', function() {
                 }
             }
         }});
-        
+
         var partial = model.getCache(["list", [0, 1]], ["list", 2, "bam"]);
         testRunner.compare({
             "list": {
@@ -122,6 +125,41 @@ describe('getCache', function() {
         testRunner.compare(outCache, jsonGraph, {
             strip: ['$size']
         });
+    });
+
+    it('should pass Professor Kims cache errors.', function() {
+        var model = new falcor.Model();
+        model.setCache({
+            foo: {
+                foo: $error("Error message"),
+                bar: 5,
+                baz: $ref(["foo", "bar"])
+            }
+        });
+
+        var allCache = model.getCache();
+        var specific = model.getCache(['foo', 'bar']);
+
+        var allCacheExpected = {
+            foo: {
+                foo: $error("Error message"),
+                bar: $atom(5),
+                baz: $ref(["foo", "bar"])
+            }
+        };
+        allCacheExpected.foo.foo.$size = 63;
+        allCacheExpected.foo.bar.$size = 51;
+        allCacheExpected.foo.baz.$size = 52;
+
+        var specificExpected = {
+            foo: {
+                bar: $atom(5)
+            }
+        };
+        specificExpected.foo.bar.$size = 51;
+
+        expect(allCache).to.deep.equals(allCacheExpected);
+        expect(specific).to.deep.equals(specificExpected);
     });
 });
 
