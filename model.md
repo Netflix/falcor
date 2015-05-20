@@ -86,8 +86,8 @@ Another advantage of using a Falcor Model is that it caches the JSON data it ret
 var model = new falcor.Model({source: new falcor.HttpDataSource('/model.json')});
 
 model.getValue('todos[0].name').then(function() {
-	// This request is served out of the local cache:
-	model.getValue('todos[0].name').then(log);
+    // This request is served out of the local cache:
+    model.getValue('todos[0].name').then(log);
 });
 ```
 
@@ -141,18 +141,18 @@ You can implement the DataSource interface to allow a Model to communicate with 
 var log = console.log.bind(console)
 
 var model = new falcor.Model({
-	cache: {
-	    todos: [
-	        {
-	            name: 'get milk from corner store',
-	            done: false
-	        },
-	        {
-	            name: 'withdraw money from ATM',
-	            done: true
-	        }
-	    ]
-	}});
+    cache: {
+        todos: [
+            {
+                name: 'get milk from corner store',
+                done: false
+            },
+            {
+                name: 'withdraw money from ATM',
+                done: true
+            }
+        ]
+    }});
 
 model.getValue('todos[0].name').then(log);
 
@@ -166,7 +166,7 @@ It is common practice to begin working against mock data in a Model cache, and t
 var log = console.log.bind(console)
 
 var model = new falcor.Model({
-	source: new falcor.HttpDataSource('/model.json'),
+    source: new falcor.HttpDataSource('/model.json'),
 });
 
 model.getValue('todos[0].name').then(log);
@@ -189,18 +189,18 @@ Every Model is associated with a JSON value. The Falcor model provides APIs to a
 var log = console.log.bind(console)
 
 var model = new falcor.Model({
-	cache: {
-	    todos: [
-	        {
-	            name: 'get milk from corner store',
-	            done: false
-	        },
-	        {
-	            name: 'withdraw money from ATM',
-	            done: true
-	        }
-	    ]
-	}});
+    cache: {
+        todos: [
+            {
+                name: 'get milk from corner store',
+                done: false
+            },
+            {
+                name: 'withdraw money from ATM',
+                done: true
+            }
+        ]
+    }});
 
 model.get('todos[0].name').then(log);
 
@@ -228,16 +228,15 @@ var json = {
             name: 'get milk from corner store',
             done: false,
             priority: 4,
- 	    customer: null
+            customer: null
         },
         {
             name: 'deliver pizza',
             done: false,
             priority: 4,
- 	    customer: {
- 		name: 'Jim Hobart'
- 		address: '123 pacifica ave., CA, US'
- 	    }
+            customer: {
+            name: 'Jim Hobart'
+            address: '123 pacifica ave., CA, US'
         }        
     ]
 };
@@ -300,12 +299,80 @@ Furthermore if you intend to display a list of items, request the first visible 
 
 (Example of retrieving first page of a list)
 
-## Retrieving values from a JSON Graph
+## Working with JSON Graph Data using a Model
 
-Models can also operate on JSON Graph documents. JSON Graph is a convention for modeling graph information in JSON. JSON Graph documents introduce references, allowing an object to be referenced from multiple places in the JSON while allowing it to appear only once in the object. 
+In addition to being able to work with JSON documents, Models can also operate on JSON Graph documents. JSON Graph is a convention for modeling graph information in JSON. JSON Graph documents introduce references, allowing an object to be referenced from multiple places in the JSON while allowing it to appear only once in the object. 
 
-Let's say that we wanted to introduce a list of prerequisites to each TODO.  If we were to model this in JSON
+Let's say that we wanted to introduce a list of prerequisites for each TODO in a TODO list.  
+```
+var log = console.log.bind(console)
 
+var json = {
+    todos: [
+        {
+            id: 2692,
+            name: 'get milk from corner store',
+            done: false,
+            prerequisites: [
+                {
+                    name: 'withdraw money from ATM',
+                    done: false  
+                }
+            ]
+        },
+        {
+            id: 4291,
+            name: 'withdraw money from ATM',
+            done: false  
+        }   
+    ]
+};
+```
+
+Notice that the TODO "withdraw money from the ATM" appears twice in the JSON object above. Let's say we want to mark this task as done:
+
+```
+json.todos[1].done = true;
+```
+
+If we examine the JSON object after this change, we will notice that the change has _not_ been propagated to all of the copies of the task. 
+
+```
+console.log(JSON.stringify(json, null, 4));
+/* Prints the following to the console:
+{
+    todos: [
+        {
+            id: 2692,
+            name: 'get milk from corner store',
+            done: false,
+            prerequisites: [
+                {
+                    id: 4291,
+                    name: 'withdraw money from ATM',
+                    done: false  
+                }
+            ]
+        },
+        {
+            id: 4291,
+            name: 'withdraw money from ATM',
+            done: true 
+        }   
+    ]
+};
+*/
+```
+
+This highlights one of the hazards of representing your data as JSON: stale data caused by duplicate objects.
+Most applications have a domain model which is a graph. However, JSON is designed to store trees. When application servers send subsets of the graph across the network as JSON, they typically use the *duplicate and identify strategy*. If the same object appears more than once in the JSON response, the application server includes a unique id within the object. The application client is expected to use the ids to de-dupe all copies of each object before storing the data in the local cache. Failing to de-dupe objects can lead to stale data being displayed to the user.
+
+Falcor attempts to solve this problem by introducing JSON Graph. JSON Graph is a convention for modeling graph information in JSON. JSON Graph introduces a new kind of value type: a reference. 
+
+To convert a JSON object into a JSON Graph, you place every object at a unique location within the JSON object and replace all other occurences of that object with a reference to the object's unique location.
+
+
+Notice in the JSON document above
 1. atom
 2. error
 3. reference
@@ -317,23 +384,23 @@ var $ref = falcor.Model.ref;
 var model = new falcor.Model({cache:{
     todos: [
         $ref('todosById[79]'),
-	$ref('todosById[99]')
+    $ref('todosById[99]')
     ],
     todosById: {
         "99": {
             name: 'deliver pizza',
             done: false,
             priority: 4,
- 	    customer: {
- 		$type: 'atom',
- 		value: {
-	 		name: 'Jim Hobart',
-	 		address: '123 pacifica ave., CA, US'
-	 	},
-	 	// this customer object expires in 30 minutes.
-	 	$expires: -30 * 60 * 1000
- 	    },
- 	    prerequisites: [$ref('todosById[79]')] 	    
+        customer: {
+        $type: 'atom',
+        value: {
+            name: 'Jim Hobart',
+            address: '123 pacifica ave., CA, US'
+        },
+        // this customer object expires in 30 minutes.
+        $expires: -30 * 60 * 1000
+        },
+        prerequisites: [$ref('todosById[79]')]      
         },
         "79": {
             $type: 'error',
