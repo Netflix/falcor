@@ -181,8 +181,8 @@ For more information on how the Model JSON cache works, see the Model JSON cache
 
 # Working with JSON data using a Model
 
-Every Model is associated with a JSON value. The Falcor model provides APIs to allow developers to retrieve data from its JSON value. To retrieve a single value from a Model, you pass a JavaScript path through the JSON object to the Model's get method.
- 
+Every Model is associated with a JSON value. The Falcor Model provides APIs to allow developers to retrieve data from its JSON value. To retrieve a single value from a Model, you pass a JavaScript path through the JSON object to the Model's get method.
+
 ```
 var log = console.log.bind(console)
 
@@ -413,16 +413,39 @@ Note that **references are only followed if there are more keys in the path that
 
 The process of rewriting a path when a reference is encountered is known as *Path Optimization.* for more information on how Path Optimization can improve the efficiency of server-side data retrieval, see Path Optimization.
 
-### JSON Graph Atoms and Errorsa
+### JSON Graph Sentinels
 
-In addition to References, cereal graph introduces two additional value types which can be retrieved from the Model:
+In addition to References, cereal graph introduces two more new value types to JSON: Atoms and Errors. These three special value types are all classified as *Sentinels.*
 
-1. Atoms
-2. Errors
+Sentinels are JSON objects that are treated by the Falcor Model as value types. References, Atoms, and Errors are all cereal objects with a "$type" value of "ref", "atom", and "error" respectively. 
+
+(Example of a reference, atom, and error.)
+
+Each Sentinel objects also contains a "value" key with its actual value. One way to think about a Sentinel is a *box around a value*  that indicates the type of the value within. Sentinels influence the way that Models interpret their values, allowing them to distinguish a string from a path or an error for example.
+
+Despite being JSON objects, all Sentinels are considered JSON Graph value types and therefore can be retrieved from a Model. However when a Sentinel is retrieved from a Model, the Model *unboxes* the value within the Sentinel and returns the value instead of the entire Sentinel object.
+
+(Example of calling get value on an Atom)
+
+You can create a new Model which does not have this unboxing behavior by calling "boxValues." For more information see Boxing and Unboxing.
+
+(Example of calling get value on an Atom with boxValues on)
+
+Each Sentinel affects the way in which the Model interprets its value differently. References were explained in the previous section. In the next two sections, Atoms and Errors will be explained.
 
 #### JSON Graph Atoms
 
-Cereal graph allows a  metadata to be attached to values to control how they are handled by the Model. For example, metadata can be attached to values to control how long they stay in the cache and also to indicate whether one value is a more recent version than another.
+Cereal graph allows metadata to be attached to values to control how they are handled by the Model. For example, metadata can be attached to values to control how long values stay in the Model cache and whether a value is a more recent version of another value. For more information see Supported Metadata.
+
+One issue is that JavaScript value types do not preserve any metadata attached to them when they are serialized as JSON:
+
+(Example of creating a JavaScript number, attaching an "$expires" property to it, and then Json stringifying it)
+
+Atoms "box" value types inside of a JSON object, allowing metadata to be attached to them. 
+
+(Example of creating a atom with a value of 4 and an "$expired property.)
+
+
 
 Notice in the JSON document above
 1. atom
@@ -436,24 +459,24 @@ var $ref = falcor.Model.ref;
 var model = new falcor.Model({cache:{
     todos: [
         $ref('todosById[79]'),
-    $ref('todosById[99]')
+        $ref('todosById[99]')
     ],
     todosById: {
         "99": {
             name: 'deliver pizza',
             done: false,
             priority: 4,
-        customer: {
-        $type: 'atom',
-        value: {
-            name: 'Jim Hobart',
-            address: '123 pacifica ave., CA, US'
-        },
-        // this customer object expires in 30 minutes.
-        $expires: -30 * 60 * 1000
+            customer: {
+                $type: 'atom',
+                value: {
+                    name: 'Jim Hobart',
+                    address: '123 pacifica ave., CA, US'
+                },
+               // this customer object expires in 30 minutes.
+              $expires: -30 * 60 * 1000
         },
         prerequisites: [$ref('todosById[79]')]      
-        },
+    },
         "79": {
             $type: 'error',
             value: 'error retrieving todo from database.'
@@ -462,14 +485,14 @@ var model = new falcor.Model({cache:{
 }});
 ```
 
-The following paths are legal to retrieve because although atoms, errors, and references are considered value types in JSON Graph:
+The following paths are legal to retrieve because  atoms, errors, and references are considered value types in JSON Graph:
 
 ```
 model.getValue("todos[0].customer").then(log); 
 // prints {name: "Jim Hobart", address:"123 pacifica ave., CA, US"} because the value of an Atom is considered a value
 ```
 
-"Why can't I retrieve arrays and objects from Model?"
+"Why can't I retrieve Arrays or Objects from a Model?"
 
 Instead you must be explicit, and request all of the value types that you need.
   
@@ -531,6 +554,8 @@ Do you get method also except optional selector function, which can be used to t
  
 One of the limitations of working with JSON data through a Falcor model is that you can only retrieve values.
  
+ ## Boxing and Unboxing
+ 
  ## Supported Metadata
 
 ## Transactions
@@ -546,4 +571,4 @@ When you request a path from a Model, the Model first attempts to retrieve the d
 Typically a path that has been optimized can be retrieved more efficiently by the Model's DataSource because it requires fewer steps through the graph to retrieve the data. 
 
 
-When attempting to retrieve paths from the cache, Models optimize paths whenever they encounter references. This means that even if a model is not able to find the requested data in its local cash, it may be able to request a more optimized path from the data source.
+When attempting to retrieve paths from the cache, Models optimize paths whenever they encounter references. This means that even if a Model is not able to find the requested data in its local cache, it may be able to request a more optimized path from the data source.
