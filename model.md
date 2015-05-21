@@ -415,27 +415,33 @@ The process of rewriting a path when a reference is encountered is known as *Pat
 
 ### JSON Graph Sentinels
 
-In addition to References, cereal graph introduces two more new value types to JSON: Atoms and Errors. These three special value types are all classified as *Sentinels.*
+In addition to References, cereal graph introduces two more new value types: Atoms and Errors. These three special value types are all classified as *Sentinels.*
 
 Sentinels are JSON objects that are treated by the Falcor Model as value types. References, Atoms, and Errors are all cereal objects with a "$type" value of "ref", "atom", and "error" respectively. 
 
 (Example of a reference, atom, and error.)
 
-Each Sentinel objects also contains a "value" key with its actual value. One way to think about a Sentinel is a *box around a value*  that indicates the type of the value within. Sentinels influence the way that Models interpret their values, allowing them to distinguish a string from a path or an error for example.
+Each Sentinel objects also contains a "value" key with its actual value. One way to think about a Sentinel is a *box around a value*  that indicates the type of the value within. Sentinels influence the way that Models interpret their values, allowing them to distinguish a path from a string or an regular object from an error for example.
 
 Despite being JSON objects, all Sentinels are considered JSON Graph value types and therefore can be retrieved from a Model. However when a Sentinel is retrieved from a Model, the Model *unboxes* the value within the Sentinel and returns the value instead of the entire Sentinel object.
 
 (Example of calling get value on an Atom)
 
-You can create a new Model which does not have this unboxing behavior by calling "boxValues." For more information see Boxing and Unboxing.
+You can create a new Model which does not have this unboxing behavior by calling "boxValues." 
 
 (Example of calling get value on an Atom with boxValues on)
+
+For more information see Boxing and Unboxing.
+
+As sentinels are value types, their contents cannot be changed. Like numbers and strings, they must be replaced entirely.
+
+(Example of Setting an Atom in the cache)
 
 Each Sentinel affects the way in which the Model interprets its value differently. References were explained in the previous section. In the next two sections, Atoms and Errors will be explained.
 
 #### JSON Graph Atoms
 
-Cereal graph allows metadata to be attached to values to control how they are handled by the Model. For example, metadata can be attached to values to control how long values stay in the Model cache and whether a value is a more recent version of another value. For more information see Supported Metadata.
+Cereal graph allows metadata to be attached to values to control how they are handled by the Model. For example, metadata can be attached to values to control how long values stay in the Model cache and indicate whether one value is a more recent version of another value. For more information see Supported Metadata.
 
 One issue is that JavaScript value types do not preserve any metadata attached to them when they are serialized as JSON:
 
@@ -443,17 +449,49 @@ One issue is that JavaScript value types do not preserve any metadata attached t
 
 Atoms "box" value types inside of a JSON object, allowing metadata to be attached to them. 
 
-(Example of creating a atom with a value of 4 and an "$expired property.)
+(Example of creating a atom with a value of 4 and an "$expired property and then serializing)
+
+The value of an Atom is always treated like a value type, meaning it is retrieved and set in its entirety. Mutating an Adam is ineffectual. Instead you must replace it entirely using the Model's set operation.
+
+(Example showing that it is ineffectual to modify the value of an atom directly. We clone Adams when they are retrieved from the model, so this example should show that mutating and Adam directly has no effect by then retrieving the same object, and displaying it,)
+
+In addition to making it possible to attach metadata to cereal values, Atoms can be used to get around the restriction against retrieving JSON Objects and Arrays from a Falcor Model. 
+
+Let's say that we have an Array which we are certain will remain small, like a list of video subtitles for example. 
+
+(Example of a serial graph object with a Netflix title which contains an array of subtitles)
+
+By boxing the Array in an Atom, we cause the Falcor model to treat it as a value and returned it in its entirety. 
+
+(Example of retrieving the entire array using a  model)
+
+#### JSON Graph Errors
+
+When a model's Data source encounters an error while attempting to retrieve a value from a cereal graph object, it is represented as an error object. 
+
+(Example of an error when attempting to retrieve the rating of a Netflix title from a model)
+
+By default a Model delivers Errors differently than other values. If synchronous methods are used to retrieve the data from the model, the error is thrown.  If the data is asynchronously being requested from the model as a observable or a promise, the error will be delivered in a special call back.
+
+(Example of receiving an error in an observable)
+
+(Example of receiving an error in a promise)
+
+To learn more about the different ways to retrieve information from a model, see retrieving information from a model.
+
+##### "What if I don't want a Model to treat errors differently from other values?"
+
+There are many reasons why you might want errors reported the same way as other values. For example you might retrieve several paths from a model in a single request, and want to be resilient against the possibility that one of them fails. Furthermore you might want to display errors in a template alongside the successfully-retrieved values. 
+
+The "treatErrorsAsValues" function creates a new model which
+
+This function creates a new model which returns error objects The same way as other values. Like all other sentinels, the value of the error is reported rather than the error sentinel itself. 
 
 
 
-Notice in the JSON document above
-1. atom
-2. error
-3. reference
+(Example of using get value sync to retrieve the rating)
 
-
-
+Errors are cached in the Model just like any other value. As it is possible to retrieve more than one path at a time from a model,
 ```
 var $ref = falcor.Model.ref;
 var model = new falcor.Model({cache:{
