@@ -270,7 +270,7 @@ Model.prototype = {
      */ 
     getCache: function() {
         var paths = slice.call(arguments);
-        if(paths.length == 0) {
+        if(paths.length === 0) {
             paths[0] = { json: this._cache };
         }
         var result;
