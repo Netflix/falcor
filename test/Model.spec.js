@@ -33,6 +33,7 @@ describe("Model", function() {
 
     require('./lru');
     require('./integration');
+    require('./hardlink');
     require('./falcor');
 
     describe('JSON-Graph Specification', function() {
