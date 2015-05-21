@@ -13,11 +13,11 @@
  * or implied. See the License for the specific language governing
  * permissions and limitations under the License.
  */
-!function(e){if("object"==typeof exports)module.exports=e();else if("function"==typeof define&&define.amd)define(e);else{var f;"undefined"!=typeof window?f=window:"undefined"!=typeof global?f=global:"undefined"!=typeof self&&(f=self),f.falcor=e()}}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
-var falcor = _dereq_('./lib/falcor');
-var get = _dereq_('./lib/get');
-var set = _dereq_('./lib/set');
-var inv = _dereq_('./lib/invalidate');
+(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
+var falcor = require(7);
+var get = require(52);
+var set = require(88);
+var inv = require(80);
 var prototype = falcor.Model.prototype;
 
 prototype._getBoundValue = get.getBoundValue;
@@ -56,11 +56,11 @@ prototype._setCache = set.setCache;
 module.exports = falcor;
 
 
-},{"./lib/falcor":6,"./lib/get":51,"./lib/invalidate":79,"./lib/set":87}],2:[function(_dereq_,module,exports){
+},{"52":52,"7":7,"80":80,"88":88}],2:[function(require,module,exports){
 if (typeof falcor === 'undefined') {
     var falcor = {};
 }
-var Rx = _dereq_('falcor-observable');
+var Rx = require(160);
 
 falcor.__Internals = {};
 falcor.Observable = Rx.Observable;
@@ -78,26 +78,37 @@ falcor.NOOP = function() {};
 
 module.exports = falcor;
 
-},{"falcor-observable":159}],3:[function(_dereq_,module,exports){
-var falcor = _dereq_('./Falcor');
-var RequestQueue = _dereq_('./request/RequestQueue');
-var ImmediateScheduler = _dereq_('./scheduler/ImmediateScheduler');
-var ASAPScheduler = _dereq_('./scheduler/ASAPScheduler');
-var TimeoutScheduler = _dereq_('./scheduler/TimeoutScheduler');
-var ERROR = _dereq_("../types/error");
-var ModelResponse = _dereq_('./ModelResponse');
-var ModelDataSourceAdapter = _dereq_('./ModelDataSourceAdapter');
-var call = _dereq_('./operations/call');
-var operations = _dereq_('./operations');
-var pathSyntax = _dereq_('falcor-path-syntax');
-var getBoundValue = _dereq_('./../get/getBoundValue');
-var collect = _dereq_('../lru/collect');
+},{"160":160}],3:[function(require,module,exports){
+var falcor = require(2);
+var ModelRoot = require(6);
+var RequestQueue = require(39);
+var ImmediateScheduler = require(41);
+var ASAPScheduler = require(40);
+var TimeoutScheduler = require(42);
+var ERROR = require(138);
+var ModelResponse = require(5);
+var ModelDataSourceAdapter = require(4);
+var call = require(8);
+var operations = require(13);
+var pathSyntax = require(173);
+var getBoundValue = require(48);
+var collect = require(85);
 var slice = Array.prototype.slice;
-var $ref = _dereq_('./../types/path');
-var $error = _dereq_('./../types/error');
-var $atom = _dereq_('./../types/atom');
-var getGeneration = _dereq_('./../get/getGeneration');
+var $ref = require(139);
+var $error = require(138);
+var $atom = require(137);
+var getGeneration = require(49);
 
+/**
+ * A Model object is used to execute commands against a {@link JSONGraph} object. {@link Model}s can work with a local JSONGraph cache, or it can work with a remote {@link JSONGraph} object through a {@link DataSource}.
+ * @constructor
+ * @param {?Object} options - A set of options to customize behavior
+ * @param {?DataSource} options.source - A data source to retrieve and manage the {@link JSONGraph}
+ * @param {?JSONGraph} options.cache - Initial state of the {@link JSONGraph}
+ * @param {?number} options.maxSize - The maximum size of the cache
+ * @param {?number} options.collectRatio - The ratio of the maximum size to collect when the maxSize is exceeded
+ * @param {?Model~errorSelector} options.errorSelector - A function used to translate errors before they are returned
+ */
 var Model = module.exports = falcor.Model = function Model(options) {
 
     if (!options) {
@@ -116,11 +127,8 @@ var Model = module.exports = falcor.Model = function Model(options) {
     this._errorSelector = options.errorSelector || Model.prototype._errorSelector;
     this._router = options.router;
 
-    this._root = options.root || {
-        expired: [],
-        allowSync: 0,
-        unsafeMode: false
-    };
+    this._root = options.root || new ModelRoot();
+    
     if (options.cache && typeof options.cache === "object") {
         this.setCache(options.cache);
     } else {
@@ -128,6 +136,14 @@ var Model = module.exports = falcor.Model = function Model(options) {
     }
     this._path = [];
 };
+
+/**
+ * The {@link Model}'s error selector is applied to any errors that occur during Model operations.  The return value of the error selector is substituted for the input error, giving clients the opportunity to translate error objects before they are returned from the {@link Model}.
+ * @callback Model~errorSelector
+ * @param {Object} requestedPath the requested path at which the error was found.
+ * @error {Error} error the error that occured during the {@link Model} operation.
+ * @returns {Error} the translated error object.
+ */
 
 Model.EXPIRES_NOW = falcor.EXPIRES_NOW;
 Model.EXPIRES_NEVER = falcor.EXPIRES_NEVER;
@@ -158,10 +174,51 @@ Model.prototype = {
         }
         return a === b;
     },
+    /**
+     * The get method retrieves several {@link Path}s or {@link PathSet}s from a {@link Model}. The get method is versatile and may be called in several different ways, allowing you to make different trade-offs between performance and expressiveness. The simplest invocation returns an ModelResponse stream that contains a JSON object with all of the requested values. An optional selector function can also be passed in order to translate the retrieved data before it appears in the Observable stream. If a selector function is provided, the output will be an Observable stream with the result of the selector function invocation instead of a ModelResponse stream.
+     If you intend to transform the JSON data into another form, specifying a selector function may be more efficient. The selector function is run once all of the requested path values are available. In the body of the selector function, you can read data from the Model's cache using {@link Model.prototype.getValueSync} and transform it directly into its final representation (ex. an HTML string). This technique can reduce allocations by preventing the get method from copying the data in {@link Model}'s cache into an intermediary JSON representation.
+     Instead of directly accessing the cache within the selector function, you can optionally pass arguments to the selector function and they will be automatically bound to the corresponding {@link Path} or {@link PathSet} passed to the get method. If a {@link Path} is bound to a selector function argument, the function argument will contain the value found at that path. However if a {@link PathSet} is bound to a selector function argument, the function argument will be a JSON structure containing all of the path values. Using argument binding can provide a good balance between allocations and expressiveness. For more detail on how {@link Path}s and {@link PathSet}s are bound to selector function arguments, see the examples below.  
+     * @function
+     * @param {...PathSet} path - The path(s) to retrieve
+     * @param {?Function} selector - The callback to execute once all of the paths have been retrieved
+     * @return {ModelResponse.<JSONEnvelope>|Observable} - The requested data as JSON, or the result of the optional selector function.
+     */
     get: operations("get"),
+    /**
+     * Sets the value at one or more places in the JSONGraph model. The set method accepts one or more {@link PathValue}s, each of which is a combination of a location in the document and the value to place there.  In addition to accepting  {@link PathValue}s, the set method also returns the values after the set operation is complete.
+     * @function
+     * @param {...(PathValue | JSONGraphEnvelope | JSONEnvelope)} value - A value or collection of values to set into the Model.
+     * @return {ModelResponse.<JSON> | Observable} - An {@link Observable} stream containing the values in the JSONGraph model after the set was attempted.
+     */
     set: operations("set"),
     invalidate: operations("invalidate"),
+    // TODO: Document selector function
+    /*
+     * Invoke a function
+     * @function
+     * @param {Path} functionPath - The path to the function to invoke
+     * @param {Array.<Object>} args - The arguments to pass to the function
+     * @param {Array.<PathSet>} pathSuffixes - The paths to retrieve from objects returned from the function
+     * @param {Array.<PathSet>} calleePaths - The paths to retrieve from function callee after successful function execution
+     * @param {Function} selector The selector function
+     * @returns {ModelResponse.<*> | Observable} The {JSONGraph} fragment and associated metadata returned from the invoked function
+     */
     call: call,
+    /**
+     * Get data for a single {@link Path}
+     * @param {Path} path - The path to retrieve
+     * @return {Observable.<*>} - The value for the path
+     * @example
+     var model = new falcor.Model({source: new falcor.HttpDataSource("/model.json") });
+
+     model.
+         getValue('user.name').
+         subscribe(function(name) {
+             console.log(name);
+         });
+
+     // The code above prints "Jim" to the console.
+     */
     getValue: function(path) {
         return this.get(path, function(x) { return x; });
     },
@@ -171,6 +228,15 @@ Model.prototype = {
         {path: path, value: value} :
             path, function(x) { return x; });
     },
+    /**
+     * Returns a clone of the {@link Model} bound to a location within the {@link JSONGraph}. The bound location is never a {@link Reference}: any {@link Reference}s encountered while resolving the bound {@link Path} are always replaced with the {@link Reference}s target value. For subsequent operations on the {@link Model}, all paths will be evaluated relative to the bound path. Bind allows you to:
+     * - Expose only a fragment of the {@link JSONGraph} to components, rather than the entire graph
+     * - Hide the location of a {@link JSONGraph} fragment from components
+     * - Optimize for executing multiple operations and path looksup at/below the same location in the {@link JSONGraph}
+     * @param {Path} boundPath - The path to bind to
+     * @param {...PathSet} relativePathsToPreload - Paths to preload before Model is created. These paths are relative to the bound path.
+     * @return {Observable.<Model>} - An Observable stream with a single value, the bound {@link Model}, or an empty stream if nothing is found at the path
+    */
     bind: function(boundPath) {
 
         var model = this, root = model._root,
@@ -198,6 +264,7 @@ Model.prototype = {
                 observer.onNext(boundModel);
                 observer.onCompleted();
             } catch (e) {
+                // Bug 129: if user code throws in onNext, they get onNexted again in the catch block instead of getting onErrored. Presumably we only want to do this catch block if bindSync encounters error?
                 return model.get.apply(model, paths.map(function(path) {
                     return boundPath.concat(path);
                 }).concat(function(){})).subscribe(
@@ -229,6 +296,10 @@ Model.prototype = {
             }
         });
     },
+    /**
+     * Set the local cache to a {@link JSONGraph} fragment. This method can be a useful way of mocking a remote document, or restoring the local cache from a previously stored state
+     * @param {JSONGraph} jsonGraph - The {@link JSONGraph} fragment to use as the local cache
+     */
     setCache: function(cache) {
         var size = this._cache && this._cache.$size || 0;
         var lru = this._root;
@@ -242,9 +313,17 @@ Model.prototype = {
         }
         return this;
     },
+    /**
+     * Get the local {@link JSONGraph} cache. This method can be a useful to store the state of the cache
+     * @param {...Array.<PathSet>} [pathSets] - The path(s) to retrieve. If no paths are specified, the entire {@link JSONGraph} is returned
+     * @return {JSONGraph} jsonGraph - A {@link JSONGraph} fragment
+     * @example
+     // Storing the boxshot of the first 10 titles in the first 10 genreLists to local storage.
+     localStorage.setItem('cache', JSON.stringify(model.getCache("genreLists[0...10][0...10].boxshot")));
+     */ 
     getCache: function() {
         var paths = slice.call(arguments);
-        if(paths.length == 0) {
+        if(paths.length === 0) {
             paths[0] = { json: this._cache };
         }
         var result;
@@ -270,6 +349,14 @@ Model.prototype = {
         return this._getGeneration(this, path);
     },
     _getGeneration: getGeneration,
+    // TODO: Does not throw if given a PathSet rather than a Path, not sure if it should or not.
+    // TODO: Doc not accurate? I was able to invoke directly against the Model, perhaps because I don't have a data source?
+    // TODO: Not clear on what it means to "retrieve objects in addition to JSONGraph values"
+    /**
+     * Synchronously retrieves a single path from the local {@link Model} only and will not retrieve missing paths from the {@link DataSource}. This method can only be invoked when the {@link Model} does not have a {@link DataSource} or from within a selector function. See {@link Model.prototype.get}. The getValueSync method differs from the asynchronous get methods (ex. get, getValues) in that it can be used to retrieve objects in addition to JSONGraph values.
+     * @arg {Path} path - The path to retrieve
+     * @return {*} - The value for the specified path
+     */
     getValueSync: function(path) {
         path = pathSyntax.fromPath(path);
         if (Array.isArray(path) === false) {
@@ -324,6 +411,15 @@ Model.prototype = {
             return json && json.value;
         }
     },
+    // TODO: Document selector function elsewhere and link
+    /**
+     * Synchronously returns a clone of the {@link Model} bound to a location within the {@link JSONGraph}. The bound location is never a {@link Reference}: any {@link Reference}s encountered while resolving the bound {@link Path} are always replaced with the {@link Reference}s target value. For subsequent operations on the {@link Model}, all paths will be evaluated relative to the bound path. This method can only be invoked when the {@link Model} does not have a {@link DataSource} or from within a selector function. Bind allows you to:
+     * - Expose only a fragment of the {@link JSONGraph} to components, rather than the entire graph
+     * - Hide the location of a {@link JSONGraph} fragment from components
+     * - Optimize for executing multiple operations and path looksup at/below the same location in the {@link JSONGraph}
+     * @param {Path} path - The path to bind to
+     * @return {Model}
+     */
     bindSync: function(path) {
         path = pathSyntax.fromPath(path);
         if(Array.isArray(path) === false) {
@@ -351,6 +447,18 @@ Model.prototype = {
         }
         return this.clone(["_path", boundValue.path]);
     },
+    /**
+     * Synchronously returns a clone of the {@link Model} bound to a location within the {@link JSONGraph}. Unlike bind or bindSync, softBind never optimizes its path.  Soft bind is ideal if you want to retrieve the bound path every time, rather than retrieve the optimized path once and then always retrieve paths from that object in the JSON Graph. For example, if you always wanted to retrieve the name from the first item in a list you could softBind to the path "list[0]".
+     * @param {Path} path - The path prefix to retrieve every time an operation is executed on a Model.
+     * @return {Model}
+     */    
+    softBind: function(path) {
+        path = pathSyntax.fromPath(path);
+        if(Array.isArray(path) === false) {
+            throw new Error("Model#softBind must be called with an Array path.");
+        }
+        return this.clone(["_path", path]);
+    },    
     clone: function() {
 
         var self = this;
@@ -375,6 +483,12 @@ Model.prototype = {
 
         return clone;
     },
+    // TODO: Should we be clearer this only applies to "get" operations? I'm assuming that is true
+    /**
+     * Returns a clone of the {@link Model} that eanbles batching. Within the configured time period, paths for operations of the same type are collected and executed on the {@link DataSource} in a batch. Batching can make more efficient use of the {@link DataSource} depending on its implementation, for example, reducing the number of HTTP requests to the server
+     * @param {?Scheduler|number} schedulerOrDelay - Either a {@link Scheduler} that determines when to send a batch to the {@link DataSource}, or the number in milliseconds to collect a batch before sending to the {@link DataSource}. If this parameter is omitted, then batch collection ends at the end of the next tick.
+     * @return {Model}
+     */
     batch: function(schedulerOrDelay) {
         if(typeof schedulerOrDelay === "number") {
             schedulerOrDelay = new TimeoutScheduler(Math.round(Math.abs(schedulerOrDelay)));
@@ -383,9 +497,21 @@ Model.prototype = {
         }
         return this.clone(["_request", new RequestQueue(this, schedulerOrDelay)]);
     },
+    /**
+     * Returns a clone of the {@link Model} that disables batching. This is the default mode. Each operation will be executed on the {@link DataSource} separately
+     * @name unbatch
+     * @memberof Model.prototype
+     * @function
+     * @return {Model} a {@link Model} that batches requests of the same type and sends them to the data source together.
+     */
     unbatch: function() {
         return this.clone(["_request", new RequestQueue(this, new ImmediateScheduler())]);
     },
+    // TODO: Add example of treatErrorsAsValues
+    /**
+     * Returns a clone of the {@link Model} that treats errors as values. Errors will be reported in the same callback used to report data. Errors will appear as objects in responses, rather than being sent to the {@link Observable~onErrorCallback} callback of the {@link ModelResponse}.
+     * @return {Model}
+     */
     treatErrorsAsValues: function() {
         return this.clone(["_treatErrorsAsValues", true]);
     },
@@ -395,12 +521,24 @@ Model.prototype = {
     materialize: function() {
         return this.clone(["_materialized", true]);
     },
+    /**
+     * Returns a clone of the {@link Model} that boxes values returning the wrapper ({@link Atom}, {@link Reference}, or {@link Error}), rather than the value inside it. This allows any metadata attached to the wrapper to be inspected
+     * @return {Model}
+     */
     boxValues: function() {
         return this.clone(["_boxed", true]);
     },
+    /**
+     * Returns a clone of the {@link Model} that unboxes values, returning the value inside of the wrapper ({@link Atom}, {@link Reference}, or {@link Error}), rather than the wrapper itself. This is the default mode.
+     * @return {Model}
+     */
     unboxValues: function() {
         return this.clone(["_boxed", false]);
     },
+    /**
+     * Returns a clone of the {@link Model} that only uses the local {@link JSONGraph} and never uses a {@link DataSource} to retrieve missing paths
+     * @return {Model}
+     */
     withoutDataSource: function() {
         return this.clone(["_dataSource", null]);
     },
@@ -417,11 +555,11 @@ Model.prototype = {
         return true;
     },
     toJSON: function() {
-        return this._path;
+        return { $type: "ref", value: this._path };
     }
 };
 
-},{"../lru/collect":84,"../types/error":137,"./../get/getBoundValue":47,"./../get/getGeneration":48,"./../types/atom":136,"./../types/error":137,"./../types/path":138,"./Falcor":2,"./ModelDataSourceAdapter":4,"./ModelResponse":5,"./operations":12,"./operations/call":7,"./request/RequestQueue":38,"./scheduler/ASAPScheduler":39,"./scheduler/ImmediateScheduler":40,"./scheduler/TimeoutScheduler":41,"falcor-path-syntax":171}],4:[function(_dereq_,module,exports){
+},{"13":13,"137":137,"138":138,"139":139,"173":173,"2":2,"39":39,"4":4,"40":40,"41":41,"42":42,"48":48,"49":49,"5":5,"6":6,"8":8,"85":85}],4:[function(require,module,exports){
 function ModelDataSourceAdapter(model) {
     this._model = model.materialize().boxValues().treatErrorsAsValues();
 }
@@ -440,14 +578,14 @@ ModelDataSourceAdapter.prototype = {
 };
 
 module.exports = ModelDataSourceAdapter;
-},{}],5:[function(_dereq_,module,exports){
-var falcor = _dereq_('./Falcor');
-var pathSyntax = _dereq_('falcor-path-syntax');
+},{}],5:[function(require,module,exports){
+var falcor = require(2);
+var pathSyntax = require(173);
 
 if(typeof Promise !== "undefined" && Promise) {
     falcor.Promise = Promise;
 } else {
-    falcor.Promise = _dereq_("promise");
+    falcor.Promise = require(180);
 }
 
 var Observable  = falcor.Observable,
@@ -456,6 +594,11 @@ var Observable  = falcor.Observable,
     jsongMixin  = { format: { value: "AsJSONG"   } },
     progressiveMixin = { operationIsProgressive: { value: true } };
 
+/**
+ * A container for the results of an operation performed on a {@link Model}, which can convert the data into any of the following formats: JSON, {@link JSONGraph}, a stream of {@link PathValue}s, or a scalar value. Once the data format is determined, the ModelResponse container can be converted into any of the following container types: Observable (default), or a Promise. A ModelResponse can also push data to a node-style callback.
+ * @constructor
+ * @augments Observable
+ */
 function ModelResponse(forEach) {
     this._subscribe = forEach;
 }
@@ -486,15 +629,43 @@ function mixin(self) {
 
 ModelResponse.prototype = Observable.create(noop);
 ModelResponse.prototype.format = "AsPathMap";
+
+/**
+ * Converts the data format to a stream of {@link PathValue}s
+ * @return ModelResponse.<PathValue>
+ */
 ModelResponse.prototype.toPathValues = function() {
     return mixin(this, valuesMixin);
 };
+
+/**
+ * Converts the data format to JSON 
+ * @return ModelResponse.<JSONEnvelope>
+ */
 ModelResponse.prototype.toJSON = function() {
     return mixin(this, jsonMixin);
 };
+
+// TODO: Adapt this to eventual progressive API on model.
+// TODO: Pretty sure this documentation is wrong as this just modifies output correct?
+
+/**
+ * The progressive method retrieves several {@link Path}s or {@link PathSet}s from the JSONGraph object, and makes them
+ * available in the local cache. Like the {@link Model.prototype.getProgressively} function, getProgressively invokes a 
+ * selector function every time is available, creating a stream of objects where each new object is a more populated version 
+ * of the one before. The getProgressively function is a memory-efficient alternative to the getProgressively function, because get does not convert the requested data from JSONGraph to JSON. Instead the getProgressively function attempts to ensure that the requested paths are locally available in the cache when it invokes a selector function. Within the selector function, data is synchronously retrieved from the local cache and translated into another form - usually a view object. Within the selector function you can use helper methods like getValueSync and setValueSync to synchronously retrieve data from the cache. These methods are only valid within the selector function, and will throw if executed anywhere else.
+ * @param {...PathSet} path - The path(s) to retrieve
+ * @param {Function} selector - The callback to execute once all the paths have been retrieved
+ * @return {ModelResponse.<JSONEnvelope>} the values found at the requested paths.
+ */
 ModelResponse.prototype.progressively = function() {
     return mixin(this, progressiveMixin);
 };
+
+/**
+ * Converts the data format to {@link JSONGraph}
+ * @return ModelResponse.<JSONGraphEnvelope>
+ */
 ModelResponse.prototype.toJSONG = function() {
     return mixin(this, jsongMixin);
 };
@@ -537,29 +708,38 @@ ModelResponse.prototype.then = function(onNext, onError) {
 
 module.exports = ModelResponse;
 
-},{"./Falcor":2,"falcor-path-syntax":171,"promise":178}],6:[function(_dereq_,module,exports){
-var falcor = _dereq_('./Falcor');
-var Model = _dereq_('./Model');
+},{"173":173,"180":180,"2":2}],6:[function(require,module,exports){
+function ModelRoot() {
+    this.expired = [];
+    this.allowSync = 0;
+    this.unsafeMode = false;
+}
+
+module.exports = ModelRoot;
+},{}],7:[function(require,module,exports){
+var falcor = require(2);
+var Model = require(3);
 falcor.Model = Model;
 
 module.exports = falcor;
 
-},{"./Falcor":2,"./Model":3}],7:[function(_dereq_,module,exports){
+},{"2":2,"3":3}],8:[function(require,module,exports){
 module.exports = call;
 
-var falcor = _dereq_("../../Falcor");
-var ModelResponse = _dereq_('./../../ModelResponse');
+var $ref = require(139);
+var falcor = require(2);
+var ModelResponse = require(5);
 
-function call(path, args, suffixes, paths, selector) {
+function call(path, args, suffixes, extraPaths, selector) {
 
     var model = this;
     args && Array.isArray(args) || (args = []);
     suffixes && Array.isArray(suffixes) || (suffixes = []);
-    paths = Array.prototype.slice.call(arguments, 3);
-    if (typeof (selector = paths[paths.length - 1]) !== "function") {
+    extraPaths = Array.prototype.slice.call(arguments, 3);
+    if (typeof (selector = extraPaths[extraPaths.length - 1]) !== "function") {
         selector = undefined;
     } else {
-        paths = paths.slice(0, -1);
+        extraPaths = extraPaths.slice(0, -1);
     }
 
     return ModelResponse.create(function (options) {
@@ -572,60 +752,97 @@ function call(path, args, suffixes, paths, selector) {
             thisPath = callPath.slice(0, -1);
 
         var disposable = model.
-            getValue(path).
-            flatMap(function (localFn) {
-                if (typeof localFn === "function") {
-                    return falcor.Observable.return(localFn.
-                        apply(rootModel.bindSync(thisPath), args).
-                        map(function (pathValue) {
-                            return {
+        getValue(path).
+        flatMap(function (localFn) {
+            if (typeof localFn === "function") {
+                return falcor.Observable.return(localFn.
+                    apply(rootModel.bindSync(thisPath), args).
+                    reduce(function (memo, pathValue) {
+                    if (Boolean(pathValue.invalidated)) {
+                        if (pathValue.path.length === 0) {
+                            pathValue.path.push(null);
+                        }
+                        memo.invalidations.push(thisPath.concat(pathValue.path));
+                    } else {
+                        var value = pathValue.value;
+                        if (Boolean(value) && typeof value === "object" && value.$type === $ref) {
+                            memo.references.push({
                                 path: thisPath.concat(pathValue.path),
                                 value: pathValue.value
-                            };
-                        }).
-                        toArray().
-                        flatMap(function (pathValues) {
-                            return localRoot.set.
-                                apply(localRoot, pathValues).
-                                toJSONG();
-                        }).
-                        flatMap(function (envelope) {
-                            return rootModel.get.apply(rootModel,
-                                envelope.paths.reduce(function (paths, path) {
-                                    return paths.concat(suffixes.map(function (suffix) {
-                                        return path.concat(suffix);
-                                    }));
-                                }, []).
-                                    concat(paths.reduce(function (paths, path) {
-                                        return paths.concat(thisPath.concat(path));
-                                    }, []))).
-                                toJSONG();
-                        }));
-                }
-                return falcor.Observable.empty();
-            }).
-            defaultIfEmpty(dataSource && dataSource.call(path, args, suffixes, paths) || falcor.Observable.empty()).
-            mergeAll().
-            subscribe(function (envelope) {
-                var invalidated = envelope.invalidated;
-                if (invalidated && invalidated.length) {
-                    invalidatePaths(rootModel, invalidated, undefined, model._errorSelector);
-                }
-                disposable = localRoot.
-                    set(envelope, function () {
-                        return model;
-                    }).
-                    subscribe(function (model) {
-                        var getPaths = envelope.paths.map(function (path) {
-                            return path.slice(boundPath.length);
-                        });
-                        if (selector) {
-                            getPaths[getPaths.length] = function () {
-                                return selector.call(model, getPaths);
-                            };
+                            });
+                        } else {
+                            memo.values.push({
+                                path: thisPath.concat(pathValue.path),
+                                value: pathValue.value
+                            });
                         }
-                        disposable = model.get.apply(model, getPaths).subscribe(options);
-                    });
+                    }
+                    return memo;
+                }, {
+                    values: [],
+                    references: [],
+                    invalidations: []
+                }).flatMap(function (obj) {
+                    var values = obj.values;
+                    var references = obj.references;
+                    var invalidations = obj.invalidations;
+                    return localRoot.set.
+                        apply(localRoot, values.concat(references, function () {
+                            return rootModel;
+                        })).
+                        flatMap(function (rootModel) {
+                            
+                            var rootRefs = references.reduce(function (refs, pathValue) {
+                                var path = pathValue.path;
+                                refs.push.apply(refs, suffixes.map(function (suffix) {
+                                    return path.concat(suffix);
+                                }));
+                                return refs;
+                            }, []);
+                            
+                            var rootExtraPaths = extraPaths.reduce(function(paths, path) {
+                                paths.push.apply(paths, thisPath.concat(path));
+                                return paths;
+                            }, []);
+                            
+                            return rootModel.get.
+                                apply(rootModel, rootRefs.concat(rootExtraPaths)).
+                                toJSONG().
+                                map(function(envelope) {
+                                    envelope.invalidated = invalidations;
+                                    return envelope;
+                                });
+                        });
+                }));
+            }
+            return falcor.Observable.empty();
+        }).
+        defaultIfEmpty(dataSource && dataSource.call(path, args, suffixes, paths) || falcor.Observable.empty()).
+        mergeAll().
+        flatMap(function (envelope) {
+            var invalidated = envelope.invalidated;
+            var obs = falcor.Observable.empty();
+            if (invalidated && invalidated.length) {
+                obs = rootModel.invalidate.apply(rootModel, invalidated).ignoreElements();
+                invalidatePaths(rootModel, invalidated, undefined, model._errorSelector);
+            }
+            return localRoot.set(envelope, function () {
+                return model;
+            });
+        }).
+        subscribe(function (model) {
+                var getPaths = envelope.paths.map(function (path) {
+                    return path.slice(boundPath.length);
+                });
+                if (selector) {
+                    getPaths[getPaths.length] = function () {
+                        return selector.call(model, getPaths);
+                    };
+                }
+                return model.get.apply(model, getPaths).subscribe(options);
+            },
+            function (e) {
+                options.onError(e);
             });
 
         return {
@@ -636,10 +853,9 @@ function call(path, args, suffixes, paths, selector) {
         };
     });
 }
-
-},{"../../Falcor":2,"./../../ModelResponse":5}],8:[function(_dereq_,module,exports){
-var combineOperations = _dereq_('./../support/combineOperations');
-var setSeedsOrOnNext = _dereq_('./../support/setSeedsOrOnNext');
+},{"139":139,"2":2,"5":5}],9:[function(require,module,exports){
+var combineOperations = require(25);
+var setSeedsOrOnNext = require(38);
 
 /**
  * The initial args that are passed into the async request pipeline.
@@ -659,10 +875,10 @@ module.exports = function getInitialArgs(options, seeds, onNext) {
     return [operations];
 };
 
-},{"./../support/combineOperations":24,"./../support/setSeedsOrOnNext":37}],9:[function(_dereq_,module,exports){
-var getSourceObserver = _dereq_('./../support/getSourceObserever');
-var partitionOperations = _dereq_('./../support/partitionOperations');
-var mergeBoundPath = _dereq_('./../support/mergeBoundPath');
+},{"25":25,"38":38}],10:[function(require,module,exports){
+var getSourceObserver = require(26);
+var partitionOperations = require(33);
+var mergeBoundPath = require(30);
 
 module.exports = getSourceRequest;
 
@@ -705,12 +921,12 @@ function getSourceRequest(
 }
 
 
-},{"./../support/getSourceObserever":25,"./../support/mergeBoundPath":29,"./../support/partitionOperations":32}],10:[function(_dereq_,module,exports){
-var getInitialArgs = _dereq_('./getInitialArgs');
-var getSourceRequest = _dereq_('./getSourceRequest');
-var shouldRequest = _dereq_('./shouldRequest');
-var request = _dereq_('./../request');
-var processOperations = _dereq_('./../support/processOperations');
+},{"26":26,"30":30,"33":33}],11:[function(require,module,exports){
+var getInitialArgs = require(9);
+var getSourceRequest = require(10);
+var shouldRequest = require(12);
+var request = require(16);
+var processOperations = require(35);
 var get = request(
     getInitialArgs,
     getSourceRequest,
@@ -719,16 +935,16 @@ var get = request(
 
 module.exports = get;
 
-},{"./../request":15,"./../support/processOperations":34,"./getInitialArgs":8,"./getSourceRequest":9,"./shouldRequest":11}],11:[function(_dereq_,module,exports){
+},{"10":10,"12":12,"16":16,"35":35,"9":9}],12:[function(require,module,exports){
 module.exports = function(model, combinedResults) {
     return model._dataSource && combinedResults.requestedMissingPaths.length > 0;
 };
 
-},{}],12:[function(_dereq_,module,exports){
-var ModelResponse = _dereq_('../ModelResponse');
-var get = _dereq_('./get');
-var set = _dereq_('./set');
-var invalidate = _dereq_('./invalidate');
+},{}],13:[function(require,module,exports){
+var ModelResponse = require(5);
+var get = require(11);
+var set = require(18);
+var invalidate = require(14);
 
 module.exports = function modelOperation(name) {
     return function() {
@@ -761,10 +977,10 @@ module.exports = function modelOperation(name) {
     };
 };
 
-},{"../ModelResponse":5,"./get":10,"./invalidate":13,"./set":17}],13:[function(_dereq_,module,exports){
-var invalidateInitialArgs = _dereq_('./invalidateInitialArgs');
-var request = _dereq_('./../request');
-var processOperations = _dereq_('./../support/processOperations');
+},{"11":11,"14":14,"18":18,"5":5}],14:[function(require,module,exports){
+var invalidateInitialArgs = require(15);
+var request = require(16);
+var processOperations = require(35);
 var invalidate = request(
     invalidateInitialArgs,
     null,
@@ -772,9 +988,9 @@ var invalidate = request(
 
 module.exports = invalidate;
 
-},{"./../request":15,"./../support/processOperations":34,"./invalidateInitialArgs":14}],14:[function(_dereq_,module,exports){
-var combineOperations = _dereq_('./../support/combineOperations');
-var setSeedsOrOnNext = _dereq_('./../support/setSeedsOrOnNext');
+},{"15":15,"16":16,"35":35}],15:[function(require,module,exports){
+var combineOperations = require(25);
+var setSeedsOrOnNext = require(38);
 module.exports = function getInitialArgs(options, seeds, onNext) {
     var seedRequired = options.format !== 'AsValues';
     var operations = combineOperations(
@@ -786,11 +1002,11 @@ module.exports = function getInitialArgs(options, seeds, onNext) {
     return [operations, seeds];
 };
 
-},{"./../support/combineOperations":24,"./../support/setSeedsOrOnNext":37}],15:[function(_dereq_,module,exports){
-var setSeedsOrOnNext = _dereq_('./support/setSeedsOrOnNext');
-var onNextValues = _dereq_('./support/onNextValue');
-var onCompletedOrError = _dereq_('./support/onCompletedOrError');
-var primeSeeds = _dereq_('./support/primeSeeds');
+},{"25":25,"38":38}],16:[function(require,module,exports){
+var setSeedsOrOnNext = require(38);
+var onNextValues = require(32);
+var onCompletedOrError = require(31);
+var primeSeeds = require(34);
 var autoFalse = function() { return false; };
 
 module.exports = request;
@@ -891,9 +1107,9 @@ function request(initialArgs, sourceRequest, processOperations, shouldRequestFn,
     };
 }
 
-},{"./support/onCompletedOrError":30,"./support/onNextValue":31,"./support/primeSeeds":33,"./support/setSeedsOrOnNext":37}],16:[function(_dereq_,module,exports){
-var collect = _dereq_('../../../lru/collect');
-var onCompletedOrError = _dereq_('../support/onCompletedOrError');
+},{"31":31,"32":32,"34":34,"38":38}],17:[function(require,module,exports){
+var collect = require(85);
+var onCompletedOrError = require(31);
 
 module.exports = function finalizeAndCollect(model, onCompleted, onError, errors) {
     onCompletedOrError(model, onCompleted, onError, errors);
@@ -907,13 +1123,13 @@ module.exports = function finalizeAndCollect(model, onCompleted, onError, errors
     );
 };
 
-},{"../../../lru/collect":84,"../support/onCompletedOrError":30}],17:[function(_dereq_,module,exports){
-var setInitialArgs = _dereq_('./setInitialArgs');
-var setSourceRequest = _dereq_('./setSourceRequest');
-var request = _dereq_('./../request');
-var setProcessOperations = _dereq_('./setProcessOperations');
-var shouldRequest = _dereq_('./shouldRequest');
-var finalize = _dereq_('./finalizeAndCollect');
+},{"31":31,"85":85}],18:[function(require,module,exports){
+var setInitialArgs = require(19);
+var setSourceRequest = require(21);
+var request = require(16);
+var setProcessOperations = require(20);
+var shouldRequest = require(22);
+var finalize = require(17);
 var set = request(
     setInitialArgs,
     setSourceRequest,
@@ -924,10 +1140,10 @@ var set = request(
 
 module.exports = set;
 
-},{"./../request":15,"./finalizeAndCollect":16,"./setInitialArgs":18,"./setProcessOperations":19,"./setSourceRequest":20,"./shouldRequest":21}],18:[function(_dereq_,module,exports){
-var combineOperations = _dereq_('./../support/combineOperations');
-var setSeedsOrOnNext = _dereq_('./../support/setSeedsOrOnNext');
-var Formats = _dereq_('./../support/Formats');
+},{"16":16,"17":17,"19":19,"20":20,"21":21,"22":22}],19:[function(require,module,exports){
+var combineOperations = require(25);
+var setSeedsOrOnNext = require(38);
+var Formats = require(23);
 var toPathValues = Formats.toPathValues;
 var toJSONG = Formats.toJSONG;
 module.exports = function setInitialArgs(options, seeds, onNext) {
@@ -982,11 +1198,11 @@ module.exports = function setInitialArgs(options, seeds, onNext) {
     return [operations, requestOptions];
 };
 
-},{"./../support/Formats":22,"./../support/combineOperations":24,"./../support/setSeedsOrOnNext":37}],19:[function(_dereq_,module,exports){
-var processOperations = _dereq_('./../support/processOperations');
-var combineOperations = _dereq_('./../support/combineOperations');
-var mergeBoundPath = _dereq_('./../support/mergeBoundPath');
-var Formats = _dereq_('./../support/Formats');
+},{"23":23,"25":25,"38":38}],20:[function(require,module,exports){
+var processOperations = require(35);
+var combineOperations = require(25);
+var mergeBoundPath = require(30);
+var Formats = require(23);
 var toPathValues = Formats.toPathValues;
 
 module.exports = setProcessOperations;
@@ -1044,11 +1260,11 @@ function setProcessOperations(model, operations, errorSelector, comparator, requ
     return results;
 }
 
-},{"./../support/Formats":22,"./../support/combineOperations":24,"./../support/mergeBoundPath":29,"./../support/processOperations":34}],20:[function(_dereq_,module,exports){
-var getSourceObserver = _dereq_('./../support/getSourceObserever');
-var combineOperations = _dereq_('./../support/combineOperations');
-var setSeedsOrOnNext = _dereq_('./../support/setSeedsOrOnNext');
-var toPathValues = _dereq_('./../support/Formats').toPathValues;
+},{"23":23,"25":25,"30":30,"35":35}],21:[function(require,module,exports){
+var getSourceObserver = require(26);
+var combineOperations = require(25);
+var setSeedsOrOnNext = require(38);
+var toPathValues = require(23).toPathValues;
 
 module.exports = setSourceRequest;
 
@@ -1085,7 +1301,7 @@ function setSourceRequest(
 }
 
 
-},{"./../support/Formats":22,"./../support/combineOperations":24,"./../support/getSourceObserever":25,"./../support/setSeedsOrOnNext":37}],21:[function(_dereq_,module,exports){
+},{"23":23,"25":25,"26":26,"38":38}],22:[function(require,module,exports){
 // Set differs from get in the sense that the first time through
 // the recurse loop a server operation must be performed if it can be.
 module.exports = function(model, combinedResults, loopCount) {
@@ -1094,7 +1310,7 @@ module.exports = function(model, combinedResults, loopCount) {
         loopCount === 0);
 };
 
-},{}],22:[function(_dereq_,module,exports){
+},{}],23:[function(require,module,exports){
 module.exports = {
     toPathValues: 'AsValues',
     toJSON: 'AsPathMap',
@@ -1102,7 +1318,7 @@ module.exports = {
     selector: 'AsJSON'
 };
 
-},{}],23:[function(_dereq_,module,exports){
+},{}],24:[function(require,module,exports){
 module.exports = function buildJSONGOperation(format, seeds, jsongOp, seedOffset, onNext) {
     return {
         methodName: '_setJSONGs' + format,
@@ -1115,11 +1331,11 @@ module.exports = function buildJSONGOperation(format, seeds, jsongOp, seedOffset
     };
 };
 
-},{}],24:[function(_dereq_,module,exports){
-var isSeedRequired = _dereq_('./seedRequired');
-var isJSONG = _dereq_('./isJSONG');
-var isPathOrPathValue = _dereq_('./isPathOrPathValue');
-var Formats = _dereq_('./Formats');
+},{}],25:[function(require,module,exports){
+var isSeedRequired = require(36);
+var isJSONG = require(28);
+var isPathOrPathValue = require(29);
+var Formats = require(23);
 var toSelector = Formats.selector;
 module.exports = function combineOperations(args, format, name, spread, isProgressive) {
     var seedRequired = isSeedRequired(format);
@@ -1158,8 +1374,8 @@ module.exports = function combineOperations(args, format, name, spread, isProgre
         }, []);
 };
 
-},{"./Formats":22,"./isJSONG":27,"./isPathOrPathValue":28,"./seedRequired":35}],25:[function(_dereq_,module,exports){
-var insertErrors = _dereq_('./insertErrors.js');
+},{"23":23,"28":28,"29":29,"36":36}],26:[function(require,module,exports){
+var insertErrors = require(27);
 /**
  * creates the model source observer
  * @param {Model} model
@@ -1186,7 +1402,7 @@ function getSourceObserver(model, requestedMissingPaths, cb) {
 
 module.exports = getSourceObserver;
 
-},{"./insertErrors.js":26}],26:[function(_dereq_,module,exports){
+},{"27":27}],27:[function(require,module,exports){
 /**
  * will insert the error provided for every requestedPath.
  * @param {Model} model
@@ -1211,20 +1427,20 @@ module.exports = function insertErrors(model, requestedPaths, err) {
 };
 
 
-},{}],27:[function(_dereq_,module,exports){
+},{}],28:[function(require,module,exports){
 module.exports = function isJSONG(x) {
     return x.hasOwnProperty("jsong");
 };
 
-},{}],28:[function(_dereq_,module,exports){
+},{}],29:[function(require,module,exports){
 module.exports = function isPathOrPathValue(x) {
     return Array.isArray(x) || (
         x.hasOwnProperty("path") && x.hasOwnProperty("value"));
 };
 
-},{}],29:[function(_dereq_,module,exports){
-var isJSONG = _dereq_('./isJSONG');
-var isPathValue = _dereq_('./isPathOrPathValue');
+},{}],30:[function(require,module,exports){
+var isJSONG = require(28);
+var isPathValue = require(29);
 
 module.exports =  mergeBoundPath;
 
@@ -1267,7 +1483,7 @@ function mergeBoundPathIntoPathValue(arg, boundPath) {
     };
 }
 
-},{"./isJSONG":27,"./isPathOrPathValue":28}],30:[function(_dereq_,module,exports){
+},{"28":28,"29":29}],31:[function(require,module,exports){
 module.exports = function onCompletedOrError(model, onCompleted, onError, errors) {
     if (errors.length) {
         onError(errors);
@@ -1276,7 +1492,7 @@ module.exports = function onCompletedOrError(model, onCompleted, onError, errors
     }
 };
 
-},{}],31:[function(_dereq_,module,exports){
+},{}],32:[function(require,module,exports){
 /**
  * will onNext the observer with the seeds provided.
  * @param {Model} model
@@ -1311,13 +1527,13 @@ module.exports = function onNextValues(model, onNext, seeds, selector) {
     }
 };
 
-},{}],32:[function(_dereq_,module,exports){
-var buildJSONGOperation = _dereq_('./buildJSONGOperation');
+},{}],33:[function(require,module,exports){
+var buildJSONGOperation = require(24);
 
 /**
  * It performs the opposite of combine operations.  It will take a JSONG
  * response and partition them into the required amount of operations.
- * @param {{jsong: {}, paths:[]}} jsongResponse
+ * @param {{jsong: Object, paths: Array}} jsongResponse
  */
 module.exports = partitionOperations;
 
@@ -1363,7 +1579,7 @@ function partitionOperations(
 }
 
 
-},{"./buildJSONGOperation":23}],33:[function(_dereq_,module,exports){
+},{"24":24}],34:[function(require,module,exports){
 module.exports = function primeSeeds(selector, selectorLength) {
     var seeds = [];
     if (selector) {
@@ -1376,7 +1592,7 @@ module.exports = function primeSeeds(selector, selectorLength) {
     return seeds;
 };
 
-},{}],34:[function(_dereq_,module,exports){
+},{}],35:[function(require,module,exports){
 module.exports = function processOperations(model, operations, errorSelector, comparator, boundPath) {
     return operations.reduce(function(memo, operation) {
 
@@ -1414,12 +1630,12 @@ module.exports = function processOperations(model, operations, errorSelector, co
     });
 }
 
-},{}],35:[function(_dereq_,module,exports){
+},{}],36:[function(require,module,exports){
 module.exports = function isSeedRequired(format) {
     return format === 'AsJSON' || format === 'AsJSONG' || format === 'AsPathMap';
 };
 
-},{}],36:[function(_dereq_,module,exports){
+},{}],37:[function(require,module,exports){
 module.exports = function setSeedsOnGroups(groups, seeds, hasSelector) {
     var valueIndex = 0;
     var seedsLength = seeds.length;
@@ -1439,8 +1655,8 @@ module.exports = function setSeedsOnGroups(groups, seeds, hasSelector) {
     }
 }
 
-},{}],37:[function(_dereq_,module,exports){
-var setSeedsOnGroups = _dereq_('./setSeedsOnGroups');
+},{}],38:[function(require,module,exports){
+var setSeedsOnGroups = require(37);
 module.exports = function setSeedsOrOnNext(operations, seedRequired, seeds, onNext, selector) {
     if (seedRequired) {
         setSeedsOnGroups(operations, seeds, selector);
@@ -1451,8 +1667,8 @@ module.exports = function setSeedsOrOnNext(operations, seedRequired, seeds, onNe
     }
 };
 
-},{"./setSeedsOnGroups":36}],38:[function(_dereq_,module,exports){
-var falcor = _dereq_('./../Falcor');
+},{"37":37}],39:[function(require,module,exports){
+var falcor = require(2);
 var NOOP = falcor.NOOP;
 var RequestQueue = function(jsongModel, scheduler) {
     this._scheduler = scheduler;
@@ -1914,8 +2130,8 @@ falcor.__Internals.buildQueries = buildQueries;
 
 module.exports = RequestQueue;
 
-},{"./../Falcor":2}],39:[function(_dereq_,module,exports){
-var asap = _dereq_('asap');
+},{"2":2}],40:[function(require,module,exports){
+var asap = require(147);
 
 
 function ASAPScheduler() {
@@ -1929,7 +2145,7 @@ ASAPScheduler.prototype = {
 
 module.exports = ASAPScheduler;
 
-},{"asap":146}],40:[function(_dereq_,module,exports){
+},{"147":147}],41:[function(require,module,exports){
 function ImmediateScheduler() {
 }
 
@@ -1941,7 +2157,7 @@ ImmediateScheduler.prototype = {
 
 module.exports = ImmediateScheduler;
 
-},{}],41:[function(_dereq_,module,exports){
+},{}],42:[function(require,module,exports){
 function TimeoutScheduler(delay) {
     this.delay = delay;
 }
@@ -1954,14 +2170,14 @@ TimeoutScheduler.prototype = {
 
 module.exports = TimeoutScheduler;
 
-},{}],42:[function(_dereq_,module,exports){
-var hardLink = _dereq_('./util/hardlink');
+},{}],43:[function(require,module,exports){
+var hardLink = require(57);
 var createHardlink = hardLink.create;
-var onValue = _dereq_('./onValue');
-var isExpired = _dereq_('./util/isExpired');
-var $path = _dereq_('./../types/path.js');
-var __context = _dereq_("../internal/context");
-var promote = _dereq_('./util/lru').promote;
+var onValue = require(55);
+var isExpired = require(58);
+var $path = require(139);
+var __context = require(65);
+var promote = require(61).promote;
 
 function followReference(model, root, node, referenceContainer, reference, seed, outputFormat) {
 
@@ -2040,9 +2256,9 @@ function followReference(model, root, node, referenceContainer, reference, seed,
 
 module.exports = followReference;
 
-},{"../internal/context":64,"./../types/path.js":138,"./onValue":54,"./util/hardlink":56,"./util/isExpired":57,"./util/lru":60}],43:[function(_dereq_,module,exports){
-var getBoundValue = _dereq_('./getBoundValue');
-var isPathValue = _dereq_('./util/isPathValue');
+},{"139":139,"55":55,"57":57,"58":58,"61":61,"65":65}],44:[function(require,module,exports){
+var getBoundValue = require(48);
+var isPathValue = require(60);
 module.exports = function(walk) {
     return function getAsJSON(model, paths, values) {
         var results = {
@@ -2108,9 +2324,9 @@ module.exports = function(walk) {
 };
 
 
-},{"./getBoundValue":47,"./util/isPathValue":59}],44:[function(_dereq_,module,exports){
-var getBoundValue = _dereq_('./getBoundValue');
-var isPathValue = _dereq_('./util/isPathValue');
+},{"48":48,"60":60}],45:[function(require,module,exports){
+var getBoundValue = require(48);
+var isPathValue = require(60);
 module.exports = function(walk) {
     return function getAsJSONG(model, paths, values) {
         var results = {
@@ -2147,9 +2363,9 @@ module.exports = function(walk) {
 };
 
 
-},{"./getBoundValue":47,"./util/isPathValue":59}],45:[function(_dereq_,module,exports){
-var getBoundValue = _dereq_('./getBoundValue');
-var isPathValue = _dereq_('./util/isPathValue');
+},{"48":48,"60":60}],46:[function(require,module,exports){
+var getBoundValue = require(48);
+var isPathValue = require(60);
 module.exports = function(walk) {
     return function getAsPathMap(model, paths, values) {
         var valueNode;
@@ -2198,9 +2414,9 @@ module.exports = function(walk) {
     };
 };
 
-},{"./getBoundValue":47,"./util/isPathValue":59}],46:[function(_dereq_,module,exports){
-var getBoundValue = _dereq_('./getBoundValue');
-var isPathValue = _dereq_('./util/isPathValue');
+},{"48":48,"60":60}],47:[function(require,module,exports){
+var getBoundValue = require(48);
+var isPathValue = require(60);
 module.exports = function(walk) {
     return function getAsValues(model, paths, onNext) {
         var results = {
@@ -2246,8 +2462,8 @@ module.exports = function(walk) {
 };
 
 
-},{"./getBoundValue":47,"./util/isPathValue":59}],47:[function(_dereq_,module,exports){
-var getValueSync = _dereq_('./getValueSync');
+},{"48":48,"60":60}],48:[function(require,module,exports){
+var getValueSync = require(50);
 module.exports = function getBoundValue(model, path) {
     var boxed, value, shorted;
 
@@ -2270,8 +2486,8 @@ module.exports = function getBoundValue(model, path) {
 };
 
 
-},{"./getValueSync":49}],48:[function(_dereq_,module,exports){
-var __generation = _dereq_('./../internal/generation');
+},{"50":50}],49:[function(require,module,exports){
+var __generation = require(66);
 
 module.exports = function _getGeneration(model, path) {
     // ultra fast clone for boxed values.
@@ -2284,14 +2500,14 @@ module.exports = function _getGeneration(model, path) {
     return gen && gen[__generation];
 };
 
-},{"./../internal/generation":65}],49:[function(_dereq_,module,exports){
-var followReference = _dereq_('./followReference');
-var clone = _dereq_('./util/clone');
-var isExpired = _dereq_('./util/isExpired');
-var promote = _dereq_('./util/lru').promote;
-var $path = _dereq_('./../types/path.js');
-var $atom = _dereq_('./../types/atom.js');
-var $error = _dereq_('./../types/error.js');
+},{"66":66}],50:[function(require,module,exports){
+var followReference = require(43);
+var clone = require(56);
+var isExpired = require(58);
+var promote = require(61).promote;
+var $path = require(139);
+var $atom = require(137);
+var $error = require(138);
 
 module.exports = function getValueSync(model, simplePath, noClone) {
     var root = model._cache;
@@ -2389,22 +2605,22 @@ module.exports = function getValueSync(model, simplePath, noClone) {
     };
 };
 
-},{"./../types/atom.js":136,"./../types/error.js":137,"./../types/path.js":138,"./followReference":42,"./util/clone":55,"./util/isExpired":57,"./util/lru":60}],50:[function(_dereq_,module,exports){
-var followReference = _dereq_('./followReference');
-var onError = _dereq_('./onError');
-var onMissing = _dereq_('./onMissing');
-var onValue = _dereq_('./onValue');
-var lru = _dereq_('./util/lru');
-var hardLink = _dereq_('./util/hardlink');
-var isMaterialized = _dereq_('./util/isMaterialzed');
+},{"137":137,"138":138,"139":139,"43":43,"56":56,"58":58,"61":61}],51:[function(require,module,exports){
+var followReference = require(43);
+var onError = require(53);
+var onMissing = require(54);
+var onValue = require(55);
+var lru = require(61);
+var hardLink = require(57);
+var isMaterialized = require(59);
 var removeHardlink = hardLink.remove;
 var splice = lru.splice;
-var isExpired = _dereq_('./util/isExpired');
-var permuteKey = _dereq_('./util/permuteKey');
-var $path = _dereq_('./../types/path');
-var $error = _dereq_('./../types/error');
-var __invalidated = _dereq_("../internal/invalidated");
-var prefix = _dereq_("./../internal/prefix");
+var isExpired = require(58);
+var permuteKey = require(62);
+var $path = require(139);
+var $error = require(138);
+var __invalidated = require(68);
+var prefix = require(73);
 
 function getWalk(model, root, curr, pathOrJSON, depth, seedOrFunction, positionalInfo, outerResults, optimizedPath, requestedPath, inputFormat, outputFormat, fromReference) {
     if ((!curr || curr && curr.$type) &&
@@ -2611,21 +2827,21 @@ function evaluateNode(model, curr, pathOrJSON, depth, seedOrFunction, requestedP
 
 module.exports = getWalk;
 
-},{"../internal/invalidated":67,"./../internal/prefix":72,"./../types/error":137,"./../types/path":138,"./followReference":42,"./onError":52,"./onMissing":53,"./onValue":54,"./util/hardlink":56,"./util/isExpired":57,"./util/isMaterialzed":58,"./util/lru":60,"./util/permuteKey":61}],51:[function(_dereq_,module,exports){
-var walk = _dereq_('./getWalk');
+},{"138":138,"139":139,"43":43,"53":53,"54":54,"55":55,"57":57,"58":58,"59":59,"61":61,"62":62,"68":68,"73":73}],52:[function(require,module,exports){
+var walk = require(51);
 module.exports = {
-    getAsJSON: _dereq_('./getAsJSON')(walk),
-    getAsJSONG: _dereq_('./getAsJSONG')(walk),
-    getAsValues: _dereq_('./getAsValues')(walk),
-    getAsPathMap: _dereq_('./getAsPathMap')(walk),
-    getValueSync: _dereq_('./getValueSync'),
-    getBoundValue: _dereq_('./getBoundValue')
+    getAsJSON: require(44)(walk),
+    getAsJSONG: require(45)(walk),
+    getAsValues: require(47)(walk),
+    getAsPathMap: require(46)(walk),
+    getValueSync: require(50),
+    getBoundValue: require(48)
 };
 
 
-},{"./getAsJSON":43,"./getAsJSONG":44,"./getAsPathMap":45,"./getAsValues":46,"./getBoundValue":47,"./getValueSync":49,"./getWalk":50}],52:[function(_dereq_,module,exports){
-var lru = _dereq_('./util/lru');
-var clone = _dereq_('./util/clone');
+},{"44":44,"45":45,"46":46,"47":47,"48":48,"50":50,"51":51}],53:[function(require,module,exports){
+var lru = require(61);
+var clone = require(56);
 var promote = lru.promote;
 module.exports = function onError(model, node, permuteRequested, permuteOptimized, outerResults) {
     outerResults.errors.push({path: permuteRequested, value: node.value});
@@ -2633,14 +2849,14 @@ module.exports = function onError(model, node, permuteRequested, permuteOptimize
 };
 
 
-},{"./util/clone":55,"./util/lru":60}],53:[function(_dereq_,module,exports){
-var support = _dereq_('./util/support');
+},{"56":56,"61":61}],54:[function(require,module,exports){
+var support = require(64);
 var fastCat = support.fastCat,
     fastCatSkipNulls = support.fastCatSkipNulls,
     fastCopy = support.fastCopy;
-var isExpired = _dereq_('./util/isExpired');
-var spreadJSON = _dereq_('./util/spreadJSON');
-var clone = _dereq_('./util/clone');
+var isExpired = require(58);
+var spreadJSON = require(63);
+var clone = require(56);
 
 module.exports = function onMissing(model, node, path, depth, seedOrFunction, outerResults, permuteRequested, permuteOptimized, permutePosition, outputFormat) {
     var pathSlice;
@@ -2687,13 +2903,13 @@ function concatAndInsertMissing(remainingPath, results, permuteRequested, permut
 }
 
 
-},{"./util/clone":55,"./util/isExpired":57,"./util/spreadJSON":62,"./util/support":63}],54:[function(_dereq_,module,exports){
-var lru = _dereq_('./util/lru');
-var clone = _dereq_('./util/clone');
+},{"56":56,"58":58,"63":63,"64":64}],55:[function(require,module,exports){
+var lru = require(61);
+var clone = require(56);
 var promote = lru.promote;
-var $path = _dereq_('./../types/path');
-var $atom = _dereq_('./../types/atom');
-var $error = _dereq_('./../types/error');
+var $path = require(139);
+var $atom = require(137);
+var $error = require(138);
 module.exports = function onValue(model, node, seedOrFunction, outerResults, permuteRequested, permuteOptimized, permutePosition, outputFormat, fromReference) {
     var i, len, k, key, curr, prev, prevK;
     var materialized = false, valueNode;
@@ -2842,9 +3058,9 @@ module.exports = function onValue(model, node, seedOrFunction, outerResults, per
 
 
 
-},{"./../types/atom":136,"./../types/error":137,"./../types/path":138,"./util/clone":55,"./util/lru":60}],55:[function(_dereq_,module,exports){
+},{"137":137,"138":138,"139":139,"56":56,"61":61}],56:[function(require,module,exports){
 // Copies the node
-var prefix = _dereq_("../../internal/prefix");
+var prefix = require(73);
 module.exports = function clone(node) {
     var outValue, i, len;
     var keys = Object.keys(node);
@@ -2861,11 +3077,11 @@ module.exports = function clone(node) {
 };
 
 
-},{"../../internal/prefix":72}],56:[function(_dereq_,module,exports){
-var __ref = _dereq_("../../internal/ref");
-var __context = _dereq_("../../internal/context");
-var __ref_index = _dereq_("../../internal/ref-index");
-var __refs_length = _dereq_("../../internal/refs-length");
+},{"73":73}],57:[function(require,module,exports){
+var __ref = require(76);
+var __context = require(65);
+var __ref_index = require(75);
+var __refs_length = require(77);
 
 function createHardlink(from, to) {
     
@@ -2901,28 +3117,28 @@ module.exports = {
     remove: removeHardlink
 };
 
-},{"../../internal/context":64,"../../internal/ref":75,"../../internal/ref-index":74,"../../internal/refs-length":76}],57:[function(_dereq_,module,exports){
-var now = _dereq_('../../support/now');
+},{"65":65,"75":75,"76":76,"77":77}],58:[function(require,module,exports){
+var now = require(123);
 module.exports = function isExpired(node) {
     var $expires = node.$expires === undefined && -1 || node.$expires;
     return $expires !== -1 && $expires !== 1 && ($expires === 0 || $expires < now());
 };
 
-},{"../../support/now":122}],58:[function(_dereq_,module,exports){
+},{"123":123}],59:[function(require,module,exports){
 module.exports = function isMaterialized(model) {
     return model._materialized && !(model._router || model._dataSource);
 };
 
-},{}],59:[function(_dereq_,module,exports){
+},{}],60:[function(require,module,exports){
 module.exports = function(x) {
     return x.path && x.value;
 };
-},{}],60:[function(_dereq_,module,exports){
-var __head = _dereq_("../../internal/head");
-var __tail = _dereq_("../../internal/tail");
-var __next = _dereq_("../../internal/next");
-var __prev = _dereq_("../../internal/prev");
-var __invalidated = _dereq_("../../internal/invalidated");
+},{}],61:[function(require,module,exports){
+var __head = require(67);
+var __tail = require(78);
+var __next = require(70);
+var __prev = require(74);
+var __invalidated = require(68);
 
 // [H] -> Next -> ... -> [T]
 // [T] -> Prev -> ... -> [H]
@@ -2995,7 +3211,7 @@ module.exports = {
     promote: lruPromote,
     splice: lruSplice
 };
-},{"../../internal/head":66,"../../internal/invalidated":67,"../../internal/next":69,"../../internal/prev":73,"../../internal/tail":77}],61:[function(_dereq_,module,exports){
+},{"67":67,"68":68,"70":70,"74":74,"78":78}],62:[function(require,module,exports){
 module.exports = function permuteKey(key, memo) {
     if (memo.isArray) {
         if (memo.loaded && memo.rangeOffset > memo.to) {
@@ -3043,8 +3259,8 @@ module.exports = function permuteKey(key, memo) {
 };
 
 
-},{}],62:[function(_dereq_,module,exports){
-var fastCopy = _dereq_('./support').fastCopy;
+},{}],63:[function(require,module,exports){
+var fastCopy = require(64).fastCopy;
 module.exports = function spreadJSON(root, bins, bin) {
     bin = bin || [];
     if (!bins.length) {
@@ -3068,7 +3284,7 @@ module.exports = function spreadJSON(root, bins, bin) {
     }
 };
 
-},{"./support":63}],63:[function(_dereq_,module,exports){
+},{"64":64}],64:[function(require,module,exports){
 
 
 function fastCopy(arr, i) {
@@ -3111,63 +3327,67 @@ module.exports = {
     fastCopy: fastCopy
 };
 
-},{}],64:[function(_dereq_,module,exports){
-module.exports = _dereq_("./prefix") + "context";
-},{"./prefix":72}],65:[function(_dereq_,module,exports){
-module.exports = _dereq_("./prefix") + "generation";
-},{"./prefix":72}],66:[function(_dereq_,module,exports){
-module.exports = _dereq_("./prefix") + "head";
-},{"./prefix":72}],67:[function(_dereq_,module,exports){
-module.exports = _dereq_("./prefix") + "invalidated";
-},{"./prefix":72}],68:[function(_dereq_,module,exports){
-module.exports = _dereq_("./prefix") + "key";
-},{"./prefix":72}],69:[function(_dereq_,module,exports){
-module.exports = _dereq_("./prefix") + "next";
-},{"./prefix":72}],70:[function(_dereq_,module,exports){
-module.exports = _dereq_("./prefix") + "offset";
-},{"./prefix":72}],71:[function(_dereq_,module,exports){
-module.exports = _dereq_("./prefix") + "parent";
-},{"./prefix":72}],72:[function(_dereq_,module,exports){
-// This may look like an empty string, but it's actually a single zero-width-space character.
-module.exports = "​";
-},{}],73:[function(_dereq_,module,exports){
-module.exports = _dereq_("./prefix") + "prev";
-},{"./prefix":72}],74:[function(_dereq_,module,exports){
-module.exports = _dereq_("./prefix") + "ref-index";
-},{"./prefix":72}],75:[function(_dereq_,module,exports){
-module.exports = _dereq_("./prefix") + "ref";
-},{"./prefix":72}],76:[function(_dereq_,module,exports){
-module.exports = _dereq_("./prefix") + "refs-length";
-},{"./prefix":72}],77:[function(_dereq_,module,exports){
-module.exports = _dereq_("./prefix") + "tail";
-},{"./prefix":72}],78:[function(_dereq_,module,exports){
-module.exports = _dereq_("./prefix") + "version";
-},{"./prefix":72}],79:[function(_dereq_,module,exports){
+},{}],65:[function(require,module,exports){
+module.exports = require(73) + "context";
+},{"73":73}],66:[function(require,module,exports){
+module.exports = require(73) + "generation";
+},{"73":73}],67:[function(require,module,exports){
+module.exports = require(73) + "head";
+},{"73":73}],68:[function(require,module,exports){
+module.exports = require(73) + "invalidated";
+},{"73":73}],69:[function(require,module,exports){
+module.exports = require(73) + "key";
+},{"73":73}],70:[function(require,module,exports){
+module.exports = require(73) + "next";
+},{"73":73}],71:[function(require,module,exports){
+module.exports = require(73) + "offset";
+},{"73":73}],72:[function(require,module,exports){
+module.exports = require(73) + "parent";
+},{"73":73}],73:[function(require,module,exports){
+/**
+ * http://en.wikipedia.org/wiki/Delimiter#ASCII_delimited_text
+ * record separator character.
+ */
+module.exports = String.fromCharCode(30);
+
+},{}],74:[function(require,module,exports){
+module.exports = require(73) + "prev";
+},{"73":73}],75:[function(require,module,exports){
+module.exports = require(73) + "ref-index";
+},{"73":73}],76:[function(require,module,exports){
+module.exports = require(73) + "ref";
+},{"73":73}],77:[function(require,module,exports){
+module.exports = require(73) + "refs-length";
+},{"73":73}],78:[function(require,module,exports){
+module.exports = require(73) + "tail";
+},{"73":73}],79:[function(require,module,exports){
+module.exports = require(73) + "version";
+},{"73":73}],80:[function(require,module,exports){
 module.exports = {
-    invPathSetsAsJSON: _dereq_("./invalidate-path-sets-as-json-dense"),
-    invPathSetsAsJSONG: _dereq_("./invalidate-path-sets-as-json-graph"),
-    invPathSetsAsPathMap: _dereq_("./invalidate-path-sets-as-json-sparse"),
-    invPathSetsAsValues: _dereq_("./invalidate-path-sets-as-json-values")
+    invPathSetsAsJSON: require(81),
+    invPathSetsAsJSONG: require(82),
+    invPathSetsAsPathMap: require(83),
+    invPathSetsAsValues: require(84)
 };
-},{"./invalidate-path-sets-as-json-dense":80,"./invalidate-path-sets-as-json-graph":81,"./invalidate-path-sets-as-json-sparse":82,"./invalidate-path-sets-as-json-values":83}],80:[function(_dereq_,module,exports){
+},{"81":81,"82":82,"83":83,"84":84}],81:[function(require,module,exports){
 module.exports = invalidate_path_sets_as_json_dense;
 
-var clone = _dereq_("../support/clone-dense-json");
-var array_clone = _dereq_("../support/array-clone");
-var array_slice = _dereq_("../support/array-slice");
+var clone = require(105);
+var array_clone = require(103);
+var array_slice = require(104);
 
-var options = _dereq_("../support/options");
-var walk_path_set = _dereq_("../walk/walk-path-set");
+var options = require(124);
+var walk_path_set = require(145);
 
-var is_object = _dereq_("../support/is-object");
+var is_object = require(119);
 
-var get_valid_key = _dereq_("../support/get-valid-key");
-var update_graph = _dereq_("../support/update-graph");
-var invalidate_node = _dereq_("../support/invalidate-node");
+var get_valid_key = require(113);
+var update_graph = require(135);
+var invalidate_node = require(117);
 
-var collect = _dereq_("../lru/collect");
+var collect = require(85);
 
-var positions = _dereq_("../support/positions");
+var positions = require(126);
 var _cache = positions.cache;
 var _message = positions.message;
 var _jsong = positions.jsong;
@@ -3281,26 +3501,26 @@ function onEdge(pathset, depth, roots, parents, nodes, requested, optimized, key
     roots.hasValue = true;
     roots.requestedPaths.push(array_slice(requested, roots.offset));
 }
-},{"../lru/collect":84,"../support/array-clone":102,"../support/array-slice":103,"../support/clone-dense-json":104,"../support/get-valid-key":112,"../support/invalidate-node":116,"../support/is-object":118,"../support/options":123,"../support/positions":125,"../support/update-graph":134,"../walk/walk-path-set":144}],81:[function(_dereq_,module,exports){
+},{"103":103,"104":104,"105":105,"113":113,"117":117,"119":119,"124":124,"126":126,"135":135,"145":145,"85":85}],82:[function(require,module,exports){
 module.exports = invalidate_path_sets_as_json_graph;
 
-var $path = _dereq_("../types/path");
+var $path = require(139);
 
-var clone = _dereq_("../support/clone-dense-json");
-var array_clone = _dereq_("../support/array-clone");
+var clone = require(105);
+var array_clone = require(103);
 
-var options = _dereq_("../support/options");
-var walk_path_set = _dereq_("../walk/walk-path-set-soft-link");
+var options = require(124);
+var walk_path_set = require(144);
 
-var is_object = _dereq_("../support/is-object");
+var is_object = require(119);
 
-var get_valid_key = _dereq_("../support/get-valid-key");
-var update_graph = _dereq_("../support/update-graph");
-var invalidate_node = _dereq_("../support/invalidate-node");
-var clone_success = _dereq_("../support/set-successful-paths");
-var collect = _dereq_("../lru/collect");
+var get_valid_key = require(113);
+var update_graph = require(135);
+var invalidate_node = require(117);
+var clone_success = require(129);
+var collect = require(85);
 
-var positions = _dereq_("../support/positions");
+var positions = require(126);
 var _cache = positions.cache;
 var _message = positions.message;
 var _jsong = positions.jsong;
@@ -3402,25 +3622,25 @@ function onEdge(pathset, depth, roots, parents, nodes, requested, optimized, key
     roots.hasValue = true;
 }
 
-},{"../lru/collect":84,"../support/array-clone":102,"../support/clone-dense-json":104,"../support/get-valid-key":112,"../support/invalidate-node":116,"../support/is-object":118,"../support/options":123,"../support/positions":125,"../support/set-successful-paths":128,"../support/update-graph":134,"../types/path":138,"../walk/walk-path-set-soft-link":143}],82:[function(_dereq_,module,exports){
+},{"103":103,"105":105,"113":113,"117":117,"119":119,"124":124,"126":126,"129":129,"135":135,"139":139,"144":144,"85":85}],83:[function(require,module,exports){
 module.exports = invalidate_path_sets_as_json_sparse;
 
-var clone = _dereq_("../support/clone-dense-json");
-var array_clone = _dereq_("../support/array-clone");
-var array_slice = _dereq_("../support/array-slice");
+var clone = require(105);
+var array_clone = require(103);
+var array_slice = require(104);
 
-var options = _dereq_("../support/options");
-var walk_path_set = _dereq_("../walk/walk-path-set");
+var options = require(124);
+var walk_path_set = require(145);
 
-var is_object = _dereq_("../support/is-object");
+var is_object = require(119);
 
-var get_valid_key = _dereq_("../support/get-valid-key");
-var update_graph = _dereq_("../support/update-graph");
-var invalidate_node = _dereq_("../support/invalidate-node");
+var get_valid_key = require(113);
+var update_graph = require(135);
+var invalidate_node = require(117);
 
-var collect = _dereq_("../lru/collect");
+var collect = require(85);
 
-var positions = _dereq_("../support/positions");
+var positions = require(126);
 var _cache = positions.cache;
 var _message = positions.message;
 var _jsong = positions.jsong;
@@ -3514,25 +3734,25 @@ function onEdge(pathset, depth, roots, parents, nodes, requested, optimized, key
     roots.hasValue = true;
     roots.requestedPaths.push(array_slice(requested, roots.offset));
 }
-},{"../lru/collect":84,"../support/array-clone":102,"../support/array-slice":103,"../support/clone-dense-json":104,"../support/get-valid-key":112,"../support/invalidate-node":116,"../support/is-object":118,"../support/options":123,"../support/positions":125,"../support/update-graph":134,"../walk/walk-path-set":144}],83:[function(_dereq_,module,exports){
+},{"103":103,"104":104,"105":105,"113":113,"117":117,"119":119,"124":124,"126":126,"135":135,"145":145,"85":85}],84:[function(require,module,exports){
 module.exports = invalidate_path_sets_as_json_values;
 
-var clone = _dereq_("../support/clone-dense-json");
-var array_clone = _dereq_("../support/array-clone");
-var array_slice = _dereq_("../support/array-slice");
+var clone = require(105);
+var array_clone = require(103);
+var array_slice = require(104);
 
-var options = _dereq_("../support/options");
-var walk_path_set = _dereq_("../walk/walk-path-set");
+var options = require(124);
+var walk_path_set = require(145);
 
-var is_object = _dereq_("../support/is-object");
+var is_object = require(119);
 
-var get_valid_key = _dereq_("../support/get-valid-key");
-var update_graph = _dereq_("../support/update-graph");
-var invalidate_node = _dereq_("../support/invalidate-node");
+var get_valid_key = require(113);
+var update_graph = require(135);
+var invalidate_node = require(117);
 
-var collect = _dereq_("../lru/collect");
+var collect = require(85);
 
-var positions = _dereq_("../support/positions");
+var positions = require(126);
 var _cache = positions.cache;
 var _message = positions.message;
 var _jsong = positions.jsong;
@@ -3622,13 +3842,13 @@ function onEdge(pathset, depth, roots, parents, nodes, requested, optimized, key
     }
     roots.requestedPaths.push(array_slice(requested, roots.offset));
 }
-},{"../lru/collect":84,"../support/array-clone":102,"../support/array-slice":103,"../support/clone-dense-json":104,"../support/get-valid-key":112,"../support/invalidate-node":116,"../support/is-object":118,"../support/options":123,"../support/positions":125,"../support/update-graph":134,"../walk/walk-path-set":144}],84:[function(_dereq_,module,exports){
-var __head = _dereq_("../internal/head");
-var __tail = _dereq_("../internal/tail");
-var __next = _dereq_("../internal/next");
-var __prev = _dereq_("../internal/prev");
+},{"103":103,"104":104,"105":105,"113":113,"117":117,"119":119,"124":124,"126":126,"135":135,"145":145,"85":85}],85:[function(require,module,exports){
+var __head = require(67);
+var __tail = require(78);
+var __next = require(70);
+var __prev = require(74);
 
-var update_graph = _dereq_("../support/update-graph");
+var update_graph = require(135);
 module.exports = function(lru, expired, version, total, max, ratio) {
 
     var targetSize = max * ratio;
@@ -3656,14 +3876,14 @@ module.exports = function(lru, expired, version, total, max, ratio) {
         }
     }
 };
-},{"../internal/head":66,"../internal/next":69,"../internal/prev":73,"../internal/tail":77,"../support/update-graph":134}],85:[function(_dereq_,module,exports){
-var $expires_never = _dereq_("../values/expires-never");
-var __head = _dereq_("../internal/head");
-var __tail = _dereq_("../internal/tail");
-var __next = _dereq_("../internal/next");
-var __prev = _dereq_("../internal/prev");
+},{"135":135,"67":67,"70":70,"74":74,"78":78}],86:[function(require,module,exports){
+var $expires_never = require(140);
+var __head = require(67);
+var __tail = require(78);
+var __next = require(70);
+var __prev = require(74);
 
-var is_object = _dereq_("../support/is-object");
+var is_object = require(119);
 module.exports = function(root, node) {
     if(is_object(node) && (node.$expires !== $expires_never)) {
         var head = root[__head], tail = root[__tail],
@@ -3682,11 +3902,11 @@ module.exports = function(root, node) {
     }
     return node;
 };
-},{"../internal/head":66,"../internal/next":69,"../internal/prev":73,"../internal/tail":77,"../support/is-object":118,"../values/expires-never":139}],86:[function(_dereq_,module,exports){
-var __head = _dereq_("../internal/head");
-var __tail = _dereq_("../internal/tail");
-var __next = _dereq_("../internal/next");
-var __prev = _dereq_("../internal/prev");
+},{"119":119,"140":140,"67":67,"70":70,"74":74,"78":78}],87:[function(require,module,exports){
+var __head = require(67);
+var __tail = require(78);
+var __next = require(70);
+var __prev = require(74);
 
 module.exports = function(root, node) {
     var head = root[__head], tail = root[__tail],
@@ -3698,52 +3918,52 @@ module.exports = function(root, node) {
     node[__next] = node[__prev] = undefined;
     head = tail = next = prev = undefined;
 };
-},{"../internal/head":66,"../internal/next":69,"../internal/prev":73,"../internal/tail":77}],87:[function(_dereq_,module,exports){
+},{"67":67,"70":70,"74":74,"78":78}],88:[function(require,module,exports){
 module.exports = {
-    setPathSetsAsJSON: _dereq_('./set-json-values-as-json-dense'),
-    setPathSetsAsJSONG: _dereq_('./set-json-values-as-json-graph'),
-    setPathSetsAsPathMap: _dereq_('./set-json-values-as-json-sparse'),
-    setPathSetsAsValues: _dereq_('./set-json-values-as-json-values'),
+    setPathSetsAsJSON: require(98),
+    setPathSetsAsJSONG: require(99),
+    setPathSetsAsPathMap: require(100),
+    setPathSetsAsValues: require(101),
     
-    setPathMapsAsJSON: _dereq_('./set-json-sparse-as-json-dense'),
-    setPathMapsAsJSONG: _dereq_('./set-json-sparse-as-json-graph'),
-    setPathMapsAsPathMap: _dereq_('./set-json-sparse-as-json-sparse'),
-    setPathMapsAsValues: _dereq_('./set-json-sparse-as-json-values'),
+    setPathMapsAsJSON: require(94),
+    setPathMapsAsJSONG: require(95),
+    setPathMapsAsPathMap: require(96),
+    setPathMapsAsValues: require(97),
     
-    setJSONGsAsJSON: _dereq_('./set-json-graph-as-json-dense'),
-    setJSONGsAsJSONG: _dereq_('./set-json-graph-as-json-graph'),
-    setJSONGsAsPathMap: _dereq_('./set-json-graph-as-json-sparse'),
-    setJSONGsAsValues: _dereq_('./set-json-graph-as-json-values'),
+    setJSONGsAsJSON: require(90),
+    setJSONGsAsJSONG: require(91),
+    setJSONGsAsPathMap: require(92),
+    setJSONGsAsValues: require(93),
     
-    setCache: _dereq_('./set-cache')
+    setCache: require(89)
 };
 
-},{"./set-cache":88,"./set-json-graph-as-json-dense":89,"./set-json-graph-as-json-graph":90,"./set-json-graph-as-json-sparse":91,"./set-json-graph-as-json-values":92,"./set-json-sparse-as-json-dense":93,"./set-json-sparse-as-json-graph":94,"./set-json-sparse-as-json-sparse":95,"./set-json-sparse-as-json-values":96,"./set-json-values-as-json-dense":97,"./set-json-values-as-json-graph":98,"./set-json-values-as-json-sparse":99,"./set-json-values-as-json-values":100}],88:[function(_dereq_,module,exports){
+},{"100":100,"101":101,"89":89,"90":90,"91":91,"92":92,"93":93,"94":94,"95":95,"96":96,"97":97,"98":98,"99":99}],89:[function(require,module,exports){
 module.exports = set_cache;
 
-var $error = _dereq_("../types/error");
-var $atom = _dereq_("../types/atom");
+var $error = require(138);
+var $atom = require(137);
 
-var clone = _dereq_("../support/clone-dense-json");
-var array_clone = _dereq_("../support/array-clone");
+var clone = require(105);
+var array_clone = require(103);
 
-var options = _dereq_("../support/options");
-var walk_path_map = _dereq_("../walk/walk-path-map");
+var options = require(124);
+var walk_path_map = require(143);
 
-var is_object = _dereq_("../support/is-object");
+var is_object = require(119);
 
-var get_valid_key = _dereq_("../support/get-valid-key");
-var create_branch = _dereq_("../support/create-branch");
-var wrap_node = _dereq_("../support/wrap-node");
-var replace_node = _dereq_("../support/replace-node");
-var graph_node = _dereq_("../support/graph-node");
-var update_back_refs = _dereq_("../support/update-back-refs");
-var update_graph = _dereq_("../support/update-graph");
-var inc_generation = _dereq_("../support/inc-generation");
+var get_valid_key = require(113);
+var create_branch = require(111);
+var wrap_node = require(136);
+var replace_node = require(128);
+var graph_node = require(114);
+var update_back_refs = require(134);
+var update_graph = require(135);
+var inc_generation = require(115);
 
-var promote = _dereq_("../lru/promote");
+var promote = require(86);
 
-var positions = _dereq_("../support/positions");
+var positions = require(126);
 var _cache = positions.cache;
 var _message = positions.message;
 var _jsong = positions.jsong;
@@ -3810,27 +4030,27 @@ function onNode(pathmap, roots, parents, nodes, requested, optimized, is_referen
 function onEdge(pathmap, keys_stack, depth, roots, parents, nodes, requested, optimized, key, keyset) {
     promote(roots.lru, nodes[_cache]);
 }
-},{"../lru/promote":85,"../support/array-clone":102,"../support/clone-dense-json":104,"../support/create-branch":110,"../support/get-valid-key":112,"../support/graph-node":113,"../support/inc-generation":114,"../support/is-object":118,"../support/options":123,"../support/positions":125,"../support/replace-node":127,"../support/update-back-refs":133,"../support/update-graph":134,"../support/wrap-node":135,"../types/atom":136,"../types/error":137,"../walk/walk-path-map":142}],89:[function(_dereq_,module,exports){
+},{"103":103,"105":105,"111":111,"113":113,"114":114,"115":115,"119":119,"124":124,"126":126,"128":128,"134":134,"135":135,"136":136,"137":137,"138":138,"143":143,"86":86}],90:[function(require,module,exports){
 module.exports = set_json_graph_as_json_dense;
 
-var $path = _dereq_("../types/path");
+var $path = require(139);
 
-var clone = _dereq_("../support/clone-dense-json");
-var array_clone = _dereq_("../support/array-clone");
+var clone = require(105);
+var array_clone = require(103);
 
-var options = _dereq_("../support/options");
-var walk_path_set = _dereq_("../walk/walk-path-set-soft-link");
+var options = require(124);
+var walk_path_set = require(144);
 
-var is_object = _dereq_("../support/is-object");
+var is_object = require(119);
 
-var get_valid_key = _dereq_("../support/get-valid-key");
-var merge_node = _dereq_("../support/merge-node");
+var get_valid_key = require(113);
+var merge_node = require(122);
 
-var set_node_if_missing_path = _dereq_("../support/treat-node-as-missing-path-set");
-var set_node_if_error = _dereq_("../support/treat-node-as-error");
-var set_successful_paths = _dereq_("../support/set-successful-paths");
+var set_node_if_missing_path = require(132);
+var set_node_if_error = require(131);
+var set_successful_paths = require(129);
 
-var positions = _dereq_("../support/positions");
+var positions = require(126);
 var _cache = positions.cache;
 var _message = positions.message;
 var _jsong = positions.jsong;
@@ -3971,29 +4191,29 @@ function onEdge(pathset, depth, roots, parents, nodes, requested, optimized, key
         roots.hasValue = true;
     }
 }
-},{"../support/array-clone":102,"../support/clone-dense-json":104,"../support/get-valid-key":112,"../support/is-object":118,"../support/merge-node":121,"../support/options":123,"../support/positions":125,"../support/set-successful-paths":128,"../support/treat-node-as-error":130,"../support/treat-node-as-missing-path-set":131,"../types/path":138,"../walk/walk-path-set-soft-link":143}],90:[function(_dereq_,module,exports){
+},{"103":103,"105":105,"113":113,"119":119,"122":122,"124":124,"126":126,"129":129,"131":131,"132":132,"139":139,"144":144}],91:[function(require,module,exports){
 module.exports = set_json_graph_as_json_graph;
 
-var $path = _dereq_("../types/path");
+var $path = require(139);
 
-var clone = _dereq_("../support/clone-graph-json");
-var array_clone = _dereq_("../support/array-clone");
+var clone = require(106);
+var array_clone = require(103);
 
-var options = _dereq_("../support/options");
-var walk_path_set = _dereq_("../walk/walk-path-set-soft-link");
+var options = require(124);
+var walk_path_set = require(144);
 
-var is_object = _dereq_("../support/is-object");
+var is_object = require(119);
 
-var get_valid_key = _dereq_("../support/get-valid-key");
-var merge_node = _dereq_("../support/merge-node");
+var get_valid_key = require(113);
+var merge_node = require(122);
 
-var set_node_if_missing_path = _dereq_("../support/treat-node-as-missing-path-set");
-var set_node_if_error = _dereq_("../support/treat-node-as-error");
-var set_successful_paths = _dereq_("../support/set-successful-paths");
+var set_node_if_missing_path = require(132);
+var set_node_if_error = require(131);
+var set_successful_paths = require(129);
 
-var promote = _dereq_("../lru/promote");
+var promote = require(86);
 
-var positions = _dereq_("../support/positions");
+var positions = require(126);
 var _cache = positions.cache;
 var _message = positions.message;
 var _jsong = positions.jsong;
@@ -4129,27 +4349,27 @@ function onEdge(pathset, depth, roots, parents, nodes, requested, optimized, key
     }
     roots.hasValue = true;
 }
-},{"../lru/promote":85,"../support/array-clone":102,"../support/clone-graph-json":105,"../support/get-valid-key":112,"../support/is-object":118,"../support/merge-node":121,"../support/options":123,"../support/positions":125,"../support/set-successful-paths":128,"../support/treat-node-as-error":130,"../support/treat-node-as-missing-path-set":131,"../types/path":138,"../walk/walk-path-set-soft-link":143}],91:[function(_dereq_,module,exports){
+},{"103":103,"106":106,"113":113,"119":119,"122":122,"124":124,"126":126,"129":129,"131":131,"132":132,"139":139,"144":144,"86":86}],92:[function(require,module,exports){
 module.exports = set_json_graph_as_json_sparse;
 
-var $path = _dereq_("../types/path");
+var $path = require(139);
 
-var clone = _dereq_("../support/clone-dense-json");
-var array_clone = _dereq_("../support/array-clone");
+var clone = require(105);
+var array_clone = require(103);
 
-var options = _dereq_("../support/options");
-var walk_path_set = _dereq_("../walk/walk-path-set-soft-link");
+var options = require(124);
+var walk_path_set = require(144);
 
-var is_object = _dereq_("../support/is-object");
+var is_object = require(119);
 
-var get_valid_key = _dereq_("../support/get-valid-key");
-var merge_node = _dereq_("../support/merge-node");
+var get_valid_key = require(113);
+var merge_node = require(122);
 
-var set_node_if_missing_path = _dereq_("../support/treat-node-as-missing-path-set");
-var set_node_if_error = _dereq_("../support/treat-node-as-error");
-var set_successful_paths = _dereq_("../support/set-successful-paths");
+var set_node_if_missing_path = require(132);
+var set_node_if_error = require(131);
+var set_successful_paths = require(129);
 
-var positions = _dereq_("../support/positions");
+var positions = require(126);
 var _cache = positions.cache;
 var _message = positions.message;
 var _jsong = positions.jsong;
@@ -4284,28 +4504,28 @@ function onEdge(pathset, depth, roots, parents, nodes, requested, optimized, key
         roots.hasValue = true;
     }
 }
-},{"../support/array-clone":102,"../support/clone-dense-json":104,"../support/get-valid-key":112,"../support/is-object":118,"../support/merge-node":121,"../support/options":123,"../support/positions":125,"../support/set-successful-paths":128,"../support/treat-node-as-error":130,"../support/treat-node-as-missing-path-set":131,"../types/path":138,"../walk/walk-path-set-soft-link":143}],92:[function(_dereq_,module,exports){
+},{"103":103,"105":105,"113":113,"119":119,"122":122,"124":124,"126":126,"129":129,"131":131,"132":132,"139":139,"144":144}],93:[function(require,module,exports){
 module.exports = set_json_graph_as_json_values;
 
-var $path = _dereq_("../types/path");
+var $path = require(139);
 
-var clone = _dereq_("../support/clone-dense-json");
-var array_clone = _dereq_("../support/array-clone");
-var array_slice = _dereq_("../support/array-slice");
+var clone = require(105);
+var array_clone = require(103);
+var array_slice = require(104);
 
-var options = _dereq_("../support/options");
-var walk_path_set = _dereq_("../walk/walk-path-set-soft-link");
+var options = require(124);
+var walk_path_set = require(144);
 
-var is_object = _dereq_("../support/is-object");
+var is_object = require(119);
 
-var get_valid_key = _dereq_("../support/get-valid-key");
-var merge_node = _dereq_("../support/merge-node");
+var get_valid_key = require(113);
+var merge_node = require(122);
 
-var set_node_if_missing_path = _dereq_("../support/treat-node-as-missing-path-set");
-var set_node_if_error = _dereq_("../support/treat-node-as-error");
-var set_successful_paths = _dereq_("../support/set-successful-paths");
+var set_node_if_missing_path = require(132);
+var set_node_if_error = require(131);
+var set_successful_paths = require(129);
 
-var positions = _dereq_("../support/positions");
+var positions = require(126);
 var _cache = positions.cache;
 var _message = positions.message;
 var _jsong = positions.jsong;
@@ -4410,34 +4630,34 @@ function onEdge(pathset, depth, roots, parents, nodes, requested, optimized, key
         });
     }
 }
-},{"../support/array-clone":102,"../support/array-slice":103,"../support/clone-dense-json":104,"../support/get-valid-key":112,"../support/is-object":118,"../support/merge-node":121,"../support/options":123,"../support/positions":125,"../support/set-successful-paths":128,"../support/treat-node-as-error":130,"../support/treat-node-as-missing-path-set":131,"../types/path":138,"../walk/walk-path-set-soft-link":143}],93:[function(_dereq_,module,exports){
+},{"103":103,"104":104,"105":105,"113":113,"119":119,"122":122,"124":124,"126":126,"129":129,"131":131,"132":132,"139":139,"144":144}],94:[function(require,module,exports){
 module.exports = set_json_sparse_as_json_dense;
 
-var $path = _dereq_("../types/path");
-var $error = _dereq_("../types/error");
-var $atom = _dereq_("../types/atom");
+var $path = require(139);
+var $error = require(138);
+var $atom = require(137);
 
-var clone = _dereq_("../support/clone-dense-json");
-var array_clone = _dereq_("../support/array-clone");
+var clone = require(105);
+var array_clone = require(103);
 
-var options = _dereq_("../support/options");
-var walk_path_map = _dereq_("../walk/walk-path-map");
+var options = require(124);
+var walk_path_map = require(143);
 
-var is_object = _dereq_("../support/is-object");
+var is_object = require(119);
 
-var get_valid_key = _dereq_("../support/get-valid-key");
-var create_branch = _dereq_("../support/create-branch");
-var wrap_node = _dereq_("../support/wrap-node");
-var replace_node = _dereq_("../support/replace-node");
-var graph_node = _dereq_("../support/graph-node");
-var update_back_refs = _dereq_("../support/update-back-refs");
-var update_graph = _dereq_("../support/update-graph");
-var inc_generation = _dereq_("../support/inc-generation");
+var get_valid_key = require(113);
+var create_branch = require(111);
+var wrap_node = require(136);
+var replace_node = require(128);
+var graph_node = require(114);
+var update_back_refs = require(134);
+var update_graph = require(135);
+var inc_generation = require(115);
 
-var set_node_if_error = _dereq_("../support/treat-node-as-error");
-var set_successful_paths = _dereq_("../support/set-successful-paths");
+var set_node_if_error = require(131);
+var set_successful_paths = require(129);
 
-var positions = _dereq_("../support/positions");
+var positions = require(126);
 var _cache = positions.cache;
 var _message = positions.message;
 var _jsong = positions.jsong;
@@ -4585,36 +4805,36 @@ function onEdge(pathmap, keys_stack, depth, roots, parents, nodes, requested, op
         roots.hasValue = true;
     }
 }
-},{"../support/array-clone":102,"../support/clone-dense-json":104,"../support/create-branch":110,"../support/get-valid-key":112,"../support/graph-node":113,"../support/inc-generation":114,"../support/is-object":118,"../support/options":123,"../support/positions":125,"../support/replace-node":127,"../support/set-successful-paths":128,"../support/treat-node-as-error":130,"../support/update-back-refs":133,"../support/update-graph":134,"../support/wrap-node":135,"../types/atom":136,"../types/error":137,"../types/path":138,"../walk/walk-path-map":142}],94:[function(_dereq_,module,exports){
+},{"103":103,"105":105,"111":111,"113":113,"114":114,"115":115,"119":119,"124":124,"126":126,"128":128,"129":129,"131":131,"134":134,"135":135,"136":136,"137":137,"138":138,"139":139,"143":143}],95:[function(require,module,exports){
 module.exports = set_json_sparse_as_json_graph;
 
-var $path = _dereq_("../types/path");
-var $error = _dereq_("../types/error");
-var $atom = _dereq_("../types/atom");
+var $path = require(139);
+var $error = require(138);
+var $atom = require(137);
 
-var clone = _dereq_("../support/clone-graph-json");
-var array_clone = _dereq_("../support/array-clone");
+var clone = require(106);
+var array_clone = require(103);
 
-var options = _dereq_("../support/options");
-var walk_path_map = _dereq_("../walk/walk-path-map-soft-link");
+var options = require(124);
+var walk_path_map = require(142);
 
-var is_object = _dereq_("../support/is-object");
+var is_object = require(119);
 
-var get_valid_key = _dereq_("../support/get-valid-key");
-var create_branch = _dereq_("../support/create-branch");
-var wrap_node = _dereq_("../support/wrap-node");
-var replace_node = _dereq_("../support/replace-node");
-var graph_node = _dereq_("../support/graph-node");
-var update_back_refs = _dereq_("../support/update-back-refs");
-var update_graph = _dereq_("../support/update-graph");
-var inc_generation = _dereq_("../support/inc-generation");
+var get_valid_key = require(113);
+var create_branch = require(111);
+var wrap_node = require(136);
+var replace_node = require(128);
+var graph_node = require(114);
+var update_back_refs = require(134);
+var update_graph = require(135);
+var inc_generation = require(115);
 
-var set_node_if_error = _dereq_("../support/treat-node-as-error");
-var set_successful_paths = _dereq_("../support/set-successful-paths");
+var set_node_if_error = require(131);
+var set_successful_paths = require(129);
 
-var promote = _dereq_("../lru/promote");
+var promote = require(86);
 
-var positions = _dereq_("../support/positions");
+var positions = require(126);
 var _cache = positions.cache;
 var _message = positions.message;
 var _jsong = positions.jsong;
@@ -4762,34 +4982,34 @@ function onEdge(pathmap, keys_stack, depth, roots, parents, nodes, requested, op
         roots.hasValue = true;
     }
 }
-},{"../lru/promote":85,"../support/array-clone":102,"../support/clone-graph-json":105,"../support/create-branch":110,"../support/get-valid-key":112,"../support/graph-node":113,"../support/inc-generation":114,"../support/is-object":118,"../support/options":123,"../support/positions":125,"../support/replace-node":127,"../support/set-successful-paths":128,"../support/treat-node-as-error":130,"../support/update-back-refs":133,"../support/update-graph":134,"../support/wrap-node":135,"../types/atom":136,"../types/error":137,"../types/path":138,"../walk/walk-path-map-soft-link":141}],95:[function(_dereq_,module,exports){
+},{"103":103,"106":106,"111":111,"113":113,"114":114,"115":115,"119":119,"124":124,"126":126,"128":128,"129":129,"131":131,"134":134,"135":135,"136":136,"137":137,"138":138,"139":139,"142":142,"86":86}],96:[function(require,module,exports){
 module.exports = set_json_sparse_as_json_sparse;
 
-var $path = _dereq_("../types/path");
-var $error = _dereq_("../types/error");
-var $atom = _dereq_("../types/atom");
+var $path = require(139);
+var $error = require(138);
+var $atom = require(137);
 
-var clone = _dereq_("../support/clone-dense-json");
-var array_clone = _dereq_("../support/array-clone");
+var clone = require(105);
+var array_clone = require(103);
 
-var options = _dereq_("../support/options");
-var walk_path_map = _dereq_("../walk/walk-path-map");
+var options = require(124);
+var walk_path_map = require(143);
 
-var is_object = _dereq_("../support/is-object");
+var is_object = require(119);
 
-var get_valid_key = _dereq_("../support/get-valid-key");
-var create_branch = _dereq_("../support/create-branch");
-var wrap_node = _dereq_("../support/wrap-node");
-var replace_node = _dereq_("../support/replace-node");
-var graph_node = _dereq_("../support/graph-node");
-var update_back_refs = _dereq_("../support/update-back-refs");
-var update_graph = _dereq_("../support/update-graph");
-var inc_generation = _dereq_("../support/inc-generation");
+var get_valid_key = require(113);
+var create_branch = require(111);
+var wrap_node = require(136);
+var replace_node = require(128);
+var graph_node = require(114);
+var update_back_refs = require(134);
+var update_graph = require(135);
+var inc_generation = require(115);
 
-var set_node_if_error = _dereq_("../support/treat-node-as-error");
-var set_successful_paths = _dereq_("../support/set-successful-paths");
+var set_node_if_error = require(131);
+var set_successful_paths = require(129);
 
-var positions = _dereq_("../support/positions");
+var positions = require(126);
 var _cache = positions.cache;
 var _message = positions.message;
 var _jsong = positions.jsong;
@@ -4928,33 +5148,33 @@ function onEdge(pathmap, keys_stack, depth, roots, parents, nodes, requested, op
         roots.hasValue = true;
     }
 }
-},{"../support/array-clone":102,"../support/clone-dense-json":104,"../support/create-branch":110,"../support/get-valid-key":112,"../support/graph-node":113,"../support/inc-generation":114,"../support/is-object":118,"../support/options":123,"../support/positions":125,"../support/replace-node":127,"../support/set-successful-paths":128,"../support/treat-node-as-error":130,"../support/update-back-refs":133,"../support/update-graph":134,"../support/wrap-node":135,"../types/atom":136,"../types/error":137,"../types/path":138,"../walk/walk-path-map":142}],96:[function(_dereq_,module,exports){
+},{"103":103,"105":105,"111":111,"113":113,"114":114,"115":115,"119":119,"124":124,"126":126,"128":128,"129":129,"131":131,"134":134,"135":135,"136":136,"137":137,"138":138,"139":139,"143":143}],97:[function(require,module,exports){
 module.exports = set_path_map_as_json_values;
 
-var $error = _dereq_("../types/error");
-var $atom = _dereq_("../types/atom");
+var $error = require(138);
+var $atom = require(137);
 
-var clone = _dereq_("../support/clone-dense-json");
-var array_clone = _dereq_("../support/array-clone");
+var clone = require(105);
+var array_clone = require(103);
 
-var options = _dereq_("../support/options");
-var walk_path_map = _dereq_("../walk/walk-path-map");
+var options = require(124);
+var walk_path_map = require(143);
 
-var is_object = _dereq_("../support/is-object");
+var is_object = require(119);
 
-var get_valid_key = _dereq_("../support/get-valid-key");
-var create_branch = _dereq_("../support/create-branch");
-var wrap_node = _dereq_("../support/wrap-node");
-var replace_node = _dereq_("../support/replace-node");
-var graph_node = _dereq_("../support/graph-node");
-var update_back_refs = _dereq_("../support/update-back-refs");
-var update_graph = _dereq_("../support/update-graph");
-var inc_generation = _dereq_("../support/inc-generation");
+var get_valid_key = require(113);
+var create_branch = require(111);
+var wrap_node = require(136);
+var replace_node = require(128);
+var graph_node = require(114);
+var update_back_refs = require(134);
+var update_graph = require(135);
+var inc_generation = require(115);
 
-var set_node_if_error = _dereq_("../support/treat-node-as-error");
-var set_successful_paths = _dereq_("../support/set-successful-paths");
+var set_node_if_error = require(131);
+var set_successful_paths = require(129);
 
-var positions = _dereq_("../support/positions");
+var positions = require(126);
 var _cache = positions.cache;
 var _message = positions.message;
 var _jsong = positions.jsong;
@@ -5069,36 +5289,36 @@ function onEdge(pathmap, keys_stack, depth, roots, parents, nodes, requested, op
         });
     }
 }
-},{"../support/array-clone":102,"../support/clone-dense-json":104,"../support/create-branch":110,"../support/get-valid-key":112,"../support/graph-node":113,"../support/inc-generation":114,"../support/is-object":118,"../support/options":123,"../support/positions":125,"../support/replace-node":127,"../support/set-successful-paths":128,"../support/treat-node-as-error":130,"../support/update-back-refs":133,"../support/update-graph":134,"../support/wrap-node":135,"../types/atom":136,"../types/error":137,"../walk/walk-path-map":142}],97:[function(_dereq_,module,exports){
+},{"103":103,"105":105,"111":111,"113":113,"114":114,"115":115,"119":119,"124":124,"126":126,"128":128,"129":129,"131":131,"134":134,"135":135,"136":136,"137":137,"138":138,"143":143}],98:[function(require,module,exports){
 module.exports = set_json_values_as_json_dense;
 
-var $path = _dereq_("../types/path");
-var $error = _dereq_("../types/error");
-var $atom = _dereq_("../types/atom");
+var $path = require(139);
+var $error = require(138);
+var $atom = require(137);
 
-var clone = _dereq_("../support/clone-dense-json");
-var array_clone = _dereq_("../support/array-clone");
+var clone = require(105);
+var array_clone = require(103);
 
-var options = _dereq_("../support/options");
-var walk_path_set = _dereq_("../walk/walk-path-set");
+var options = require(124);
+var walk_path_set = require(145);
 
-var is_object = _dereq_("../support/is-object");
+var is_object = require(119);
 
-var get_valid_key = _dereq_("../support/get-valid-key");
-var create_branch = _dereq_("../support/create-branch");
-var wrap_node = _dereq_("../support/wrap-node");
-var invalidate_node = _dereq_("../support/invalidate-node");
-var replace_node = _dereq_("../support/replace-node");
-var graph_node = _dereq_("../support/graph-node");
-var update_back_refs = _dereq_("../support/update-back-refs");
-var update_graph = _dereq_("../support/update-graph");
-var inc_generation = _dereq_("../support/inc-generation");
+var get_valid_key = require(113);
+var create_branch = require(111);
+var wrap_node = require(136);
+var invalidate_node = require(117);
+var replace_node = require(128);
+var graph_node = require(114);
+var update_back_refs = require(134);
+var update_graph = require(135);
+var inc_generation = require(115);
 
-var set_node_if_missing_path = _dereq_("../support/treat-node-as-missing-path-set");
-var set_node_if_error = _dereq_("../support/treat-node-as-error");
-var set_successful_paths = _dereq_("../support/set-successful-paths");
+var set_node_if_missing_path = require(132);
+var set_node_if_error = require(131);
+var set_successful_paths = require(129);
 
-var positions = _dereq_("../support/positions");
+var positions = require(126);
 var _cache = positions.cache;
 var _message = positions.message;
 var _jsong = positions.jsong;
@@ -5260,38 +5480,38 @@ function onEdge(pathset, depth, roots, parents, nodes, requested, optimized, key
         roots.hasValue = true;
     }
 }
-},{"../support/array-clone":102,"../support/clone-dense-json":104,"../support/create-branch":110,"../support/get-valid-key":112,"../support/graph-node":113,"../support/inc-generation":114,"../support/invalidate-node":116,"../support/is-object":118,"../support/options":123,"../support/positions":125,"../support/replace-node":127,"../support/set-successful-paths":128,"../support/treat-node-as-error":130,"../support/treat-node-as-missing-path-set":131,"../support/update-back-refs":133,"../support/update-graph":134,"../support/wrap-node":135,"../types/atom":136,"../types/error":137,"../types/path":138,"../walk/walk-path-set":144}],98:[function(_dereq_,module,exports){
+},{"103":103,"105":105,"111":111,"113":113,"114":114,"115":115,"117":117,"119":119,"124":124,"126":126,"128":128,"129":129,"131":131,"132":132,"134":134,"135":135,"136":136,"137":137,"138":138,"139":139,"145":145}],99:[function(require,module,exports){
 module.exports = set_json_values_as_json_graph;
 
-var $path = _dereq_("../types/path");
-var $error = _dereq_("../types/error");
-var $atom = _dereq_("../types/atom");
+var $path = require(139);
+var $error = require(138);
+var $atom = require(137);
 
-var clone = _dereq_("../support/clone-graph-json");
-var array_clone = _dereq_("../support/array-clone");
+var clone = require(106);
+var array_clone = require(103);
 
-var options = _dereq_("../support/options");
-var walk_path_set = _dereq_("../walk/walk-path-set-soft-link");
+var options = require(124);
+var walk_path_set = require(144);
 
-var is_object = _dereq_("../support/is-object");
+var is_object = require(119);
 
-var get_valid_key = _dereq_("../support/get-valid-key");
-var create_branch = _dereq_("../support/create-branch");
-var wrap_node = _dereq_("../support/wrap-node");
-var invalidate_node = _dereq_("../support/invalidate-node");
-var replace_node = _dereq_("../support/replace-node");
-var graph_node = _dereq_("../support/graph-node");
-var update_back_refs = _dereq_("../support/update-back-refs");
-var update_graph = _dereq_("../support/update-graph");
-var inc_generation = _dereq_("../support/inc-generation");
+var get_valid_key = require(113);
+var create_branch = require(111);
+var wrap_node = require(136);
+var invalidate_node = require(117);
+var replace_node = require(128);
+var graph_node = require(114);
+var update_back_refs = require(134);
+var update_graph = require(135);
+var inc_generation = require(115);
 
-var set_node_if_missing_path = _dereq_("../support/treat-node-as-missing-path-set");
-var set_node_if_error = _dereq_("../support/treat-node-as-error");
-var set_successful_paths = _dereq_("../support/set-successful-paths");
+var set_node_if_missing_path = require(132);
+var set_node_if_error = require(131);
+var set_successful_paths = require(129);
 
-var promote = _dereq_("../lru/promote");
+var promote = require(86);
 
-var positions = _dereq_("../support/positions");
+var positions = require(126);
 var _cache = positions.cache;
 var _message = positions.message;
 var _jsong = positions.jsong;
@@ -5454,36 +5674,36 @@ function onEdge(pathset, depth, roots, parents, nodes, requested, optimized, key
         roots.hasValue = true;
     }
 }
-},{"../lru/promote":85,"../support/array-clone":102,"../support/clone-graph-json":105,"../support/create-branch":110,"../support/get-valid-key":112,"../support/graph-node":113,"../support/inc-generation":114,"../support/invalidate-node":116,"../support/is-object":118,"../support/options":123,"../support/positions":125,"../support/replace-node":127,"../support/set-successful-paths":128,"../support/treat-node-as-error":130,"../support/treat-node-as-missing-path-set":131,"../support/update-back-refs":133,"../support/update-graph":134,"../support/wrap-node":135,"../types/atom":136,"../types/error":137,"../types/path":138,"../walk/walk-path-set-soft-link":143}],99:[function(_dereq_,module,exports){
+},{"103":103,"106":106,"111":111,"113":113,"114":114,"115":115,"117":117,"119":119,"124":124,"126":126,"128":128,"129":129,"131":131,"132":132,"134":134,"135":135,"136":136,"137":137,"138":138,"139":139,"144":144,"86":86}],100:[function(require,module,exports){
 module.exports = set_json_values_as_json_sparse;
 
-var $path = _dereq_("../types/path");
-var $error = _dereq_("../types/error");
-var $atom = _dereq_("../types/atom");
+var $path = require(139);
+var $error = require(138);
+var $atom = require(137);
 
-var clone = _dereq_("../support/clone-dense-json");
-var array_clone = _dereq_("../support/array-clone");
+var clone = require(105);
+var array_clone = require(103);
 
-var options = _dereq_("../support/options");
-var walk_path_set = _dereq_("../walk/walk-path-set");
+var options = require(124);
+var walk_path_set = require(145);
 
-var is_object = _dereq_("../support/is-object");
+var is_object = require(119);
 
-var get_valid_key = _dereq_("../support/get-valid-key");
-var create_branch = _dereq_("../support/create-branch");
-var wrap_node = _dereq_("../support/wrap-node");
-var invalidate_node = _dereq_("../support/invalidate-node");
-var replace_node = _dereq_("../support/replace-node");
-var graph_node = _dereq_("../support/graph-node");
-var update_back_refs = _dereq_("../support/update-back-refs");
-var update_graph = _dereq_("../support/update-graph");
-var inc_generation = _dereq_("../support/inc-generation");
+var get_valid_key = require(113);
+var create_branch = require(111);
+var wrap_node = require(136);
+var invalidate_node = require(117);
+var replace_node = require(128);
+var graph_node = require(114);
+var update_back_refs = require(134);
+var update_graph = require(135);
+var inc_generation = require(115);
 
-var set_node_if_missing_path = _dereq_("../support/treat-node-as-missing-path-set");
-var set_node_if_error = _dereq_("../support/treat-node-as-error");
-var set_successful_paths = _dereq_("../support/set-successful-paths");
+var set_node_if_missing_path = require(132);
+var set_node_if_error = require(131);
+var set_successful_paths = require(129);
 
-var positions = _dereq_("../support/positions");
+var positions = require(126);
 var _cache = positions.cache;
 var _message = positions.message;
 var _jsong = positions.jsong;
@@ -5637,35 +5857,35 @@ function onEdge(pathset, depth, roots, parents, nodes, requested, optimized, key
         roots.hasValue = true;
     }
 }
-},{"../support/array-clone":102,"../support/clone-dense-json":104,"../support/create-branch":110,"../support/get-valid-key":112,"../support/graph-node":113,"../support/inc-generation":114,"../support/invalidate-node":116,"../support/is-object":118,"../support/options":123,"../support/positions":125,"../support/replace-node":127,"../support/set-successful-paths":128,"../support/treat-node-as-error":130,"../support/treat-node-as-missing-path-set":131,"../support/update-back-refs":133,"../support/update-graph":134,"../support/wrap-node":135,"../types/atom":136,"../types/error":137,"../types/path":138,"../walk/walk-path-set":144}],100:[function(_dereq_,module,exports){
+},{"103":103,"105":105,"111":111,"113":113,"114":114,"115":115,"117":117,"119":119,"124":124,"126":126,"128":128,"129":129,"131":131,"132":132,"134":134,"135":135,"136":136,"137":137,"138":138,"139":139,"145":145}],101:[function(require,module,exports){
 module.exports = set_json_values_as_json_values;
 
-var $error = _dereq_("../types/error");
-var $atom = _dereq_("../types/atom");
+var $error = require(138);
+var $atom = require(137);
 
-var clone = _dereq_("../support/clone-dense-json");
-var array_clone = _dereq_("../support/array-clone");
+var clone = require(105);
+var array_clone = require(103);
 
-var options = _dereq_("../support/options");
-var walk_path_set = _dereq_("../walk/walk-path-set");
+var options = require(124);
+var walk_path_set = require(145);
 
-var is_object = _dereq_("../support/is-object");
+var is_object = require(119);
 
-var get_valid_key = _dereq_("../support/get-valid-key");
-var create_branch = _dereq_("../support/create-branch");
-var wrap_node = _dereq_("../support/wrap-node");
-var invalidate_node = _dereq_("../support/invalidate-node");
-var replace_node = _dereq_("../support/replace-node");
-var graph_node = _dereq_("../support/graph-node");
-var update_back_refs = _dereq_("../support/update-back-refs");
-var update_graph = _dereq_("../support/update-graph");
-var inc_generation = _dereq_("../support/inc-generation");
+var get_valid_key = require(113);
+var create_branch = require(111);
+var wrap_node = require(136);
+var invalidate_node = require(117);
+var replace_node = require(128);
+var graph_node = require(114);
+var update_back_refs = require(134);
+var update_graph = require(135);
+var inc_generation = require(115);
 
-var set_node_if_missing_path = _dereq_("../support/treat-node-as-missing-path-set");
-var set_node_if_error = _dereq_("../support/treat-node-as-error");
-var set_successful_paths = _dereq_("../support/set-successful-paths");
+var set_node_if_missing_path = require(132);
+var set_node_if_error = require(131);
+var set_successful_paths = require(129);
 
-var positions = _dereq_("../support/positions");
+var positions = require(126);
 var _cache = positions.cache;
 var _message = positions.message;
 var _jsong = positions.jsong;
@@ -5805,7 +6025,7 @@ function onValueType(pathset, depth, roots, parents, nodes, requested, optimized
         });
     }
 }
-},{"../support/array-clone":102,"../support/clone-dense-json":104,"../support/create-branch":110,"../support/get-valid-key":112,"../support/graph-node":113,"../support/inc-generation":114,"../support/invalidate-node":116,"../support/is-object":118,"../support/options":123,"../support/positions":125,"../support/replace-node":127,"../support/set-successful-paths":128,"../support/treat-node-as-error":130,"../support/treat-node-as-missing-path-set":131,"../support/update-back-refs":133,"../support/update-graph":134,"../support/wrap-node":135,"../types/atom":136,"../types/error":137,"../walk/walk-path-set":144}],101:[function(_dereq_,module,exports){
+},{"103":103,"105":105,"111":111,"113":113,"114":114,"115":115,"117":117,"119":119,"124":124,"126":126,"128":128,"129":129,"131":131,"132":132,"134":134,"135":135,"136":136,"137":137,"138":138,"145":145}],102:[function(require,module,exports){
 module.exports = function(array, value) {
     var i = -1;
     var n = array.length;
@@ -5814,7 +6034,7 @@ module.exports = function(array, value) {
     array2[i] = value;
     return array2;
 };
-},{}],102:[function(_dereq_,module,exports){
+},{}],103:[function(require,module,exports){
 module.exports = function(array) {
     var i = -1;
     var n = array.length;
@@ -5822,7 +6042,7 @@ module.exports = function(array) {
     while(++i < n) { array2[i] = array[i]; }
     return array2;
 };
-},{}],103:[function(_dereq_,module,exports){
+},{}],104:[function(require,module,exports){
 module.exports = function(array, index) {
     var i = -1;
     var n = Math.max(array.length - index, 0);
@@ -5830,9 +6050,9 @@ module.exports = function(array, index) {
     while(++i < n) { array2[i] = array[i + index]; }
     return array2;
 };
-},{}],104:[function(_dereq_,module,exports){
-var $atom = _dereq_("../types/atom");
-var clone = _dereq_("./clone");
+},{}],105:[function(require,module,exports){
+var $atom = require(137);
+var clone = require(110);
 module.exports = function(roots, node, type, value) {
 
     if(node == null || value === undefined) {
@@ -5846,10 +6066,10 @@ module.exports = function(roots, node, type, value) {
     return value;
 }
 
-},{"../types/atom":136,"./clone":109}],105:[function(_dereq_,module,exports){
-var $atom = _dereq_("../types/atom");
-var clone = _dereq_("./clone");
-var is_primitive = _dereq_("./is-primitive");
+},{"110":110,"137":137}],106:[function(require,module,exports){
+var $atom = require(137);
+var clone = require(110);
+var is_primitive = require(120);
 module.exports = function(roots, node, type, value) {
 
     if(node == null || value === undefined) {
@@ -5867,14 +6087,14 @@ module.exports = function(roots, node, type, value) {
     return clone(node);
 }
 
-},{"../types/atom":136,"./clone":109,"./is-primitive":119}],106:[function(_dereq_,module,exports){
-var clone_requested_path = _dereq_("./clone-requested-path");
-var clone_optimized_path = _dereq_("./clone-optimized-path");
+},{"110":110,"120":120,"137":137}],107:[function(require,module,exports){
+var clone_requested_path = require(109);
+var clone_optimized_path = require(108);
 module.exports = function clone_missing_path_sets(roots, pathset, depth, requested, optimized) {
     roots.requestedMissingPaths.push(clone_requested_path(roots.bound, requested, pathset, depth, roots.index));
     roots.optimizedMissingPaths.push(clone_optimized_path(optimized, pathset, depth));
 }
-},{"./clone-optimized-path":107,"./clone-requested-path":108}],107:[function(_dereq_,module,exports){
+},{"108":108,"109":109}],108:[function(require,module,exports){
 module.exports = function(optimized, pathset, depth) {
     var x;
     var i = -1;
@@ -5892,8 +6112,8 @@ module.exports = function(optimized, pathset, depth) {
     }
     return array2;
 }
-},{}],108:[function(_dereq_,module,exports){
-var is_object = _dereq_("./is-object");
+},{}],109:[function(require,module,exports){
+var is_object = require(119);
 module.exports = function(bound, requested, pathset, depth, index) {
     var x;
     var i = -1;
@@ -5923,9 +6143,9 @@ module.exports = function(bound, requested, pathset, depth, index) {
     }
     return array2;
 }
-},{"./is-object":118}],109:[function(_dereq_,module,exports){
-var is_object = _dereq_("./is-object");
-var prefix = _dereq_("../internal/prefix");
+},{"119":119}],110:[function(require,module,exports){
+var is_object = require(119);
+var prefix = require(73);
 
 module.exports = function(value) {
     var dest = value, src = dest, i = -1, n, keys, key;
@@ -5942,15 +6162,15 @@ module.exports = function(value) {
     }
     return dest;
 }
-},{"../internal/prefix":72,"./is-object":118}],110:[function(_dereq_,module,exports){
+},{"119":119,"73":73}],111:[function(require,module,exports){
 // TODO: rename path to ref
-var $ref = _dereq_("../types/path");
+var $ref = require(139);
 var $expired = "expired";
-var replace_node = _dereq_("./replace-node");
-var graph_node = _dereq_("./graph-node");
-var update_back_refs = _dereq_("./update-back-refs");
-var is_primitive = _dereq_("./is-primitive");
-var is_expired = _dereq_("./is-expired");
+var replace_node = require(128);
+var graph_node = require(114);
+var update_back_refs = require(134);
+var is_primitive = require(120);
+var is_expired = require(118);
 
 // TODO: comment about what happens if node is a branch vs leaf.
 module.exports = function create_branch(roots, parent, node, type, key) {
@@ -5966,11 +6186,11 @@ module.exports = function create_branch(roots, parent, node, type, key) {
     }
     return node;
 }
-},{"../types/path":138,"./graph-node":113,"./is-expired":117,"./is-primitive":119,"./replace-node":127,"./update-back-refs":133}],111:[function(_dereq_,module,exports){
-var __ref = _dereq_("../internal/ref");
-var __context = _dereq_("../internal/context");
-var __ref_index = _dereq_("../internal/ref-index");
-var __refs_length = _dereq_("../internal/refs-length");
+},{"114":114,"118":118,"120":120,"128":128,"134":134,"139":139}],112:[function(require,module,exports){
+var __ref = require(76);
+var __context = require(65);
+var __ref_index = require(75);
+var __refs_length = require(77);
 
 module.exports = function(node) {
     var ref, i = -1, n = node[__refs_length] || 0;
@@ -5981,7 +6201,7 @@ module.exports = function(node) {
     }
     node[__refs_length] = undefined
 }
-},{"../internal/context":64,"../internal/ref":75,"../internal/ref-index":74,"../internal/refs-length":76}],112:[function(_dereq_,module,exports){
+},{"65":65,"75":75,"76":76,"77":77}],113:[function(require,module,exports){
 module.exports = function(path) {
     var key, index = path.length - 1;
     do {
@@ -5991,10 +6211,10 @@ module.exports = function(path) {
     } while(--index > -1);
     return null;
 }
-},{}],113:[function(_dereq_,module,exports){
-var __parent = _dereq_("../internal/parent");
-var __key = _dereq_("../internal/key");
-var __generation = _dereq_("../internal/generation");
+},{}],114:[function(require,module,exports){
+var __parent = require(72);
+var __key = require(69);
+var __generation = require(66);
 
 module.exports = function(root, parent, node, key, generation) {
     node[__parent] = parent;
@@ -6002,18 +6222,18 @@ module.exports = function(root, parent, node, key, generation) {
     node[__generation] = generation;
     return node;
 }
-},{"../internal/generation":65,"../internal/key":68,"../internal/parent":71}],114:[function(_dereq_,module,exports){
+},{"66":66,"69":69,"72":72}],115:[function(require,module,exports){
 var generation = 0;
 module.exports = function() { return generation++; }
-},{}],115:[function(_dereq_,module,exports){
+},{}],116:[function(require,module,exports){
 var version = 0;
 module.exports = function() { return version++; }
-},{}],116:[function(_dereq_,module,exports){
+},{}],117:[function(require,module,exports){
 module.exports = invalidate;
 
-var is_object = _dereq_("./is-object");
-var remove_node = _dereq_("./remove-node");
-var prefix = _dereq_("../internal/prefix");
+var is_object = require(119);
+var remove_node = require(127);
+var prefix = require(73);
 
 function invalidate(parent, node, key, lru) {
     if(remove_node(parent, node, key, lru)) {
@@ -6031,12 +6251,12 @@ function invalidate(parent, node, key, lru) {
     }
     return false;
 }
-},{"../internal/prefix":72,"./is-object":118,"./remove-node":126}],117:[function(_dereq_,module,exports){
-var $expires_now = _dereq_("../values/expires-now");
-var $expires_never = _dereq_("../values/expires-never");
-var __invalidated = _dereq_("../internal/invalidated");
-var now = _dereq_("./now");
-var splice = _dereq_("../lru/splice");
+},{"119":119,"127":127,"73":73}],118:[function(require,module,exports){
+var $expires_now = require(141);
+var $expires_never = require(140);
+var __invalidated = require(68);
+var now = require(123);
+var splice = require(87);
 
 module.exports = function isExpired(roots, node) {
     var expires = node.$expires;
@@ -6053,22 +6273,22 @@ module.exports = function isExpired(roots, node) {
     return false;
 }
 
-},{"../internal/invalidated":67,"../lru/splice":86,"../values/expires-never":139,"../values/expires-now":140,"./now":122}],118:[function(_dereq_,module,exports){
+},{"123":123,"140":140,"141":141,"68":68,"87":87}],119:[function(require,module,exports){
 var obj_typeof = "object";
 module.exports = function(value) {
     return value != null && typeof value == obj_typeof;
 }
-},{}],119:[function(_dereq_,module,exports){
+},{}],120:[function(require,module,exports){
 var obj_typeof = "object";
 module.exports = function(value) {
     return value == null || typeof value != obj_typeof;
 }
-},{}],120:[function(_dereq_,module,exports){
+},{}],121:[function(require,module,exports){
 module.exports = key_to_keyset;
 
-var __offset = _dereq_("../internal/offset");
+var __offset = require(71);
 var is_array = Array.isArray;
-var is_object = _dereq_("./is-object");
+var is_object = require(119);
 
 function key_to_keyset(key, iskeyset) {
     if(iskeyset) {
@@ -6083,23 +6303,23 @@ function key_to_keyset(key, iskeyset) {
 }
 
 
-},{"../internal/offset":70,"./is-object":118}],121:[function(_dereq_,module,exports){
+},{"119":119,"71":71}],122:[function(require,module,exports){
 
 var $self = "./";
-var $path = _dereq_("../types/path");
-var $atom = _dereq_("../types/atom");
-var $expires_now = _dereq_("../values/expires-now");
+var $path = require(139);
+var $atom = require(137);
+var $expires_now = require(141);
 
-var is_object = _dereq_("./is-object");
-var is_primitive = _dereq_("./is-primitive");
-var is_expired = _dereq_("./is-expired");
-var promote = _dereq_("../lru/promote");
-var wrap_node = _dereq_("./wrap-node");
-var graph_node = _dereq_("./graph-node");
-var replace_node = _dereq_("../support/replace-node");
-var update_graph  = _dereq_("../support/update-graph");
-var inc_generation = _dereq_("./inc-generation");
-var invalidate_node = _dereq_("./invalidate-node");
+var is_object = require(119);
+var is_primitive = require(120);
+var is_expired = require(118);
+var promote = require(86);
+var wrap_node = require(136);
+var graph_node = require(114);
+var replace_node = require(128);
+var update_graph  = require(135);
+var inc_generation = require(115);
+var invalidate_node = require(117);
 
 module.exports = function(roots, parent, node, messageParent, message, key, requested) {
 
@@ -6272,11 +6492,11 @@ module.exports = function(roots, parent, node, messageParent, message, key, requ
     return node;
 }
 
-},{"../lru/promote":85,"../support/replace-node":127,"../support/update-graph":134,"../types/atom":136,"../types/path":138,"../values/expires-now":140,"./graph-node":113,"./inc-generation":114,"./invalidate-node":116,"./is-expired":117,"./is-object":118,"./is-primitive":119,"./wrap-node":135}],122:[function(_dereq_,module,exports){
+},{"114":114,"115":115,"117":117,"118":118,"119":119,"120":120,"128":128,"135":135,"136":136,"137":137,"139":139,"141":141,"86":86}],123:[function(require,module,exports){
 module.exports = Date.now;
-},{}],123:[function(_dereq_,module,exports){
-var inc_version = _dereq_("../support/inc-version");
-var getBoundValue = _dereq_('../get/getBoundValue');
+},{}],124:[function(require,module,exports){
+var inc_version = require(116);
+var getBoundValue = require(48);
 
 /**
  * TODO: more options state tracking comments.
@@ -6311,12 +6531,12 @@ module.exports = function(options, model, error_selector, comparator) {
     
     return options;
 };
-},{"../get/getBoundValue":47,"../support/inc-version":115}],124:[function(_dereq_,module,exports){
+},{"116":116,"48":48}],125:[function(require,module,exports){
 module.exports = permute_keyset;
 
-var __offset = _dereq_("../internal/offset");
+var __offset = require(71);
 var is_array = Array.isArray;
-var is_object = _dereq_("./is-object");
+var is_object = require(119);
 
 function permute_keyset(key) {
     if(is_array(key)) {
@@ -6358,20 +6578,20 @@ function permute_keyset(key) {
 }
 
 
-},{"../internal/offset":70,"./is-object":118}],125:[function(_dereq_,module,exports){
+},{"119":119,"71":71}],126:[function(require,module,exports){
 module.exports = {
     cache: 0,
     message: 1,
     jsong: 2,
     json: 3
 };
-},{}],126:[function(_dereq_,module,exports){
-var $path = _dereq_("../types/path");
-var __parent = _dereq_("../internal/parent");
-var unlink = _dereq_("./unlink");
-var delete_back_refs = _dereq_("./delete-back-refs");
-var splice = _dereq_("../lru/splice");
-var is_object = _dereq_("./is-object");
+},{}],127:[function(require,module,exports){
+var $path = require(139);
+var __parent = require(72);
+var unlink = require(133);
+var delete_back_refs = require(112);
+var splice = require(87);
+var is_object = require(119);
 
 module.exports = function(parent, node, key, lru) {
     if(is_object(node)) {
@@ -6387,9 +6607,9 @@ module.exports = function(parent, node, key, lru) {
     return false;
 }
 
-},{"../internal/parent":71,"../lru/splice":86,"../types/path":138,"./delete-back-refs":111,"./is-object":118,"./unlink":132}],127:[function(_dereq_,module,exports){
-var transfer_back_refs = _dereq_("./transfer-back-refs");
-var invalidate_node = _dereq_("./invalidate-node");
+},{"112":112,"119":119,"133":133,"139":139,"72":72,"87":87}],128:[function(require,module,exports){
+var transfer_back_refs = require(130);
+var invalidate_node = require(117);
 
 module.exports = function(parent, node, replacement, key, lru) {
     if(node != null && node !== replacement && typeof node == "object") {
@@ -6398,17 +6618,17 @@ module.exports = function(parent, node, replacement, key, lru) {
     }
     return parent[key] = replacement;
 }
-},{"./invalidate-node":116,"./transfer-back-refs":129}],128:[function(_dereq_,module,exports){
-var array_slice = _dereq_("./array-slice");
-var array_clone = _dereq_("./array-clone");
+},{"117":117,"130":130}],129:[function(require,module,exports){
+var array_slice = require(104);
+var array_clone = require(103);
 module.exports = function cloneSuccessPaths(roots, requested, optimized) {
     roots.requestedPaths.push(array_slice(requested, roots.offset));
     roots.optimizedPaths.push(array_clone(optimized));
 }
-},{"./array-clone":102,"./array-slice":103}],129:[function(_dereq_,module,exports){
-var __ref = _dereq_("../internal/ref");
-var __context = _dereq_("../internal/context");
-var __refs_length = _dereq_("../internal/refs-length");
+},{"103":103,"104":104}],130:[function(require,module,exports){
+var __ref = require(76);
+var __context = require(65);
+var __refs_length = require(77);
 
 module.exports = function(node, dest) {
     var nodeRefsLength = node[__refs_length] || 0,
@@ -6425,10 +6645,10 @@ module.exports = function(node, dest) {
     dest[__refs_length] = nodeRefsLength + destRefsLength;
     node[__refs_length] = ref = undefined;
 }
-},{"../internal/context":64,"../internal/ref":75,"../internal/refs-length":76}],130:[function(_dereq_,module,exports){
-var $error = _dereq_("../types/error");
-var promote = _dereq_("../lru/promote");
-var array_clone = _dereq_("./array-clone");
+},{"65":65,"76":76,"77":77}],131:[function(require,module,exports){
+var $error = require(138);
+var promote = require(86);
+var array_clone = require(103);
 module.exports = function treatNodeAsError(roots, node, type, path) {
     if(node == null) {
         return false;
@@ -6441,10 +6661,10 @@ module.exports = function treatNodeAsError(roots, node, type, path) {
     return true;
 };
 
-},{"../lru/promote":85,"../types/error":137,"./array-clone":102}],131:[function(_dereq_,module,exports){
-var $atom = _dereq_("../types/atom");
-var clone_misses = _dereq_("./clone-missing-path-sets");
-var is_expired = _dereq_("./is-expired");
+},{"103":103,"138":138,"86":86}],132:[function(require,module,exports){
+var $atom = require(137);
+var clone_misses = require(107);
+var is_expired = require(118);
 
 module.exports = function treatNodeAsMissingPathSet(roots, node, type, pathset, depth, requested, optimized) {
     var dematerialized = !roots.materialized;
@@ -6464,11 +6684,11 @@ module.exports = function treatNodeAsMissingPathSet(roots, node, type, pathset, 
     return false;
 };
 
-},{"../types/atom":136,"./clone-missing-path-sets":106,"./is-expired":117}],132:[function(_dereq_,module,exports){
-var __ref = _dereq_("../internal/ref");
-var __context = _dereq_("../internal/context");
-var __ref_index = _dereq_("../internal/ref-index");
-var __refs_length = _dereq_("../internal/refs-length");
+},{"107":107,"118":118,"137":137}],133:[function(require,module,exports){
+var __ref = require(76);
+var __context = require(65);
+var __ref_index = require(75);
+var __refs_length = require(77);
 
 module.exports = function(ref) {
     var destination = ref[__context];
@@ -6482,16 +6702,16 @@ module.exports = function(ref) {
         ref[__ref_index] = ref[__context] = destination = undefined;
     }
 }
-},{"../internal/context":64,"../internal/ref":75,"../internal/ref-index":74,"../internal/refs-length":76}],133:[function(_dereq_,module,exports){
+},{"65":65,"75":75,"76":76,"77":77}],134:[function(require,module,exports){
 module.exports = update_back_refs;
 
-var __ref = _dereq_("../internal/ref");
-var __parent = _dereq_("../internal/parent");
-var __version = _dereq_("../internal/version");
-var __generation = _dereq_("../internal/generation");
-var __refs_length = _dereq_("../internal/refs-length");
+var __ref = require(76);
+var __parent = require(72);
+var __version = require(79);
+var __generation = require(66);
+var __refs_length = require(77);
 
-var generation = _dereq_("./inc-generation");
+var generation = require(115);
 
 function update_back_refs(node, version) {
     if(node && node[__version] !== version) {
@@ -6506,12 +6726,12 @@ function update_back_refs(node, version) {
     return node;
 }
 
-},{"../internal/generation":65,"../internal/parent":71,"../internal/ref":75,"../internal/refs-length":76,"../internal/version":78,"./inc-generation":114}],134:[function(_dereq_,module,exports){
-var __key = _dereq_("../internal/key");
-var __version = _dereq_("../internal/version");
-var __parent = _dereq_("../internal/parent");
-var remove_node = _dereq_("./remove-node");
-var update_back_refs = _dereq_("./update-back-refs");
+},{"115":115,"66":66,"72":72,"76":76,"77":77,"79":79}],135:[function(require,module,exports){
+var __key = require(69);
+var __version = require(79);
+var __parent = require(72);
+var remove_node = require(127);
+var update_back_refs = require(134);
 
 module.exports = function(node, offset, version, lru) {
     var child;
@@ -6524,15 +6744,15 @@ module.exports = function(node, offset, version, lru) {
         }
     }
 }
-},{"../internal/key":68,"../internal/parent":71,"../internal/version":78,"./remove-node":126,"./update-back-refs":133}],135:[function(_dereq_,module,exports){
-var $path = _dereq_("../types/path");
-var $error = _dereq_("../types/error");
-var $atom = _dereq_("../types/atom");
+},{"127":127,"134":134,"69":69,"72":72,"79":79}],136:[function(require,module,exports){
+var $path = require(139);
+var $error = require(138);
+var $atom = require(137);
 
-var now = _dereq_("./now");
-var clone = _dereq_("./clone");
+var now = require(123);
+var clone = require(110);
 var is_array = Array.isArray;
-var is_object = _dereq_("./is-object");
+var is_object = require(119);
 
 // TODO: CR Wraps a node for insertion.
 // TODO: CR Define default atom size values.
@@ -6572,6 +6792,7 @@ module.exports = function wrap_node(node, type, value) {
         }
     }
 
+    // TODO: Is it intended that null or 0 will effectively be treated as undefined? Other places see 0 treated specially as EXPIRE_NOW, but not possible to get into that state through this. Maybe occurs elsewhere?
     var expires = is_object(node) && node.$expires || undefined;
     if(typeof expires === "number" && expires < 0) {
         dest.$expires = now() + (expires * -1);
@@ -6583,36 +6804,37 @@ module.exports = function wrap_node(node, type, value) {
     return dest;
 }
 
-},{"../types/atom":136,"../types/error":137,"../types/path":138,"./clone":109,"./is-object":118,"./now":122}],136:[function(_dereq_,module,exports){
+},{"110":110,"119":119,"123":123,"137":137,"138":138,"139":139}],137:[function(require,module,exports){
 module.exports = "atom";
-},{}],137:[function(_dereq_,module,exports){
+
+},{}],138:[function(require,module,exports){
 module.exports = "error";
-},{}],138:[function(_dereq_,module,exports){
+},{}],139:[function(require,module,exports){
 module.exports = "ref";
-},{}],139:[function(_dereq_,module,exports){
+},{}],140:[function(require,module,exports){
 module.exports = 1;
-},{}],140:[function(_dereq_,module,exports){
+},{}],141:[function(require,module,exports){
 module.exports = 0;
-},{}],141:[function(_dereq_,module,exports){
+},{}],142:[function(require,module,exports){
 module.exports = walk_path_map;
 
-var prefix = _dereq_("../internal/prefix");
-var $path = _dereq_("../types/path");
+var prefix = require(73);
+var $path = require(139);
 
-var walk_reference = _dereq_("./walk-reference");
+var walk_reference = require(146);
 
-var array_slice = _dereq_("../support/array-slice");
-var array_clone    = _dereq_("../support/array-clone");
-var array_append   = _dereq_("../support/array-append");
+var array_slice = require(104);
+var array_clone    = require(103);
+var array_append   = require(102);
 
-var is_expired = _dereq_("../support/is-expired");
-var is_primitive = _dereq_("../support/is-primitive");
-var is_object = _dereq_("../support/is-object");
+var is_expired = require(118);
+var is_primitive = require(120);
+var is_object = require(119);
 var is_array = Array.isArray;
 
-var promote = _dereq_("../lru/promote");
+var promote = require(86);
 
-var positions = _dereq_("../support/positions");
+var positions = require(126);
 var _cache = positions.cache;
 var _message = positions.message;
 var _jsong = positions.jsong;
@@ -6713,27 +6935,27 @@ function walk_path_map(onNode, onValueType, pathmap, keys_stack, depth, roots, p
     }
 }
 
-},{"../internal/prefix":72,"../lru/promote":85,"../support/array-append":101,"../support/array-clone":102,"../support/array-slice":103,"../support/is-expired":117,"../support/is-object":118,"../support/is-primitive":119,"../support/positions":125,"../types/path":138,"./walk-reference":145}],142:[function(_dereq_,module,exports){
+},{"102":102,"103":103,"104":104,"118":118,"119":119,"120":120,"126":126,"139":139,"146":146,"73":73,"86":86}],143:[function(require,module,exports){
 module.exports = walk_path_map;
 
-var prefix = _dereq_("../internal/prefix");
-var __context = _dereq_("../internal/context");
-var $path = _dereq_("../types/path");
+var prefix = require(73);
+var __context = require(65);
+var $path = require(139);
 
-var walk_reference = _dereq_("./walk-reference");
+var walk_reference = require(146);
 
-var array_slice = _dereq_("../support/array-slice");
-var array_clone    = _dereq_("../support/array-clone");
-var array_append   = _dereq_("../support/array-append");
+var array_slice = require(104);
+var array_clone    = require(103);
+var array_append   = require(102);
 
-var is_expired = _dereq_("../support/is-expired");
-var is_primitive = _dereq_("../support/is-primitive");
-var is_object = _dereq_("../support/is-object");
+var is_expired = require(118);
+var is_primitive = require(120);
+var is_object = require(119);
 var is_array = Array.isArray;
 
-var promote = _dereq_("../lru/promote");
+var promote = require(86);
 
-var positions = _dereq_("../support/positions");
+var positions = require(126);
 var _cache = positions.cache;
 var _message = positions.message;
 var _jsong = positions.jsong;
@@ -6849,28 +7071,28 @@ function walk_path_map(onNode, onValueType, pathmap, keys_stack, depth, roots, p
     }
 }
 
-},{"../internal/context":64,"../internal/prefix":72,"../lru/promote":85,"../support/array-append":101,"../support/array-clone":102,"../support/array-slice":103,"../support/is-expired":117,"../support/is-object":118,"../support/is-primitive":119,"../support/positions":125,"../types/path":138,"./walk-reference":145}],143:[function(_dereq_,module,exports){
+},{"102":102,"103":103,"104":104,"118":118,"119":119,"120":120,"126":126,"139":139,"146":146,"65":65,"73":73,"86":86}],144:[function(require,module,exports){
 module.exports = walk_path_set;
 
-var $path = _dereq_("../types/path");
+var $path = require(139);
 var empty_array = new Array(0);
 
-var walk_reference = _dereq_("./walk-reference");
+var walk_reference = require(146);
 
-var array_slice    = _dereq_("../support/array-slice");
-var array_clone    = _dereq_("../support/array-clone");
-var array_append   = _dereq_("../support/array-append");
+var array_slice    = require(104);
+var array_clone    = require(103);
+var array_append   = require(102);
 
-var is_expired = _dereq_("../support/is-expired");
-var is_primitive = _dereq_("../support/is-primitive");
-var is_object = _dereq_("../support/is-object");
+var is_expired = require(118);
+var is_primitive = require(120);
+var is_object = require(119);
 
-var keyset_to_key  = _dereq_("../support/keyset-to-key");
-var permute_keyset = _dereq_("../support/permute-keyset");
+var keyset_to_key  = require(121);
+var permute_keyset = require(125);
 
-var promote = _dereq_("../lru/promote");
+var promote = require(86);
 
-var positions = _dereq_("../support/positions");
+var positions = require(126);
 var _cache = positions.cache;
 var _message = positions.message;
 var _jsong = positions.jsong;
@@ -6961,28 +7183,28 @@ function walk_path_set(onNode, onValueType, pathset, depth, roots, parents, node
     }
 }
 
-},{"../lru/promote":85,"../support/array-append":101,"../support/array-clone":102,"../support/array-slice":103,"../support/is-expired":117,"../support/is-object":118,"../support/is-primitive":119,"../support/keyset-to-key":120,"../support/permute-keyset":124,"../support/positions":125,"../types/path":138,"./walk-reference":145}],144:[function(_dereq_,module,exports){
+},{"102":102,"103":103,"104":104,"118":118,"119":119,"120":120,"121":121,"125":125,"126":126,"139":139,"146":146,"86":86}],145:[function(require,module,exports){
 module.exports = walk_path_set;
 
-var __context = _dereq_("../internal/context");
-var $path = _dereq_("../types/path");
+var __context = require(65);
+var $path = require(139);
 
-var walk_reference = _dereq_("./walk-reference");
+var walk_reference = require(146);
 
-var array_slice    = _dereq_("../support/array-slice");
-var array_clone    = _dereq_("../support/array-clone");
-var array_append   = _dereq_("../support/array-append");
+var array_slice    = require(104);
+var array_clone    = require(103);
+var array_append   = require(102);
 
-var is_expired = _dereq_("../support/is-expired");
-var is_primitive = _dereq_("../support/is-primitive");
-var is_object = _dereq_("../support/is-object");
+var is_expired = require(118);
+var is_primitive = require(120);
+var is_object = require(119);
 
-var keyset_to_key  = _dereq_("../support/keyset-to-key");
-var permute_keyset = _dereq_("../support/permute-keyset");
+var keyset_to_key  = require(121);
+var permute_keyset = require(125);
 
-var promote = _dereq_("../lru/promote");
+var promote = require(86);
 
-var positions = _dereq_("../support/positions");
+var positions = require(126);
 var _cache = positions.cache;
 var _message = positions.message;
 var _jsong = positions.jsong;
@@ -7080,21 +7302,21 @@ function walk_path_set(onNode, onValueType, pathset, depth, roots, parents, node
     }
 }
 
-},{"../internal/context":64,"../lru/promote":85,"../support/array-append":101,"../support/array-clone":102,"../support/array-slice":103,"../support/is-expired":117,"../support/is-object":118,"../support/is-primitive":119,"../support/keyset-to-key":120,"../support/permute-keyset":124,"../support/positions":125,"../types/path":138,"./walk-reference":145}],145:[function(_dereq_,module,exports){
+},{"102":102,"103":103,"104":104,"118":118,"119":119,"120":120,"121":121,"125":125,"126":126,"139":139,"146":146,"65":65,"86":86}],146:[function(require,module,exports){
 module.exports = walk_reference;
 
-var prefix = _dereq_("../internal/prefix");
-var __ref = _dereq_("../internal/ref");
-var __context = _dereq_("../internal/context");
-var __ref_index = _dereq_("../internal/ref-index");
-var __refs_length = _dereq_("../internal/refs-length");
+var prefix = require(73);
+var __ref = require(76);
+var __context = require(65);
+var __ref_index = require(75);
+var __refs_length = require(77);
 
-var is_object      = _dereq_("../support/is-object");
-var is_primitive   = _dereq_("../support/is-primitive");
-var array_slice    = _dereq_("../support/array-slice");
-var array_append   = _dereq_("../support/array-append");
+var is_object      = require(119);
+var is_primitive   = require(120);
+var array_slice    = require(104);
+var array_append   = require(102);
 
-var positions = _dereq_("../support/positions");
+var positions = require(126);
 var _cache = positions.cache;
 var _message = positions.message;
 var _jsong = positions.jsong;
@@ -7143,11 +7365,11 @@ function walk_reference(onNode, container, reference, roots, parents, nodes, req
     return nodes;
 }
 
-},{"../internal/context":64,"../internal/prefix":72,"../internal/ref":75,"../internal/ref-index":74,"../internal/refs-length":76,"../support/array-append":101,"../support/array-slice":103,"../support/is-object":118,"../support/is-primitive":119,"../support/positions":125}],146:[function(_dereq_,module,exports){
+},{"102":102,"104":104,"119":119,"120":120,"126":126,"65":65,"73":73,"75":75,"76":76,"77":77}],147:[function(require,module,exports){
 "use strict";
 
 // rawAsap provides everything we need except exception management.
-var rawAsap = _dereq_("./raw");
+var rawAsap = require(148);
 // RawTasks are recycled to reduce GC churn.
 var freeTasks = [];
 // We queue errors to ensure they are thrown in right order (FIFO).
@@ -7211,7 +7433,7 @@ RawTask.prototype.call = function () {
     }
 };
 
-},{"./raw":147}],147:[function(_dereq_,module,exports){
+},{"148":148}],148:[function(require,module,exports){
 (function (global){
 "use strict";
 
@@ -7434,8 +7656,8 @@ rawAsap.makeRequestCallFromTimer = makeRequestCallFromTimer;
 // back into ASAP proper.
 // https://github.com/tildeio/rsvp.js/blob/cddf7232546a9cf858524b75cde6f9edf72620a7/lib/rsvp/asap.js
 
-}).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],148:[function(_dereq_,module,exports){
+}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
+},{}],149:[function(require,module,exports){
 (function (process){
 "use strict";
 
@@ -7517,7 +7739,7 @@ function requestFlush() {
         if (!domain) {
             // Lazy execute the domain module.
             // Only employed if the user elects to use domains.
-            domain = _dereq_("domain");
+            domain = require(150);
         }
         domain.active = process.domain = null;
     }
@@ -7539,12 +7761,12 @@ function requestFlush() {
     }
 }
 
-}).call(this,_dereq_("FWaASH"))
-},{"FWaASH":151,"domain":149}],149:[function(_dereq_,module,exports){
+}).call(this,require(152))
+},{"150":150,"152":152}],150:[function(require,module,exports){
 /*global define:false require:false */
 module.exports = (function(){
 	// Import Events
-	var events = _dereq_('events')
+	var events = require(151)
 
 	// Export Domain
 	var domain = {}
@@ -7608,7 +7830,7 @@ module.exports = (function(){
 	};
 	return domain
 }).call(this)
-},{"events":150}],150:[function(_dereq_,module,exports){
+},{"151":151}],151:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -7911,50 +8133,76 @@ function isUndefined(arg) {
   return arg === void 0;
 }
 
-},{}],151:[function(_dereq_,module,exports){
+},{}],152:[function(require,module,exports){
 // shim for using process in browser
 
 var process = module.exports = {};
+var queue = [];
+var draining = false;
+var currentQueue;
+var queueIndex = -1;
 
-process.nextTick = (function () {
-    var canSetImmediate = typeof window !== 'undefined'
-    && window.setImmediate;
-    var canPost = typeof window !== 'undefined'
-    && window.postMessage && window.addEventListener
-    ;
-
-    if (canSetImmediate) {
-        return function (f) { return window.setImmediate(f) };
+function cleanUpNextTick() {
+    draining = false;
+    if (currentQueue.length) {
+        queue = currentQueue.concat(queue);
+    } else {
+        queueIndex = -1;
     }
-
-    if (canPost) {
-        var queue = [];
-        window.addEventListener('message', function (ev) {
-            var source = ev.source;
-            if ((source === window || source === null) && ev.data === 'process-tick') {
-                ev.stopPropagation();
-                if (queue.length > 0) {
-                    var fn = queue.shift();
-                    fn();
-                }
-            }
-        }, true);
-
-        return function nextTick(fn) {
-            queue.push(fn);
-            window.postMessage('process-tick', '*');
-        };
+    if (queue.length) {
+        drainQueue();
     }
+}
 
-    return function nextTick(fn) {
-        setTimeout(fn, 0);
-    };
-})();
+function drainQueue() {
+    if (draining) {
+        return;
+    }
+    var timeout = setTimeout(cleanUpNextTick);
+    draining = true;
 
+    var len = queue.length;
+    while(len) {
+        currentQueue = queue;
+        queue = [];
+        while (++queueIndex < len) {
+            currentQueue[queueIndex].run();
+        }
+        queueIndex = -1;
+        len = queue.length;
+    }
+    currentQueue = null;
+    draining = false;
+    clearTimeout(timeout);
+}
+
+process.nextTick = function (fun) {
+    var args = new Array(arguments.length - 1);
+    if (arguments.length > 1) {
+        for (var i = 1; i < arguments.length; i++) {
+            args[i - 1] = arguments[i];
+        }
+    }
+    queue.push(new Item(fun, args));
+    if (!draining) {
+        setTimeout(drainQueue, 0);
+    }
+};
+
+// v8 likes predictible objects
+function Item(fun, array) {
+    this.fun = fun;
+    this.array = array;
+}
+Item.prototype.run = function () {
+    this.fun.apply(null, this.array);
+};
 process.title = 'browser';
 process.browser = true;
 process.env = {};
 process.argv = [];
+process.version = ''; // empty string to avoid regexp issues
+process.versions = {};
 
 function noop() {}
 
@@ -7968,22 +8216,23 @@ process.emit = noop;
 
 process.binding = function (name) {
     throw new Error('process.binding is not supported');
-}
+};
 
 // TODO(shtylman)
 process.cwd = function () { return '/' };
 process.chdir = function (dir) {
     throw new Error('process.chdir is not supported');
 };
+process.umask = function() { return 0; };
 
-},{}],152:[function(_dereq_,module,exports){
+},{}],153:[function(require,module,exports){
 module.exports = function(x) {
     return x;
 };
 
-},{}],153:[function(_dereq_,module,exports){
-var Observer = _dereq_('./Observer');
-var Disposable = _dereq_('./disposable/Disposable');
+},{}],154:[function(require,module,exports){
+var Observer = require(155);
+var Disposable = require(158);
 
 function Observable(s) {
     this._subscribe = s;
@@ -8067,8 +8316,8 @@ function fixDisposable(disposable) {
 }
 
 module.exports = Observable;
-},{"./Observer":154,"./disposable/Disposable":157}],154:[function(_dereq_,module,exports){
-var I = _dereq_('./I');
+},{"155":155,"158":158}],155:[function(require,module,exports){
+var I = require(153);
 var Observer = module.exports = function Observer(n, e, c) {
     this.onNext =       n || I;
     this.onError =      e || I;
@@ -8080,7 +8329,7 @@ Observer.create = function(n, e, c) {
 };
 
 
-},{"./I":152}],155:[function(_dereq_,module,exports){
+},{"153":153}],156:[function(require,module,exports){
 var Subject = module.exports = function Subject() {
     this.observers = [];
 };
@@ -8118,8 +8367,8 @@ Subject.prototype.onCompleted = function() {
     }
 };
 
-},{}],156:[function(_dereq_,module,exports){
-var Disposable = _dereq_("./Disposable");
+},{}],157:[function(require,module,exports){
+var Disposable = require(158);
 
 function CompositeDisposable() {
     this.length = 0;
@@ -8206,7 +8455,7 @@ CompositeDisposable.prototype.action = function() {
 };
 
 module.exports = CompositeDisposable;
-},{"./Disposable":157}],157:[function(_dereq_,module,exports){
+},{"158":158}],158:[function(require,module,exports){
 function Disposable(a) {
     this.action = a;
 };
@@ -8224,8 +8473,8 @@ Disposable.prototype.dispose = function() {
 };
 
 module.exports = Disposable;
-},{}],158:[function(_dereq_,module,exports){
-var Disposable = _dereq_("./Disposable");
+},{}],159:[function(require,module,exports){
+var Disposable = require(158);
 
 function SerialDisposable() {
     if(arguments.length > 0) {
@@ -8255,7 +8504,7 @@ SerialDisposable.prototype.setDisposable = function(d) {
 };
 
 module.exports = SerialDisposable;
-},{"./Disposable":157}],159:[function(_dereq_,module,exports){
+},{"158":158}],160:[function(require,module,exports){
 (function (global){
 var Rx;
 
@@ -8265,8 +8514,8 @@ if (typeof window !== "undefined" && typeof window["Rx"] !== "undefined") {
 } else if (typeof global !== "undefined" && typeof global["Rx"] !== "undefined") {
     // Node.js environment
     Rx = global["Rx"];
-} else if (typeof _dereq_ !== 'undefined' || typeof window !== 'undefined' && window.require) {
-    var r = typeof _dereq_ !== 'undefined' && _dereq_ || window.require;
+} else if (typeof require !== 'undefined' || typeof window !== 'undefined' && window.require) {
+    var r = typeof require !== 'undefined' && require || window.require;
     try {
         // CommonJS environment with rx module
         Rx = r("rx");
@@ -8277,38 +8526,40 @@ if (typeof window !== "undefined" && typeof window["Rx"] !== "undefined") {
 
 if (Rx === undefined) {
     
-    var Observable = _dereq_("./Observable");
+    var Observable = require(154);
     
-    Observable.prototype.materialize = _dereq_("./operators/materialize");
-    Observable.prototype.reduce = _dereq_("./operators/reduce");
-    Observable.prototype.catchException = _dereq_("./operators/catch");
-    Observable.prototype.toArray = _dereq_("./operators/to-array");
-    Observable.prototype.mergeAll = _dereq_("./operators/merge-all");
-    Observable.prototype.map = _dereq_("./operators/map");
-    Observable.prototype.flatMap = _dereq_("./operators/flat-map");
-    Observable.prototype.defaultIfEmpty = _dereq_("./operators/default-if-empty");
+    Observable.prototype.materialize = require(166);
+    Observable.prototype.reduce = require(168);
+    Observable.prototype.catchException = require(161);
+    Observable.prototype.toArray = require(169);
+    Observable.prototype.mergeAll = require(167);
+    Observable.prototype.map = require(165);
+    Observable.prototype.flatMap = require(164);
+    Observable.prototype.defaultIfEmpty = require(162);
+    Observable.prototype.do = require(163);
     
     Observable.prototype.forEach = Observable.prototype.subscribe;
     Observable.prototype.select = Observable.prototype.map;
     Observable.prototype.selectMany = Observable.prototype.flatMap;
+    Observable.prototype.doAction = Observable.prototype.do;
     
     Rx = {
-        Disposable: _dereq_('./disposable/Disposable'),
-        CompositeDisposable: _dereq_('./disposable/CompositeDisposable'),
-        SerialDisposable: _dereq_('./disposable/SerialDisposable'),
+        Disposable: require(158),
+        CompositeDisposable: require(157),
+        SerialDisposable: require(159),
         Observable: Observable,
-        Observer: _dereq_('./Observer'),
-        Subject: _dereq_('./Subject'),
+        Observer: require(155),
+        Subject: require(156),
     };
 }
 
 module.exports = Rx;
 
-}).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./Observable":153,"./Observer":154,"./Subject":155,"./disposable/CompositeDisposable":156,"./disposable/Disposable":157,"./disposable/SerialDisposable":158,"./operators/catch":160,"./operators/default-if-empty":161,"./operators/flat-map":162,"./operators/map":163,"./operators/materialize":164,"./operators/merge-all":165,"./operators/reduce":166,"./operators/to-array":167}],160:[function(_dereq_,module,exports){
-var Observable = _dereq_("../Observable");
-var CompositeDisposable = _dereq_("../disposable/CompositeDisposable");
-var SerialDisposable = _dereq_("../disposable/SerialDisposable");
+}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
+},{"154":154,"155":155,"156":156,"157":157,"158":158,"159":159,"161":161,"162":162,"163":163,"164":164,"165":165,"166":166,"167":167,"168":168,"169":169}],161:[function(require,module,exports){
+var Observable = require(154);
+var CompositeDisposable = require(157);
+var SerialDisposable = require(159);
 
 module.exports = function catchException(next) {
     var source = this;
@@ -8324,8 +8575,8 @@ module.exports = function catchException(next) {
         return m;
     });
 }
-},{"../Observable":153,"../disposable/CompositeDisposable":156,"../disposable/SerialDisposable":158}],161:[function(_dereq_,module,exports){
-var Observable = _dereq_("../Observable");
+},{"154":154,"157":157,"159":159}],162:[function(require,module,exports){
+var Observable = require(154);
 
 module.exports = function defaultIfEmpty(value) {
     var source = this;
@@ -8344,8 +8595,37 @@ module.exports = function defaultIfEmpty(value) {
         })
     });
 };
-},{"../Observable":153}],162:[function(_dereq_,module,exports){
-var Observable = _dereq_("../Observable");
+},{"154":154}],163:[function(require,module,exports){
+var Observable = require(154);
+var Observer = require(155);
+
+module.exports = function doAction() {
+    var actions = arguments[0];
+    if (typeof arguments[0] === "function" ||
+        typeof arguments[1] === "function" ||
+        typeof arguments[2] === "function" ){
+        actions = Observer.create.apply(Observer, arguments);
+    }
+    var source = this;
+    return Observable.create(function(observer) {
+        return source.subscribe(
+            function(x) {
+                actions.onNext(x);
+                observer.onNext(x);
+            },
+            function(e) {
+                actions.onError(e);
+                observer.onError(e);
+            },
+            function( ) {
+                actions.onCompleted();
+                observer.onCompleted();
+            });
+    });
+};
+
+},{"154":154,"155":155}],164:[function(require,module,exports){
+var Observable = require(154);
 module.exports = function flatMap(selector) {
     if(Boolean(selector) && typeof selector === "object") {
         var obs = selector;
@@ -8353,8 +8633,8 @@ module.exports = function flatMap(selector) {
     }
     return this.map(selector).mergeAll();
 }
-},{"../Observable":153}],163:[function(_dereq_,module,exports){
-var Observable = _dereq_("../Observable");
+},{"154":154}],165:[function(require,module,exports){
+var Observable = require(154);
 
 module.exports = function map(selector) {
     var source = this;
@@ -8378,8 +8658,8 @@ module.exports = function map(selector) {
         )
     });
 };
-},{"../Observable":153}],164:[function(_dereq_,module,exports){
-var Observable = _dereq_("../Observable");
+},{"154":154}],166:[function(require,module,exports){
+var Observable = require(154);
 
 module.exports = function materialize() {
     var source = this;
@@ -8399,11 +8679,11 @@ module.exports = function materialize() {
         });
     });
 }
-},{"../Observable":153}],165:[function(_dereq_,module,exports){
-var Observable = _dereq_("../Observable");
-var Disposable = _dereq_("../disposable/Disposable");
-var CompositeDisposable = _dereq_("../disposable/CompositeDisposable");
-var SerialDisposable = _dereq_("../disposable/SerialDisposable");
+},{"154":154}],167:[function(require,module,exports){
+var Observable = require(154);
+var Disposable = require(158);
+var CompositeDisposable = require(157);
+var SerialDisposable = require(159);
 
 module.exports = function mergeAll() {
     var source = this;
@@ -8434,8 +8714,8 @@ module.exports = function mergeAll() {
         return group;
     });
 };
-},{"../Observable":153,"../disposable/CompositeDisposable":156,"../disposable/Disposable":157,"../disposable/SerialDisposable":158}],166:[function(_dereq_,module,exports){
-var Observable = _dereq_("../Observable");
+},{"154":154,"157":157,"158":158,"159":159}],168:[function(require,module,exports){
+var Observable = require(154);
 
 module.exports = function reduce(selector, seedValue) {
     var source = this;
@@ -8465,8 +8745,8 @@ module.exports = function reduce(selector, seedValue) {
             });
     });
 }
-},{"../Observable":153}],167:[function(_dereq_,module,exports){
-var Observable = _dereq_("../Observable");
+},{"154":154}],169:[function(require,module,exports){
+var Observable = require(154);
 
 module.exports = function toArray() {
     var source = this;
@@ -8481,14 +8761,14 @@ module.exports = function toArray() {
             });
     });
 };
-},{"../Observable":153}],168:[function(_dereq_,module,exports){
+},{"154":154}],170:[function(require,module,exports){
 module.exports = {
     integers: 'integers',
     ranges: 'ranges',
     keys: 'keys'
 };
 
-},{}],169:[function(_dereq_,module,exports){
+},{}],171:[function(require,module,exports){
 var TokenTypes = {
     token: 'token',
     dotSeparator: '.',
@@ -8506,7 +8786,7 @@ var TokenTypes = {
 
 module.exports = TokenTypes;
 
-},{}],170:[function(_dereq_,module,exports){
+},{}],172:[function(require,module,exports){
 module.exports = {
     indexer: {
         nested: 'Indexers cannot be nested.',
@@ -8540,10 +8820,10 @@ module.exports = {
 };
 
 
-},{}],171:[function(_dereq_,module,exports){
-var Tokenizer = _dereq_('./tokenizer');
-var head = _dereq_('./parse-tree/head');
-var RoutedTokens = _dereq_('./RoutedTokens');
+},{}],173:[function(require,module,exports){
+var Tokenizer = require(179);
+var head = require(174);
+var RoutedTokens = require(170);
 
 var parser = function parser(string, extendedRules) {
     return head(new Tokenizer(string, extendedRules));
@@ -8591,10 +8871,10 @@ parser.fromPath = function(path, ext) {
 // Potential routed tokens.
 parser.RoutedTokens = RoutedTokens;
 
-},{"./RoutedTokens":168,"./parse-tree/head":172,"./tokenizer":177}],172:[function(_dereq_,module,exports){
-var TokenTypes = _dereq_('./../TokenTypes');
-var E = _dereq_('./../exceptions');
-var indexer = _dereq_('./indexer');
+},{"170":170,"174":174,"179":179}],174:[function(require,module,exports){
+var TokenTypes = require(171);
+var E = require(172);
+var indexer = require(175);
 
 /**
  * The top level of the parse tree.  This returns the generated path
@@ -8652,13 +8932,13 @@ module.exports = function head(tokenizer) {
 };
 
 
-},{"./../TokenTypes":169,"./../exceptions":170,"./indexer":173}],173:[function(_dereq_,module,exports){
-var TokenTypes = _dereq_('./../TokenTypes');
-var E = _dereq_('./../exceptions');
+},{"171":171,"172":172,"175":175}],175:[function(require,module,exports){
+var TokenTypes = require(171);
+var E = require(172);
 var idxE = E.indexer;
-var range = _dereq_('./range');
-var quote = _dereq_('./quote');
-var routed = _dereq_('./routed');
+var range = require(177);
+var quote = require(176);
+var routed = require(178);
 
 /**
  * The indexer is all the logic that happens in between
@@ -8767,9 +9047,9 @@ module.exports = function indexer(tokenizer, openingToken, state, out) {
 };
 
 
-},{"./../TokenTypes":169,"./../exceptions":170,"./quote":174,"./range":175,"./routed":176}],174:[function(_dereq_,module,exports){
-var TokenTypes = _dereq_('./../TokenTypes');
-var E = _dereq_('./../exceptions');
+},{"171":171,"172":172,"176":176,"177":177,"178":178}],176:[function(require,module,exports){
+var TokenTypes = require(171);
+var E = require(172);
 var quoteE = E.quote;
 
 /**
@@ -8851,10 +9131,10 @@ module.exports = function quote(tokenizer, openingToken, state, out) {
 };
 
 
-},{"./../TokenTypes":169,"./../exceptions":170}],175:[function(_dereq_,module,exports){
-var Tokenizer = _dereq_('./../tokenizer');
-var TokenTypes = _dereq_('./../TokenTypes');
-var E = _dereq_('./../exceptions');
+},{"171":171,"172":172}],177:[function(require,module,exports){
+var Tokenizer = require(179);
+var TokenTypes = require(171);
+var E = require(172);
 
 /**
  * The indexer is all the logic that happens in between
@@ -8930,10 +9210,10 @@ module.exports = function range(tokenizer, openingToken, state, out) {
 };
 
 
-},{"./../TokenTypes":169,"./../exceptions":170,"./../tokenizer":177}],176:[function(_dereq_,module,exports){
-var TokenTypes = _dereq_('./../TokenTypes');
-var RoutedTokens = _dereq_('./../RoutedTokens');
-var E = _dereq_('./../exceptions');
+},{"171":171,"172":172,"179":179}],178:[function(require,module,exports){
+var TokenTypes = require(171);
+var RoutedTokens = require(170);
+var E = require(172);
 var routedE = E.routed;
 
 /**
@@ -8996,8 +9276,8 @@ module.exports = function routed(tokenizer, openingToken, state, out) {
 };
 
 
-},{"./../RoutedTokens":168,"./../TokenTypes":169,"./../exceptions":170}],177:[function(_dereq_,module,exports){
-var TokenTypes = _dereq_('./../TokenTypes');
+},{"170":170,"171":171,"172":172}],179:[function(require,module,exports){
+var TokenTypes = require(171);
 var DOT_SEPARATOR = '.';
 var COMMA_SEPARATOR = ',';
 var OPENING_BRACKET = '[';
@@ -9148,15 +9428,15 @@ function getNext(string, idx, ext) {
 
 
 
-},{"./../TokenTypes":169}],178:[function(_dereq_,module,exports){
+},{"171":171}],180:[function(require,module,exports){
 'use strict';
 
-module.exports = _dereq_('./lib')
+module.exports = require(185)
 
-},{"./lib":183}],179:[function(_dereq_,module,exports){
+},{"185":185}],181:[function(require,module,exports){
 'use strict';
 
-var asap = _dereq_('asap/raw')
+var asap = require(149)
 
 function noop() {};
 
@@ -9325,10 +9605,10 @@ function doResolve(fn, promise) {
     promise._67(LAST_ERROR)
   }
 }
-},{"asap/raw":148}],180:[function(_dereq_,module,exports){
+},{"149":149}],182:[function(require,module,exports){
 'use strict';
 
-var Promise = _dereq_('./core.js')
+var Promise = require(181)
 
 module.exports = Promise
 Promise.prototype.done = function (onFulfilled, onRejected) {
@@ -9339,13 +9619,13 @@ Promise.prototype.done = function (onFulfilled, onRejected) {
     }, 0)
   })
 }
-},{"./core.js":179}],181:[function(_dereq_,module,exports){
+},{"181":181}],183:[function(require,module,exports){
 'use strict';
 
 //This file contains the ES6 extensions to the core Promises/A+ API
 
-var Promise = _dereq_('./core.js')
-var asap = _dereq_('asap/raw')
+var Promise = require(181)
+var asap = require(149)
 
 module.exports = Promise
 
@@ -9445,10 +9725,10 @@ Promise.prototype['catch'] = function (onRejected) {
   return this.then(null, onRejected);
 }
 
-},{"./core.js":179,"asap/raw":148}],182:[function(_dereq_,module,exports){
+},{"149":149,"181":181}],184:[function(require,module,exports){
 'use strict';
 
-var Promise = _dereq_('./core.js')
+var Promise = require(181)
 
 module.exports = Promise
 Promise.prototype['finally'] = function (f) {
@@ -9463,22 +9743,22 @@ Promise.prototype['finally'] = function (f) {
   })
 }
 
-},{"./core.js":179}],183:[function(_dereq_,module,exports){
+},{"181":181}],185:[function(require,module,exports){
 'use strict';
 
-module.exports = _dereq_('./core.js')
-_dereq_('./done.js')
-_dereq_('./finally.js')
-_dereq_('./es6-extensions.js')
-_dereq_('./node-extensions.js')
+module.exports = require(181)
+require(182)
+require(184)
+require(183)
+require(186)
 
-},{"./core.js":179,"./done.js":180,"./es6-extensions.js":181,"./finally.js":182,"./node-extensions.js":184}],184:[function(_dereq_,module,exports){
+},{"181":181,"182":182,"183":183,"184":184,"186":186}],186:[function(require,module,exports){
 'use strict';
 
 //This file contains then/promise specific extensions that are only useful for node.js interop
 
-var Promise = _dereq_('./core.js')
-var asap = _dereq_('asap')
+var Promise = require(181)
+var asap = require(147)
 
 module.exports = Promise
 
@@ -9537,6 +9817,4 @@ Promise.prototype.nodeify = function (callback, ctx) {
   })
 }
 
-},{"./core.js":179,"asap":146}]},{},[1])
-(1)
-});
+},{"147":147,"181":181}]},{},[1]);

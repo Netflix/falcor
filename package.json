@@ -33,6 +33,8 @@
   "devDependencies": {
     "benchmark": "^1.0.0",
     "benchmarks": "^0.1.2",
+    "browserify": "10.2.0",
+    "bundle-collapser": "1.2.0",
     "chai": "~1.9.1",
     "colors": "~0.6.2",
     "coveralls": "^2.11.2",
@@ -53,11 +55,10 @@
     "gulp-plumber": "~0.6.5",
     "gulp-rename": "~1.2.0",
     "gulp-shell": "~0.4.1",
-    "gulp-sweetjs": "~0.5.2",
     "istanbul": "~0.3.2",
     "jsdoc": "~3.3.0-beta3",
     "lodash": "~2.4.1",
-    "minifyify": "~2.4.1",
+    "minifyify": "7.0.0",
     "minimist": "~1.1.0",
     "mocha": "~1.21.4",
     "run-sequence": "^1.0.2",
@@ -68,7 +69,7 @@
     "xmlhttprequest": "~1.7.0"
   },
   "dependencies": {
-    "rx": "^2.3.25",
+    "rx": "git+ssh://git@github.com:Reactive-Extensions/RxJS.git",
     "promise": "7.0.0",
     "asap": "~2.0.3",
     "falcor-observable": "git+ssh://git@github.com/Netflix/falcor-observable.git",
