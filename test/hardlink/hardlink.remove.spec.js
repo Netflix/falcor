@@ -22,7 +22,7 @@ var __refs_length = require("../../lib/internal/refs-length");
 describe('Removing', function() {
     var getPath = ['genreList', 0, 0, 'summary'];
     var setPath = {path: ['genreList', 0], value: 4};
-    var setJSON = {genreList: {0: 4}};
+    var setJSON = {json: {genreList: {0: 4}}};
     describe('setPaths', function() {
         it('should perform a hard-link with back references toJSONG.', function(done) {
             getTest(getPath, 'toJSONG').
@@ -85,14 +85,17 @@ describe('Removing', function() {
     });
 });
 describe('Expired', function() {
-    var getPath = ['genreList', 0, null];
-    var getJSON = {genreList: {0: {'__null': null}}};
+    var getPath = ['genreList', 0, 1, 'summary'];
+    var getJSON = {json: {genreList: {0: {1: {summary: null}}}}};
     var setPath = {path: ['genreList', 0, 1, 'summary'], value: {should: 'not set'}};
-    var setJSON = {genreList: {0: {1: {summary: 'no set'}}}};
+    var setJSON = {json: {genreList: {0: {1: {summary: 'no set'}}}}};
     var setJSONG = {
         jsong: {
             genreList: {
-                0: ['lists', 'abcd']
+                0: {
+                    $type: "ref",
+                    value: ['lists', 'abcd']
+                }
             },
             lists: {
                 abcd: {
@@ -199,10 +202,10 @@ describe('Expired', function() {
 });
 
 function setExpireyAndGet(query, output, get) {
-    var model = new Model({cache: {
+    var model = new Model({ cache: {
         genreList: {
             0: {
-                $type: 'atom',
+                $type: 'ref',
                 $expires: Date.now() + 50,
                 value: ['lists', 'abcd']
             }
@@ -211,24 +214,27 @@ function setExpireyAndGet(query, output, get) {
             abcd: {
                 0: {
                     summary: {
-                        $type: 'leaf',
-                        hello: 'world'
+                        $type: 'atom',
+                        value: { hello: 'world' }
                     }
                 }
             }
         }
     }});
+    var genreList = model._cache.genreList;
+    var lhs = genreList[0];
+    var rhs = model._cache.lists.abcd;
     return model.
         get(['genreList', 0, 0, 'summary']).
-        delay(100).
         do(function() {
-            var lhs = model._cache.genreList[0];
-            var rhs = model._cache.lists.abcd;
+            // var lhs = model._cache.genreList[0];
+            // var rhs = model._cache.lists.abcd;
             expect(lhs[__ref_index]).to.equal(0);
             expect(rhs[__refs_length]).to.equal(1);
             expect(rhs[__ref + lhs[__ref_index]]).to.equal(lhs);
             expect(lhs[__context]).to.equal(rhs);
         }, noOp, noOp).
+        delay(100).
         flatMap(function() {
             if (get) {
                 return testRunner.get(model, _.cloneDeep(query), output);
@@ -236,8 +242,8 @@ function setExpireyAndGet(query, output, get) {
             return testRunner.set(model, _.cloneDeep(query), output);
         }).
         do(noOp, noOp, function() {
-            var lhs = model._cache.genreList[0];
-            var rhs = model._cache.lists.abcd;
+            // var lhs = model._cache.genreList[0];
+            // var rhs = model._cache.lists.abcd;
             expect(lhs[__ref_index]).to.not.be.ok;
             expect(rhs[__refs_length]).to.not.be.ok;
             expect(lhs[__context]).to.not.equal(rhs);

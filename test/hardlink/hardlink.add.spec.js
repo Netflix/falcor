@@ -21,9 +21,9 @@ var __refs_length = require("../../lib/internal/refs-length");
 
 describe('Adding', function() {
     var getPath = ['genreList', 0, 0, 'summary'];
-    var getJSON = {genreList: {0: {0: {summary: null}}}};
+    var getJSON = {json: {genreList: {0: {0: {summary: null}}}}};
     var setPath = {path: ['genreList', 0, 'length'], value: 4};
-    var setJSON = {genreList: {0: {length: 4}}};
+    var setJSON = {json: {genreList: {0: {length: 4}}}};
     describe('getPaths', function() {
         it('should perform a hard-link with back references toJSONG.', function(done) {
             getTest(getPath, 'toJSONG').
@@ -60,7 +60,7 @@ describe('Adding', function() {
                 subscribe(noOp, done, done);
         });
     });
-    xdescribe('setPaths', function() {
+    describe('setPaths', function() {
         it('should perform a hard-link with back references toJSONG.', function(done) {
             setTest(setPath, 'toJSONG').
                 subscribe(noOp, done, done);
@@ -78,7 +78,7 @@ describe('Adding', function() {
                 subscribe(noOp, done, done);
         });
     });
-    xdescribe('setJSON', function() {
+    describe('setJSON', function() {
         it('should perform a hard-link with back references toJSONG.', function(done) {
             setTest(setJSON, 'toJSONG').
                 subscribe(noOp, done, done);

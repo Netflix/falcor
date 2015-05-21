@@ -12,7 +12,7 @@ var RouterTestRunner = {
                 });
                 count++;
             }, undefined, function() {
-                expect(count, 'The observable should of onNext one time').to.equal(1);
+                expect(count, 'The observable should have onNext\'d one time').to.equal(1);
             });
 
     },
