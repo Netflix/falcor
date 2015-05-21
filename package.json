@@ -69,7 +69,7 @@
     "xmlhttprequest": "~1.7.0"
   },
   "dependencies": {
-    "rx": "^2.3.25",
+    "rx": "^2.5.2",
     "promise": "7.0.0",
     "asap": "~2.0.3",
     "falcor-observable": "git+ssh://git@github.com/Netflix/falcor-observable.git",
