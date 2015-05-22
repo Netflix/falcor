@@ -1,6 +1,6 @@
 # The Falcor Model
  
-Falcor provides a Model object, which is intended to be the "M" in your MVC. An application that uses Falcor doesn't work with JSON data directly, but rather works with JSON data _indirectly_ through the Model object. The Model object provides a set of familiar JavaScript APIs for working with JSON data, including get, set, and call. The main difference between working with JSON data directly and working with it indirectly through a Model object, is that the Falcor Model has a push API.
+Falcor provides a Model object, which is intended to be the "M" in your MVC. An application that uses Falcor doesn't work with JSON data directly, but rather works with JSON data _indirectly_ through the Model object. The Model object provides a set of familiar JavaScript APIs for working with JSON data, including get, set, and call. The main difference between working with JSON data directly and working with it indirectly through a Model object, is that the Falcor Model has a _push API_.
 
 ```
 var log = console.log.bind(console)
@@ -47,7 +47,7 @@ model.getValue('todos[0].name').then(log);
 // get milk from corner store 
 ```
 
-Note that in the example above, the name of the TODO is pushed to a call back.
+Note that in the example above, the name of the TODO is _pushed_ to a call back.
  
 The main advantage of using a push API is that you can code against JSON data the same way regardless of whether the data is local or remote. This makes it very easy to begin coding your application against mocked data at first, and then work against server data later on without changing client code.
 
@@ -72,7 +72,7 @@ var model = new falcor.Model({cache: {
 model.getValue('todos[0].name').then(log);
 ```
 
-In this code sample the data has been moved to the cloud but the client code which retrieves the data remains the same:
+In this code sample the data has been moved to the cloud, but the client code that retrieves the data remains the same:
 
 ```
 var model = new falcor.Model({source: new falcor.HttpDataSource('/model.json')});
@@ -80,7 +80,7 @@ var model = new falcor.Model({source: new falcor.HttpDataSource('/model.json')})
 model.getValue('todos[0].name').then(log);
 ```
 
-Another advantage of using a Falcor Model is that it caches the JSON data it retrieves from the server in-memory. As a result, you don't need to maintain a cache of the data that you retrieve from a Falcor Model. Whenever you need data, just retrieve it from the Model. If the Model finds the data in its cache, it will push the data to you immediately. Otherwise the Model will retrieve your data from the server, insert it into the cache, and push it to you asynchronously.
+Another advantage of using a Falcor Model is that it caches the JSON data it retrieves from the server _in-memory_. As a result, you don't need to maintain a cache of the data that you retrieve from a Falcor Model. Whenever you need data, just retrieve it from the Model. If the Model finds the data in its cache, it will push the data to you immediately. Otherwise the Model will retrieve your data from the server, insert it into the cache, and push it to you asynchronously.
  
 ```
 var model = new falcor.Model({source: new falcor.HttpDataSource('/model.json')});
@@ -127,13 +127,15 @@ In addition to using JSON graph to make sure that objects don't appear more than
 
 ## Working with JSON using a Model
  
-Every Falcor Model is associated with a JSON value. Models use DataSources to retrieve the data from their associated JSON values. Falcor ships with HttpDataSource, an implementation of the DataSource interface that communicates with a remote DataSource over HTTP.
+Every Falcor Model is associated with a JSON value. Models use DataSources to retrieve the data from their associated JSON values. Falcor ships with HttpDataSource, an implementation of the DataSource interface which remotes requests to another DataSource running on an HTTP server (usually a Router).
  
 ```
 var model = new falcor.Model({source: new falcor.HttpDataSource('/model.json')});
 ```
 
-You can implement the DataSource interface to allow a Model to communicate with a remote JSON object over a different transfer protocol, like web sockets for example. If a Model does not have a DataSource, all Model operations will be performed on the Model's local JSON cache. When you initialize the Mode, you can provide it with JSON data to prime its local cache.
+You can implement the DataSource interface to allow a Model to communicate with a remote JSON object over a different transport layer (ex. web sockets).
+
+If a Model does _not_ have a DataSource, all Model operations will be performed on the Model's local cache. When you initialize the Model, you can provide it with JSON data to prime its local cache.
  
 ```
 var log = console.log.bind(console)
@@ -177,7 +179,7 @@ When data is retrieved from a DataSource, it is placed into the Model's local ca
 model.getValue('todos[0].name').then(log);
 ```
 
-For more information on how the Model JSON cache works, see the Model JSON cache.
+For more information on how the Model JSON cache works, see The Model Cache.
 
 # Working with JSON data using a Model
 
@@ -213,7 +215,7 @@ model.get('todos[0].name').then(log);
 ```
 There is one important difference between working with a JSON object directly and working with that same JSON object through a Falcor Model: **you can only retrieve value types from a Model.**  
 
-## Retrieving values from a Falcor Model
+## Retrieving Values from a Falcor Model
 
 The following JSON object contains a list of TODOs.
 
@@ -253,7 +255,7 @@ log(JSON.stringify(customer, null, 4))
 // }
 ```
 
-When working with the same JSON object indirectly through a Falcor Model, you can _not_ retrieve Arrays or Objects - only value types like null, string, boolean, and Array.
+When working with the same JSON object indirectly through a Falcor Model, you can _not_ retrieve Arrays or Objects - only value types like null, string, boolean, and number.
 
 ```
 var log = console.log.bind(console)
@@ -287,19 +289,21 @@ The requests above can not reliably be expected to return data. Therefore you sh
 
 ### "Why can't I request Objects or Arrays from a Model?"
 
-Falcor is optimized for displaying information to human beings in real-time. Both Arrays and Objects can contain an unbounded amount of data. This means it’s impossible to predict how much data will be retrieved from the server when you request them. Server requests that take less than a second at first can become slower over time as more data is added to backend data stores.  This can cause the performance of your application to degrade slowly, and eventually may even cause it to become unusable as more and more data finds its way into your persistent data stores.
+_Falcor is optimized for displaying information to human beings in real-time._ Both Arrays and Objects can contain an unbounded amount of data. This means it’s impossible to predict how much data will be retrieved from the server when you request an JSON Array or Object. Requests which are served quickly at first can become slower over time as more data is added to backend data stores.  This can cause the performance of your application to degrade slowly over time. 
 
-In order to ensure that backend requests for data have more **predictable performance** over time Falcor Models force developers to be explicit. If your view will only be displaying a few properties, you should those properties explicitly. 
+Models force developers to be explicit about which value types they would like to retrieve in order to maximize the likelihood that server requests for data will have **stable performance** over time. Rather than allow you to retrieve an entire object, Model's force you to _be explicit_ and retrieve only those values needed in a given scenario:
 
-(Example of requesting properties and displaying them)
+(Example of requesting three properties and displaying them)
 
-Furthermore if you intend to display a list of items, request the first visible page of an array and follow up with additional page requests as the user scrolls.
+Similarly when displaying an Array of items Models do not allow you to retrieve the entire Array upfront. Instead you must request the first visible page of an Array, and follow up with additional page requests as the user scrolls.
 
 (Example of retrieving first page of a list)
 
+If you are certain that an Object or Array will remain a constant size, you can indicate to a Model that they should always be retrieved in their entirety by using an Atom. For more information, see [JSON Graph Atoms][].
+
 ## Working with JSON Graph Data using a Model
 
-In addition to being able to work with JSON documents, Models can also operate on JSON Graph documents. JSON Graph is a convention for modeling graph information in JSON. JSON Graph documents introduce references, allowing an object to be referenced from multiple places in the JSON while allowing it to appear only once in the object. 
+In addition to being able to work with JSON documents, Models can also operate on JSON Graph documents. JSON Graph is a convention for modeling graph information in JSON. JSON Graph documents extend JSON with **References**. References can be used anywhere within a serial object to refer to a value elsewhere within the same serial object. This removes the need to duplicate objects when serializing a graph into a hierarchical cereal object.
 
 Let's say that we wanted to introduce a list of prerequisites for each TODO in a TODO list.  
 ```
@@ -333,7 +337,7 @@ Notice that the TODO "withdraw money from the ATM" appears twice in the JSON obj
 json.todos[1].done = true;
 ```
 
-If we examine the JSON object after this change, we will notice that the change has _not_ been propagated to all of the copies of the task. 
+If we examine the JSON object after this change, we will notice that the change has _not_ been propagated to all of the copies of the task. Because the same task also appears in the prerequisites array of task 2692, its "done" value remains false.
 
 ```
 console.log(JSON.stringify(json, null, 4));
@@ -609,6 +613,10 @@ One of the limitations of working with JSON data through a Falcor model is that 
 ## Error Handling
 
 ## Cache Control
+
+## The Model Cache
+
+
 
 ## Path Optimization and the DataSource
 
