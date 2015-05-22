@@ -453,7 +453,7 @@ Atoms "box" value types inside of a JSON object, allowing metadata to be attache
 
 The value of an Atom is always treated like a value type, meaning it is retrieved and set in its entirety. Mutating an Adam is ineffectual. Instead you must replace it entirely using the Model's set operation.
 
-(Example showing that it is ineffectual to modify the value of an atom directly. We clone Adams when they are retrieved from the model, so this example should show that mutating and Adam directly has no effect by then retrieving the same object, and displaying it,)
+(Example showing that it is ineffectual to modify the value of an atom directly. We clone Adams when they are retrieved from the model, so this example should show that mutating an Adam directly has no effect by then retrieving the same object, and displaying it's data which will be unchanged)
 
 In addition to making it possible to attach metadata to cereal values, Atoms can be used to get around the restriction against retrieving JSON Objects and Arrays from a Falcor Model. 
 
@@ -464,6 +464,8 @@ Let's say that we have an Array which we are certain will remain small, like a l
 By boxing the Array in an Atom, we cause the Falcor model to treat it as a value and returned it in its entirety. 
 
 (Example of retrieving the entire array using a  model)
+
+Internally the Model boxes all retrieved values that have been successfully retrieved from the data source before storing these values in its local cache.
 
 #### JSON Graph Errors
 
@@ -477,17 +479,23 @@ By default a Model delivers Errors differently than other values. If synchronous
 
 (Example of receiving an error in a promise)
 
-To learn more about the different ways to retrieve information from a model, see retrieving information from a model.
+To learn more about the different ways to retrieve information from a model, see Retrieving Data from a Model.
 
 ##### "What if I don't want a Model to treat errors differently from other values?"
 
-There are many reasons why you might want errors reported the same way as other values. For example you might retrieve several paths from a model in a single request, and want to be resilient against the possibility that one of them fails. Furthermore you might want to display errors in a template alongside the successfully-retrieved values. 
+There are many reasons why you might want errors reported the same way as other values. For example you might retrieve several paths from a model in a single request, and want to be resilient against the possibility that one of them fails. Furthermore you might want to display errors in a template alongside successfully-retrieved values. 
 
-The "treatErrorsAsValues" function creates a new model which
+The "treatErrorsAsValues" function creates a new Model which reports errors the same way as values. 
 
-This function creates a new model which returns error objects The same way as other values. Like all other sentinels, the value of the error is reported rather than the error sentinel itself. 
+(Example of retrieving a single error from a serial graph using get value)
 
+Note that using "treatErrorsAsValues" will cause the model to deliver errors as values. However it will not provide you with a way to distinguish errors from values. If you would like to be able to receive errors alongside values, but retain the ability to distinguish between errors and values, you can chain "treatErrorsAsValues" and "boxValues" together. When I model is operating in "boxValues" mode, it always returns the sentinels that box each value and indicate their type. 
 
+(Identical example as above, except this time we also call box values in addition to treat errors as values)
+
+When you receive a Sentinel, you can check the "$type" property of each sentinel to distinguish whether a value is an error ("error") or a successfully-retrieved value ("atom"). For more information see Boxing and Unboxing.
+
+## Retrieving data from a Model
 
 (Example of using get value sync to retrieve the rating)
 
