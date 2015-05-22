@@ -299,7 +299,7 @@ Similarly when displaying an Array of items Models do not allow you to retrieve 
 
 (Example of retrieving first page of a list)
 
-If you are certain that an Object or Array will remain a constant size, you can indicate to a Model that they should always be retrieved in their entirety by using an Atom. For more information, see [JSON Graph Atoms][].
+If you are certain that an Object or Array will remain a constant size, you can indicate to a Model that they should always be retrieved in their entirety by using an Atom. For more information, see [JSON Graph Atoms](#JSON-Graph-Atoms).
 
 ## Working with JSON Graph Data using a Model
 
