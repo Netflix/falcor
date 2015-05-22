@@ -90,7 +90,7 @@ var ModelResponse = require(5);
 var ModelDataSourceAdapter = require(4);
 var call = require(8);
 var operations = require(13);
-var pathSyntax = require(173);
+var pathSyntax = require(177);
 var getBoundValue = require(48);
 var collect = require(85);
 var slice = Array.prototype.slice;
@@ -98,6 +98,7 @@ var $ref = require(139);
 var $error = require(138);
 var $atom = require(137);
 var getGeneration = require(49);
+var noop = function(){};
 
 /**
  * A Model object is used to execute commands against a {@link JSONGraph} object. {@link Model}s can work with a local JSONGraph cache, or it can work with a remote {@link JSONGraph} object through a {@link DataSource}.
@@ -249,52 +250,50 @@ Model.prototype = {
             paths[i] = pathSyntax.fromPath(arguments[i + 1]);
         }
 
-        if(n === 0) { throw new Error("Model#bind requires at least one value path."); }
+        if(root.allowSync <= 0 && n === 0) {
+            throw new Error("Model#bind requires at least one value path.");
+        }
 
-        return falcor.Observable.create(function(observer) {
-
+        var syncBoundModelObs = falcor.Observable.create(function(observer) {
+            var error;
             var boundModel;
             root.allowSync++;
             try {
                 boundModel = model.bindSync(model._path.concat(boundPath));
-
-                if (!boundModel) {
-                    throw false;
-                }
+            } catch(e) {
+                error = e;
+            }
+            if(boundModel && !error) {
                 observer.onNext(boundModel);
                 observer.onCompleted();
-            } catch (e) {
-                // Bug 129: if user code throws in onNext, they get onNexted again in the catch block instead of getting onErrored. Presumably we only want to do this catch block if bindSync encounters error?
-                return model.get.apply(model, paths.map(function(path) {
-                    return boundPath.concat(path);
-                }).concat(function(){})).subscribe(
-                    function onNext() {},
-                    function onError(err)  { observer.onError(err); },
-                    function onCompleted() {
-                        root.allowSync++;
-                        try {
-
-                            boundModel = model.bindSync(boundPath);
-                            if(boundModel) {
-                                observer.onNext(boundModel);
-                            }
-                            observer.onCompleted();
-                        } catch(e) {
-                            observer.onError(e);
-                        }
-
-                        // remove the inc
-                        finally {
-                            root.allowSync--;
-                        }
-                    });
+            } else {
+                observer.onError(error);
             }
-
-            // remove the inc
-            finally {
-                root.allowSync--;
-            }
+            --root.allowSync;
         });
+
+        return syncBoundModelObs.
+            flatMap(function(boundModel) {
+                if(paths.length > 0) {
+                    return boundModel.get.apply(boundModel, paths.concat(function() {
+                        return boundModel;
+                    })).
+                    catchException(falcor.Observable.empty());
+                }
+                return falcor.Observable.returnValue(boundModel);
+            }).
+            catchException(function() {
+                if(paths.length > 0) {
+                    var boundPaths = paths.map(function(path) {
+                        return boundPath.concat(path);
+                    });
+                    boundPaths.push(noop);
+                    return model.get.
+                        apply(model, boundPaths).
+                        flatMap(model.bind(boundPath));
+                }
+                return falcor.Observable.empty();
+            });
     },
     /**
      * Set the local cache to a {@link JSONGraph} fragment. This method can be a useful way of mocking a remote document, or restoring the local cache from a previously stored state
@@ -559,7 +558,7 @@ Model.prototype = {
     }
 };
 
-},{"13":13,"137":137,"138":138,"139":139,"173":173,"2":2,"39":39,"4":4,"40":40,"41":41,"42":42,"48":48,"49":49,"5":5,"6":6,"8":8,"85":85}],4:[function(require,module,exports){
+},{"13":13,"137":137,"138":138,"139":139,"177":177,"2":2,"39":39,"4":4,"40":40,"41":41,"42":42,"48":48,"49":49,"5":5,"6":6,"8":8,"85":85}],4:[function(require,module,exports){
 function ModelDataSourceAdapter(model) {
     this._model = model.materialize().boxValues().treatErrorsAsValues();
 }
@@ -580,12 +579,12 @@ ModelDataSourceAdapter.prototype = {
 module.exports = ModelDataSourceAdapter;
 },{}],5:[function(require,module,exports){
 var falcor = require(2);
-var pathSyntax = require(173);
+var pathSyntax = require(177);
 
 if(typeof Promise !== "undefined" && Promise) {
     falcor.Promise = Promise;
 } else {
-    falcor.Promise = require(180);
+    falcor.Promise = require(184);
 }
 
 var Observable  = falcor.Observable,
@@ -708,7 +707,7 @@ ModelResponse.prototype.then = function(onNext, onError) {
 
 module.exports = ModelResponse;
 
-},{"173":173,"180":180,"2":2}],6:[function(require,module,exports){
+},{"177":177,"184":184,"2":2}],6:[function(require,module,exports){
 function ModelRoot() {
     this.expired = [];
     this.allowSync = 0;
@@ -724,15 +723,23 @@ falcor.Model = Model;
 module.exports = falcor;
 
 },{"2":2,"3":3}],8:[function(require,module,exports){
-module.exports = call;
-
 var $ref = require(139);
 var falcor = require(2);
+var Observable = falcor.Observable;
+var pathSyntax = require(177);
 var ModelResponse = require(5);
 
-function call(path, args, suffixes, extraPaths, selector) {
+function mapPathSyntax(path) {
+    if(typeof path === "string") {
+        return pathSyntax(path);
+    }
+    return path;
+}
+
+module.exports = function call(path, args, suffixes, extraPaths, selector) {
 
     var model = this;
+    
     args && Array.isArray(args) || (args = []);
     suffixes && Array.isArray(suffixes) || (suffixes = []);
     extraPaths = Array.prototype.slice.call(arguments, 3);
@@ -742,118 +749,204 @@ function call(path, args, suffixes, extraPaths, selector) {
         extraPaths = extraPaths.slice(0, -1);
     }
 
+    path = mapPathSyntax(path);
+    suffixes = suffixes.map(mapPathSyntax);
+    extraPaths = extraPaths.map(mapPathSyntax);
+
     return ModelResponse.create(function (options) {
 
-        var rootModel = model.clone(["_path", []]),
-            localRoot = rootModel.withoutDataSource(),
-            dataSource = model._dataSource,
-            boundPath = model._path,
-            callPath = boundPath.concat(path),
-            thisPath = callPath.slice(0, -1);
-
-        var disposable = model.
-        getValue(path).
-        flatMap(function (localFn) {
-            if (typeof localFn === "function") {
-                return falcor.Observable.return(localFn.
-                    apply(rootModel.bindSync(thisPath), args).
-                    reduce(function (memo, pathValue) {
-                    if (Boolean(pathValue.invalidated)) {
-                        if (pathValue.path.length === 0) {
-                            pathValue.path.push(null);
-                        }
-                        memo.invalidations.push(thisPath.concat(pathValue.path));
-                    } else {
-                        var value = pathValue.value;
-                        if (Boolean(value) && typeof value === "object" && value.$type === $ref) {
-                            memo.references.push({
-                                path: thisPath.concat(pathValue.path),
-                                value: pathValue.value
-                            });
-                        } else {
-                            memo.values.push({
-                                path: thisPath.concat(pathValue.path),
-                                value: pathValue.value
-                            });
-                        }
-                    }
-                    return memo;
-                }, {
-                    values: [],
-                    references: [],
-                    invalidations: []
-                }).flatMap(function (obj) {
-                    var values = obj.values;
-                    var references = obj.references;
-                    var invalidations = obj.invalidations;
-                    return localRoot.set.
-                        apply(localRoot, values.concat(references, function () {
-                            return rootModel;
-                        })).
-                        flatMap(function (rootModel) {
-                            
-                            var rootRefs = references.reduce(function (refs, pathValue) {
-                                var path = pathValue.path;
-                                refs.push.apply(refs, suffixes.map(function (suffix) {
-                                    return path.concat(suffix);
-                                }));
-                                return refs;
-                            }, []);
-                            
-                            var rootExtraPaths = extraPaths.reduce(function(paths, path) {
-                                paths.push.apply(paths, thisPath.concat(path));
-                                return paths;
-                            }, []);
-                            
-                            return rootModel.get.
-                                apply(rootModel, rootRefs.concat(rootExtraPaths)).
-                                toJSONG().
-                                map(function(envelope) {
-                                    envelope.invalidated = invalidations;
-                                    return envelope;
-                                });
-                        });
-                }));
-            }
-            return falcor.Observable.empty();
-        }).
-        defaultIfEmpty(dataSource && dataSource.call(path, args, suffixes, paths) || falcor.Observable.empty()).
-        mergeAll().
-        flatMap(function (envelope) {
+        var rootModel = model.clone(["_path", []]);
+        var localRoot = rootModel.withoutDataSource();
+        var dataSource = model._dataSource;
+        var boundPath = model._path;
+        var callPath = boundPath.concat(path);
+        var thisPath = callPath.slice(0, -1);
+        
+        var localFnObs = model.
+            withoutDataSource().
+            get(path, function(localFn) {
+                return {
+                    model: rootModel.bindSync(thisPath).boxValues(),
+                    localFn: localFn
+                };
+            });
+        
+        var localFnCallObs = localFnObs.flatMap(getLocalCallObs);
+        
+        var localOrRemoteCallObs = localFnCallObs.
+            defaultIfEmpty(getRemoteCallObs(dataSource)).
+            mergeAll();
+        
+        var setCallValuesObs = localOrRemoteCallObs.flatMap(setCallEnvelope);
+        
+        var innerDisposable;
+        var disposable = setCallValuesObs.last().subscribe(function (envelope) {
+            var paths = envelope.paths;
             var invalidated = envelope.invalidated;
-            var obs = falcor.Observable.empty();
-            if (invalidated && invalidated.length) {
-                obs = rootModel.invalidate.apply(rootModel, invalidated).ignoreElements();
-                invalidatePaths(rootModel, invalidated, undefined, model._errorSelector);
-            }
-            return localRoot.set(envelope, function () {
-                return model;
-            });
-        }).
-        subscribe(function (model) {
-                var getPaths = envelope.paths.map(function (path) {
-                    return path.slice(boundPath.length);
+            if (selector) {
+                paths.push(function () {
+                    return selector.call(model, paths);
                 });
-                if (selector) {
-                    getPaths[getPaths.length] = function () {
-                        return selector.call(model, getPaths);
-                    };
-                }
-                return model.get.apply(model, getPaths).subscribe(options);
-            },
-            function (e) {
-                options.onError(e);
-            });
+            }
+            var innerObs = model.get.apply(model, paths);
+            if(options.format === "AsJSONG") {
+                innerObs = innerObs.toJSONG().doAction(function(envelope) {
+                    envelope.invalidated = invalidated;
+                });
+            }
+            innerDisposable = innerObs.subscribe(options);
+        },
+        function (e) { options.onError(e); });
 
         return {
             dispose: function () {
                 disposable && disposable.dispose();
+                innerDisposable && innerDisposable.dispose();
                 disposable = undefined;
+                innerDisposable = undefined;
             }
         };
+        
+        function getLocalCallObs(tuple) {
+
+            var localFn = tuple && tuple.localFn;
+
+            if (typeof localFn === "function") {
+
+                var localFnModel = tuple.model;
+                var localThisPath = localFnModel._path;
+                var localFnCallObs = localFn.apply(localFnModel, args);
+                var localFnResults = localFnCallObs.reduce(aggregateFnResults, {
+                    values: [],
+                    references: [],
+                    invalidations: [],
+                    localThisPath: localThisPath
+                });
+                var localSetValues = localFnResults.flatMap(setLocalValues);
+                var remoteGetValues = localSetValues.flatMap(getRemoteValues);
+
+                return Observable.returnValue(remoteGetValues);
+            }
+
+            return Observable.empty();
+
+            function aggregateFnResults(results, pathValue) {
+                var localThisPath = results.localThisPath;
+                if (Boolean(pathValue.invalidated)) {
+                    results.invalidations.push(localThisPath.concat(pathValue.path));
+                } else {
+                    var path = pathValue.path;
+                    var value = pathValue.value;
+                    if (Boolean(value) && typeof value === "object" && value.$type === $ref) {
+                        results.references.push({
+                            path: prependThisPath(path),
+                            value: pathValue.value
+                        });
+                    } else {
+                        results.values.push({
+                            path: prependThisPath(path),
+                            value: pathValue.value
+                        });
+                    }
+                }
+                return results;
+            }
+
+            function setLocalValues(results) {
+                var values = results.values.concat(results.references);
+                if(values.length > 0) {
+                    return localRoot.set.
+                        apply(localRoot, values).
+                        toJSONG().
+                        map(function(envelope) {
+                            return { results: results, envelope: envelope };
+                        });
+                } else {
+                    return Observable.returnValue({
+                        results: results,
+                        envelope: { jsong: {}, paths: [] }
+                    });
+                }
+            }
+
+            function getRemoteValues(tuple) {
+                
+                var envelope = tuple.envelope;
+                var results = tuple.results;
+                var values = results.values;
+                var references = results.references;
+                var invalidations = results.invalidations;
+                
+                var rootValues = values.map(pluckPath).map(prependThisPath);
+                var rootSuffixes = references.reduce(prependRefToSuffixes, []);
+                var rootExtraPaths = extraPaths.map(prependThisPath);
+                var rootPaths = rootSuffixes.concat(rootExtraPaths);
+                var envelopeObs;
+                
+                debugger;
+                
+                if(rootPaths.length > 0) {
+                    envelopeObs = rootModel.get.apply(rootModel, rootValues.concat(rootPaths)).toJSONG();
+                } else {
+                    envelopeObs = Observable.returnValue(envelope);
+                }
+                
+                return envelopeObs.doAction(function (envelope) {
+                    envelope.invalidated = invalidations;
+                });
+            }
+
+            function prependRefToSuffixes(refPaths, refPathValue) {
+                var refPath = refPathValue.path;
+                refPaths.push.apply(refPaths, suffixes.map(function (pathSuffix) {
+                    return refPath.concat(pathSuffix);
+                }));
+                return refPaths;
+            }
+
+            function pluckPath(pathValue) {
+                return pathValue.path;
+            }
+
+            function prependThisPath(path) {
+                return thisPath.concat(path);
+            }
+        }
+        
+        function getRemoteCallObs(dataSource) {
+            if(dataSource && typeof dataSource === "object") {
+                return dataSource.
+                    call(path, args, suffixes, extraPaths).
+                    flatMap(invalidateLocalValues);
+            }
+            
+            return Observable.empty();
+            
+            function invalidateLocalValues(envelope) {
+                var invalidations = envelope.invalidated;
+                if(invalidations && invalidations.length) {
+                    return rootModel.invalidate.
+                        apply(rootModel, invalidations).
+                        map(function() { return envelope; })
+                }
+                return Observable.returnValue(envelope);
+            }
+        }
+
+        function setCallEnvelope(envelope) {
+            return localRoot.set(envelope, function () {
+                return {
+                    invalidated: envelope.invalidated,
+                    paths: envelope.paths.map(function (path) {
+                        return path.slice(boundPath.length);
+                    })
+                }
+            });
+        }
+
     });
-}
-},{"139":139,"2":2,"5":5}],9:[function(require,module,exports){
+};
+},{"139":139,"177":177,"2":2,"5":5}],9:[function(require,module,exports){
 var combineOperations = require(25);
 var setSeedsOrOnNext = require(38);
 
@@ -1185,7 +1278,7 @@ module.exports = function setInitialArgs(options, seeds, onNext) {
     // the ModelResponse is toPathValues
     // but luckily we can just perform a get for the progressive or
     // toPathValues mode.
-    if (isProgressive || isPathValues) {
+    if ((isProgressive || isPathValues) && shouldRequest && format !== toJSONG) {
         var getOps = combineOperations(
             args, format, 'get', selector, true);
         setSeedsOrOnNext(
@@ -3102,7 +3195,7 @@ function removeHardlink(cacheObject) {
         var len = context[__refs_length];
         
         while (idx < len) {
-            context[__ref + idx] = context[__REF + idx + 1];
+            context[__ref + idx] = context[__ref + idx + 1];
             ++idx;
         }
         
@@ -4028,7 +4121,9 @@ function onNode(pathmap, roots, parents, nodes, requested, optimized, is_referen
 }
 
 function onEdge(pathmap, keys_stack, depth, roots, parents, nodes, requested, optimized, key, keyset) {
-    promote(roots.lru, nodes[_cache]);
+    if(depth > 0) {
+        promote(roots.lru, nodes[_cache]);
+    }
 }
 },{"103":103,"105":105,"111":111,"113":113,"114":114,"115":115,"119":119,"124":124,"126":126,"128":128,"134":134,"135":135,"136":136,"137":137,"138":138,"143":143,"86":86}],90:[function(require,module,exports){
 module.exports = set_json_graph_as_json_dense;
@@ -6930,7 +7025,7 @@ function walk_path_map(onNode, onValueType, pathmap, keys_stack, depth, roots, p
                 inner_key, inner_keyset, is_outer_keyset
             );
         } else {
-            onValueType(pathmap2, keys_stack, depth, roots, parents2, nodes2, requested2, optimized2, inner_key, inner_keyset);
+            onValueType(pathmap2, keys_stack, depth + 1, roots, parents2, nodes2, requested2, optimized2, inner_key, inner_keyset);
         }
     }
 }
@@ -7066,7 +7161,7 @@ function walk_path_map(onNode, onValueType, pathmap, keys_stack, depth, roots, p
                 inner_key, inner_keyset, is_outer_keyset
             );
         } else {
-            onValueType(pathmap2, keys_stack, depth, roots, parents2, nodes2, requested2, optimized2, inner_key, inner_keyset);
+            onValueType(pathmap2, keys_stack, depth + 1, roots, parents2, nodes2, requested2, optimized2, inner_key, inner_keyset);
         }
     }
 }
@@ -8184,7 +8279,7 @@ process.nextTick = function (fun) {
         }
     }
     queue.push(new Item(fun, args));
-    if (!draining) {
+    if (queue.length === 1 && !draining) {
         setTimeout(drainQueue, 0);
     }
 };
@@ -8238,22 +8333,39 @@ function Observable(s) {
     this._subscribe = s;
 };
 
-Observable.create = Observable.createWithDisposable = function(s) {
+Observable.create = Observable.createWithDisposable = function create(s) {
     return new Observable(s);
 };
 
 Observable.fastCreateWithDisposable = Observable.create;
 
-Observable.fastReturnValue = function fastReturnValue(value) {
+Observable["return"] = function returnValue(value) {
     return Observable.create(function(observer) {
         observer.onNext(value);
         observer.onCompleted();
     });
 };
 
+Observable.returnValue = Observable["return"];
+Observable.fastReturnValue = Observable["return"];
+
+Observable["throw"] = function throwError(e) {
+    return Observable.create(function(observer) {
+        observer.onError(e);
+    });
+};
+
+Observable.throwError = Observable["throw"];
+
 Observable.empty = function empty() {
     return Observable.create(function(observer) {
         observer.onCompleted();
+    });
+};
+
+Observable.defer = function defer(observableFactory) {
+    return Observable.create(function(observer) {
+        return observableFactory().subscribe(observer);
     });
 };
 
@@ -8295,6 +8407,7 @@ Observable.from = function from(x) {
         });
     }
 };
+Observable.fromArray = Observable.from;
 
 Observable.prototype.subscribe = function subscribe(n, e, c) {
     return fixDisposable(this._subscribe(
@@ -8528,20 +8641,25 @@ if (Rx === undefined) {
     
     var Observable = require(154);
     
-    Observable.prototype.materialize = require(166);
-    Observable.prototype.reduce = require(168);
     Observable.prototype.catchException = require(161);
-    Observable.prototype.toArray = require(169);
-    Observable.prototype.mergeAll = require(167);
-    Observable.prototype.map = require(165);
-    Observable.prototype.flatMap = require(164);
-    Observable.prototype.defaultIfEmpty = require(162);
-    Observable.prototype.do = require(163);
+    Observable.prototype.concat = require(163);
+    Observable.prototype.concatAll = require(162);
+    Observable.prototype.defaultIfEmpty = require(164);
+    Observable.prototype.doAction = require(165);
+    Observable.prototype.flatMap = require(166);
+    Observable.prototype.last = require(167);
+    Observable.prototype.map = require(168);
+    Observable.prototype.materialize = require(169);
+    Observable.prototype.mergeAll = require(170);
+    Observable.prototype.reduce = require(171);
+    Observable.prototype.retry = require(172);
+    Observable.prototype.toArray = require(173);
     
+    Observable.prototype["catch"] = Observable.prototype.catchException;
+    Observable.prototype["do"] = Observable.prototype.doAction;
     Observable.prototype.forEach = Observable.prototype.subscribe;
     Observable.prototype.select = Observable.prototype.map;
     Observable.prototype.selectMany = Observable.prototype.flatMap;
-    Observable.prototype.doAction = Observable.prototype.do;
     
     Rx = {
         Disposable: require(158),
@@ -8556,7 +8674,7 @@ if (Rx === undefined) {
 module.exports = Rx;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"154":154,"155":155,"156":156,"157":157,"158":158,"159":159,"161":161,"162":162,"163":163,"164":164,"165":165,"166":166,"167":167,"168":168,"169":169}],161:[function(require,module,exports){
+},{"154":154,"155":155,"156":156,"157":157,"158":158,"159":159,"161":161,"162":162,"163":163,"164":164,"165":165,"166":166,"167":167,"168":168,"169":169,"170":170,"171":171,"172":172,"173":173}],161:[function(require,module,exports){
 var Observable = require(154);
 var CompositeDisposable = require(157);
 var SerialDisposable = require(159);
@@ -8577,6 +8695,65 @@ module.exports = function catchException(next) {
 }
 },{"154":154,"157":157,"159":159}],162:[function(require,module,exports){
 var Observable = require(154);
+var Disposable = require(158);
+var CompositeDisposable = require(157);
+var SerialDisposable = require(159);
+
+module.exports = function concatAll() {
+    var source = this;
+    return Observable.create(function(observer) {
+        
+        var m = new SerialDisposable();
+        var group = new CompositeDisposable(m);
+        var isStopped = false;
+        var buffer = [];
+        
+        m.setDisposable(source.subscribe(function(innerObs) {
+            if(group.length > 1) {
+                buffer.push(innerObs);
+                return;
+            }
+            subscribe(innerObs);
+        },
+        function(e) { observer.onError(e); },
+        function( ) {
+            isStopped = true;
+            if(group.length === 1 && buffer.length === 0) {
+                observer.onCompleted();
+            }
+        }));
+        
+        function subscribe(innerObs) {
+            var innerDisposable = new SerialDisposable();
+            group.add(innerDisposable);
+            innerDisposable.setDisposable(innerObs.subscribe(
+                function(x) { observer.onNext(x); },
+                function(e) { observer.onError(e); },
+                function( ) {
+                    group.remove(innerDisposable);
+                    if(buffer.length > 0) {
+                        subscribe(buffer.shift());
+                    } else if(isStopped && group.length === 1) {
+                        observer.onCompleted();
+                    }
+                }));
+        }
+        
+        return group;
+    });
+};
+},{"154":154,"157":157,"158":158,"159":159}],163:[function(require,module,exports){
+var Observable = require(154);
+
+module.exports = function concat() {
+    var len = arguments.length;
+    var observables = new Array(len + 1);
+    observables[0] = this;
+    for(var i = 0; i < len; i++) { observables[i + 1] = arguments[i]; }
+    return Observable.from(observables).concatAll();
+};
+},{"154":154}],164:[function(require,module,exports){
+var Observable = require(154);
 
 module.exports = function defaultIfEmpty(value) {
     var source = this;
@@ -8595,7 +8772,7 @@ module.exports = function defaultIfEmpty(value) {
         })
     });
 };
-},{"154":154}],163:[function(require,module,exports){
+},{"154":154}],165:[function(require,module,exports){
 var Observable = require(154);
 var Observer = require(155);
 
@@ -8624,7 +8801,7 @@ module.exports = function doAction() {
     });
 };
 
-},{"154":154,"155":155}],164:[function(require,module,exports){
+},{"154":154,"155":155}],166:[function(require,module,exports){
 var Observable = require(154);
 module.exports = function flatMap(selector) {
     if(Boolean(selector) && typeof selector === "object") {
@@ -8633,7 +8810,31 @@ module.exports = function flatMap(selector) {
     }
     return this.map(selector).mergeAll();
 }
-},{"154":154}],165:[function(require,module,exports){
+},{"154":154}],167:[function(require,module,exports){
+var Observable = require(154);
+
+module.exports = function last() {
+    var source = this;
+    return Observable.create(function (observer) {
+        var value;
+        var hasValue = false;
+        return source.subscribe(
+            function onNext(x) {
+                value = x;
+                hasValue = true;
+            },
+            function onError(e) { observer.onError(e); },
+            function onCompleted() {
+                if (hasValue) {
+                    observer.onNext(value);
+                    observer.onCompleted();
+                } else {
+                    observer.onError(new Error("Sequence contains no elements."));
+                }
+            });
+    });
+};
+},{"154":154}],168:[function(require,module,exports){
 var Observable = require(154);
 
 module.exports = function map(selector) {
@@ -8658,7 +8859,7 @@ module.exports = function map(selector) {
         )
     });
 };
-},{"154":154}],166:[function(require,module,exports){
+},{"154":154}],169:[function(require,module,exports){
 var Observable = require(154);
 
 module.exports = function materialize() {
@@ -8679,7 +8880,7 @@ module.exports = function materialize() {
         });
     });
 }
-},{"154":154}],167:[function(require,module,exports){
+},{"154":154}],170:[function(require,module,exports){
 var Observable = require(154);
 var Disposable = require(158);
 var CompositeDisposable = require(157);
@@ -8714,7 +8915,7 @@ module.exports = function mergeAll() {
         return group;
     });
 };
-},{"154":154,"157":157,"158":158,"159":159}],168:[function(require,module,exports){
+},{"154":154,"157":157,"158":158,"159":159}],171:[function(require,module,exports){
 var Observable = require(154);
 
 module.exports = function reduce(selector, seedValue) {
@@ -8745,7 +8946,38 @@ module.exports = function reduce(selector, seedValue) {
             });
     });
 }
-},{"154":154}],169:[function(require,module,exports){
+},{"154":154}],172:[function(require,module,exports){
+var Observable = require(154);
+var SerialDisposable = require(159);
+
+module.exports = function retry(retryTotal) {
+    retryTotal || (retryTotal = 1);
+    var source = this;
+    return Observable.create(function(observer) {
+        
+        var retryCount = 0;
+        var disposable = new SerialDisposable();
+        
+        disposable.setDisposable(subscribe(observer));
+        
+        return disposable;
+        
+        function subscribe(observer) {
+            return source.subscribe(
+                function(x) { observer.onNext(x); },
+                function(e) {
+                    if(++retryCount > retryTotal) {
+                        observer.onError(e);
+                        return;
+                    }
+                    disposable.setDisposable(subscribe(observer));
+                },
+                function( ) { observer.onCompleted(); }
+            );
+        };
+    });
+};
+},{"154":154,"159":159}],173:[function(require,module,exports){
 var Observable = require(154);
 
 module.exports = function toArray() {
@@ -8761,14 +8993,14 @@ module.exports = function toArray() {
             });
     });
 };
-},{"154":154}],170:[function(require,module,exports){
+},{"154":154}],174:[function(require,module,exports){
 module.exports = {
     integers: 'integers',
     ranges: 'ranges',
     keys: 'keys'
 };
 
-},{}],171:[function(require,module,exports){
+},{}],175:[function(require,module,exports){
 var TokenTypes = {
     token: 'token',
     dotSeparator: '.',
@@ -8786,7 +9018,7 @@ var TokenTypes = {
 
 module.exports = TokenTypes;
 
-},{}],172:[function(require,module,exports){
+},{}],176:[function(require,module,exports){
 module.exports = {
     indexer: {
         nested: 'Indexers cannot be nested.',
@@ -8820,10 +9052,10 @@ module.exports = {
 };
 
 
-},{}],173:[function(require,module,exports){
-var Tokenizer = require(179);
-var head = require(174);
-var RoutedTokens = require(170);
+},{}],177:[function(require,module,exports){
+var Tokenizer = require(183);
+var head = require(178);
+var RoutedTokens = require(174);
 
 var parser = function parser(string, extendedRules) {
     return head(new Tokenizer(string, extendedRules));
@@ -8871,10 +9103,10 @@ parser.fromPath = function(path, ext) {
 // Potential routed tokens.
 parser.RoutedTokens = RoutedTokens;
 
-},{"170":170,"174":174,"179":179}],174:[function(require,module,exports){
-var TokenTypes = require(171);
-var E = require(172);
-var indexer = require(175);
+},{"174":174,"178":178,"183":183}],178:[function(require,module,exports){
+var TokenTypes = require(175);
+var E = require(176);
+var indexer = require(179);
 
 /**
  * The top level of the parse tree.  This returns the generated path
@@ -8932,13 +9164,13 @@ module.exports = function head(tokenizer) {
 };
 
 
-},{"171":171,"172":172,"175":175}],175:[function(require,module,exports){
-var TokenTypes = require(171);
-var E = require(172);
+},{"175":175,"176":176,"179":179}],179:[function(require,module,exports){
+var TokenTypes = require(175);
+var E = require(176);
 var idxE = E.indexer;
-var range = require(177);
-var quote = require(176);
-var routed = require(178);
+var range = require(181);
+var quote = require(180);
+var routed = require(182);
 
 /**
  * The indexer is all the logic that happens in between
@@ -9047,9 +9279,9 @@ module.exports = function indexer(tokenizer, openingToken, state, out) {
 };
 
 
-},{"171":171,"172":172,"176":176,"177":177,"178":178}],176:[function(require,module,exports){
-var TokenTypes = require(171);
-var E = require(172);
+},{"175":175,"176":176,"180":180,"181":181,"182":182}],180:[function(require,module,exports){
+var TokenTypes = require(175);
+var E = require(176);
 var quoteE = E.quote;
 
 /**
@@ -9131,10 +9363,10 @@ module.exports = function quote(tokenizer, openingToken, state, out) {
 };
 
 
-},{"171":171,"172":172}],177:[function(require,module,exports){
-var Tokenizer = require(179);
-var TokenTypes = require(171);
-var E = require(172);
+},{"175":175,"176":176}],181:[function(require,module,exports){
+var Tokenizer = require(183);
+var TokenTypes = require(175);
+var E = require(176);
 
 /**
  * The indexer is all the logic that happens in between
@@ -9210,10 +9442,10 @@ module.exports = function range(tokenizer, openingToken, state, out) {
 };
 
 
-},{"171":171,"172":172,"179":179}],178:[function(require,module,exports){
-var TokenTypes = require(171);
-var RoutedTokens = require(170);
-var E = require(172);
+},{"175":175,"176":176,"183":183}],182:[function(require,module,exports){
+var TokenTypes = require(175);
+var RoutedTokens = require(174);
+var E = require(176);
 var routedE = E.routed;
 
 /**
@@ -9276,8 +9508,8 @@ module.exports = function routed(tokenizer, openingToken, state, out) {
 };
 
 
-},{"170":170,"171":171,"172":172}],179:[function(require,module,exports){
-var TokenTypes = require(171);
+},{"174":174,"175":175,"176":176}],183:[function(require,module,exports){
+var TokenTypes = require(175);
 var DOT_SEPARATOR = '.';
 var COMMA_SEPARATOR = ',';
 var OPENING_BRACKET = '[';
@@ -9428,12 +9660,12 @@ function getNext(string, idx, ext) {
 
 
 
-},{"171":171}],180:[function(require,module,exports){
+},{"175":175}],184:[function(require,module,exports){
 'use strict';
 
-module.exports = require(185)
+module.exports = require(189)
 
-},{"185":185}],181:[function(require,module,exports){
+},{"189":189}],185:[function(require,module,exports){
 'use strict';
 
 var asap = require(149)
@@ -9605,10 +9837,10 @@ function doResolve(fn, promise) {
     promise._67(LAST_ERROR)
   }
 }
-},{"149":149}],182:[function(require,module,exports){
+},{"149":149}],186:[function(require,module,exports){
 'use strict';
 
-var Promise = require(181)
+var Promise = require(185)
 
 module.exports = Promise
 Promise.prototype.done = function (onFulfilled, onRejected) {
@@ -9619,12 +9851,12 @@ Promise.prototype.done = function (onFulfilled, onRejected) {
     }, 0)
   })
 }
-},{"181":181}],183:[function(require,module,exports){
+},{"185":185}],187:[function(require,module,exports){
 'use strict';
 
 //This file contains the ES6 extensions to the core Promises/A+ API
 
-var Promise = require(181)
+var Promise = require(185)
 var asap = require(149)
 
 module.exports = Promise
@@ -9725,10 +9957,10 @@ Promise.prototype['catch'] = function (onRejected) {
   return this.then(null, onRejected);
 }
 
-},{"149":149,"181":181}],184:[function(require,module,exports){
+},{"149":149,"185":185}],188:[function(require,module,exports){
 'use strict';
 
-var Promise = require(181)
+var Promise = require(185)
 
 module.exports = Promise
 Promise.prototype['finally'] = function (f) {
@@ -9743,21 +9975,21 @@ Promise.prototype['finally'] = function (f) {
   })
 }
 
-},{"181":181}],185:[function(require,module,exports){
+},{"185":185}],189:[function(require,module,exports){
 'use strict';
 
-module.exports = require(181)
-require(182)
-require(184)
-require(183)
+module.exports = require(185)
 require(186)
+require(188)
+require(187)
+require(190)
 
-},{"181":181,"182":182,"183":183,"184":184,"186":186}],186:[function(require,module,exports){
+},{"185":185,"186":186,"187":187,"188":188,"190":190}],190:[function(require,module,exports){
 'use strict';
 
 //This file contains then/promise specific extensions that are only useful for node.js interop
 
-var Promise = require(181)
+var Promise = require(185)
 var asap = require(147)
 
 module.exports = Promise
@@ -9817,4 +10049,4 @@ Promise.prototype.nodeify = function (callback, ctx) {
   })
 }
 
-},{"147":147,"181":181}]},{},[1]);
+},{"147":147,"185":185}]},{},[1]);

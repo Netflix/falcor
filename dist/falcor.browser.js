@@ -15,10 +15,10 @@
  */
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.falcor = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 var falcor = require(2);
-falcor.HttpDataSource = require(327);
+falcor.HttpDataSource = require(300);
 module.exports = falcor;
 
-},{"2":2,"327":327}],2:[function(require,module,exports){
+},{"2":2,"300":300}],2:[function(require,module,exports){
 var falcor = require(8);
 var get = require(53);
 var set = require(89);
@@ -65,7 +65,7 @@ module.exports = falcor;
 if (typeof falcor === 'undefined') {
     var falcor = {};
 }
-var Rx = require(335);
+var Rx = require(308);
 
 falcor.__Internals = {};
 falcor.Observable = Rx.Observable;
@@ -83,7 +83,7 @@ falcor.NOOP = function() {};
 
 module.exports = falcor;
 
-},{"335":335}],4:[function(require,module,exports){
+},{"308":308}],4:[function(require,module,exports){
 var falcor = require(3);
 var ModelRoot = require(7);
 var RequestQueue = require(40);
@@ -95,7 +95,7 @@ var ModelResponse = require(6);
 var ModelDataSourceAdapter = require(5);
 var call = require(9);
 var operations = require(14);
-var pathSyntax = require(348);
+var pathSyntax = require(325);
 var getBoundValue = require(49);
 var collect = require(86);
 var slice = Array.prototype.slice;
@@ -103,6 +103,7 @@ var $ref = require(140);
 var $error = require(139);
 var $atom = require(138);
 var getGeneration = require(50);
+var noop = function(){};
 
 /**
  * A Model object is used to execute commands against a {@link JSONGraph} object. {@link Model}s can work with a local JSONGraph cache, or it can work with a remote {@link JSONGraph} object through a {@link DataSource}.
@@ -254,52 +255,50 @@ Model.prototype = {
             paths[i] = pathSyntax.fromPath(arguments[i + 1]);
         }
 
-        if(n === 0) { throw new Error("Model#bind requires at least one value path."); }
+        if(root.allowSync <= 0 && n === 0) {
+            throw new Error("Model#bind requires at least one value path.");
+        }
 
-        return falcor.Observable.create(function(observer) {
-
+        var syncBoundModelObs = falcor.Observable.create(function(observer) {
+            var error;
             var boundModel;
             root.allowSync++;
             try {
                 boundModel = model.bindSync(model._path.concat(boundPath));
-
-                if (!boundModel) {
-                    throw false;
-                }
+            } catch(e) {
+                error = e;
+            }
+            if(boundModel && !error) {
                 observer.onNext(boundModel);
                 observer.onCompleted();
-            } catch (e) {
-                // Bug 129: if user code throws in onNext, they get onNexted again in the catch block instead of getting onErrored. Presumably we only want to do this catch block if bindSync encounters error?
-                return model.get.apply(model, paths.map(function(path) {
-                    return boundPath.concat(path);
-                }).concat(function(){})).subscribe(
-                    function onNext() {},
-                    function onError(err)  { observer.onError(err); },
-                    function onCompleted() {
-                        root.allowSync++;
-                        try {
-
-                            boundModel = model.bindSync(boundPath);
-                            if(boundModel) {
-                                observer.onNext(boundModel);
-                            }
-                            observer.onCompleted();
-                        } catch(e) {
-                            observer.onError(e);
-                        }
-
-                        // remove the inc
-                        finally {
-                            root.allowSync--;
-                        }
-                    });
+            } else {
+                observer.onError(error);
             }
-
-            // remove the inc
-            finally {
-                root.allowSync--;
-            }
+            --root.allowSync;
         });
+
+        return syncBoundModelObs.
+            flatMap(function(boundModel) {
+                if(paths.length > 0) {
+                    return boundModel.get.apply(boundModel, paths.concat(function() {
+                        return boundModel;
+                    })).
+                    catchException(falcor.Observable.empty());
+                }
+                return falcor.Observable.returnValue(boundModel);
+            }).
+            catchException(function() {
+                if(paths.length > 0) {
+                    var boundPaths = paths.map(function(path) {
+                        return boundPath.concat(path);
+                    });
+                    boundPaths.push(noop);
+                    return model.get.
+                        apply(model, boundPaths).
+                        flatMap(model.bind(boundPath));
+                }
+                return falcor.Observable.empty();
+            });
     },
     /**
      * Set the local cache to a {@link JSONGraph} fragment. This method can be a useful way of mocking a remote document, or restoring the local cache from a previously stored state
@@ -564,7 +563,7 @@ Model.prototype = {
     }
 };
 
-},{"138":138,"139":139,"14":14,"140":140,"3":3,"348":348,"40":40,"41":41,"42":42,"43":43,"49":49,"5":5,"50":50,"6":6,"7":7,"86":86,"9":9}],5:[function(require,module,exports){
+},{"138":138,"139":139,"14":14,"140":140,"3":3,"325":325,"40":40,"41":41,"42":42,"43":43,"49":49,"5":5,"50":50,"6":6,"7":7,"86":86,"9":9}],5:[function(require,module,exports){
 function ModelDataSourceAdapter(model) {
     this._model = model.materialize().boxValues().treatErrorsAsValues();
 }
@@ -585,12 +584,12 @@ ModelDataSourceAdapter.prototype = {
 module.exports = ModelDataSourceAdapter;
 },{}],6:[function(require,module,exports){
 var falcor = require(3);
-var pathSyntax = require(348);
+var pathSyntax = require(325);
 
 if(typeof Promise !== "undefined" && Promise) {
     falcor.Promise = Promise;
 } else {
-    falcor.Promise = require(355);
+    falcor.Promise = require(332);
 }
 
 var Observable  = falcor.Observable,
@@ -713,7 +712,7 @@ ModelResponse.prototype.then = function(onNext, onError) {
 
 module.exports = ModelResponse;
 
-},{"3":3,"348":348,"355":355}],7:[function(require,module,exports){
+},{"3":3,"325":325,"332":332}],7:[function(require,module,exports){
 function ModelRoot() {
     this.expired = [];
     this.allowSync = 0;
@@ -729,15 +728,23 @@ falcor.Model = Model;
 module.exports = falcor;
 
 },{"3":3,"4":4}],9:[function(require,module,exports){
-module.exports = call;
-
 var $ref = require(140);
 var falcor = require(3);
+var Observable = falcor.Observable;
+var pathSyntax = require(325);
 var ModelResponse = require(6);
 
-function call(path, args, suffixes, extraPaths, selector) {
+function mapPathSyntax(path) {
+    if(typeof path === "string") {
+        return pathSyntax(path);
+    }
+    return path;
+}
+
+module.exports = function call(path, args, suffixes, extraPaths, selector) {
 
     var model = this;
+    
     args && Array.isArray(args) || (args = []);
     suffixes && Array.isArray(suffixes) || (suffixes = []);
     extraPaths = Array.prototype.slice.call(arguments, 3);
@@ -747,118 +754,204 @@ function call(path, args, suffixes, extraPaths, selector) {
         extraPaths = extraPaths.slice(0, -1);
     }
 
+    path = mapPathSyntax(path);
+    suffixes = suffixes.map(mapPathSyntax);
+    extraPaths = extraPaths.map(mapPathSyntax);
+
     return ModelResponse.create(function (options) {
 
-        var rootModel = model.clone(["_path", []]),
-            localRoot = rootModel.withoutDataSource(),
-            dataSource = model._dataSource,
-            boundPath = model._path,
-            callPath = boundPath.concat(path),
-            thisPath = callPath.slice(0, -1);
-
-        var disposable = model.
-        getValue(path).
-        flatMap(function (localFn) {
-            if (typeof localFn === "function") {
-                return falcor.Observable.return(localFn.
-                    apply(rootModel.bindSync(thisPath), args).
-                    reduce(function (memo, pathValue) {
-                    if (Boolean(pathValue.invalidated)) {
-                        if (pathValue.path.length === 0) {
-                            pathValue.path.push(null);
-                        }
-                        memo.invalidations.push(thisPath.concat(pathValue.path));
-                    } else {
-                        var value = pathValue.value;
-                        if (Boolean(value) && typeof value === "object" && value.$type === $ref) {
-                            memo.references.push({
-                                path: thisPath.concat(pathValue.path),
-                                value: pathValue.value
-                            });
-                        } else {
-                            memo.values.push({
-                                path: thisPath.concat(pathValue.path),
-                                value: pathValue.value
-                            });
-                        }
-                    }
-                    return memo;
-                }, {
-                    values: [],
-                    references: [],
-                    invalidations: []
-                }).flatMap(function (obj) {
-                    var values = obj.values;
-                    var references = obj.references;
-                    var invalidations = obj.invalidations;
-                    return localRoot.set.
-                        apply(localRoot, values.concat(references, function () {
-                            return rootModel;
-                        })).
-                        flatMap(function (rootModel) {
-                            
-                            var rootRefs = references.reduce(function (refs, pathValue) {
-                                var path = pathValue.path;
-                                refs.push.apply(refs, suffixes.map(function (suffix) {
-                                    return path.concat(suffix);
-                                }));
-                                return refs;
-                            }, []);
-                            
-                            var rootExtraPaths = extraPaths.reduce(function(paths, path) {
-                                paths.push.apply(paths, thisPath.concat(path));
-                                return paths;
-                            }, []);
-                            
-                            return rootModel.get.
-                                apply(rootModel, rootRefs.concat(rootExtraPaths)).
-                                toJSONG().
-                                map(function(envelope) {
-                                    envelope.invalidated = invalidations;
-                                    return envelope;
-                                });
-                        });
-                }));
-            }
-            return falcor.Observable.empty();
-        }).
-        defaultIfEmpty(dataSource && dataSource.call(path, args, suffixes, paths) || falcor.Observable.empty()).
-        mergeAll().
-        flatMap(function (envelope) {
+        var rootModel = model.clone(["_path", []]);
+        var localRoot = rootModel.withoutDataSource();
+        var dataSource = model._dataSource;
+        var boundPath = model._path;
+        var callPath = boundPath.concat(path);
+        var thisPath = callPath.slice(0, -1);
+        
+        var localFnObs = model.
+            withoutDataSource().
+            get(path, function(localFn) {
+                return {
+                    model: rootModel.bindSync(thisPath).boxValues(),
+                    localFn: localFn
+                };
+            });
+        
+        var localFnCallObs = localFnObs.flatMap(getLocalCallObs);
+        
+        var localOrRemoteCallObs = localFnCallObs.
+            defaultIfEmpty(getRemoteCallObs(dataSource)).
+            mergeAll();
+        
+        var setCallValuesObs = localOrRemoteCallObs.flatMap(setCallEnvelope);
+        
+        var innerDisposable;
+        var disposable = setCallValuesObs.last().subscribe(function (envelope) {
+            var paths = envelope.paths;
             var invalidated = envelope.invalidated;
-            var obs = falcor.Observable.empty();
-            if (invalidated && invalidated.length) {
-                obs = rootModel.invalidate.apply(rootModel, invalidated).ignoreElements();
-                invalidatePaths(rootModel, invalidated, undefined, model._errorSelector);
-            }
-            return localRoot.set(envelope, function () {
-                return model;
-            });
-        }).
-        subscribe(function (model) {
-                var getPaths = envelope.paths.map(function (path) {
-                    return path.slice(boundPath.length);
+            if (selector) {
+                paths.push(function () {
+                    return selector.call(model, paths);
                 });
-                if (selector) {
-                    getPaths[getPaths.length] = function () {
-                        return selector.call(model, getPaths);
-                    };
-                }
-                return model.get.apply(model, getPaths).subscribe(options);
-            },
-            function (e) {
-                options.onError(e);
-            });
+            }
+            var innerObs = model.get.apply(model, paths);
+            if(options.format === "AsJSONG") {
+                innerObs = innerObs.toJSONG().doAction(function(envelope) {
+                    envelope.invalidated = invalidated;
+                });
+            }
+            innerDisposable = innerObs.subscribe(options);
+        },
+        function (e) { options.onError(e); });
 
         return {
             dispose: function () {
                 disposable && disposable.dispose();
+                innerDisposable && innerDisposable.dispose();
                 disposable = undefined;
+                innerDisposable = undefined;
             }
         };
+        
+        function getLocalCallObs(tuple) {
+
+            var localFn = tuple && tuple.localFn;
+
+            if (typeof localFn === "function") {
+
+                var localFnModel = tuple.model;
+                var localThisPath = localFnModel._path;
+                var localFnCallObs = localFn.apply(localFnModel, args);
+                var localFnResults = localFnCallObs.reduce(aggregateFnResults, {
+                    values: [],
+                    references: [],
+                    invalidations: [],
+                    localThisPath: localThisPath
+                });
+                var localSetValues = localFnResults.flatMap(setLocalValues);
+                var remoteGetValues = localSetValues.flatMap(getRemoteValues);
+
+                return Observable.returnValue(remoteGetValues);
+            }
+
+            return Observable.empty();
+
+            function aggregateFnResults(results, pathValue) {
+                var localThisPath = results.localThisPath;
+                if (Boolean(pathValue.invalidated)) {
+                    results.invalidations.push(localThisPath.concat(pathValue.path));
+                } else {
+                    var path = pathValue.path;
+                    var value = pathValue.value;
+                    if (Boolean(value) && typeof value === "object" && value.$type === $ref) {
+                        results.references.push({
+                            path: prependThisPath(path),
+                            value: pathValue.value
+                        });
+                    } else {
+                        results.values.push({
+                            path: prependThisPath(path),
+                            value: pathValue.value
+                        });
+                    }
+                }
+                return results;
+            }
+
+            function setLocalValues(results) {
+                var values = results.values.concat(results.references);
+                if(values.length > 0) {
+                    return localRoot.set.
+                        apply(localRoot, values).
+                        toJSONG().
+                        map(function(envelope) {
+                            return { results: results, envelope: envelope };
+                        });
+                } else {
+                    return Observable.returnValue({
+                        results: results,
+                        envelope: { jsong: {}, paths: [] }
+                    });
+                }
+            }
+
+            function getRemoteValues(tuple) {
+                
+                var envelope = tuple.envelope;
+                var results = tuple.results;
+                var values = results.values;
+                var references = results.references;
+                var invalidations = results.invalidations;
+                
+                var rootValues = values.map(pluckPath).map(prependThisPath);
+                var rootSuffixes = references.reduce(prependRefToSuffixes, []);
+                var rootExtraPaths = extraPaths.map(prependThisPath);
+                var rootPaths = rootSuffixes.concat(rootExtraPaths);
+                var envelopeObs;
+                
+                debugger;
+                
+                if(rootPaths.length > 0) {
+                    envelopeObs = rootModel.get.apply(rootModel, rootValues.concat(rootPaths)).toJSONG();
+                } else {
+                    envelopeObs = Observable.returnValue(envelope);
+                }
+                
+                return envelopeObs.doAction(function (envelope) {
+                    envelope.invalidated = invalidations;
+                });
+            }
+
+            function prependRefToSuffixes(refPaths, refPathValue) {
+                var refPath = refPathValue.path;
+                refPaths.push.apply(refPaths, suffixes.map(function (pathSuffix) {
+                    return refPath.concat(pathSuffix);
+                }));
+                return refPaths;
+            }
+
+            function pluckPath(pathValue) {
+                return pathValue.path;
+            }
+
+            function prependThisPath(path) {
+                return thisPath.concat(path);
+            }
+        }
+        
+        function getRemoteCallObs(dataSource) {
+            if(dataSource && typeof dataSource === "object") {
+                return dataSource.
+                    call(path, args, suffixes, extraPaths).
+                    flatMap(invalidateLocalValues);
+            }
+            
+            return Observable.empty();
+            
+            function invalidateLocalValues(envelope) {
+                var invalidations = envelope.invalidated;
+                if(invalidations && invalidations.length) {
+                    return rootModel.invalidate.
+                        apply(rootModel, invalidations).
+                        map(function() { return envelope; })
+                }
+                return Observable.returnValue(envelope);
+            }
+        }
+
+        function setCallEnvelope(envelope) {
+            return localRoot.set(envelope, function () {
+                return {
+                    invalidated: envelope.invalidated,
+                    paths: envelope.paths.map(function (path) {
+                        return path.slice(boundPath.length);
+                    })
+                }
+            });
+        }
+
     });
-}
-},{"140":140,"3":3,"6":6}],10:[function(require,module,exports){
+};
+},{"140":140,"3":3,"325":325,"6":6}],10:[function(require,module,exports){
 var combineOperations = require(26);
 var setSeedsOrOnNext = require(39);
 
@@ -1190,7 +1283,7 @@ module.exports = function setInitialArgs(options, seeds, onNext) {
     // the ModelResponse is toPathValues
     // but luckily we can just perform a get for the progressive or
     // toPathValues mode.
-    if (isProgressive || isPathValues) {
+    if ((isProgressive || isPathValues) && shouldRequest && format !== toJSONG) {
         var getOps = combineOperations(
             args, format, 'get', selector, true);
         setSeedsOrOnNext(
@@ -3107,7 +3200,7 @@ function removeHardlink(cacheObject) {
         var len = context[__refs_length];
         
         while (idx < len) {
-            context[__ref + idx] = context[__REF + idx + 1];
+            context[__ref + idx] = context[__ref + idx + 1];
             ++idx;
         }
         
@@ -4033,7 +4126,9 @@ function onNode(pathmap, roots, parents, nodes, requested, optimized, is_referen
 }
 
 function onEdge(pathmap, keys_stack, depth, roots, parents, nodes, requested, optimized, key, keyset) {
-    promote(roots.lru, nodes[_cache]);
+    if(depth > 0) {
+        promote(roots.lru, nodes[_cache]);
+    }
 }
 },{"104":104,"106":106,"112":112,"114":114,"115":115,"116":116,"120":120,"125":125,"127":127,"129":129,"135":135,"136":136,"137":137,"138":138,"139":139,"144":144,"87":87}],91:[function(require,module,exports){
 module.exports = set_json_graph_as_json_dense;
@@ -6935,7 +7030,7 @@ function walk_path_map(onNode, onValueType, pathmap, keys_stack, depth, roots, p
                 inner_key, inner_keyset, is_outer_keyset
             );
         } else {
-            onValueType(pathmap2, keys_stack, depth, roots, parents2, nodes2, requested2, optimized2, inner_key, inner_keyset);
+            onValueType(pathmap2, keys_stack, depth + 1, roots, parents2, nodes2, requested2, optimized2, inner_key, inner_keyset);
         }
     }
 }
@@ -7071,7 +7166,7 @@ function walk_path_map(onNode, onValueType, pathmap, keys_stack, depth, roots, p
                 inner_key, inner_keyset, is_outer_keyset
             );
         } else {
-            onValueType(pathmap2, keys_stack, depth, roots, parents2, nodes2, requested2, optimized2, inner_key, inner_keyset);
+            onValueType(pathmap2, keys_stack, depth + 1, roots, parents2, nodes2, requested2, optimized2, inner_key, inner_keyset);
         }
     }
 }
@@ -8189,7 +8284,7 @@ process.nextTick = function (fun) {
         }
     }
     queue.push(new Item(fun, args));
-    if (!draining) {
+    if (queue.length === 1 && !draining) {
         setTimeout(drainQueue, 0);
     }
 };
@@ -8234,577 +8329,19 @@ process.umask = function() { return 0; };
 arguments[4][2][0].apply(exports,arguments)
 },{"160":160,"2":2,"205":205,"233":233,"241":241}],155:[function(require,module,exports){
 arguments[4][3][0].apply(exports,arguments)
-},{"3":3,"307":307}],156:[function(require,module,exports){
-var falcor = require(155);
-var ModelRoot = require(159);
-var RequestQueue = require(192);
-var ImmediateScheduler = require(194);
-var ASAPScheduler = require(193);
-var TimeoutScheduler = require(195);
-var ERROR = require(291);
-var ModelResponse = require(158);
-var ModelDataSourceAdapter = require(157);
-var call = require(161);
-var operations = require(166);
-var pathSyntax = require(320);
-var getBoundValue = require(201);
-var collect = require(238);
-var slice = Array.prototype.slice;
-var $ref = require(292);
-var $error = require(291);
-var $atom = require(290);
-var getGeneration = require(202);
-
-/**
- * A Model object is used to execute commands against a {@link JSONGraph} object. {@link Model}s can work with a local JSONGraph cache, or it can work with a remote {@link JSONGraph} object through a {@link DataSource}.
- * @constructor
- * @param {?Object} options - A set of options to customize behavior
- * @param {?DataSource} options.source - A data source to retrieve and manage the {@link JSONGraph}
- * @param {?JSONGraph} options.cache - Initial state of the {@link JSONGraph}
- * @param {?number} options.maxSize - The maximum size of the cache
- * @param {?number} options.collectRatio - The ratio of the maximum size to collect when the maxSize is exceeded
- * @param {?Model~errorSelector} options.errorSelector - A function used to translate errors before they are returned
- */
-var Model = module.exports = falcor.Model = function Model(options) {
-
-    if (!options) {
-        options = {};
-    }
-
-    this._materialized = options.materialized || false;
-    this._boxed = options.boxed || false;
-    this._treatErrorsAsValues = options.treatErrorsAsValues || false;
-
-    this._dataSource = options.source;
-    this._maxSize = options.maxSize || Math.pow(2, 53) - 1;
-    this._collectRatio = options.collectRatio || 0.75;
-    this._scheduler = new ImmediateScheduler();
-    this._request = new RequestQueue(this, this._scheduler);
-    this._errorSelector = options.errorSelector || Model.prototype._errorSelector;
-    this._router = options.router;
-
-    this._root = options.root || new ModelRoot();
-    
-    if (options.cache && typeof options.cache === "object") {
-        this.setCache(options.cache);
-    } else {
-        this._cache = {};
-    }
-    this._path = [];
-};
-
-/**
- * The {@link Model}'s error selector is applied to any errors that occur during Model operations.  The return value of the error selector is substituted for the input error, giving clients the opportunity to translate error objects before they are returned from the {@link Model}.
- * @callback Model~errorSelector
- * @param {Object} requestedPath the requested path at which the error was found.
- * @error {Error} error the error that occured during the {@link Model} operation.
- * @returns {Error} the translated error object.
- */
-
-Model.EXPIRES_NOW = falcor.EXPIRES_NOW;
-Model.EXPIRES_NEVER = falcor.EXPIRES_NEVER;
-
-Model.ref = function(path) {
-    if (typeof path === 'string') {
-        path = pathSyntax(path);
-    }
-    return {$type: $ref, value: path};
-};
-
-Model.error = function(error) {
-    return {$type: $error, value: error};
-};
-
-Model.atom = function(value) {
-    return {$type: $atom, value: value};
-};
-
-Model.prototype = {
-    _boxed: false,
-    _progressive: false,
-    _errorSelector: function(x, y) { return y; },
-    _comparator: function(a, b) {
-        if (Boolean(a) && typeof a === "object" && a.hasOwnProperty("value") &&
-            Boolean(b) && typeof b === "object" && b.hasOwnProperty("value")) {
-            return a.value === b.value;
-        }
-        return a === b;
-    },
-    /**
-     * The get method retrieves several {@link Path}s or {@link PathSet}s from a {@link Model}. The get method is versatile and may be called in several different ways, allowing you to make different trade-offs between performance and expressiveness. The simplest invocation returns an ModelResponse stream that contains a JSON object with all of the requested values. An optional selector function can also be passed in order to translate the retrieved data before it appears in the Observable stream. If a selector function is provided, the output will be an Observable stream with the result of the selector function invocation instead of a ModelResponse stream.
-     If you intend to transform the JSON data into another form, specifying a selector function may be more efficient. The selector function is run once all of the requested path values are available. In the body of the selector function, you can read data from the Model's cache using {@link Model.prototype.getValueSync} and transform it directly into its final representation (ex. an HTML string). This technique can reduce allocations by preventing the get method from copying the data in {@link Model}'s cache into an intermediary JSON representation.
-     Instead of directly accessing the cache within the selector function, you can optionally pass arguments to the selector function and they will be automatically bound to the corresponding {@link Path} or {@link PathSet} passed to the get method. If a {@link Path} is bound to a selector function argument, the function argument will contain the value found at that path. However if a {@link PathSet} is bound to a selector function argument, the function argument will be a JSON structure containing all of the path values. Using argument binding can provide a good balance between allocations and expressiveness. For more detail on how {@link Path}s and {@link PathSet}s are bound to selector function arguments, see the examples below.  
-     * @function
-     * @param {...PathSet} path - The path(s) to retrieve
-     * @param {?Function} selector - The callback to execute once all of the paths have been retrieved
-     * @return {ModelResponse.<JSONEnvelope>|Observable} - The requested data as JSON, or the result of the optional selector function.
-     */
-    get: operations("get"),
-    /**
-     * Sets the value at one or more places in the JSONGraph model. The set method accepts one or more {@link PathValue}s, each of which is a combination of a location in the document and the value to place there.  In addition to accepting  {@link PathValue}s, the set method also returns the values after the set operation is complete.
-     * @function
-     * @param {...(PathValue | JSONGraphEnvelope | JSONEnvelope)} value - A value or collection of values to set into the Model.
-     * @return {ModelResponse.<JSON> | Observable} - An {@link Observable} stream containing the values in the JSONGraph model after the set was attempted.
-     */
-    set: operations("set"),
-    invalidate: operations("invalidate"),
-    // TODO: Document selector function
-    /*
-     * Invoke a function
-     * @function
-     * @param {Path} functionPath - The path to the function to invoke
-     * @param {Array.<Object>} args - The arguments to pass to the function
-     * @param {Array.<PathSet>} pathSuffixes - The paths to retrieve from objects returned from the function
-     * @param {Array.<PathSet>} calleePaths - The paths to retrieve from function callee after successful function execution
-     * @param {Function} selector The selector function
-     * @returns {ModelResponse.<*> | Observable} The {JSONGraph} fragment and associated metadata returned from the invoked function
-     */
-    call: call,
-    /**
-     * Get data for a single {@link Path}
-     * @param {Path} path - The path to retrieve
-     * @return {Observable.<*>} - The value for the path
-     * @example
-     var model = new falcor.Model({source: new falcor.HttpDataSource("/model.json") });
-
-     model.
-         getValue('user.name').
-         subscribe(function(name) {
-             console.log(name);
-         });
-
-     // The code above prints "Jim" to the console.
-     */
-    getValue: function(path) {
-        return this.get(path, function(x) { return x; });
-    },
-    setValue: function(path, value) {
-        path = pathSyntax.fromPath(path);
-        return this.set(Array.isArray(path) ?
-        {path: path, value: value} :
-            path, function(x) { return x; });
-    },
-    /**
-     * Returns a clone of the {@link Model} bound to a location within the {@link JSONGraph}. The bound location is never a {@link Reference}: any {@link Reference}s encountered while resolving the bound {@link Path} are always replaced with the {@link Reference}s target value. For subsequent operations on the {@link Model}, all paths will be evaluated relative to the bound path. Bind allows you to:
-     * - Expose only a fragment of the {@link JSONGraph} to components, rather than the entire graph
-     * - Hide the location of a {@link JSONGraph} fragment from components
-     * - Optimize for executing multiple operations and path looksup at/below the same location in the {@link JSONGraph}
-     * @param {Path} boundPath - The path to bind to
-     * @param {...PathSet} relativePathsToPreload - Paths to preload before Model is created. These paths are relative to the bound path.
-     * @return {Observable.<Model>} - An Observable stream with a single value, the bound {@link Model}, or an empty stream if nothing is found at the path
-    */
-    bind: function(boundPath) {
-
-        var model = this, root = model._root,
-            paths = new Array(arguments.length - 1),
-            i = -1, n = arguments.length - 1;
-
-        boundPath = pathSyntax.fromPath(boundPath);
-
-        while(++i < n) {
-            paths[i] = pathSyntax.fromPath(arguments[i + 1]);
-        }
-
-        if(n === 0) { throw new Error("Model#bind requires at least one value path."); }
-
-        return falcor.Observable.create(function(observer) {
-
-            var boundModel;
-            root.allowSync++;
-            try {
-                boundModel = model.bindSync(model._path.concat(boundPath));
-
-                if (!boundModel) {
-                    throw false;
-                }
-                observer.onNext(boundModel);
-                observer.onCompleted();
-            } catch (e) {
-                // Bug 129: if user code throws in onNext, they get onNexted again in the catch block instead of getting onErrored. Presumably we only want to do this catch block if bindSync encounters error?
-                return model.get.apply(model, paths.map(function(path) {
-                    return boundPath.concat(path);
-                }).concat(function(){})).subscribe(
-                    function onNext() {},
-                    function onError(err)  { observer.onError(err); },
-                    function onCompleted() {
-                        root.allowSync++;
-                        try {
-
-                            boundModel = model.bindSync(boundPath);
-                            if(boundModel) {
-                                observer.onNext(boundModel);
-                            }
-                            observer.onCompleted();
-                        } catch(e) {
-                            observer.onError(e);
-                        }
-
-                        // remove the inc
-                        finally {
-                            root.allowSync--;
-                        }
-                    });
-            }
-
-            // remove the inc
-            finally {
-                root.allowSync--;
-            }
-        });
-    },
-    /**
-     * Set the local cache to a {@link JSONGraph} fragment. This method can be a useful way of mocking a remote document, or restoring the local cache from a previously stored state
-     * @param {JSONGraph} jsonGraph - The {@link JSONGraph} fragment to use as the local cache
-     */
-    setCache: function(cache) {
-        var size = this._cache && this._cache.$size || 0;
-        var lru = this._root;
-        var expired = lru.expired;
-        this._cache = {};
-        collect(lru, expired, -1, size, 0, 0);
-        if(Array.isArray(cache.paths) && cache.jsong && typeof cache.jsong === "object") {
-            this._setJSONGsAsJSON(this, [cache], []);
-        } else {
-            this._setCache(this, cache);
-        }
-        return this;
-    },
-    /**
-     * Get the local {@link JSONGraph} cache. This method can be a useful to store the state of the cache
-     * @param {...Array.<PathSet>} [pathSets] - The path(s) to retrieve. If no paths are specified, the entire {@link JSONGraph} is returned
-     * @return {JSONGraph} jsonGraph - A {@link JSONGraph} fragment
-     * @example
-     // Storing the boxshot of the first 10 titles in the first 10 genreLists to local storage.
-     localStorage.setItem('cache', JSON.stringify(model.getCache("genreLists[0...10][0...10].boxshot")));
-     */ 
-    getCache: function() {
-        var paths = slice.call(arguments);
-        if(paths.length == 0) {
-            paths[0] = { json: this._cache };
-        }
-        var result;
-        this.get.apply(this.
-                withoutDataSource().
-                boxValues().
-                treatErrorsAsValues().
-                materialize(), paths).
-            toJSONG().
-            subscribe(function(envelope) {
-                result = envelope.jsong;
-            });
-        return result;
-    },
-    getGeneration: function(path) {
-        path = path && pathSyntax.fromPath(path) || [];
-        if (Array.isArray(path) === false) {
-            throw new Error("Model#getGenerationSync must be called with an Array path.");
-        }
-        if (this._path.length) {
-            path = this._path.concat(path);
-        }
-        return this._getGeneration(this, path);
-    },
-    _getGeneration: getGeneration,
-    // TODO: Does not throw if given a PathSet rather than a Path, not sure if it should or not.
-    // TODO: Doc not accurate? I was able to invoke directly against the Model, perhaps because I don't have a data source?
-    // TODO: Not clear on what it means to "retrieve objects in addition to JSONGraph values"
-    /**
-     * Synchronously retrieves a single path from the local {@link Model} only and will not retrieve missing paths from the {@link DataSource}. This method can only be invoked when the {@link Model} does not have a {@link DataSource} or from within a selector function. See {@link Model.prototype.get}. The getValueSync method differs from the asynchronous get methods (ex. get, getValues) in that it can be used to retrieve objects in addition to JSONGraph values.
-     * @arg {Path} path - The path to retrieve
-     * @return {*} - The value for the specified path
-     */
-    getValueSync: function(path) {
-        path = pathSyntax.fromPath(path);
-        if (Array.isArray(path) === false) {
-            throw new Error("Model#getValueSync must be called with an Array path.");
-        }
-        if (this._path.length) {
-            path = this._path.concat(path);
-        }
-        return this.syncCheck("getValueSync") && this._getValueSync(this, path).value;
-    },
-    setValueSync: function(path, value, errorSelector) {
-        path = pathSyntax.fromPath(path);
-
-        if(Array.isArray(path) === false) {
-            if(typeof errorSelector !== "function") {
-                errorSelector = value || this._errorSelector;
-            }
-            value = path.value;
-            path  = path.path;
-        }
-
-        if(Array.isArray(path) === false) {
-            throw new Error("Model#setValueSync must be called with an Array path.");
-        }
-
-        if(this.syncCheck("setValueSync")) {
-
-            var json = {};
-            var tEeAV = this._treatErrorsAsValues;
-            var boxed = this._boxed;
-
-            this._treatErrorsAsValues = true;
-            this._boxed = true;
-
-            this._setPathSetsAsJSON(this, [{path: path, value: value}], [json], errorSelector);
-
-            this._treatErrorsAsValues = tEeAV;
-            this._boxed = boxed;
-
-            json = json.json;
-
-            if(json && json.$type === ERROR && !this._treatErrorsAsValues) {
-                if(this._boxed) {
-                    throw json;
-                } else {
-                    throw json.value;
-                }
-            } else if(this._boxed) {
-                return json;
-            }
-
-            return json && json.value;
-        }
-    },
-    // TODO: Document selector function elsewhere and link
-    /**
-     * Synchronously returns a clone of the {@link Model} bound to a location within the {@link JSONGraph}. The bound location is never a {@link Reference}: any {@link Reference}s encountered while resolving the bound {@link Path} are always replaced with the {@link Reference}s target value. For subsequent operations on the {@link Model}, all paths will be evaluated relative to the bound path. This method can only be invoked when the {@link Model} does not have a {@link DataSource} or from within a selector function. Bind allows you to:
-     * - Expose only a fragment of the {@link JSONGraph} to components, rather than the entire graph
-     * - Hide the location of a {@link JSONGraph} fragment from components
-     * - Optimize for executing multiple operations and path looksup at/below the same location in the {@link JSONGraph}
-     * @param {Path} path - The path to bind to
-     * @return {Model}
-     */
-    bindSync: function(path) {
-        path = pathSyntax.fromPath(path);
-        if(Array.isArray(path) === false) {
-            throw new Error("Model#bindSync must be called with an Array path.");
-        }
-        var boundValue = this.syncCheck("bindSync") && getBoundValue(this, this._path.concat(path));
-        var node = boundValue.value;
-        path = boundValue.path;
-        if(boundValue.shorted) {
-            if(Boolean(node)) {
-                if(node.$type === ERROR) {
-                    if(this._boxed) {
-                        throw node;
-                    }
-                    throw node.value;
-                    // throw new Error("Model#bindSync can\'t bind to or beyond an error: " + boundValue.toString());
-                }
-            }
-            return undefined;
-        } else if(Boolean(node) && node.$type === ERROR) {
-            if(this._boxed) {
-                throw node;
-            }
-            throw node.value;
-        }
-        return this.clone(["_path", boundValue.path]);
-    },
-    clone: function() {
-
-        var self = this;
-        var clone = new Model();
-
-        var key, keyValue;
-
-        var keys = Object.keys(self);
-        var keysIdx = -1;
-        var keysLen = keys.length;
-        while(++keysIdx < keysLen) {
-            key = keys[keysIdx];
-            clone[key] = self[key];
-        }
-
-        var argsIdx = -1;
-        var argsLen = arguments.length;
-        while(++argsIdx < argsLen) {
-            keyValue = arguments[argsIdx];
-            clone[keyValue[0]] = keyValue[1];
-        }
-
-        return clone;
-    },
-    // TODO: Should we be clearer this only applies to "get" operations? I'm assuming that is true
-    /**
-     * Returns a clone of the {@link Model} that eanbles batching. Within the configured time period, paths for operations of the same type are collected and executed on the {@link DataSource} in a batch. Batching can make more efficient use of the {@link DataSource} depending on its implementation, for example, reducing the number of HTTP requests to the server
-     * @param {?Scheduler|number} schedulerOrDelay - Either a {@link Scheduler} that determines when to send a batch to the {@link DataSource}, or the number in milliseconds to collect a batch before sending to the {@link DataSource}. If this parameter is omitted, then batch collection ends at the end of the next tick.
-     * @return {Model}
-     */
-    batch: function(schedulerOrDelay) {
-        if(typeof schedulerOrDelay === "number") {
-            schedulerOrDelay = new TimeoutScheduler(Math.round(Math.abs(schedulerOrDelay)));
-        } else if(!schedulerOrDelay || !schedulerOrDelay.schedule) {
-            schedulerOrDelay = new ASAPScheduler();
-        }
-        return this.clone(["_request", new RequestQueue(this, schedulerOrDelay)]);
-    },
-    /**
-     * Returns a clone of the {@link Model} that disables batching. This is the default mode. Each operation will be executed on the {@link DataSource} separately
-     * @name unbatch
-     * @memberof Model.prototype
-     * @function
-     * @return {Model} a {@link Model} that batches requests of the same type and sends them to the data source together.
-     */
-    unbatch: function() {
-        return this.clone(["_request", new RequestQueue(this, new ImmediateScheduler())]);
-    },
-    // TODO: Add example of treatErrorsAsValues
-    /**
-     * Returns a clone of the {@link Model} that treats errors as values. Errors will be reported in the same callback used to report data. Errors will appear as objects in responses, rather than being sent to the {@link Observable~onErrorCallback} callback of the {@link ModelResponse}.
-     * @return {Model}
-     */
-    treatErrorsAsValues: function() {
-        return this.clone(["_treatErrorsAsValues", true]);
-    },
-    asDataSource: function() {
-        return new ModelDataSourceAdapter(this);
-    },
-    materialize: function() {
-        return this.clone(["_materialized", true]);
-    },
-    /**
-     * Returns a clone of the {@link Model} that boxes values returning the wrapper ({@link Atom}, {@link Reference}, or {@link Error}), rather than the value inside it. This allows any metadata attached to the wrapper to be inspected
-     * @return {Model}
-     */
-    boxValues: function() {
-        return this.clone(["_boxed", true]);
-    },
-    /**
-     * Returns a clone of the {@link Model} that unboxes values, returning the value inside of the wrapper ({@link Atom}, {@link Reference}, or {@link Error}), rather than the wrapper itself. This is the default mode.
-     * @return {Model}
-     */
-    unboxValues: function() {
-        return this.clone(["_boxed", false]);
-    },
-    /**
-     * Returns a clone of the {@link Model} that only uses the local {@link JSONGraph} and never uses a {@link DataSource} to retrieve missing paths
-     * @return {Model}
-     */
-    withoutDataSource: function() {
-        return this.clone(["_dataSource", null]);
-    },
-    withComparator: function(compare) {
-        return this.clone(["_comparator", compare]);
-    },
-    withoutComparator: function(compare) {
-        return this.clone(["_comparator", Model.prototype._comparator]);
-    },
-    syncCheck: function(name) {
-        if (Boolean(this._dataSource) && this._root.allowSync <= 0 && this._root.unsafeMode === false) {
-            throw new Error("Model#" + name + " may only be called within the context of a request selector.");
-        }
-        return true;
-    },
-    toJSON: function() {
-        return { $type: "ref", value: this._path };
-    }
-};
-
-},{"155":155,"157":157,"158":158,"159":159,"161":161,"166":166,"192":192,"193":193,"194":194,"195":195,"201":201,"202":202,"238":238,"290":290,"291":291,"292":292,"320":320}],157:[function(require,module,exports){
+},{"3":3,"308":308}],156:[function(require,module,exports){
+arguments[4][4][0].apply(exports,arguments)
+},{"155":155,"157":157,"158":158,"159":159,"161":161,"166":166,"192":192,"193":193,"194":194,"195":195,"201":201,"202":202,"238":238,"290":290,"291":291,"292":292,"325":325,"4":4}],157:[function(require,module,exports){
 arguments[4][5][0].apply(exports,arguments)
 },{"5":5}],158:[function(require,module,exports){
 arguments[4][6][0].apply(exports,arguments)
-},{"155":155,"320":320,"355":355,"6":6}],159:[function(require,module,exports){
+},{"155":155,"325":325,"332":332,"6":6}],159:[function(require,module,exports){
 arguments[4][7][0].apply(exports,arguments)
 },{"7":7}],160:[function(require,module,exports){
 arguments[4][8][0].apply(exports,arguments)
 },{"155":155,"156":156,"8":8}],161:[function(require,module,exports){
-module.exports = call;
-
-var falcor = require(155);
-var ModelResponse = require(158);
-
-function call(path, args, suffixes, paths, selector) {
-
-    var model = this;
-    args && Array.isArray(args) || (args = []);
-    suffixes && Array.isArray(suffixes) || (suffixes = []);
-    paths = Array.prototype.slice.call(arguments, 3);
-    if (typeof (selector = paths[paths.length - 1]) !== "function") {
-        selector = undefined;
-    } else {
-        paths = paths.slice(0, -1);
-    }
-
-    return ModelResponse.create(function (options) {
-
-        var rootModel = model.clone(["_path", []]),
-            localRoot = rootModel.withoutDataSource(),
-            dataSource = model._dataSource,
-            boundPath = model._path,
-            callPath = boundPath.concat(path),
-            thisPath = callPath.slice(0, -1);
-
-        var disposable = model.
-            getValue(path).
-            flatMap(function (localFn) {
-                if (typeof localFn === "function") {
-                    return falcor.Observable.return(localFn.
-                        apply(rootModel.bindSync(thisPath), args).
-                        map(function (pathValue) {
-                            return {
-                                path: thisPath.concat(pathValue.path),
-                                value: pathValue.value
-                            };
-                        }).
-                        toArray().
-                        flatMap(function (pathValues) {
-                            return localRoot.set.
-                                apply(localRoot, pathValues).
-                                toJSONG();
-                        }).
-                        flatMap(function (envelope) {
-                            return rootModel.get.apply(rootModel,
-                                envelope.paths.reduce(function (paths, path) {
-                                    return paths.concat(suffixes.map(function (suffix) {
-                                        return path.concat(suffix);
-                                    }));
-                                }, []).
-                                    concat(paths.reduce(function (paths, path) {
-                                        return paths.concat(thisPath.concat(path));
-                                    }, []))).
-                                toJSONG();
-                        }));
-                }
-                return falcor.Observable.empty();
-            }).
-            defaultIfEmpty(dataSource && dataSource.call(path, args, suffixes, paths) || falcor.Observable.empty()).
-            mergeAll().
-            subscribe(function (envelope) {
-                var invalidated = envelope.invalidated;
-                if (invalidated && invalidated.length) {
-                    invalidatePaths(rootModel, invalidated, undefined, model._errorSelector);
-                }
-                disposable = localRoot.
-                    set(envelope, function () {
-                        return model;
-                    }).
-                    subscribe(function (model) {
-                        var getPaths = envelope.paths.map(function (path) {
-                            return path.slice(boundPath.length);
-                        });
-                        if (selector) {
-                            getPaths[getPaths.length] = function () {
-                                return selector.call(model, getPaths);
-                            };
-                        }
-                        disposable = model.get.apply(model, getPaths).subscribe(options);
-                    });
-            });
-
-        return {
-            dispose: function () {
-                disposable && disposable.dispose();
-                disposable = undefined;
-            }
-        };
-    });
-}
-
-},{"155":155,"158":158}],162:[function(require,module,exports){
+arguments[4][9][0].apply(exports,arguments)
+},{"155":155,"158":158,"292":292,"325":325,"9":9}],162:[function(require,module,exports){
 arguments[4][10][0].apply(exports,arguments)
 },{"10":10,"178":178,"191":191}],163:[function(require,module,exports){
 arguments[4][11][0].apply(exports,arguments)
@@ -8933,9 +8470,8 @@ arguments[4][72][0].apply(exports,arguments)
 },{"226":226,"72":72}],225:[function(require,module,exports){
 arguments[4][73][0].apply(exports,arguments)
 },{"226":226,"73":73}],226:[function(require,module,exports){
-// This may look like an empty string, but it's actually a single zero-width-space character.
-module.exports = "​";
-},{}],227:[function(require,module,exports){
+arguments[4][74][0].apply(exports,arguments)
+},{"74":74}],227:[function(require,module,exports){
 arguments[4][75][0].apply(exports,arguments)
 },{"226":226,"75":75}],228:[function(require,module,exports){
 arguments[4][76][0].apply(exports,arguments)
@@ -9082,1209 +8618,6 @@ arguments[4][146][0].apply(exports,arguments)
 },{"146":146,"218":218,"239":239,"255":255,"256":256,"257":257,"271":271,"272":272,"273":273,"274":274,"278":278,"279":279,"292":292,"299":299}],299:[function(require,module,exports){
 arguments[4][147][0].apply(exports,arguments)
 },{"147":147,"218":218,"226":226,"228":228,"229":229,"230":230,"255":255,"257":257,"272":272,"273":273,"279":279}],300:[function(require,module,exports){
-module.exports = function(x) {
-    return x;
-};
-
-},{}],301:[function(require,module,exports){
-var Observer = require(302);
-var Disposable = require(305);
-
-function Observable(s) {
-    this._subscribe = s;
-};
-
-Observable.create = Observable.createWithDisposable = function(s) {
-    return new Observable(s);
-};
-
-Observable.fastCreateWithDisposable = Observable.create;
-
-Observable.fastReturnValue = function fastReturnValue(value) {
-    return Observable.create(function(observer) {
-        observer.onNext(value);
-        observer.onCompleted();
-    });
-};
-
-Observable.empty = function empty() {
-    return Observable.create(function(observer) {
-        observer.onCompleted();
-    });
-};
-
-Observable.of = function of() {
-    var len = arguments.length, args = new Array(len);
-    for(var i = 0; i < len; i++) { args[i] = arguments[i]; }
-    return Observable.create(function(observer) {
-        var errorOcurred = false;
-        try {
-            for(var i = 0; i < len; ++i) {
-                observer.onNext(args[i]);
-            }
-        } catch(e) {
-            errorOcurred = true;
-            observer.onError(e);
-        }
-        if (errorOcurred !== true) {
-            observer.onCompleted();
-        }
-    });
-};
-
-Observable.from = function from(x) {
-    if (Array.isArray(x)) {
-        return Observable.create(function(observer) {
-            var err = false;
-            x.forEach(function(el) {
-                try {
-                    observer.onNext(el);
-                } catch (e) {
-                    err = true;
-                    observer.onError(e);
-                }
-            });
-
-            if (!err) {
-                observer.onCompleted();
-            }
-        });
-    }
-};
-
-Observable.prototype.subscribe = function subscribe(n, e, c) {
-    return fixDisposable(this._subscribe(
-        (n && typeof n === 'object') ?
-        n :
-        Observer.create(n, e, c)
-    ));
-};
-
-function fixDisposable(disposable) {
-    switch(typeof disposable) {
-        case "function":
-            return new Disposable(disposable);
-        case "object":
-            return disposable || Disposable.empty;
-        default:
-            return Disposable.empty;
-    }
-}
-
-module.exports = Observable;
-},{"302":302,"305":305}],302:[function(require,module,exports){
-var I = require(300);
-var Observer = module.exports = function Observer(n, e, c) {
-    this.onNext =       n || I;
-    this.onError =      e || I;
-    this.onCompleted =  c || I;
-};
-
-Observer.create = function(n, e, c) {
-    return new Observer(n, e, c);
-};
-
-
-},{"300":300}],303:[function(require,module,exports){
-var Subject = module.exports = function Subject() {
-    this.observers = [];
-};
-Subject.prototype.subscribe = function(subscriber) {
-    var a = this.observers,
-        n = a.length;
-    a[n] = subscriber;
-    return {
-        dispose: function() {
-            a.splice(n, 1);
-        }
-    };
-};
-Subject.prototype.onNext = function(x) {
-    var listeners = this.observers.concat(),
-        i = -1, n = listeners.length;
-    while(++i < n) {
-        listeners[i].onNext(x);
-    }
-};
-Subject.prototype.onError = function(e) {
-    var listeners = this.observers.concat(),
-        i  = -1, n = listeners.length;
-    this.observers.length = 0;
-    while(++i < n) {
-        listeners[i].onError(e);
-    }
-};
-Subject.prototype.onCompleted = function() {
-    var listeners = this.observers.concat(),
-        i  = -1, n = listeners.length;
-    this.observers.length = 0;
-    while(++i < n) {
-        listeners[i].onCompleted();
-    }
-};
-
-},{}],304:[function(require,module,exports){
-var Disposable = require(305);
-
-function CompositeDisposable() {
-    this.length = 0;
-    this.disposables = [];
-    if(arguments.length) {
-        this.add.apply(this, arguments);
-    }
-}
-
-CompositeDisposable.prototype = Object.create(Disposable.prototype);
-
-CompositeDisposable.prototype.add = function() {
-    var disposables = this.disposables;
-    var args = [];
-    var argsLen = arguments.length;
-    var argsIdx = -1;
-    while(++argsIdx < argsLen) {
-        args[argsIdx] = arguments[argsIdx];
-    }
-    if(argsLen > 0) {
-        argsIdx = -1;
-        argsLen = args.length;
-        while(++argsIdx < argsLen) {
-            var disposable = args[argsIdx];
-            if(Array.isArray(disposable)) {
-                argsLen = args.push.apply(args, disposable);
-            } else if(!!disposable) {
-                switch(typeof disposable) {
-                    case "function":
-                        disposables.push(new Disposable(disposable));
-                        break;
-                    case "object":
-                        if(typeof disposable.dispose === "function") {
-                            disposables.push(disposable);
-                        }
-                        break;
-                }
-            }
-        }
-    }
-    if(this.disposed) {
-        this.action();
-    }
-    this.length = disposables.length;
-    return this;
-};
-
-CompositeDisposable.prototype.remove = function() {
-    var disposables = this.disposables;
-    var args = [];
-    var argsLen = arguments.length;
-    var argsIdx = -1;
-    while(++argsIdx < argsLen) {
-        args[argsIdx] = arguments[argsIdx];
-    }
-    if(argsLen > 0) {
-        argsIdx = -1;
-        argsLen = args.length;
-        while(++argsIdx < argsLen) {
-            var disposable = args[argsIdx];
-            if(Array.isArray(disposable)) {
-                argsLen = args.push.apply(args, disposable);
-            } else if(!!disposable) {
-                var disposableIndex = disposables.indexOf(disposable);
-                if(~disposableIndex) {
-                    disposables.splice(disposableIndex, 1);
-                }
-            }
-        }
-    }
-    this.length = disposables.length;
-    return this;
-}
-
-CompositeDisposable.prototype.action = function() {
-    this.disposed = true;
-    var disposables = this.disposables;
-    var disposablesCount = disposables.length;
-    while(--disposablesCount > -1) {
-        var disposable = disposables[disposablesCount];
-        disposables.length = disposablesCount;
-        disposable.dispose();
-    }
-};
-
-module.exports = CompositeDisposable;
-},{"305":305}],305:[function(require,module,exports){
-function Disposable(a) {
-    this.action = a;
-};
-
-Disposable.create = function(a) {
-    return new Disposable(a);
-};
-
-Disposable.empty = new Disposable(function(){});
-
-Disposable.prototype.dispose = function() {
-    if(typeof this.action === 'function') {
-        this.action();
-    }
-};
-
-module.exports = Disposable;
-},{}],306:[function(require,module,exports){
-var Disposable = require(305);
-
-function SerialDisposable() {
-    if(arguments.length > 0) {
-        this.setDisposable(arguments[0]);
-    }
-}
-
-SerialDisposable.prototype = Object.create(Disposable.prototype);
-
-SerialDisposable.prototype.action = function() {
-    if(this.disposable) {
-        this.disposable.dispose();
-        this.disposable = undefined;
-    }
-    this.disposed = true;
-};
-
-SerialDisposable.prototype.setDisposable = function(d) {
-    if(this.disposed) {
-        d.dispose();
-    } else {
-        if(this.disposable) {
-            this.disposable.dispose();
-        }
-        this.disposable = d;
-    }
-};
-
-module.exports = SerialDisposable;
-},{"305":305}],307:[function(require,module,exports){
-(function (global){
-var Rx;
-
-if (typeof window !== "undefined" && typeof window["Rx"] !== "undefined") {
-    // Browser environment
-    Rx = window["Rx"];
-} else if (typeof global !== "undefined" && typeof global["Rx"] !== "undefined") {
-    // Node.js environment
-    Rx = global["Rx"];
-} else if (typeof require !== 'undefined' || typeof window !== 'undefined' && window.require) {
-    var r = typeof require !== 'undefined' && require || window.require;
-    try {
-        // CommonJS environment with rx module
-        Rx = r("rx");
-    } catch(e) {
-        Rx = undefined;
-    }
-}
-
-if (Rx === undefined) {
-    
-    var Observable = require(301);
-    
-    Observable.prototype.materialize = require(313);
-    Observable.prototype.reduce = require(315);
-    Observable.prototype.catchException = require(308);
-    Observable.prototype.toArray = require(316);
-    Observable.prototype.mergeAll = require(314);
-    Observable.prototype.map = require(312);
-    Observable.prototype.flatMap = require(311);
-    Observable.prototype.defaultIfEmpty = require(309);
-    Observable.prototype.do = require(310);
-    
-    Observable.prototype.forEach = Observable.prototype.subscribe;
-    Observable.prototype.select = Observable.prototype.map;
-    Observable.prototype.selectMany = Observable.prototype.flatMap;
-    Observable.prototype.doAction = Observable.prototype.do;
-    
-    Rx = {
-        Disposable: require(305),
-        CompositeDisposable: require(304),
-        SerialDisposable: require(306),
-        Observable: Observable,
-        Observer: require(302),
-        Subject: require(303),
-    };
-}
-
-module.exports = Rx;
-
-}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"301":301,"302":302,"303":303,"304":304,"305":305,"306":306,"308":308,"309":309,"310":310,"311":311,"312":312,"313":313,"314":314,"315":315,"316":316}],308:[function(require,module,exports){
-var Observable = require(301);
-var CompositeDisposable = require(304);
-var SerialDisposable = require(306);
-
-module.exports = function catchException(next) {
-    var source = this;
-    return Observable.create(function(o) {
-        var m = new SerialDisposable();
-        m.setDisposable(source.subscribe(
-            function(x) { o.onNext(x); },
-            function(e) {
-                m.setDisposable(((typeof next === 'function') ? next(e) : next).subscribe(o));
-            },
-            function() { o.onCompleted(); }
-        ))
-        return m;
-    });
-}
-},{"301":301,"304":304,"306":306}],309:[function(require,module,exports){
-var Observable = require(301);
-
-module.exports = function defaultIfEmpty(value) {
-    var source = this;
-    return Observable.create(function(observer) {
-        var hasValue = false;
-        return source.subscribe(function(x) {
-            hasValue = true;
-            observer.onNext(x);
-        },
-        function(e) { observer.onError(e); },
-        function( ) {
-            if(!hasValue) {
-                observer.onNext(value);
-            }
-            observer.onCompleted();
-        })
-    });
-};
-},{"301":301}],310:[function(require,module,exports){
-var Observable = require(301);
-var Observer = require(302);
-
-module.exports = function doAction() {
-    var actions = arguments[0];
-    if (typeof arguments[0] === "function" ||
-        typeof arguments[1] === "function" ||
-        typeof arguments[2] === "function" ){
-        actions = Observer.create.apply(Observer, arguments);
-    }
-    var source = this;
-    return Observable.create(function(observer) {
-        return source.subscribe(
-            function(x) {
-                actions.onNext(x);
-                observer.onNext(x);
-            },
-            function(e) {
-                actions.onError(e);
-                observer.onError(e);
-            },
-            function( ) {
-                actions.onCompleted();
-                observer.onCompleted();
-            });
-    });
-};
-
-},{"301":301,"302":302}],311:[function(require,module,exports){
-var Observable = require(301);
-module.exports = function flatMap(selector) {
-    if(Boolean(selector) && typeof selector === "object") {
-        var obs = selector;
-        selector = function() { return obs; };
-    }
-    return this.map(selector).mergeAll();
-}
-},{"301":301}],312:[function(require,module,exports){
-var Observable = require(301);
-
-module.exports = function map(selector) {
-    var source = this;
-    return Observable.create(function(observer) {
-        return source.subscribe(
-            function(x) {
-                try {
-                    var errored = false;
-                    var value = selector(x);
-                } catch(e) {
-                    errored = true;
-                    observer.onError(e);
-                } finally {
-                    if(errored === false) {
-                        observer.onNext(value);
-                    }
-                }
-            },
-            function(e) { observer.onError(e); },
-            function( ) { observer.onCompleted(); }
-        )
-    });
-};
-},{"301":301}],313:[function(require,module,exports){
-var Observable = require(301);
-
-module.exports = function materialize() {
-    var source = this;
-    return Observable.create(function(observer) {
-        source.subscribe(function(x) {
-            try {
-                observer.onNext({kind: 'N', value: x});
-            } catch(e) {
-                observer.onError(e);
-            }
-        }, function(err) {
-            observer.onNext({kind: 'E', value: err});
-            observer.onCompleted();
-        }, function() {
-            observer.onNext({kind: 'C'});
-            observer.onCompleted();
-        });
-    });
-}
-},{"301":301}],314:[function(require,module,exports){
-var Observable = require(301);
-var Disposable = require(305);
-var CompositeDisposable = require(304);
-var SerialDisposable = require(306);
-
-module.exports = function mergeAll() {
-    var source = this;
-    return Observable.create(function(observer) {
-        var m = new SerialDisposable();
-        var group = new CompositeDisposable(m);
-        var isStopped = false;
-        m.setDisposable(source.subscribe(function(innerObs) {
-            var innerDisposable = new SerialDisposable();
-            group.add(innerDisposable);
-            innerDisposable.setDisposable(innerObs.subscribe(
-                function(x) { observer.onNext(x); },
-                function(e) { observer.onError(e); },
-                function( ) {
-                    group.remove(innerDisposable);
-                    if(isStopped && group.length === 1) {
-                        observer.onCompleted();
-                    }
-                }));
-        },
-        function(e) { observer.onError(e); },
-        function( ) {
-            isStopped = true;
-            if(group.length === 1) {
-                observer.onCompleted();
-            }
-        }));
-        return group;
-    });
-};
-},{"301":301,"304":304,"305":305,"306":306}],315:[function(require,module,exports){
-var Observable = require(301);
-
-module.exports = function reduce(selector, seedValue) {
-    var source = this;
-    var hasSeed = arguments.length > 1;
-    return Observable.create(function(observer) {
-        var accValue = seedValue;
-        var hasValue = false;
-        return source.subscribe(
-            function(x) {
-                try {
-                    if(hasValue || (hasValue = hasSeed)) {
-                        accValue = selector(accValue, x);
-                        return;
-                    }
-                    accValue = x;
-                    hasValue = true;
-                } catch (e) {
-                    observer.onError(e);
-                }
-            },
-            function(e) { observer.onError(e); },
-            function( ) {
-                if(hasValue || hasSeed) {
-                    observer.onNext(accValue);
-                }
-                observer.onCompleted();
-            });
-    });
-}
-},{"301":301}],316:[function(require,module,exports){
-var Observable = require(301);
-
-module.exports = function toArray() {
-    var source = this;
-    return Observable.create(function(observer) {
-        var list = [];
-        return source.subscribe(
-            function(x) { list.push(x); },
-            function(e) { observer.onError(e); },
-            function( ) {
-                observer.onNext(list);
-                observer.onCompleted();
-            });
-    });
-};
-},{"301":301}],317:[function(require,module,exports){
-module.exports = {
-    integers: 'integers',
-    ranges: 'ranges',
-    keys: 'keys'
-};
-
-},{}],318:[function(require,module,exports){
-var TokenTypes = {
-    token: 'token',
-    dotSeparator: '.',
-    commaSeparator: ',',
-    openingBracket: '[',
-    closingBracket: ']',
-    openingBrace: '{',
-    closingBrace: '}',
-    escape: '\\',
-    space: ' ',
-    colon: ':',
-    quote: 'quote',
-    unknown: 'unknown'
-};
-
-module.exports = TokenTypes;
-
-},{}],319:[function(require,module,exports){
-module.exports = {
-    indexer: {
-        nested: 'Indexers cannot be nested.',
-        needQuotes: 'unquoted indexers must be numeric.',
-        empty: 'cannot have empty indexers.',
-        leadingDot: 'Indexers cannot have leading dots.',
-        leadingComma: 'Indexers cannot have leading comma.',
-        requiresComma: 'Indexers require commas between indexer args.',
-        routedTokens: 'Only one token can be used per indexer when specifying routed tokens.'
-    },
-    range: {
-        precedingNaN: 'ranges must be preceded by numbers.',
-        suceedingNaN: 'ranges must be suceeded by numbers.'
-    },
-    routed: {
-        invalid: 'Invalid routed token.  only integers|ranges|keys are supported.'
-    },
-    quote: {
-        empty: 'cannot have empty quoted keys.',
-        illegalEscape: 'Invalid escape character.  Only quotes are escapable.'
-    },
-    unexpectedToken: 'Unexpected token.',
-    invalidIdentifier: 'Invalid Identifier.',
-    invalidPath: 'Please provide a valid path.',
-    throwError: function(err, tokenizer, token) {
-        if (token) {
-            throw err + ' -- ' + tokenizer.parseString + ' with next token: ' + token;
-        }
-        throw err + ' -- ' + tokenizer.parseString;
-    }
-};
-
-
-},{}],320:[function(require,module,exports){
-var Tokenizer = require(326);
-var head = require(321);
-var RoutedTokens = require(317);
-
-var parser = function parser(string, extendedRules) {
-    return head(new Tokenizer(string, extendedRules));
-};
-
-module.exports = parser;
-
-// Constructs the paths from paths / pathValues that have strings.
-// If it does not have a string, just moves the value into the return
-// results.
-parser.fromPathsOrPathValues = function(paths, ext) {
-    var out = [];
-    for (i = 0, len = paths.length; i < len; i++) {
-
-        // Is the path a string
-        if (typeof paths[i] === 'string') {
-            out[i] = parser(paths[i], ext);
-        }
-
-        // is the path a path value with a string value.
-        else if (typeof paths[i].path === 'string') {
-            out[i] = {
-                path: parser(paths[i].path, ext), value: paths[i].value
-            };
-        }
-
-        // just copy it over.
-        else {
-            out[i] = paths[i];
-        }
-    }
-
-    return out;
-};
-
-// If the argument is a string, this with convert, else just return
-// the path provided.
-parser.fromPath = function(path, ext) {
-    if (typeof path === 'string') {
-        return parser(path, ext);
-    }
-    return path;
-};
-
-// Potential routed tokens.
-parser.RoutedTokens = RoutedTokens;
-
-},{"317":317,"321":321,"326":326}],321:[function(require,module,exports){
-var TokenTypes = require(318);
-var E = require(319);
-var indexer = require(322);
-
-/**
- * The top level of the parse tree.  This returns the generated path
- * from the tokenizer.
- */
-module.exports = function head(tokenizer) {
-    var token = tokenizer.next();
-    var state = {};
-    var out = [];
-
-    while (!token.done) {
-
-        switch (token.type) {
-            case TokenTypes.token:
-                var first = +token.token[0];
-                if (!isNaN(first)) {
-                    E.throwError(E.invalidIdentifier, tokenizer);
-                }
-                out[out.length] = token.token;
-                break;
-
-            // dotSeparators at the top level have no meaning
-            case TokenTypes.dotSeparator:
-                if (out.length === 0) {
-                    E.throwError(E.unexpectedToken, tokenizer);
-                }
-                break;
-
-            // Spaces do nothing.
-            case TokenTypes.space:
-                // NOTE: Spaces at the top level are allowed.
-                // titlesById  .summary is a valid path.
-                break;
-
-
-            // Its time to decend the parse tree.
-            case TokenTypes.openingBracket:
-                indexer(tokenizer, token, state, out);
-                break;
-
-            default:
-                E.throwError(E.unexpectedToken, tokenizer);
-                break;
-        }
-
-        // Keep cycling through the tokenizer.
-        token = tokenizer.next();
-    }
-
-    if (out.length === 0) {
-        E.throwError(E.invalidPath, tokenizer);
-    }
-
-    return out;
-};
-
-
-},{"318":318,"319":319,"322":322}],322:[function(require,module,exports){
-var TokenTypes = require(318);
-var E = require(319);
-var idxE = E.indexer;
-var range = require(324);
-var quote = require(323);
-var routed = require(325);
-
-/**
- * The indexer is all the logic that happens in between
- * the '[', opening bracket, and ']' closing bracket.
- */
-module.exports = function indexer(tokenizer, openingToken, state, out) {
-    var token = tokenizer.next();
-    var done = false;
-    var allowedMaxLength = 1;
-    var routedIndexer = false;
-
-    // State variables
-    state.indexer = [];
-
-    while (!token.done) {
-
-        switch (token.type) {
-            case TokenTypes.token:
-            case TokenTypes.quote:
-
-                // ensures that token adders are properly delimited.
-                if (state.indexer.length === allowedMaxLength) {
-                    E.throwError(idxE.requiresComma, tokenizer);
-                }
-                break;
-        }
-
-        switch (token.type) {
-            // Extended syntax case
-            case TokenTypes.openingBrace:
-                routedIndexer = true;
-                routed(tokenizer, token, state, out);
-                break;
-
-
-            case TokenTypes.token:
-                var t = +token.token;
-                if (isNaN(t)) {
-                    E.throwError(idxE.needQuotes, tokenizer);
-                }
-                state.indexer[state.indexer.length] = t;
-                break;
-
-            // dotSeparators at the top level have no meaning
-            case TokenTypes.dotSeparator:
-                if (!state.indexer.length) {
-                    E.throwError(idxE.leadingDot, tokenizer);
-                }
-                range(tokenizer, token, state, out);
-                break;
-
-            // Spaces do nothing.
-            case TokenTypes.space:
-                break;
-
-            case TokenTypes.closingBracket:
-                done = true;
-                break;
-
-
-            // The quotes require their own tree due to what can be in it.
-            case TokenTypes.quote:
-                quote(tokenizer, token, state, out);
-                break;
-
-
-            // Its time to decend the parse tree.
-            case TokenTypes.openingBracket:
-                E.throwError(idxE.nested, tokenizer);
-                break;
-
-            case TokenTypes.commaSeparator:
-                ++allowedMaxLength;
-                break;
-
-            default:
-                E.throwError(idxE.unexpectedToken, tokenizer);
-        }
-
-        // If done, leave loop
-        if (done) {
-            break;
-        }
-
-        // Keep cycling through the tokenizer.
-        token = tokenizer.next();
-    }
-
-    if (state.indexer.length === 0) {
-        E.throwError(idxE.empty, tokenizer);
-    }
-
-    if (state.indexer.length > 1 && routedIndexer) {
-        E.throwError(idxE.routedTokens, tokenizer);
-    }
-
-    // Remember, if an array of 1, keySets will be generated.
-    if (state.indexer.length === 1) {
-        state.indexer = state.indexer[0];
-    }
-
-    out[out.length] = state.indexer;
-
-    // Clean state.
-    state.indexer = undefined;
-};
-
-
-},{"318":318,"319":319,"323":323,"324":324,"325":325}],323:[function(require,module,exports){
-var TokenTypes = require(318);
-var E = require(319);
-var quoteE = E.quote;
-
-/**
- * quote is all the parse tree in between quotes.  This includes the only
- * escaping logic.
- *
- * parse-tree:
- * <opening-quote>(.|(<escape><opening-quote>))*<opening-quote>
- */
-module.exports = function quote(tokenizer, openingToken, state, out) {
-    var token = tokenizer.next();
-    var innerToken = '';
-    var openingQuote = openingToken.token;
-    var escaping = false;
-    var done = false;
-
-    while (!token.done) {
-
-        switch (token.type) {
-            case TokenTypes.token:
-            case TokenTypes.space:
-
-            case TokenTypes.dotSeparator:
-            case TokenTypes.commaSeparator:
-
-            case TokenTypes.openingBracket:
-            case TokenTypes.closingBracket:
-            case TokenTypes.openingBrace:
-            case TokenTypes.closingBrace:
-                if (escaping) {
-                    E.throwError(quoteE.illegalEscape, tokenizer);
-                }
-
-                innerToken += token.token;
-                break;
-
-
-            case TokenTypes.quote:
-                // the simple case.  We are escaping
-                if (escaping) {
-                    innerToken += token.token;
-                    escaping = false;
-                }
-
-                // its not a quote that is the opening quote
-                else if (token.token !== openingQuote) {
-                    innerToken += token.token;
-                }
-
-                // last thing left.  Its a quote that is the opening quote
-                // therefore we must produce the inner token of the indexer.
-                else {
-                    done = true;
-                }
-
-                break;
-            case TokenTypes.escape:
-                escaping = true;
-                break;
-
-            default:
-                E.throwError(E.unexpectedToken, tokenizer);
-        }
-
-        // If done, leave loop
-        if (done) {
-            break;
-        }
-
-        // Keep cycling through the tokenizer.
-        token = tokenizer.next();
-    }
-
-    if (innerToken.length === 0) {
-        E.throwError(quoteE.empty, tokenizer);
-    }
-
-    state.indexer[state.indexer.length] = innerToken;
-};
-
-
-},{"318":318,"319":319}],324:[function(require,module,exports){
-var Tokenizer = require(326);
-var TokenTypes = require(318);
-var E = require(319);
-
-/**
- * The indexer is all the logic that happens in between
- * the '[', opening bracket, and ']' closing bracket.
- */
-module.exports = function range(tokenizer, openingToken, state, out) {
-    var token = tokenizer.peek();
-    var dotCount = 1;
-    var done = false;
-    var inclusive = true;
-
-    // Grab the last token off the stack.  Must be an integer.
-    var idx = state.indexer.length - 1;
-    var from = Tokenizer.toNumber(state.indexer[idx]);
-    var to;
-
-    if (isNaN(from)) {
-        E.throwError(E.range.precedingNaN, tokenizer);
-    }
-
-    // Why is number checking so difficult in javascript.
-
-    while (!done && !token.done) {
-
-        switch (token.type) {
-
-            // dotSeparators at the top level have no meaning
-            case TokenTypes.dotSeparator:
-                if (dotCount === 3) {
-                    E.throwError(E.unexpectedToken, tokenizer);
-                }
-                ++dotCount;
-
-                if (dotCount === 3) {
-                    inclusive = false;
-                }
-                break;
-
-            case TokenTypes.token:
-                // move the tokenizer forward and save to.
-                to = Tokenizer.toNumber(tokenizer.next().token);
-
-                // throw potential error.
-                if (isNaN(to)) {
-                    E.throwError(E.range.suceedingNaN, tokenizer);
-                }
-
-                done = true;
-                break;
-
-            default:
-                done = true;
-                break;
-        }
-
-        // Keep cycling through the tokenizer.  But ranges have to peek
-        // before they go to the next token since there is no 'terminating'
-        // character.
-        if (!done) {
-            tokenizer.next();
-
-            // go to the next token without consuming.
-            token = tokenizer.peek();
-        }
-
-        // break and remove state information.
-        else {
-            break;
-        }
-    }
-
-    state.indexer[idx] = {from: from, to: inclusive ? to : to - 1};
-};
-
-
-},{"318":318,"319":319,"326":326}],325:[function(require,module,exports){
-var TokenTypes = require(318);
-var RoutedTokens = require(317);
-var E = require(319);
-var routedE = E.routed;
-
-/**
- * The routing logic.
- *
- * parse-tree:
- * <opening-brace><routed-token>(:<token>)<closing-brace>
- */
-module.exports = function routed(tokenizer, openingToken, state, out) {
-    var routeToken = tokenizer.next();
-    var named = false;
-    var name = '';
-
-    // ensure the routed token is a valid ident.
-    switch (routeToken.token) {
-        case RoutedTokens.integers:
-        case RoutedTokens.ranges:
-        case RoutedTokens.keys:
-            //valid
-            break;
-        default:
-            E.throwError(routedE.invalid, tokenizer);
-            break;
-    }
-
-    // Now its time for colon or ending brace.
-    var next = tokenizer.next();
-
-    // we are parsing a named identifier.
-    if (next.type === TokenTypes.colon) {
-        named = true;
-
-        // Get the token name.
-        next = tokenizer.next();
-        if (next.type !== TokenTypes.token) {
-            E.throwError(routedE.invalid, tokenizer);
-        }
-        name = next.token;
-
-        // move to the closing brace.
-        next = tokenizer.next();
-    }
-
-    // must close with a brace.
-
-    if (next.type === TokenTypes.closingBrace) {
-        var outputToken = {
-            type: routeToken.token,
-            named: named,
-            name: name
-        };
-        state.indexer[state.indexer.length] = outputToken;
-    }
-
-    // closing brace expected
-    else {
-        E.throwError(routedE.invalid, tokenizer);
-    }
-
-};
-
-
-},{"317":317,"318":318,"319":319}],326:[function(require,module,exports){
-var TokenTypes = require(318);
-var DOT_SEPARATOR = '.';
-var COMMA_SEPARATOR = ',';
-var OPENING_BRACKET = '[';
-var CLOSING_BRACKET = ']';
-var OPENING_BRACE = '{';
-var CLOSING_BRACE = '}';
-var COLON = ':';
-var ESCAPE = '\\';
-var DOUBLE_OUOTES = '"';
-var SINGE_OUOTES = "'";
-var SPACE = " ";
-var SPECIAL_CHARACTERS = '\\\'"[]., ';
-var EXT_SPECIAL_CHARACTERS = '\\{}\'"[]., :';
-
-var Tokenizer = module.exports = function(string, ext) {
-    this._string = string;
-    this._idx = -1;
-    this._extended = ext;
-    this.parseString = '';
-};
-
-Tokenizer.prototype = {
-    /**
-     * grabs the next token either from the peek operation or generates the
-     * next token.
-     */
-    next: function() {
-        var nextToken = this._nextToken ?
-            this._nextToken : getNext(this._string, this._idx, this._extended);
-
-        this._idx = nextToken.idx;
-        this._nextToken = false;
-        this.parseString += nextToken.token.token;
-
-        return nextToken.token;
-    },
-
-    /**
-     * will peak but not increment the tokenizer
-     */
-    peek: function() {
-        var nextToken = this._nextToken ?
-            this._nextToken : getNext(this._string, this._idx, this._extended);
-        this._nextToken = nextToken;
-
-        return nextToken.token;
-    }
-};
-
-Tokenizer.toNumber = function toNumber(x) {
-    if (!isNaN(+x)) {
-        return +x;
-    }
-    return NaN;
-};
-
-function toOutput(token, type, done) {
-    return {
-        token: token,
-        done: done,
-        type: type
-    };
-}
-
-function getNext(string, idx, ext) {
-    var output = false;
-    var token = '';
-    var specialChars = ext ?
-        EXT_SPECIAL_CHARACTERS : SPECIAL_CHARACTERS;
-    do {
-
-        done = idx + 1 >= string.length;
-        if (done) {
-            break;
-        }
-
-        // we have to peek at the next token
-        var character = string[idx + 1];
-
-        if (character !== undefined &&
-            specialChars.indexOf(character) === -1) {
-
-            token += character;
-            ++idx;
-            continue;
-        }
-
-        // The token to delimiting character transition.
-        else if (token.length) {
-            break;
-        }
-
-        ++idx;
-        var type;
-        switch (character) {
-            case DOT_SEPARATOR:
-                type = TokenTypes.dotSeparator;
-                break;
-            case COMMA_SEPARATOR:
-                type = TokenTypes.commaSeparator;
-                break;
-            case OPENING_BRACKET:
-                type = TokenTypes.openingBracket;
-                break;
-            case CLOSING_BRACKET:
-                type = TokenTypes.closingBracket;
-                break;
-            case OPENING_BRACE:
-                type = TokenTypes.openingBrace;
-                break;
-            case CLOSING_BRACE:
-                type = TokenTypes.closingBrace;
-                break;
-            case SPACE:
-                type = TokenTypes.space;
-                break;
-            case DOUBLE_OUOTES:
-            case SINGE_OUOTES:
-                type = TokenTypes.quote;
-                break;
-            case ESCAPE:
-                type = TokenTypes.escape;
-                break;
-            case COLON:
-                type = TokenTypes.colon;
-                break;
-            default:
-                type = TokenTypes.unknown;
-                break;
-        }
-        output = toOutput(character, type, false);
-        break;
-    } while (!done);
-
-    if (!output && token.length) {
-        output = toOutput(token, TokenTypes.token, false);
-    }
-
-    if (!output) {
-        output = {done: true};
-    }
-
-    return {
-        token: output,
-        idx: idx
-    };
-}
-
-
-
-},{"318":318}],327:[function(require,module,exports){
 var falcor = require(154);
 Observable = falcor.Observable;
 
@@ -10476,66 +8809,1352 @@ function buildQueryObject(url, method, queryData) {
 }
 module.exports = XMLHttpSource;
 
-},{"154":154}],328:[function(require,module,exports){
-arguments[4][300][0].apply(exports,arguments)
-},{"300":300}],329:[function(require,module,exports){
-arguments[4][301][0].apply(exports,arguments)
-},{"301":301,"330":330,"333":333}],330:[function(require,module,exports){
-arguments[4][302][0].apply(exports,arguments)
-},{"302":302,"328":328}],331:[function(require,module,exports){
-arguments[4][303][0].apply(exports,arguments)
-},{"303":303}],332:[function(require,module,exports){
-arguments[4][304][0].apply(exports,arguments)
-},{"304":304,"333":333}],333:[function(require,module,exports){
-arguments[4][305][0].apply(exports,arguments)
-},{"305":305}],334:[function(require,module,exports){
-arguments[4][306][0].apply(exports,arguments)
-},{"306":306,"333":333}],335:[function(require,module,exports){
-arguments[4][307][0].apply(exports,arguments)
-},{"307":307,"329":329,"330":330,"331":331,"332":332,"333":333,"334":334,"336":336,"337":337,"338":338,"339":339,"340":340,"341":341,"342":342,"343":343,"344":344}],336:[function(require,module,exports){
-arguments[4][308][0].apply(exports,arguments)
-},{"308":308,"329":329,"332":332,"334":334}],337:[function(require,module,exports){
-arguments[4][309][0].apply(exports,arguments)
-},{"309":309,"329":329}],338:[function(require,module,exports){
-arguments[4][310][0].apply(exports,arguments)
-},{"310":310,"329":329,"330":330}],339:[function(require,module,exports){
-arguments[4][311][0].apply(exports,arguments)
-},{"311":311,"329":329}],340:[function(require,module,exports){
-arguments[4][312][0].apply(exports,arguments)
-},{"312":312,"329":329}],341:[function(require,module,exports){
-arguments[4][313][0].apply(exports,arguments)
-},{"313":313,"329":329}],342:[function(require,module,exports){
-arguments[4][314][0].apply(exports,arguments)
-},{"314":314,"329":329,"332":332,"333":333,"334":334}],343:[function(require,module,exports){
-arguments[4][315][0].apply(exports,arguments)
-},{"315":315,"329":329}],344:[function(require,module,exports){
-arguments[4][316][0].apply(exports,arguments)
-},{"316":316,"329":329}],345:[function(require,module,exports){
-arguments[4][317][0].apply(exports,arguments)
-},{"317":317}],346:[function(require,module,exports){
-arguments[4][318][0].apply(exports,arguments)
-},{"318":318}],347:[function(require,module,exports){
-arguments[4][319][0].apply(exports,arguments)
-},{"319":319}],348:[function(require,module,exports){
-arguments[4][320][0].apply(exports,arguments)
-},{"320":320,"345":345,"349":349,"354":354}],349:[function(require,module,exports){
-arguments[4][321][0].apply(exports,arguments)
-},{"321":321,"346":346,"347":347,"350":350}],350:[function(require,module,exports){
-arguments[4][322][0].apply(exports,arguments)
-},{"322":322,"346":346,"347":347,"351":351,"352":352,"353":353}],351:[function(require,module,exports){
-arguments[4][323][0].apply(exports,arguments)
-},{"323":323,"346":346,"347":347}],352:[function(require,module,exports){
-arguments[4][324][0].apply(exports,arguments)
-},{"324":324,"346":346,"347":347,"354":354}],353:[function(require,module,exports){
-arguments[4][325][0].apply(exports,arguments)
-},{"325":325,"345":345,"346":346,"347":347}],354:[function(require,module,exports){
-arguments[4][326][0].apply(exports,arguments)
-},{"326":326,"346":346}],355:[function(require,module,exports){
+},{"154":154}],301:[function(require,module,exports){
+module.exports = function(x) {
+    return x;
+};
+
+},{}],302:[function(require,module,exports){
+var Observer = require(303);
+var Disposable = require(306);
+
+function Observable(s) {
+    this._subscribe = s;
+};
+
+Observable.create = Observable.createWithDisposable = function create(s) {
+    return new Observable(s);
+};
+
+Observable.fastCreateWithDisposable = Observable.create;
+
+Observable["return"] = function returnValue(value) {
+    return Observable.create(function(observer) {
+        observer.onNext(value);
+        observer.onCompleted();
+    });
+};
+
+Observable.returnValue = Observable["return"];
+Observable.fastReturnValue = Observable["return"];
+
+Observable["throw"] = function throwError(e) {
+    return Observable.create(function(observer) {
+        observer.onError(e);
+    });
+};
+
+Observable.throwError = Observable["throw"];
+
+Observable.empty = function empty() {
+    return Observable.create(function(observer) {
+        observer.onCompleted();
+    });
+};
+
+Observable.defer = function defer(observableFactory) {
+    return Observable.create(function(observer) {
+        return observableFactory().subscribe(observer);
+    });
+};
+
+Observable.of = function of() {
+    var len = arguments.length, args = new Array(len);
+    for(var i = 0; i < len; i++) { args[i] = arguments[i]; }
+    return Observable.create(function(observer) {
+        var errorOcurred = false;
+        try {
+            for(var i = 0; i < len; ++i) {
+                observer.onNext(args[i]);
+            }
+        } catch(e) {
+            errorOcurred = true;
+            observer.onError(e);
+        }
+        if (errorOcurred !== true) {
+            observer.onCompleted();
+        }
+    });
+};
+
+Observable.from = function from(x) {
+    if (Array.isArray(x)) {
+        return Observable.create(function(observer) {
+            var err = false;
+            x.forEach(function(el) {
+                try {
+                    observer.onNext(el);
+                } catch (e) {
+                    err = true;
+                    observer.onError(e);
+                }
+            });
+
+            if (!err) {
+                observer.onCompleted();
+            }
+        });
+    }
+};
+Observable.fromArray = Observable.from;
+
+Observable.prototype.subscribe = function subscribe(n, e, c) {
+    return fixDisposable(this._subscribe(
+        (n && typeof n === 'object') ?
+        n :
+        Observer.create(n, e, c)
+    ));
+};
+
+function fixDisposable(disposable) {
+    switch(typeof disposable) {
+        case "function":
+            return new Disposable(disposable);
+        case "object":
+            return disposable || Disposable.empty;
+        default:
+            return Disposable.empty;
+    }
+}
+
+module.exports = Observable;
+},{"303":303,"306":306}],303:[function(require,module,exports){
+var I = require(301);
+var Observer = module.exports = function Observer(n, e, c) {
+    this.onNext =       n || I;
+    this.onError =      e || I;
+    this.onCompleted =  c || I;
+};
+
+Observer.create = function(n, e, c) {
+    return new Observer(n, e, c);
+};
+
+
+},{"301":301}],304:[function(require,module,exports){
+var Subject = module.exports = function Subject() {
+    this.observers = [];
+};
+Subject.prototype.subscribe = function(subscriber) {
+    var a = this.observers,
+        n = a.length;
+    a[n] = subscriber;
+    return {
+        dispose: function() {
+            a.splice(n, 1);
+        }
+    };
+};
+Subject.prototype.onNext = function(x) {
+    var listeners = this.observers.concat(),
+        i = -1, n = listeners.length;
+    while(++i < n) {
+        listeners[i].onNext(x);
+    }
+};
+Subject.prototype.onError = function(e) {
+    var listeners = this.observers.concat(),
+        i  = -1, n = listeners.length;
+    this.observers.length = 0;
+    while(++i < n) {
+        listeners[i].onError(e);
+    }
+};
+Subject.prototype.onCompleted = function() {
+    var listeners = this.observers.concat(),
+        i  = -1, n = listeners.length;
+    this.observers.length = 0;
+    while(++i < n) {
+        listeners[i].onCompleted();
+    }
+};
+
+},{}],305:[function(require,module,exports){
+var Disposable = require(306);
+
+function CompositeDisposable() {
+    this.length = 0;
+    this.disposables = [];
+    if(arguments.length) {
+        this.add.apply(this, arguments);
+    }
+}
+
+CompositeDisposable.prototype = Object.create(Disposable.prototype);
+
+CompositeDisposable.prototype.add = function() {
+    var disposables = this.disposables;
+    var args = [];
+    var argsLen = arguments.length;
+    var argsIdx = -1;
+    while(++argsIdx < argsLen) {
+        args[argsIdx] = arguments[argsIdx];
+    }
+    if(argsLen > 0) {
+        argsIdx = -1;
+        argsLen = args.length;
+        while(++argsIdx < argsLen) {
+            var disposable = args[argsIdx];
+            if(Array.isArray(disposable)) {
+                argsLen = args.push.apply(args, disposable);
+            } else if(!!disposable) {
+                switch(typeof disposable) {
+                    case "function":
+                        disposables.push(new Disposable(disposable));
+                        break;
+                    case "object":
+                        if(typeof disposable.dispose === "function") {
+                            disposables.push(disposable);
+                        }
+                        break;
+                }
+            }
+        }
+    }
+    if(this.disposed) {
+        this.action();
+    }
+    this.length = disposables.length;
+    return this;
+};
+
+CompositeDisposable.prototype.remove = function() {
+    var disposables = this.disposables;
+    var args = [];
+    var argsLen = arguments.length;
+    var argsIdx = -1;
+    while(++argsIdx < argsLen) {
+        args[argsIdx] = arguments[argsIdx];
+    }
+    if(argsLen > 0) {
+        argsIdx = -1;
+        argsLen = args.length;
+        while(++argsIdx < argsLen) {
+            var disposable = args[argsIdx];
+            if(Array.isArray(disposable)) {
+                argsLen = args.push.apply(args, disposable);
+            } else if(!!disposable) {
+                var disposableIndex = disposables.indexOf(disposable);
+                if(~disposableIndex) {
+                    disposables.splice(disposableIndex, 1);
+                }
+            }
+        }
+    }
+    this.length = disposables.length;
+    return this;
+}
+
+CompositeDisposable.prototype.action = function() {
+    this.disposed = true;
+    var disposables = this.disposables;
+    var disposablesCount = disposables.length;
+    while(--disposablesCount > -1) {
+        var disposable = disposables[disposablesCount];
+        disposables.length = disposablesCount;
+        disposable.dispose();
+    }
+};
+
+module.exports = CompositeDisposable;
+},{"306":306}],306:[function(require,module,exports){
+function Disposable(a) {
+    this.action = a;
+};
+
+Disposable.create = function(a) {
+    return new Disposable(a);
+};
+
+Disposable.empty = new Disposable(function(){});
+
+Disposable.prototype.dispose = function() {
+    if(typeof this.action === 'function') {
+        this.action();
+    }
+};
+
+module.exports = Disposable;
+},{}],307:[function(require,module,exports){
+var Disposable = require(306);
+
+function SerialDisposable() {
+    if(arguments.length > 0) {
+        this.setDisposable(arguments[0]);
+    }
+}
+
+SerialDisposable.prototype = Object.create(Disposable.prototype);
+
+SerialDisposable.prototype.action = function() {
+    if(this.disposable) {
+        this.disposable.dispose();
+        this.disposable = undefined;
+    }
+    this.disposed = true;
+};
+
+SerialDisposable.prototype.setDisposable = function(d) {
+    if(this.disposed) {
+        d.dispose();
+    } else {
+        if(this.disposable) {
+            this.disposable.dispose();
+        }
+        this.disposable = d;
+    }
+};
+
+module.exports = SerialDisposable;
+},{"306":306}],308:[function(require,module,exports){
+(function (global){
+var Rx;
+
+if (typeof window !== "undefined" && typeof window["Rx"] !== "undefined") {
+    // Browser environment
+    Rx = window["Rx"];
+} else if (typeof global !== "undefined" && typeof global["Rx"] !== "undefined") {
+    // Node.js environment
+    Rx = global["Rx"];
+} else if (typeof require !== 'undefined' || typeof window !== 'undefined' && window.require) {
+    var r = typeof require !== 'undefined' && require || window.require;
+    try {
+        // CommonJS environment with rx module
+        Rx = r("rx");
+    } catch(e) {
+        Rx = undefined;
+    }
+}
+
+if (Rx === undefined) {
+    
+    var Observable = require(302);
+    
+    Observable.prototype.catchException = require(309);
+    Observable.prototype.concat = require(311);
+    Observable.prototype.concatAll = require(310);
+    Observable.prototype.defaultIfEmpty = require(312);
+    Observable.prototype.doAction = require(313);
+    Observable.prototype.flatMap = require(314);
+    Observable.prototype.last = require(315);
+    Observable.prototype.map = require(316);
+    Observable.prototype.materialize = require(317);
+    Observable.prototype.mergeAll = require(318);
+    Observable.prototype.reduce = require(319);
+    Observable.prototype.retry = require(320);
+    Observable.prototype.toArray = require(321);
+    
+    Observable.prototype["catch"] = Observable.prototype.catchException;
+    Observable.prototype["do"] = Observable.prototype.doAction;
+    Observable.prototype.forEach = Observable.prototype.subscribe;
+    Observable.prototype.select = Observable.prototype.map;
+    Observable.prototype.selectMany = Observable.prototype.flatMap;
+    
+    Rx = {
+        Disposable: require(306),
+        CompositeDisposable: require(305),
+        SerialDisposable: require(307),
+        Observable: Observable,
+        Observer: require(303),
+        Subject: require(304),
+    };
+}
+
+module.exports = Rx;
+
+}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
+},{"302":302,"303":303,"304":304,"305":305,"306":306,"307":307,"309":309,"310":310,"311":311,"312":312,"313":313,"314":314,"315":315,"316":316,"317":317,"318":318,"319":319,"320":320,"321":321}],309:[function(require,module,exports){
+var Observable = require(302);
+var CompositeDisposable = require(305);
+var SerialDisposable = require(307);
+
+module.exports = function catchException(next) {
+    var source = this;
+    return Observable.create(function(o) {
+        var m = new SerialDisposable();
+        m.setDisposable(source.subscribe(
+            function(x) { o.onNext(x); },
+            function(e) {
+                m.setDisposable(((typeof next === 'function') ? next(e) : next).subscribe(o));
+            },
+            function() { o.onCompleted(); }
+        ))
+        return m;
+    });
+}
+},{"302":302,"305":305,"307":307}],310:[function(require,module,exports){
+var Observable = require(302);
+var Disposable = require(306);
+var CompositeDisposable = require(305);
+var SerialDisposable = require(307);
+
+module.exports = function concatAll() {
+    var source = this;
+    return Observable.create(function(observer) {
+        
+        var m = new SerialDisposable();
+        var group = new CompositeDisposable(m);
+        var isStopped = false;
+        var buffer = [];
+        
+        m.setDisposable(source.subscribe(function(innerObs) {
+            if(group.length > 1) {
+                buffer.push(innerObs);
+                return;
+            }
+            subscribe(innerObs);
+        },
+        function(e) { observer.onError(e); },
+        function( ) {
+            isStopped = true;
+            if(group.length === 1 && buffer.length === 0) {
+                observer.onCompleted();
+            }
+        }));
+        
+        function subscribe(innerObs) {
+            var innerDisposable = new SerialDisposable();
+            group.add(innerDisposable);
+            innerDisposable.setDisposable(innerObs.subscribe(
+                function(x) { observer.onNext(x); },
+                function(e) { observer.onError(e); },
+                function( ) {
+                    group.remove(innerDisposable);
+                    if(buffer.length > 0) {
+                        subscribe(buffer.shift());
+                    } else if(isStopped && group.length === 1) {
+                        observer.onCompleted();
+                    }
+                }));
+        }
+        
+        return group;
+    });
+};
+},{"302":302,"305":305,"306":306,"307":307}],311:[function(require,module,exports){
+var Observable = require(302);
+
+module.exports = function concat() {
+    var len = arguments.length;
+    var observables = new Array(len + 1);
+    observables[0] = this;
+    for(var i = 0; i < len; i++) { observables[i + 1] = arguments[i]; }
+    return Observable.from(observables).concatAll();
+};
+},{"302":302}],312:[function(require,module,exports){
+var Observable = require(302);
+
+module.exports = function defaultIfEmpty(value) {
+    var source = this;
+    return Observable.create(function(observer) {
+        var hasValue = false;
+        return source.subscribe(function(x) {
+            hasValue = true;
+            observer.onNext(x);
+        },
+        function(e) { observer.onError(e); },
+        function( ) {
+            if(!hasValue) {
+                observer.onNext(value);
+            }
+            observer.onCompleted();
+        })
+    });
+};
+},{"302":302}],313:[function(require,module,exports){
+var Observable = require(302);
+var Observer = require(303);
+
+module.exports = function doAction() {
+    var actions = arguments[0];
+    if (typeof arguments[0] === "function" ||
+        typeof arguments[1] === "function" ||
+        typeof arguments[2] === "function" ){
+        actions = Observer.create.apply(Observer, arguments);
+    }
+    var source = this;
+    return Observable.create(function(observer) {
+        return source.subscribe(
+            function(x) {
+                actions.onNext(x);
+                observer.onNext(x);
+            },
+            function(e) {
+                actions.onError(e);
+                observer.onError(e);
+            },
+            function( ) {
+                actions.onCompleted();
+                observer.onCompleted();
+            });
+    });
+};
+
+},{"302":302,"303":303}],314:[function(require,module,exports){
+var Observable = require(302);
+module.exports = function flatMap(selector) {
+    if(Boolean(selector) && typeof selector === "object") {
+        var obs = selector;
+        selector = function() { return obs; };
+    }
+    return this.map(selector).mergeAll();
+}
+},{"302":302}],315:[function(require,module,exports){
+var Observable = require(302);
+
+module.exports = function last() {
+    var source = this;
+    return Observable.create(function (observer) {
+        var value;
+        var hasValue = false;
+        return source.subscribe(
+            function onNext(x) {
+                value = x;
+                hasValue = true;
+            },
+            function onError(e) { observer.onError(e); },
+            function onCompleted() {
+                if (hasValue) {
+                    observer.onNext(value);
+                    observer.onCompleted();
+                } else {
+                    observer.onError(new Error("Sequence contains no elements."));
+                }
+            });
+    });
+};
+},{"302":302}],316:[function(require,module,exports){
+var Observable = require(302);
+
+module.exports = function map(selector) {
+    var source = this;
+    return Observable.create(function(observer) {
+        return source.subscribe(
+            function(x) {
+                try {
+                    var errored = false;
+                    var value = selector(x);
+                } catch(e) {
+                    errored = true;
+                    observer.onError(e);
+                } finally {
+                    if(errored === false) {
+                        observer.onNext(value);
+                    }
+                }
+            },
+            function(e) { observer.onError(e); },
+            function( ) { observer.onCompleted(); }
+        )
+    });
+};
+},{"302":302}],317:[function(require,module,exports){
+var Observable = require(302);
+
+module.exports = function materialize() {
+    var source = this;
+    return Observable.create(function(observer) {
+        source.subscribe(function(x) {
+            try {
+                observer.onNext({kind: 'N', value: x});
+            } catch(e) {
+                observer.onError(e);
+            }
+        }, function(err) {
+            observer.onNext({kind: 'E', value: err});
+            observer.onCompleted();
+        }, function() {
+            observer.onNext({kind: 'C'});
+            observer.onCompleted();
+        });
+    });
+}
+},{"302":302}],318:[function(require,module,exports){
+var Observable = require(302);
+var Disposable = require(306);
+var CompositeDisposable = require(305);
+var SerialDisposable = require(307);
+
+module.exports = function mergeAll() {
+    var source = this;
+    return Observable.create(function(observer) {
+        var m = new SerialDisposable();
+        var group = new CompositeDisposable(m);
+        var isStopped = false;
+        m.setDisposable(source.subscribe(function(innerObs) {
+            var innerDisposable = new SerialDisposable();
+            group.add(innerDisposable);
+            innerDisposable.setDisposable(innerObs.subscribe(
+                function(x) { observer.onNext(x); },
+                function(e) { observer.onError(e); },
+                function( ) {
+                    group.remove(innerDisposable);
+                    if(isStopped && group.length === 1) {
+                        observer.onCompleted();
+                    }
+                }));
+        },
+        function(e) { observer.onError(e); },
+        function( ) {
+            isStopped = true;
+            if(group.length === 1) {
+                observer.onCompleted();
+            }
+        }));
+        return group;
+    });
+};
+},{"302":302,"305":305,"306":306,"307":307}],319:[function(require,module,exports){
+var Observable = require(302);
+
+module.exports = function reduce(selector, seedValue) {
+    var source = this;
+    var hasSeed = arguments.length > 1;
+    return Observable.create(function(observer) {
+        var accValue = seedValue;
+        var hasValue = false;
+        return source.subscribe(
+            function(x) {
+                try {
+                    if(hasValue || (hasValue = hasSeed)) {
+                        accValue = selector(accValue, x);
+                        return;
+                    }
+                    accValue = x;
+                    hasValue = true;
+                } catch (e) {
+                    observer.onError(e);
+                }
+            },
+            function(e) { observer.onError(e); },
+            function( ) {
+                if(hasValue || hasSeed) {
+                    observer.onNext(accValue);
+                }
+                observer.onCompleted();
+            });
+    });
+}
+},{"302":302}],320:[function(require,module,exports){
+var Observable = require(302);
+var SerialDisposable = require(307);
+
+module.exports = function retry(retryTotal) {
+    retryTotal || (retryTotal = 1);
+    var source = this;
+    return Observable.create(function(observer) {
+        
+        var retryCount = 0;
+        var disposable = new SerialDisposable();
+        
+        disposable.setDisposable(subscribe(observer));
+        
+        return disposable;
+        
+        function subscribe(observer) {
+            return source.subscribe(
+                function(x) { observer.onNext(x); },
+                function(e) {
+                    if(++retryCount > retryTotal) {
+                        observer.onError(e);
+                        return;
+                    }
+                    disposable.setDisposable(subscribe(observer));
+                },
+                function( ) { observer.onCompleted(); }
+            );
+        };
+    });
+};
+},{"302":302,"307":307}],321:[function(require,module,exports){
+var Observable = require(302);
+
+module.exports = function toArray() {
+    var source = this;
+    return Observable.create(function(observer) {
+        var list = [];
+        return source.subscribe(
+            function(x) { list.push(x); },
+            function(e) { observer.onError(e); },
+            function( ) {
+                observer.onNext(list);
+                observer.onCompleted();
+            });
+    });
+};
+},{"302":302}],322:[function(require,module,exports){
+module.exports = {
+    integers: 'integers',
+    ranges: 'ranges',
+    keys: 'keys'
+};
+
+},{}],323:[function(require,module,exports){
+var TokenTypes = {
+    token: 'token',
+    dotSeparator: '.',
+    commaSeparator: ',',
+    openingBracket: '[',
+    closingBracket: ']',
+    openingBrace: '{',
+    closingBrace: '}',
+    escape: '\\',
+    space: ' ',
+    colon: ':',
+    quote: 'quote',
+    unknown: 'unknown'
+};
+
+module.exports = TokenTypes;
+
+},{}],324:[function(require,module,exports){
+module.exports = {
+    indexer: {
+        nested: 'Indexers cannot be nested.',
+        needQuotes: 'unquoted indexers must be numeric.',
+        empty: 'cannot have empty indexers.',
+        leadingDot: 'Indexers cannot have leading dots.',
+        leadingComma: 'Indexers cannot have leading comma.',
+        requiresComma: 'Indexers require commas between indexer args.',
+        routedTokens: 'Only one token can be used per indexer when specifying routed tokens.'
+    },
+    range: {
+        precedingNaN: 'ranges must be preceded by numbers.',
+        suceedingNaN: 'ranges must be suceeded by numbers.'
+    },
+    routed: {
+        invalid: 'Invalid routed token.  only integers|ranges|keys are supported.'
+    },
+    quote: {
+        empty: 'cannot have empty quoted keys.',
+        illegalEscape: 'Invalid escape character.  Only quotes are escapable.'
+    },
+    unexpectedToken: 'Unexpected token.',
+    invalidIdentifier: 'Invalid Identifier.',
+    invalidPath: 'Please provide a valid path.',
+    throwError: function(err, tokenizer, token) {
+        if (token) {
+            throw err + ' -- ' + tokenizer.parseString + ' with next token: ' + token;
+        }
+        throw err + ' -- ' + tokenizer.parseString;
+    }
+};
+
+
+},{}],325:[function(require,module,exports){
+var Tokenizer = require(331);
+var head = require(326);
+var RoutedTokens = require(322);
+
+var parser = function parser(string, extendedRules) {
+    return head(new Tokenizer(string, extendedRules));
+};
+
+module.exports = parser;
+
+// Constructs the paths from paths / pathValues that have strings.
+// If it does not have a string, just moves the value into the return
+// results.
+parser.fromPathsOrPathValues = function(paths, ext) {
+    var out = [];
+    for (i = 0, len = paths.length; i < len; i++) {
+
+        // Is the path a string
+        if (typeof paths[i] === 'string') {
+            out[i] = parser(paths[i], ext);
+        }
+
+        // is the path a path value with a string value.
+        else if (typeof paths[i].path === 'string') {
+            out[i] = {
+                path: parser(paths[i].path, ext), value: paths[i].value
+            };
+        }
+
+        // just copy it over.
+        else {
+            out[i] = paths[i];
+        }
+    }
+
+    return out;
+};
+
+// If the argument is a string, this with convert, else just return
+// the path provided.
+parser.fromPath = function(path, ext) {
+    if (typeof path === 'string') {
+        return parser(path, ext);
+    }
+    return path;
+};
+
+// Potential routed tokens.
+parser.RoutedTokens = RoutedTokens;
+
+},{"322":322,"326":326,"331":331}],326:[function(require,module,exports){
+var TokenTypes = require(323);
+var E = require(324);
+var indexer = require(327);
+
+/**
+ * The top level of the parse tree.  This returns the generated path
+ * from the tokenizer.
+ */
+module.exports = function head(tokenizer) {
+    var token = tokenizer.next();
+    var state = {};
+    var out = [];
+
+    while (!token.done) {
+
+        switch (token.type) {
+            case TokenTypes.token:
+                var first = +token.token[0];
+                if (!isNaN(first)) {
+                    E.throwError(E.invalidIdentifier, tokenizer);
+                }
+                out[out.length] = token.token;
+                break;
+
+            // dotSeparators at the top level have no meaning
+            case TokenTypes.dotSeparator:
+                if (out.length === 0) {
+                    E.throwError(E.unexpectedToken, tokenizer);
+                }
+                break;
+
+            // Spaces do nothing.
+            case TokenTypes.space:
+                // NOTE: Spaces at the top level are allowed.
+                // titlesById  .summary is a valid path.
+                break;
+
+
+            // Its time to decend the parse tree.
+            case TokenTypes.openingBracket:
+                indexer(tokenizer, token, state, out);
+                break;
+
+            default:
+                E.throwError(E.unexpectedToken, tokenizer);
+                break;
+        }
+
+        // Keep cycling through the tokenizer.
+        token = tokenizer.next();
+    }
+
+    if (out.length === 0) {
+        E.throwError(E.invalidPath, tokenizer);
+    }
+
+    return out;
+};
+
+
+},{"323":323,"324":324,"327":327}],327:[function(require,module,exports){
+var TokenTypes = require(323);
+var E = require(324);
+var idxE = E.indexer;
+var range = require(329);
+var quote = require(328);
+var routed = require(330);
+
+/**
+ * The indexer is all the logic that happens in between
+ * the '[', opening bracket, and ']' closing bracket.
+ */
+module.exports = function indexer(tokenizer, openingToken, state, out) {
+    var token = tokenizer.next();
+    var done = false;
+    var allowedMaxLength = 1;
+    var routedIndexer = false;
+
+    // State variables
+    state.indexer = [];
+
+    while (!token.done) {
+
+        switch (token.type) {
+            case TokenTypes.token:
+            case TokenTypes.quote:
+
+                // ensures that token adders are properly delimited.
+                if (state.indexer.length === allowedMaxLength) {
+                    E.throwError(idxE.requiresComma, tokenizer);
+                }
+                break;
+        }
+
+        switch (token.type) {
+            // Extended syntax case
+            case TokenTypes.openingBrace:
+                routedIndexer = true;
+                routed(tokenizer, token, state, out);
+                break;
+
+
+            case TokenTypes.token:
+                var t = +token.token;
+                if (isNaN(t)) {
+                    E.throwError(idxE.needQuotes, tokenizer);
+                }
+                state.indexer[state.indexer.length] = t;
+                break;
+
+            // dotSeparators at the top level have no meaning
+            case TokenTypes.dotSeparator:
+                if (!state.indexer.length) {
+                    E.throwError(idxE.leadingDot, tokenizer);
+                }
+                range(tokenizer, token, state, out);
+                break;
+
+            // Spaces do nothing.
+            case TokenTypes.space:
+                break;
+
+            case TokenTypes.closingBracket:
+                done = true;
+                break;
+
+
+            // The quotes require their own tree due to what can be in it.
+            case TokenTypes.quote:
+                quote(tokenizer, token, state, out);
+                break;
+
+
+            // Its time to decend the parse tree.
+            case TokenTypes.openingBracket:
+                E.throwError(idxE.nested, tokenizer);
+                break;
+
+            case TokenTypes.commaSeparator:
+                ++allowedMaxLength;
+                break;
+
+            default:
+                E.throwError(idxE.unexpectedToken, tokenizer);
+        }
+
+        // If done, leave loop
+        if (done) {
+            break;
+        }
+
+        // Keep cycling through the tokenizer.
+        token = tokenizer.next();
+    }
+
+    if (state.indexer.length === 0) {
+        E.throwError(idxE.empty, tokenizer);
+    }
+
+    if (state.indexer.length > 1 && routedIndexer) {
+        E.throwError(idxE.routedTokens, tokenizer);
+    }
+
+    // Remember, if an array of 1, keySets will be generated.
+    if (state.indexer.length === 1) {
+        state.indexer = state.indexer[0];
+    }
+
+    out[out.length] = state.indexer;
+
+    // Clean state.
+    state.indexer = undefined;
+};
+
+
+},{"323":323,"324":324,"328":328,"329":329,"330":330}],328:[function(require,module,exports){
+var TokenTypes = require(323);
+var E = require(324);
+var quoteE = E.quote;
+
+/**
+ * quote is all the parse tree in between quotes.  This includes the only
+ * escaping logic.
+ *
+ * parse-tree:
+ * <opening-quote>(.|(<escape><opening-quote>))*<opening-quote>
+ */
+module.exports = function quote(tokenizer, openingToken, state, out) {
+    var token = tokenizer.next();
+    var innerToken = '';
+    var openingQuote = openingToken.token;
+    var escaping = false;
+    var done = false;
+
+    while (!token.done) {
+
+        switch (token.type) {
+            case TokenTypes.token:
+            case TokenTypes.space:
+
+            case TokenTypes.dotSeparator:
+            case TokenTypes.commaSeparator:
+
+            case TokenTypes.openingBracket:
+            case TokenTypes.closingBracket:
+            case TokenTypes.openingBrace:
+            case TokenTypes.closingBrace:
+                if (escaping) {
+                    E.throwError(quoteE.illegalEscape, tokenizer);
+                }
+
+                innerToken += token.token;
+                break;
+
+
+            case TokenTypes.quote:
+                // the simple case.  We are escaping
+                if (escaping) {
+                    innerToken += token.token;
+                    escaping = false;
+                }
+
+                // its not a quote that is the opening quote
+                else if (token.token !== openingQuote) {
+                    innerToken += token.token;
+                }
+
+                // last thing left.  Its a quote that is the opening quote
+                // therefore we must produce the inner token of the indexer.
+                else {
+                    done = true;
+                }
+
+                break;
+            case TokenTypes.escape:
+                escaping = true;
+                break;
+
+            default:
+                E.throwError(E.unexpectedToken, tokenizer);
+        }
+
+        // If done, leave loop
+        if (done) {
+            break;
+        }
+
+        // Keep cycling through the tokenizer.
+        token = tokenizer.next();
+    }
+
+    if (innerToken.length === 0) {
+        E.throwError(quoteE.empty, tokenizer);
+    }
+
+    state.indexer[state.indexer.length] = innerToken;
+};
+
+
+},{"323":323,"324":324}],329:[function(require,module,exports){
+var Tokenizer = require(331);
+var TokenTypes = require(323);
+var E = require(324);
+
+/**
+ * The indexer is all the logic that happens in between
+ * the '[', opening bracket, and ']' closing bracket.
+ */
+module.exports = function range(tokenizer, openingToken, state, out) {
+    var token = tokenizer.peek();
+    var dotCount = 1;
+    var done = false;
+    var inclusive = true;
+
+    // Grab the last token off the stack.  Must be an integer.
+    var idx = state.indexer.length - 1;
+    var from = Tokenizer.toNumber(state.indexer[idx]);
+    var to;
+
+    if (isNaN(from)) {
+        E.throwError(E.range.precedingNaN, tokenizer);
+    }
+
+    // Why is number checking so difficult in javascript.
+
+    while (!done && !token.done) {
+
+        switch (token.type) {
+
+            // dotSeparators at the top level have no meaning
+            case TokenTypes.dotSeparator:
+                if (dotCount === 3) {
+                    E.throwError(E.unexpectedToken, tokenizer);
+                }
+                ++dotCount;
+
+                if (dotCount === 3) {
+                    inclusive = false;
+                }
+                break;
+
+            case TokenTypes.token:
+                // move the tokenizer forward and save to.
+                to = Tokenizer.toNumber(tokenizer.next().token);
+
+                // throw potential error.
+                if (isNaN(to)) {
+                    E.throwError(E.range.suceedingNaN, tokenizer);
+                }
+
+                done = true;
+                break;
+
+            default:
+                done = true;
+                break;
+        }
+
+        // Keep cycling through the tokenizer.  But ranges have to peek
+        // before they go to the next token since there is no 'terminating'
+        // character.
+        if (!done) {
+            tokenizer.next();
+
+            // go to the next token without consuming.
+            token = tokenizer.peek();
+        }
+
+        // break and remove state information.
+        else {
+            break;
+        }
+    }
+
+    state.indexer[idx] = {from: from, to: inclusive ? to : to - 1};
+};
+
+
+},{"323":323,"324":324,"331":331}],330:[function(require,module,exports){
+var TokenTypes = require(323);
+var RoutedTokens = require(322);
+var E = require(324);
+var routedE = E.routed;
+
+/**
+ * The routing logic.
+ *
+ * parse-tree:
+ * <opening-brace><routed-token>(:<token>)<closing-brace>
+ */
+module.exports = function routed(tokenizer, openingToken, state, out) {
+    var routeToken = tokenizer.next();
+    var named = false;
+    var name = '';
+
+    // ensure the routed token is a valid ident.
+    switch (routeToken.token) {
+        case RoutedTokens.integers:
+        case RoutedTokens.ranges:
+        case RoutedTokens.keys:
+            //valid
+            break;
+        default:
+            E.throwError(routedE.invalid, tokenizer);
+            break;
+    }
+
+    // Now its time for colon or ending brace.
+    var next = tokenizer.next();
+
+    // we are parsing a named identifier.
+    if (next.type === TokenTypes.colon) {
+        named = true;
+
+        // Get the token name.
+        next = tokenizer.next();
+        if (next.type !== TokenTypes.token) {
+            E.throwError(routedE.invalid, tokenizer);
+        }
+        name = next.token;
+
+        // move to the closing brace.
+        next = tokenizer.next();
+    }
+
+    // must close with a brace.
+
+    if (next.type === TokenTypes.closingBrace) {
+        var outputToken = {
+            type: routeToken.token,
+            named: named,
+            name: name
+        };
+        state.indexer[state.indexer.length] = outputToken;
+    }
+
+    // closing brace expected
+    else {
+        E.throwError(routedE.invalid, tokenizer);
+    }
+
+};
+
+
+},{"322":322,"323":323,"324":324}],331:[function(require,module,exports){
+var TokenTypes = require(323);
+var DOT_SEPARATOR = '.';
+var COMMA_SEPARATOR = ',';
+var OPENING_BRACKET = '[';
+var CLOSING_BRACKET = ']';
+var OPENING_BRACE = '{';
+var CLOSING_BRACE = '}';
+var COLON = ':';
+var ESCAPE = '\\';
+var DOUBLE_OUOTES = '"';
+var SINGE_OUOTES = "'";
+var SPACE = " ";
+var SPECIAL_CHARACTERS = '\\\'"[]., ';
+var EXT_SPECIAL_CHARACTERS = '\\{}\'"[]., :';
+
+var Tokenizer = module.exports = function(string, ext) {
+    this._string = string;
+    this._idx = -1;
+    this._extended = ext;
+    this.parseString = '';
+};
+
+Tokenizer.prototype = {
+    /**
+     * grabs the next token either from the peek operation or generates the
+     * next token.
+     */
+    next: function() {
+        var nextToken = this._nextToken ?
+            this._nextToken : getNext(this._string, this._idx, this._extended);
+
+        this._idx = nextToken.idx;
+        this._nextToken = false;
+        this.parseString += nextToken.token.token;
+
+        return nextToken.token;
+    },
+
+    /**
+     * will peak but not increment the tokenizer
+     */
+    peek: function() {
+        var nextToken = this._nextToken ?
+            this._nextToken : getNext(this._string, this._idx, this._extended);
+        this._nextToken = nextToken;
+
+        return nextToken.token;
+    }
+};
+
+Tokenizer.toNumber = function toNumber(x) {
+    if (!isNaN(+x)) {
+        return +x;
+    }
+    return NaN;
+};
+
+function toOutput(token, type, done) {
+    return {
+        token: token,
+        done: done,
+        type: type
+    };
+}
+
+function getNext(string, idx, ext) {
+    var output = false;
+    var token = '';
+    var specialChars = ext ?
+        EXT_SPECIAL_CHARACTERS : SPECIAL_CHARACTERS;
+    do {
+
+        done = idx + 1 >= string.length;
+        if (done) {
+            break;
+        }
+
+        // we have to peek at the next token
+        var character = string[idx + 1];
+
+        if (character !== undefined &&
+            specialChars.indexOf(character) === -1) {
+
+            token += character;
+            ++idx;
+            continue;
+        }
+
+        // The token to delimiting character transition.
+        else if (token.length) {
+            break;
+        }
+
+        ++idx;
+        var type;
+        switch (character) {
+            case DOT_SEPARATOR:
+                type = TokenTypes.dotSeparator;
+                break;
+            case COMMA_SEPARATOR:
+                type = TokenTypes.commaSeparator;
+                break;
+            case OPENING_BRACKET:
+                type = TokenTypes.openingBracket;
+                break;
+            case CLOSING_BRACKET:
+                type = TokenTypes.closingBracket;
+                break;
+            case OPENING_BRACE:
+                type = TokenTypes.openingBrace;
+                break;
+            case CLOSING_BRACE:
+                type = TokenTypes.closingBrace;
+                break;
+            case SPACE:
+                type = TokenTypes.space;
+                break;
+            case DOUBLE_OUOTES:
+            case SINGE_OUOTES:
+                type = TokenTypes.quote;
+                break;
+            case ESCAPE:
+                type = TokenTypes.escape;
+                break;
+            case COLON:
+                type = TokenTypes.colon;
+                break;
+            default:
+                type = TokenTypes.unknown;
+                break;
+        }
+        output = toOutput(character, type, false);
+        break;
+    } while (!done);
+
+    if (!output && token.length) {
+        output = toOutput(token, TokenTypes.token, false);
+    }
+
+    if (!output) {
+        output = {done: true};
+    }
+
+    return {
+        token: output,
+        idx: idx
+    };
+}
+
+
+
+},{"323":323}],332:[function(require,module,exports){
 'use strict';
 
-module.exports = require(360)
+module.exports = require(337)
 
-},{"360":360}],356:[function(require,module,exports){
+},{"337":337}],333:[function(require,module,exports){
 'use strict';
 
 var asap = require(150)
@@ -10707,10 +10326,10 @@ function doResolve(fn, promise) {
     promise._67(LAST_ERROR)
   }
 }
-},{"150":150}],357:[function(require,module,exports){
+},{"150":150}],334:[function(require,module,exports){
 'use strict';
 
-var Promise = require(356)
+var Promise = require(333)
 
 module.exports = Promise
 Promise.prototype.done = function (onFulfilled, onRejected) {
@@ -10721,12 +10340,12 @@ Promise.prototype.done = function (onFulfilled, onRejected) {
     }, 0)
   })
 }
-},{"356":356}],358:[function(require,module,exports){
+},{"333":333}],335:[function(require,module,exports){
 'use strict';
 
 //This file contains the ES6 extensions to the core Promises/A+ API
 
-var Promise = require(356)
+var Promise = require(333)
 var asap = require(150)
 
 module.exports = Promise
@@ -10827,10 +10446,10 @@ Promise.prototype['catch'] = function (onRejected) {
   return this.then(null, onRejected);
 }
 
-},{"150":150,"356":356}],359:[function(require,module,exports){
+},{"150":150,"333":333}],336:[function(require,module,exports){
 'use strict';
 
-var Promise = require(356)
+var Promise = require(333)
 
 module.exports = Promise
 Promise.prototype['finally'] = function (f) {
@@ -10845,21 +10464,21 @@ Promise.prototype['finally'] = function (f) {
   })
 }
 
-},{"356":356}],360:[function(require,module,exports){
+},{"333":333}],337:[function(require,module,exports){
 'use strict';
 
-module.exports = require(356)
-require(357)
-require(359)
-require(358)
-require(361)
+module.exports = require(333)
+require(334)
+require(336)
+require(335)
+require(338)
 
-},{"356":356,"357":357,"358":358,"359":359,"361":361}],361:[function(require,module,exports){
+},{"333":333,"334":334,"335":335,"336":336,"338":338}],338:[function(require,module,exports){
 'use strict';
 
 //This file contains then/promise specific extensions that are only useful for node.js interop
 
-var Promise = require(356)
+var Promise = require(333)
 var asap = require(148)
 
 module.exports = Promise
@@ -10919,5 +10538,5 @@ Promise.prototype.nodeify = function (callback, ctx) {
   })
 }
 
-},{"148":148,"356":356}]},{},[1])(1)
+},{"148":148,"333":333}]},{},[1])(1)
 });
