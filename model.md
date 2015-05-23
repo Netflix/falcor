@@ -289,9 +289,9 @@ The requests above can not reliably be expected to return data. Therefore you sh
 
 ### "Why can't I request Objects or Arrays from a Model?"
 
-_Falcor is optimized for displaying information to human beings in real-time._ Both Arrays and Objects can contain an unbounded amount of data. This means it’s impossible to predict how much data will be retrieved from the server when you request an JSON Array or Object. Requests which are served quickly at first can become slower over time as more data is added to backend data stores.  This can cause the performance of your application to degrade slowly over time. 
+_Falcor is optimized for displaying information to human beings in real-time._ Both Arrays and Objects can contain an unbounded amount of data. This means it’s impossible to predict how much data will be retrieved from the server when you request an JSON Array or Object. An Array that contains 5 items today, can grow to contain 10,000 items later on. This means that Requests which are initially served quickly can become slower over time as more data is added to backend data stores.  This can cause the performance of your application to degrade slowly over time. 
 
-Models force developers to be explicit about which value types they would like to retrieve in order to maximize the likelihood that server requests for data will have **stable performance** over time. Rather than allow you to retrieve an entire object, Model's force you to _be explicit_ and retrieve only those values needed in a given scenario:
+Models force developers to be explicit about which value types they would like to retrieve in order to maximize the likelihood that server requests for data will have **stable performance** over time. Rather than allow you to retrieve an entire Object, Model's force you to _be explicit_ and retrieve only those values needed in a given scenario:
 
 (Example of requesting three properties and displaying them)
 
@@ -445,7 +445,7 @@ Each Sentinel affects the way in which the Model interprets its value differentl
 
 #### JSON Graph Atoms <a href="JSON-Graph-Atoms"></a>
 
-Cereal graph allows metadata to be attached to values to control how they are handled by the Model. For example, metadata can be attached to values to control how long values stay in the Model cache and indicate whether one value is a more recent version of another value. For more information see Supported Metadata.
+Cereal graph allows metadata to be attached to values to control how they are handled by the Model. For example, metadata can be attached to values to control how long values stay in the Model cache and indicate whether one value is a more recent version of another value. For more information see Sentinel Metadata.
 
 One issue is that JavaScript value types do not preserve any metadata attached to them when they are serialized as JSON:
 
@@ -473,7 +473,7 @@ Internally the Model boxes all retrieved values that have been successfully retr
 
 #### JSON Graph Errors
 
-When a model's Data source encounters an error while attempting to retrieve a value from a cereal graph object, it is represented as an error object. 
+When a model's DataSource encounters an error while attempting to retrieve a value from a cereal graph object, it is represented as an error object. 
 
 (Example of an error when attempting to retrieve the rating of a Netflix title from a model)
 
@@ -499,7 +499,14 @@ Note that using "treatErrorsAsValues" will cause the model to deliver errors as 
 
 When you receive a Sentinel, you can check the "$type" property of each sentinel to distinguish whether a value is an error ("error") or a successfully-retrieved value ("atom"). For more information see Boxing and Unboxing.
 
-## Retrieving data from a Model
+ #### Sentinel Metadata
+
+Metadata can be attached to Sentinels to control the way the Model handles them once they have been retrieved from the data source. Metadata is any key that starts with the prefix "$".
+
+(Example of using setValue to add an atom that expires in two seconds  ($expires: -2000) and then attempting to retrieve it after four seconds only to prove that it is gone)
+
+
+## Retrieving Data from a Model
 
 (Example of using get value sync to retrieve the rating)
 
@@ -606,9 +613,38 @@ One of the limitations of working with JSON data through a Falcor model is that 
  
  ## Boxing and Unboxing
  
- ## Supported Metadata
+ 
+ 
+ ## Sentinel Metadata
+
+Metadata can be attached to value types to control the way the Model handles them once they have been retrieved from the data source. Metadata can be to any JSON object as a key that starts with the prefix "$". Note that any keys set on JSON value types (string, number, boolean, and null) will not persist when serialized to cereal. 
+
+(Example of attaching a metadata key to a JavaScript number, and then cereal stringifying it only to discover that the key is missing.)
+
+Therefore in order to add metadata to cereal value types, the value types must be boxed in an atom. For more information on Atoms see JSON Graph Atoms.
+
+
+
+
+For more information on sentinels, see JSON Graph Sentinels.
+
 
 ## Transactions
+
+A Model automatically collects least-recently-used items in the local cache when the size of the cache breaches the Model's maximum cache size. However the Model also attempts to ensure that data that is currently being delivered 
+A transaction is a period of time during which no cache collections occur. 
+
+When you request data from a Falcor model, any request the data that is not in the local cash is retrieved from the data source, added to the cash, and then pushed to a callback.  By default, a transaction begins when the data is written to the cache and ends when the callback function has finished executing.
+
+The Falcor model uses push APIs to deliver data, giving it the flexibility to retrieve data from the data source if it is not synchronously available in the Model's cache. Under normal circumstances the model does not allow synchronous access to the cache. The reason why don't you just cannot be synchronously retrieved from the model cash is that there is no way for a developer to ascertain whether a model a value is undefined or simply not present in the cash.
+
+
+There are a several Model methods which can _only_ be called within a transaction. These methods end in the suffix "Sync", because they are both _synch_ronous and _sync_hronized, meaning they synchronously retrieve data from the model cache but throw if not run within a transaction. 
+
+Synchronized methods allow you to synchronously read data directly from the Falcor cache. 
+
+
+
 
 ## Error Handling
 
@@ -616,7 +652,7 @@ One of the limitations of working with JSON data through a Falcor model is that 
 
 ## The Model Cache
 
-
+## Schedulers
 
 ## Path Optimization and the DataSource
 
