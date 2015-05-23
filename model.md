@@ -2,7 +2,7 @@
  
 Falcor provides a Model object, which is intended to be the "M" in your MVC. An application that uses Falcor doesn't work with JSON data directly, but rather works with JSON data _indirectly_ through the Model object. The Model object provides a set of familiar JavaScript APIs for working with JSON data, including get, set, and call. The main difference between working with JSON data directly and working with it indirectly through a Model object, is that the Falcor Model has a _push API_.
 
-```
+```JavaScript
 var log = console.log.bind(console)
 
 var model = {
@@ -53,7 +53,7 @@ The main advantage of using a push API is that you can code against JSON data th
 
 In this example we retrieve the name of the first TODO from a JSON Object: 
 
-```
+```JavaScript
 var log = console.log.bind(console)
 
 var model = new falcor.Model({cache: {
@@ -74,7 +74,7 @@ model.getValue('todos[0].name').then(log);
 
 In this code sample the data has been moved to the cloud, but the client code that retrieves the data remains the same:
 
-```
+```JavaScript
 var model = new falcor.Model({source: new falcor.HttpDataSource('/model.json')});
 
 model.getValue('todos[0].name').then(log);
@@ -82,7 +82,7 @@ model.getValue('todos[0].name').then(log);
 
 Another advantage of using a Falcor Model is that it caches the JSON data it retrieves from the server _in-memory_. As a result, you don't need to maintain a cache of the data that you retrieve from a Falcor Model. Whenever you need data, just retrieve it from the Model. If the Model finds the data in its cache, it will push the data to you immediately. Otherwise the Model will retrieve your data from the server, insert it into the cache, and push it to you asynchronously.
  
-```
+```JavaScript
 var model = new falcor.Model({source: new falcor.HttpDataSource('/model.json')});
 
 model.getValue('todos[0].name').then(function() {
@@ -93,7 +93,7 @@ model.getValue('todos[0].name').then(function() {
 
 In addition to JSON data the Falcor model also supports JSON Graph. JSON Graph is a convention for modeling graph information in JSON. JSON graph can help you ensure that the same object never appears more than once in either server responses or the Model cache. This means you never need to worry about propagating changes to multiple copies of the same object.
  
-```
+```JavaScript
 var log = console.log.bind(console)
 var $ref = falcor.Model.ref;
 
@@ -129,7 +129,7 @@ In addition to using JSON graph to make sure that objects don't appear more than
  
 Every Falcor Model is associated with a JSON value. Models use DataSources to retrieve the data from their associated JSON values. Falcor ships with HttpDataSource, an implementation of the DataSource interface which remotes requests to another DataSource running on an HTTP server (usually a Router).
  
-```
+```JavaScript
 var model = new falcor.Model({source: new falcor.HttpDataSource('/model.json')});
 ```
 
@@ -137,7 +137,7 @@ You can implement the DataSource interface to allow a Model to communicate with 
 
 If a Model does _not_ have a DataSource, all Model operations will be performed on the Model's local cache. When you initialize the Model, you can provide it with JSON data to prime its local cache.
  
-```
+```JavaScript
 var log = console.log.bind(console)
 
 var model = new falcor.Model({
@@ -162,7 +162,7 @@ model.getValue('todos[0].name').then(log);
  
 It is common practice to begin working against mock data in a Model cache, and then replace it with a DataSource that retrieves data from the server later on.
  
-```
+```JavaScript
 var log = console.log.bind(console)
 
 var model = new falcor.Model({
@@ -174,7 +174,7 @@ model.getValue('todos[0].name').then(log);
 
 When data is retrieved from a DataSource, it is placed into the Model's local cache. Subsequent requests for the same information will not trigger a request to the DataSource if the data has not been purged from the local cache.
 
-```
+```JavaScript
 // Does not trigger a request to the server.
 model.getValue('todos[0].name').then(log);
 ```
@@ -185,7 +185,7 @@ For more information on how the Model JSON cache works, see The Model Cache.
 
 Every Model is associated with a JSON value. The Falcor Model provides APIs to allow developers to retrieve data from its JSON value. To retrieve a single value from a Model, you pass a JavaScript path through the JSON object to the Model's get method.
 
-```
+```JavaScript
 var log = console.log.bind(console)
 
 var model = new falcor.Model({
@@ -219,7 +219,7 @@ There is one important difference between working with a JSON object directly an
 
 The following JSON object contains a list of TODOs.
 
-```
+```JavaScript
 var log = console.log.bind(console)
 
 var json = {
@@ -244,7 +244,7 @@ var json = {
 
 When working with a JSON object directly in JavaScript you can retrieve an Object or an Array and print it to the console:
 
-```
+```JavaScript
 var customer = json.todos[1].customer;
 log(JSON.stringify(customer, null, 4))
 
@@ -257,7 +257,7 @@ log(JSON.stringify(customer, null, 4))
 
 When working with the same JSON object indirectly through a Falcor Model, you can _not_ retrieve Arrays or Objects - only value types like null, string, boolean, and number.
 
-```
+```JavaScript
 var log = console.log.bind(console)
 var $ref = falcor.Model.ref;
 
@@ -268,7 +268,7 @@ model.getValue("todos[1].customer").then(function(customer) { log(customer); });
 
 The only paths which can be retrieved from the Model above are those that retrieve the basic JSON value types. That means any of the following paths are legal to retrieve from a Model:
 
-```
+```JavaScript
 model.getValue("todos[0].name").then(log); // prints "get milk from the corner store"
 model.getValue("todos[0].done").then(log); // prints "false"
 model.getValue("todos[1].customer.name").then(log); // prints "Jim Hobart"
@@ -276,12 +276,12 @@ model.getValue("todos[1].priority").then(log); // prints 4
 ```
 
 In contrast the following get operation has _undefined behavior_ because it attempts to retrieve the entire "todos" Array:
-```
+```JavaScript
 model.getValue("todos").then(log); // undefined behavior
 ```
 
 Likewise of the following get operation also has undefined behavior, because it retrieves an entire customer object:
-```
+```JavaScript
 model.getValue("todos[1].customer").then(log);  // undefined behavior
 ```
 
@@ -289,24 +289,57 @@ The requests above can not reliably be expected to return data. Therefore you sh
 
 ### "Why can't I request Objects or Arrays from a Model?"
 
-_Falcor is optimized for displaying information to human beings in real-time._ Both Arrays and Objects can contain an unbounded amount of data. This means it’s impossible to predict how much data will be retrieved from the server when you request an JSON Array or Object. An Array that contains 5 items today, can grow to contain 10,000 items later on. This means that Requests which are initially served quickly can become slower over time as more data is added to backend data stores.  This can cause the performance of your application to degrade slowly over time. 
+_Falcor is optimized for displaying information to human beings in real-time._ Both Arrays and Objects can contain an unbounded amount of data. This means it’s impossible to predict how much data will be retrieved from the server when you request a JSON Array or Object. An Array that contains 5 items today, can grow to contain 10,000 items later on. This means that Requests which are initially served quickly can become slower over time as more data is added to backend data stores.  This can cause the performance of your application to degrade slowly over time. 
 
 Models force developers to be explicit about which value types they would like to retrieve in order to maximize the likelihood that server requests for data will have **stable performance** over time. Rather than allow you to retrieve an entire Object, Model's force you to _be explicit_ and retrieve only those values needed in a given scenario:
 
 (Example of requesting three properties and displaying them)
+```JavaScript
+var model = new falcor.Model({
+    cache: {
+        todos: [
+            {
+                name: 'get milk from corner store',
+                done: false,
+                priority: 4
+            }
+        ]
+    }});
+
+model.get('todos[0]["name", "done", "priority"]').
+	then(function(x) { console.log(JSON.stringify(x, null, 4)); });
+```
 
 Similarly when displaying an Array of items Models do not allow you to retrieve the entire Array upfront. Instead you must request the first visible page of an Array, and follow up with additional page requests as the user scrolls.
 
 (Example of retrieving first page of a list)
+```JavaScript
+var model = new falcor.Model({
+    cache: {
+        todos: [
+            {
+                name: 'get milk from corner store',
+                done: false
+            },
+            {
+                name: 'withdraw money from ATM',
+                done: false
+            }            
+        ]
+    }});
+
+model.get('todos[0]["name", "done"]').
+	then(function(x) { console.log(JSON.stringify(x, null, 4)); });
+```
 
 If you are certain that an Object or Array will remain a constant size, you can indicate to a Model that they should always be retrieved in their entirety by using an Atom. For more information, see [JSON Graph Atoms](#JSON-Graph-Atoms).
 
 ## Working with JSON Graph Data using a Model
 
-In addition to being able to work with JSON documents, Models can also operate on JSON Graph documents. JSON Graph is a convention for modeling graph information in JSON. JSON Graph documents extend JSON with **References**. References can be used anywhere within a serial object to refer to a value elsewhere within the same serial object. This removes the need to duplicate objects when serializing a graph into a hierarchical cereal object.
+In addition to being able to work with JSON documents, Models can also operate on JSON Graph documents. JSON Graph is a convention for modeling graph information in JSON. JSON Graph documents extend JSON with **References**. References can be used anywhere within a JSON object to refer to a value elsewhere within the same JSON object. This removes the need to duplicate objects when serializing a graph into a hierarchical JSON object.
 
 Let's say that we wanted to introduce a list of prerequisites for each TODO in a TODO list.  
-```
+```JavaScript
 var log = console.log.bind(console)
 
 var json = {
@@ -333,13 +366,13 @@ var json = {
 
 Notice that the TODO "withdraw money from the ATM" appears twice in the JSON object above. Let's say we want to mark this task as done:
 
-```
+```JavaScript
 json.todos[1].done = true;
 ```
 
 If we examine the JSON object after this change, we will notice that the change has _not_ been propagated to all of the copies of the task. Because the same task also appears in the prerequisites array of task 2692, its "done" value remains false.
 
-```
+```JavaScript
 console.log(JSON.stringify(json, null, 4));
 /* Prints the following to the console:
 {
@@ -372,7 +405,7 @@ When application servers send subsets of the graph across the network as JSON, t
 
 Falcor attempts to solve this problem by introducing JSON Graph. JSON Graph is a convention for modeling graph information in JSON. You can convert any JSON object into a JSON Graph in two steps:
 
-1. Move all objects to a unique location within the cereal object
+1. Move all objects to a unique location within the JSON object
 2. Replace all other occurrences of the object with a **Reference** to that object's unique location
 
 We can use the task ID to create a unique location in the JSON for each task. We start by adding a map of all Tasks that is organized by Task ID to the root of the document:
@@ -391,11 +424,11 @@ Note that in the example above each TODO appears only once. If we use a Model to
 
 (Example demonstrating that when we use set value to set the done property of the second two due to false, we get done:true when we read it from both places in the to do list)
 
-Note that in the example operations above we use a path which extends *beyond* the reference object in the cereal graph. However instead of short-circuiting and returning the reference, the Model *follows* the path in the reference and continues evaluating the remaining keys and the path at the location referred to by the path in the reference. In the next section we will explain how models evaluate paths against JSON and JSON Graph objects.
+Note that in the example operations above we use a path which extends *beyond* the reference object in the JSON Graph. However instead of short-circuiting and returning the reference, the Model *follows* the path in the reference and continues evaluating the remaining keys and the path at the location referred to by the path in the reference. In the next section we will explain how models evaluate paths against JSON and JSON Graph objects.
 
 ### Path Evaluation and JSON Graph
 
-When evaluating paths against a serial object, the Falcor model starts at the root of its associated JSON object and continues looking up keys until it arrives at a value type.
+When evaluating paths against a JSON object, the Falcor model starts at the root of its associated JSON object and continues looking up keys until it arrives at a value type.
 
 (Example of looking up a path using get value)
 
@@ -419,9 +452,9 @@ The process of rewriting a path when a reference is encountered is known as *Pat
 
 ### JSON Graph Sentinels
 
-In addition to References, cereal graph introduces two more new value types: Atoms and Errors. These three special value types are all classified as *Sentinels.*
+In addition to References, JSON graph introduces two more new value types: Atoms and Errors. These three special value types are all classified as *Sentinels.*
 
-Sentinels are JSON objects that are treated by the Falcor Model as value types. References, Atoms, and Errors are all cereal objects with a "$type" value of "ref", "atom", and "error" respectively. 
+Sentinels are JSON objects that are treated by the Falcor Model as value types. References, Atoms, and Errors are all JSON objects with a "$type" value of "ref", "atom", and "error" respectively. 
 
 (Example of a reference, atom, and error.)
 
@@ -443,9 +476,9 @@ As sentinels are value types, their contents cannot be changed. Like numbers and
 
 Each Sentinel affects the way in which the Model interprets its value differently. References were explained in the previous section. In the next two sections, Atoms and Errors will be explained.
 
-#### JSON Graph Atoms <a href="JSON-Graph-Atoms"></a>
+#### JSON Graph Atoms <a name="JSON-Graph-Atoms"></a>
 
-Cereal graph allows metadata to be attached to values to control how they are handled by the Model. For example, metadata can be attached to values to control how long values stay in the Model cache and indicate whether one value is a more recent version of another value. For more information see Sentinel Metadata.
+JSON Graph allows metadata to be attached to values to control how they are handled by the Model. For example, metadata can be attached to values to control how long values stay in the Model cache and indicate whether one value is a more recent version of another value. For more information see Sentinel Metadata.
 
 One issue is that JavaScript value types do not preserve any metadata attached to them when they are serialized as JSON:
 
@@ -459,11 +492,11 @@ The value of an Atom is always treated like a value type, meaning it is retrieve
 
 (Example showing that it is ineffectual to modify the value of an atom directly. We clone Adams when they are retrieved from the model, so this example should show that mutating an Adam directly has no effect by then retrieving the same object, and displaying it's data which will be unchanged)
 
-In addition to making it possible to attach metadata to cereal values, Atoms can be used to get around the restriction against retrieving JSON Objects and Arrays from a Falcor Model. 
+In addition to making it possible to attach metadata to JSON values, Atoms can be used to get around the restriction against retrieving JSON Objects and Arrays from a Falcor Model. 
 
 Let's say that we have an Array which we are certain will remain small, like a list of video subtitles for example. 
 
-(Example of a serial graph object with a Netflix title which contains an array of subtitles)
+(Example of a JSON graph object with a Netflix title which contains an array of subtitles)
 
 By boxing the Array in an Atom, we cause the Falcor model to treat it as a value and returned it in its entirety. 
 
@@ -473,7 +506,7 @@ Internally the Model boxes all retrieved values that have been successfully retr
 
 #### JSON Graph Errors
 
-When a model's DataSource encounters an error while attempting to retrieve a value from a cereal graph object, it is represented as an error object. 
+When a model's DataSource encounters an error while attempting to retrieve a value from a JSON Graph object, it is represented as an error object. 
 
 (Example of an error when attempting to retrieve the rating of a Netflix title from a model)
 
@@ -491,7 +524,7 @@ There are many reasons why you might want errors reported the same way as other 
 
 The "treatErrorsAsValues" function creates a new Model which reports errors the same way as values. 
 
-(Example of retrieving a single error from a serial graph using get value)
+(Example of retrieving a single error from a JSON graph using get value)
 
 Note that using "treatErrorsAsValues" will cause the model to deliver errors as values. However it will not provide you with a way to distinguish errors from values. If you would like to be able to receive errors alongside values, but retain the ability to distinguish between errors and values, you can chain "treatErrorsAsValues" and "boxValues" together. When I model is operating in "boxValues" mode, it always returns the sentinels that box each value and indicate their type. 
 
@@ -511,7 +544,7 @@ Metadata can be attached to Sentinels to control the way the Model handles them 
 (Example of using get value sync to retrieve the rating)
 
 Errors are cached in the Model just like any other value. As it is possible to retrieve more than one path at a time from a model,
-```
+```JavaScript
 var $ref = falcor.Model.ref;
 var model = new falcor.Model({cache:{
     todos: [
@@ -544,7 +577,7 @@ var model = new falcor.Model({cache:{
 
 The following paths are legal to retrieve because  atoms, errors, and references are considered value types in JSON Graph:
 
-```
+```JavaScript
 model.getValue("todos[0].customer").then(log); 
 // prints {name: "Jim Hobart", address:"123 pacifica ave., CA, US"} because the value of an Atom is considered a value
 ```
@@ -555,7 +588,7 @@ Instead you must be explicit, and request all of the value types that you need.
   
 In addition to the JavaScript path syntax, models can also process paths with ranges in indexers:
 
-```
+```JavaScript
 var $ref = falcor.Model.ref;
 
 var model = new falcor.Model({cache: {
@@ -597,13 +630,13 @@ model.get('todos[0..1].name').then(function(x) {
  
 Models allow you to select as many paths as you want in a single network request.
  
-```
+```JavaScript
 model.get('todos[0..1].name', 'todos[0..1].done').then(log);
 ```
 
 The paths in the previous example can be simplified to one path, because in addition to allowing ranges in indexers, Falcor models also allow multiple keys to be passed in a single indexer:
 
-```
+```JavaScript
 model.get('todos[0..1]["name", "done"]').then(log);
 ```
 
@@ -617,11 +650,11 @@ One of the limitations of working with JSON data through a Falcor model is that 
  
  ## Sentinel Metadata
 
-Metadata can be attached to value types to control the way the Model handles them once they have been retrieved from the data source. Metadata can be to any JSON object as a key that starts with the prefix "$". Note that any keys set on JSON value types (string, number, boolean, and null) will not persist when serialized to cereal. 
+Metadata can be attached to value types to control the way the Model handles them once they have been retrieved from the data source. Metadata can be to any JSON object as a key that starts with the prefix "$". Note that any keys set on JSON value types (string, number, boolean, and null) will not persist when serialized to JSON. 
 
-(Example of attaching a metadata key to a JavaScript number, and then cereal stringifying it only to discover that the key is missing.)
+(Example of attaching a metadata key to a JavaScript number, and then JSON stringifying it only to discover that the key is missing.)
 
-Therefore in order to add metadata to cereal value types, the value types must be boxed in an atom. For more information on Atoms see JSON Graph Atoms.
+Therefore in order to add metadata to JSON value types, the value types must be boxed in an atom. For more information on Atoms see JSON Graph Atoms.
 
 
 
