@@ -96,6 +96,15 @@ var Model = module.exports = falcor.Model = function Model(options) {
 Model.EXPIRES_NOW = falcor.EXPIRES_NOW;
 Model.EXPIRES_NEVER = falcor.EXPIRES_NEVER;
 
+Model.REF_TARGET = null;
+
+Model.pathValue = function(path, value) {
+    if (typeof path === 'string') {
+        path = pathSyntax(path);
+    }
+    return {path: path, value: value};
+};
+
 Model.ref = function(path) {
     if (typeof path === 'string') {
         path = pathSyntax(path);
