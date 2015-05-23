@@ -476,7 +476,8 @@ As sentinels are value types, their contents cannot be changed. Like numbers and
 
 Each Sentinel affects the way in which the Model interprets its value differently. References were explained in the previous section. In the next two sections, Atoms and Errors will be explained.
 
-#### JSON Graph Atoms <a name="JSON-Graph-Atoms"></a>
+<a name="JSON-Graph-Atoms"></a>
+#### JSON Graph Atoms
 
 JSON Graph allows metadata to be attached to values to control how they are handled by the Model. For example, metadata can be attached to values to control how long values stay in the Model cache and indicate whether one value is a more recent version of another value. For more information see Sentinel Metadata.
 
