@@ -95,18 +95,26 @@ In addition to JSON data the Falcor model also supports JSON Graph. JSON Graph i
  
 ```JavaScript
 var log = console.log.bind(console)
-var $ref = falcor.Model.ref;
 
 var model = new falcor.Model({cache: {
     todos: [
-        $ref('todosById[44]'),
-        $ref('todosById[54]')
+        {
+            $type: "ref",
+            value: ['todosById', 44]
+        },
+        {
+            $type: "ref",
+            value: ['todosById', 54]
+        }        
     ],
     todosById: {
         "44": {
             name: 'get milk from corner store',
             done: false,
-            prerequisites: [$ref('todosById[54]')]
+            prerequisites: [{
+                $type: "ref",
+                value: ['todosById', 54]
+            }]
         },
         "54": {
             name: 'withdraw money from ATM',
@@ -259,7 +267,6 @@ When working with the same JSON object indirectly through a Falcor Model, you ca
 
 ```JavaScript
 var log = console.log.bind(console)
-var $ref = falcor.Model.ref;
 
 var model = new falcor.Model({cache:json});
 
@@ -490,7 +497,6 @@ model.get('todos[1]').
 //         }
 //     }
 // }
-//@TODO: is this the correct output?  this looks like the deprecated reference way.
 ```
 
 Note that in the example above each TODO appears only once. If we use a Model to set a TODO to false we will observe that the new state will be reflected regardless of where in the JSON Graph we retrieve the TODO's information.
@@ -526,6 +532,7 @@ model.setValue('todos[1].done', true).then(function(x) {
 // This outputs the following to the console:
 // true
 // true
+```
 
 Note that in the example operations above we use a path which extends *beyond* the reference object in the JSON Graph. However instead of short-circuiting and returning the reference, the Model *follows* the path in the reference and continues evaluating the remaining keys and the path at the location referred to by the path in the reference. In the next section we will explain how models evaluate paths against JSON and JSON Graph objects.
 
@@ -676,8 +683,6 @@ Sentinels are JSON objects that are treated by the Falcor Model as value types. 
 ```JavaScript
 var log = console.log.bind(console)
 var $ref = falcor.Model.ref;
-var $error = falcor.Model.error;
-var $atom = falcor.Model.atom;
 
 var model = new falcor.Model({cache: {
     todos: [
@@ -685,12 +690,20 @@ var model = new falcor.Model({cache: {
         $ref('todosById[54]')
     ],
     todosById: {
-        "44": $ref('todosById[44]''),
-        "45": $error('no #45 todo'),
-        "46": $atom([1,2,3])
+        "44": {
+            name: 'get milk from corner store',
+            done: false
+        },
+        "45": {
+            $type: "error",
+            value: "todo #45 missing."
+        },
+        "46": {
+            $type: "atom",
+            value: [1, 2, 3]
+        }
     }
 }});
-//@TODO: $ref _OR_ { $type: "ref", value: 'asdfasd'} ?
 ```
 
 Each Sentinel objects also contains a "value" key with its actual value. One way to think about a Sentinel is a *box around a value*  that indicates the type of the value within. Sentinels influence the way that Models interpret their values, allowing them to distinguish a path from a string or an regular object from an error for example.
@@ -706,7 +719,7 @@ var model = new falcor.Model({cache: {
     todosById: {
         "44": {
             $type: "atom",
-            value: [1,2,3,4]
+            value: [1, 2, 3, 4]
         }
     }
 }});
@@ -727,7 +740,7 @@ var model = new falcor.Model({cache: {
     todosById: {
         "44": {
             $type: "atom",
-            value: [1,2,3,4]
+            value: [1, 2, 3, 4]
         }
     }
 }});
@@ -760,13 +773,13 @@ var model = new falcor.Model({cache: {
     todosById: {
         "44": {
             $type: "atom",
-            value: [1,2,3,4]
+            value: [1, 2, 3, 4]
         }
     }
 }});
 
 model.setValue('todosById[44]');
-//@TODO: how ummm...exactly do you set an atom in the cache?
+//@TODO: how do you set an atom in the cache?
 // This outputs the following to the console:
 ```
 
@@ -816,23 +829,32 @@ The value of an Atom is always treated like a value type, meaning it is retrieve
 ```JavaScript
 var log = console.log.bind(console)
 var $ref = falcor.Model.ref;
+var $atom = falcor.Model.atom;
 
 var model = new falcor.Model({cache: {
+    todos: [
+        $ref('todosById[44]')
+    ],
     todosById: {
         "44": {
-            $type: "atom",
-            value: 5
+            name: 'deliver pizza',
+            done: false,
+            customer: $atom({
+                name: 'Jim Hobart',
+                address: '123 pacifica ave., CA, US'
+            })
         }
     }
 }});
 
-model.setValue('todosById[44].value', 9).then(function() {
-    model.getValue('todosById[44].value').then(log)
-});
+model.getValue('todosById[44].customer').
+    then(function(x) { 
+        log(x); 
+        x.name = "not Jim Hobart"
+        model.getValue('todosById[44].customer').then(log)
+    })
 
-// This outputs the following to the console:
-// 9
-//@TODO: i am doing something wrong here.
+//@TODO: example is inaccurate.
 ```
 
 
@@ -874,10 +896,12 @@ When a Model's DataSource encounters an error while attempting to retrieve a val
 
 (Example of an error when attempting to retrieve the rating of a Netflix title from a model)
 ```JavaScript
-var $error = falcor.Model.error;
 var model = new falcor.Model({cache: {
     titlesById: {
-        "44": $error('failure.')
+        "44": {
+            $type: "error",
+            value: "failure to retrieve title."
+        }
     }
 }});
 
@@ -888,7 +912,7 @@ try {
 }
 
 // This outputs the following to the error console:
-// failure.
+// failure to retrieve title.
 ```
 
 By default a Model delivers Errors differently than other values. If synchronous methods are used to retrieve the data from the model, the error is thrown.  If the data is asynchronously being requested from the model as a observable or a promise, the error will be delivered in a special call back.
@@ -897,17 +921,19 @@ By default a Model delivers Errors differently than other values. If synchronous
 ```JavaScript
 var log = console.log.bind(console);
 
-var $error = falcor.Model.error;
 var model = new falcor.Model({cache: {
     titlesById: {
-        "44": $error('failure.')
+        "44": {
+            $type: "error",
+            value: "failure to retrieve title."
+        }
     }
 }});
 
 model.getValue('titlesById[44]').subscribe(log, function(e) { console.error(e[0].value); })
 
 // This outputs the following to the error console:
-// failure.
+// failure to retrieve title.
 //@TODO: bug?  why does 'subscribe's error callback return an array while 'then's does not?
 ```
 
@@ -915,17 +941,19 @@ model.getValue('titlesById[44]').subscribe(log, function(e) { console.error(e[0]
 ```JavaScript
 var log = console.log.bind(console);
 
-var $error = falcor.Model.error;
 var model = new falcor.Model({cache: {
     titlesById: {
-        "44": $error('failure.')
+        "44": {
+            $type: "error",
+            value: "failure to retrieve title."
+        }
     }
 }});
 
 model.getValue('titlesById[44]').then(log, function(e) { console.error(e.value); })
 
 // This outputs the following to the error console:
-// failure.
+// failure to retrieve title.
 ```
 
 To learn more about the different ways to retrieve information from a model, see [Retrieving Data from a Model](#Retrieving-Data-from-a-Model).
@@ -938,10 +966,12 @@ The "treatErrorsAsValues" function creates a new Model which reports errors the 
 
 (Example of retrieving a single error from a JSON graph using get value)
 ```JavaScript
-var $error = falcor.Model.error;
 var model = new falcor.Model({cache: {
     titlesById: {
-        "44": $error('failure.')
+        "44": {
+            $type: "error",
+            value: "failure."
+        }
     }
 }});
 
@@ -955,10 +985,12 @@ Note that using "treatErrorsAsValues" will cause the model to deliver errors as 
 
 (Identical example as above, except this time we also call box values in addition to treat errors as values)
 ```JavaScript
-var $error = falcor.Model.error;
 var model = new falcor.Model({cache: {
     titlesById: {
-        "44": $error('failure.')
+        "44": {
+            $type: "error",
+            value: "failure."
+        }
     }
 }});
 
