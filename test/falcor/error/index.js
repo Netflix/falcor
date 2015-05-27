@@ -4,20 +4,22 @@ var Model = jsong.Model;
 var chai = require("chai");
 var expect = chai.expect;
 var testRunner = require("../../testRunner");
+var noOp = function() {};
 
-describe("DataSource", function() {
+describe("Error", function() {
     it("should get a hard error from the DataSource.", function(done) {
-        var model = testRunner.getModel(new ErrorDataSource(503, "Timeout"));
+        var model = new Model({
+            source: new ErrorDataSource(503, "Timeout")
+        });
         model.
             get(["test", {to: 5}, "summary"]).
             toPathValues().
-            subscribe(function() {}, function(err) {
+            doAction(noOp, function(err) {
                 expect(err.length).to.equal(6);
+                // not in boxValue mode
                 var expected = {
                     path: [],
                     value: {
-                        "$size": 51,
-                        "$type": "error",
                         status: 503,
                         message: "Timeout"
                     }
@@ -26,20 +28,33 @@ describe("DataSource", function() {
                     expected.path = ["test", i, "summary"];
                     testRunner.compare(expected, e);
                 });
-                done();
-            }, function() {
-                done("Should not finish with completed");
+            }).
+            subscribe(function() {
+                done('Should not onNext');
+            },
+            function(e) {
+                if (isAssertionError(e)) {
+                    done(e);
+                } else {
+                    done();
+                }
+            },
+            function() {
+                done('Should not onComplete');
             });
     });
-    
+
     it("should get a hard error from the DataSource with some data found in the cache.", function(done) {
-        var model = testRunner.getModel(new ErrorDataSource(503, "Timeout"), {
-            test: {
-                0: {
-                    summary: "in cache"
-                },
-                5: {
-                    summary: "in cache"
+        var model = new Model({
+            source: new ErrorDataSource(503, "Timeout"),
+            cache: {
+                test: {
+                    0: {
+                        summary: "in cache"
+                    },
+                    5: {
+                        summary: "in cache"
+                    }
                 }
             }
         });
@@ -47,7 +62,7 @@ describe("DataSource", function() {
         model.
             get(["test", {to: 5}, "summary"]).
             toPathValues().
-            subscribe(function(x) {
+            doAction(function(x) {
                 var expected = {
                     path: ["test", count === 0 ? 0 : 5, "summary"],
                     value: "in cache"
@@ -56,11 +71,10 @@ describe("DataSource", function() {
                 testRunner.compare(expected, x);
             }, function(err) {
                 expect(err.length).to.equal(4);
+                // not in boxValue mode
                 var expected = {
                     path: [],
                     value: {
-                        "$size": 51,
-                        "$type": "error",
                         status: 503,
                         message: "Timeout"
                     }
@@ -69,9 +83,21 @@ describe("DataSource", function() {
                     expected.path = ["test", i + 1, "summary"];
                     testRunner.compare(expected, e);
                 });
-                done();
-            }, function() {
-                done("Should not finish with completed");
+                expect(count).to.equals(2);
+            }).
+            subscribe(noOp,
+            function(e) {
+                if (isAssertionError(e)) {
+                    done(e);
+                } else {
+                    done();
+                }
+            },
+            function() {
+                done('Should not onComplete');
             });
     });
 });
+function isAssertionError(e) {
+    return e.hasOwnProperty('expected') && e.hasOwnProperty('actual');
+}
