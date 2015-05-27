@@ -19,10 +19,14 @@ describe("End-to-End", function() {
             source: source
         });
         var called = 0;
-        model.
-            get(['videos', 1234, 'summary'], function() {
-                var video = this.getValueSync(['videos', 1234, 'summary']);
-                return video;
+        server.
+            take(1).
+            flatMap(function() {
+                return model.
+                    get(['videos', 1234, 'summary'], function() {
+                        var video = this.getValueSync(['videos', 1234, 'summary']);
+                        return video;
+                    });
             }).
             doAction(function(x) {
                 testRunner.compare(expected, x);

@@ -6,4 +6,5 @@ describe('Operations', function() {
     require('./request');
     require('./schedulers');
     require('./bind');
+    require('./error');
 });
