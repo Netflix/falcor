@@ -33,7 +33,7 @@
  * @param {Array.&lt;Array>} requestedMissingPaths
  * @param {Function} cb
  */
-function getSourceObserver(model, requestedMissingPaths, cb) {
+function getSourceObserver(model, requestedMissingPaths, cb, options) {
     var incomingValues;
     return {
         onNext: function(jsongEnvelop) {
@@ -43,7 +43,7 @@ function getSourceObserver(model, requestedMissingPaths, cb) {
             };
         },
         onError: function(err) {
-            cb(insertErrors(model, requestedMissingPaths, err));
+            cb(insertErrors(model, requestedMissingPaths, err, options));
         },
         onCompleted: function() {
             cb(false, incomingValues);
