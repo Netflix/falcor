@@ -298,45 +298,38 @@ The requests above can not reliably be expected to return data. Therefore you sh
 
 _Falcor is optimized for displaying information to human beings in real-time._ Both Arrays and Objects can contain an unbounded amount of data. This means it’s impossible to predict how much data will be retrieved from the server when you request a JSON Array or Object. An Array that contains 5 items today, can grow to contain 10,000 items later on. This means that Requests which are initially served quickly can become slower over time as more data is added to backend data stores.  This can cause the performance of your application to degrade slowly over time. 
 
-Models force developers to be explicit about which value types they would like to retrieve in order to maximize the likelihood that server requests for data will have **stable performance** over time. Rather than allow you to retrieve an entire Object, Model's force you to _be explicit_ and retrieve only those values needed in a given scenario:
+Models force developers to be explicit about which value types they would like to retrieve in order to maximize the likelihood that server requests for data will have **stable performance** over time. Rather than allow you to retrieve an entire Object, Model's force you to _be explicit_ and retrieve only those values needed in a given scenario, similarly when displaying an Array of items Models do not allow you to retrieve the entire Array upfront. Instead you must request the first visible page of an Array, and follow up with additional page requests as the user scrolls.
 
-(Example of requesting three properties and displaying them)
+In the following example we page through a list of TODOs, selecting the name and done property of all the TODOs in the current page.
 ```JavaScript
 var model = new falcor.Model({
-    cache: {
-        todos: [
-            {
-                name: 'get milk from corner store',
-                done: false,
-                priority: 4
+    source: new falcor.HttpSource('/todos.json')
+});
+
+function showPage(page) {
+    //selecting just the props needed to display table row
+    var from = page, to = page + 5;
+    model.get('todos[' + from + '..' + to + ']["name", "done"]').
+        then(function(response) {
+            var html = "<ul>";
+            var todo;
+            for (var i = from; i < to; i++) {
+                todo = response.json.todos[i];
+                if (todo)
+                    html += "<li>" + todo.name + " <img src='" + (todo.done ? "check.png" : "blank.png") + "'></li>";
             }
-        ]
-    }});
+            html += "</ul><a onclick='showPage(" + to + ")'>Next</a>";
+            document.body.innerHTML = html;
+        });
+};
+showPage(0);
 
-model.get('todos[0]["name", "done", "priority"]').
-	then(function(x) { console.log(JSON.stringify(x, null, 4)); });
-```
-
-Similarly when displaying an Array of items Models do not allow you to retrieve the entire Array upfront. Instead you must request the first visible page of an Array, and follow up with additional page requests as the user scrolls.
-
-(Example of retrieving first page of a list)
-```JavaScript
-var model = new falcor.Model({
-    cache: {
-        todos: [
-            {
-                name: 'get milk from corner store',
-                done: false
-            },
-            {
-                name: 'withdraw money from ATM',
-                done: false
-            }            
-        ]
-    }});
-
-model.get('todos[0]["name", "done"]').
-	then(function(x) { console.log(JSON.stringify(x, null, 4)); });
+// // The code above prints the following html:
+// <ul>
+//     <li>get milk from corner store <img src="blank.png"></li>
+//     <li>withdraw money from ATM <img src="check.png"></li>
+// </ul>
+// <a onclick="showPage(5)">Next</a>
 ```
 
 If you are certain that an Object or Array will remain a constant size, you can indicate to a Model that they should always be retrieved in their entirety by using an Atom. For more information, see [JSON Graph Atoms](#JSON-Graph-Atoms).
@@ -400,7 +393,7 @@ console.log(JSON.stringify(json, null, 4));
             id: 4291,
             name: 'withdraw money from ATM',
             done: true 
-        }   
+        }
     ]
 };
 */
@@ -417,10 +410,8 @@ Falcor attempts to solve this problem by introducing JSON Graph. JSON Graph is a
 
 We can use the task ID to create a unique location in the JSON for each task. We start by adding a map of all Tasks that is organized by Task ID to the root of the document:
 
-(Example of tasks by ID)
 ```JavaScript
 var json = {
-    todos: [],
     todosById: {
         "44": {
             name: 'get milk from corner store',
@@ -431,20 +422,34 @@ var json = {
             name: 'withdraw money from ATM',
             done: false
         }
-    }
+    },
+    todos: [
+        {
+            id: 44,
+            name: 'get milk from corner store',
+            done: false,
+            prerequisites: [
+                {
+                    id: 54,
+                    name: 'withdraw money from ATM',
+                    done: false  
+                }
+            ]
+        },
+        {
+            id: 54,
+            name: 'withdraw money from ATM',
+            done: true 
+        }
+    ]
 };
 ```
 
 Next we replace every other occurrence of each task with a Reference value. A Reference is a JSON object that contains a path to another location within an object. References can be constructed using the Model.ref factory function. 
 
-(Example that shows references)
 ```JavaScript
 var $ref = falcor.Model.ref;
 var json = {
-    todos: [
-        $ref('todosById[44]'),
-        $ref('todosById[54]')
-    ],
     todosById: {
         "44": {
             name: 'get milk from corner store',
@@ -455,13 +460,16 @@ var json = {
             name: 'withdraw money from ATM',
             done: false
         }
-    }
+    },
+    todos: [
+        $ref('todosById[44]'),
+        $ref('todosById[54]')
+    ]
 };
 ```
 
 Although a Reference is a JSON object, it is treated as a value type by the Model. In other words it is legal to retrieve a reference from a Falcor Model.
 
-(Example that shows retrieving a reference from a Falcor model)
 ```JavaScript
 var $ref = falcor.Model.ref;
 
@@ -501,7 +509,6 @@ model.get('todos[1]').
 
 Note that in the example above each TODO appears only once. If we use a Model to set a TODO to false we will observe that the new state will be reflected regardless of where in the JSON Graph we retrieve the TODO's information.
 
-(Example demonstrating that when we use set value to set the done property of the second todo to false, we get done: true when we read it from both places in the to do list)
 ```JavaScript
 var log = console.log.bind(console)
 var $ref = falcor.Model.ref;
@@ -540,7 +547,6 @@ Note that in the example operations above we use a path which extends *beyond* t
 
 When evaluating paths against a JSON object, the Falcor model starts at the root of its associated JSON object and continues looking up keys until it arrives at a value type.
 
-(Example of looking up a path using get value)
 ```JavaScript
 var log = console.log.bind(console)
 var $ref = falcor.Model.ref;
@@ -572,7 +578,6 @@ model.getValue('todosById[44].name').then(log);
 
 If a value type is encountered before the path is fully evaluated, the path evaluation process is short-circuited and the value discovered is returned.
 
-(example of what I said above, this time running into a null at a branch node)
 ```JavaScript
 var log = console.log.bind(console)
 var $ref = falcor.Model.ref;
@@ -590,13 +595,18 @@ var model = new falcor.Model({cache: {
             customer: null
         },
         "54": {
-            name: 'withdraw money from ATM',
-            done: false
+            name: 'deliver pizza',
+            done: false,
+            prerequisites: [],
+            customer: {
+                name: "Jim Donut",
+                address: "123 Seaside blvd. Pacifica, CA"
+            }
         }
     }
 }});
 
-model.getValue('todosById[44].customer').then(log);
+model.getValue('todosById[44].customer.name').then(log);
 
 // This outputs the following to the console:
 // null
@@ -606,7 +616,6 @@ The one exception to this rule is the case in which  a Model encounters a **Refe
 
 In the following piece of code, we attempt to retrieve the name of the first TODO:
 
-(Get value todos, 0, name)
 ```JavaScript
 var log = console.log.bind(console)
 var $ref = falcor.Model.ref;
@@ -640,7 +649,6 @@ First the model evaluates the keys "todo" and "0" and encounters a reference val
 
 Note that **references are only followed if there are more keys in the path that have not yet been evaluated.** If we shorten the path to "todos[0]" the model returns the reference path rather than the object it refers to.
 
-(Example of what I said above printed to the console)
 ```JavaScript
 var log = console.log.bind(console)
 var $ref = falcor.Model.ref;
@@ -686,8 +694,14 @@ var $ref = falcor.Model.ref;
 
 var model = new falcor.Model({cache: {
     todos: [
-        $ref('todosById[44]'),
-        $ref('todosById[54]')
+        {
+            $type: "ref",
+            value: ['todosById', 44]
+        },
+        {
+            $type: "ref",
+            value: ['todosById', 54]
+        }
     ],
     todosById: {
         "44": {
@@ -728,6 +742,7 @@ model.getValue('todosById[44]').then(log);
 
 // This outputs the following to the console:
 // [1, 2, 3, 4]
+//@TODO: revisit.
 ```
 
 You can create a new Model which does not have this unboxing behavior by calling "boxValues." 
@@ -745,6 +760,7 @@ var model = new falcor.Model({cache: {
     }
 }});
 
+//@TODO: revisit.
 model.boxValues().getValue('todosById[44]').
     then(function(x) { console.log(JSON.stringify(x, null, 4)); });
 
@@ -1040,11 +1056,11 @@ var model = new falcor.Model({cache:{
                     name: 'Jim Hobart',
                     address: '123 pacifica ave., CA, US'
                 },
-               // this customer object expires in 30 minutes.
-              $expires: -30 * 60 * 1000
+                // this customer object expires in 30 minutes.
+                $expires: -30 * 60 * 1000
+            },
+            prerequisites: [$ref('todosById[79]')]      
         },
-        prerequisites: [$ref('todosById[79]')]      
-    },
         "79": {
             $type: 'error',
             value: 'error retrieving todo from database.'
