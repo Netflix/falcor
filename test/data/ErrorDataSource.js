@@ -12,16 +12,21 @@ var ErrorDataSource = module.exports = function(errorCode, errorMessage, errorDa
 
 ErrorDataSource.prototype = {
     get: function(paths) {
-        var self = this;
-        return Rx.Observable.create(function(observer) {
-            var err = {
-                $type: 'error',
-                value: _.assign({
-                    status: self.errorCode,
-                    "message": self.errorMessage
-                }, self.errorData)
-            };
-            observer.onError(err);
+        return Rx.Observable.throw({
+            $type: 'error',
+            value: _.assign({
+                status: this.errorCode,
+                "message": this.errorMessage
+            }, this.errorData)
+        });
+    },
+    set: function(paths) {
+        return Rx.Observable.throw({
+            $type: 'error',
+            value: _.assign({
+                status: this.errorCode,
+                "message": this.errorMessage
+            }, this.errorData)
         });
     }
 };

@@ -1,6 +1,8 @@
 var jsong = require('../../../index');
 var Model = jsong.Model;
 var Expected = require('../../data/expected');
+var Values = Expected.Values;
+var Complex = Expected.Complex;
 var ReducedCache = require('../../data/ReducedCache');
 var Cache = require('../../data/Cache');
 var M = ReducedCache.MinimalCache;
@@ -9,6 +11,9 @@ var getTestRunner = require('./../../getTestRunner');
 var testRunner = require('./../../testRunner');
 var noOp = function() {};
 var LocalDataSource = require('../../data/LocalDataSource');
+var ErrorDataSource = require('../../data/ErrorDataSource');
+var $error = require('./../../../lib/types/error');
+var expect = require('chai').expect;
 
 describe('DataSource and Cache', function() {
     describe('Selector Functions', function() {
@@ -265,6 +270,71 @@ describe('DataSource and Cache', function() {
             }, noOp, function() {
                 testRunner.compare(true, called, 'Expected onNext to be called');
                 testRunner.compare(true, sourceCalled, 'Expected source.set to be called.');
+            }).
+            subscribe(noOp, done, done);
+    });
+    it('should do an error set and project it.', function(done) {
+        var model = new Model({
+            source: new ErrorDataSource(503, "Timeout")
+        });
+        var called = false;
+        model.
+            boxValues().
+            set({path: ['genreList', 0, 0, 'summary'], value: 5}).
+            withErrorSelector(function(path, value) {
+                value.$foo = 'bar';
+                return value;
+            }).
+            doAction(function(x) {
+                expect(false, 'onNext should not be called.').to.be.ok;
+            }, function(e) {
+                called = true;
+                testRunner.compare([{
+                    path: ['genreList', 0, 0, 'summary'],
+                    value: {
+                        $type: $error,
+                        $foo: 'bar',
+                        value: {
+                            message: 'Timeout',
+                            status: 503
+                        }
+                    }
+                }], e, {strip: ['$size']});
+            }, function() {
+                expect(false, 'onNext should not be called.').to.be.ok;
+            }).
+            subscribe(noOp, function(e) {
+                if (Array.isArray(e) && e[0].value.$foo === 'bar' && called) {
+                    done();
+                    return;
+                }
+                done(e);
+            }, noOp);
+    });
+    it('should progessively selector.', function(done) {
+        var model = new Model({
+            cache: M(),
+            source: new LocalDataSource(Cache())
+        });
+        var called = 0;
+        model.
+            get(['genreList', 0, {to:1}, 'summary'], function(x) {
+                if (called === 0) {
+                    testRunner.compare({
+                        0: Values().direct.AsJSON.values[0].json
+                    }, x);
+                }
+
+                else {
+                    testRunner.compare(
+                        Complex().toOnly.AsJSON.values[0].json,
+                        x);
+                }
+                called++;
+            }).
+            progressively().
+            doAction(noOp, noOp, function() {
+                expect(called).to.equals(2);
             }).
             subscribe(noOp, done, done);
     });
