@@ -51,9 +51,13 @@ describe("End-to-End", function() {
                 }
             }
         };
-        model.
-            boxValues().
-            get(['videos', 'missing-branch', 'summary']).
+        server.
+            take(1).
+            flatMap(function() {
+                return model.
+                    boxValues().
+                    get(['videos', 'missing-branch', 'summary']);
+            }).
             doAction(function(x) {
                 testRunner.compare(expected, x);
                 called++;

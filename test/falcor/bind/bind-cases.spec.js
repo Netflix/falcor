@@ -38,10 +38,37 @@ describe('Bind', function() {
         expect(typeof results.optimizedMissingPaths[10][0] !== 'undefined').to.be.ok;
     });
     it('ensure that roman riding is working', function() {
-        var model = new Model({ cache: getCache() })
+        var model = new Model({ cache: getCache() });
         model._root.unsafeMode = true;
         var out = model._getValueSync(model, ["lolomos","c595efe8-4de0-4226-8d4a-ebe89d236e2f_ROOT", 1, 0]);
         expect(out.optimizedPath).to.deep.equal(["lolomos","c595efe8-4de0-4226-8d4a-ebe89d236e2f_ROOT", 1, 0]);
+    });
+
+    it('should allow for multiple bind operations.', function(done) {
+        var model = new Model({ cache: getCache() });
+        var expectedAtLolomo = ["lolomos", "c595efe8-4de0-4226-8d4a-ebe89d236e2f_ROOT"];
+        var expectedAtLolomo0 = ["lists", "c595efe8-4de0-4226-8d4a-ebe89d236e2f_fcce4c47-7b36-456b-89ac-bde430a24ca8"];
+        var expectedAtLolomo00Item = ["videos", "80041601"];
+        var called = [false, false, false];
+        model.
+            bind('lolomo', [0, 0, 'item', 'info']).
+            flatMap(function(boundModel) {
+                testRunner.compare(expectedAtLolomo, boundModel._path);
+                called[0] = true;
+                return boundModel.bind([0], [0, 'item', 'info']);
+            }).
+            flatMap(function(boundModel) {
+                testRunner.compare(expectedAtLolomo0, boundModel._path);
+                called[1] = true;
+                return boundModel.bind([0, 'item'], ['info']);
+            }).
+            doAction(function(boundModel) {
+                called[2] = true;
+                testRunner.compare(expectedAtLolomo00Item, boundModel._path);
+            }, noOp, function() {
+                expect(called.every(function(x) { return x; })).to.be.ok;
+            }).
+            subscribe(noOp, done, done);
     });
 });
 
