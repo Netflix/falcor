@@ -46,6 +46,8 @@ var $error = require('./../types/error');
 var $atom = require('./../types/atom');
 var getGeneration = require('./../get/getGeneration');
 var noop = function(){};
+var bind = require('./operations/bind/bind');
+var bindSync = require('./operations/bind/bindSync');
 
 /**
  * A Model object is used to execute commands against a {@link JSONGraph} object. {@link Model}s can work with a local JSONGraph cache, or it can work with a remote {@link JSONGraph} object through a {@link DataSource}.
@@ -76,7 +78,7 @@ var Model = module.exports = falcor.Model = function Model(options) {
     this._router = options.router;
 
     this._root = options.root || new ModelRoot();
-    
+
     if (options.cache &amp;&amp; typeof options.cache === "object") {
         this.setCache(options.cache);
     } else {
@@ -134,7 +136,7 @@ Model.prototype = {
     /**
      * The get method retrieves several {@link Path}s or {@link PathSet}s from a {@link Model}. The get method is versatile and may be called in several different ways, allowing you to make different trade-offs between performance and expressiveness. The simplest invocation returns an ModelResponse stream that contains a JSON object with all of the requested values. An optional selector function can also be passed in order to translate the retrieved data before it appears in the Observable stream. If a selector function is provided, the output will be an Observable stream with the result of the selector function invocation instead of a ModelResponse stream.
      If you intend to transform the JSON data into another form, specifying a selector function may be more efficient. The selector function is run once all of the requested path values are available. In the body of the selector function, you can read data from the Model's cache using {@link Model.prototype.getValueSync} and transform it directly into its final representation (ex. an HTML string). This technique can reduce allocations by preventing the get method from copying the data in {@link Model}'s cache into an intermediary JSON representation.
-     Instead of directly accessing the cache within the selector function, you can optionally pass arguments to the selector function and they will be automatically bound to the corresponding {@link Path} or {@link PathSet} passed to the get method. If a {@link Path} is bound to a selector function argument, the function argument will contain the value found at that path. However if a {@link PathSet} is bound to a selector function argument, the function argument will be a JSON structure containing all of the path values. Using argument binding can provide a good balance between allocations and expressiveness. For more detail on how {@link Path}s and {@link PathSet}s are bound to selector function arguments, see the examples below.  
+     Instead of directly accessing the cache within the selector function, you can optionally pass arguments to the selector function and they will be automatically bound to the corresponding {@link Path} or {@link PathSet} passed to the get method. If a {@link Path} is bound to a selector function argument, the function argument will contain the value found at that path. However if a {@link PathSet} is bound to a selector function argument, the function argument will be a JSON structure containing all of the path values. Using argument binding can provide a good balance between allocations and expressiveness. For more detail on how {@link Path}s and {@link PathSet}s are bound to selector function arguments, see the examples below.
      * @function
      * @param {...PathSet} path - The path(s) to retrieve
      * @param {?Function} selector - The callback to execute once all of the paths have been retrieved
@@ -185,6 +187,7 @@ Model.prototype = {
         {path: path, value: value} :
             path, function(x) { return x; });
     },
+
     /**
      * Returns a clone of the {@link Model} bound to a location within the {@link JSONGraph}. The bound location is never a {@link Reference}: any {@link Reference}s encountered while resolving the bound {@link Path} are always replaced with the {@link Reference}s target value. For subsequent operations on the {@link Model}, all paths will be evaluated relative to the bound path. Bind allows you to:
      * - Expose only a fragment of the {@link JSONGraph} to components, rather than the entire graph
@@ -194,63 +197,8 @@ Model.prototype = {
      * @param {...PathSet} relativePathsToPreload - Paths to preload before Model is created. These paths are relative to the bound path.
      * @return {Observable.&lt;Model>} - An Observable stream with a single value, the bound {@link Model}, or an empty stream if nothing is found at the path
     */
-    bind: function(boundPath) {
+    bind: bind,
 
-        var model = this, root = model._root,
-            paths = new Array(arguments.length - 1),
-            i = -1, n = arguments.length - 1;
-
-        boundPath = pathSyntax.fromPath(boundPath);
-
-        while(++i &lt; n) {
-            paths[i] = pathSyntax.fromPath(arguments[i + 1]);
-        }
-
-        if(root.allowSync &lt;= 0 &amp;&amp; n === 0) {
-            throw new Error("Model#bind requires at least one value path.");
-        }
-
-        var syncBoundModelObs = falcor.Observable.create(function(observer) {
-            var error;
-            var boundModel;
-            root.allowSync++;
-            try {
-                boundModel = model.bindSync(boundPath);
-            } catch(e) {
-                error = e;
-            }
-            if(boundModel &amp;&amp; !error) {
-                observer.onNext(boundModel);
-                observer.onCompleted();
-            } else {
-                observer.onError(error);
-            }
-            --root.allowSync;
-        });
-
-        return syncBoundModelObs.
-            flatMap(function(boundModel) {
-                if(paths.length > 0) {
-                    return boundModel.get.apply(boundModel, paths.concat(function() {
-                        return boundModel;
-                    })).
-                    catchException(falcor.Observable.empty());
-                }
-                return falcor.Observable.returnValue(boundModel);
-            }).
-            catchException(function() {
-                if(paths.length > 0) {
-                    var boundPaths = paths.map(function(path) {
-                        return boundPath.concat(path);
-                    });
-                    boundPaths.push(noop);
-                    return model.get.
-                        apply(model, boundPaths).
-                        flatMap(model.bind(boundPath));
-                }
-                return falcor.Observable.empty();
-            });
-    },
     /**
      * Set the local cache to a {@link JSONGraph} fragment. This method can be a useful way of mocking a remote document, or restoring the local cache from a previously stored state
      * @param {JSONGraph} jsonGraph - The {@link JSONGraph} fragment to use as the local cache
@@ -275,7 +223,7 @@ Model.prototype = {
      * @example
      // Storing the boxshot of the first 10 titles in the first 10 genreLists to local storage.
      localStorage.setItem('cache', JSON.stringify(model.getCache("genreLists[0...10][0...10].boxshot")));
-     */ 
+     */
     getCache: function() {
         var paths = slice.call(arguments);
         if(paths.length === 0) {
@@ -293,6 +241,7 @@ Model.prototype = {
             });
         return result;
     },
+
     getGeneration: function(path) {
         path = path &amp;&amp; pathSyntax.fromPath(path) || [];
         if (Array.isArray(path) === false) {
@@ -375,45 +324,19 @@ Model.prototype = {
      * @param {Path} path - The path to bind to
      * @return {Model}
      */
-    bindSync: function(path) {
-        path = pathSyntax.fromPath(path);
-        if(Array.isArray(path) === false) {
-            throw new Error("Model#bindSync must be called with an Array path.");
-        }
-        var boundValue = this.syncCheck("bindSync") &amp;&amp; getBoundValue(this, this._path.concat(path));
-        var node = boundValue.value;
-        path = boundValue.path;
-        if(boundValue.shorted) {
-            if(Boolean(node)) {
-                if(node.$type === ERROR) {
-                    if(this._boxed) {
-                        throw node;
-                    }
-                    throw node.value;
-                    // throw new Error("Model#bindSync can\'t bind to or beyond an error: " + boundValue.toString());
-                }
-            }
-            return undefined;
-        } else if(Boolean(node) &amp;&amp; node.$type === ERROR) {
-            if(this._boxed) {
-                throw node;
-            }
-            throw node.value;
-        }
-        return this.clone(["_path", boundValue.path]);
-    },
+    bindSync: bindSync,
     /**
      * Synchronously returns a clone of the {@link Model} bound to a location within the {@link JSONGraph}. Unlike bind or bindSync, softBind never optimizes its path.  Soft bind is ideal if you want to retrieve the bound path every time, rather than retrieve the optimized path once and then always retrieve paths from that object in the JSON Graph. For example, if you always wanted to retrieve the name from the first item in a list you could softBind to the path "list[0]".
      * @param {Path} path - The path prefix to retrieve every time an operation is executed on a Model.
      * @return {Model}
-     */    
+     */
     softBind: function(path) {
         path = pathSyntax.fromPath(path);
         if(Array.isArray(path) === false) {
             throw new Error("Model#softBind must be called with an Array path.");
         }
         return this.clone(["_path", path]);
-    },    
+    },
     clone: function() {
 
         var self = this;
@@ -523,7 +446,7 @@ Model.prototype = {
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="HttpDataSource.html">HttpDataSource</a></li><li><a href="Model.html">Model</a></li><li><a href="ModelResponse.html">ModelResponse</a></li><li><a href="Observable.html">Observable</a></li><li><a href="Subscription.html">Subscription</a></li></ul><h3>Interfaces</h3><ul><li><a href="DataSource.html">DataSource</a></li></ul><h3>Global</h3><ul><li><a href="global.html#allUnique">allUnique</a></li><li><a href="global.html#charPattern">charPattern</a></li><li><a href="global.html#createKey">createKey</a></li><li><a href="global.html#getSourceObserver">getSourceObserver</a></li><li><a href="global.html#isNumber">isNumber</a></li><li><a href="global.html#performGetOnModelSource">performGetOnModelSource</a></li><li><a href="global.html#rangeCollapse">rangeCollapse</a></li><li><a href="global.html#set_json_values_as_json_values">set_json_values_as_json_values</a></li><li><a href="global.html#sortLol">sortLol</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="HttpDataSource.html">HttpDataSource</a></li><li><a href="Model.html">Model</a></li><li><a href="ModelResponse.html">ModelResponse</a></li><li><a href="Observable.html">Observable</a></li><li><a href="Subscription.html">Subscription</a></li></ul><h3>Interfaces</h3><ul><li><a href="DataSource.html">DataSource</a></li></ul><h3>Global</h3><ul><li><a href="global.html#allUnique">allUnique</a></li><li><a href="global.html#charPattern">charPattern</a></li><li><a href="global.html#createKey">createKey</a></li><li><a href="global.html#getSourceObserver">getSourceObserver</a></li><li><a href="global.html#InvalidModelError">InvalidModelError</a></li><li><a href="global.html#isNumber">isNumber</a></li><li><a href="global.html#performGetOnModelSource">performGetOnModelSource</a></li><li><a href="global.html#rangeCollapse">rangeCollapse</a></li><li><a href="global.html#set_json_values_as_json_values">set_json_values_as_json_values</a></li><li><a href="global.html#sortLol">sortLol</a></li></ul>
 </nav>
 
 <br class="clear">

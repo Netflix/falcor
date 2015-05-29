@@ -347,7 +347,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="falcor_Model.js.html">falcor/Model.js</a>, <a href="falcor_Model.js.html#line32">line 32</a>
+        <a href="falcor_Model.js.html">falcor/Model.js</a>, <a href="falcor_Model.js.html#line34">line 34</a>
     </li></ul></dd>
     
 
@@ -386,6 +386,144 @@
 
     
 
+    
+        <h3 class="subsection-title">Members</h3>
+
+        
+            
+<h4 class="name" id="bind"><span class="type-signature"></span>bind<span class="type-signature"></span></h4>
+
+
+
+
+<div class="description">
+    <p>Returns a clone of the <a href="Model.html">Model</a> bound to a location within the <a href="global.html#JSONGraph">JSONGraph</a>. The bound location is never a Reference: any References encountered while resolving the bound <a href="global.html#Path">Path</a> are always replaced with the References target value. For subsequent operations on the <a href="Model.html">Model</a>, all paths will be evaluated relative to the bound path. Bind allows you to:</p>
+<ul>
+<li>Expose only a fragment of the <a href="global.html#JSONGraph">JSONGraph</a> to components, rather than the entire graph</li>
+<li>Hide the location of a <a href="global.html#JSONGraph">JSONGraph</a> fragment from components</li>
+<li>Optimize for executing multiple operations and path looksup at/below the same location in the <a href="global.html#JSONGraph">JSONGraph</a></li>
+</ul>
+</div>
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="falcor_Model.js.html">falcor/Model.js</a>, <a href="falcor_Model.js.html#line172">line 172</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+        
+            
+<h4 class="name" id="bindSync"><span class="type-signature"></span>bindSync<span class="type-signature"></span></h4>
+
+
+
+
+<div class="description">
+    <p>Synchronously returns a clone of the <a href="Model.html">Model</a> bound to a location within the <a href="global.html#JSONGraph">JSONGraph</a>. The bound location is never a Reference: any References encountered while resolving the bound <a href="global.html#Path">Path</a> are always replaced with the References target value. For subsequent operations on the <a href="Model.html">Model</a>, all paths will be evaluated relative to the bound path. This method can only be invoked when the <a href="Model.html">Model</a> does not have a <a href="DataSource.html">DataSource</a> or from within a selector function. Bind allows you to:</p>
+<ul>
+<li>Expose only a fragment of the <a href="global.html#JSONGraph">JSONGraph</a> to components, rather than the entire graph</li>
+<li>Hide the location of a <a href="global.html#JSONGraph">JSONGraph</a> fragment from components</li>
+<li>Optimize for executing multiple operations and path looksup at/below the same location in the <a href="global.html#JSONGraph">JSONGraph</a></li>
+</ul>
+</div>
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="falcor_Model.js.html">falcor/Model.js</a>, <a href="falcor_Model.js.html#line299">line 299</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+        
     
 
     
@@ -499,364 +637,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="falcor_Model.js.html">falcor/Model.js</a>, <a href="falcor_Model.js.html#line419">line 419</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<h5>Returns:</h5>
-
-        
-
-
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type"><a href="Model.html">Model</a></span>
-
-
-    </dd>
-</dl>
-
-    
-
-
-
-        
-            
-
-    
-
-    <h4 class="name" id="bind"><span class="type-signature"></span>bind<span class="signature">(boundPath, &hellip;relativePathsToPreload)</span><span class="type-signature"> &rarr; {<a href="Observable.html">Observable</a>.&lt;<a href="Model.html">Model</a>>}</span></h4>
-
-    
-
-
-
-<div class="description">
-    <p>Returns a clone of the <a href="Model.html">Model</a> bound to a location within the <a href="global.html#JSONGraph">JSONGraph</a>. The bound location is never a Reference: any References encountered while resolving the bound <a href="global.html#Path">Path</a> are always replaced with the References target value. For subsequent operations on the <a href="Model.html">Model</a>, all paths will be evaluated relative to the bound path. Bind allows you to:</p>
-<ul>
-<li>Expose only a fragment of the <a href="global.html#JSONGraph">JSONGraph</a> to components, rather than the entire graph</li>
-<li>Hide the location of a <a href="global.html#JSONGraph">JSONGraph</a> fragment from components</li>
-<li>Optimize for executing multiple operations and path looksup at/below the same location in the <a href="global.html#JSONGraph">JSONGraph</a></li>
-</ul>
-</div>
-
-
-
-
-
-
-
-
-
-    <h5>Parameters:</h5>
-    
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-        <th>Attributes</th>
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>boundPath</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type"><a href="global.html#Path">Path</a></span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-
-                
-
-                
-                </td>
-            
-
-            
-
-            <td class="description last"><p>The path to bind to</p></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>relativePathsToPreload</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type"><a href="global.html#PathSet">PathSet</a></span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-
-                
-
-                
-                    &lt;repeatable><br>
-                
-                </td>
-            
-
-            
-
-            <td class="description last"><p>Paths to preload before Model is created. These paths are relative to the bound path.</p></td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="falcor_Model.js.html">falcor/Model.js</a>, <a href="falcor_Model.js.html#line169">line 169</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<h5>Returns:</h5>
-
-        
-<div class="param-desc">
-    <ul>
-<li>An Observable stream with a single value, the bound <a href="Model.html">Model</a>, or an empty stream if nothing is found at the path</li>
-</ul>
-</div>
-
-
-
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type"><a href="Observable.html">Observable</a>.&lt;<a href="Model.html">Model</a>></span>
-
-
-    </dd>
-</dl>
-
-    
-
-
-
-        
-            
-
-    
-
-    <h4 class="name" id="bindSync"><span class="type-signature"></span>bindSync<span class="signature">(path)</span><span class="type-signature"> &rarr; {<a href="Model.html">Model</a>}</span></h4>
-
-    
-
-
-
-<div class="description">
-    <p>Synchronously returns a clone of the <a href="Model.html">Model</a> bound to a location within the <a href="global.html#JSONGraph">JSONGraph</a>. The bound location is never a Reference: any References encountered while resolving the bound <a href="global.html#Path">Path</a> are always replaced with the References target value. For subsequent operations on the <a href="Model.html">Model</a>, all paths will be evaluated relative to the bound path. This method can only be invoked when the <a href="Model.html">Model</a> does not have a <a href="DataSource.html">DataSource</a> or from within a selector function. Bind allows you to:</p>
-<ul>
-<li>Expose only a fragment of the <a href="global.html#JSONGraph">JSONGraph</a> to components, rather than the entire graph</li>
-<li>Hide the location of a <a href="global.html#JSONGraph">JSONGraph</a> fragment from components</li>
-<li>Optimize for executing multiple operations and path looksup at/below the same location in the <a href="global.html#JSONGraph">JSONGraph</a></li>
-</ul>
-</div>
-
-
-
-
-
-
-
-
-
-    <h5>Parameters:</h5>
-    
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>path</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type"><a href="global.html#Path">Path</a></span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>The path to bind to</p></td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="falcor_Model.js.html">falcor/Model.js</a>, <a href="falcor_Model.js.html#line350">line 350</a>
+        <a href="falcor_Model.js.html">falcor/Model.js</a>, <a href="falcor_Model.js.html#line342">line 342</a>
     </li></ul></dd>
     
 
@@ -956,7 +737,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="falcor_Model.js.html">falcor/Model.js</a>, <a href="falcor_Model.js.html#line455">line 455</a>
+        <a href="falcor_Model.js.html">falcor/Model.js</a>, <a href="falcor_Model.js.html#line378">line 378</a>
     </li></ul></dd>
     
 
@@ -1152,7 +933,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="falcor_Model.js.html">falcor/Model.js</a>, <a href="falcor_Model.js.html#line115">line 115</a>
+        <a href="falcor_Model.js.html">falcor/Model.js</a>, <a href="falcor_Model.js.html#line117">line 117</a>
     </li></ul></dd>
     
 
@@ -1324,7 +1105,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="falcor_Model.js.html">falcor/Model.js</a>, <a href="falcor_Model.js.html#line251">line 251</a>
+        <a href="falcor_Model.js.html">falcor/Model.js</a>, <a href="falcor_Model.js.html#line199">line 199</a>
     </li></ul></dd>
     
 
@@ -1483,7 +1264,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="falcor_Model.js.html">falcor/Model.js</a>, <a href="falcor_Model.js.html#line151">line 151</a>
+        <a href="falcor_Model.js.html">falcor/Model.js</a>, <a href="falcor_Model.js.html#line153">line 153</a>
     </li></ul></dd>
     
 
@@ -1651,7 +1432,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="falcor_Model.js.html">falcor/Model.js</a>, <a href="falcor_Model.js.html#line287">line 287</a>
+        <a href="falcor_Model.js.html">falcor/Model.js</a>, <a href="falcor_Model.js.html#line236">line 236</a>
     </li></ul></dd>
     
 
@@ -1824,7 +1605,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="falcor_Model.js.html">falcor/Model.js</a>, <a href="falcor_Model.js.html#line122">line 122</a>
+        <a href="falcor_Model.js.html">falcor/Model.js</a>, <a href="falcor_Model.js.html#line124">line 124</a>
     </li></ul></dd>
     
 
@@ -1982,7 +1763,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="falcor_Model.js.html">falcor/Model.js</a>, <a href="falcor_Model.js.html#line230">line 230</a>
+        <a href="falcor_Model.js.html">falcor/Model.js</a>, <a href="falcor_Model.js.html#line178">line 178</a>
     </li></ul></dd>
     
 
@@ -2113,7 +1894,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="falcor_Model.js.html">falcor/Model.js</a>, <a href="falcor_Model.js.html#line382">line 382</a>
+        <a href="falcor_Model.js.html">falcor/Model.js</a>, <a href="falcor_Model.js.html#line305">line 305</a>
     </li></ul></dd>
     
 
@@ -2213,7 +1994,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="falcor_Model.js.html">falcor/Model.js</a>, <a href="falcor_Model.js.html#line442">line 442</a>
+        <a href="falcor_Model.js.html">falcor/Model.js</a>, <a href="falcor_Model.js.html#line365">line 365</a>
     </li></ul></dd>
     
 
@@ -2313,7 +2094,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="falcor_Model.js.html">falcor/Model.js</a>, <a href="falcor_Model.js.html#line427">line 427</a>
+        <a href="falcor_Model.js.html">falcor/Model.js</a>, <a href="falcor_Model.js.html#line350">line 350</a>
     </li></ul></dd>
     
 
@@ -2417,7 +2198,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="falcor_Model.js.html">falcor/Model.js</a>, <a href="falcor_Model.js.html#line462">line 462</a>
+        <a href="falcor_Model.js.html">falcor/Model.js</a>, <a href="falcor_Model.js.html#line385">line 385</a>
     </li></ul></dd>
     
 
@@ -2517,7 +2298,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="falcor_Model.js.html">falcor/Model.js</a>, <a href="falcor_Model.js.html#line469">line 469</a>
+        <a href="falcor_Model.js.html">falcor/Model.js</a>, <a href="falcor_Model.js.html#line392">line 392</a>
     </li></ul></dd>
     
 
@@ -2672,7 +2453,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="falcor_Model.js.html">falcor/Model.js</a>, <a href="falcor_Model.js.html#line60">line 60</a>
+        <a href="falcor_Model.js.html">falcor/Model.js</a>, <a href="falcor_Model.js.html#line62">line 62</a>
     </li></ul></dd>
     
 
@@ -2734,7 +2515,7 @@
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="HttpDataSource.html">HttpDataSource</a></li><li><a href="Model.html">Model</a></li><li><a href="ModelResponse.html">ModelResponse</a></li><li><a href="Observable.html">Observable</a></li><li><a href="Subscription.html">Subscription</a></li></ul><h3>Interfaces</h3><ul><li><a href="DataSource.html">DataSource</a></li></ul><h3>Global</h3><ul><li><a href="global.html#allUnique">allUnique</a></li><li><a href="global.html#charPattern">charPattern</a></li><li><a href="global.html#createKey">createKey</a></li><li><a href="global.html#getSourceObserver">getSourceObserver</a></li><li><a href="global.html#isNumber">isNumber</a></li><li><a href="global.html#performGetOnModelSource">performGetOnModelSource</a></li><li><a href="global.html#rangeCollapse">rangeCollapse</a></li><li><a href="global.html#set_json_values_as_json_values">set_json_values_as_json_values</a></li><li><a href="global.html#sortLol">sortLol</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="HttpDataSource.html">HttpDataSource</a></li><li><a href="Model.html">Model</a></li><li><a href="ModelResponse.html">ModelResponse</a></li><li><a href="Observable.html">Observable</a></li><li><a href="Subscription.html">Subscription</a></li></ul><h3>Interfaces</h3><ul><li><a href="DataSource.html">DataSource</a></li></ul><h3>Global</h3><ul><li><a href="global.html#allUnique">allUnique</a></li><li><a href="global.html#charPattern">charPattern</a></li><li><a href="global.html#createKey">createKey</a></li><li><a href="global.html#getSourceObserver">getSourceObserver</a></li><li><a href="global.html#InvalidModelError">InvalidModelError</a></li><li><a href="global.html#isNumber">isNumber</a></li><li><a href="global.html#performGetOnModelSource">performGetOnModelSource</a></li><li><a href="global.html#rangeCollapse">rangeCollapse</a></li><li><a href="global.html#set_json_values_as_json_values">set_json_values_as_json_values</a></li><li><a href="global.html#sortLol">sortLol</a></li></ul>
 </nav>
 
 <br class="clear">

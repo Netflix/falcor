@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>JSDoc: Source: falcor/DataSource.js</title>
+    <title>JSDoc: Source: falcor/InvalidModelError.js</title>
 
     <script src="scripts/prettify/prettify.js"> </script>
     <script src="scripts/prettify/lang-css.js"> </script>
@@ -17,7 +17,7 @@
 
 <div id="main">
 
-    <h1 class="page-title">Source: falcor/DataSource.js</h1>
+    <h1 class="page-title">Source: falcor/InvalidModelError.js</h1>
 
     
 
@@ -27,36 +27,24 @@
     <section>
         <article>
             <pre class="prettyprint source linenums"><code>/**
- * Controls how the {@link Model} retrieves and manages data, generally from a remote {@link JSONGraph} model 
- * @interface DataSource
+ * An InvalidModelError can only happen when a user binds, whether sync
+ * or async to shorted value.  See the unit tests for examples.
+ *
+ * @param {String} message
  */
+var InvalidModelError = function InvalidModelError(boundPath, shortedPath) {
+    this.message = 'The boundPath of the model is not valid since it a value or error is found before the path ends.';
+    this.stack = (new Error()).stack;
+    this.boundPath = boundPath;
+    this.shortedPath = shortedPath;
+};
 
-/**
- * Get data for the specified path(s)
- * @function get
- * @param {Array.&lt;PathSet>} pathSets - The path(s) to retrieve
- * @returns {Observable.&lt;JSONGraphEnvelope>} - The {JSONGraph} fragment and associated metadata for the path(s)
- * @memberof DataSource.prototype
- */
+module.exports = InvalidModelError;
 
-/**
- * Set values for the specified path(s). Since operations on the data source may fail or coerce values, to maintain consistency between the data source and {@link Model}, return the values of each path after the set operation
- * @function set
- * @param {JSONGraphEnvelope} jsonGraphEnvelope - The path and value pairs to set
- * @returns {Observable.&lt;JSONGraphEnvelope>} The {JSONGraph} fragment of the final values and associated metadata for the set path(s)
- * @memberof DataSource.prototype
- */
-
-/**
- * Invoke a function
- * @function call
- * @param {Path} functionPath - The path to the function to invoke
- * @param {Array.&lt;Object>} args - The arguments to pass to the function
- * @param {Array.&lt;PathSet>} pathSuffixes - The paths to retrieve from objects returned from the function
- * @param {Array.&lt;PathSet>} calleePaths - The paths to retrieve from function callee after successful function execution
- * @returns {Observable.&lt;JSONGraphEnvelope>} The {JSONGraph} fragment and associated metadata returned from the invoked function
- * @memberof DataSource.prototype
- */
+// instanceof will be an error.
+// but stack will be correct because its defined in the constructor.
+InvalidModelError.prototype = new Error();
+InvalidModelError.prototype.name = 'InvalidModel';
 </code></pre>
         </article>
     </section>
