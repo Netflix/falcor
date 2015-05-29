@@ -215,7 +215,7 @@ Model.prototype = {
             var boundModel;
             root.allowSync++;
             try {
-                boundModel = model.bindSync(model._path.concat(boundPath));
+                boundModel = model.bindSync(boundPath);
             } catch(e) {
                 error = e;
             }
