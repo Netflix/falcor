@@ -1,6 +1,6 @@
 var express = require('express');
 var app = express();
-var FalcorServer = require('falcor-server');
+var FalcorServer = require('falcor-express');
 var Cache = require('../../data/Cache');
 var falcor = require('../../../index');
 var Rx = require('rx');

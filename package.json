@@ -41,7 +41,7 @@
     "diff": "~1.0.8",
     "express": "~4.9.0",
     "falcor-browser": "git+ssh://git@github.com/Netflix/falcor-browser.git",
-    "falcor-server": "git+ssh://git@github.com/Netflix/falcor-server.git",
+    "falcor-express": "git+ssh://git@github.com/Netflix/falcor-express.git",
     "gulp": "~3.8.8",
     "gulp-beautify": "~1.1.0",
     "gulp-bench": "~1.0.3",
