@@ -185,7 +185,12 @@ var person = new falcor.Model({
                   FROM user 
            WHERE id = ${request.cookies.userid}`).
            then(row => {
-             jsong: 
+             jsong: {
+                person: {
+                    name: getProps(row, pathSet[0]),
+                    occupation: getProps(row, pathSet[1])
+                }
+             }
     },
     {
       route: 'location["country", "city", "address"]',
