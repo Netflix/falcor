@@ -95,18 +95,26 @@ In addition to JSON data the Falcor model also supports JSON Graph. JSON Graph i
  
 ```JavaScript
 var log = console.log.bind(console)
-var $ref = falcor.Model.ref;
 
 var model = new falcor.Model({cache: {
     todos: [
-        $ref('todosById[44]'),
-        $ref('todosById[54]')
+        {
+            $type: "ref",
+            value: ['todosById', 44]
+        },
+        {
+            $type: "ref",
+            value: ['todosById', 54]
+        }        
     ],
     todosById: {
         "44": {
             name: 'get milk from corner store',
             done: false,
-            prerequisites: [$ref('todosById[54]')]
+            prerequisites: [{
+                $type: "ref",
+                value: ['todosById', 54]
+            }]
         },
         "54": {
             name: 'withdraw money from ATM',
@@ -123,7 +131,7 @@ model.setValue('todos[1].done', true).then(function(x) {
 // true
 ```
  
-In addition to using JSON graph to make sure that objects don't appear more than once in the Model's cache, the model uses the references in JSON graph to optimize server requests. For more information, see Path Optimization.
+In addition to using JSON graph to make sure that objects don't appear more than once in the Model's cache, the model uses the references in JSON graph to optimize server requests. For more information, see [Path Optimization](#Path-Optimization).
 
 ## Working with JSON using a Model
  
@@ -179,7 +187,7 @@ When data is retrieved from a DataSource, it is placed into the Model's local ca
 model.getValue('todos[0].name').then(log);
 ```
 
-For more information on how the Model JSON cache works, see The Model Cache.
+For more information on how the Model JSON cache works, see [The Model Cache](#The-Model-Cache).
 
 # Working with JSON data using a Model
 
@@ -259,7 +267,6 @@ When working with the same JSON object indirectly through a Falcor Model, you ca
 
 ```JavaScript
 var log = console.log.bind(console)
-var $ref = falcor.Model.ref;
 
 var model = new falcor.Model({cache:json});
 
@@ -291,45 +298,38 @@ The requests above can not reliably be expected to return data. Therefore you sh
 
 _Falcor is optimized for displaying information to human beings in real-time._ Both Arrays and Objects can contain an unbounded amount of data. This means it’s impossible to predict how much data will be retrieved from the server when you request a JSON Array or Object. An Array that contains 5 items today, can grow to contain 10,000 items later on. This means that Requests which are initially served quickly can become slower over time as more data is added to backend data stores.  This can cause the performance of your application to degrade slowly over time. 
 
-Models force developers to be explicit about which value types they would like to retrieve in order to maximize the likelihood that server requests for data will have **stable performance** over time. Rather than allow you to retrieve an entire Object, Model's force you to _be explicit_ and retrieve only those values needed in a given scenario:
+Models force developers to be explicit about which value types they would like to retrieve in order to maximize the likelihood that server requests for data will have **stable performance** over time. Rather than allow you to retrieve an entire Object, Model's force you to _be explicit_ and retrieve only those values needed in a given scenario, similarly when displaying an Array of items Models do not allow you to retrieve the entire Array upfront. Instead you must request the first visible page of an Array, and follow up with additional page requests as the user scrolls.
 
-(Example of requesting three properties and displaying them)
+In the following example we page through a list of TODOs, selecting the name and done property of all the TODOs in the current page.
 ```JavaScript
 var model = new falcor.Model({
-    cache: {
-        todos: [
-            {
-                name: 'get milk from corner store',
-                done: false,
-                priority: 4
+    source: new falcor.HttpSource('/todos.json')
+});
+
+function showPage(page) {
+    //selecting just the props needed to display table row
+    var from = page, to = page + 5;
+    model.get('todos[' + from + '..' + to + ']["name", "done"]').
+        then(function(response) {
+            var html = "<ul>";
+            var todo;
+            for (var i = from; i < to; i++) {
+                todo = response.json.todos[i];
+                if (todo)
+                    html += "<li>" + todo.name + " <img src='" + (todo.done ? "check.png" : "blank.png") + "'></li>";
             }
-        ]
-    }});
+            html += "</ul><a onclick='showPage(" + to + ")'>Next</a>";
+            document.body.innerHTML = html;
+        });
+};
+showPage(0);
 
-model.get('todos[0]["name", "done", "priority"]').
-	then(function(x) { console.log(JSON.stringify(x, null, 4)); });
-```
-
-Similarly when displaying an Array of items Models do not allow you to retrieve the entire Array upfront. Instead you must request the first visible page of an Array, and follow up with additional page requests as the user scrolls.
-
-(Example of retrieving first page of a list)
-```JavaScript
-var model = new falcor.Model({
-    cache: {
-        todos: [
-            {
-                name: 'get milk from corner store',
-                done: false
-            },
-            {
-                name: 'withdraw money from ATM',
-                done: false
-            }            
-        ]
-    }});
-
-model.get('todos[0]["name", "done"]').
-	then(function(x) { console.log(JSON.stringify(x, null, 4)); });
+// // The code above prints the following html:
+// <ul>
+//     <li>get milk from corner store <img src="blank.png"></li>
+//     <li>withdraw money from ATM <img src="check.png"></li>
+// </ul>
+// <a onclick="showPage(5)">Next</a>
 ```
 
 If you are certain that an Object or Array will remain a constant size, you can indicate to a Model that they should always be retrieved in their entirety by using an Atom. For more information, see [JSON Graph Atoms](#JSON-Graph-Atoms).
@@ -393,7 +393,7 @@ console.log(JSON.stringify(json, null, 4));
             id: 4291,
             name: 'withdraw money from ATM',
             done: true 
-        }   
+        }
     ]
 };
 */
@@ -401,7 +401,7 @@ console.log(JSON.stringify(json, null, 4));
 
 This highlights one of the hazards of representing your data as JSON: **most application domains are Graphs and JSON models Trees.**
 
-When application servers send subsets of the graph across the network as JSON, they typically use the *duplicate and identify strategy*. If the same object appears more than once in the JSON response, the application server includes a unique ID within the object. The application client is expected to use the IDs to determine the two copies of an object represent the same entity. This code must often be specialized for each new type of message that comes back from the server. Failing to de-dupe objects can lead to stale data being displayed to the user.
+When application servers send subsets of the graph across the network as JSON, they typically use the *duplicate and identify strategy*. If the same object appears more than once in the JSON response, the application server includes a unique ID within the object. The application client is expected to use the IDs to determine if the two copies of an object represent the same entity. This code must often be specialized for each new type of message that comes back from the server. Failing to de-dupe objects can lead to stale data being displayed to the user.
 
 Falcor attempts to solve this problem by introducing JSON Graph. JSON Graph is a convention for modeling graph information in JSON. You can convert any JSON object into a JSON Graph in two steps:
 
@@ -410,19 +410,136 @@ Falcor attempts to solve this problem by introducing JSON Graph. JSON Graph is a
 
 We can use the task ID to create a unique location in the JSON for each task. We start by adding a map of all Tasks that is organized by Task ID to the root of the document:
 
-(Example of tasks by ID)
+```JavaScript
+var json = {
+    todosById: {
+        "44": {
+            name: 'get milk from corner store',
+            done: false,
+            prerequisites: []
+        },
+        "54": {
+            name: 'withdraw money from ATM',
+            done: false
+        }
+    },
+    todos: [
+        {
+            id: 44,
+            name: 'get milk from corner store',
+            done: false,
+            prerequisites: [
+                {
+                    id: 54,
+                    name: 'withdraw money from ATM',
+                    done: false  
+                }
+            ]
+        },
+        {
+            id: 54,
+            name: 'withdraw money from ATM',
+            done: true 
+        }
+    ]
+};
+```
 
 Next we replace every other occurrence of each task with a Reference value. A Reference is a JSON object that contains a path to another location within an object. References can be constructed using the Model.ref factory function. 
 
-(Example that shows references)
+```JavaScript
+var $ref = falcor.Model.ref;
+var json = {
+    todosById: {
+        "44": {
+            name: 'get milk from corner store',
+            done: false,
+            prerequisites: [$ref('todosById[54]')]
+        },
+        "54": {
+            name: 'withdraw money from ATM',
+            done: false
+        }
+    },
+    todos: [
+        $ref('todosById[44]'),
+        $ref('todosById[54]')
+    ]
+};
+```
 
 Although a Reference is a JSON object, it is treated as a value type by the Model. In other words it is legal to retrieve a reference from a Falcor Model.
 
-(Example that shows retrieving a reference for a Falcor model)
+```JavaScript
+var $ref = falcor.Model.ref;
+
+var model = new falcor.Model({cache: {
+    todos: [
+        $ref('todosById[44]'),
+        $ref('todosById[54]')
+    ],
+    todosById: {
+        "44": {
+            name: 'get milk from corner store',
+            done: false,
+            prerequisites: [$ref('todosById[54]')]
+        },
+        "54": {
+            name: 'withdraw money from ATM',
+            done: false
+        }
+    }
+}});
+
+model.get('todos[1]').
+    then(function(x) { console.log(JSON.stringify(x, null, 4)); })
+
+// This outputs the following to the console:
+// {
+//     "json": {
+//         "todos": {
+//             "1": [
+//                 "todosById",
+//                 54
+//             ]
+//         }
+//     }
+// }
+```
 
 Note that in the example above each TODO appears only once. If we use a Model to set a TODO to false we will observe that the new state will be reflected regardless of where in the JSON Graph we retrieve the TODO's information.
 
-(Example demonstrating that when we use set value to set the done property of the second two due to false, we get done:true when we read it from both places in the to do list)
+```JavaScript
+var log = console.log.bind(console)
+var $ref = falcor.Model.ref;
+
+var model = new falcor.Model({cache: {
+    todos: [
+        $ref('todosById[44]'),
+        $ref('todosById[54]')
+    ],
+    todosById: {
+        "44": {
+            name: 'get milk from corner store',
+            done: false,
+            prerequisites: [$ref('todosById[54]')]
+        },
+        "54": {
+            name: 'withdraw money from ATM',
+            done: false
+        }
+    }
+}});
+
+model.setValue('todos[1].done', true).then(function(x) {
+    model.getValue('todos[0].prerequisites[0].done').then(log);
+    model.getValue('todos[1].done').then(log);
+})
+
+// This outputs the following to the console:
+// true
+// true
+```
 
 Note that in the example operations above we use a path which extends *beyond* the reference object in the JSON Graph. However instead of short-circuiting and returning the reference, the Model *follows* the path in the reference and continues evaluating the remaining keys and the path at the location referred to by the path in the reference. In the next section we will explain how models evaluate paths against JSON and JSON Graph objects.
 
@@ -430,94 +547,432 @@ Note that in the example operations above we use a path which extends *beyond* t
 
 When evaluating paths against a JSON object, the Falcor model starts at the root of its associated JSON object and continues looking up keys until it arrives at a value type.
 
-(Example of looking up a path using get value)
+```JavaScript
+var log = console.log.bind(console)
+var $ref = falcor.Model.ref;
+
+var model = new falcor.Model({cache: {
+    todos: [
+        $ref('todosById[44]'),
+        $ref('todosById[54]')
+    ],
+    todosById: {
+        "44": {
+            name: 'get milk from corner store',
+            done: false,
+            prerequisites: [$ref('todosById[54]')],
+            customer: null
+        },
+        "54": {
+            name: 'withdraw money from ATM',
+            done: false
+        }
+    }
+}});
+
+model.getValue('todosById[44].name').then(log);
+
+// This outputs the following to the console:
+// get milk from corner store 
+```
 
 If a value type is encountered before the path is fully evaluated, the path evaluation process is short-circuited and the value discovered is returned.
 
-(example of what I said above, this time running into a null at a branch node)
+```JavaScript
+var log = console.log.bind(console)
+var $ref = falcor.Model.ref;
+
+var model = new falcor.Model({cache: {
+    todos: [
+        $ref('todosById[44]'),
+        $ref('todosById[54]')
+    ],
+    todosById: {
+        "44": {
+            name: 'get milk from corner store',
+            done: false,
+            prerequisites: [$ref('todosById[54]')],
+            customer: null
+        },
+        "54": {
+            name: 'deliver pizza',
+            done: false,
+            prerequisites: [],
+            customer: {
+                name: "Jim Donut",
+                address: "123 Seaside blvd. Pacifica, CA"
+            }
+        }
+    }
+}});
+
+model.getValue('todosById[44].customer.name').then(log);
+
+// This outputs the following to the console:
+// null
+```
 
 The one exception to this rule is the case in which  a Model encounters a **Reference** value type. When a Model encounters a reference while evaluating a path, it behaves differently than does if it encounters any other value type. If a Model encounters a reference before evaluating all of the keys in a path, the unevaluated keys are appended to the path within the reference and evaluation is resumed from root of the JSON object.
 
 In the following piece of code, we attempt to retrieve the name of the first TODO:
 
-(Get value todos, 0, name)
+```JavaScript
+var log = console.log.bind(console)
+var $ref = falcor.Model.ref;
 
-First the model evaluates the keys "todo" and "0" and encounters a reference value. However instead of short-circuiting and returning the reference value, the Model resumes evaluation from the location in the JSON referred to in the reference path. This is accomplished by dynamically rewriting the path from "todos[0].name" to "todosById[2692].name" and resuming evaluation from the root of the JSON object. 
+var model = new falcor.Model({cache: {
+    todos: [
+        $ref('todosById[44]'),
+        $ref('todosById[54]')
+    ],
+    todosById: {
+        "44": {
+            name: 'get milk from corner store',
+            done: false,
+            prerequisites: [$ref('todosById[54]')],
+            customer: null
+        },
+        "54": {
+            name: 'withdraw money from ATM',
+            done: false
+        }
+    }
+}});
+
+model.getValue('todos[0].name').then(log);
+
+// This outputs the following to the console:
+// get milk from corner store
+```
+
+First the model evaluates the keys "todo" and "0" and encounters a reference value. However instead of short-circuiting and returning the reference value, the Model resumes evaluation from the location in the JSON referred to in the reference path. This is accomplished by dynamically rewriting the path from "todos[0].name" to "todosById[44].name" and resuming evaluation from the root of the JSON object. 
 
 Note that **references are only followed if there are more keys in the path that have not yet been evaluated.** If we shorten the path to "todos[0]" the model returns the reference path rather than the object it refers to.
 
-(Example of what I said above printed to the console)
+```JavaScript
+var log = console.log.bind(console)
+var $ref = falcor.Model.ref;
 
-The process of rewriting a path when a reference is encountered is known as *Path Optimization.* for more information on how Path Optimization can improve the efficiency of server-side data retrieval, see Path Optimization.
+var model = new falcor.Model({cache: {
+    todos: [
+        $ref('todosById[44]'),
+        $ref('todosById[54]')
+    ],
+    todosById: {
+        "44": {
+            name: 'get milk from corner store',
+            done: false,
+            prerequisites: [$ref('todosById[54]')],
+            customer: null
+        },
+        "54": {
+            name: 'withdraw money from ATM',
+            done: false
+        }
+    }
+}});
 
+model.getValue('todos[0]').then(log);
+
+// This outputs the following to the console:
+// ["todosById", 44]
+```
+
+The process of rewriting a path when a reference is encountered is known as *Path Optimization*. For more information on how Path Optimization can improve the efficiency of server-side data retrieval, see [Path Optimization](#Path-Optimization).
+
+<a name="JSON-Graph-Sentinels"></a>
 ### JSON Graph Sentinels
 
-In addition to References, JSON graph introduces two more new value types: Atoms and Errors. These three special value types are all classified as *Sentinels.*
+In addition to References, JSON graph introduces two more new value types: Atoms and Errors. These three special value types are all classified as *Sentinels*.
 
 Sentinels are JSON objects that are treated by the Falcor Model as value types. References, Atoms, and Errors are all JSON objects with a "$type" value of "ref", "atom", and "error" respectively. 
 
 (Example of a reference, atom, and error.)
+```JavaScript
+var log = console.log.bind(console)
+var $ref = falcor.Model.ref;
+
+var model = new falcor.Model({cache: {
+    todos: [
+        {
+            $type: "ref",
+            value: ['todosById', 44]
+        },
+        {
+            $type: "ref",
+            value: ['todosById', 54]
+        }
+    ],
+    todosById: {
+        "44": {
+            name: 'get milk from corner store',
+            done: false
+        },
+        "45": {
+            $type: "error",
+            value: "todo #45 missing."
+        },
+        "46": {
+            $type: "atom",
+            value: [1, 2, 3]
+        }
+    }
+}});
+```
 
 Each Sentinel objects also contains a "value" key with its actual value. One way to think about a Sentinel is a *box around a value*  that indicates the type of the value within. Sentinels influence the way that Models interpret their values, allowing them to distinguish a path from a string or an regular object from an error for example.
 
 Despite being JSON objects, all Sentinels are considered JSON Graph value types and therefore can be retrieved from a Model. However when a Sentinel is retrieved from a Model, the Model *unboxes* the value within the Sentinel and returns the value instead of the entire Sentinel object.
 
 (Example of calling get value on an Atom)
+```JavaScript
+var log = console.log.bind(console)
+var $ref = falcor.Model.ref;
+
+var model = new falcor.Model({cache: {
+    todosById: {
+        "44": {
+            $type: "atom",
+            value: [1, 2, 3, 4]
+        }
+    }
+}});
+
+model.getValue('todosById[44]').then(log);
+
+// This outputs the following to the console:
+// [1, 2, 3, 4]
+//@TODO: revisit.
+```
 
 You can create a new Model which does not have this unboxing behavior by calling "boxValues." 
 
 (Example of calling get value on an Atom with boxValues on)
+```JavaScript
+var $ref = falcor.Model.ref;
 
-For more information see Boxing and Unboxing.
+var model = new falcor.Model({cache: {
+    todosById: {
+        "44": {
+            $type: "atom",
+            value: [1, 2, 3, 4]
+        }
+    }
+}});
+
+//@TODO: revisit.
+model.boxValues().getValue('todosById[44]').
+    then(function(x) { console.log(JSON.stringify(x, null, 4)); });
+
+// This outputs the following to the console:
+// {
+//     "$type": "atom",
+//     "value": [
+//         1,
+//         2,
+//         3,
+//         4
+//     ],
+//     "$size": 54
+// } 
+```
+
+For more information see [Boxing and Unboxing](#Boxing-and-Unboxing).
 
 As sentinels are value types, their contents cannot be changed. Like numbers and strings, they must be replaced entirely.
 
 (Example of Setting an Atom in the cache)
+```JavaScript
+var $ref = falcor.Model.ref;
+
+var model = new falcor.Model({cache: {
+    todosById: {
+        "44": {
+            $type: "atom",
+            value: [1, 2, 3, 4]
+        }
+    }
+}});
+
+model.setValue('todosById[44]');
+//@TODO: how do you set an atom in the cache?
+// This outputs the following to the console:
+```
 
 Each Sentinel affects the way in which the Model interprets its value differently. References were explained in the previous section. In the next two sections, Atoms and Errors will be explained.
 
 <a name="JSON-Graph-Atoms"></a>
 #### JSON Graph Atoms
 
-JSON Graph allows metadata to be attached to values to control how they are handled by the Model. For example, metadata can be attached to values to control how long values stay in the Model cache and indicate whether one value is a more recent version of another value. For more information see Sentinel Metadata.
+JSON Graph allows metadata to be attached to values to control how they are handled by the Model. For example, metadata can be attached to values to control how long values stay in the Model cache and indicate whether one value is a more recent version of another value. For more information see [Sentinel Metadata](#Sentinel-Metadata).
 
 One issue is that JavaScript value types do not preserve any metadata attached to them when they are serialized as JSON:
 
 (Example of creating a JavaScript number, attaching an "$expires" property to it, and then Json stringifying it)
+```JavaScript
+var number = 4;
+number['$expires'] = 5000;
+
+console.log(JSON.stringify(number, null, 4))
+
+// This outputs the following to the console:
+// 4
+```
 
 Atoms "box" value types inside of a JSON object, allowing metadata to be attached to them. 
 
-(Example of creating a atom with a value of 4 and an "$expired property and then serializing)
+(Example of creating an atom with a value of 4 and an "$expired property and then serializing)
+```JavaScript
+var number = {
+    $type: "atom",
+    value: 4,
+    $expires: 5000
+};
+
+console.log(JSON.stringify(number, null, 4))
+
+// This outputs the following to the console:
+// {
+//     "$type": "atom",
+//     "value": 4,
+//     "$expires": 5000
+// } 
+```
 
 The value of an Atom is always treated like a value type, meaning it is retrieved and set in its entirety. Mutating an Adam is ineffectual. Instead you must replace it entirely using the Model's set operation.
 
-(Example showing that it is ineffectual to modify the value of an atom directly. We clone Adams when they are retrieved from the model, so this example should show that mutating an Adam directly has no effect by then retrieving the same object, and displaying it's data which will be unchanged)
+(Example showing that it is ineffectual to modify the value of an atom directly. We clone Atoms when they are retrieved from the model, so this example should show that mutating an Atom directly has no effect by then retrieving the same object, and displaying it's data which will be unchanged)
+```JavaScript
+var log = console.log.bind(console)
+var $ref = falcor.Model.ref;
+var $atom = falcor.Model.atom;
+
+var model = new falcor.Model({cache: {
+    todos: [
+        $ref('todosById[44]')
+    ],
+    todosById: {
+        "44": {
+            name: 'deliver pizza',
+            done: false,
+            customer: $atom({
+                name: 'Jim Hobart',
+                address: '123 pacifica ave., CA, US'
+            })
+        }
+    }
+}});
+
+model.getValue('todosById[44].customer').
+    then(function(x) { 
+        log(x); 
+        x.name = "not Jim Hobart"
+        model.getValue('todosById[44].customer').then(log)
+    })
+
+//@TODO: example is inaccurate.
+```
+
 
 In addition to making it possible to attach metadata to JSON values, Atoms can be used to get around the restriction against retrieving JSON Objects and Arrays from a Falcor Model. 
 
 Let's say that we have an Array which we are certain will remain small, like a list of video subtitles for example. 
 
 (Example of a JSON graph object with a Netflix title which contains an array of subtitles)
+```JavaScript
+var log = console.log.bind(console)
+var $ref = falcor.Model.ref;
+var $atom = falcor.Model.atom;
 
-By boxing the Array in an Atom, we cause the Falcor model to treat it as a value and returned it in its entirety. 
+var model = new falcor.Model({cache: {
+    titlesById: {
+        "44": {
+            name: "Die Hard",
+            subtitles: $atom(['en', 'fr'])
+        }
+    }
+}});
+```
 
-(Example of retrieving the entire array using a  model)
+By boxing the Array in an Atom, we cause the Falcor model to treat it as a value and return it in its entirety. 
+
+(Example of retrieving the entire array using a model)
+```JavaScript
+model.getValue('titlesById[44].subtitles').then(log)
+
+// This outputs the following to the console:
+// ['en', 'fr']
+```
 
 Internally the Model boxes all retrieved values that have been successfully retrieved from the data source before storing these values in its local cache.
 
 #### JSON Graph Errors
 
-When a model's DataSource encounters an error while attempting to retrieve a value from a JSON Graph object, it is represented as an error object. 
+When a Model's DataSource encounters an error while attempting to retrieve a value from a JSON Graph object, it is represented as an error object. 
 
 (Example of an error when attempting to retrieve the rating of a Netflix title from a model)
+```JavaScript
+var model = new falcor.Model({cache: {
+    titlesById: {
+        "44": {
+            $type: "error",
+            value: "failure to retrieve title."
+        }
+    }
+}});
+
+try {
+    console.log(model.getValueSync('titlesById[44]'))
+} catch(e) {
+    console.error(e.value)
+}
+
+// This outputs the following to the error console:
+// failure to retrieve title.
+```
 
 By default a Model delivers Errors differently than other values. If synchronous methods are used to retrieve the data from the model, the error is thrown.  If the data is asynchronously being requested from the model as a observable or a promise, the error will be delivered in a special call back.
 
 (Example of receiving an error in an observable)
+```JavaScript
+var log = console.log.bind(console);
+
+var model = new falcor.Model({cache: {
+    titlesById: {
+        "44": {
+            $type: "error",
+            value: "failure to retrieve title."
+        }
+    }
+}});
+
+model.getValue('titlesById[44]').subscribe(log, function(e) { console.error(e[0].value); })
+
+// This outputs the following to the error console:
+// failure to retrieve title.
+//@TODO: bug?  why does 'subscribe's error callback return an array while 'then's does not?
+```
 
 (Example of receiving an error in a promise)
+```JavaScript
+var log = console.log.bind(console);
 
-To learn more about the different ways to retrieve information from a model, see Retrieving Data from a Model.
+var model = new falcor.Model({cache: {
+    titlesById: {
+        "44": {
+            $type: "error",
+            value: "failure to retrieve title."
+        }
+    }
+}});
+
+model.getValue('titlesById[44]').then(log, function(e) { console.error(e.value); })
+
+// This outputs the following to the error console:
+// failure to retrieve title.
+```
+
+To learn more about the different ways to retrieve information from a model, see [Retrieving Data from a Model](#Retrieving-Data-from-a-Model).
 
 ##### "What if I don't want a Model to treat errors differently from other values?"
 
@@ -526,23 +981,61 @@ There are many reasons why you might want errors reported the same way as other 
 The "treatErrorsAsValues" function creates a new Model which reports errors the same way as values. 
 
 (Example of retrieving a single error from a JSON graph using get value)
+```JavaScript
+var model = new falcor.Model({cache: {
+    titlesById: {
+        "44": {
+            $type: "error",
+            value: "failure."
+        }
+    }
+}});
+
+console.log(model.treatErrorsAsValues().getValueSync('titlesById[44]'))
+
+// This outputs the following to the regular console:
+// failure.
+```
 
 Note that using "treatErrorsAsValues" will cause the model to deliver errors as values. However it will not provide you with a way to distinguish errors from values. If you would like to be able to receive errors alongside values, but retain the ability to distinguish between errors and values, you can chain "treatErrorsAsValues" and "boxValues" together. When I model is operating in "boxValues" mode, it always returns the sentinels that box each value and indicate their type. 
 
 (Identical example as above, except this time we also call box values in addition to treat errors as values)
+```JavaScript
+var model = new falcor.Model({cache: {
+    titlesById: {
+        "44": {
+            $type: "error",
+            value: "failure."
+        }
+    }
+}});
 
-When you receive a Sentinel, you can check the "$type" property of each sentinel to distinguish whether a value is an error ("error") or a successfully-retrieved value ("atom"). For more information see Boxing and Unboxing.
+console.log(JSON.stringify(model.treatErrorsAsValues().boxValues().getValueSync('titlesById[44]'), null, 4))
 
- #### Sentinel Metadata
+// This outputs the following to the regular console:
+// {
+//     "$type": "error",
+//     "value": "failure.",
+//     "$size": 58
+// }
+```
+
+When you receive a Sentinel, you can check the "$type" property of each sentinel to distinguish whether a value is an error ("error") or a successfully-retrieved value ("atom"). For more information see [Boxing and Unboxing](#Boxing-and-Unboxing).
+
+#### Sentinel Metadata
 
 Metadata can be attached to Sentinels to control the way the Model handles them once they have been retrieved from the data source. Metadata is any key that starts with the prefix "$".
 
 (Example of using setValue to add an atom that expires in two seconds  ($expires: -2000) and then attempting to retrieve it after four seconds only to prove that it is gone)
+```JavaScript
+//@TODO: look up syntax for how do this.
+```
 
-
+<a name="Retrieving-Data-from-a-Model"></a>
 ## Retrieving Data from a Model
 
 (Example of using get value sync to retrieve the rating)
+
 
 Errors are cached in the Model just like any other value. As it is possible to retrieve more than one path at a time from a model,
 ```JavaScript
@@ -563,11 +1056,11 @@ var model = new falcor.Model({cache:{
                     name: 'Jim Hobart',
                     address: '123 pacifica ave., CA, US'
                 },
-               // this customer object expires in 30 minutes.
-              $expires: -30 * 60 * 1000
+                // this customer object expires in 30 minutes.
+                $expires: -30 * 60 * 1000
+            },
+            prerequisites: [$ref('todosById[79]')]      
         },
-        prerequisites: [$ref('todosById[79]')]      
-    },
         "79": {
             $type: 'error',
             value: 'error retrieving todo from database.'
@@ -576,7 +1069,7 @@ var model = new falcor.Model({cache:{
 }});
 ```
 
-The following paths are legal to retrieve because  atoms, errors, and references are considered value types in JSON Graph:
+The following paths are legal to retrieve because atoms, errors, and references are considered value types in JSON Graph:
 
 ```JavaScript
 model.getValue("todos[0].customer").then(log); 
@@ -645,22 +1138,24 @@ Do you get method also except optional selector function, which can be used to t
  
 One of the limitations of working with JSON data through a Falcor model is that you can only retrieve values.
  
+ <a name="Boxing-and-Unboxing"></a>
  ## Boxing and Unboxing
  
  
  
- ## Sentinel Metadata
+<a name="Sentinel-Metadata"></a>
+## Sentinel Metadata
 
 Metadata can be attached to value types to control the way the Model handles them once they have been retrieved from the data source. Metadata can be to any JSON object as a key that starts with the prefix "$". Note that any keys set on JSON value types (string, number, boolean, and null) will not persist when serialized to JSON. 
 
 (Example of attaching a metadata key to a JavaScript number, and then JSON stringifying it only to discover that the key is missing.)
 
-Therefore in order to add metadata to JSON value types, the value types must be boxed in an atom. For more information on Atoms see JSON Graph Atoms.
+Therefore in order to add metadata to JSON value types, the value types must be boxed in an atom. For more information on Atoms see [JSON Graph Atoms](#JSON-Graph-Atoms).
 
 
 
 
-For more information on sentinels, see JSON Graph Sentinels.
+For more information on sentinels, see [JSON Graph Sentinels](#JSON-Graph-Sentinels).
 
 
 ## Transactions
@@ -684,10 +1179,12 @@ Synchronized methods allow you to synchronously read data directly from the Falc
 
 ## Cache Control
 
+<a name="The-Model-Cache"></a>
 ## The Model Cache
 
 ## Schedulers
 
+<a name="Path-Optimization"></a>
 ## Path Optimization and the DataSource
 
 When you request a path from a Model, the Model first attempts to retrieve the data from an in-memory cache. If the model fails to find the data in its cache, the Model request the data from its data source.
