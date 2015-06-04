@@ -94,74 +94,6 @@
     
 
     
-        <h3 class="subsection-title">Members</h3>
-
-        
-            
-<h4 class="name" id="charPattern"><span class="type-signature"></span>charPattern<span class="type-signature"></span></h4>
-
-
-
-
-<div class="description">
-    <p>Builds the set of collapsed
-queries by traversing the tree
-once</p>
-</div>
-
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="falcor_request_RequestQueue.js.html">falcor/request/RequestQueue.js</a>, <a href="falcor_request_RequestQueue.js.html#line285">line 285</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-        
-    
 
     
         <h3 class="subsection-title">Methods</h3>
@@ -223,7 +155,7 @@ return true if every number in an array is unique</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="falcor_request_RequestQueue.js.html">falcor/request/RequestQueue.js</a>, <a href="falcor_request_RequestQueue.js.html#line421">line 421</a>
+        <a href="support_collapse.js.html">support/collapse.js</a>, <a href="support_collapse.js.html#line166">line 166</a>
     </li></ul></dd>
     
 
@@ -254,15 +186,16 @@ return true if every number in an array is unique</p>
 
     
 
-    <h4 class="name" id="createKey"><span class="type-signature"></span>createKey<span class="signature">()</span><span class="type-signature"></span></h4>
+    <h4 class="name" id="buildQueries"><span class="type-signature"></span>buildQueries<span class="signature">()</span><span class="type-signature"></span></h4>
 
     
 
 
 
 <div class="description">
-    <p>Create a unique hash key for a set
-of paths</p>
+    <p>Builds the set of collapsed
+queries by traversing the tree
+once</p>
 </div>
 
 
@@ -306,7 +239,173 @@ of paths</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="falcor_request_RequestQueue.js.html">falcor/request/RequestQueue.js</a>, <a href="falcor_request_RequestQueue.js.html#line455">line 455</a>
+        <a href="support_collapse.js.html">support/collapse.js</a>, <a href="support_collapse.js.html#line81">line 81</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="collapseRangeIndexes"><span class="type-signature"></span>collapseRangeIndexes<span class="signature">()</span><span class="type-signature"></span></h4>
+
+    
+
+
+
+<div class="description">
+    <p>Collapse range indexers, e.g. when there is a continuous
+range in an array, turn it into an object instead:</p>
+<p>[1,2,3,4,5,6] =&gt; {&quot;from&quot;:1, &quot;to&quot;:6}</p>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="support_collapse.js.html">support/collapse.js</a>, <a href="support_collapse.js.html#line19">line 19</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="createKey"><span class="type-signature"></span>createKey<span class="signature">()</span><span class="type-signature"></span></h4>
+
+    
+
+
+
+<div class="description">
+    <p>Create a unique hash key for a set of paths</p>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="support_collapse.js.html">support/collapse.js</a>, <a href="support_collapse.js.html#line181">line 181</a>
     </li></ul></dd>
     
 
@@ -653,7 +752,7 @@ or async to shorted value.  See the unit tests for examples.</p>
 
 
 <div class="description">
-    <p>Return true if argument is a number</p>
+    <p>Return true if argument is a number or can be cast to a number</p>
 </div>
 
 
@@ -697,7 +796,7 @@ or async to shorted value.  See the unit tests for examples.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="falcor_request_RequestQueue.js.html">falcor/request/RequestQueue.js</a>, <a href="falcor_request_RequestQueue.js.html#line413">line 413</a>
+        <a href="support_collapse.js.html">support/collapse.js</a>, <a href="support_collapse.js.html#line154">line 154</a>
     </li></ul></dd>
     
 
@@ -930,90 +1029,6 @@ If performance in the future is relaxed i would like to see Rx.</p>
 
     
 
-    <h4 class="name" id="rangeCollapse"><span class="type-signature"></span>rangeCollapse<span class="signature">()</span><span class="type-signature"></span></h4>
-
-    
-
-
-
-<div class="description">
-    <p>Collapse ranges, e.g. when there is a continuous range
-in an array, turn it into an object instead</p>
-<p>[1,2,3,4,5,6] =&gt; {&quot;from&quot;:1, &quot;to&quot;:6}</p>
-</div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="falcor_request_RequestQueue.js.html">falcor/request/RequestQueue.js</a>, <a href="falcor_request_RequestQueue.js.html#line322">line 322</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        
-            
-
-    
-
     <h4 class="name" id="set_json_values_as_json_values"><span class="type-signature"></span>set_json_values_as_json_values<span class="signature">()</span><span class="type-signature"></span></h4>
 
     
@@ -1097,7 +1112,7 @@ Sets a list of PathValues into the cache and calls the onNext for each value.</p
 
     
 
-    <h4 class="name" id="sortLol"><span class="type-signature"></span>sortLol<span class="signature">()</span><span class="type-signature"></span></h4>
+    <h4 class="name" id="sortListOfLists"><span class="type-signature"></span>sortListOfLists<span class="signature">()</span><span class="type-signature"></span></h4>
 
     
 
@@ -1105,9 +1120,7 @@ Sets a list of PathValues into the cache and calls the onNext for each value.</p
 
 <div class="description">
     <p>Sort a list-of-lists
-Used for generating a unique hash
-key for each subtree; used by the
-memoization</p>
+Used for generating a unique hash key for each subtree; used by the memoization</p>
 </div>
 
 
@@ -1151,7 +1164,7 @@ memoization</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="falcor_request_RequestQueue.js.html">falcor/request/RequestQueue.js</a>, <a href="falcor_request_RequestQueue.js.html#line441">line 441</a>
+        <a href="support_collapse.js.html">support/collapse.js</a>, <a href="support_collapse.js.html#line189">line 189</a>
     </li></ul></dd>
     
 
@@ -1984,7 +1997,7 @@ memoization</p>
 
 
 <div class="description">
-    <p>A part of a <a href="global.html#Path">Path</a> that can be any JSON value type. All types are coerced to string, except null. This makes the number 1 and the string &quot;1&quot; equivalent. It is illegal to use a string beginning with &quot;__&quot;.</p>
+    <p>A part of a <a href="global.html#Path">Path</a> that can be any JSON value type. All types are coerced to string, except null. This makes the number 1 and the string &quot;1&quot; equivalent.</p>
 </div>
 
 
@@ -2696,7 +2709,7 @@ memoization</p>
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="HttpDataSource.html">HttpDataSource</a></li><li><a href="Model.html">Model</a></li><li><a href="ModelResponse.html">ModelResponse</a></li><li><a href="Observable.html">Observable</a></li><li><a href="Subscription.html">Subscription</a></li></ul><h3>Interfaces</h3><ul><li><a href="DataSource.html">DataSource</a></li></ul><h3>Global</h3><ul><li><a href="global.html#allUnique">allUnique</a></li><li><a href="global.html#charPattern">charPattern</a></li><li><a href="global.html#createKey">createKey</a></li><li><a href="global.html#getSourceObserver">getSourceObserver</a></li><li><a href="global.html#InvalidModelError">InvalidModelError</a></li><li><a href="global.html#isNumber">isNumber</a></li><li><a href="global.html#performGetOnModelSource">performGetOnModelSource</a></li><li><a href="global.html#rangeCollapse">rangeCollapse</a></li><li><a href="global.html#set_json_values_as_json_values">set_json_values_as_json_values</a></li><li><a href="global.html#sortLol">sortLol</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="HttpDataSource.html">HttpDataSource</a></li><li><a href="Model.html">Model</a></li><li><a href="ModelResponse.html">ModelResponse</a></li><li><a href="Observable.html">Observable</a></li><li><a href="Subscription.html">Subscription</a></li></ul><h3>Interfaces</h3><ul><li><a href="DataSource.html">DataSource</a></li></ul><h3>Global</h3><ul><li><a href="global.html#allUnique">allUnique</a></li><li><a href="global.html#buildQueries">buildQueries</a></li><li><a href="global.html#collapseRangeIndexes">collapseRangeIndexes</a></li><li><a href="global.html#createKey">createKey</a></li><li><a href="global.html#getSourceObserver">getSourceObserver</a></li><li><a href="global.html#InvalidModelError">InvalidModelError</a></li><li><a href="global.html#isNumber">isNumber</a></li><li><a href="global.html#performGetOnModelSource">performGetOnModelSource</a></li><li><a href="global.html#set_json_values_as_json_values">set_json_values_as_json_values</a></li><li><a href="global.html#sortListOfLists">sortListOfLists</a></li></ul>
 </nav>
 
 <br class="clear">
