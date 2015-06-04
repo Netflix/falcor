@@ -1,5 +1,6 @@
-var jsong = require("./../index");
-var Model = jsong.Model;
+var falcor = require("./../index");
+var collapse = require("../lib/support/collapse");
+var Model = falcor.Model;
 var chai = require("chai");
 var expect = chai.expect;
 var _ = require("lodash");
@@ -106,7 +107,7 @@ function setTestRunner(data, options) {
                     // Note: JSONG should have all the required references
                     if (prefix !== 'setJSONGs') {
                         query.forEach(function(q) {
-                            var paths = q.path || q.paths || jsong.__Internals.buildQueries(removeLeafs(_.cloneDeep(q)));
+                            var paths = q.path || q.paths || collapse.buildQueries(removeLeafs(_.cloneDeep(q)));
                             options.fillReferences && fillInReferences(model, paths);
                             if (options.hardLink) {
                                 model._getPathSetsAsValues(model, [paths]);

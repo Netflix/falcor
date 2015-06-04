@@ -1,4 +1,4 @@
-module.exports = function(x) {
+module.exports = function clone(x) {
     switch(typeof x) {
         case "undefined":
             return void 0;
@@ -23,4 +23,4 @@ module.exports = function(x) {
             
             return z;
     }
-}
+};
