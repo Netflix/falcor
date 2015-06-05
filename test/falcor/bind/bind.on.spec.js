@@ -95,7 +95,11 @@ describe("Bind-On", function() {
                         testRunner.compare([{
                             path: ['genreList', 0],
                             value: {
-                                message: 'The humans are dead.'
+                                $type: $error,
+                                $size: 51,
+                                value: {
+                                    message: 'The humans are dead.'
+                                }
                             }
                         }], e);
                         throwError = true;

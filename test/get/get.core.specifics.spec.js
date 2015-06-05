@@ -390,4 +390,35 @@ describe('Specific Cases', function() {
                 subscribe(noOp, done, done);
         });
     });
+
+    it('should report the error in boxed mode.', function (done) {
+        var model = new Model({cache: Cache()});
+        var errored = false;
+        model.
+            withoutDataSource().
+            boxValues().
+            get('videos.errorBranch').
+            doAction(function() {
+                throw new Error('Should never on next');
+            }, function(e) {
+                testRunner.compare([{
+                    path: ['videos', 'errorBranch'],
+                    value: {
+                        $type: $error,
+                        $size: 51,
+                        value: 'I am yelling timber.'
+                    }
+                }], e);
+                errored = true;
+            }, function() {
+                throw new Error('Should never on completed');
+            }).
+            subscribe(noOp, function(e) {
+                if (errored) {
+                    done();
+                } else {
+                    done(e);
+                }
+            });
+    });
 });
