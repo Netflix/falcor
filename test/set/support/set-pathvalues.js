@@ -1,8 +1,8 @@
 module.exports = set_pathvalues;
 
 var _ = require("lodash");
-var jsong = require("../../../index");
-var Model = jsong.Model;
+var falcor = require("falcor");
+var Model = falcor.Model;
 var partial_cache = require("./partial-cache");
 var get_seeds = require("./get-seeds");
 var sort_path_values = require("./sort-path-values");

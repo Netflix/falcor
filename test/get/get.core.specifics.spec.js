@@ -1,5 +1,5 @@
-var jsong = require('../../index');
-var Model = jsong.Model;
+var falcor = require("falcor");
+var Model = falcor.Model;
 var Cache = require('../data/Cache');
 var Expected = require('../data/expected');
 var Rx = require('rx');
@@ -13,8 +13,7 @@ var Bound = Expected.Bound;
 var Materialized = Expected.Materialized;
 var Boxed = Expected.Boxed;
 var Errors = Expected.Errors;
-var $atom = require("../../lib/types/atom");
-var $error = require("../../lib/types/error");
+var $atom = require("falcor/types/atom");
 var noOp = function() {};
 
 describe('Specific Cases', function() {
@@ -390,36 +389,5 @@ describe('Specific Cases', function() {
                 }).
                 subscribe(noOp, done, done);
         });
-    });
-
-    it('should report the error in boxed mode.', function (done) {
-        var model = new Model({cache: Cache()});
-        var errored = false;
-        model.
-            withoutDataSource().
-            boxValues().
-            get('videos.errorBranch').
-            doAction(function() {
-                throw new Error('Should never on next');
-            }, function(e) {
-                testRunner.compare([{
-                    path: ['videos', 'errorBranch'],
-                    value: {
-                        $type: $error,
-                        $size: 51,
-                        value: 'I am yelling timber.'
-                    }
-                }], e);
-                errored = true;
-            }, function() {
-                throw new Error('Should never on completed');
-            }).
-            subscribe(noOp, function(e) {
-                if (errored) {
-                    done();
-                } else {
-                    done(e);
-                }
-            });
     });
 });

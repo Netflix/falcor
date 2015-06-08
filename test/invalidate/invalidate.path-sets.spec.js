@@ -1,7 +1,7 @@
 var Rx = require("rx");
 var _ = require("lodash");
-var jsong = require("../../index");
-var Model = jsong.Model;
+var falcor = require("falcor");
+var Model = falcor.Model;
 var expect = require('chai').expect;
 
 var whole_cache = require("../set/support/whole-cache");
@@ -9,8 +9,8 @@ var partial_cache = require("../set/support/partial-cache");
 var invalidate_and_verify_path_sets = require("./support/invalidate-and-verify-path-sets");
 
 var slice = Array.prototype.slice;
-var $path = require("../../lib/types/path");
-var $atom = require("../../lib/types/atom");
+var $path = require("falcor/types/path");
+var $atom = require("falcor/types/atom");
 
 // Tests each output format.
 execute("JSON values", "Values");

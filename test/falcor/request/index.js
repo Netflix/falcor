@@ -1,3 +1,3 @@
-describe('RequestQueue', function() {
+xdescribe('RequestQueue', function() {
     require('./RequestQueue.spec.js');
 });

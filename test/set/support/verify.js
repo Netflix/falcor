@@ -2,7 +2,7 @@ module.exports = verify;
 
 var slice = Array.prototype.slice;
 var expect = require('chai').expect;
-var collect = require("../../../lib/lru/collect");
+var collect = require("falcor/lru/collect");
 var get_seeds = require("./get-seeds");
 var get_pathsets = require("./get-pathsets");
 var inspect = require("util").inspect;

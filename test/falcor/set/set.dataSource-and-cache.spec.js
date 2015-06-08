@@ -1,5 +1,5 @@
-var jsong = require('../../../index');
-var Model = jsong.Model;
+var falcor = require("falcor");
+var Model = falcor.Model;
 var Expected = require('../../data/expected');
 var Values = Expected.Values;
 var Complex = Expected.Complex;
@@ -12,7 +12,7 @@ var testRunner = require('./../../testRunner');
 var noOp = function() {};
 var LocalDataSource = require('../../data/LocalDataSource');
 var ErrorDataSource = require('../../data/ErrorDataSource');
-var $error = require('./../../../lib/types/error');
+var $error = require('falcor/types/error');
 var expect = require('chai').expect;
 
 describe('DataSource and Cache', function() {

@@ -14,10 +14,10 @@ var Bound = Expected.Bound;
 var noOp = function() {};
 var _ = require('lodash');
 
-var __ref = require("../../lib/internal/ref");
-var __context = require("../../lib/internal/context");
-var __ref_index = require("../../lib/internal/ref-index");
-var __refs_length = require("../../lib/internal/refs-length");
+var __ref = require("falcor/internal/ref");
+var __context = require("falcor/internal/context");
+var __ref_index = require("falcor/internal/ref-index");
+var __refs_length = require("falcor/internal/refs-length");
 
 describe('Adding', function() {
     var getPath = ['genreList', 0, 0, 'summary'];

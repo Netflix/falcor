@@ -1,5 +1,5 @@
-var jsong = require("../../../index");
-var Model = jsong.Model;
+var falcor = require("falcor");
+var Model = falcor.Model;
 var Rx = require("rx");
 var LocalDataSource = require("../../data/LocalDataSource");
 var Cache = require("../../data/Cache");
@@ -12,9 +12,10 @@ var Values = Expected.Values;
 var chai = require("chai");
 var expect = chai.expect;
 var noOp = function() {};
-var InvalidModelError = require('./../../../lib/falcor/InvalidModelError');
-var $atom = require('./../../../lib/types/atom');
-var $error = require('./../../../lib/types/error');
+var InvalidModelError = require('falcor/errors/InvalidModelError');
+var $atom = require('falcor/types/atom');
+var $error = require('falcor/types/error');
+
 describe("Bind-Short", function() {
     describe('Sync', function() {
         it("bound to a path that short-circuits in a branch key position on error.", function() {

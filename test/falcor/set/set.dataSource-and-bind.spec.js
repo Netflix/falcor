@@ -1,5 +1,5 @@
-var jsong = require('../../../index');
-var Model = jsong.Model;
+var falcor = require("falcor");
+var Model = falcor.Model;
 var Cache = require('../../data/Cache');
 var M = require('../../data/ReducedCache').MinimalCache;
 var Expected = require('../../data/expected');
@@ -9,9 +9,7 @@ var testRunner = require('./../../testRunner');
 var noOp = function() {};
 var LocalDataSource = require('../../data/LocalDataSource');
 var ErrorDataSource = require('../../data/ErrorDataSource');
-var isPathValue = function(x) {
-    return x && x.hasOwnProperty('path') && x.hasOwnProperty('value');
-};
+var isPathValue = require("falcor/support/is-path-value");
 
 describe('DataSource and Bind', function() {
     it('should get a value from from dataSource when bound.', function(done) {

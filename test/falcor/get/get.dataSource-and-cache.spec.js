@@ -1,5 +1,5 @@
-var jsong = require('../../../index');
-var Model = jsong.Model;
+var falcor = require("falcor");
+var Model = falcor.Model;
 var Expected = require('../../data/expected');
 var ReducedCache = require('../../data/ReducedCache');
 var Cache = require('../../data/Cache');
@@ -10,7 +10,6 @@ var testRunner = require('./../../testRunner');
 var noOp = function() {};
 var LocalDataSource = require('../../data/LocalDataSource');
 var Observable = Rx.Observable;
-var falcor = { Model: Model, Observable: Observable };
 
 describe('DataSource and Partial Cache', function() {
     describe('Selector Functions', function() {

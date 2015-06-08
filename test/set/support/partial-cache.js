@@ -1,5 +1,5 @@
-var $path = require("../../../lib/types/path");
-var $atom = require("../../../lib/types/atom");
+var $path = require("falcor/types/path");
+var $atom = require("falcor/types/atom");
 
 module.exports = function() {
     return {
