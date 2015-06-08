@@ -23,6 +23,7 @@ function getModel(newModel, cache) {
 describe("Call", function() {
     it("executes a local function with the call args", function(done) {
 
+        debugger;
         var model = getDataModel(new LocalDataSource(Cache()), ReducedCache());
 
         model.withoutDataSource().setValueSync(["lists", "my-list", "add"], function(videoID) {
@@ -138,7 +139,7 @@ describe("Call", function() {
                         return this
                             .setValue({ path: ["length"], value: 8})
                             .flatMap(this.set({ path: [7], value: listRef }).toPathValues())
-                            .concat(Rx.Observable.returnValue({ path: [], invalidated: true }));
+                            .concat(Rx.Observable["return"]({ path: [], invalidated: true }));
                     }
                 }
             },
