@@ -1,5 +1,5 @@
-var jsong = require("../../../index");
-var Model = jsong.Model;
+var falcor = require("falcor");
+var Model = falcor.Model;
 var Rx = require("rx");
 var LocalDataSource = require("../../data/LocalDataSource");
 var UnoDataSource = require("../../data/UnoDataSource");
@@ -18,7 +18,7 @@ var inspect = require("util").inspect;
 var noOp = function() {};
 
 var getModel = testRunner.getModel;
-describe("Invalidate", function() {
+xdescribe("Invalidate", function() {
     it("should invalidate a leaf value.", function(done) {
         var dataSourceCount = 0;
         var dataSource = new LocalDataSource({}, {

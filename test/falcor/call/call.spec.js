@@ -1,5 +1,5 @@
-var jsong = require("../../../index");
-var Model = jsong.Model;
+var falcor = require("falcor");
+var Model = falcor.Model;
 var $ref = Model.ref;
 var Cache = require("../../data/Cache");
 var ReducedCache = require("../../data/ReducedCache").ReducedCache;

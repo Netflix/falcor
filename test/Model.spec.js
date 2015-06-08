@@ -1,17 +1,17 @@
 var Rx = require("rx");
-var jsong = require("./../index");
+var jsong = require("falcor");
 var Model = jsong.Model;
 var testRunner = require('./testRunner');
 var chai = require("chai");
 var expect = chai.expect;
-var $ref = require('./../lib/types/path');
-var $error = require('./../lib/types/error');
-var $atom = require('./../lib/types/atom');
+var $ref = require('falcor/types/path');
+var $error = require('falcor/types/error');
+var $atom = require('falcor/types/atom');
 
 describe("Model", function() {
 
     it("should construct a new Model", function() {
-        new jsong.Model();
+        new Model();
     });
 
     it('should have access to static helper methods.', function() {

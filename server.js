@@ -28,6 +28,7 @@ if (require.main === module) {
     var run = process.argv[3];
     switch (run) {
         case 'coverage':
+        default:
             coverage(port, true);
             break;
     }

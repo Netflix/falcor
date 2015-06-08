@@ -1,5 +1,5 @@
-var jsong = require('../../../index');
-var Model = jsong.Model;
+var falcor = require("falcor");
+var Model = falcor.Model;
 var Cache = require('../../data/Cache');
 var Expected = require('../../data/expected');
 var Rx = require('rx');
@@ -7,7 +7,6 @@ var getTestRunner = require('./../../getTestRunner');
 var testRunner = require('./../../testRunner');
 var noOp = function() {};
 var Observable = Rx.Observable;
-var falcor = {Model: Model, Observable:Observable};
 
 describe('Cache Only', function() {
     describe('Selector Functions', function() {

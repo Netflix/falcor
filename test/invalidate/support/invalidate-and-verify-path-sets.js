@@ -1,8 +1,8 @@
 module.exports = invalidate_and_verify_path_sets;
 
 var _ = require("lodash");
-var jsong = require("../../../index");
-var Model = jsong.Model;
+var falcor = require("falcor");
+var Model = falcor.Model;
 var whole_cache = require("../../set/support/whole-cache");
 var verify = require("./verify");
 

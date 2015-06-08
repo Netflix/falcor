@@ -1,5 +1,5 @@
-var jsong = require('../../index');
-var Model = jsong.Model;
+var falcor = require("falcor");
+var Model = falcor.Model;
 var Cache = require('../data/Cache');
 var Expected = require('../data/expected');
 var Rx = require('rx');
@@ -13,7 +13,7 @@ var Bound = Expected.Bound;
 var Materialized = Expected.Materialized;
 var Boxed = Expected.Boxed;
 var Errors = Expected.Errors;
-var $atom = require("../../lib/types/atom");
+var $atom = require("falcor/types/atom");
 var noOp = function() {};
 
 describe('Specific Cases', function() {
