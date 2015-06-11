@@ -78,7 +78,7 @@ function execute(output, suffix, opts) {
                         }], {
                             model: new Model(_.extend({
                                 cache: partial_cache()
-                            }, opts)).clone(["_path", ["movies"]])
+                            }, opts)).clone({ _path: ["movies"] })
                         });
                     });
                     it("through a reference", function() {
@@ -255,7 +255,7 @@ function execute(output, suffix, opts) {
                             }], {
                                 model: new Model(_.extend({
                                     cache: partial_cache()
-                                }, opts)).clone(["_path", ["grid", 0]])
+                                }, opts)).clone({ _path: ["grid", 0] })
                             });
                         });
                     });
