@@ -18,7 +18,7 @@ var inspect = require("util").inspect;
 var noOp = function() {};
 
 var getModel = testRunner.getModel;
-xdescribe("Invalidate", function() {
+describe("Invalidate", function() {
     it("should invalidate a leaf value.", function(done) {
         var dataSourceCount = 0;
         var dataSource = new LocalDataSource({}, {
@@ -26,40 +26,36 @@ xdescribe("Invalidate", function() {
                 dataSourceCount++;
             }
         });
+        var count = 0;
         var model = getModel(dataSource, Cache());
-        var invalidate = model.
+        model.
             invalidate(["videos", 3355, "summary"]).
-            flatMap(function() {
-                return model.
-                    withoutDataSource().
-                    get(["videos", 3355, "summary"]).
-                    asObservable();
-            }).
+            withoutDataSource().
+            get(["videos", 3355, "summary"]).
             doAction(function(x) {
                 throw inspect(x, {depth: 10}) + " should not be onNext'd";
+            }).
+            concat(model.get(["videos", 3355, "art"]).toPathValues()).
+            subscribe(function(x) {
+                count++;
+                testRunner.compare({
+                    path: ["videos", 3355, "art"],
+                    value: { "box-shot": "www.cdn.com/3355" }
+                }, x);
+            }, done, function() {
+                // wtf is this all about.  I rely on errors in subscriptions all the time.
+                var error = false;
+                try {
+                    expect(count, "onNext must be called 1 time.").to.equal(1);
+                    expect(dataSourceCount, "dataSource.get must be called 0 times.").to.equal(0);
+                } catch (e) {
+                    done(e);
+                    error = true;
+                }
+                if (!error) {
+                    done();
+                }
             });
-        var otherLeaf = model.get(["videos", 3355, "art"]).toPathValues();
-        var count = 0;
-        invalidate.concat(otherLeaf).subscribe(function(x) {
-            count++;
-            testRunner.compare({
-                path: ["videos", 3355, "art"],
-                value: { "box-shot": "www.cdn.com/3355" }
-            }, x);
-        }, done, function() {
-            // wtf is this all about.  I rely on errors in subscriptions all the time.
-            var error = false;
-            try {
-                expect(count, "onNext must be called 1 time.").to.equal(1);
-                expect(dataSourceCount, "dataSource.get must be called 0 times.").to.equal(0);
-            } catch (e) {
-                done(e);
-                error = true;
-            }
-            if (!error) {
-                done();
-            }
-        });
     });
 
     it("should invalidate a branch value.", function(done) {
@@ -82,42 +78,38 @@ xdescribe("Invalidate", function() {
                 dataSourceCount++;
             }
         });
+        var count = 0;
         var model = getModel(dataSource, Cache());
-        var invalidate = model.
+        model.
             invalidate(["videos", 3355]).
-            flatMap(function() {
-                return model.
-                    withoutDataSource().
-                    get(summary.slice()).
-                    asObservable();
-            }).
+            withoutDataSource().
+            get(summary.slice()).
             doAction(function(x) {
                 throw inspect(x, {depth: 10}) + " should not be onNext'd";
-            });
-        var otherLeaf = model.get(art.slice()).toPathValues();
-        var count = 0;
-        invalidate.concat(otherLeaf).subscribe(function(x) {
-            count++;
-        }, function(e) {
-            if (!doneDone) {
-                done(e);
-            }
-        }, function() {
-            // wtf is this all about.  I rely on errors in subscriptions all the time.
-            if (!doneDone) {
-                var error = false;
-                try {
-                    expect(count, "onNext must be called 1 time.").to.equal(1);
-                    expect(dataSourceCount, "dataSource.get must be called 1 times.").to.equal(1);
-                } catch (e) {
+            }).
+            concat(model.get(art.slice()).toPathValues()).
+            subscribe(function(x) {
+                count++;
+            }, function(e) {
+                if (!doneDone) {
                     done(e);
-                    error = true;
                 }
-                if (!error) {
-                    done();
+            }, function() {
+                // wtf is this all about.  I rely on errors in subscriptions all the time.
+                if (!doneDone) {
+                    var error = false;
+                    try {
+                        expect(count, "onNext must be called 1 time.").to.equal(1);
+                        expect(dataSourceCount, "dataSource.get must be called 1 times.").to.equal(1);
+                    } catch (e) {
+                        done(e);
+                        error = true;
+                    }
+                    if (!error) {
+                        done();
+                    }
                 }
-            }
-        });
+            });
     });
 
     it("should invalidate a reference but not through the reference.", function(done) {
@@ -139,48 +131,44 @@ xdescribe("Invalidate", function() {
                 dataSourceCount++;
             }
         });
+        var count = 0;
         var model = getModel(dataSource, Cache());
-        var invalidate = model.
+        model.
             invalidate(["genreList", 0]).
-            flatMap(function() {
-                return model.
-                    withoutDataSource().
-                    get(summary.concat()).
-                    asObservable();
-            }).
+            withoutDataSource().
+            get(summary.concat()).
             doAction(function(x) {
                 throw inspect(x, {depth: 10}) + " should not be onNext'd";
-            });
-        var otherLeaf = model.get(["lists", "abcd", 0, "summary"]).toPathValues();
-        var count = 0;
-        invalidate.concat(otherLeaf).subscribe(function(x) {
-            count++;
-            testRunner.compare({
-                path: ["lists", "abcd", 0, "summary"],
-                value: {
-                    "title": "House of Cards",
-                    "url": "/movies/1234"
-                }
-            }, x);
-        }, function(e) {
-            if (!doneDone) {
-                done(e);
-            }
-        }, function() {
-            // wtf is this all about.  I rely on errors in subscriptions all the time.
-            if (!doneDone) {
-                var error = false;
-                try {
-                    expect(count, "onNext must be called 1 time.").to.equal(1);
-                    expect(dataSourceCount, "dataSource.get must be called 0 times.").to.equal(0);
-                } catch (e) {
+            }).
+            concat(model.get(["lists", "abcd", 0, "summary"]).toPathValues()).
+            subscribe(function(x) {
+                count++;
+                testRunner.compare({
+                    path: ["lists", "abcd", 0, "summary"],
+                    value: {
+                        "title": "House of Cards",
+                        "url": "/movies/1234"
+                    }
+                }, x);
+            }, function(e) {
+                if (!doneDone) {
                     done(e);
-                    error = true;
                 }
-                if (!error) {
-                    done();
+            }, function() {
+                // wtf is this all about.  I rely on errors in subscriptions all the time.
+                if (!doneDone) {
+                    var error = false;
+                    try {
+                        expect(count, "onNext must be called 1 time.").to.equal(1);
+                        expect(dataSourceCount, "dataSource.get must be called 0 times.").to.equal(0);
+                    } catch (e) {
+                        done(e);
+                        error = true;
+                    }
+                    if (!error) {
+                        done();
+                    }
                 }
-            }
-        });
+            });
     });
 });
