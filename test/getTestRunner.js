@@ -1,11 +1,11 @@
-var jsong = require("./../index");
+var falcor = require("falcor");
 var _ = require("lodash");
 var Rx = require("rx");
 var testRunner = require("./testRunner");
 var noOp = function() {};
 var chai = require("chai");
 var expect = chai.expect;
-var Model = jsong.Model;
+var Model = falcor.Model;
 var Cache = require("./data/Cache");
 function getTestRunner(data, options) {
     options = _.extend({
@@ -45,7 +45,7 @@ function getTestRunner(data, options) {
                 if (options.model) {
                     model = options.model;
                 } else {
-                    model = new jsong.Model({cache: Cache()});
+                    model = new falcor.Model({cache: Cache()});
                 }
                 
                 if(options.materialized) {

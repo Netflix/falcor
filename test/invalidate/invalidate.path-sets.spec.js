@@ -9,7 +9,7 @@ var partial_cache = require("../set/support/partial-cache");
 var invalidate_and_verify_path_sets = require("./support/invalidate-and-verify-path-sets");
 
 var slice = Array.prototype.slice;
-var $path = require("falcor/types/path");
+var $path = require("falcor/types/ref");
 var $atom = require("falcor/types/atom");
 
 // Tests each output format.

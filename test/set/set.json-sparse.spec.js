@@ -13,7 +13,7 @@ var get_pathsets = require("./support/get-pathsets");
 var set_and_verify_json_sparse = require("./support/set-and-verify-json-sparse");
 
 var slice = Array.prototype.slice;
-var $path = require("falcor/types/path");
+var $path = require("falcor/types/ref");
 var $atom = require("falcor/types/atom");
 
 

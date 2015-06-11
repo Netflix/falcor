@@ -16,8 +16,9 @@ describe('getCache', function() {
     it("should serialize the cache", function(done) {
         var model = new Model({ cache: Cache() });
         model.
-            get(["genreList", {from: -1, to: 12}], function() {}).
-            catchException(Rx.Observable.return(model)).
+            get(["genreList", {from: -1, to: 12}], function() {})
+            // catchException(Rx.Observable.return(model)).
+            ['catch'](Rx.Observable.return(model)).
             defaultIfEmpty(null).
             map(function() { return model.getCache(); }).
             subscribe(function(serializedCache) {

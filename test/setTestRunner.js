@@ -1,4 +1,4 @@
-var falcor = require("./../index");
+var falcor = require("falcor");
 var collapse = require("../lib/support/collapse");
 var Model = falcor.Model;
 var chai = require("chai");
@@ -65,7 +65,7 @@ function fillInReferences(model, pathTo, prefix) {
 
                 // fills in reference if dne
                 // Also considers
-                !modelC && model._setPathSetsAsValues(model, [{path: prefix.concat(followed), value: value}]);
+                !modelC && model._setPathValuesAsValues(model, [{path: prefix.concat(followed), value: value}]);
                 fillInReferences(model, pathTo.slice(i + 1), c);
                 return;
             }
@@ -75,7 +75,7 @@ function fillInReferences(model, pathTo, prefix) {
     // Finally put in the final object into the cache so that we can set it while following references.
     // since a reference that points to an empty spot in the cache will be considered a "miss"
     // If something is there then it will put nothing there.
-    (followReference(cache, prefix.concat(followed)) === undefined) && model._setPathSetsAsValues(model, [{path: prefix.concat(followed), value: {$type: "atom", value: null}}]);
+    (followReference(cache, prefix.concat(followed)) === undefined) && model._setPathValuesAsValues(model, [{path: prefix.concat(followed), value: {$type: "atom", value: null}}]);
 }
 
 function setTestRunner(data, options) {
@@ -95,7 +95,7 @@ function setTestRunner(data, options) {
         var countOrFunction;
         prefixesAndSuffixes[0].
             filter(function (prefix) {
-                return ~prefix.indexOf("setPathSets");
+                return ~prefix.indexOf("setPathValues");
             }).
             map(function (prefix) {
                 prefixesAndSuffixes[1].map(function (suffix) {

@@ -1,4 +1,4 @@
-var $path = require("falcor/types/path");
+var $path = require("falcor/types/ref");
 var $atom = require("falcor/types/atom");
 
 module.exports = function() {

@@ -11,7 +11,7 @@ var set_envelopes = require("./support/set-envelopes");
 var set_and_verify_json_graph = require("./support/set-and-verify-json-graph");
 
 var slice = Array.prototype.slice;
-var $path = require("falcor/types/path");
+var $path = require("falcor/types/ref");
 var $atom = require("falcor/types/atom");
 
 var modes = [{
@@ -960,6 +960,7 @@ function execute(output, suffix, opts) {
                                 paths: []
                             }],
                             errors: [],
+                            hasValue: true,
                             requestedPaths: [],
                             optimizedPaths: [],
                             requestedMissingPaths: [["grid", 2, 0, "title"]],

@@ -4,7 +4,7 @@ var Model = jsong.Model;
 var testRunner = require('./testRunner');
 var chai = require("chai");
 var expect = chai.expect;
-var $ref = require('falcor/types/path');
+var $ref = require('falcor/types/ref');
 var $error = require('falcor/types/error');
 var $atom = require('falcor/types/atom');
 

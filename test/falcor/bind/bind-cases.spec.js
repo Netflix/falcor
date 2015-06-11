@@ -15,7 +15,6 @@ describe('Bind', function() {
         var model = new Model({source: new LocalDataSource(Cache())});
         var count = 0;
         var expected = Bound().directValue.AsPathMap.values[0];
-        debugger
         model = model.
             bind(["genreList", 0, 0], ['summary']).
             flatMap(function(model) {

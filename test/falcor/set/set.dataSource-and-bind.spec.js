@@ -48,7 +48,7 @@ describe('DataSource and Bind', function() {
                     count++;
 
                     if (count === 1) {
-
+                        debugger;
                         // Don't do it this way, it will cause memory leaks.
                         model._cache.lists.abcd[1] = undefined;
                         return {

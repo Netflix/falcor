@@ -90,9 +90,7 @@ function spliceExpired(query, output) {
 
     expect(model._root[__head].value).to.equal('sad panda');
 
-    return Rx.Observable.
-        return('').
-        delay(100).
+    return Rx.Observable.timer(100).
         flatMap(function() {
             return testRunner.get(model, _.cloneDeep(query), output);
         }).

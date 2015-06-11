@@ -1,6 +1,6 @@
-var $path = require('./../../../lib/types/path.js');
-var $atom = require('./../../../lib/types/atom.js');
-var $error = require('./../../../lib/types/error.js');
+var $path = require('falcor/types/ref');
+var $atom = require('falcor/types/atom');
+var $error = require('falcor/types/error');
 module.exports = function() {
     return {
         simpleReference0: {
@@ -109,7 +109,7 @@ module.exports = function() {
                 ]
             },
 
-            setPathSets: {
+            setPathValues: {
                 query: [
                     {
                         path: ["genreList", "0", "1", "summary"],
@@ -243,7 +243,7 @@ module.exports = function() {
                 ]
             },
 
-            setPathSets: {
+            setPathValues: {
                 query: [
                     {
                         path: ["genreList", "0", "2", "summary"],
@@ -385,7 +385,7 @@ module.exports = function() {
                 ]
             },
 
-            setPathSets: {
+            setPathValues: {
                 query: [
                     {
                         path: ["genreList", "0", "3", "summary"],
@@ -823,7 +823,7 @@ module.exports = function() {
                 ]
             },
 
-//            setPathSets: {
+//            setPathValues: {
 //                query: [
 //                    {
 //                        path: ["genreList", "1", "0"],

@@ -39,7 +39,7 @@ describe("Call", function() {
             subscribe(function(videos) {
                 testRunner.compare(videos[0], videos[1]);
                 done();
-            });
+            }, done);
     });
 
     it("executes a local function with call args on a bound Model", function(done) {
@@ -68,7 +68,7 @@ describe("Call", function() {
             subscribe(function(videos) {
                 testRunner.compare(videos[0], videos[1]);
                 done();
-            });
+            }, done);
     });
 
     it("executes a local function with call args and maps the result paths through a selector", function(done) {
@@ -91,7 +91,7 @@ describe("Call", function() {
             subscribe(function(videos) {
                 testRunner.compare(videos[0], videos[1]);
                 done();
-            });
+            }, done);
     });
 
     it("executes a local function with call args on a bound Model and maps the result paths through a selector", function(done) {
@@ -122,7 +122,7 @@ describe("Call", function() {
             .subscribe(function(videos) {
                 testRunner.compare(videos[0], videos[1]);
                 done();
-            });
+            }, done);
     });
 
     it("executes a local function with call args on a bound model and emits invalidations relative to the optimized bound path", function(done) {
@@ -138,7 +138,7 @@ describe("Call", function() {
                         return this
                             .setValue({ path: ["length"], value: 8})
                             .flatMap(this.set({ path: [7], value: listRef }).toPathValues())
-                            .concat(Rx.Observable.returnValue({ path: [], invalidated: true }));
+                            .concat(Rx.Observable["return"]({ path: [], invalidated: true }));
                     }
                 }
             },
@@ -157,7 +157,7 @@ describe("Call", function() {
                 } finally {
                     done(err);
                 }
-            });
+            }, done);
 
         function getExpectedJSONG() {
             // The output json
