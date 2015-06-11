@@ -6,7 +6,7 @@ var expect = require('chai').expect;
 
 var whole_cache = require("../set/support/whole-cache");
 var partial_cache = require("../set/support/partial-cache");
-var invalidate_and_verify_path_sets = require("./support/invalidate-and-verify-path-sets");
+var invalidate_and_verify_json_sparse = require("./support/invalidate-and-verify-json-sparse");
 
 var slice = Array.prototype.slice;
 var $path = require("falcor/types/ref");
@@ -20,49 +20,49 @@ execute("dense JSON", "JSON");
 
 function execute(output, suffix) {
 
-    describe("Build " + output + " from path sets", function() {
+    describe("Build " + output + " from sparse JSON", function() {
         // set new values
         describe("by invalidating", function() {
             // set a primitive value
             describe("a primitive value", function() {
                 describe("in one place", function() {
                     it("directly", function() {
-                        invalidate_and_verify_path_sets(this.test, suffix, [["movies", "pulp-fiction", "title"]]);
+                        invalidate_and_verify_json_sparse(this.test, suffix, [["movies", "pulp-fiction", "title"]]);
                     });
                     it("through a reference", function() {
-                        invalidate_and_verify_path_sets(this.test, suffix, [["grid", 0, 0, "title"]]);
+                        invalidate_and_verify_json_sparse(this.test, suffix, [["grid", 0, 0, "title"]]);
                     });
                     it("through a reference that lands on a atom", function() {
-                        invalidate_and_verify_path_sets(this.test, suffix, [["grid", 0, 1, "title"]]);
+                        invalidate_and_verify_json_sparse(this.test, suffix, [["grid", 0, 1, "title"]]);
                     });
                     it("through a broken reference", function() {
-                        invalidate_and_verify_path_sets(this.test, suffix, [["grid", 0, 2, "title"]]);
+                        invalidate_and_verify_json_sparse(this.test, suffix, [["grid", 0, 2, "title"]]);
                     });
                     it("through a reference with a null last key", function() {
-                        invalidate_and_verify_path_sets(this.test, suffix, [["grid", 0, 2, null]]);
+                        invalidate_and_verify_json_sparse(this.test, suffix, [["grid", 0, 2, null]]);
                     });
                 });
                 describe("in multiple places", function() {
                     describe("via keyset", function() {
                         it("directly", function() {
-                            invalidate_and_verify_path_sets(this.test, suffix, [["movies", ["pulp-fiction", "kill-bill-1", "reservior-dogs"], "director"]]);
+                            invalidate_and_verify_json_sparse(this.test, suffix, [["movies", ["pulp-fiction", "kill-bill-1", "reservior-dogs"], "director"]]);
                         });
                         it("through through successful, short-circuit, and broken references", function() {
-                            invalidate_and_verify_path_sets(this.test, suffix, [["grid", 0, [0, 1, 2], "director"]]);
+                            invalidate_and_verify_json_sparse(this.test, suffix, [["grid", 0, [0, 1, 2], "director"]]);
                         });
                     });
                     describe("via range", function() {
                         it("to:2", function() {
-                            invalidate_and_verify_path_sets(this.test, suffix, [["grid", 0, {to:2}, "director"]]);
+                            invalidate_and_verify_json_sparse(this.test, suffix, [["grid", 0, {to:2}, "director"]]);
                         });
                         it("from:1, to:2", function() {
-                            invalidate_and_verify_path_sets(this.test, suffix, [["grid", 0, {from:1, to:2}, "director"]]);
+                            invalidate_and_verify_json_sparse(this.test, suffix, [["grid", 0, {from:1, to:2}, "director"]]);
                         });
                         it("length:3", function() {
-                            invalidate_and_verify_path_sets(this.test, suffix, [["grid", 0, {length:3}, "director"]]);
+                            invalidate_and_verify_json_sparse(this.test, suffix, [["grid", 0, {length:3}, "director"]]);
                         });
                         it("from:1, length:2", function() {
-                            invalidate_and_verify_path_sets(this.test, suffix, [["grid", 0, {from:1, length:2}, "director"]]);
+                            invalidate_and_verify_json_sparse(this.test, suffix, [["grid", 0, {from:1, length:2}, "director"]]);
                         });
                     });
                 });
@@ -73,42 +73,42 @@ function execute(output, suffix) {
             describe("a $atom", function() {
                 describe("in one place", function() {
                     it("directly", function() {
-                        invalidate_and_verify_path_sets(this.test, suffix, [["movies", "pulp-fiction", "summary"]]);
+                        invalidate_and_verify_json_sparse(this.test, suffix, [["movies", "pulp-fiction", "summary"]]);
                     });
                     it("through a reference", function() {
-                        invalidate_and_verify_path_sets(this.test, suffix, [["grid", 0, 0, "summary"]]);
+                        invalidate_and_verify_json_sparse(this.test, suffix, [["grid", 0, 0, "summary"]]);
                     });
                     it("through a reference that lands on a atom", function() {
-                        invalidate_and_verify_path_sets(this.test, suffix, [["grid", 0, 1, "summary"]]);
+                        invalidate_and_verify_json_sparse(this.test, suffix, [["grid", 0, 1, "summary"]]);
                     });
                     it("through a broken reference", function() {
-                        invalidate_and_verify_path_sets(this.test, suffix, [["grid", 0, 2, "summary"]]);
+                        invalidate_and_verify_json_sparse(this.test, suffix, [["grid", 0, 2, "summary"]]);
                     });
                     it("through a reference with a null last key", function() {
-                        invalidate_and_verify_path_sets(this.test, suffix, [["grid", 0, 2, null]]);
+                        invalidate_and_verify_json_sparse(this.test, suffix, [["grid", 0, 2, null]]);
                     });
                 });
                 describe("in multiple places", function() {
                     describe("via keyset", function() {
                         it("directly", function() {
-                            invalidate_and_verify_path_sets(this.test, suffix, [["movies", ["pulp-fiction", "kill-bill-1", "reservior-dogs"], "genres"]]);
+                            invalidate_and_verify_json_sparse(this.test, suffix, [["movies", ["pulp-fiction", "kill-bill-1", "reservior-dogs"], "genres"]]);
                         });
                         it("through through successful, short-circuit, and broken references", function() {
-                            invalidate_and_verify_path_sets(this.test, suffix, [["grid", 0, [0, 1, 2], "genres"]]);
+                            invalidate_and_verify_json_sparse(this.test, suffix, [["grid", 0, [0, 1, 2], "genres"]]);
                         });
                     });
                     describe("via range", function() {
                         it("to:2", function() {
-                            invalidate_and_verify_path_sets(this.test, suffix, [["grid", 0, {to:2}, "genres"]]);
+                            invalidate_and_verify_json_sparse(this.test, suffix, [["grid", 0, {to:2}, "genres"]]);
                         });
                         it("from:1, to:2", function() {
-                            invalidate_and_verify_path_sets(this.test, suffix, [["grid", 0, {from:1, to:2}, "genres"]]);
+                            invalidate_and_verify_json_sparse(this.test, suffix, [["grid", 0, {from:1, to:2}, "genres"]]);
                         });
                         it("length:3", function() {
-                            invalidate_and_verify_path_sets(this.test, suffix, [["grid", 0, {length:3}, "genres"]]);
+                            invalidate_and_verify_json_sparse(this.test, suffix, [["grid", 0, {length:3}, "genres"]]);
                         });
                         it("from:1, length:2", function() {
-                            invalidate_and_verify_path_sets(this.test, suffix, [["grid", 0, {from:1, length:2}, "genres"]]);
+                            invalidate_and_verify_json_sparse(this.test, suffix, [["grid", 0, {from:1, length:2}, "genres"]]);
                         });
                     });
                 });
@@ -119,10 +119,10 @@ function execute(output, suffix) {
             describe("a $path", function() {
                 describe("in one place", function() {
                     it("directly", function() {
-                        invalidate_and_verify_path_sets(this.test, suffix, [["rows", "row-0", "3"]]);
+                        invalidate_and_verify_json_sparse(this.test, suffix, [["rows", "row-0", "3"]]);
                     });
                     it("through a reference", function() {
-                        invalidate_and_verify_path_sets(this.test, suffix, [["grid", 0, 3]]);
+                        invalidate_and_verify_json_sparse(this.test, suffix, [["grid", 0, 3]]);
                     });
                 });
             });
@@ -131,7 +131,7 @@ function execute(output, suffix) {
             // set multiple mixed-type json values
             describe("multiple mixed paths and values as", function() {
                 it("directly", function() {
-                    invalidate_and_verify_path_sets(this.test, suffix, [
+                    invalidate_and_verify_json_sparse(this.test, suffix, [
                         ["movies", "pulp-fiction", "title"],
                         ["movies", ["pulp-fiction", "kill-bill-1", "reservior-dogs"], "director"],
                         ["movies", "pulp-fiction", "summary"],
@@ -141,7 +141,7 @@ function execute(output, suffix) {
                 });
 
                 it("through references", function() {
-                    invalidate_and_verify_path_sets(this.test, suffix, [
+                    invalidate_and_verify_json_sparse(this.test, suffix, [
                         ["grid", 0, 0, "title"],
                         ["grid", 0, [0, 1, 2], "director"],
                         ["grid", 0, 0, "summary"],

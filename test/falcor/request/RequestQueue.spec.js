@@ -1,5 +1,6 @@
-var ImmediateScheduler = require('falcor/scheduler/ImmediateScheduler');
-var TimeoutScheduler = require('falcor/scheduler/TimeoutScheduler');
+var ASAPScheduler = require('falcor/schedulers/ASAPScheduler');
+var TimeoutScheduler = require('falcor/schedulers/TimeoutScheduler');
+var ImmediateScheduler = require('falcor/schedulers/ImmediateScheduler');
 var RequestQueue = require('falcor/request/RequestQueue');
 var LocalDataSource = require("../../data/LocalDataSource");
 var Cache = require("../../data/Cache");
@@ -12,11 +13,12 @@ var Values = Expected.Values;
 var requestTestRunner = require("../../requestTestRunner");
 
 describe("RequestQueue", function() {
-    var nextTick = new TimeoutScheduler(0);
+    var nextTick = new ASAPScheduler();
+    var nextSlice = new TimeoutScheduler(16);
     var immediate = new ImmediateScheduler();
     var dataSource = new LocalDataSource(Cache());
     var dataModel = {
-        _dataSource: dataSource
+        _source: dataSource
     };
 
     it("should be constructable.", function() {
@@ -35,11 +37,8 @@ describe("RequestQueue", function() {
 
     it("should immediately fire off multiple requests.", function() {
         var queue = new RequestQueue(dataModel, immediate);
-        var id = -1;
         var checks = 0;
-        function onNext() {
-            expect(id < this._requestId).to.be.ok;
-            id = this._requestId;
+        function onNext(envelope) {
             checks++;
         }
         requestTestRunner(References().simpleReference0, queue, onNext).subscribe();
@@ -50,16 +49,10 @@ describe("RequestQueue", function() {
         expect(checks).to.equal(4);
     });
 
-    it("should batch multiple requests into a single request.", function(done) {
+    it("should batch multiple requests into a single request asap.", function(done) {
         var queue = new RequestQueue(dataModel, nextTick);
-        var id = -1;
         var checks = 0;
         function onNext(x) {
-            if (id !== -1) {
-                expect(id).to.equal(this._requestId);
-            } else {
-                id = this._requestId;
-            }
             checks++;
         }
         Rx.Observable.zip(
@@ -76,36 +69,66 @@ describe("RequestQueue", function() {
             });
     });
 
-    it("should have multiple requests batched.", function(done) {
-        var dataSource = new LocalDataSource(Cache(), {wait:100});
-        var dataModel = {
-            _dataSource: dataSource
-        };
-        var queue = new RequestQueue(dataModel, nextTick);
-        var id = -1;
+    it("should batch multiple requests into a single request in a 16ms time slice.", function(done) {
+        var queue = new RequestQueue(dataModel, nextSlice);
         var checks = 0;
         function onNext(x) {
-            if (id !== -1) {
-                expect(id).to.not.equal(this._requestId);
-            } else {
-                id = this._requestId;
-            }
             checks++;
         }
-        var r1 = Rx.Observable.
-            return(3).
-            delay(16).
-            flatMap(function() {
-                return requestTestRunner(References().simpleReference1, queue, onNext);
-            });
-
         Rx.Observable.zip(
+            requestTestRunner(References().simpleReference0, queue, onNext),
             requestTestRunner(References().simpleReference1, queue, onNext),
-            r1,
-            function() {}).subscribe(function() {}, done, function() {
-                expect(checks).to.equal(2);
+            requestTestRunner(References().simpleReference2, queue, onNext),
+            requestTestRunner(References().simpleReference3, queue, onNext),
+            function(a, b, c, d) {
+
+            }).
+            subscribe(function() {}, done, function() {
+                expect(checks).to.equal(4);
                 done();
             });
+    });
+
+    it("should have multiple requests batched across pending source requests.", function(done) {
+        var dataSource = new LocalDataSource(Cache(), {wait:100});
+        var dataModel = { _source: dataSource };
+        var queue = new RequestQueue(dataModel, nextTick);
+        var checks = 0;
+        function onNext(x) {
+            checks++;
+        }
+        var r1 = requestTestRunner(References().simpleReference1, queue, onNext);
+        var r2 = Rx.Observable.timer(50).flatMap(function() {
+            return requestTestRunner(References().simpleReference1, queue, onNext);
+        });
+        r1.zip(r2, function(){}).subscribe(function() {}, done, function() {
+            expect(checks).to.equal(2);
+            done();
+        });
+    });
+
+    it("should merge multiple JSONGraph Envelopes from batched pending source requests.", function(done) {
+        var dataSource = new LocalDataSource(Cache(), {wait:100});
+        var dataModel = { _source: dataSource };
+        var queue = new RequestQueue(dataModel, nextTick);
+        var checks = 0;
+        function onNext(x) {
+            checks++;
+        }
+        
+        var ref0 = ["genreList", "0", "0", "summary"];
+        var ref1 = ["genreList", "0", "0", "title"]
+        var ref2 = ["genreList", "0", "1", "summary"]
+
+        var r1 = queue.get([ref0]).do(onNext);
+        var r2 = Rx.Observable.timer(50).flatMap(function() {
+            dataModel._source = new LocalDataSource(Cache());
+            return queue.get([ref0, ref1, ref2]).do(onNext);
+        });
+        r1.zip(r2, function(){}).subscribe(function() {}, done, function() {
+            expect(checks).to.equal(2);
+            done();
+        });
     });
 });
 

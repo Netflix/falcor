@@ -438,6 +438,11 @@ var Cache = function() {
                 }
             },
             "1234": {
+                "title": {
+                    "$size": 51,
+                    "$type": $atom,
+                    "value": "House of Cards"
+                },
                 "summary": {
                     "$size": 51,
                     "$type": $atom,
