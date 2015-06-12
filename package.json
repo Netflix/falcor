@@ -1,6 +1,6 @@
 {
   "name": "falcor",
-  "version": "0.0.22",
+  "version": "0.0.23",
   "main": "./index.js",
   "homepage": "https://github.com/Netflix/falcor",
   "author": {
