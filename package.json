@@ -1,7 +1,7 @@
 {
   "name": "falcor",
-  "version": "0.0.22",
-  "main": "./lib/index.js",
+  "version": "0.0.23",
+  "main": "./index.js",
   "homepage": "https://github.com/Netflix/falcor",
   "author": {
     "name": "Netflix",
@@ -21,8 +21,7 @@
     "test": "gulp test-coverage",
     "dist": "gulp build",
     "doc": "gulp doc",
-    "deploy-ghpages": "./build/deploy-ghpages.sh",
-    "postinstall": "node -e \" var s='../lib',d='node_modules/falcor',fs=require('fs'); fs.readlink(d,function(err, xl){if(!xl){fs.symlinkSync(s, d,'dir');}})\""
+    "deploy-ghpages": "./build/deploy-ghpages.sh"
   },
   "files": [
     "build",
