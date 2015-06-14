@@ -27,41 +27,6 @@ Now set up a simple webpage and import the newly-generated falcor library:
 </html>
 ```
 
-### Learn Falcor: Video Tutorials
-
-#### 1. [Introduction to the Model](https://www.youtube.com/watch?v=xby_MUlBOw0)
-
-In this video will learn how to work with JSON data indirectly through a Falcor Model. The Falcor Model allows you to work with data using the same familiar JavaScript path syntax. However the Model uses a push API, sending the data to a callback rather than returning it immediately. Using a push API means that you can move your data anywhere in the network later on, without changing the data retrieval code in your client.
-
-#### 2. [Retrieving Multiple Values](http://youtu.be/6c0BEPywkYc)
-
-In addition to being able to retrieve a path from a Falcor Model, you can also retrieve multiple Path Sets. Path Sets are paths that contain ranges or multiple string keys inside of indexers. In addition to being able to retrieve a Path Set, you can also retrieve as many paths as you like in a single method call.
-
-#### 3. [Intro to JSON Graph](https://www.youtube.com/watch?v=2xX5JTHWw4Q)
-
-JSON is a very commonly used data interchange format. Unfortunately while most application domain models are graphs, JSON is designed to model hierarchical information. To get around this problem, Falcor introduces JSON Graph. JSON Graph introduces references to JSON, allowing you to ensure that no object appears more than once in your JSON.
-
-#### 4. [Building Paths Programmatically](https://www.youtube.com/watch?v=XyMHk4wKg3Q)
-
-In this video you will learn how to build Paths and Path Sets programmatically using Arrays.
-
-#### 5. [JSON Graph in-depth](https://www.youtube.com/watch?v=9tAvnn-Wd14)
-
-In this video you will learn why it is only possible to retrieve value types from a Falcor Model. The prohibition against retrieving Objects or Arrays from your JSON object leads to more predicable server performance, because server requests stay approximately the same speed despite the growth of your backend data set.
-
-#### 6. [Retrieving Data from the Server](http://youtu.be/dlcqUcjR1Ig)
-
-In this video you will learn how to retrieve data from an Node application server running express. You'll also learn about the DataSource interface, and how Models use DataSources to retrieve JSON data.
-
-#### 7. [Path Optimization](https://www.youtube.com/watch?v=PlG55w_G9mw)
-
-One of the most powerful optimizations Falcor makes when requesting data from the server is Path Optimization. When patterns are requested from the model, the model checks it's local cache first, and if the value is not present, requests the data from its data source (usually the server). However if references are encountered while evaluating the path against the cache, the Model uses them to optimize the path before forwarding the path request to the data source. By providing optimized paths to the server Falcor can reduce the cost of retrieving data from your persistent data stores.
-
-#### 8. [Batching Requests](https://www.youtube.com/watch?v=ulK8m8_HGJg)
-
-In addition to caching and path optimization, the Falcor Model provides one more optimization when requesting data from the server: batching. By creating a batched Falcor Model you can collapse multiple concurrent path requests into a single HTTP request.
-
-
 ## What is Falcor?
 
 Every user wants to believe that all the data in the cloud is stored on their device. Falcor lets web developers code that way.
@@ -252,94 +217,36 @@ The virtual model exposes the entire JSON model at a single URL and accepts one 
 
 For more information on the router, see
 
-# Frequently Asked Questions
+## Learn Falcor: Video Tutorials
 
-## Why not use REST?
+### 1. [Introduction to the Model](https://www.youtube.com/watch?v=xby_MUlBOw0)
 
+In this video will learn how to work with JSON data indirectly through a Falcor Model. The Falcor Model allows you to work with data using the same familiar JavaScript path syntax. However the Model uses a push API, sending the data to a callback rather than returning it immediately. Using a push API means that you can move your data anywhere in the network later on, without changing the data retrieval code in your client.
 
-## Why use Falcor?
+### 2. [Retrieving Multiple Values](http://youtu.be/6c0BEPywkYc)
 
-Falcor uses an architecture which is ideal for web applications that retrieve all or most of their data from a single domain and have a data model that changes infrequently (more reads than writes). For these types of applications, Falcor can be a better choice than REST.
+In addition to being able to retrieve a path from a Falcor Model, you can also retrieve multiple Path Sets. Path Sets are paths that contain ranges or multiple string keys inside of indexers. In addition to being able to retrieve a Path Set, you can also retrieve as many paths as you like in a single method call.
 
-Four years ago, Netflix attempted to build a RESTful API. The goal was to get two desirable properties of RESTful architectures: Cache Coherence and Loose Coupling. Gradually the impracticality of rest became clear. Latency was much too high And message sizes were much too large, particularly for mobile
+### 3. [Intro to JSON Graph](https://www.youtube.com/watch?v=2xX5JTHWw4Q)
 
-### Cache Coherence
+JSON is a very commonly used data interchange format. Unfortunately while most application domain models are graphs, JSON is designed to model hierarchical information. To get around this problem, Falcor introduces JSON Graph. JSON Graph introduces references to JSON, allowing you to ensure that no object appears more than once in your JSON.
 
-The **Netflix UI is primarily a browsing problem.** Although we frequently add new titles for our members to enjoy, the catalog is unlikely to change substantially within the period of a single user's session (1-3 hours). That means that the average user session is spent browsing through a large, static catalog. It is precisely these types of problems that benefit greatly from caching.
+### 4. [Building Paths Programmatically](https://www.youtube.com/watch?v=XyMHk4wKg3Q)
 
-When you maintain a cache, it is important for the cache to remain coherent. Cache coherence means that the data in the local cache is up-to-date with the changes on the server. Failure to ensure cache coherence can cause stale data to be displayed to the user. Imagine rating "House of Cards" in the "Recently Watched" list only to find that your rating is not reflected in the same title when it appears in "New Releases."
+In this video you will learn how to build Paths and Path Sets programmatically using Arrays.
 
-![alt text](http://netflix.github.io/falcor/staledata.png "Stale Data")
+### 5. [JSON Graph in-depth](https://www.youtube.com/watch?v=9tAvnn-Wd14)
 
-RESTful systems achieve Cache Coherence by ensuring that data appears in only one resource. For Netflix this meant creating a separate resource for each individual title.
+In this video you will learn why it is only possible to retrieve value types from a Falcor Model. The prohibition against retrieving Objects or Arrays from your JSON object leads to more predicable server performance, because server requests stay approximately the same speed despite the growth of your backend data set.
 
-http://netflix.com/title/23432
+### 6. [Retrieving Data from the Server](http://youtu.be/dlcqUcjR1Ig)
 
-{
-  id: 23432,
-  name: "House of Cards",
-  rating: 5,
-  description: "This Emmy-winning original thriller series stars Golden Globe winner Kevin Spacey as ruthless, cunning Congressman Francis Underwood, who will stop at nothing to conquer the halls of power in Washington D.C. His secret weapon: his gorgeous, ambitious, and equally conniving wife Claire (Golden Globe winner Robin Wright).",
-  boxshotURL: "http://cdn6.nflximg.net/webp/8266/13038266.webp",
-  // more fields
-}
+In this video you will learn how to retrieve data from an Node application server running express. You'll also learn about the DataSource interface, and how Models use DataSources to retrieve JSON data.
 
-This made it possible to update the rating of the title with a single PUT.
+### 7. [Path Optimization](https://www.youtube.com/watch?v=PlG55w_G9mw)
 
-### Loose Coupling
+One of the most powerful optimizations Falcor makes when requesting data from the server is Path Optimization. When patterns are requested from the model, the model checks it's local cache first, and if the value is not present, requests the data from its data source (usually the server). However if references are encountered while evaluating the path against the cache, the Model uses them to optimize the path before forwarding the path request to the data source. By providing optimized paths to the server Falcor can reduce the cost of retrieving data from your persistent data stores.
 
-RESTful APIs Are loosely coupled and can be used by many different applications. This was important to Netflix as we already had several different applications, including a Tablet, Phone, and TV app. Rather than have the EDGE team build and maintain APIs for each of these applications, the decision was made to build-loosely coupled API that could be used by all UIs.
+### 8. [Batching Requests](https://www.youtube.com/watch?v=ulK8m8_HGJg)
 
-### The Trouble with REST
-
-The impracticality of using REST became clear overtime.
-
-Another reason for building a loosely coupled API for applications is that Netflix already had several different applications that had different needs. 
-
-Reflecting the different media sizes different applications would display more or less fields on certain screens. 
-The World Wide Web is easy for browsers to cache because each individual resource is found a separate URL. When you visit a site the contents of that site are placed in the browser cache and the URL is used as the key. If the same resource needs to be made available at two different URLs, one URL can redirect to the other. As a result no website need ever appear twice in the browser cache. Eliminating duplicate resources from the browser cache reduces the risk of stale data being displayed to the user. 
-
-In addition to a resource being available at two different locations callAnother source of stale dataIs went to the data into resources overlap. For example Let's say the following URL
-
-http://netflix.com/genreLists?rowOffset=5&rowPageSize=5&colOffset=5&colPageSize=10
-
-
-
-Rather than duplicate a resource in multiple a URL Can redirect to another location. Resources are found in a single location, and it is possible to create a reference to a resource in another location using a HTTP redirect. 
-
-Netflix created resources for each of its domain model entities. 
-```
-http://netflix.com/titles/23432
-
-```
-These resources Did not overlap at first, making it easy to cash them individually
-
-
-1. How do I retrieve all the data in a collection in a single request.
-
-In general requesting the entire contents of a collection in a single request can be hazardous. While lists may start small, they can grow over time. If an application requests the entire contents of a list that can grow over time, it can eventually result in unnecessarily long load times and even out-of-memory exceptions.
-
-*Falcor is designed for Applications that display information to human beings in real-time.* Rather than requesting the entire contents of a list, applications are encouraged to use paging to retrieve the first page as quickly as possible. Typically applications retrieve the first visible page of a list as well as the list length in one request to the Model (and consequently the server). At that point applications can choose whether to load the rest of the list as soon as the first page and length are displayed on screen, or simply lazily load pages as the user scrolls through the list.
-
-
-An Array must be chosen if you would like to be able to retrieve the entire contents of the list in a single request, and none of the values within need to be paths. 
-
-2. How do I retrieve an Object and all its descendants from a JSON Graph Model.
-
-Clients must explicitly specify the path to every value they want to retrieve from a JSON Grap object.  JSON Graph values include strings, numbers, boolean values, Arrays, or Atomic Maps. It is not possible to retrieve a value from Falcor unless you know its path.
-
-This should not be restrictive, because UIs know exactly what 
-
-3. How do I filter or sort lists on the client?
-
-Falcor clients do _not_ perform transformations on lists in the virtual model like filtering and sorting. Instead clients rely on the virtual model on the server to expose filtered or sorted versions of the lists for them. 
-
-```JavaScript
-model.get("titleList.byRating[0...10].name");
-```
-
-In the example above, virtual model provides a "byRating" key on the titleList which is it sorted version of the same list. 
-
-(Example router code showing how to build a list sorted by by rating)
-
-It is rarely efficient to download all of the data on the server onto the client and perform transformations locally. Instead of trying to enable client-side transformations, Falcor clients rely on the virtual model to do all the data transformation. Falcor clients focus only on data retrieval.
+In addition to caching and path optimization, the Falcor Model provides one more optimization when requesting data from the server: batching. By creating a batched Falcor Model you can collapse multiple concurrent path requests into a single HTTP request.
