@@ -57,7 +57,7 @@ In this video you will learn how to retrieve data from an Node application serve
 
 One of the most powerful optimizations Falcor makes when requesting data from the server is Path Optimization. When patterns are requested from the model, the model checks it's local cache first, and if the value is not present, requests the data from its data source (usually the server). However if references are encountered while evaluating the path against the cache, the Model uses them to optimize the path before forwarding the path request to the data source. By providing optimized paths to the server Falcor can reduce the cost of retrieving data from your persistent data stores.
 
-#### 8. [Batching Requests](https://www.youtube.com/watch?v=PlG55w_G9mw)
+#### 8. [Batching Requests](https://www.youtube.com/watch?v=ulK8m8_HGJg)
 
 In addition to caching and path optimization, the Falcor Model provides one more optimization when requesting data from the server: batching. By creating a batched Falcor Model you can collapse multiple concurrent path requests into a single HTTP request.
 
