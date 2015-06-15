@@ -47,7 +47,7 @@ function execute(output, suffix) {
                         it("directly", function() {
                             invalidate_and_verify_json_sparse(this.test, suffix, [["movies", ["pulp-fiction", "kill-bill-1", "reservior-dogs"], "director"]]);
                         });
-                        it("through through successful, short-circuit, and broken references", function() {
+                        it("through successful, short-circuit, and broken references", function() {
                             invalidate_and_verify_json_sparse(this.test, suffix, [["grid", 0, [0, 1, 2], "director"]]);
                         });
                     });
@@ -93,7 +93,7 @@ function execute(output, suffix) {
                         it("directly", function() {
                             invalidate_and_verify_json_sparse(this.test, suffix, [["movies", ["pulp-fiction", "kill-bill-1", "reservior-dogs"], "genres"]]);
                         });
-                        it("through through successful, short-circuit, and broken references", function() {
+                        it("through successful, short-circuit, and broken references", function() {
                             invalidate_and_verify_json_sparse(this.test, suffix, [["grid", 0, [0, 1, 2], "genres"]]);
                         });
                     });
