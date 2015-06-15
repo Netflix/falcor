@@ -94,7 +94,7 @@ function execute(output, suffix, opts) {
                                 value: "Quentin Tarantino"
                             }], opts);
                         });
-                        it("through through successful, short-circuit, and broken references", function() {
+                        it("through successful, short-circuit, and broken references", function() {
                             set_and_verify_json_values(this.test, suffix, [{
                                 path: ["grid", 0, [0, 1, 2], "director"],
                                 value: "Quentin Tarantino"
@@ -209,7 +209,7 @@ function execute(output, suffix, opts) {
                                 }
                             }], opts);
                         });
-                        it("through through successful, short-circuit, and broken references", function() {
+                        it("through successful, short-circuit, and broken references", function() {
                             set_and_verify_json_values(this.test, suffix, [{
                                 path: ["grid", 0, [0, 1, 2], "genres"],
                                 value: {
