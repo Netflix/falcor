@@ -14,6 +14,7 @@
  * permissions and limitations under the License.
  */
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.falcor = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
+<<<<<<< HEAD
 var falcor = require(30);
 falcor.HttpDataSource = require(325);
 module.exports = falcor;
@@ -94,8 +95,105 @@ function Model(options) {
 
     if(options.boxed || options.hasOwnProperty("_boxed")) {
         this._boxed = options.boxed || options._boxed;
-    }
+=======
+var falcor = require(233);
+falcor.HttpDataSource = require(190);
+module.exports = falcor;
 
+},{"190":190,"233":233}],2:[function(require,module,exports){
+"use strict";
+
+// rawAsap provides everything we need except exception management.
+var rawAsap = require(3);
+// RawTasks are recycled to reduce GC churn.
+var freeTasks = [];
+// We queue errors to ensure they are thrown in right order (FIFO).
+// Array-as-queue is good enough here, since we are just dealing with exceptions.
+var pendingErrors = [];
+var requestErrorThrow = rawAsap.makeRequestCallFromTimer(throwFirstError);
+
+function throwFirstError() {
+    if (pendingErrors.length) {
+        throw pendingErrors.shift();
+    }
+}
+
+/**
+ * Calls a task as soon as possible after returning, in its own event, with priority
+ * over other events like animation, reflow, and repaint. An error thrown from an
+ * event will not interrupt, nor even substantially slow down the processing of
+ * other events, but will be rather postponed to a lower priority event.
+ * @param {{call}} task A callable object, typically a function that takes no
+ * arguments.
+ */
+module.exports = asap;
+function asap(task) {
+    var rawTask;
+    if (freeTasks.length) {
+        rawTask = freeTasks.pop();
+    } else {
+        rawTask = new RawTask();
+    }
+    rawTask.task = task;
+    rawAsap(rawTask);
+}
+
+// We wrap tasks with recyclable task objects.  A task object implements
+// `call`, just like a function.
+function RawTask() {
+    this.task = null;
+}
+
+// The sole purpose of wrapping the task is to catch the exception and recycle
+// the task object after its single use.
+RawTask.prototype.call = function () {
+    try {
+        this.task.call();
+    } catch (error) {
+        if (asap.onerror) {
+            // This hook exists purely for testing purposes.
+            // Its name will be periodically randomized to break any code that
+            // depends on its existence.
+            asap.onerror(error);
+        } else {
+            // In a web browser, exceptions are not fatal. However, to avoid
+            // slowing down the queue of pending tasks, we rethrow the error in a
+            // lower priority turn.
+            pendingErrors.push(error);
+            requestErrorThrow();
+        }
+    } finally {
+        this.task = null;
+        freeTasks[freeTasks.length] = this;
+    }
+};
+
+},{"3":3}],3:[function(require,module,exports){
+(function (global){
+"use strict";
+
+// Use the fastest means possible to execute a task in its own turn, with
+// priority over other events including IO, animation, reflow, and redraw
+// events in browsers.
+//
+// An exception thrown by a task will permanently interrupt the processing of
+// subsequent tasks. The higher level `asap` function ensures that if an
+// exception is thrown by a task, that the task queue will continue flushing as
+// soon as possible, but if you use `rawAsap` directly, you are responsible to
+// either ensure that no exceptions are thrown from your task, or to manually
+// call `rawAsap.requestFlush` if an exception is thrown.
+module.exports = rawAsap;
+function rawAsap(task) {
+    if (!queue.length) {
+        requestFlush();
+        flushing = true;
+>>>>>>> 6b8733c... Removes falcor-observable, imports rx/dist/rx, fixes BatchedRequest canceling, moves comparator and errorSelector to the ModelRoot, removes the promise collection guards, fixes bind and bindSync anomalies.
+    }
+    // Equivalent to push, but avoids a function call.
+    queue[queue.length] = task;
+}
+
+<<<<<<< HEAD
     if(options.materialized || options.hasOwnProperty("_materialized")) {
         this._materialized = options.materialized || options._materialized;
     }
@@ -299,6 +397,9583 @@ Model.prototype.setCache = function setCache(cacheOrJSONGraphEnvelope) {
             set_cache(this, cacheOrJSONGraphEnvelope.json);
         } else if(is_object(cacheOrJSONGraphEnvelope)) {
             set_cache(this, cacheOrJSONGraphEnvelope);
+=======
+var queue = [];
+// Once a flush has been requested, no further calls to `requestFlush` are
+// necessary until the next `flush` completes.
+var flushing = false;
+// `requestFlush` is an implementation-specific method that attempts to kick
+// off a `flush` event as quickly as possible. `flush` will attempt to exhaust
+// the event queue before yielding to the browser's own event loop.
+var requestFlush;
+// The position of the next task to execute in the task queue. This is
+// preserved between calls to `flush` so that it can be resumed if
+// a task throws an exception.
+var index = 0;
+// If a task schedules additional tasks recursively, the task queue can grow
+// unbounded. To prevent memory exhaustion, the task queue will periodically
+// truncate already-completed tasks.
+var capacity = 1024;
+
+// The flush function processes all tasks that have been scheduled with
+// `rawAsap` unless and until one of those tasks throws an exception.
+// If a task throws an exception, `flush` ensures that its state will remain
+// consistent and will resume where it left off when called again.
+// However, `flush` does not make any arrangements to be called again if an
+// exception is thrown.
+function flush() {
+    while (index < queue.length) {
+        var currentIndex = index;
+        // Advance the index before calling the task. This ensures that we will
+        // begin flushing on the next task the task throws an error.
+        index = index + 1;
+        queue[currentIndex].call();
+        // Prevent leaking memory for long chains of recursive calls to `asap`.
+        // If we call `asap` within tasks scheduled by `asap`, the queue will
+        // grow, but to avoid an O(n) walk for every task we execute, we don't
+        // shift tasks off the queue after they have been executed.
+        // Instead, we periodically shift 1024 tasks off the queue.
+        if (index > capacity) {
+            // Manually shift all values starting at the index back to the
+            // beginning of the queue.
+            for (var scan = 0, newLength = queue.length - index; scan < newLength; scan++) {
+                queue[scan] = queue[scan + index];
+            }
+            queue.length -= index;
+            index = 0;
+        }
+    }
+    queue.length = 0;
+    index = 0;
+    flushing = false;
+}
+
+// `requestFlush` is implemented using a strategy based on data collected from
+// every available SauceLabs Selenium web driver worker at time of writing.
+// https://docs.google.com/spreadsheets/d/1mG-5UYGup5qxGdEMWkhP6BWCz053NUb2E1QoUTU16uA/edit#gid=783724593
+
+// Safari 6 and 6.1 for desktop, iPad, and iPhone are the only browsers that
+// have WebKitMutationObserver but not un-prefixed MutationObserver.
+// Must use `global` instead of `window` to work in both frames and web
+// workers. `global` is a provision of Browserify, Mr, Mrs, or Mop.
+var BrowserMutationObserver = global.MutationObserver || global.WebKitMutationObserver;
+
+// MutationObservers are desirable because they have high priority and work
+// reliably everywhere they are implemented.
+// They are implemented in all modern browsers.
+//
+// - Android 4-4.3
+// - Chrome 26-34
+// - Firefox 14-29
+// - Internet Explorer 11
+// - iPad Safari 6-7.1
+// - iPhone Safari 7-7.1
+// - Safari 6-7
+if (typeof BrowserMutationObserver === "function") {
+    requestFlush = makeRequestCallFromMutationObserver(flush);
+
+// MessageChannels are desirable because they give direct access to the HTML
+// task queue, are implemented in Internet Explorer 10, Safari 5.0-1, and Opera
+// 11-12, and in web workers in many engines.
+// Although message channels yield to any queued rendering and IO tasks, they
+// would be better than imposing the 4ms delay of timers.
+// However, they do not work reliably in Internet Explorer or Safari.
+
+// Internet Explorer 10 is the only browser that has setImmediate but does
+// not have MutationObservers.
+// Although setImmediate yields to the browser's renderer, it would be
+// preferrable to falling back to setTimeout since it does not have
+// the minimum 4ms penalty.
+// Unfortunately there appears to be a bug in Internet Explorer 10 Mobile (and
+// Desktop to a lesser extent) that renders both setImmediate and
+// MessageChannel useless for the purposes of ASAP.
+// https://github.com/kriskowal/q/issues/396
+
+// Timers are implemented universally.
+// We fall back to timers in workers in most engines, and in foreground
+// contexts in the following browsers.
+// However, note that even this simple case requires nuances to operate in a
+// broad spectrum of browsers.
+//
+// - Firefox 3-13
+// - Internet Explorer 6-9
+// - iPad Safari 4.3
+// - Lynx 2.8.7
+} else {
+    requestFlush = makeRequestCallFromTimer(flush);
+}
+
+// `requestFlush` requests that the high priority event queue be flushed as
+// soon as possible.
+// This is useful to prevent an error thrown in a task from stalling the event
+// queue if the exception handled by Node.js’s
+// `process.on("uncaughtException")` or by a domain.
+rawAsap.requestFlush = requestFlush;
+
+// To request a high priority event, we induce a mutation observer by toggling
+// the text of a text node between "1" and "-1".
+function makeRequestCallFromMutationObserver(callback) {
+    var toggle = 1;
+    var observer = new BrowserMutationObserver(callback);
+    var node = document.createTextNode("");
+    observer.observe(node, {characterData: true});
+    return function requestCall() {
+        toggle = -toggle;
+        node.data = toggle;
+    };
+}
+
+// The message channel technique was discovered by Malte Ubl and was the
+// original foundation for this library.
+// http://www.nonblocking.io/2011/06/windownexttick.html
+
+// Safari 6.0.5 (at least) intermittently fails to create message ports on a
+// page's first load. Thankfully, this version of Safari supports
+// MutationObservers, so we don't need to fall back in that case.
+
+// function makeRequestCallFromMessageChannel(callback) {
+//     var channel = new MessageChannel();
+//     channel.port1.onmessage = callback;
+//     return function requestCall() {
+//         channel.port2.postMessage(0);
+//     };
+// }
+
+// For reasons explained above, we are also unable to use `setImmediate`
+// under any circumstances.
+// Even if we were, there is another bug in Internet Explorer 10.
+// It is not sufficient to assign `setImmediate` to `requestFlush` because
+// `setImmediate` must be called *by name* and therefore must be wrapped in a
+// closure.
+// Never forget.
+
+// function makeRequestCallFromSetImmediate(callback) {
+//     return function requestCall() {
+//         setImmediate(callback);
+//     };
+// }
+
+// Safari 6.0 has a problem where timers will get lost while the user is
+// scrolling. This problem does not impact ASAP because Safari 6.0 supports
+// mutation observers, so that implementation is used instead.
+// However, if we ever elect to use timers in Safari, the prevalent work-around
+// is to add a scroll event listener that calls for a flush.
+
+// `setTimeout` does not call the passed callback if the delay is less than
+// approximately 7 in web workers in Firefox 8 through 18, and sometimes not
+// even then.
+
+function makeRequestCallFromTimer(callback) {
+    return function requestCall() {
+        // We dispatch a timeout with a specified delay of 0 for engines that
+        // can reliably accommodate that request. This will usually be snapped
+        // to a 4 milisecond delay, but once we're flushing, there's no delay
+        // between events.
+        var timeoutHandle = setTimeout(handleTimer, 0);
+        // However, since this timer gets frequently dropped in Firefox
+        // workers, we enlist an interval handle that will try to fire
+        // an event 20 times per second until it succeeds.
+        var intervalHandle = setInterval(handleTimer, 50);
+
+        function handleTimer() {
+            // Whichever timer succeeds will cancel both timers and
+            // execute the callback.
+            clearTimeout(timeoutHandle);
+            clearInterval(intervalHandle);
+            callback();
+        }
+    };
+}
+
+// This is for `asap.js` only.
+// Its name will be periodically randomized to break any code that depends on
+// its existence.
+rawAsap.makeRequestCallFromTimer = makeRequestCallFromTimer;
+
+// ASAP was originally a nextTick shim included in Q. This was factored out
+// into this ASAP package. It was later adapted to RSVP which made further
+// amendments. These decisions, particularly to marginalize MessageChannel and
+// to capture the MutationObserver implementation in a closure, were integrated
+// back into ASAP proper.
+// https://github.com/tildeio/rsvp.js/blob/cddf7232546a9cf858524b75cde6f9edf72620a7/lib/rsvp/asap.js
+
+}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
+},{}],4:[function(require,module,exports){
+(function (process){
+"use strict";
+
+var domain; // The domain module is executed on demand
+var hasSetImmediate = typeof setImmediate === "function";
+
+// Use the fastest means possible to execute a task in its own turn, with
+// priority over other events including network IO events in Node.js.
+//
+// An exception thrown by a task will permanently interrupt the processing of
+// subsequent tasks. The higher level `asap` function ensures that if an
+// exception is thrown by a task, that the task queue will continue flushing as
+// soon as possible, but if you use `rawAsap` directly, you are responsible to
+// either ensure that no exceptions are thrown from your task, or to manually
+// call `rawAsap.requestFlush` if an exception is thrown.
+module.exports = rawAsap;
+function rawAsap(task) {
+    if (!queue.length) {
+        requestFlush();
+        flushing = true;
+    }
+    // Avoids a function call
+    queue[queue.length] = task;
+}
+
+var queue = [];
+// Once a flush has been requested, no further calls to `requestFlush` are
+// necessary until the next `flush` completes.
+var flushing = false;
+// The position of the next task to execute in the task queue. This is
+// preserved between calls to `flush` so that it can be resumed if
+// a task throws an exception.
+var index = 0;
+// If a task schedules additional tasks recursively, the task queue can grow
+// unbounded. To prevent memory excaustion, the task queue will periodically
+// truncate already-completed tasks.
+var capacity = 1024;
+
+// The flush function processes all tasks that have been scheduled with
+// `rawAsap` unless and until one of those tasks throws an exception.
+// If a task throws an exception, `flush` ensures that its state will remain
+// consistent and will resume where it left off when called again.
+// However, `flush` does not make any arrangements to be called again if an
+// exception is thrown.
+function flush() {
+    while (index < queue.length) {
+        var currentIndex = index;
+        // Advance the index before calling the task. This ensures that we will
+        // begin flushing on the next task the task throws an error.
+        index = index + 1;
+        queue[currentIndex].call();
+        // Prevent leaking memory for long chains of recursive calls to `asap`.
+        // If we call `asap` within tasks scheduled by `asap`, the queue will
+        // grow, but to avoid an O(n) walk for every task we execute, we don't
+        // shift tasks off the queue after they have been executed.
+        // Instead, we periodically shift 1024 tasks off the queue.
+        if (index > capacity) {
+            // Manually shift all values starting at the index back to the
+            // beginning of the queue.
+            for (var scan = 0, newLength = queue.length - index; scan < newLength; scan++) {
+                queue[scan] = queue[scan + index];
+            }
+            queue.length -= index;
+            index = 0;
+        }
+    }
+    queue.length = 0;
+    index = 0;
+    flushing = false;
+}
+
+rawAsap.requestFlush = requestFlush;
+function requestFlush() {
+    // Ensure flushing is not bound to any domain.
+    // It is not sufficient to exit the domain, because domains exist on a stack.
+    // To execute code outside of any domain, the following dance is necessary.
+    var parentDomain = process.domain;
+    if (parentDomain) {
+        if (!domain) {
+            // Lazy execute the domain module.
+            // Only employed if the user elects to use domains.
+            domain = require(5);
+        }
+        domain.active = process.domain = null;
+    }
+
+    // `setImmediate` is slower that `process.nextTick`, but `process.nextTick`
+    // cannot handle recursion.
+    // `requestFlush` will only be called recursively from `asap.js`, to resume
+    // flushing after an error is thrown into a domain.
+    // Conveniently, `setImmediate` was introduced in the same version
+    // `process.nextTick` started throwing recursion errors.
+    if (flushing && hasSetImmediate) {
+        setImmediate(flush);
+    } else {
+        process.nextTick(flush);
+    }
+
+    if (parentDomain) {
+        domain.active = process.domain = parentDomain;
+    }
+}
+
+}).call(this,require(7))
+},{"5":5,"7":7}],5:[function(require,module,exports){
+/*global define:false require:false */
+module.exports = (function(){
+	// Import Events
+	var events = require(6)
+
+	// Export Domain
+	var domain = {}
+	domain.createDomain = domain.create = function(){
+		var d = new events.EventEmitter()
+
+		function emitError(e) {
+			d.emit('error', e)
+		}
+
+		d.add = function(emitter){
+			emitter.on('error', emitError)
+		}
+		d.remove = function(emitter){
+			emitter.removeListener('error', emitError)
+		}
+		d.bind = function(fn){
+			return function(){
+				var args = Array.prototype.slice.call(arguments)
+				try {
+					fn.apply(null, args)
+				}
+				catch (err){
+					emitError(err)
+				}
+			}
+		}
+		d.intercept = function(fn){
+			return function(err){
+				if ( err ) {
+					emitError(err)
+				}
+				else {
+					var args = Array.prototype.slice.call(arguments, 1)
+					try {
+						fn.apply(null, args)
+					}
+					catch (err){
+						emitError(err)
+					}
+				}
+			}
+		}
+		d.run = function(fn){
+			try {
+				fn()
+			}
+			catch (err) {
+				emitError(err)
+			}
+			return this
+		};
+		d.dispose = function(){
+			this.removeAllListeners()
+			return this
+		};
+		d.enter = d.exit = function(){
+			return this
+		}
+		return d
+	};
+	return domain
+}).call(this)
+},{"6":6}],6:[function(require,module,exports){
+// Copyright Joyent, Inc. and other Node contributors.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a
+// copy of this software and associated documentation files (the
+// "Software"), to deal in the Software without restriction, including
+// without limitation the rights to use, copy, modify, merge, publish,
+// distribute, sublicense, and/or sell copies of the Software, and to permit
+// persons to whom the Software is furnished to do so, subject to the
+// following conditions:
+//
+// The above copyright notice and this permission notice shall be included
+// in all copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+// OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN
+// NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+// DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+// OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
+// USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+function EventEmitter() {
+  this._events = this._events || {};
+  this._maxListeners = this._maxListeners || undefined;
+}
+module.exports = EventEmitter;
+
+// Backwards-compat with node 0.10.x
+EventEmitter.EventEmitter = EventEmitter;
+
+EventEmitter.prototype._events = undefined;
+EventEmitter.prototype._maxListeners = undefined;
+
+// By default EventEmitters will print a warning if more than 10 listeners are
+// added to it. This is a useful default which helps finding memory leaks.
+EventEmitter.defaultMaxListeners = 10;
+
+// Obviously not all Emitters should be limited to 10. This function allows
+// that to be increased. Set to zero for unlimited.
+EventEmitter.prototype.setMaxListeners = function(n) {
+  if (!isNumber(n) || n < 0 || isNaN(n))
+    throw TypeError('n must be a positive number');
+  this._maxListeners = n;
+  return this;
+};
+
+EventEmitter.prototype.emit = function(type) {
+  var er, handler, len, args, i, listeners;
+
+  if (!this._events)
+    this._events = {};
+
+  // If there is no 'error' event listener then throw.
+  if (type === 'error') {
+    if (!this._events.error ||
+        (isObject(this._events.error) && !this._events.error.length)) {
+      er = arguments[1];
+      if (er instanceof Error) {
+        throw er; // Unhandled 'error' event
+      }
+      throw TypeError('Uncaught, unspecified "error" event.');
+    }
+  }
+
+  handler = this._events[type];
+
+  if (isUndefined(handler))
+    return false;
+
+  if (isFunction(handler)) {
+    switch (arguments.length) {
+      // fast cases
+      case 1:
+        handler.call(this);
+        break;
+      case 2:
+        handler.call(this, arguments[1]);
+        break;
+      case 3:
+        handler.call(this, arguments[1], arguments[2]);
+        break;
+      // slower
+      default:
+        len = arguments.length;
+        args = new Array(len - 1);
+        for (i = 1; i < len; i++)
+          args[i - 1] = arguments[i];
+        handler.apply(this, args);
+    }
+  } else if (isObject(handler)) {
+    len = arguments.length;
+    args = new Array(len - 1);
+    for (i = 1; i < len; i++)
+      args[i - 1] = arguments[i];
+
+    listeners = handler.slice();
+    len = listeners.length;
+    for (i = 0; i < len; i++)
+      listeners[i].apply(this, args);
+  }
+
+  return true;
+};
+
+EventEmitter.prototype.addListener = function(type, listener) {
+  var m;
+
+  if (!isFunction(listener))
+    throw TypeError('listener must be a function');
+
+  if (!this._events)
+    this._events = {};
+
+  // To avoid recursion in the case that type === "newListener"! Before
+  // adding it to the listeners, first emit "newListener".
+  if (this._events.newListener)
+    this.emit('newListener', type,
+              isFunction(listener.listener) ?
+              listener.listener : listener);
+
+  if (!this._events[type])
+    // Optimize the case of one listener. Don't need the extra array object.
+    this._events[type] = listener;
+  else if (isObject(this._events[type]))
+    // If we've already got an array, just append.
+    this._events[type].push(listener);
+  else
+    // Adding the second element, need to change to array.
+    this._events[type] = [this._events[type], listener];
+
+  // Check for listener leak
+  if (isObject(this._events[type]) && !this._events[type].warned) {
+    var m;
+    if (!isUndefined(this._maxListeners)) {
+      m = this._maxListeners;
+    } else {
+      m = EventEmitter.defaultMaxListeners;
+    }
+
+    if (m && m > 0 && this._events[type].length > m) {
+      this._events[type].warned = true;
+      console.error('(node) warning: possible EventEmitter memory ' +
+                    'leak detected. %d listeners added. ' +
+                    'Use emitter.setMaxListeners() to increase limit.',
+                    this._events[type].length);
+      if (typeof console.trace === 'function') {
+        // not supported in IE 10
+        console.trace();
+      }
+    }
+  }
+
+  return this;
+};
+
+EventEmitter.prototype.on = EventEmitter.prototype.addListener;
+
+EventEmitter.prototype.once = function(type, listener) {
+  if (!isFunction(listener))
+    throw TypeError('listener must be a function');
+
+  var fired = false;
+
+  function g() {
+    this.removeListener(type, g);
+
+    if (!fired) {
+      fired = true;
+      listener.apply(this, arguments);
+    }
+  }
+
+  g.listener = listener;
+  this.on(type, g);
+
+  return this;
+};
+
+// emits a 'removeListener' event iff the listener was removed
+EventEmitter.prototype.removeListener = function(type, listener) {
+  var list, position, length, i;
+
+  if (!isFunction(listener))
+    throw TypeError('listener must be a function');
+
+  if (!this._events || !this._events[type])
+    return this;
+
+  list = this._events[type];
+  length = list.length;
+  position = -1;
+
+  if (list === listener ||
+      (isFunction(list.listener) && list.listener === listener)) {
+    delete this._events[type];
+    if (this._events.removeListener)
+      this.emit('removeListener', type, listener);
+
+  } else if (isObject(list)) {
+    for (i = length; i-- > 0;) {
+      if (list[i] === listener ||
+          (list[i].listener && list[i].listener === listener)) {
+        position = i;
+        break;
+      }
+    }
+
+    if (position < 0)
+      return this;
+
+    if (list.length === 1) {
+      list.length = 0;
+      delete this._events[type];
+    } else {
+      list.splice(position, 1);
+    }
+
+    if (this._events.removeListener)
+      this.emit('removeListener', type, listener);
+  }
+
+  return this;
+};
+
+EventEmitter.prototype.removeAllListeners = function(type) {
+  var key, listeners;
+
+  if (!this._events)
+    return this;
+
+  // not listening for removeListener, no need to emit
+  if (!this._events.removeListener) {
+    if (arguments.length === 0)
+      this._events = {};
+    else if (this._events[type])
+      delete this._events[type];
+    return this;
+  }
+
+  // emit removeListener for all listeners on all events
+  if (arguments.length === 0) {
+    for (key in this._events) {
+      if (key === 'removeListener') continue;
+      this.removeAllListeners(key);
+    }
+    this.removeAllListeners('removeListener');
+    this._events = {};
+    return this;
+  }
+
+  listeners = this._events[type];
+
+  if (isFunction(listeners)) {
+    this.removeListener(type, listeners);
+  } else {
+    // LIFO order
+    while (listeners.length)
+      this.removeListener(type, listeners[listeners.length - 1]);
+  }
+  delete this._events[type];
+
+  return this;
+};
+
+EventEmitter.prototype.listeners = function(type) {
+  var ret;
+  if (!this._events || !this._events[type])
+    ret = [];
+  else if (isFunction(this._events[type]))
+    ret = [this._events[type]];
+  else
+    ret = this._events[type].slice();
+  return ret;
+};
+
+EventEmitter.listenerCount = function(emitter, type) {
+  var ret;
+  if (!emitter._events || !emitter._events[type])
+    ret = 0;
+  else if (isFunction(emitter._events[type]))
+    ret = 1;
+  else
+    ret = emitter._events[type].length;
+  return ret;
+};
+
+function isFunction(arg) {
+  return typeof arg === 'function';
+}
+
+function isNumber(arg) {
+  return typeof arg === 'number';
+}
+
+function isObject(arg) {
+  return typeof arg === 'object' && arg !== null;
+}
+
+function isUndefined(arg) {
+  return arg === void 0;
+}
+
+},{}],7:[function(require,module,exports){
+// shim for using process in browser
+
+var process = module.exports = {};
+var queue = [];
+var draining = false;
+var currentQueue;
+var queueIndex = -1;
+
+function cleanUpNextTick() {
+    draining = false;
+    if (currentQueue.length) {
+        queue = currentQueue.concat(queue);
+    } else {
+        queueIndex = -1;
+    }
+    if (queue.length) {
+        drainQueue();
+    }
+}
+
+function drainQueue() {
+    if (draining) {
+        return;
+    }
+    var timeout = setTimeout(cleanUpNextTick);
+    draining = true;
+
+    var len = queue.length;
+    while(len) {
+        currentQueue = queue;
+        queue = [];
+        while (++queueIndex < len) {
+            currentQueue[queueIndex].run();
+        }
+        queueIndex = -1;
+        len = queue.length;
+    }
+    currentQueue = null;
+    draining = false;
+    clearTimeout(timeout);
+}
+
+process.nextTick = function (fun) {
+    var args = new Array(arguments.length - 1);
+    if (arguments.length > 1) {
+        for (var i = 1; i < arguments.length; i++) {
+            args[i - 1] = arguments[i];
+        }
+    }
+    queue.push(new Item(fun, args));
+    if (queue.length === 1 && !draining) {
+        setTimeout(drainQueue, 0);
+    }
+};
+
+// v8 likes predictible objects
+function Item(fun, array) {
+    this.fun = fun;
+    this.array = array;
+}
+Item.prototype.run = function () {
+    this.fun.apply(null, this.array);
+};
+process.title = 'browser';
+process.browser = true;
+process.env = {};
+process.argv = [];
+process.version = ''; // empty string to avoid regexp issues
+process.versions = {};
+
+function noop() {}
+
+process.on = noop;
+process.addListener = noop;
+process.once = noop;
+process.off = noop;
+process.removeListener = noop;
+process.removeAllListeners = noop;
+process.emit = noop;
+
+process.binding = function (name) {
+    throw new Error('process.binding is not supported');
+};
+
+// TODO(shtylman)
+process.cwd = function () { return '/' };
+process.chdir = function (dir) {
+    throw new Error('process.chdir is not supported');
+};
+process.umask = function() { return 0; };
+
+},{}],8:[function(require,module,exports){
+var falcor = require(15);
+var get = require(62);
+var set = require(98);
+var inv = require(90);
+var prototype = falcor.Model.prototype;
+
+prototype._getBoundValue = get.getBoundValue;
+prototype._getValueSync = get.getValueSync;
+prototype._getPathSetsAsValues = get.getAsValues;
+prototype._getPathSetsAsJSON = get.getAsJSON;
+prototype._getPathSetsAsPathMap = get.getAsPathMap;
+prototype._getPathSetsAsJSONG = get.getAsJSONG;
+prototype._getPathMapsAsValues = get.getAsValues;
+prototype._getPathMapsAsJSON = get.getAsJSON;
+prototype._getPathMapsAsPathMap = get.getAsPathMap;
+prototype._getPathMapsAsJSONG = get.getAsJSONG;
+
+prototype._setPathSetsAsJSON = set.setPathSetsAsJSON;
+prototype._setPathSetsAsJSONG = set.setPathSetsAsJSONG;
+prototype._setPathSetsAsPathMap = set.setPathSetsAsPathMap;
+prototype._setPathSetsAsValues = set.setPathSetsAsValues;
+
+prototype._setPathMapsAsJSON = set.setPathMapsAsJSON;
+prototype._setPathMapsAsJSONG = set.setPathMapsAsJSONG;
+prototype._setPathMapsAsPathMap = set.setPathMapsAsPathMap;
+prototype._setPathMapsAsValues = set.setPathMapsAsValues;
+
+prototype._setJSONGsAsJSON = set.setJSONGsAsJSON;
+prototype._setJSONGsAsJSONG = set.setJSONGsAsJSONG;
+prototype._setJSONGsAsPathMap = set.setJSONGsAsPathMap;
+prototype._setJSONGsAsValues = set.setJSONGsAsValues;
+
+prototype._invPathSetsAsJSON = inv.invPathSetsAsJSON;
+prototype._invPathSetsAsJSONG = inv.invPathSetsAsJSONG;
+prototype._invPathSetsAsPathMap = inv.invPathSetsAsPathMap;
+prototype._invPathSetsAsValues = inv.invPathSetsAsValues;
+
+prototype._setCache = set.setCache;
+
+module.exports = falcor;
+
+
+},{"15":15,"62":62,"90":90,"98":98}],9:[function(require,module,exports){
+if (typeof falcor === 'undefined') {
+    var falcor = {};
+}
+var Rx = require(166);
+
+falcor.__Internals = {};
+falcor.Observable = Rx.Observable;
+falcor.EXPIRES_NOW = 0;
+falcor.EXPIRES_NEVER = 1;
+/**
+ * The current semVer'd data version of falcor.
+ */
+falcor.dataVersion = '0.1.0';
+
+falcor.now = function now() {
+    return Date.now();
+};
+falcor.NOOP = function() {};
+
+module.exports = falcor;
+
+},{"166":166}],10:[function(require,module,exports){
+/**
+ * An InvalidModelError can only happen when a user binds, whether sync
+ * or async to shorted value.  See the unit tests for examples.
+ *
+ * @param {String} message
+ */
+var InvalidModelError = function InvalidModelError(boundPath, shortedPath) {
+    this.message = 'The boundPath of the model is not valid since it a value or error is found before the path ends.';
+    this.stack = (new Error()).stack;
+    this.boundPath = boundPath;
+    this.shortedPath = shortedPath;
+};
+
+module.exports = InvalidModelError;
+
+// instanceof will be an error.
+// but stack will be correct because its defined in the constructor.
+InvalidModelError.prototype = new Error();
+InvalidModelError.prototype.name = 'InvalidModel';
+
+},{}],11:[function(require,module,exports){
+var falcor = require(9);
+var ModelRoot = require(14);
+var RequestQueue = require(49);
+var ImmediateScheduler = require(51);
+var ASAPScheduler = require(50);
+var TimeoutScheduler = require(52);
+var ERROR = require(150);
+var ModelResponse = require(13);
+var ModelDataSourceAdapter = require(12);
+var call = require(18);
+var operations = require(23);
+var pathSyntax = require(183);
+var getBoundValue = require(58);
+var collect = require(95);
+var slice = Array.prototype.slice;
+var $ref = require(151);
+var $error = require(150);
+var $atom = require(149);
+var getGeneration = require(59);
+var noop = function(){};
+var bind = require(16);
+var bindSync = require(17);
+
+/**
+ * A Model object is used to execute commands against a {@link JSONGraph} object. {@link Model}s can work with a local JSONGraph cache, or it can work with a remote {@link JSONGraph} object through a {@link DataSource}.
+ * @constructor
+ * @param {?Object} options - A set of options to customize behavior
+ * @param {?DataSource} options.source - A data source to retrieve and manage the {@link JSONGraph}
+ * @param {?JSONGraph} options.cache - Initial state of the {@link JSONGraph}
+ * @param {?number} options.maxSize - The maximum size of the cache
+ * @param {?number} options.collectRatio - The ratio of the maximum size to collect when the maxSize is exceeded
+ * @param {?Model~errorSelector} options.errorSelector - A function used to translate errors before they are returned
+ */
+var Model = module.exports = falcor.Model = function Model(options) {
+
+    if (!options) {
+        options = {};
+    }
+
+    this._materialized = options.materialized || false;
+    this._boxed = options.boxed || false;
+    this._treatErrorsAsValues = options.treatErrorsAsValues || false;
+
+    this._dataSource = options.source;
+    this._maxSize = options.maxSize || Math.pow(2, 53) - 1;
+    this._collectRatio = options.collectRatio || 0.75;
+    this._scheduler = new ImmediateScheduler();
+    this._request = new RequestQueue(this, this._scheduler);
+    this._errorSelector = options.errorSelector || Model.prototype._errorSelector;
+    this._router = options.router;
+
+    this._root = options.root || new ModelRoot();
+
+    if (options.cache && typeof options.cache === "object") {
+        this.setCache(options.cache);
+    } else {
+        this._cache = {};
+    }
+    this._path = [];
+};
+
+/**
+ * The {@link Model}'s error selector is applied to any errors that occur during Model operations.  The return value of the error selector is substituted for the input error, giving clients the opportunity to translate error objects before they are returned from the {@link Model}.
+ * @callback Model~errorSelector
+ * @param {Object} requestedPath the requested path at which the error was found.
+ * @error {Error} error the error that occured during the {@link Model} operation.
+ * @returns {Error} the translated error object.
+ */
+
+Model.EXPIRES_NOW = falcor.EXPIRES_NOW;
+Model.EXPIRES_NEVER = falcor.EXPIRES_NEVER;
+
+Model.REF_TARGET = null;
+
+Model.pathValue = function(path, value) {
+    if (typeof path === 'string') {
+        path = pathSyntax(path);
+    }
+    return {path: path, value: value};
+};
+
+Model.ref = function(path) {
+    if (typeof path === 'string') {
+        path = pathSyntax(path);
+    }
+    return {$type: $ref, value: path};
+};
+
+Model.error = function(error) {
+    return {$type: $error, value: error};
+};
+
+Model.atom = function(value) {
+    return {$type: $atom, value: value};
+};
+
+Model.prototype = {
+    // because javascript
+    constructor: Model,
+    
+    _boxed: false,
+    _progressive: false,
+    _errorSelector: function(x, y) { return y; },
+    _comparator: function(a, b) {
+        if (Boolean(a) && typeof a === "object" && a.hasOwnProperty("value") &&
+            Boolean(b) && typeof b === "object" && b.hasOwnProperty("value")) {
+            return a.value === b.value;
+        }
+        return a === b;
+    },
+    /**
+     * The get method retrieves several {@link Path}s or {@link PathSet}s from a {@link Model}. The get method is versatile and may be called in several different ways, allowing you to make different trade-offs between performance and expressiveness. The simplest invocation returns an ModelResponse stream that contains a JSON object with all of the requested values. An optional selector function can also be passed in order to translate the retrieved data before it appears in the Observable stream. If a selector function is provided, the output will be an Observable stream with the result of the selector function invocation instead of a ModelResponse stream.
+     If you intend to transform the JSON data into another form, specifying a selector function may be more efficient. The selector function is run once all of the requested path values are available. In the body of the selector function, you can read data from the Model's cache using {@link Model.prototype.getValueSync} and transform it directly into its final representation (ex. an HTML string). This technique can reduce allocations by preventing the get method from copying the data in {@link Model}'s cache into an intermediary JSON representation.
+     Instead of directly accessing the cache within the selector function, you can optionally pass arguments to the selector function and they will be automatically bound to the corresponding {@link Path} or {@link PathSet} passed to the get method. If a {@link Path} is bound to a selector function argument, the function argument will contain the value found at that path. However if a {@link PathSet} is bound to a selector function argument, the function argument will be a JSON structure containing all of the path values. Using argument binding can provide a good balance between allocations and expressiveness. For more detail on how {@link Path}s and {@link PathSet}s are bound to selector function arguments, see the examples below.
+     * @function
+     * @param {...PathSet} path - The path(s) to retrieve
+     * @param {?Function} selector - The callback to execute once all of the paths have been retrieved
+     * @return {ModelResponse.<JSONEnvelope>|Observable} - The requested data as JSON, or the result of the optional selector function.
+     */
+    get: operations("get"),
+    /**
+     * Sets the value at one or more places in the JSONGraph model. The set method accepts one or more {@link PathValue}s, each of which is a combination of a location in the document and the value to place there.  In addition to accepting  {@link PathValue}s, the set method also returns the values after the set operation is complete.
+     * @function
+     * @param {...(PathValue | JSONGraphEnvelope | JSONEnvelope)} value - A value or collection of values to set into the Model.
+     * @return {ModelResponse.<JSON> | Observable} - An {@link Observable} stream containing the values in the JSONGraph model after the set was attempted.
+     */
+    set: operations("set"),
+    invalidate: operations("invalidate"),
+    // TODO: Document selector function
+    /*
+     * Invoke a function
+     * @function
+     * @param {Path} functionPath - The path to the function to invoke
+     * @param {Array.<Object>} args - The arguments to pass to the function
+     * @param {Array.<PathSet>} pathSuffixes - The paths to retrieve from objects returned from the function
+     * @param {Array.<PathSet>} calleePaths - The paths to retrieve from function callee after successful function execution
+     * @param {Function} selector The selector function
+     * @returns {ModelResponse.<*> | Observable} The {JSONGraph} fragment and associated metadata returned from the invoked function
+     */
+    call: call,
+    /**
+     * Get data for a single {@link Path}
+     * @param {Path} path - The path to retrieve
+     * @return {Observable.<*>} - The value for the path
+     * @example
+     var model = new falcor.Model({source: new falcor.HttpDataSource("/model.json") });
+
+     model.
+         getValue('user.name').
+         subscribe(function(name) {
+             console.log(name);
+         });
+
+     // The code above prints "Jim" to the console.
+     */
+    getValue: function(path) {
+        return this.get(path, function(x) { return x; });
+    },
+    setValue: function(path, value) {
+        path = pathSyntax.fromPath(path);
+        return this.set(Array.isArray(path) ?
+        {path: path, value: value} :
+            path, function(x) { return x; });
+    },
+
+    /**
+     * Returns a clone of the {@link Model} bound to a location within the {@link JSONGraph}. The bound location is never a {@link Reference}: any {@link Reference}s encountered while resolving the bound {@link Path} are always replaced with the {@link Reference}s target value. For subsequent operations on the {@link Model}, all paths will be evaluated relative to the bound path. Bind allows you to:
+     * - Expose only a fragment of the {@link JSONGraph} to components, rather than the entire graph
+     * - Hide the location of a {@link JSONGraph} fragment from components
+     * - Optimize for executing multiple operations and path looksup at/below the same location in the {@link JSONGraph}
+     * @param {Path} boundPath - The path to bind to
+     * @param {...PathSet} relativePathsToPreload - Paths to preload before Model is created. These paths are relative to the bound path.
+     * @return {Observable.<Model>} - An Observable stream with a single value, the bound {@link Model}, or an empty stream if nothing is found at the path
+    */
+    bind: bind,
+
+    /**
+     * Set the local cache to a {@link JSONGraph} fragment. This method can be a useful way of mocking a remote document, or restoring the local cache from a previously stored state
+     * @param {JSONGraph} jsonGraph - The {@link JSONGraph} fragment to use as the local cache
+     */
+    setCache: function(cache) {
+        var size = this._cache && this._cache.$size || 0;
+        var lru = this._root;
+        var expired = lru.expired;
+        this._cache = {};
+        collect(lru, expired, -1, size, 0, 0);
+        if(Array.isArray(cache.paths) && cache.jsong && typeof cache.jsong === "object") {
+            this._setJSONGsAsJSON(this, [cache], []);
+        } else {
+            this._setCache(this, cache);
+        }
+        return this;
+    },
+    /**
+     * Get the local {@link JSONGraph} cache. This method can be a useful to store the state of the cache
+     * @param {...Array.<PathSet>} [pathSets] - The path(s) to retrieve. If no paths are specified, the entire {@link JSONGraph} is returned
+     * @return {JSONGraph} jsonGraph - A {@link JSONGraph} fragment
+     * @example
+     // Storing the boxshot of the first 10 titles in the first 10 genreLists to local storage.
+     localStorage.setItem('cache', JSON.stringify(model.getCache("genreLists[0...10][0...10].boxshot")));
+     */
+    getCache: function() {
+        var paths = slice.call(arguments);
+        if(paths.length === 0) {
+            paths[0] = { json: this._cache };
+        }
+        var result;
+        this.get.apply(this.
+                withoutDataSource().
+                boxValues().
+                treatErrorsAsValues().
+                materialize(), paths).
+            toJSONG().
+            subscribe(function(envelope) {
+                result = envelope.jsong;
+            });
+        return result;
+    },
+
+    getGeneration: function(path) {
+        path = path && pathSyntax.fromPath(path) || [];
+        if (Array.isArray(path) === false) {
+            throw new Error("Model#getGenerationSync must be called with an Array path.");
+        }
+        if (this._path.length) {
+            path = this._path.concat(path);
+        }
+        return this._getGeneration(this, path);
+    },
+    _getGeneration: getGeneration,
+    // TODO: Does not throw if given a PathSet rather than a Path, not sure if it should or not.
+    // TODO: Doc not accurate? I was able to invoke directly against the Model, perhaps because I don't have a data source?
+    // TODO: Not clear on what it means to "retrieve objects in addition to JSONGraph values"
+    /**
+     * Synchronously retrieves a single path from the local {@link Model} only and will not retrieve missing paths from the {@link DataSource}. This method can only be invoked when the {@link Model} does not have a {@link DataSource} or from within a selector function. See {@link Model.prototype.get}. The getValueSync method differs from the asynchronous get methods (ex. get, getValues) in that it can be used to retrieve objects in addition to JSONGraph values.
+     * @arg {Path} path - The path to retrieve
+     * @return {*} - The value for the specified path
+     */
+    getValueSync: function(path) {
+        path = pathSyntax.fromPath(path);
+        if (Array.isArray(path) === false) {
+            throw new Error("Model#getValueSync must be called with an Array path.");
+        }
+        if (this._path.length) {
+            path = this._path.concat(path);
+        }
+        return this.syncCheck("getValueSync") && this._getValueSync(this, path).value;
+    },
+    setValueSync: function(path, value, errorSelector) {
+        path = pathSyntax.fromPath(path);
+
+        if(Array.isArray(path) === false) {
+            if(typeof errorSelector !== "function") {
+                errorSelector = value || this._errorSelector;
+            }
+            value = path.value;
+            path  = path.path;
+        }
+
+        if(Array.isArray(path) === false) {
+            throw new Error("Model#setValueSync must be called with an Array path.");
+        }
+
+        if(this.syncCheck("setValueSync")) {
+
+            var json = {};
+            var tEeAV = this._treatErrorsAsValues;
+            var boxed = this._boxed;
+
+            this._treatErrorsAsValues = true;
+            this._boxed = true;
+
+            this._setPathSetsAsJSON(this, [{path: path, value: value}], [json], errorSelector);
+
+            this._treatErrorsAsValues = tEeAV;
+            this._boxed = boxed;
+
+            json = json.json;
+
+            if(json && json.$type === ERROR && !this._treatErrorsAsValues) {
+                if(this._boxed) {
+                    throw json;
+                } else {
+                    throw json.value;
+                }
+            } else if(this._boxed) {
+                return json;
+            }
+
+            return json && json.value;
+        }
+    },
+    // TODO: Document selector function elsewhere and link
+    /**
+     * Synchronously returns a clone of the {@link Model} bound to a location within the {@link JSONGraph}. The bound location is never a {@link Reference}: any {@link Reference}s encountered while resolving the bound {@link Path} are always replaced with the {@link Reference}s target value. For subsequent operations on the {@link Model}, all paths will be evaluated relative to the bound path. This method can only be invoked when the {@link Model} does not have a {@link DataSource} or from within a selector function. Bind allows you to:
+     * - Expose only a fragment of the {@link JSONGraph} to components, rather than the entire graph
+     * - Hide the location of a {@link JSONGraph} fragment from components
+     * - Optimize for executing multiple operations and path looksup at/below the same location in the {@link JSONGraph}
+     * @param {Path} path - The path to bind to
+     * @return {Model}
+     */
+    bindSync: bindSync,
+    /**
+     * Synchronously returns a clone of the {@link Model} bound to a location within the {@link JSONGraph}. Unlike bind or bindSync, softBind never optimizes its path.  Soft bind is ideal if you want to retrieve the bound path every time, rather than retrieve the optimized path once and then always retrieve paths from that object in the JSON Graph. For example, if you always wanted to retrieve the name from the first item in a list you could softBind to the path "list[0]".
+     * @param {Path} path - The path prefix to retrieve every time an operation is executed on a Model.
+     * @return {Model}
+     */
+    softBind: function(path) {
+        path = pathSyntax.fromPath(path);
+        if(Array.isArray(path) === false) {
+            throw new Error("Model#softBind must be called with an Array path.");
+        }
+        return this.clone(["_path", path]);
+    },
+    clone: function() {
+
+        var self = this;
+        var clone = new Model();
+
+        var key, keyValue;
+
+        var keys = Object.keys(self);
+        var keysIdx = -1;
+        var keysLen = keys.length;
+        while(++keysIdx < keysLen) {
+            key = keys[keysIdx];
+            clone[key] = self[key];
+        }
+
+        var argsIdx = -1;
+        var argsLen = arguments.length;
+        while(++argsIdx < argsLen) {
+            keyValue = arguments[argsIdx];
+            clone[keyValue[0]] = keyValue[1];
+        }
+
+        return clone;
+    },
+    // TODO: Should we be clearer this only applies to "get" operations? I'm assuming that is true
+    /**
+     * Returns a clone of the {@link Model} that eanbles batching. Within the configured time period, paths for operations of the same type are collected and executed on the {@link DataSource} in a batch. Batching can make more efficient use of the {@link DataSource} depending on its implementation, for example, reducing the number of HTTP requests to the server
+     * @param {?Scheduler|number} schedulerOrDelay - Either a {@link Scheduler} that determines when to send a batch to the {@link DataSource}, or the number in milliseconds to collect a batch before sending to the {@link DataSource}. If this parameter is omitted, then batch collection ends at the end of the next tick.
+     * @return {Model}
+     */
+    batch: function(schedulerOrDelay) {
+        if(typeof schedulerOrDelay === "number") {
+            schedulerOrDelay = new TimeoutScheduler(Math.round(Math.abs(schedulerOrDelay)));
+        } else if(!schedulerOrDelay || !schedulerOrDelay.schedule) {
+            schedulerOrDelay = new ASAPScheduler();
+        }
+        return this.clone(["_request", new RequestQueue(this, schedulerOrDelay)]);
+    },
+    /**
+     * Returns a clone of the {@link Model} that disables batching. This is the default mode. Each operation will be executed on the {@link DataSource} separately
+     * @name unbatch
+     * @memberof Model.prototype
+     * @function
+     * @return {Model} a {@link Model} that batches requests of the same type and sends them to the data source together.
+     */
+    unbatch: function() {
+        return this.clone(["_request", new RequestQueue(this, new ImmediateScheduler())]);
+    },
+    // TODO: Add example of treatErrorsAsValues
+    /**
+     * Returns a clone of the {@link Model} that treats errors as values. Errors will be reported in the same callback used to report data. Errors will appear as objects in responses, rather than being sent to the {@link Observable~onErrorCallback} callback of the {@link ModelResponse}.
+     * @return {Model}
+     */
+    treatErrorsAsValues: function() {
+        return this.clone(["_treatErrorsAsValues", true]);
+    },
+    asDataSource: function() {
+        return new ModelDataSourceAdapter(this);
+    },
+    materialize: function() {
+        return this.clone(["_materialized", true]);
+    },
+    /**
+     * Returns a clone of the {@link Model} that boxes values returning the wrapper ({@link Atom}, {@link Reference}, or {@link Error}), rather than the value inside it. This allows any metadata attached to the wrapper to be inspected
+     * @return {Model}
+     */
+    boxValues: function() {
+        return this.clone(["_boxed", true]);
+    },
+    /**
+     * Returns a clone of the {@link Model} that unboxes values, returning the value inside of the wrapper ({@link Atom}, {@link Reference}, or {@link Error}), rather than the wrapper itself. This is the default mode.
+     * @return {Model}
+     */
+    unboxValues: function() {
+        return this.clone(["_boxed", false]);
+    },
+    /**
+     * Returns a clone of the {@link Model} that only uses the local {@link JSONGraph} and never uses a {@link DataSource} to retrieve missing paths
+     * @return {Model}
+     */
+    withoutDataSource: function() {
+        return this.clone(["_dataSource", null]);
+    },
+    withComparator: function(compare) {
+        return this.clone(["_comparator", compare]);
+    },
+    withoutComparator: function(compare) {
+        return this.clone(["_comparator", Model.prototype._comparator]);
+    },
+    syncCheck: function(name) {
+        if (Boolean(this._dataSource) && this._root.allowSync <= 0 && this._root.unsafeMode === false) {
+            throw new Error("Model#" + name + " may only be called within the context of a request selector.");
+        }
+        return true;
+    },
+    toJSON: function() {
+        return { $type: "ref", value: this._path };
+    }
+};
+
+},{"12":12,"13":13,"14":14,"149":149,"150":150,"151":151,"16":16,"17":17,"18":18,"183":183,"23":23,"49":49,"50":50,"51":51,"52":52,"58":58,"59":59,"9":9,"95":95}],12:[function(require,module,exports){
+function ModelDataSourceAdapter(model) {
+    this._model = model.materialize().boxValues().treatErrorsAsValues();
+}
+
+ModelDataSourceAdapter.prototype = {
+    get: function(pathSets) {
+        return this._model.get.apply(this._model, pathSets).toJSONG();
+    },
+    set: function(jsongResponse) {
+        return this._model.set(jsongResponse).toJSONG();
+    },
+    call: function(path, args, suffixes, paths) {
+        var params = [path, args, suffixes].concat(paths);
+        return this._model.call.apply(this._model, params).toJSONG();
+    }
+};
+
+module.exports = ModelDataSourceAdapter;
+},{}],13:[function(require,module,exports){
+var falcor = require(9);
+var pathSyntax = require(183);
+
+if(typeof Promise !== "undefined" && Promise) {
+    falcor.Promise = Promise;
+} else {
+    falcor.Promise = require(339);
+}
+
+var Observable  = falcor.Observable,
+    valuesMixin = { format: { value: "AsValues"  } },
+    jsonMixin   = { format: { value: "AsPathMap" } },
+    jsongMixin  = { format: { value: "AsJSONG"   } },
+    progressiveMixin = { operationIsProgressive: { value: true } };
+
+/**
+ * A container for the results of an operation performed on a {@link Model}, which can convert the data into any of the following formats: JSON, {@link JSONGraph}, a stream of {@link PathValue}s, or a scalar value. Once the data format is determined, the ModelResponse container can be converted into any of the following container types: Observable (default), or a Promise. A ModelResponse can also push data to a node-style callback.
+ * @constructor
+ * @augments Observable
+ */
+function ModelResponse(forEach) {
+    this._subscribe = forEach;
+}
+
+ModelResponse.create = function(forEach) {
+    return new ModelResponse(forEach);
+};
+
+ModelResponse.fromOperation = function(model, args, selector, forEach) {
+    return new ModelResponse(function(observer) {
+        return forEach(Object.create(observer, {
+            operationModel: {value: model},
+            operationArgs: {value: pathSyntax.fromPathsOrPathValues(args)},
+            operationSelector: {value: selector}
+        }));
+    });
+};
+
+function noop() {}
+function mixin(self) {
+    var mixins = Array.prototype.slice.call(arguments, 1);
+    return new ModelResponse(function(other) {
+        return self.subscribe(mixins.reduce(function(proto, mixin) {
+            return Object.create(proto, mixin);
+        }, other));
+    });
+}
+
+ModelResponse.prototype = Observable.create(noop);
+ModelResponse.prototype.format = "AsPathMap";
+
+/**
+ * Converts the data format to a stream of {@link PathValue}s
+ * @return ModelResponse.<PathValue>
+ */
+ModelResponse.prototype.toPathValues = function() {
+    return mixin(this, valuesMixin);
+};
+
+/**
+ * Converts the data format to JSON 
+ * @return ModelResponse.<JSONEnvelope>
+ */
+ModelResponse.prototype.toJSON = function() {
+    return mixin(this, jsonMixin);
+};
+
+// TODO: Adapt this to eventual progressive API on model.
+// TODO: Pretty sure this documentation is wrong as this just modifies output correct?
+
+/**
+ * The progressive method retrieves several {@link Path}s or {@link PathSet}s from the JSONGraph object, and makes them
+ * available in the local cache. Like the {@link Model.prototype.getProgressively} function, getProgressively invokes a 
+ * selector function every time is available, creating a stream of objects where each new object is a more populated version 
+ * of the one before. The getProgressively function is a memory-efficient alternative to the getProgressively function, because get does not convert the requested data from JSONGraph to JSON. Instead the getProgressively function attempts to ensure that the requested paths are locally available in the cache when it invokes a selector function. Within the selector function, data is synchronously retrieved from the local cache and translated into another form - usually a view object. Within the selector function you can use helper methods like getValueSync and setValueSync to synchronously retrieve data from the cache. These methods are only valid within the selector function, and will throw if executed anywhere else.
+ * @param {...PathSet} path - The path(s) to retrieve
+ * @param {Function} selector - The callback to execute once all the paths have been retrieved
+ * @return {ModelResponse.<JSONEnvelope>} the values found at the requested paths.
+ */
+ModelResponse.prototype.progressively = function() {
+    return mixin(this, progressiveMixin);
+};
+
+/**
+ * Converts the data format to {@link JSONGraph}
+ * @return ModelResponse.<JSONGraphEnvelope>
+ */
+ModelResponse.prototype.toJSONG = function() {
+    return mixin(this, jsongMixin);
+};
+ModelResponse.prototype.withErrorSelector = function(project) {
+    return mixin(this, { errorSelector: { value: project } });
+};
+ModelResponse.prototype.withComparator = function(compare) {
+    return mixin(this, { comparator: { value: compare } });
+};
+ModelResponse.prototype.then = function(onNext, onError) {
+    var self = this;
+    return new falcor.Promise(function(resolve, reject) {
+        var value = undefined;
+        var error = undefined;
+        self.toArray().subscribe(
+            function(values) {
+                if(values.length <= 1) {
+                    value = values[0];
+                } else {
+                    value = values;
+                }
+            },
+            function(errors) {
+                if(errors.length <= 1) {
+                    error = errors[0];
+                } else {
+                    error = errors;
+                }
+                resolve = undefined;
+                reject(error);
+            },
+            function() {
+                if(Boolean(resolve)) {
+                    resolve(value);
+                }
+            }
+        );
+    }).then(onNext, onError);
+};
+
+module.exports = ModelResponse;
+
+},{"183":183,"339":339,"9":9}],14:[function(require,module,exports){
+function ModelRoot() {
+    this.expired = [];
+    this.allowSync = 0;
+    this.unsafeMode = false;
+}
+
+module.exports = ModelRoot;
+},{}],15:[function(require,module,exports){
+var falcor = require(9);
+var Model = require(11);
+falcor.Model = Model;
+
+module.exports = falcor;
+
+},{"11":11,"9":9}],16:[function(require,module,exports){
+var pathSyntax = require(183);
+var falcor = require(9);
+var noop = function() {};
+var InvalidModelError = require(10);
+
+module.exports = function bind(boundPath) {
+    var model = this, root = model._root,
+        paths = new Array(arguments.length - 1),
+        i = -1, n = arguments.length - 1;
+
+    boundPath = pathSyntax.fromPath(boundPath);
+
+    while(++i < n) {
+        paths[i] = pathSyntax.fromPath(arguments[i + 1]);
+    }
+
+    if(root.allowSync <= 0 && n === 0) {
+        throw new Error("Model#bind requires at least one value path.");
+    }
+
+    var syncBoundModelObs = falcor.Observable.create(function(observer) {
+        var error;
+        var boundModel;
+        root.allowSync++;
+        try {
+            boundModel = model.bindSync(boundPath);
+        } catch(e) {
+            error = e;
+        }
+        if (boundModel && !error) {
+            observer.onNext(boundModel);
+            observer.onCompleted();
+        } else {
+            observer.onError(error);
+        }
+        --root.allowSync;
+    });
+
+    return syncBoundModelObs.
+        flatMap(function(boundModel) {
+            if(paths.length > 0) {
+                return boundModel.get.apply(boundModel, paths.concat(function() {
+                    return boundModel;
+                }))['catch'](falcor.Observable.empty());
+            }
+            return falcor.Observable["return"](boundModel);
+        })['catch'](function(e) {
+            if (e instanceof InvalidModelError) {
+                throw e;
+            }
+
+            if(paths.length > 0) {
+                var boundPaths = paths.map(function(path) {
+                    return boundPath.concat(path);
+                });
+                boundPaths.push(noop);
+                return model.get.
+                    apply(model, boundPaths).
+                    flatMap(model.bind(boundPath));
+            }
+            return falcor.Observable.empty();
+        });
+};
+
+},{"10":10,"183":183,"9":9}],17:[function(require,module,exports){
+var pathSyntax = require(183);
+var falcor = require(9);
+var noop = function() {};
+var ERROR = require(150);
+var getBoundValue = require(58);
+var InvalidModelError = require(10);
+
+module.exports = function bindSync(path) {
+    path = pathSyntax.fromPath(path);
+    if (!Array.isArray(path)) {
+        throw new Error("Model#bindSync must be called with an Array path.");
+    }
+    var boundValue = this.syncCheck("bindSync") && getBoundValue(this, this._path.concat(path));
+    var node = boundValue.value;
+
+    if (boundValue.shorted && boundValue.found) {
+        throw new InvalidModelError(path, boundValue.path);
+    } else if (node && node.$type === ERROR) {
+        if (this._boxed) {
+            throw node;
+        }
+        throw node.value;
+    }
+    return this.clone(["_path", boundValue.path]);
+};
+
+},{"10":10,"150":150,"183":183,"58":58,"9":9}],18:[function(require,module,exports){
+var $ref = require(151);
+var falcor = require(9);
+var Observable = falcor.Observable;
+var pathSyntax = require(183);
+var ModelResponse = require(13);
+
+function mapPathSyntax(path) {
+    if(typeof path === "string") {
+        return pathSyntax(path);
+    }
+    return path;
+}
+
+module.exports = function call(path, args, suffixes, extraPaths, selector) {
+
+    var model = this;
+    
+    args && Array.isArray(args) || (args = []);
+    suffixes && Array.isArray(suffixes) || (suffixes = []);
+    extraPaths = Array.prototype.slice.call(arguments, 3);
+    if (typeof (selector = extraPaths[extraPaths.length - 1]) !== "function") {
+        selector = undefined;
+    } else {
+        extraPaths = extraPaths.slice(0, -1);
+    }
+
+    path = mapPathSyntax(path);
+    suffixes = suffixes.map(mapPathSyntax);
+    extraPaths = extraPaths.map(mapPathSyntax);
+
+    return ModelResponse.create(function (options) {
+
+        var rootModel = model.clone(["_path", []]);
+        var localRoot = rootModel.withoutDataSource();
+        var dataSource = model._dataSource;
+        var boundPath = model._path;
+        var callPath = boundPath.concat(path);
+        var thisPath = callPath.slice(0, -1);
+        
+        var localFnObs = model.
+            withoutDataSource().
+            get(path, function(localFn) {
+                return {
+                    model: rootModel.bindSync(thisPath).boxValues(),
+                    localFn: localFn
+                };
+            });
+        
+        var localFnCallObs = localFnObs.flatMap(getLocalCallObs);
+        
+        var localOrRemoteCallObs = localFnCallObs.
+            defaultIfEmpty(getRemoteCallObs(dataSource)).
+            mergeAll();
+        
+        var setCallValuesObs = localOrRemoteCallObs.flatMap(setCallEnvelope);
+        
+        var innerDisposable;
+        var disposable = setCallValuesObs.last().subscribe(function (envelope) {
+            var paths = envelope.paths;
+            var invalidated = envelope.invalidated;
+            if (selector) {
+                paths.push(function () {
+                    return selector.call(model, paths);
+                });
+            }
+            var innerObs = model.get.apply(model, paths);
+            if(options.format === "AsJSONG") {
+                innerObs = innerObs.toJSONG().doAction(function(envelope) {
+                    envelope.invalidated = invalidated;
+                });
+            }
+            innerDisposable = innerObs.subscribe(options);
+        },
+        function (e) { options.onError(e); });
+
+        return {
+            dispose: function () {
+                disposable && disposable.dispose();
+                innerDisposable && innerDisposable.dispose();
+                disposable = undefined;
+                innerDisposable = undefined;
+            }
+        };
+        
+        function getLocalCallObs(tuple) {
+
+            var localFn = tuple && tuple.localFn;
+
+            if (typeof localFn === "function") {
+
+                var localFnModel = tuple.model;
+                var localThisPath = localFnModel._path;
+                var localFnCallObs = localFn.apply(localFnModel, args);
+                var localFnResults = localFnCallObs.reduce(aggregateFnResults, {
+                    values: [],
+                    references: [],
+                    invalidations: [],
+                    localThisPath: localThisPath
+                });
+                var localSetValues = localFnResults.flatMap(setLocalValues);
+                var remoteGetValues = localSetValues.flatMap(getRemoteValues);
+
+                return Observable["return"](remoteGetValues);
+            }
+
+            return Observable.empty();
+
+            function aggregateFnResults(results, pathValue) {
+                var localThisPath = results.localThisPath;
+                if (Boolean(pathValue.invalidated)) {
+                    results.invalidations.push(localThisPath.concat(pathValue.path));
+                } else {
+                    var path = pathValue.path;
+                    var value = pathValue.value;
+                    if (Boolean(value) && typeof value === "object" && value.$type === $ref) {
+                        results.references.push({
+                            path: prependThisPath(path),
+                            value: pathValue.value
+                        });
+                    } else {
+                        results.values.push({
+                            path: prependThisPath(path),
+                            value: pathValue.value
+                        });
+                    }
+                }
+                return results;
+            }
+
+            function setLocalValues(results) {
+                var values = results.values.concat(results.references);
+                if(values.length > 0) {
+                    return localRoot.set.
+                        apply(localRoot, values).
+                        toJSONG().
+                        map(function(envelope) {
+                            return { results: results, envelope: envelope };
+                        });
+                } else {
+                    return Observable["return"]({
+                        results: results,
+                        envelope: { jsong: {}, paths: [] }
+                    });
+                }
+            }
+
+            function getRemoteValues(tuple) {
+                
+                var envelope = tuple.envelope;
+                var results = tuple.results;
+                var values = results.values;
+                var references = results.references;
+                var invalidations = results.invalidations;
+                
+                var rootValues = values.map(pluckPath).map(prependThisPath);
+                var rootSuffixes = references.reduce(prependRefToSuffixes, []);
+                var rootExtraPaths = extraPaths.map(prependThisPath);
+                var rootPaths = rootSuffixes.concat(rootExtraPaths);
+                var envelopeObs;
+                
+                debugger;
+                
+                if(rootPaths.length > 0) {
+                    envelopeObs = rootModel.get.apply(rootModel, rootValues.concat(rootPaths)).toJSONG();
+                } else {
+                    envelopeObs = Observable["return"](envelope);
+                }
+                
+                return envelopeObs.doAction(function (envelope) {
+                    envelope.invalidated = invalidations;
+                });
+            }
+
+            function prependRefToSuffixes(refPaths, refPathValue) {
+                var refPath = refPathValue.path;
+                refPaths.push.apply(refPaths, suffixes.map(function (pathSuffix) {
+                    return refPath.concat(pathSuffix);
+                }));
+                return refPaths;
+            }
+
+            function pluckPath(pathValue) {
+                return pathValue.path;
+            }
+
+            function prependThisPath(path) {
+                return thisPath.concat(path);
+            }
+        }
+        
+        function getRemoteCallObs(dataSource) {
+            if(dataSource && typeof dataSource === "object") {
+                return dataSource.
+                    call(path, args, suffixes, extraPaths).
+                    flatMap(invalidateLocalValues);
+            }
+            
+            return Observable.empty();
+            
+            function invalidateLocalValues(envelope) {
+                var invalidations = envelope.invalidated;
+                if(invalidations && invalidations.length) {
+                    return rootModel.invalidate.
+                        apply(rootModel, invalidations).
+                        map(function() { return envelope; })
+                }
+                return Observable["return"](envelope);
+            }
+        }
+
+        function setCallEnvelope(envelope) {
+            return localRoot.set(envelope, function () {
+                return {
+                    invalidated: envelope.invalidated,
+                    paths: envelope.paths.map(function (path) {
+                        return path.slice(boundPath.length);
+                    })
+                }
+            });
+        }
+
+    });
+};
+},{"13":13,"151":151,"183":183,"9":9}],19:[function(require,module,exports){
+var combineOperations = require(35);
+var setSeedsOrOnNext = require(48);
+
+/**
+ * The initial args that are passed into the async request pipeline.
+ * @see lib/falcor/operations/request.js for how initialArgs are used
+ */
+module.exports = function getInitialArgs(options, seeds, onNext) {
+    var seedRequired = options.format !== 'AsValues';
+    var isProgressive = options.operationIsProgressive;
+    var spreadOperations = false;
+    var operations =
+        combineOperations(
+            options.operationArgs, options.format, 'get',
+            spreadOperations, isProgressive);
+    setSeedsOrOnNext(
+        operations, seedRequired, seeds, onNext, options.operationSelector);
+    var requestOptions;
+    return [operations];
+};
+
+},{"35":35,"48":48}],20:[function(require,module,exports){
+var getSourceObserver = require(36);
+var partitionOperations = require(43);
+var mergeBoundPath = require(40);
+
+module.exports = getSourceRequest;
+
+function getSourceRequest(
+    options, onNext, seeds, combinedResults, requestOptions, cb) {
+
+    var model = options.operationModel;
+    var boundPath = model._path;
+    var missingPaths = combinedResults.requestedMissingPaths;
+    if (boundPath.length) {
+        for (var i = 0; i < missingPaths.length; ++i) {
+            var pathSetIndex = missingPaths[i].pathSetIndex;
+            var path = missingPaths[i] = boundPath.concat(missingPaths[i]);
+            path.pathSetIndex = pathSetIndex;
+        }
+    }
+
+    return model._request.get(
+        missingPaths,
+        combinedResults.optimizedMissingPaths,
+        getSourceObserver(
+            model,
+            missingPaths, combinedResults.optimizedMissingPaths,
+            function getSourceCallback(err, results) {
+                if (err) {
+                    cb(err);
+                    return;
+                }
+
+                // partitions the operations by their pathSetIndex
+                var partitionOperationsAndSeeds = partitionOperations(
+                    results,
+                    seeds,
+                    options.format,
+                    onNext);
+
+                // We allow for the rerequesting to happen.
+                cb(null, partitionOperationsAndSeeds);
+            }, options));
+}
+
+
+},{"36":36,"40":40,"43":43}],21:[function(require,module,exports){
+var getInitialArgs = require(19);
+var getSourceRequest = require(20);
+var shouldRequest = require(22);
+var request = require(26);
+var processOperations = require(45);
+var get = request(
+    getInitialArgs,
+    getSourceRequest,
+    processOperations,
+    shouldRequest);
+
+module.exports = get;
+
+},{"19":19,"20":20,"22":22,"26":26,"45":45}],22:[function(require,module,exports){
+module.exports = function(model, combinedResults) {
+    return model._dataSource && combinedResults.requestedMissingPaths.length > 0;
+};
+
+},{}],23:[function(require,module,exports){
+var ModelResponse = require(13);
+var get = require(21);
+var set = require(28);
+var invalidate = require(24);
+
+module.exports = function modelOperation(name) {
+    return function() {
+        var model = this, root = model._root,
+            args = Array.prototype.slice.call(arguments),
+            selector = args[args.length - 1];
+        if (typeof selector === 'function') {
+            args.pop();
+        } else {
+            selector = false;
+        }
+
+        var modelResponder;
+        switch (name) {
+            case 'get':
+                modelResponder = get;
+                break;
+            case 'set':
+                modelResponder = set;
+                break;
+            case 'invalidate':
+                modelResponder = invalidate;
+                break;
+        }
+        return ModelResponse.fromOperation(
+            model,
+            args,
+            selector,
+            modelResponder);
+    };
+};
+
+},{"13":13,"21":21,"24":24,"28":28}],24:[function(require,module,exports){
+var invalidateInitialArgs = require(25);
+var request = require(26);
+var processOperations = require(45);
+var invalidate = request(
+    invalidateInitialArgs,
+    null,
+    processOperations);
+
+module.exports = invalidate;
+
+},{"25":25,"26":26,"45":45}],25:[function(require,module,exports){
+var combineOperations = require(35);
+var setSeedsOrOnNext = require(48);
+module.exports = function getInitialArgs(options, seeds, onNext) {
+    var seedRequired = options.format !== 'AsValues';
+    var operations = combineOperations(
+        options.operationArgs, options.format, 'inv');
+    setSeedsOrOnNext(
+        operations, seedRequired, seeds,
+        onNext, options.operationSelector);
+
+    return [operations, seeds];
+};
+
+},{"35":35,"48":48}],26:[function(require,module,exports){
+var setSeedsOrOnNext = require(48);
+var onNextValues = require(42);
+var onCompletedOrError = require(41);
+var primeSeeds = require(44);
+var autoFalse = function() { return false; };
+
+module.exports = request;
+
+function request(initialArgs, sourceRequest, processOperations, shouldRequestFn, finalize) {
+    if (!shouldRequestFn) {
+        shouldRequestFn = autoFalse;
+    }
+    if(!finalize) {
+        finalize = onCompletedOrError;
+    }
+    return function innerRequest(options) {
+        var selector = options.operationSelector;
+        var model = options.operationModel;
+        var args = options.operationArgs;
+        var onNext = options.onNext.bind(options);
+        var onError = options.onError.bind(options);
+        var onCompleted = options.onCompleted.bind(options);
+        var isProgressive = options.operationIsProgressive;
+        var errorSelector = options.errorSelector || model._errorSelector;
+        var comparator = options.comparator || model._comparator;
+        var selectorLength = selector && selector.length || 0;
+
+        // State variables
+        var errors = [];
+        var format = options.format = selector && 'AsJSON' ||
+            options.format || 'AsPathMap';
+        var toJSONG = format === 'AsJSONG';
+        var toJSON = format === 'AsPathMap';
+        var toPathValues = format === 'AsValues';
+        var seedRequired = toJSON || toJSONG || selector;
+        var boundPath = model._path;
+        var i, len;
+        var foundValue = false;
+        var seeds = primeSeeds(selector, selectorLength);
+        var loopCount = 0;
+
+        function recurse(operations, opts) {
+            if (loopCount > 50) {
+                throw 'Loop Kill switch thrown.';
+            }
+            var combinedResults = processOperations(
+                model,
+                operations,
+                errorSelector,
+                loopCount > 0 ? comparator : null,
+                opts);
+
+            if (shouldUseValue(model, operations, loopCount)) {
+                foundValue = foundValue || combinedResults.valuesReceived;
+            }
+            if (combinedResults.errors.length) {
+                errors = errors.concat(combinedResults.errors);
+            }
+
+            // if in progressiveMode, values are emitted
+            // each time through the recurse loop.  This may have
+            // to change when the router is considered.
+            if (isProgressive && !toPathValues) {
+                onNextValues(model, onNext, seeds, selector);
+            }
+
+            // Performs the recursing via dataSource
+            if (shouldRequestFn(model, combinedResults, loopCount)) {
+                sourceRequest(
+                    options,
+                    onNext,
+                    seeds,
+                    combinedResults,
+                    opts,
+                    function onCompleteFromSourceSet(err, results) {
+                        ++loopCount;
+                        if (err) {
+                            errors = errors.concat(err);
+                            recurse([], seeds);
+                            return;
+                        }
+
+                        // We continue to string the opts through
+                        recurse(results, opts);
+                    });
+            }
+
+            // Else we need to onNext values and complete/error.
+            else {
+                if (!toPathValues && !isProgressive && foundValue) {
+                    onNextValues(model, onNext, seeds, selector);
+                }
+                finalize(model, onCompleted, onError, errors);
+            }
+        }
+
+        try {
+            recurse.apply(null,
+                initialArgs(options, seeds, onNext));
+        } catch(e) {
+            errors = [e];
+            finalize(model, onCompleted, onError, errors);
+        }
+    };
+}
+
+function shouldUseValue(model, operations, loopCount) {
+    return loopCount > 0 ||
+        !model._dataSource ||
+        operations.length === 0 ||
+        operations[0].operation !== 'set';
+}
+
+},{"41":41,"42":42,"44":44,"48":48}],27:[function(require,module,exports){
+var collect = require(95);
+var onCompletedOrError = require(41);
+
+module.exports = function finalizeAndCollect(model, onCompleted, onError, errors) {
+    onCompletedOrError(model, onCompleted, onError, errors);
+    collect(
+        model._root,
+        model._root.expired,
+        model._version,
+        model._cache.$size || 0,
+        model._maxSize,
+        model._collectRatio
+    );
+};
+
+},{"41":41,"95":95}],28:[function(require,module,exports){
+var setInitialArgs = require(29);
+var setSourceRequest = require(31);
+var request = require(26);
+var setProcessOperations = require(30);
+var shouldRequest = require(32);
+var finalize = require(27);
+var set = request(
+    setInitialArgs,
+    setSourceRequest,
+    setProcessOperations,
+    shouldRequest,
+    finalize
+);
+
+module.exports = set;
+
+},{"26":26,"27":27,"29":29,"30":30,"31":31,"32":32}],29:[function(require,module,exports){
+var combineOperations = require(35);
+var setSeedsOrOnNext = require(48);
+var Formats = require(33);
+var toPathValues = Formats.toPathValues;
+var toJSONG = Formats.toJSONG;
+module.exports = function setInitialArgs(options, seeds, onNext) {
+    var isPathValues = options.format === toPathValues;
+    var seedRequired = !isPathValues;
+    var shouldRequest = Boolean(options.operationModel._dataSource);
+    var format = options.format;
+    var args = options.operationArgs;
+    var selector = options.operationSelector;
+    var isProgressive = options.operationIsProgressive;
+    var firstSeeds, operations;
+    var requestOptions = {
+        removeBoundPath: shouldRequest
+    };
+
+    // If Model is a slave, in shouldRequest mode,
+    // a single seed is required to accumulate the jsong results.
+    if (shouldRequest) {
+        operations =
+            combineOperations(args, toJSONG, 'set', selector, false);
+        firstSeeds = [{}];
+        setSeedsOrOnNext(
+            operations, true, firstSeeds, false, options.selector);
+
+        // we must keep track of the set seeds.
+        requestOptions.requestSeed = firstSeeds[0];
+    }
+
+    // This model is the master, therefore a regular set can be performed.
+    else {
+        firstSeeds = seeds;
+        operations = combineOperations(args, format, 'set');
+        setSeedsOrOnNext(
+            operations, seedRequired, seeds, onNext, options.operationSelector);
+    }
+
+    // We either have to construct the master operations if
+    // the ModelResponse is isProgressive
+    // the ModelResponse is toPathValues
+    // but luckily we can just perform a get for the progressive or
+    // toPathValues mode.
+    if ((isProgressive || isPathValues) && shouldRequest && format !== toJSONG) {
+        var getOps = combineOperations(
+            args, format, 'get', selector, true);
+        setSeedsOrOnNext(
+            getOps, seedRequired, seeds, onNext, options.operationSelector);
+        operations = operations.concat(getOps);
+
+        requestOptions.isProgressive = true;
+    }
+
+    return [operations, requestOptions];
+};
+
+},{"33":33,"35":35,"48":48}],30:[function(require,module,exports){
+var processOperations = require(45);
+var combineOperations = require(35);
+var mergeBoundPath = require(40);
+var Formats = require(33);
+var toPathValues = Formats.toPathValues;
+var __version = require(89);
+
+module.exports = setProcessOperations;
+
+function setProcessOperations(model, operations, errorSelector, comparator, requestOptions) {
+
+    var boundPath = model._path;
+    var hasBoundPath = boundPath.length > 0;
+    var removeBoundPath = requestOptions && requestOptions.removeBoundPath;
+    var isProgressive = requestOptions && requestOptions.isProgressive;
+    var progressiveOperations;
+
+    // if in progressive mode, then the progressive operations
+    // need to be executed but the bound path must stay intact.
+    if (isProgressive && removeBoundPath && hasBoundPath) {
+        progressiveOperations = operations.filter(function(op) {
+            return op.isProgressive;
+        });
+        operations = operations.filter(function(op) {
+            return !op.isProgressive;
+        });
+    }
+
+    if (removeBoundPath && hasBoundPath) {
+        model._path = [];
+
+        // For every operations arguments, the bound path must be adjusted.
+        for (var i = 0, opLen = operations.length; i < opLen; i++) {
+            var args = operations[i].args;
+            for (var j = 0, argsLen = args.length; j < argsLen; j++) {
+                args[j] = mergeBoundPath(args[j], boundPath);
+            }
+        }
+    }
+
+    
+    var onChangeHandler = model._root.onChange;
+    var initialRootVersion = model._cache[__version];
+
+    var results = processOperations(model, operations, errorSelector, comparator);
+
+    if(onChangeHandler && initialRootVersion !== model._cache[__version]) {
+        onChangeHandler();
+    }
+
+    // We need to set the requestSeed to be the optimizedPaths only.
+    // The bound path must be removed for this to work.
+    if (removeBoundPath && model._dataSource && results.optimizedPaths) {
+        var requestSeed = requestOptions.requestSeed = {};
+        model._getPathSetsAsJSONG(model, results.optimizedPaths, [requestSeed]);
+    }
+
+    // Undo what we have done to the model's bound path.
+    if (removeBoundPath && hasBoundPath) {
+        model._path = boundPath;
+    }
+
+    // executes the progressive ops
+    if (progressiveOperations) {
+        processOperations(model, progressiveOperations, errorSelector, comparator);
+    }
+
+    return results;
+}
+
+},{"33":33,"35":35,"40":40,"45":45,"89":89}],31:[function(require,module,exports){
+var getSourceObserver = require(36);
+var combineOperations = require(35);
+var setSeedsOrOnNext = require(48);
+var toPathValues = require(33).toPathValues;
+
+module.exports = setSourceRequest;
+
+function setSourceRequest(
+        options, onNext, seeds, combinedResults, requestOptions, cb) {
+    var model = options.operationModel;
+    var seedRequired = options.format !== toPathValues;
+    var requestSeed = requestOptions.requestSeed;
+    var errorSelector = options.errorSelector;
+    return model._request.set(
+        requestSeed,
+        getSourceObserver(
+            model,
+            requestSeed.paths, requestSeed.paths,
+            function setSourceRequestCB(err, results) {
+                if (err) {
+                    cb(err);
+                    return;
+                }
+
+                // Sets the results into the model.
+                model._setJSONGsAsJSON(model, [results], []);
+
+                // Gets the original paths / maps back out.
+                var operations = combineOperations(
+                        options.operationArgs, options.format, 'get');
+                setSeedsOrOnNext(
+                    operations, seedRequired,
+                    seeds, onNext, options.operationSelector);
+
+                // unset the removeBoundPath.
+                requestOptions.removeBoundPath = false;
+
+                cb(null, operations);
+            }, options));
+}
+
+
+},{"33":33,"35":35,"36":36,"48":48}],32:[function(require,module,exports){
+// Set differs from get in the sense that the first time through
+// the recurse loop a server operation must be performed if it can be.
+module.exports = function(model, combinedResults, loopCount) {
+    return model._dataSource && (
+        combinedResults.requestedMissingPaths.length > 0 ||
+        loopCount === 0);
+};
+
+},{}],33:[function(require,module,exports){
+module.exports = {
+    toPathValues: 'AsValues',
+    toJSON: 'AsPathMap',
+    toJSONG: 'AsJSONG',
+    selector: 'AsJSON'
+};
+
+},{}],34:[function(require,module,exports){
+module.exports = function buildJSONGOperation(format, seeds, jsongOp, seedOffset, onNext) {
+    return {
+        methodName: '_setJSONGs' + format,
+        format: format,
+        isValues: format === 'AsValues',
+        onNext: onNext,
+        seeds: seeds,
+        seedsOffset: seedOffset,
+        args: [jsongOp]
+    };
+};
+
+},{}],35:[function(require,module,exports){
+var isSeedRequired = require(46);
+var isJSONG = require(38);
+var isPathOrPathValue = require(39);
+var Formats = require(33);
+var toSelector = Formats.selector;
+module.exports = function combineOperations(args, format, name, spread, isProgressive) {
+    var seedRequired = isSeedRequired(format);
+    var isValues = !seedRequired;
+    var hasSelector = seedRequired && format === toSelector;
+    var seedsOffset = 0;
+
+    return args.
+        reduce(function(groups, argument) {
+            var group = groups[groups.length - 1];
+            var type  = isPathOrPathValue(argument) ? "PathSets" :
+                isJSONG(argument) ? "JSONGs" : "PathMaps";
+            var groupType = group && group.type;
+            var methodName = '_' + name + type + format;
+
+            if (!groupType || type !== groupType || spread) {
+                group = {
+                    methodName: methodName,
+                    format: format,
+                    operation: name,
+                    isValues: isValues,
+                    seeds: [],
+                    onNext: null,
+                    seedsOffset: seedsOffset,
+                    isProgressive: isProgressive,
+                    type: type,
+                    args: []
+                };
+                groups.push(group);
+            }
+            if (hasSelector) {
+                ++seedsOffset;
+            }
+            group.args.push(argument);
+            return groups;
+        }, []);
+};
+
+},{"33":33,"38":38,"39":39,"46":46}],36:[function(require,module,exports){
+var insertErrors = require(37);
+/**
+ * creates the model source observer
+ * @param {Model} model
+ * @param {Array.<Array>} requestedMissingPaths
+ * @param {Function} cb
+ */
+function getSourceObserver(model, requestedMissingPaths, optimizedMissingPaths, cb, options) {
+    var incomingValues;
+    return {
+        onNext: function(jsongEnvelop) {
+            incomingValues = {
+                jsong: jsongEnvelop.jsong,
+                paths: requestedMissingPaths
+            };
+        },
+        onError: function(err) {
+            cb(insertErrors(model, optimizedMissingPaths, err, options));
+        },
+        onCompleted: function() {
+            cb(false, incomingValues);
+        }
+    };
+}
+
+module.exports = getSourceObserver;
+
+},{"37":37}],37:[function(require,module,exports){
+/**
+ * will insert the error provided for every requestedPath.
+ * @param {Model} model
+ * @param {Array.<Array>} requestedPaths
+ * @param {Object} err
+ */
+var emptyArray = new Array(0);
+module.exports = function insertErrors(model, requestedPaths, err, options) {
+    var boundPath = model._path;
+    model._path = emptyArray;
+    var out = model._setPathSetsAsJSON.apply(null, [model].concat(
+        requestedPaths.
+            reduce(function(acc, r) {
+                acc[0].push({ path: r, value: err });
+                return acc;
+            }, [[]]),
+        [[]],
+        options.errorSelector || model._errorSelector,
+        options.comparator || model._comparator
+    ));
+    model._path = boundPath;
+    return out.errors;
+};
+
+
+},{}],38:[function(require,module,exports){
+module.exports = function isJSONG(x) {
+    return x.hasOwnProperty("jsong");
+};
+
+},{}],39:[function(require,module,exports){
+module.exports = function isPathOrPathValue(x) {
+    return Array.isArray(x) || (
+        x.hasOwnProperty("path") && x.hasOwnProperty("value"));
+};
+
+},{}],40:[function(require,module,exports){
+var isJSONG = require(38);
+var isPathValue = require(39);
+
+module.exports =  mergeBoundPath;
+
+function mergeBoundPath(arg, boundPath) {
+    return isJSONG(arg) && mergeBoundPathIntoJSONG(arg, boundPath) ||
+        isPathValue(arg) && mergeBoundPathIntoPathValue(arg, boundPath) ||
+        mergeBoundPathIntoJSON(arg, boundPath);
+}
+
+function mergeBoundPathIntoJSONG(jsongEnv, boundPath) {
+    var newJSONGEnv = {jsong: jsongEnv.jsong, paths: jsongEnv.paths};
+    if (boundPath.length) {
+        var paths = [];
+        for (i = 0, len = jsongEnv.paths.length; i < len; i++) {
+            paths[i] = boundPath.concat(jsongEnv.paths[i]);
+        }
+        newJSONGEnv.paths = paths;
+    }
+
+    return newJSONGEnv;
+}
+
+function mergeBoundPathIntoJSON(arg, boundPath) {
+    var newArg = arg;
+    if (boundPath.length) {
+        newArg = {};
+        for (var i = 0, len = boundPath.length - 1; i < len; i++) {
+            newArg[boundPath[i]] = {};
+        }
+        newArg[boundPath[i]] = arg;
+    }
+
+    return newArg;
+}
+
+function mergeBoundPathIntoPathValue(arg, boundPath) {
+    return {
+        path: boundPath.concat(arg.path),
+        value: arg.value
+    };
+}
+
+},{"38":38,"39":39}],41:[function(require,module,exports){
+module.exports = function onCompletedOrError(model, onCompleted, onError, errors) {
+    if (errors.length) {
+        onError(errors);
+    } else {
+        onCompleted();
+    }
+};
+
+},{}],42:[function(require,module,exports){
+/**
+ * will onNext the observer with the seeds provided.
+ * @param {Model} model
+ * @param {Function} onNext
+ * @param {Array.<Object>} seeds
+ * @param {Function} [selector]
+ */
+module.exports = function onNextValues(model, onNext, seeds, selector) {
+    var root = model._root;
+
+    root.allowSync++;
+    try {
+        if (selector) {
+            if (seeds.length) {
+                // they should be wrapped in json items
+                onNext(selector.apply(model, seeds.map(function(x, i) {
+                    return x.json;
+                })));
+            } else {
+                onNext(selector.call(model));
+            }
+        } else {
+            // this means there is an onNext function that is not AsValues or progressive,
+            // therefore there must only be one onNext call, which should only be the 0
+            // index of the values of the array
+            onNext(seeds[0]);
+        }
+    } catch (err) {
+        throw err;
+    } finally {
+        root.allowSync--;
+    }
+};
+
+},{}],43:[function(require,module,exports){
+var buildJSONGOperation = require(34);
+
+/**
+ * It performs the opposite of combine operations.  It will take a JSONG
+ * response and partition them into the required amount of operations.
+ * @param {{jsong: Object, paths: Array}} jsongResponse
+ */
+module.exports = partitionOperations;
+
+function partitionOperations(
+        jsongResponse, seeds, format, onNext) {
+
+    var partitionedOps = [];
+    var requestedMissingPaths = jsongResponse.paths;
+
+    if (format === 'AsJSON') {
+        // fast collapse ass the requestedMissingPaths into their
+        // respective groups
+        var opsFromRequestedMissingPaths = [];
+        var op = null;
+        for (var i = 0, len = requestedMissingPaths.length; i < len; i++) {
+            var missingPath = requestedMissingPaths[i];
+            if (!op || op.idx !== missingPath.pathSetIndex) {
+                op = {
+                    idx: missingPath.pathSetIndex,
+                    paths: []
+                };
+                opsFromRequestedMissingPaths.push(op);
+            }
+            op.paths.push(missingPath);
+        }
+        opsFromRequestedMissingPaths.forEach(function(op, i) {
+            var seed = [seeds[op.idx]];
+            var jsong = {
+                jsong: jsongResponse.jsong,
+                paths: op.paths
+            };
+            partitionedOps.push(buildJSONGOperation(
+                format,
+                seed,
+                jsong,
+                op.idx,
+                onNext));
+        });
+    } else {
+        partitionedOps[0] = buildJSONGOperation(format, seeds, jsongResponse, 0, onNext);
+    }
+    return partitionedOps;
+}
+
+
+},{"34":34}],44:[function(require,module,exports){
+module.exports = function primeSeeds(selector, selectorLength) {
+    var seeds = [];
+    if (selector) {
+        for (i = 0; i < selectorLength; i++) {
+            seeds.push({});
+        }
+    } else {
+        seeds[0] = {};
+    }
+    return seeds;
+};
+
+},{}],45:[function(require,module,exports){
+module.exports = function processOperations(model, operations, errorSelector, comparator, boundPath) {
+    return operations.reduce(function(memo, operation) {
+
+        var jsonGraphOperation = model[operation.methodName];
+        var seedsOrFunction = operation.isValues ?
+            operation.onNext : operation.seeds;
+        var results = jsonGraphOperation(
+            model,
+            operation.args,
+            seedsOrFunction,
+            errorSelector,
+            comparator,
+            boundPath);
+        var missing = results.requestedMissingPaths;
+        var offset = operation.seedsOffset;
+
+        for (var i = 0, len = missing.length; i < len; i++) {
+            missing[i].boundPath = boundPath;
+            missing[i].pathSetIndex += offset;
+        }
+
+        memo.requestedMissingPaths = memo.requestedMissingPaths.concat(missing);
+        memo.optimizedMissingPaths = memo.optimizedMissingPaths.concat(results.optimizedMissingPaths);
+        memo.optimizedPaths = memo.optimizedPaths.concat(results.optimizedPaths);
+        memo.errors = memo.errors.concat(results.errors);
+        memo.valuesReceived = memo.valuesReceived || results.requestedPaths.length > 0;
+
+        return memo;
+    }, {
+        errors: [],
+        requestedMissingPaths: [],
+        optimizedMissingPaths: [],
+        optimizedPaths: [],
+        valuesReceived: false
+    });
+}
+
+},{}],46:[function(require,module,exports){
+module.exports = function isSeedRequired(format) {
+    return format === 'AsJSON' || format === 'AsJSONG' || format === 'AsPathMap';
+};
+
+},{}],47:[function(require,module,exports){
+module.exports = function setSeedsOnGroups(groups, seeds, hasSelector) {
+    var valueIndex = 0;
+    var seedsLength = seeds.length;
+    var j, i, len = groups.length, gLen, group;
+    if (hasSelector) {
+        for (i = 0; i < len && valueIndex < seedsLength; i++) {
+            group = groups[i];
+            gLen = gLen = group.args.length;
+            for (j = 0; j < gLen && valueIndex < seedsLength; j++, valueIndex++) {
+                group.seeds.push(seeds[valueIndex]);
+            }
+        }
+    } else {
+        for (i = 0; i < len && valueIndex < seedsLength; i++) {
+            groups[i].seeds = seeds;
+        }
+    }
+}
+
+},{}],48:[function(require,module,exports){
+var setSeedsOnGroups = require(47);
+module.exports = function setSeedsOrOnNext(operations, seedRequired, seeds, onNext, selector) {
+    if (seedRequired) {
+        setSeedsOnGroups(operations, seeds, selector);
+    } else {
+        for (i = 0; i < operations.length; i++) {
+            operations[i].onNext = onNext;
+        }
+    }
+};
+
+},{"47":47}],49:[function(require,module,exports){
+var falcor = require(9);
+var collapse = require(122);
+var NOOP = falcor.NOOP;
+var RequestQueue = function(jsongModel, scheduler) {
+    this._scheduler = scheduler;
+    this._jsongModel = jsongModel;
+
+    this._scheduled = false;
+    this._requests = [];
+};
+
+RequestQueue.prototype = {
+    _get: function() {
+        var i = -1;
+        var requests = this._requests;
+        while (++i < requests.length) {
+            if (!requests[i].pending && requests[i].isGet) {
+                return requests[i];
+            }
+        }
+        return requests[requests.length] = new GetRequest(this._jsongModel, this);
+    },
+    _set: function() {
+        var i = -1;
+        var requests = this._requests;
+
+        // TODO: Set always sends off a request immediately, so there is no batching.
+        // while (++i < requests.length) {
+        //     if (!requests[i].pending && requests[i].isSet) {
+        //         return requests[i];
+        //     }
+        // }
+        return requests[requests.length] = new SetRequest(this._jsongModel, this);
+    },
+
+    remove: function(request) {
+        for (var i = this._requests.length - 1; i > -1; i--) {
+            if (this._requests[i].id === request.id && this._requests.splice(i, 1)) {
+                break;
+            }
+        }
+    },
+
+    set: function(jsongEnv, observer) {
+        var self = this;
+        var disposable = self._set().batch(jsongEnv, observer).flush();
+
+        return {
+            dispose: function() {
+                disposable.dispose();
+            }
+        };
+    },
+
+    get: function(requestedPaths, optimizedPaths, observer) {
+        var self = this;
+        var disposable = null;
+
+        // TODO: get does not batch across requests.
+        self._get().batch(requestedPaths, optimizedPaths, observer);
+
+        if (!self._scheduled) {
+            self._scheduled = true;
+            disposable = self._scheduler.schedule(self._flush.bind(self));
+        }
+
+        return {
+            dispose: function() {
+                disposable.dispose();
+            }
+        };
+    },
+
+    _flush: function() {
+        this._scheduled = false;
+
+        var requests = this._requests, i = -1;
+        var disposables = [];
+        while (++i < requests.length) {
+            if (!requests[i].pending) {
+                disposables[disposables.length] = requests[i].flush();
+            }
+        }
+
+        return {
+            dispose: function() {
+                disposables.forEach(function(d) { d.dispose(); });
+            }
+        };
+    }
+};
+
+var REQUEST_ID = 0;
+
+var SetRequest = function(model, queue) {
+    var self = this;
+    self._jsongModel = model;
+    self._queue = queue;
+    self.observers = [];
+    self.jsongEnvs = [];
+    self.pending = false;
+    self.id = ++REQUEST_ID;
+    self.isSet = true;
+};
+
+SetRequest.prototype = {
+    batch: function(jsongEnv, observer) {
+        var self = this;
+        observer.onNext = observer.onNext || NOOP;
+        observer.onError = observer.onError || NOOP;
+        observer.onCompleted = observer.onCompleted || NOOP;
+        observer._requestId = self.id;
+        self.observers[self.observers.length] = observer;
+        self.jsongEnvs[self.jsongEnvs.length] = jsongEnv;
+
+        return self;
+    },
+    flush: function() {
+        var incomingValues, query, op, len;
+        var self = this;
+        var jsongs = self.jsongEnvs;
+        var observers = self.observers;
+        var model = self._jsongModel;
+        self.pending = true;
+
+        // TODO: Set does not batch.
+        return model._dataSource.
+            set(jsongs[0]).
+            subscribe(function(response) {
+                incomingValues = response;
+            }, function(err) {
+                var i = -1;
+                var n = observers.length;
+                while (++i < n) {
+                    obs = observers[i];
+                    obs.onError && obs.onError(err);
+                }
+            }, function() {
+                var i, n, obs;
+                self._queue.remove(self);
+                i = -1;
+                n = observers.length;
+                while (++i < n) {
+                    obs = observers[i];
+                    obs.onNext && obs.onNext({
+                        jsong: incomingValues.jsong || incomingValues.value,
+                        paths: incomingValues.paths
+                    });
+                    obs.onCompleted && obs.onCompleted();
+                }
+            });
+    }
+};
+
+var GetRequest = function(jsongModel, queue) {
+    var self = this;
+    self._jsongModel = jsongModel;
+    self._queue = queue;
+    self.observers = [];
+    self.optimizedPaths = [];
+    self.requestedPaths = [];
+    self.pending = false;
+    self.id = ++REQUEST_ID;
+    self.isGet = true;
+};
+
+GetRequest.prototype = {
+
+    batch: function(requestedPaths, optimizedPaths, observer) {
+        // TODO: Do we need to gap fill?
+        var self = this;
+        observer.onNext = observer.onNext || NOOP;
+        observer.onError = observer.onError || NOOP;
+        observer.onCompleted = observer.onCompleted || NOOP;
+        observer._requestId = self.id;
+        self.observers[self.observers.length] = observer;
+        self.optimizedPaths[self.optimizedPaths.length] = optimizedPaths;
+        self.requestedPaths[self.requestedPaths.length] = requestedPaths;
+
+        return self;
+    },
+
+    flush: function() {
+        var incomingValues, query, op, len;
+        var self = this;
+        var requested = self.requestedPaths;
+        var optimized = self.optimizedPaths;
+        var observers = self.observers;
+        var disposables = [];
+        var results = [];
+        var model = self._jsongModel;
+        self._scheduled = false;
+        self.pending = true;
+
+        var optimizedMaps = {};
+        var o, i, j, obs;
+        for (i = 0, len = requested.length; i < len; i++) {
+            o = optimized[i];
+            for (j = 0; j < o.length; j++) {
+                pathsToMapWithObservers(o[j], 0, optimizedMaps);
+            }
+        }
+        return model._dataSource.
+            get(collapse(optimizedMaps)).
+            subscribe(function(response) {
+                incomingValues = response;
+            }, function(err) {
+                var i = -1;
+                var n = observers.length;
+                while (++i < n) {
+                    obs = observers[i];
+                    obs.onError && obs.onError(err);
+                }
+            }, function() {
+                var i, n, obs;
+                self._queue.remove(self);
+                i = -1;
+                n = observers.length;
+                while (++i < n) {
+                    obs = observers[i];
+                    obs.onNext && obs.onNext({
+                        jsong: incomingValues.jsong || incomingValues.value,
+                        paths: incomingValues.paths
+                    });
+                    obs.onCompleted && obs.onCompleted();
+                }
+            });
+    }
+};
+
+function pathsToMapWithObservers(path, idx, branch) {
+    var curr = path[idx];
+    // Object / Array
+    if (typeof curr === 'object') {
+        if (Array.isArray(curr)) {
+            curr.forEach(function(v) {
+                var child = branch[v] || (branch[v] = {});
+                if (path.length > idx + 1) {
+                    pathsToMapWithObservers(path, idx + 1, child);
+                }
+            });
+        } else {
+            var from = curr.from || 0;
+            var to = curr.to >= 0 ? curr.to : curr.length;
+            for (var i = from; i <= to; i++) {
+                var child = branch[i] || (branch[i] = {});
+                if (path.length > idx + 1) {
+                    pathsToMapWithObservers(path, idx + 1, child);
+                }
+            }
+        }
+    } else {
+        if (path.length > idx + 1) {
+            pathsToMapWithObservers(path, idx + 1, branch[curr] || (branch[curr] = {}));
+        } else {
+            branch[curr] = true;
+        }
+    }
+}
+
+module.exports = RequestQueue;
+
+},{"122":122,"9":9}],50:[function(require,module,exports){
+var asap = require(2);
+
+
+function ASAPScheduler() {
+}
+
+ASAPScheduler.prototype = {
+    schedule: function(action) {
+        asap(action);
+    }
+};
+
+module.exports = ASAPScheduler;
+
+},{"2":2}],51:[function(require,module,exports){
+function ImmediateScheduler() {
+}
+
+ImmediateScheduler.prototype = {
+    schedule: function(action) {
+        action();
+    }
+};
+
+module.exports = ImmediateScheduler;
+
+},{}],52:[function(require,module,exports){
+function TimeoutScheduler(delay) {
+    this.delay = delay;
+}
+
+TimeoutScheduler.prototype = {
+    schedule: function(action) {
+        setTimeout(action, this.delay);
+    }
+};
+
+module.exports = TimeoutScheduler;
+
+},{}],53:[function(require,module,exports){
+var hardLink = require(67);
+var createHardlink = hardLink.create;
+var onValue = require(65);
+var isExpired = require(68);
+var $path = require(151);
+var __context = require(75);
+var promote = require(71).promote;
+
+function followReference(model, root, node, referenceContainer, reference, seed, outputFormat) {
+
+    var depth = 0;
+    var k, next;
+
+    while (true) { //eslint-disable-line no-constant-condition
+        if (depth === 0 && referenceContainer[__context]) {
+            depth = reference.length;
+            next = referenceContainer[__context];
+        } else {
+            k = reference[depth++];
+            next = node[k];
+        }
+        if (next) {
+            var type = next.$type;
+            var value = type && next.value || next;
+
+            if (depth < reference.length) {
+                if (type) {
+                    node = next;
+                    break;
+                }
+
+                node = next;
+                continue;
+            }
+
+            // We need to report a value or follow another reference.
+            else {
+
+                node = next;
+
+                if (type && isExpired(next)) {
+                    break;
+                }
+
+                if (!referenceContainer[__context]) {
+                    createHardlink(referenceContainer, next);
+                }
+
+                // Restart the reference follower.
+                if (type === $path) {
+                    if (outputFormat === 'JSONG') {
+                        onValue(model, next, seed, null, null, reference, null, outputFormat);
+                    } else {
+                        promote(model, next);
+                    }
+
+                    depth = 0;
+                    reference = value;
+                    referenceContainer = next;
+                    node = root;
+                    continue;
+                }
+
+                break;
+            }
+        } else {
+            node = undefined;
+        }
+        break;
+    }
+
+
+    if (depth < reference.length && node !== undefined) {
+        var ref = [];
+        for (var i = 0; i < depth; i++) {
+            ref[i] = reference[i];
+        }
+        reference = ref;
+    }
+
+    return [node, reference];
+}
+
+module.exports = followReference;
+
+},{"151":151,"65":65,"67":67,"68":68,"71":71,"75":75}],54:[function(require,module,exports){
+var getBoundValue = require(58);
+var isPathValue = require(70);
+module.exports = function(walk) {
+    return function getAsJSON(model, paths, values) {
+        var results = {
+            values: [],
+            errors: [],
+            requestedPaths: [],
+            optimizedPaths: [],
+            requestedMissingPaths: [],
+            optimizedMissingPaths: []
+        };
+        var requestedMissingPaths = results.requestedMissingPaths;
+        var inputFormat = Array.isArray(paths[0]) || isPathValue(paths[0]) ?
+            'Paths' : 'JSON';
+        var cache = model._cache;
+        var boundPath = model._path;
+        var currentCachePosition;
+        var missingIdx = 0;
+        var boundOptimizedPath, optimizedPath;
+        var i, j, len, bLen;
+
+        results.values = values;
+        if (!values) {
+            values = [];
+        }
+        if (boundPath.length) {
+            var boundValue = getBoundValue(model, boundPath);
+            currentCachePosition = boundValue.value;
+            optimizedPath = boundOptimizedPath = boundValue.path;
+        } else {
+            currentCachePosition = cache;
+            optimizedPath = boundOptimizedPath = [];
+        }
+
+        for (i = 0, len = paths.length; i < len; i++) {
+            var valueNode = undefined;
+            var pathSet = paths[i];
+            if (values[i]) {
+                valueNode = values[i];
+            }
+            if (len > 1) {
+                optimizedPath = [];
+                for (j = 0, bLen = boundOptimizedPath.length; j < bLen; j++) {
+                    optimizedPath[j] = boundOptimizedPath[j];
+                }
+            }
+            if(inputFormat == 'JSON') {
+                pathSet = pathSet.json;
+            } else if (pathSet.path) {
+                pathSet = pathSet.path;
+            }
+
+            walk(model, cache, currentCachePosition, pathSet, 0, valueNode, [], results, optimizedPath, [], inputFormat, 'JSON');
+            if (missingIdx < requestedMissingPaths.length) {
+                for (j = missingIdx, length = requestedMissingPaths.length; j < length; j++) {
+                    requestedMissingPaths[j].pathSetIndex = i;
+                }
+                missingIdx = length;
+            }
+        }
+
+        return results;
+    };
+};
+
+
+},{"58":58,"70":70}],55:[function(require,module,exports){
+var getBoundValue = require(58);
+var isPathValue = require(70);
+module.exports = function(walk) {
+    return function getAsJSONG(model, paths, values) {
+        var results = {
+            values: [],
+            errors: [],
+            requestedPaths: [],
+            optimizedPaths: [],
+            requestedMissingPaths: [],
+            optimizedMissingPaths: []
+        };
+        var inputFormat = Array.isArray(paths[0]) || isPathValue(paths[0]) ?
+            'Paths' : 'JSON';
+        results.values = values;
+        var cache = model._cache;
+        var boundPath = model._path;
+        var currentCachePosition;
+        if (boundPath.length) {
+            throw 'It is not legal to use the JSON Graph format from a bound Model. JSON Graph format can only be used from a root model.';
+        } else {
+            currentCachePosition = cache;
+        }
+
+        for (var i = 0, len = paths.length; i < len; i++) {
+            var pathSet = paths[i];
+            if(inputFormat == 'JSON') {
+                pathSet = pathSet.json;
+            } else if (pathSet.path) {
+                pathSet = pathSet.path;
+            }
+            walk(model, cache, currentCachePosition, pathSet, 0, values[0], [], results, [], [], inputFormat, 'JSONG');
+        }
+        return results;
+    };
+};
+
+
+},{"58":58,"70":70}],56:[function(require,module,exports){
+var getBoundValue = require(58);
+var isPathValue = require(70);
+module.exports = function(walk) {
+    return function getAsPathMap(model, paths, values) {
+        var valueNode;
+        var results = {
+            values: [],
+            errors: [],
+            requestedPaths: [],
+            optimizedPaths: [],
+            requestedMissingPaths: [],
+            optimizedMissingPaths: []
+        };
+        var inputFormat = Array.isArray(paths[0]) || isPathValue(paths[0]) ?
+            'Paths' : 'JSON';
+        valueNode = values[0];
+        results.values = values;
+
+        var cache = model._cache;
+        var boundPath = model._path;
+        var currentCachePosition;
+        var optimizedPath, boundOptimizedPath;
+        if (boundPath.length) {
+            var boundValue = getBoundValue(model, boundPath);
+            currentCachePosition = boundValue.value;
+            optimizedPath = boundOptimizedPath = boundValue.path;
+        } else {
+            currentCachePosition = cache;
+            optimizedPath = boundOptimizedPath = [];
+        }
+
+        for (var i = 0, len = paths.length; i < len; i++) {
+            if (len > 1) {
+                optimizedPath = [];
+                for (j = 0, bLen = boundOptimizedPath.length; j < bLen; j++) {
+                    optimizedPath[j] = boundOptimizedPath[j];
+                }
+            }
+            var pathSet = paths[i];
+            if(inputFormat == 'JSON') {
+                pathSet = pathSet.json;
+            } else if (pathSet.path) {
+                pathSet = pathSet.path;
+            }
+            walk(model, cache, currentCachePosition, pathSet, 0, valueNode, [], results, optimizedPath, [], inputFormat, 'PathMap');
+        }
+        return results;
+    };
+};
+
+},{"58":58,"70":70}],57:[function(require,module,exports){
+var getBoundValue = require(58);
+var isPathValue = require(70);
+module.exports = function(walk) {
+    return function getAsValues(model, paths, onNext) {
+        var results = {
+            values: [],
+            errors: [],
+            requestedPaths: [],
+            optimizedPaths: [],
+            requestedMissingPaths: [],
+            optimizedMissingPaths: []
+        };
+        var inputFormat = Array.isArray(paths[0]) || isPathValue(paths[0]) ?
+            'Paths' : 'JSON';
+        var cache = model._cache;
+        var boundPath = model._path;
+        var currentCachePosition;
+        var optimizedPath, boundOptimizedPath;
+        if (boundPath.length) {
+            var boundValue = getBoundValue(model, boundPath);
+            currentCachePosition = boundValue.value;
+            optimizedPath = boundOptimizedPath = boundValue.path;
+        } else {
+            currentCachePosition = cache;
+            optimizedPath = boundOptimizedPath = [];
+        }
+
+        for (var i = 0, len = paths.length; i < len; i++) {
+            if (len > 1) {
+                optimizedPath = [];
+                for (j = 0, bLen = boundOptimizedPath.length; j < bLen; j++) {
+                    optimizedPath[j] = boundOptimizedPath[j];
+                }
+            }
+            var pathSet = paths[i];
+            if(inputFormat == 'JSON') {
+                pathSet = pathSet.json;
+            } else if (pathSet.path) {
+                pathSet = pathSet.path;
+            }
+            walk(model, cache, currentCachePosition, pathSet, 0, onNext, null, results, optimizedPath, [], inputFormat, 'Values');
+        }
+        return results;
+    };
+};
+
+
+},{"58":58,"70":70}],58:[function(require,module,exports){
+var getValueSync = require(60);
+module.exports = function getBoundValue(model, path) {
+    var boxed, value, shorted, found;
+
+    boxed = model._boxed;
+    model._boxed = true;
+    value = getValueSync(model, path.concat(null));
+    model._boxed = boxed;
+    path = value.optimizedPath;
+    shorted = value.shorted;
+    found = value.found;
+    value = value.value;
+    while (path.length && path[path.length - 1] === null) {
+        path.pop();
+    }
+
+    return {
+        path: path,
+        value: value,
+        shorted: shorted,
+        found: found
+    };
+};
+
+
+},{"60":60}],59:[function(require,module,exports){
+var __generation = require(76);
+
+module.exports = function _getGeneration(model, path) {
+    // ultra fast clone for boxed values.
+    var gen = model._getValueSync({
+        _boxed: true,
+        _root: model._root,
+        _cache: model._cache,
+        _treatErrorsAsValues: model._treatErrorsAsValues
+    }, path, true).value;
+    return gen && gen[__generation];
+};
+
+},{"76":76}],60:[function(require,module,exports){
+var followReference = require(53);
+var clone = require(66);
+var isExpired = require(68);
+var promote = require(71).promote;
+var $path = require(151);
+var $atom = require(149);
+var $error = require(150);
+
+module.exports = function getValueSync(model, simplePath, noClone) {
+    var root = model._cache;
+    var len = simplePath.length;
+    var optimizedPath = [];
+    var shorted = false, shouldShort = false;
+    var depth = 0;
+    var key, i, next = root, type, curr = root, out, ref, refNode;
+    var found = true;
+
+    do {
+        key = simplePath[depth++];
+        if (key !== null) {
+            next = curr[key];
+            optimizedPath[optimizedPath.length] = key;
+        }
+
+        if (!next) {
+            out = undefined;
+            shorted = true;
+            found = false;
+            break;
+        }
+
+        type = next.$type;
+
+        // Up to the last key we follow references
+        if (depth < len) {
+            if (type === $path) {
+                ref = followReference(model, root, root, next, next.value);
+                refNode = ref[0];
+
+                if (!refNode) {
+                    out = undefined;
+                    break;
+                }
+                type = refNode.$type;
+                next = refNode;
+                optimizedPath = ref[1].slice(0);
+            }
+
+            if (type) {
+                break;
+            }
+        }
+        // If there is a value, then we have great success, else, report an undefined.
+        else {
+            out = next;
+        }
+        curr = next;
+
+    } while (next && depth < len);
+
+    if (depth < len) {
+        // Unfortunately, if all that follows are nulls, then we have not shorted.
+        for (i = depth; i < len; ++i) {
+            if (simplePath[depth] !== null) {
+                shouldShort = true;
+                break;
+            }
+        }
+        // if we should short or report value.  Values are reported on nulls.
+        if (shouldShort) {
+            shorted = true;
+            out = undefined;
+        } else {
+            out = next;
+        }
+
+        for (i = depth; i < len; ++i) {
+            optimizedPath[optimizedPath.length] = simplePath[i];
+        }
+    }
+
+    // promotes if not expired
+    if (out) {
+        if (isExpired(out)) {
+            out = undefined;
+        } else {
+            promote(model, out);
+        }
+    }
+
+    if (out && out.$type === $error && !model._treatErrorsAsValues) {
+        throw {
+            path: depth === len ? simplePath : simplePath.slice(0, depth),
+            value: out.value
+        };
+    } else if (out && model._boxed) {
+        out = Boolean(type) && !noClone ? clone(out) : out;
+    } else if (!out && model._materialized) {
+        out = {$type: $atom};
+    } else if (out) {
+        out = out.value;
+    }
+
+    return {
+        value: out,
+        shorted: shorted,
+        optimizedPath: optimizedPath,
+        found: found
+    };
+};
+
+},{"149":149,"150":150,"151":151,"53":53,"66":66,"68":68,"71":71}],61:[function(require,module,exports){
+var followReference = require(53);
+var onError = require(63);
+var onMissing = require(64);
+var onValue = require(65);
+var lru = require(71);
+var hardLink = require(67);
+var isMaterialized = require(69);
+var removeHardlink = hardLink.remove;
+var splice = lru.splice;
+var isExpired = require(68);
+var permuteKey = require(72);
+var $path = require(151);
+var $error = require(150);
+var __invalidated = require(78);
+var prefix = require(83);
+
+function getWalk(model, root, curr, pathOrJSON, depth, seedOrFunction, positionalInfo, outerResults, optimizedPath, requestedPath, inputFormat, outputFormat, fromReference) {
+    if ((!curr || curr && curr.$type) &&
+        evaluateNode(model, curr, pathOrJSON, depth, seedOrFunction, requestedPath, optimizedPath, positionalInfo, outerResults, outputFormat, fromReference)) {
+        return;
+    }
+
+    // We continue the search to the end of the path/json structure.
+    else {
+
+        // Base case of the searching:  Have we hit the end of the road?
+        // Paths
+        // 1) depth === path.length
+        // PathMaps (json input)
+        // 2) if its an object with no keys
+        // 3) its a non-object
+        var jsonQuery = inputFormat === 'JSON';
+        var atEndOfJSONQuery = false;
+        var k, i, len;
+        if (jsonQuery) {
+            // it has a $type property means we have hit a end.
+            if (pathOrJSON && pathOrJSON.$type) {
+                atEndOfJSONQuery = true;
+            }
+
+            else if (pathOrJSON && typeof pathOrJSON === 'object') {
+                k = Object.keys(pathOrJSON);
+
+                // Parses out all the prefix keys so that later parts
+                // of the algorithm do not have to consider them.
+                var parsedKeys = [];
+                var parsedKeysLength = -1;
+                for (i = 0, len = k.length; i < len; ++i) {
+                    if (k[i][0] !== prefix && k[i][0] !== '$') {
+                        parsedKeys[++parsedKeysLength] = k[i];
+                    }
+                }
+                k = parsedKeys;
+                if (k.length === 1) {
+                    k = k[0];
+                }
+            }
+
+            // found a primitive, we hit the end.
+            else {
+                atEndOfJSONQuery = true;
+            }
+        } else {
+            k = pathOrJSON[depth];
+        }
+
+        // BaseCase: we have hit the end of our query without finding a 'leaf' node, therefore emit missing.
+        if (atEndOfJSONQuery || !jsonQuery && depth === pathOrJSON.length) {
+            if (isMaterialized(model)) {
+                onValue(model, curr, seedOrFunction, outerResults, requestedPath, optimizedPath, positionalInfo, outputFormat, fromReference);
+                return;
+            }
+            onMissing(model, curr, pathOrJSON, depth, seedOrFunction, outerResults, requestedPath, optimizedPath, positionalInfo, outputFormat);
+            return;
+        }
+
+        var memo = {done: false};
+        var permutePosition = positionalInfo;
+        var permuteRequested = requestedPath;
+        var permuteOptimized = optimizedPath;
+        var asJSONG = outputFormat === 'JSONG';
+        var asJSON = outputFormat === 'JSON';
+        var isKeySet = false;
+        var hasChildren = false;
+        depth++;
+
+        var key;
+        if (k && typeof k === 'object') {
+            memo.isArray = Array.isArray(k);
+            memo.arrOffset = 0;
+
+            key = permuteKey(k, memo);
+            isKeySet = true;
+
+            // The complex key provided is actual empty
+            if (memo.done) {
+                return;
+            }
+        } else {
+            key = k;
+            memo.done = true;
+        }
+
+        if (asJSON && isKeySet) {
+            permutePosition = [];
+            for (i = 0, len = positionalInfo.length; i < len; i++) {
+                permutePosition[i] = positionalInfo[i];
+            }
+            permutePosition.push(depth - 1);
+        }
+
+        do {
+            fromReference = false;
+            if (!memo.done) {
+                permuteOptimized = [];
+                permuteRequested = [];
+                for (i = 0, len = requestedPath.length; i < len; i++) {
+                    permuteRequested[i] = requestedPath[i];
+                }
+                for (i = 0, len = optimizedPath.length; i < len; i++) {
+                    permuteOptimized[i] = optimizedPath[i];
+                }
+            }
+
+            var nextPathOrPathMap = jsonQuery ? pathOrJSON[key] : pathOrJSON;
+            if (jsonQuery && nextPathOrPathMap) {
+                if (typeof nextPathOrPathMap === 'object') {
+                    if (nextPathOrPathMap.$type) {
+                        hasChildren = false;
+                    } else {
+                        hasChildren = Object.keys(nextPathOrPathMap).length > 0;
+                    }
+                }
+            }
+
+            var next;
+            if (key === null || jsonQuery && key === '__null') {
+                next = curr;
+            } else {
+                next = curr[key];
+                permuteOptimized.push(key);
+                permuteRequested.push(key);
+            }
+
+            if (next) {
+                var nType = next.$type;
+                var value = nType && next.value || next;
+
+                if (jsonQuery && hasChildren || !jsonQuery && depth < pathOrJSON.length) {
+
+                    if (nType && nType === $path && !isExpired(next)) {
+                        if (asJSONG) {
+                            onValue(model, next, seedOrFunction, outerResults, false, permuteOptimized, permutePosition, outputFormat);
+                        }
+                        var ref = followReference(model, root, root, next, value, seedOrFunction, outputFormat);
+                        fromReference = true;
+                        next = ref[0];
+                        var refPath = ref[1];
+
+                        permuteOptimized = [];
+                        for (i = 0, len = refPath.length; i < len; i++) {
+                            permuteOptimized[i] = refPath[i];
+                        }
+                    }
+                }
+            }
+            getWalk(model, root, next, nextPathOrPathMap, depth, seedOrFunction, permutePosition, outerResults, permuteOptimized, permuteRequested, inputFormat, outputFormat, fromReference);
+
+            if (!memo.done) {
+                key = permuteKey(k, memo);
+            }
+
+        } while (!memo.done);
+    }
+}
+
+function evaluateNode(model, curr, pathOrJSON, depth, seedOrFunction, requestedPath, optimizedPath, positionalInfo, outerResults, outputFormat, fromReference) {
+    // BaseCase: This position does not exist, emit missing.
+    if (!curr) {
+        if (isMaterialized(model)) {
+            onValue(model, curr, seedOrFunction, outerResults, requestedPath, optimizedPath, positionalInfo, outputFormat, fromReference);
+        } else {
+            onMissing(model, curr, pathOrJSON, depth, seedOrFunction, outerResults, requestedPath, optimizedPath, positionalInfo, outputFormat);
+        }
+        return true;
+    }
+
+    var currType = curr.$type;
+
+    positionalInfo = positionalInfo || [];
+
+    // The Base Cases.  There is a type, therefore we have hit a 'leaf' node.
+    if (currType === $error) {
+        if (fromReference) {
+            requestedPath.push(null);
+        }
+        if (outputFormat === 'JSONG' || model._treatErrorsAsValues) {
+            onValue(model, curr, seedOrFunction, outerResults, requestedPath, optimizedPath, positionalInfo, outputFormat, fromReference);
+        } else {
+            onError(model, curr, requestedPath, optimizedPath, outerResults);
+        }
+    }
+
+    // Else we have found a value, emit the current position information.
+    else {
+        if (isExpired(curr)) {
+            if (!curr[__invalidated]) {
+                splice(model, curr);
+                removeHardlink(curr);
+            }
+            onMissing(model, curr, pathOrJSON, depth, seedOrFunction, outerResults, requestedPath, optimizedPath, positionalInfo, outputFormat);
+        } else {
+            onValue(model, curr, seedOrFunction, outerResults, requestedPath, optimizedPath, positionalInfo, outputFormat, fromReference);
+        }
+    }
+
+    return true;
+}
+
+module.exports = getWalk;
+
+},{"150":150,"151":151,"53":53,"63":63,"64":64,"65":65,"67":67,"68":68,"69":69,"71":71,"72":72,"78":78,"83":83}],62:[function(require,module,exports){
+var walk = require(61);
+module.exports = {
+    getAsJSON: require(54)(walk),
+    getAsJSONG: require(55)(walk),
+    getAsValues: require(57)(walk),
+    getAsPathMap: require(56)(walk),
+    getValueSync: require(60),
+    getBoundValue: require(58)
+};
+
+
+},{"54":54,"55":55,"56":56,"57":57,"58":58,"60":60,"61":61}],63:[function(require,module,exports){
+var lru = require(71);
+var clone = require(66);
+var promote = lru.promote;
+module.exports = function onError(model, node, permuteRequested, permuteOptimized, outerResults) {
+    var value = node.value;
+
+    if (model._boxed) {
+        value = clone(node);
+    }
+    outerResults.errors.push({path: permuteRequested, value: value});
+    promote(model, node);
+};
+
+
+},{"66":66,"71":71}],64:[function(require,module,exports){
+var support = require(74);
+var fastCat = support.fastCat,
+    fastCatSkipNulls = support.fastCatSkipNulls,
+    fastCopy = support.fastCopy;
+var isExpired = require(68);
+var spreadJSON = require(73);
+var clone = require(66);
+
+module.exports = function onMissing(model, node, path, depth, seedOrFunction, outerResults, permuteRequested, permuteOptimized, permutePosition, outputFormat) {
+    var pathSlice;
+    if (Array.isArray(path)) {
+        if (depth < path.length) {
+            pathSlice = fastCopy(path, depth);
+        } else {
+            pathSlice = [];
+        }
+
+        concatAndInsertMissing(pathSlice, outerResults, permuteRequested, permuteOptimized, permutePosition, outputFormat);
+    } else {
+        pathSlice = [];
+        spreadJSON(path, pathSlice);
+
+        for (var i = 0, len = pathSlice.length; i < len; i++) {
+            concatAndInsertMissing(pathSlice[i], outerResults, permuteRequested, permuteOptimized, permutePosition, outputFormat, true);
+        }
+    }
+};
+
+function concatAndInsertMissing(remainingPath, results, permuteRequested, permuteOptimized, permutePosition, outputFormat, __null) {
+    var i = 0, len;
+    if (__null) {
+        for (i = 0, len = remainingPath.length; i < len; i++) {
+            if (remainingPath[i] === '__null') {
+                remainingPath[i] = null;
+            }
+        }
+    }
+    if (outputFormat === 'JSON') {
+        permuteRequested = fastCat(permuteRequested, remainingPath);
+        for (i = 0, len = permutePosition.length; i < len; i++) {
+            var idx = permutePosition[i];
+            var r = permuteRequested[idx];
+            permuteRequested[idx] = [r];
+        }
+        results.requestedMissingPaths.push(permuteRequested);
+        results.optimizedMissingPaths.push(fastCatSkipNulls(permuteOptimized, remainingPath));
+    } else {
+        results.requestedMissingPaths.push(fastCat(permuteRequested, remainingPath));
+        results.optimizedMissingPaths.push(fastCatSkipNulls(permuteOptimized, remainingPath));
+    }
+}
+
+
+},{"66":66,"68":68,"73":73,"74":74}],65:[function(require,module,exports){
+var lru = require(71);
+var clone = require(66);
+var promote = lru.promote;
+var $path = require(151);
+var $atom = require(149);
+var $error = require(150);
+module.exports = function onValue(model, node, seedOrFunction, outerResults, permuteRequested, permuteOptimized, permutePosition, outputFormat, fromReference) {
+    var i, len, k, key, curr, prev, prevK;
+    var materialized = false, valueNode;
+    if (node) {
+        promote(model, node);
+    }
+
+    if (!node || node.value === undefined) {
+        materialized = model._materialized;
+    }
+
+    // materialized
+    if (materialized) {
+        valueNode = {$type: $atom};
+    }
+
+    // Boxed Mode will clone the node.
+    else if (model._boxed) {
+        valueNode = clone(node);
+    }
+
+    // JSONG always clones the node.
+    else if (node.$type === $path || node.$type === $error) {
+        if (outputFormat === 'JSONG') {
+            valueNode = clone(node);
+        } else {
+            valueNode = node.value;
+        }
+    }
+
+    else {
+        if (outputFormat === 'JSONG') {
+            if (typeof node.value === 'object') {
+                valueNode = clone(node);
+            } else {
+                valueNode = node.value;
+            }
+        } else {
+            valueNode = node.value;
+        }
+    }
+
+
+    if (permuteRequested) {
+        if (fromReference && permuteRequested[permuteRequested.length - 1] !== null) {
+            permuteRequested.push(null);
+        }
+        outerResults.requestedPaths.push(permuteRequested);
+        outerResults.optimizedPaths.push(permuteOptimized);
+    }
+
+    switch (outputFormat) {
+
+        case 'Values':
+            // Its difficult to invert this statement, so for now i am going
+            // to leave it as is.  This just prevents onNexts from happening on
+            // undefined nodes
+            if (valueNode === undefined ||
+                !materialized && !model._boxed && valueNode &&
+                valueNode.$type === $atom && valueNode.value === undefined) {
+                return;
+            }
+            seedOrFunction({path: permuteRequested, value: valueNode});
+            break;
+
+        case 'PathMap':
+            len = permuteRequested.length - 1;
+            if (len === -1) {
+                seedOrFunction.json = valueNode;
+            } else {
+                curr = seedOrFunction.json;
+                if (!curr) {
+                    curr = seedOrFunction.json = {};
+                }
+                for (i = 0; i < len; i++) {
+                    k = permuteRequested[i];
+                    if (!curr[k]) {
+                        curr[k] = {};
+                    }
+                    prev = curr;
+                    prevK = k;
+                    curr = curr[k];
+                }
+                k = permuteRequested[i];
+                if (k !== null) {
+                    curr[k] = valueNode;
+                } else {
+                    prev[prevK] = valueNode;
+                }
+            }
+            break;
+
+        case 'JSON':
+            if (seedOrFunction) {
+                if (permutePosition.length) {
+                    if (!seedOrFunction.json) {
+                        seedOrFunction.json = {};
+                    }
+                    curr = seedOrFunction.json;
+                    for (i = 0, len = permutePosition.length - 1; i < len; i++) {
+                        k = permutePosition[i];
+                        key = permuteRequested[k];
+
+                        if (!curr[key]) {
+                            curr[key] = {};
+                        }
+                        curr = curr[key];
+                    }
+
+                    // assign the last
+                    k = permutePosition[i];
+                    key = permuteRequested[k];
+                    curr[key] = valueNode;
+                } else {
+                    seedOrFunction.json = valueNode;
+                }
+            }
+            break;
+
+        case 'JSONG':
+            curr = seedOrFunction.jsong;
+            if (!curr) {
+                curr = seedOrFunction.jsong = {};
+                seedOrFunction.paths = [];
+            }
+            for (i = 0, len = permuteOptimized.length - 1; i < len; i++) {
+                key = permuteOptimized[i];
+
+                if (!curr[key]) {
+                    curr[key] = {};
+                }
+                curr = curr[key];
+            }
+
+            // assign the last
+            key = permuteOptimized[i];
+
+            // TODO: Special case? do string comparisons make big difference?
+            curr[key] = materialized ? {$type: $atom} : valueNode;
+            if (permuteRequested) {
+                seedOrFunction.paths.push(permuteRequested);
+            }
+            break;
+    }
+};
+
+
+
+},{"149":149,"150":150,"151":151,"66":66,"71":71}],66:[function(require,module,exports){
+// Copies the node
+var prefix = require(83);
+module.exports = function clone(node) {
+    var outValue, i, len;
+    var keys = Object.keys(node);
+    outValue = {};
+    for (i = 0, len = keys.length; i < len; i++) {
+        var k = keys[i];
+        if (k[0] === prefix) {
+            continue;
+        }
+        outValue[k] = node[k];
+    }
+    return outValue;
+};
+
+
+},{"83":83}],67:[function(require,module,exports){
+var __ref = require(86);
+var __context = require(75);
+var __ref_index = require(85);
+var __refs_length = require(87);
+
+function createHardlink(from, to) {
+    
+    // create a back reference
+    var backRefs  = to[__refs_length] || 0;
+    to[__ref + backRefs] = from;
+    to[__refs_length] = backRefs + 1;
+    
+    // create a hard reference
+    from[__ref_index] = backRefs;
+    from[__context] = to;
+}
+
+function removeHardlink(cacheObject) {
+    var context = cacheObject[__context];
+    if (context) {
+        var idx = cacheObject[__ref_index];
+        var len = context[__refs_length];
+        
+        while (idx < len) {
+            context[__ref + idx] = context[__ref + idx + 1];
+            ++idx;
+        }
+        
+        context[__refs_length] = len - 1;
+        cacheObject[__context] = undefined;
+        cacheObject[__ref_index] = undefined;
+    }
+}
+
+module.exports = {
+    create: createHardlink,
+    remove: removeHardlink
+};
+
+},{"75":75,"85":85,"86":86,"87":87}],68:[function(require,module,exports){
+var now = require(135);
+module.exports = function isExpired(node) {
+    var $expires = node.$expires === undefined && -1 || node.$expires;
+    return $expires !== -1 && $expires !== 1 && ($expires === 0 || $expires < now());
+};
+
+},{"135":135}],69:[function(require,module,exports){
+module.exports = function isMaterialized(model) {
+    return model._materialized && !(model._router || model._dataSource);
+};
+
+},{}],70:[function(require,module,exports){
+module.exports = function(x) {
+    return x.path && x.value;
+};
+},{}],71:[function(require,module,exports){
+var __head = require(77);
+var __tail = require(88);
+var __next = require(80);
+var __prev = require(84);
+var __invalidated = require(78);
+
+// [H] -> Next -> ... -> [T]
+// [T] -> Prev -> ... -> [H]
+function lruPromote(model, object) {
+    var root = model._root;
+    var head = root[__head];
+    if (head === object) {
+        return;
+    }
+
+    // First insert
+    if (!head) {
+        root[__head] = object;
+        return;
+    }
+
+    // The head and the tail need to separate
+    if (!root[__tail]) {
+        root[__head] = object;
+        root[__tail] = head;
+        object[__next] = head;
+        
+        // Now tail
+        head[__prev] = object;
+        return;
+    }
+
+    // Its in the cache.  Splice out.
+    var prev = object[__prev];
+    var next = object[__next];
+    if (next) {
+        next[__prev] = prev;
+    }
+    if (prev) {
+        prev[__next] = next;
+    }
+    object[__prev] = undefined;
+
+    // Insert into head position
+    root[__head] = object;
+    object[__next] = head;
+    head[__prev] = object;
+}
+
+function lruSplice(model, object) {
+    var root = model._root;
+
+    // Its in the cache.  Splice out.
+    var prev = object[__prev];
+    var next = object[__next];
+    if (next) {
+        next[__prev] = prev;
+    }
+    if (prev) {
+        prev[__next] = next;
+    }
+    object[__prev] = undefined;
+    
+    if (object === root[__head]) {
+        root[__head] = undefined;
+    }
+    if (object === root[__tail]) {
+        root[__tail] = undefined;
+    }
+    object[__invalidated] = true;
+    root.expired.push(object);
+}
+
+module.exports = {
+    promote: lruPromote,
+    splice: lruSplice
+};
+},{"77":77,"78":78,"80":80,"84":84,"88":88}],72:[function(require,module,exports){
+module.exports = function permuteKey(key, memo) {
+    if (memo.isArray) {
+        if (memo.loaded && memo.rangeOffset > memo.to) {
+            memo.arrOffset++;
+            memo.loaded = false;
+        }
+
+        var idx = memo.arrOffset, length = key.length;
+        if (idx === length) {
+            memo.done = true;
+            return '';
+        }
+
+        var el = key[memo.arrOffset];
+        var type = typeof el;
+        if (type === 'object') {
+            if (!memo.loaded) {
+                memo.from = el.from || 0;
+                memo.to = el.to ||
+                    typeof el.length === 'number' && memo.from + el.length - 1 || 0;
+                memo.rangeOffset = memo.from;
+                memo.loaded = true;
+            }
+
+            return memo.rangeOffset++;
+        } else {
+            memo.arrOffset = idx + 1;
+            return el;
+        }
+    } else {
+        if (!memo.loaded) {
+            memo.from = key.from || 0;
+            memo.to = key.to ||
+                typeof key.length === 'number' && memo.from + key.length - 1 || 0;
+            memo.rangeOffset = memo.from;
+            memo.loaded = true;
+        }
+        if (memo.rangeOffset > memo.to) {
+            memo.done = true;
+            return '';
+        }
+
+        return memo.rangeOffset++;
+    }
+};
+
+
+},{}],73:[function(require,module,exports){
+var fastCopy = require(74).fastCopy;
+module.exports = function spreadJSON(root, bins, bin) {
+    bin = bin || [];
+    if (!bins.length) {
+        bins.push(bin);
+    }
+    if (!root || typeof root !== 'object' || root.$type) {
+        return [];
+    }
+    var keys = Object.keys(root);
+    if (keys.length === 1) {
+        bin.push(keys[0]);
+        spreadJSON(root[keys[0]], bins, bin);
+    } else {
+        for (var i = 0, len = keys.length; i < len; i++) {
+            var k = keys[i];
+            var nextBin = fastCopy(bin);
+            nextBin.push(k);
+            bins.push(nextBin);
+            spreadJSON(root[k], bins, nextBin);
+        }
+    }
+};
+
+},{"74":74}],74:[function(require,module,exports){
+
+
+function fastCopy(arr, i) {
+    var a = [], len, j;
+    for (j = 0, i = i || 0, len = arr.length; i < len; j++, i++) {
+        a[j] = arr[i];
+    }
+    return a;
+}
+
+function fastCatSkipNulls(arr1, arr2) {
+    var a = [], i, len, j;
+    for (i = 0, len = arr1.length; i < len; i++) {
+        a[i] = arr1[i];
+    }
+    for (j = 0, len = arr2.length; j < len; j++) {
+        if (arr2[j] !== null) {
+            a[i++] = arr2[j];
+        }
+    }
+    return a;
+}
+
+function fastCat(arr1, arr2) {
+    var a = [], i, len, j;
+    for (i = 0, len = arr1.length; i < len; i++) {
+        a[i] = arr1[i];
+    }
+    for (j = 0, len = arr2.length; j < len; j++) {
+        a[i++] = arr2[j];
+    }
+    return a;
+}
+
+
+
+module.exports = {
+    fastCat: fastCat,
+    fastCatSkipNulls: fastCatSkipNulls,
+    fastCopy: fastCopy
+};
+
+},{}],75:[function(require,module,exports){
+module.exports = require(83) + "context";
+},{"83":83}],76:[function(require,module,exports){
+module.exports = require(83) + "generation";
+},{"83":83}],77:[function(require,module,exports){
+module.exports = require(83) + "head";
+},{"83":83}],78:[function(require,module,exports){
+module.exports = require(83) + "invalidated";
+},{"83":83}],79:[function(require,module,exports){
+module.exports = require(83) + "key";
+},{"83":83}],80:[function(require,module,exports){
+module.exports = require(83) + "next";
+},{"83":83}],81:[function(require,module,exports){
+module.exports = require(83) + "offset";
+},{"83":83}],82:[function(require,module,exports){
+module.exports = require(83) + "parent";
+},{"83":83}],83:[function(require,module,exports){
+/**
+ * http://en.wikipedia.org/wiki/Delimiter#ASCII_delimited_text
+ * record separator character.
+ */
+module.exports = String.fromCharCode(30);
+
+},{}],84:[function(require,module,exports){
+module.exports = require(83) + "prev";
+},{"83":83}],85:[function(require,module,exports){
+module.exports = require(83) + "ref-index";
+},{"83":83}],86:[function(require,module,exports){
+module.exports = require(83) + "ref";
+},{"83":83}],87:[function(require,module,exports){
+module.exports = require(83) + "refs-length";
+},{"83":83}],88:[function(require,module,exports){
+module.exports = require(83) + "tail";
+},{"83":83}],89:[function(require,module,exports){
+module.exports = require(83) + "version";
+},{"83":83}],90:[function(require,module,exports){
+module.exports = {
+    invPathSetsAsJSON: require(91),
+    invPathSetsAsJSONG: require(92),
+    invPathSetsAsPathMap: require(93),
+    invPathSetsAsValues: require(94)
+};
+},{"91":91,"92":92,"93":93,"94":94}],91:[function(require,module,exports){
+module.exports = invalidate_path_sets_as_json_dense;
+
+var clone = require(116);
+var array_clone = require(113);
+var array_slice = require(115);
+
+var options = require(136);
+var walk_path_set = require(157);
+
+var is_object = require(131);
+
+var get_valid_key = require(125);
+var update_graph = require(147);
+var invalidate_node = require(129);
+
+var collect = require(95);
+
+var positions = require(138);
+var _cache = positions.cache;
+var _message = positions.message;
+var _jsong = positions.jsong;
+var _json = positions.json;
+
+function invalidate_path_sets_as_json_dense(model, pathsets, values) {
+
+    var roots = options([], model);
+    var index = -1;
+    var count = pathsets.length;
+    var nodes = roots.nodes;
+    var parents = array_clone(nodes);
+    var requested = [];
+    var optimized = [];
+    var json, hasValue;
+
+    roots[_cache] = roots.root;
+
+    while (++index < count) {
+
+        json = values && values[index];
+        if (is_object(json)) {
+            roots[_json] = parents[_json] = nodes[_json] = json.json || (json.json = {})
+        } else {
+            roots[_json] = parents[_json] = nodes[_json] = undefined;
+        }
+
+        var pathset = pathsets[index];
+        roots.index = index;
+        
+        walk_path_set(onNode, onEdge, pathset, 0, roots, parents, nodes, requested, optimized);
+
+        if (is_object(json)) {
+            json.json = roots.json;
+        }
+        delete roots.json;
+    }
+
+    collect(
+        roots.lru,
+        roots.expired,
+        roots.version,
+        roots.root.$size || 0,
+        model._maxSize,
+        model._collectRatio
+    );
+
+    return {
+        values: values,
+        errors: roots.errors,
+        hasValue: true,
+        requestedPaths: roots.requestedPaths,
+        optimizedPaths: roots.optimizedPaths,
+        requestedMissingPaths: roots.requestedMissingPaths,
+        optimizedMissingPaths: roots.optimizedMissingPaths
+    };
+}
+
+function onNode(pathset, roots, parents, nodes, requested, optimized, is_reference, is_branch, key, keyset, is_keyset) {
+
+    var parent, json;
+
+    if (key == null) {
+        if ((key = get_valid_key(optimized)) == null) {
+            return;
+        }
+        json = parents[_json];
+        parent = parents[_cache];
+    } else {
+        json = is_keyset && nodes[_json] || parents[_json];
+        parent = nodes[_cache];
+    }
+
+    var node = parent[key];
+
+    if (is_reference) {
+        parents[_cache] = parent;
+        nodes[_cache] = node;
+        return;
+    }
+
+    if (is_branch) {
+        parents[_cache] = nodes[_cache] = node;
+        if (is_keyset && Boolean(parents[_json] = json)) {
+            nodes[_json] = json[keyset] || (json[keyset] = {});
+        }
+        return;
+    }
+
+    nodes[_cache] = node;
+
+    if (Boolean(json)) {
+        var type = is_object(node) && node.$type || undefined;
+        var jsonkey = keyset;
+        if (jsonkey == null) {
+            json = roots;
+            jsonkey = 3;
+        }
+        json[jsonkey] = clone(roots, node, type, node && node.value);
+    }
+
+    var lru = roots.lru;
+    var size = node.$size || 0;
+    var version = roots.version;
+    invalidate_node(parent, node, key, roots.lru);
+    update_graph(parent, size, version, lru);
+}
+
+function onEdge(pathset, depth, roots, parents, nodes, requested, optimized, key, keyset) {
+    roots.json = roots[_json];
+    roots.hasValue = true;
+    roots.requestedPaths.push(array_slice(requested, roots.offset));
+}
+},{"113":113,"115":115,"116":116,"125":125,"129":129,"131":131,"136":136,"138":138,"147":147,"157":157,"95":95}],92:[function(require,module,exports){
+module.exports = invalidate_path_sets_as_json_graph;
+
+var $path = require(151);
+
+var clone = require(116);
+var array_clone = require(113);
+
+var options = require(136);
+var walk_path_set = require(156);
+
+var is_object = require(131);
+
+var get_valid_key = require(125);
+var update_graph = require(147);
+var invalidate_node = require(129);
+var clone_success = require(141);
+var collect = require(95);
+
+var positions = require(138);
+var _cache = positions.cache;
+var _message = positions.message;
+var _jsong = positions.jsong;
+var _json = positions.json;
+
+function invalidate_path_sets_as_json_graph(model, pathsets, values) {
+
+    var roots = options([], model);
+    var index = -1;
+    var count = pathsets.length;
+    var nodes = roots.nodes;
+    var parents = array_clone(nodes);
+    var requested = [];
+    var optimized = [];
+    var json = values[0];
+
+    roots[_cache] = roots.root;
+    roots[_jsong] = parents[_jsong] = nodes[_jsong] = json.jsong || (json.jsong = {});
+    roots.requestedPaths = json.paths || (json.paths = roots.requestedPaths);
+
+    while (++index < count) {
+        var pathset = pathsets[index];
+        walk_path_set(onNode, onEdge, pathset, 0, roots, parents, nodes, requested, optimized);
+    }
+
+    collect(
+        roots.lru,
+        roots.expired,
+        roots.version,
+        roots.root.$size || 0,
+        model._maxSize,
+        model._collectRatio
+    );
+
+    return {
+        values: values,
+        errors: roots.errors,
+        hasValue: true,
+        requestedPaths: roots.requestedPaths,
+        optimizedPaths: roots.optimizedPaths,
+        requestedMissingPaths: roots.requestedMissingPaths,
+        optimizedMissingPaths: roots.optimizedMissingPaths
+    };
+}
+
+function onNode(pathset, roots, parents, nodes, requested, optimized, is_reference, is_branch, key, keyset, is_keyset) {
+
+    var parent, json;
+
+    if (key == null) {
+        if ((key = get_valid_key(optimized)) == null) {
+            return;
+        }
+        json = parents[_jsong];
+        parent = parents[_cache];
+    } else {
+        json = nodes[_jsong];
+        parent = nodes[_cache];
+    }
+
+    var jsonkey = key;
+    var node = parent[key];
+
+    if (is_reference) {
+        parents[_cache] = parent;
+        nodes[_cache] = node;
+        parents[_jsong] = json;
+        nodes[_jsong] = json[jsonkey] || (json[jsonkey] = {});
+        return;
+    }
+
+    var type = is_object(node) && node.$type || undefined;
+    
+    if (is_branch) {
+        parents[_cache] = nodes[_cache] = node;
+        parents[_jsong] = json;
+        if (type == $path) {
+            json[jsonkey] = clone(roots, node, type, node.value);
+        } else {
+            nodes[_jsong] = json[jsonkey] || (json[jsonkey] = {});
+        }
+        return;
+    }
+
+    nodes[_cache] = node;
+
+    json[jsonkey] = clone(roots, node, type, node && node.value);
+
+    var lru = roots.lru;
+    var size = node.$size || 0;
+    var version = roots.version;
+    invalidate_node(parent, node, key, roots.lru);
+    update_graph(parent, size, version, lru);
+}
+
+function onEdge(pathset, depth, roots, parents, nodes, requested, optimized, key, keyset) {
+    clone_success(roots, requested, optimized);
+    roots.json = roots[_jsong];
+    roots.hasValue = true;
+}
+
+},{"113":113,"116":116,"125":125,"129":129,"131":131,"136":136,"138":138,"141":141,"147":147,"151":151,"156":156,"95":95}],93:[function(require,module,exports){
+module.exports = invalidate_path_sets_as_json_sparse;
+
+var clone = require(116);
+var array_clone = require(113);
+var array_slice = require(115);
+
+var options = require(136);
+var walk_path_set = require(157);
+
+var is_object = require(131);
+
+var get_valid_key = require(125);
+var update_graph = require(147);
+var invalidate_node = require(129);
+
+var collect = require(95);
+
+var positions = require(138);
+var _cache = positions.cache;
+var _message = positions.message;
+var _jsong = positions.jsong;
+var _json = positions.json;
+
+function invalidate_path_sets_as_json_sparse(model, pathsets, values) {
+
+    var roots = options([], model);
+    var index = -1;
+    var count = pathsets.length;
+    var nodes = roots.nodes;
+    var parents = array_clone(nodes);
+    var requested = [];
+    var optimized = [];
+    var json = values[0];
+
+    roots[_cache] = roots.root;
+    roots[_json] = parents[_json] = nodes[_json] = json.json || (json.json = {});
+
+    while (++index < count) {
+        var pathset = pathsets[index];
+        walk_path_set(onNode, onEdge, pathset, 0, roots, parents, nodes, requested, optimized);
+    }
+
+    collect(
+        roots.lru,
+        roots.expired,
+        roots.version,
+        roots.root.$size || 0,
+        model._maxSize,
+        model._collectRatio
+    );
+
+    return {
+        values: values,
+        errors: roots.errors,
+        hasValue: true,
+        requestedPaths: roots.requestedPaths,
+        optimizedPaths: roots.optimizedPaths,
+        requestedMissingPaths: roots.requestedMissingPaths,
+        optimizedMissingPaths: roots.optimizedMissingPaths
+    };
+}
+
+function onNode(pathset, roots, parents, nodes, requested, optimized, is_reference, is_branch, key, keyset, is_keyset) {
+
+    var parent, json, jsonkey;
+
+    if (key == null) {
+        if ((key = get_valid_key(optimized)) == null) {
+            return;
+        }
+        jsonkey = get_valid_key(requested);
+        json = parents[_json];
+        parent = parents[_cache];
+    } else {
+        jsonkey = key;
+        json = nodes[_json];
+        parent = nodes[_cache];
+    }
+
+    var node = parent[key];
+
+    if (is_reference) {
+        parents[_cache] = parent;
+        nodes[_cache] = node;
+        return;
+    }
+
+    if (is_branch) {
+        parents[_cache] = nodes[_cache] = node;
+        parents[_json] = json;
+        nodes[_json] = json[jsonkey] || (json[jsonkey] = {});
+        return;
+    }
+
+    nodes[_cache] = node;
+
+    var type = is_object(node) && node.$type || undefined;
+    json[jsonkey] = clone(roots, node, type, node && node.value);
+
+    var lru = roots.lru;
+    var size = node.$size || 0;
+    var version = roots.version;
+    invalidate_node(parent, node, key, roots.lru);
+    update_graph(parent, size, version, lru);
+}
+
+function onEdge(pathset, depth, roots, parents, nodes, requested, optimized, key, keyset) {
+    roots.json = roots[_json];
+    roots.hasValue = true;
+    roots.requestedPaths.push(array_slice(requested, roots.offset));
+}
+},{"113":113,"115":115,"116":116,"125":125,"129":129,"131":131,"136":136,"138":138,"147":147,"157":157,"95":95}],94:[function(require,module,exports){
+module.exports = invalidate_path_sets_as_json_values;
+
+var clone = require(116);
+var array_clone = require(113);
+var array_slice = require(115);
+
+var options = require(136);
+var walk_path_set = require(157);
+
+var is_object = require(131);
+
+var get_valid_key = require(125);
+var update_graph = require(147);
+var invalidate_node = require(129);
+
+var collect = require(95);
+
+var positions = require(138);
+var _cache = positions.cache;
+var _message = positions.message;
+var _jsong = positions.jsong;
+var _json = positions.json;
+
+function invalidate_path_sets_as_json_values(model, pathsets, onNext) {
+
+    var roots = options([], model);
+    var index = -1;
+    var count = pathsets.length;
+    var nodes = roots.nodes;
+    var parents = array_clone(nodes);
+    var requested = [];
+    var optimized = [];
+
+    roots[_cache] = roots.root;
+    roots.onNext = onNext;
+
+    while (++index < count) {
+        var pathset = pathsets[index];
+        walk_path_set(onNode, onEdge, pathset, 0, roots, parents, nodes, requested, optimized);
+    }
+
+    collect(
+        roots.lru,
+        roots.expired,
+        roots.version,
+        roots.root.$size || 0,
+        model._maxSize,
+        model._collectRatio
+    );
+
+    return {
+        values: null,
+        errors: roots.errors,
+        requestedPaths: roots.requestedPaths,
+        optimizedPaths: roots.optimizedPaths,
+        requestedMissingPaths: roots.requestedMissingPaths,
+        optimizedMissingPaths: roots.optimizedMissingPaths
+    };
+}
+
+function onNode(pathset, roots, parents, nodes, requested, optimized, is_reference, is_branch, key, keyset, is_keyset) {
+
+    var parent;
+
+    if (key == null) {
+        if ((key = get_valid_key(optimized)) == null) {
+            return;
+        }
+        parent = parents[_cache];
+    } else {
+        parent = nodes[_cache];
+    }
+
+    var node = parent[key];
+
+    if (is_reference) {
+        parents[_cache] = parent;
+        nodes[_cache] = node;
+        return;
+    }
+
+    if (is_branch) {
+        parents[_cache] = nodes[_cache] = node;
+        return;
+    }
+
+    nodes[_cache] = node;
+
+    var lru = roots.lru;
+    var size = node.$size || 0;
+    var version = roots.version;
+    invalidate_node(parent, node, key, roots.lru);
+    update_graph(parent, size, version, lru);
+}
+
+function onEdge(pathset, depth, roots, parents, nodes, requested, optimized, key, keyset) {
+    var node = nodes[_cache];
+    var type = is_object(node) && node.$type || undefined;
+    var onNext = roots.onNext;
+    if (Boolean(type) && onNext) {
+        onNext({
+            path: array_clone(requested),
+            value: clone(roots, node, type, node && node.value)
+        });
+    }
+    roots.requestedPaths.push(array_slice(requested, roots.offset));
+}
+},{"113":113,"115":115,"116":116,"125":125,"129":129,"131":131,"136":136,"138":138,"147":147,"157":157,"95":95}],95:[function(require,module,exports){
+var __head = require(77);
+var __tail = require(88);
+var __next = require(80);
+var __prev = require(84);
+
+var update_graph = require(147);
+module.exports = function(lru, expired, version, total, max, ratio) {
+
+    var targetSize = max * ratio;
+    var node, size;
+
+    while(Boolean(node = expired.pop())) {
+        size = node.$size || 0;
+        total -= size;
+        update_graph(node, size, version, lru);
+    }
+
+    if(total >= max) {
+        var prev = lru[__tail];
+        while((total >= targetSize) && Boolean(node = prev)) {
+            prev = prev[__prev];
+            size = node.$size || 0;
+            total -= size;
+            update_graph(node, size, version, lru);
+        }
+
+        if((lru[__tail] = lru[__prev] = prev) == null) {
+            lru[__head] = lru[__next] = undefined;
+        } else {
+            prev[__next] = undefined;
+        }
+    }
+};
+},{"147":147,"77":77,"80":80,"84":84,"88":88}],96:[function(require,module,exports){
+var $expires_never = require(152);
+var __head = require(77);
+var __tail = require(88);
+var __next = require(80);
+var __prev = require(84);
+
+var is_object = require(131);
+module.exports = function(root, node) {
+    if(is_object(node) && (node.$expires !== $expires_never)) {
+        var head = root[__head], tail = root[__tail],
+            next = node[__next], prev = node[__prev];
+        if (node !== head) {
+            (next != null && typeof next === "object") && (next[__prev] = prev);
+            (prev != null && typeof prev === "object") && (prev[__next] = next);
+            (next = head) && (head != null && typeof head === "object") && (head[__prev] = node);
+            (root[__head] = root[__next] = head = node);
+            (head[__next] = next);
+            (head[__prev] = undefined);
+        }
+        if (tail == null || node === tail) {
+            root[__tail] = root[__prev] = tail = prev || node;
+        }
+    }
+    return node;
+};
+},{"131":131,"152":152,"77":77,"80":80,"84":84,"88":88}],97:[function(require,module,exports){
+var __head = require(77);
+var __tail = require(88);
+var __next = require(80);
+var __prev = require(84);
+
+module.exports = function(root, node) {
+    var head = root[__head], tail = root[__tail],
+        next = node[__next], prev = node[__prev];
+    (next != null && typeof next === "object") && (next[__prev] = prev);
+    (prev != null && typeof prev === "object") && (prev[__next] = next);
+    (node === head) && (root[__head] = root[__next] = next);
+    (node === tail) && (root[__tail] = root[__prev] = prev);
+    node[__next] = node[__prev] = undefined;
+    head = tail = next = prev = undefined;
+};
+},{"77":77,"80":80,"84":84,"88":88}],98:[function(require,module,exports){
+module.exports = {
+    setPathSetsAsJSON: require(108),
+    setPathSetsAsJSONG: require(109),
+    setPathSetsAsPathMap: require(110),
+    setPathSetsAsValues: require(111),
+    
+    setPathMapsAsJSON: require(104),
+    setPathMapsAsJSONG: require(105),
+    setPathMapsAsPathMap: require(106),
+    setPathMapsAsValues: require(107),
+    
+    setJSONGsAsJSON: require(100),
+    setJSONGsAsJSONG: require(101),
+    setJSONGsAsPathMap: require(102),
+    setJSONGsAsValues: require(103),
+    
+    setCache: require(99)
+};
+
+},{"100":100,"101":101,"102":102,"103":103,"104":104,"105":105,"106":106,"107":107,"108":108,"109":109,"110":110,"111":111,"99":99}],99:[function(require,module,exports){
+module.exports = set_cache;
+
+var $error = require(150);
+var $atom = require(149);
+
+var clone = require(116);
+var array_clone = require(113);
+
+var options = require(136);
+var walk_path_map = require(155);
+
+var is_object = require(131);
+
+var get_valid_key = require(125);
+var create_branch = require(123);
+var wrap_node = require(148);
+var replace_node = require(140);
+var graph_node = require(126);
+var update_back_refs = require(146);
+var update_graph = require(147);
+var inc_generation = require(127);
+
+var promote = require(96);
+
+var positions = require(138);
+var _cache = positions.cache;
+var _message = positions.message;
+var _jsong = positions.jsong;
+var _json = positions.json;
+
+function set_cache(model, pathmap, error_selector) {
+
+    var roots = options([], model, error_selector);
+    var nodes = roots.nodes;
+    var parents = array_clone(nodes);
+    var requested = [];
+    var optimized = [];
+    var keys_stack = [];
+    
+    roots[_cache] = roots.root;
+
+    walk_path_map(onNode, onEdge, pathmap, keys_stack, 0, roots, parents, nodes, requested, optimized);
+
+    return model;
+}
+
+function onNode(pathmap, roots, parents, nodes, requested, optimized, is_reference, is_branch, key, keyset, is_keyset) {
+
+    var parent;
+
+    if (key == null) {
+        if ((key = get_valid_key(optimized)) == null) {
+            return;
+        }
+        parent = parents[_cache];
+    } else {
+        parent = nodes[_cache];
+    }
+
+    var node = parent[key],
+        type;
+
+    if (is_branch) {
+        type = is_object(node) && node.$type || undefined;
+        node = create_branch(roots, parent, node, type, key);
+        parents[_cache] = nodes[_cache] = node;
+        return;
+    }
+
+    var selector = roots.error_selector;
+    var root = roots[_cache];
+    var size = is_object(node) && node.$size || 0;
+    var mess = pathmap;
+
+    type = is_object(mess) && mess.$type || undefined;
+    mess = wrap_node(mess, type, Boolean(type) ? mess.value : mess);
+    type || (type = $atom);
+
+    if (type == $error && Boolean(selector)) {
+        mess = selector(requested, mess);
+    }
+
+    node = replace_node(parent, node, mess, key, roots.lru);
+    node = graph_node(root, parent, node, key, inc_generation());
+    update_graph(parent, size - node.$size, roots.version, roots.lru);
+    nodes[_cache] = node;
+}
+
+function onEdge(pathmap, keys_stack, depth, roots, parents, nodes, requested, optimized, key, keyset) {
+    if(depth > 0) {
+        promote(roots.lru, nodes[_cache]);
+    }
+}
+},{"113":113,"116":116,"123":123,"125":125,"126":126,"127":127,"131":131,"136":136,"138":138,"140":140,"146":146,"147":147,"148":148,"149":149,"150":150,"155":155,"96":96}],100:[function(require,module,exports){
+module.exports = set_json_graph_as_json_dense;
+
+var $path = require(151);
+
+var clone = require(116);
+var array_clone = require(113);
+
+var options = require(136);
+var walk_path_set = require(156);
+
+var is_object = require(131);
+
+var get_valid_key = require(125);
+var merge_node = require(134);
+
+var set_node_if_missing_path = require(144);
+var set_node_if_error = require(143);
+var set_successful_paths = require(141);
+
+var positions = require(138);
+var _cache = positions.cache;
+var _message = positions.message;
+var _jsong = positions.jsong;
+var _json = positions.json;
+
+function set_json_graph_as_json_dense(model, envelopes, values, error_selector, comparator) {
+
+    var roots = [];
+    roots.offset = model._path.length;
+    roots.bound = [];
+    roots = options(roots, model, error_selector, comparator);
+
+    var index = -1;
+    var index2 = -1;
+    var count = envelopes.length;
+    var nodes = roots.nodes;
+    var parents = array_clone(nodes);
+    var requested = [];
+    var optimized = [];
+    var json, hasValue, hasValues;
+
+    roots[_cache] = roots.root;
+
+    while (++index < count) {
+        var envelope = envelopes[index];
+        var pathsets = envelope.paths;
+        var jsong = envelope.jsong || envelope.values || envelope.value;
+        var index3 = -1;
+        var count2 = pathsets.length;
+        roots[_message] = jsong;
+        nodes[_message] = jsong;
+        while (++index3 < count2) {
+
+            json = values && values[++index2];
+            if (is_object(json)) {
+                roots.json = roots[_json] = parents[_json] = nodes[_json] = json.json || (json.json = {});
+            } else {
+                roots.json = roots[_json] = parents[_json] = nodes[_json] = undefined;
+            }
+
+            var pathset = pathsets[index3];
+            roots.index = index3;
+
+            walk_path_set(onNode, onEdge, pathset, 0, roots, parents, nodes, requested, optimized);
+
+            hasValue = roots.hasValue;
+            if (Boolean(hasValue)) {
+                hasValues = true;
+                if (is_object(json)) {
+                    json.json = roots.json;
+                }
+                delete roots.json;
+                delete roots.hasValue;
+            } else if (is_object(json)) {
+                delete json.json;
+            }
+        }
+    }
+
+    return {
+        values: values,
+        errors: roots.errors,
+        requestedPaths: roots.requestedPaths,
+        optimizedPaths: roots.optimizedPaths,
+        requestedMissingPaths: roots.requestedMissingPaths,
+        optimizedMissingPaths: roots.optimizedMissingPaths
+    };
+}
+
+function onNode(pathset, roots, parents, nodes, requested, optimized, is_reference, is_branch, key, keyset, is_keyset) {
+
+    var parent, messageParent, json;
+
+    if (key == null) {
+        if ((key = get_valid_key(optimized)) == null) {
+            return;
+        }
+        json = parents[_json];
+        parent = parents[_cache];
+        messageParent = parents[_message];
+    } else {
+        json = is_keyset && nodes[_json] || parents[_json];
+        parent = nodes[_cache];
+        messageParent = nodes[_message];
+    }
+
+    var node = parent[key];
+    var message = messageParent && messageParent[key];
+
+    nodes[_message] = message;
+    nodes[_cache] = node = merge_node(roots, parent, node, messageParent, message, key, requested);
+
+    if (is_reference) {
+        parents[_cache] = parent;
+        parents[_message] = messageParent;
+        return;
+    }
+
+    var length = requested.length;
+    var offset = roots.offset;
+
+    parents[_json] = json;
+
+    if (is_branch) {
+        parents[_cache] = node;
+        parents[_message] = message;
+        if ((length > offset) && is_keyset && Boolean(json)) {
+            nodes[_json] = json[keyset] || (json[keyset] = {});
+        }
+    }
+}
+
+function onEdge(pathset, depth, roots, parents, nodes, requested, optimized, key, keyset) {
+
+    var json;
+    var node = nodes[_cache];
+    var type = is_object(node) && node.$type || (node = undefined);
+    var isMissingPath = set_node_if_missing_path(roots, node, type, pathset, depth, requested, optimized);
+
+    if (isMissingPath) {
+        return;
+    }
+
+    var isError = set_node_if_error(roots, node, type, requested);
+
+    if (isError) {
+        return;
+    }
+
+    if (roots.is_distinct === true) {
+        roots.is_distinct = false;
+        set_successful_paths(roots, requested, optimized);
+        if (keyset == null) {
+            roots.json = clone(roots, node, type, node && node.value);
+        } else if (Boolean(json = parents[_json])) {
+            json[keyset] = clone(roots, node, type, node && node.value);
+        }
+        roots.hasValue = true;
+    }
+}
+},{"113":113,"116":116,"125":125,"131":131,"134":134,"136":136,"138":138,"141":141,"143":143,"144":144,"151":151,"156":156}],101:[function(require,module,exports){
+module.exports = set_json_graph_as_json_graph;
+
+var $path = require(151);
+
+var clone = require(117);
+var array_clone = require(113);
+
+var options = require(136);
+var walk_path_set = require(156);
+
+var is_object = require(131);
+
+var get_valid_key = require(125);
+var merge_node = require(134);
+
+var set_node_if_missing_path = require(144);
+var set_node_if_error = require(143);
+var set_successful_paths = require(141);
+
+var promote = require(96);
+
+var positions = require(138);
+var _cache = positions.cache;
+var _message = positions.message;
+var _jsong = positions.jsong;
+var _json = positions.json;
+
+function set_json_graph_as_json_graph(model, envelopes, values, error_selector, comparator) {
+
+    var roots = [];
+    roots.offset = 0;
+    roots.bound = [];
+    roots = options(roots, model, error_selector, comparator);
+
+    var index = -1;
+    var count = envelopes.length;
+    var nodes = roots.nodes;
+    var parents = array_clone(nodes);
+    var requested = [];
+    var optimized = [];
+    var json = values[0];
+    var hasValue;
+
+    roots[_cache] = roots.root;
+    roots[_jsong] = parents[_jsong] = nodes[_jsong] = json.jsong || (json.jsong = {});
+    roots.requestedPaths = json.paths || (json.paths = roots.requestedPaths);
+
+    while (++index < count) {
+        var envelope = envelopes[index];
+        var pathsets = envelope.paths;
+        var jsong = envelope.jsong || envelope.values || envelope.value;
+        var index2 = -1;
+        var count2 = pathsets.length;
+        roots[_message] = jsong;
+        nodes[_message] = jsong;
+        while (++index2 < count2) {
+            var pathset = pathsets[index2];
+            walk_path_set(onNode, onEdge, pathset, 0, roots, parents, nodes, requested, optimized);
+        }
+    }
+
+    hasValue = roots.hasValue;
+    if (hasValue) {
+        json.jsong = roots[_jsong];
+    } else {
+        delete json.jsong;
+        delete json.paths;
+    }
+
+    return {
+        values: values,
+        errors: roots.errors,
+        requestedPaths: roots.requestedPaths,
+        optimizedPaths: roots.optimizedPaths,
+        requestedMissingPaths: roots.requestedMissingPaths,
+        optimizedMissingPaths: roots.optimizedMissingPaths
+    };
+}
+
+function onNode(pathset, roots, parents, nodes, requested, optimized, is_reference, is_branch, key, keyset, is_keyset) {
+
+    var parent, messageParent, json, jsonkey;
+
+    if (key == null) {
+        if ((key = get_valid_key(optimized)) == null) {
+            return;
+        }
+        json = parents[_jsong];
+        parent = parents[_cache];
+        messageParent = parents[_message];
+    } else {
+        json = nodes[_jsong];
+        parent = nodes[_cache];
+        messageParent = nodes[_message];
+    }
+
+    var jsonkey = key;
+    var node = parent[key];
+    var message = messageParent && messageParent[key];
+
+    nodes[_message] = message;
+    nodes[_cache] = node = merge_node(roots, parent, node, messageParent, message, key, requested);
+
+    if (is_reference) {
+        parents[_cache] = parent;
+        parents[_message] = messageParent;
+        parents[_jsong] = json;
+        nodes[_jsong] = json[jsonkey] || (json[jsonkey] = {});
+        return;
+    }
+
+    var type = is_object(node) && node.$type || undefined;
+
+    if (is_branch) {
+        parents[_cache] = node;
+        parents[_message] = message;
+        parents[_jsong] = json;
+        if (type == $path) {
+            json[jsonkey] = clone(roots, node, type, node.value);
+            roots.hasValue = true;
+        } else {
+            nodes[_jsong] = json[jsonkey] || (json[jsonkey] = {});
+        }
+        return;
+    }
+
+    if(roots.is_distinct === true) {
+        roots.is_distinct = false;
+        json[jsonkey] = clone(roots, node, type, node && node.value);
+        roots.hasValue = true;
+    }
+}
+
+function onEdge(pathset, depth, roots, parents, nodes, requested, optimized, key, keyset) {
+
+    var json;
+    var node = nodes[_cache];
+    var type = is_object(node) && node.$type || (node = undefined);
+
+    var isMissingPath = set_node_if_missing_path(roots, node, type, pathset, depth, requested, optimized);
+
+    if (isMissingPath) {
+        return;
+    }
+
+    promote(roots.lru, node);
+
+    set_successful_paths(roots, requested, optimized);
+
+    if (keyset == null && !roots.hasValue && (keyset = get_valid_key(optimized)) == null) {
+        node = clone(roots, node, type, node && node.value);
+        json = roots[_jsong];
+        json.$type = node.$type;
+        json.value = node.value;
+    }
+    roots.hasValue = true;
+}
+},{"113":113,"117":117,"125":125,"131":131,"134":134,"136":136,"138":138,"141":141,"143":143,"144":144,"151":151,"156":156,"96":96}],102:[function(require,module,exports){
+module.exports = set_json_graph_as_json_sparse;
+
+var $path = require(151);
+
+var clone = require(116);
+var array_clone = require(113);
+
+var options = require(136);
+var walk_path_set = require(156);
+
+var is_object = require(131);
+
+var get_valid_key = require(125);
+var merge_node = require(134);
+
+var set_node_if_missing_path = require(144);
+var set_node_if_error = require(143);
+var set_successful_paths = require(141);
+
+var positions = require(138);
+var _cache = positions.cache;
+var _message = positions.message;
+var _jsong = positions.jsong;
+var _json = positions.json;
+
+function set_json_graph_as_json_sparse(model, envelopes, values, error_selector, comparator) {
+
+    var roots = [];
+    roots.offset = model._path.length;
+    roots.bound = [];
+    roots = options(roots, model, error_selector, comparator);
+
+    var index = -1;
+    var count = envelopes.length;
+    var nodes = roots.nodes;
+    var parents = array_clone(nodes);
+    var requested = [];
+    var optimized = [];
+    var json = values[0];
+    var hasValue;
+
+    roots[_cache] = roots.root;
+    roots[_json] = parents[_json] = nodes[_json] = json.json || (json.json = {});
+
+    while (++index < count) {
+        var envelope = envelopes[index];
+        var pathsets = envelope.paths;
+        var jsong = envelope.jsong || envelope.values || envelope.value;
+        var index2 = -1;
+        var count2 = pathsets.length;
+        roots[_message] = jsong;
+        nodes[_message] = jsong;
+        while (++index2 < count2) {
+            var pathset = pathsets[index2];
+            walk_path_set(onNode, onEdge, pathset, 0, roots, parents, nodes, requested, optimized);
+        }
+    }
+
+    hasValue = roots.hasValue;
+    if (hasValue) {
+        json.json = roots[_json];
+    } else {
+        delete json.json;
+    }
+
+    return {
+        values: values,
+        errors: roots.errors,
+        requestedPaths: roots.requestedPaths,
+        optimizedPaths: roots.optimizedPaths,
+        requestedMissingPaths: roots.requestedMissingPaths,
+        optimizedMissingPaths: roots.optimizedMissingPaths
+    };
+}
+
+function onNode(pathset, roots, parents, nodes, requested, optimized, is_reference, is_branch, key, keyset, is_keyset) {
+
+    var parent, messageParent, json, jsonkey;
+
+    if (key == null) {
+        if ((key = get_valid_key(optimized)) == null) {
+            return;
+        }
+        jsonkey = get_valid_key(requested);
+        json = parents[_json];
+        parent = parents[_cache];
+        messageParent = parents[_message];
+    } else {
+        jsonkey = key;
+        json = nodes[_json];
+        parent = nodes[_cache];
+        messageParent = nodes[_message];
+    }
+
+    var node = parent[key];
+    var message = messageParent && messageParent[key];
+
+    nodes[_message] = message;
+    nodes[_cache] = node = merge_node(roots, parent, node, messageParent, message, key, requested);
+
+    if (is_reference) {
+        parents[_cache] = parent;
+        parents[_message] = messageParent;
+        return;
+    }
+
+    parents[_json] = json;
+
+    if (is_branch) {
+        var length = requested.length;
+        var offset = roots.offset;
+        var type = is_object(node) && node.$type || undefined;
+
+        parents[_cache] = node;
+        parents[_message] = message;
+        if ((length > offset) && (!type || type == $path)) {
+            nodes[_json] = json[jsonkey] || (json[jsonkey] = {});
+        }
+    }
+}
+
+function onEdge(pathset, depth, roots, parents, nodes, requested, optimized, key, keyset) {
+
+    var json;
+    var node = nodes[_cache];
+    var type = is_object(node) && node.$type || (node = undefined);
+
+    var isMissingPath = set_node_if_missing_path(roots, node, type, pathset, depth, requested, optimized);
+
+    if (isMissingPath) {
+        return;
+    }
+
+    var isError = set_node_if_error(roots, node, type, requested);
+
+    if (isError) {
+        return;
+    }
+
+    if (roots.is_distinct === true) {
+        roots.is_distinct = false;
+        set_successful_paths(roots, requested, optimized);
+        if (keyset == null && !roots.hasValue && (keyset = get_valid_key(optimized)) == null) {
+            node = clone(roots, node, type, node && node.value);
+            json = roots[_json];
+            json.$type = node.$type;
+            json.value = node.value;
+        } else {
+            json = parents[_json];
+            json[key] = clone(roots, node, type, node && node.value);
+        }
+        roots.hasValue = true;
+    }
+}
+},{"113":113,"116":116,"125":125,"131":131,"134":134,"136":136,"138":138,"141":141,"143":143,"144":144,"151":151,"156":156}],103:[function(require,module,exports){
+module.exports = set_json_graph_as_json_values;
+
+var $path = require(151);
+
+var clone = require(116);
+var array_clone = require(113);
+var array_slice = require(115);
+
+var options = require(136);
+var walk_path_set = require(156);
+
+var is_object = require(131);
+
+var get_valid_key = require(125);
+var merge_node = require(134);
+
+var set_node_if_missing_path = require(144);
+var set_node_if_error = require(143);
+var set_successful_paths = require(141);
+
+var positions = require(138);
+var _cache = positions.cache;
+var _message = positions.message;
+var _jsong = positions.jsong;
+var _json = positions.json;
+
+function set_json_graph_as_json_values(model, envelopes, onNext, error_selector, comparator) {
+
+    var roots = [];
+    roots.offset = model._path.length;
+    roots.bound = [];
+    roots = options(roots, model, error_selector, comparator);
+
+    var index = -1;
+    var count = envelopes.length;
+    var nodes = roots.nodes;
+    var parents = array_clone(nodes);
+    var requested = [];
+    var optimized = [];
+
+    roots[_cache] = roots.root;
+    roots.onNext = onNext;
+
+    while (++index < count) {
+        var envelope = envelopes[index];
+        var pathsets = envelope.paths;
+        var jsong = envelope.jsong || envelope.values || envelope.value;
+        var index2 = -1;
+        var count2 = pathsets.length;
+        roots[_message] = jsong;
+        nodes[_message] = jsong;
+        while (++index2 < count2) {
+            var pathset = pathsets[index2];
+            walk_path_set(onNode, onEdge, pathset, 0, roots, parents, nodes, requested, optimized);
+        }
+    }
+
+    return {
+        values: null,
+        errors: roots.errors,
+        requestedPaths: roots.requestedPaths,
+        optimizedPaths: roots.optimizedPaths,
+        requestedMissingPaths: roots.requestedMissingPaths,
+        optimizedMissingPaths: roots.optimizedMissingPaths
+    };
+}
+
+function onNode(pathset, roots, parents, nodes, requested, optimized, is_reference, is_branch, key, keyset) {
+
+    var parent, messageParent;
+
+    if (key == null) {
+        if ((key = get_valid_key(optimized)) == null) {
+            return;
+        }
+        parent = parents[_cache];
+        messageParent = parents[_message];
+    } else {
+        parent = nodes[_cache];
+        messageParent = nodes[_message];
+    }
+
+    var node = parent[key];
+    var message = messageParent && messageParent[key];
+
+    nodes[_message] = message;
+    nodes[_cache] = node = merge_node(roots, parent, node, messageParent, message, key, requested);
+
+    if (is_reference) {
+        parents[_cache] = parent;
+        parents[_message] = messageParent;
+        return;
+    }
+
+    if (is_branch) {
+        parents[_cache] = node;
+        parents[_message] = message;
+    }
+}
+
+function onEdge(pathset, depth, roots, parents, nodes, requested, optimized, key, keyset, is_keyset) {
+
+    var node = nodes[_cache];
+    var type = is_object(node) && node.$type || (node = undefined);
+    var isMissingPath = set_node_if_missing_path(roots, node, type, pathset, depth, requested, optimized);
+
+    if (isMissingPath) {
+        return;
+    }
+
+    var isError = set_node_if_error(roots, node, type, requested);
+
+    if (isError) {
+        return;
+    }
+
+    if (roots.is_distinct === true) {
+        roots.is_distinct = false;
+        set_successful_paths(roots, requested, optimized);
+        roots.onNext({
+            path: array_slice(requested, roots.offset),
+            value: clone(roots, node, type, node && node.value)
+        });
+    }
+}
+},{"113":113,"115":115,"116":116,"125":125,"131":131,"134":134,"136":136,"138":138,"141":141,"143":143,"144":144,"151":151,"156":156}],104:[function(require,module,exports){
+module.exports = set_json_sparse_as_json_dense;
+
+var $path = require(151);
+var $error = require(150);
+var $atom = require(149);
+
+var clone = require(116);
+var array_clone = require(113);
+
+var options = require(136);
+var walk_path_map = require(155);
+
+var is_object = require(131);
+
+var get_valid_key = require(125);
+var create_branch = require(123);
+var wrap_node = require(148);
+var replace_node = require(140);
+var graph_node = require(126);
+var update_back_refs = require(146);
+var update_graph = require(147);
+var inc_generation = require(127);
+
+var set_node_if_error = require(143);
+var set_successful_paths = require(141);
+
+var positions = require(138);
+var _cache = positions.cache;
+var _message = positions.message;
+var _jsong = positions.jsong;
+var _json = positions.json;
+
+function set_json_sparse_as_json_dense(model, pathmaps, values, error_selector, comparator) {
+
+    var roots = options([], model, error_selector, comparator);
+    var index = -1;
+    var count = pathmaps.length;
+    var nodes = roots.nodes;
+    var parents = array_clone(nodes);
+    var requested = [];
+    var optimized = [];
+    var keys_stack = [];
+    var json, hasValue, hasValues;
+
+    roots[_cache] = roots.root;
+
+    while (++index < count) {
+
+        json = values && values[index];
+        if (is_object(json)) {
+            roots.json = roots[_json] = parents[_json] = nodes[_json] = json.json || (json.json = {})
+        } else {
+            roots.json = roots[_json] = parents[_json] = nodes[_json] = undefined;
+        }
+
+        var pathmap = pathmaps[index].json;
+        roots.index = index;
+
+        walk_path_map(onNode, onEdge, pathmap, keys_stack, 0, roots, parents, nodes, requested, optimized);
+
+        hasValue = roots.hasValue;
+        if (Boolean(hasValue)) {
+            hasValues = true;
+            if (is_object(json)) {
+                json.json = roots.json;
+            }
+            delete roots.json;
+            delete roots.hasValue;
+        } else if (is_object(json)) {
+            delete json.json;
+        }
+    }
+
+    return {
+        values: values,
+        errors: roots.errors,
+        hasValue: hasValues,
+        requestedPaths: roots.requestedPaths,
+        optimizedPaths: roots.optimizedPaths,
+        requestedMissingPaths: roots.requestedMissingPaths,
+        optimizedMissingPaths: roots.optimizedMissingPaths
+    };
+}
+
+function onNode(pathmap, roots, parents, nodes, requested, optimized, is_reference, is_branch, key, keyset, is_keyset) {
+
+    var parent, json;
+
+    if (key == null) {
+        if ((key = get_valid_key(optimized)) == null) {
+            return;
+        }
+        json = parents[_json];
+        parent = parents[_cache];
+    } else {
+        json = is_keyset && nodes[_json] || parents[_json];
+        parent = nodes[_cache];
+    }
+
+    var node = parent[key],
+        type;
+
+    if (is_reference) {
+        type = is_object(node) && node.$type || undefined;
+        type = type && is_branch && "." || type;
+        node = create_branch(roots, parent, node, type, key);
+        parents[_cache] = parent;
+        nodes[_cache] = node;
+        return;
+    }
+
+    parents[_json] = json;
+
+    if (is_branch) {
+        type = is_object(node) && node.$type || undefined;
+        node = create_branch(roots, parent, node, type, key);
+        parents[_cache] = nodes[_cache] = node;
+        if (is_keyset && Boolean(json)) {
+            nodes[_json] = json[keyset] || (json[keyset] = {});
+        }
+        return;
+    }
+
+    var selector = roots.error_selector;
+    var comparator = roots.comparator;
+    var root = roots[_cache];
+    var size = is_object(node) && node.$size || 0;
+    var message = pathmap;
+
+    type = is_object(message) && message.$type || undefined;
+    message = wrap_node(message, type, Boolean(type) ? message.value : message);
+    type || (type = $atom);
+
+    if (type == $error && Boolean(selector)) {
+        message = selector(requested, message);
+    }
+
+    var is_distinct = roots.is_distinct = true;
+
+    if(Boolean(comparator)) {
+        is_distinct = roots.is_distinct = !comparator(requested, node, message);
+    }
+
+    if (is_distinct) {
+        node = replace_node(parent, node, message, key, roots.lru);
+        node = graph_node(root, parent, node, key, inc_generation());
+        update_graph(parent, size - node.$size, roots.version, roots.lru);
+    }
+    nodes[_cache] = node;
+}
+
+function onEdge(pathmap, keys_stack, depth, roots, parents, nodes, requested, optimized, key, keyset) {
+
+    var json;
+    var node = nodes[_cache];
+    var type = is_object(node) && node.$type || (node = undefined);
+
+    var isError = set_node_if_error(roots, node, type, requested);
+
+    if (isError) {
+        return;
+    }
+
+    if (roots.is_distinct === true) {
+        roots.is_distinct = false;
+        set_successful_paths(roots, requested, optimized);
+        if (keyset == null) {
+            roots.json = clone(roots, node, type, node && node.value);
+        } else if (Boolean(json = parents[_json])) {
+            json[keyset] = clone(roots, node, type, node && node.value);
+        }
+        roots.hasValue = true;
+    }
+}
+},{"113":113,"116":116,"123":123,"125":125,"126":126,"127":127,"131":131,"136":136,"138":138,"140":140,"141":141,"143":143,"146":146,"147":147,"148":148,"149":149,"150":150,"151":151,"155":155}],105:[function(require,module,exports){
+module.exports = set_json_sparse_as_json_graph;
+
+var $path = require(151);
+var $error = require(150);
+var $atom = require(149);
+
+var clone = require(117);
+var array_clone = require(113);
+
+var options = require(136);
+var walk_path_map = require(154);
+
+var is_object = require(131);
+
+var get_valid_key = require(125);
+var create_branch = require(123);
+var wrap_node = require(148);
+var replace_node = require(140);
+var graph_node = require(126);
+var update_back_refs = require(146);
+var update_graph = require(147);
+var inc_generation = require(127);
+
+var set_node_if_error = require(143);
+var set_successful_paths = require(141);
+
+var promote = require(96);
+
+var positions = require(138);
+var _cache = positions.cache;
+var _message = positions.message;
+var _jsong = positions.jsong;
+var _json = positions.json;
+
+function set_json_sparse_as_json_graph(model, pathmaps, values, error_selector, comparator) {
+
+    var roots = options([], model, error_selector, comparator);
+    var index = -1;
+    var count = pathmaps.length;
+    var nodes = roots.nodes;
+    var parents = array_clone(nodes);
+    var requested = [];
+    var optimized = [];
+    var keys_stack = [];
+    var json = values[0];
+    var hasValue;
+
+    roots[_cache] = roots.root;
+    roots[_jsong] = parents[_jsong] = nodes[_jsong] = json.jsong || (json.jsong = {});
+    roots.requestedPaths = json.paths || (json.paths = roots.requestedPaths);
+
+    while (++index < count) {
+        var pathmap = pathmaps[index].json;
+        walk_path_map(onNode, onEdge, pathmap, keys_stack, 0, roots, parents, nodes, requested, optimized);
+    }
+
+    hasValue = roots.hasValue;
+    if (hasValue) {
+        json.jsong = roots[_jsong];
+    } else {
+        delete json.jsong;
+        delete json.paths;
+    }
+
+    return {
+        values: values,
+        errors: roots.errors,
+        hasValue: hasValue,
+        requestedPaths: roots.requestedPaths,
+        optimizedPaths: roots.optimizedPaths,
+        requestedMissingPaths: roots.requestedMissingPaths,
+        optimizedMissingPaths: roots.optimizedMissingPaths
+    };
+}
+
+function onNode(pathmap, roots, parents, nodes, requested, optimized, is_reference, is_branch, key, keyset, is_keyset) {
+
+    var parent, json;
+
+    if (key == null) {
+        if ((key = get_valid_key(optimized)) == null) {
+            return;
+        }
+        json = parents[_jsong];
+        parent = parents[_cache];
+    } else {
+        json = nodes[_jsong];
+        parent = nodes[_cache];
+    }
+
+    var jsonkey = key;
+    var node = parent[key],
+        type;
+
+    if (is_reference) {
+        type = is_object(node) && node.$type || undefined;
+        type = type && is_branch && "." || type;
+        node = create_branch(roots, parent, node, type, key);
+        parents[_cache] = parent;
+        nodes[_cache] = node;
+        parents[_jsong] = json;
+        if (type == $path) {
+            json[jsonkey] = clone(roots, node, type, node.value);
+            roots.hasValue = true;
+        } else {
+            nodes[_jsong] = json[jsonkey] || (json[jsonkey] = {});
+        }
+        return;
+    }
+
+    if (is_branch) {
+        type = is_object(node) && node.$type || undefined;
+        node = create_branch(roots, parent, node, type, key);
+        type = node.$type;
+        parents[_cache] = nodes[_cache] = node;
+        parents[_jsong] = json;
+        if (type == $path) {
+            json[jsonkey] = clone(roots, node, type, node.value);
+            roots.hasValue = true;
+        } else {
+            nodes[_jsong] = json[jsonkey] || (json[jsonkey] = {});
+        }
+        return;
+    }
+
+    var selector = roots.error_selector;
+    var comparator = roots.comparator;
+    var root = roots[_cache];
+    var size = is_object(node) && node.$size || 0;
+    var message = pathmap;
+
+    type = is_object(message) && message.$type || undefined;
+    message = wrap_node(message, type, Boolean(type) ? message.value : message);
+    type || (type = $atom);
+
+    if (type == $error && Boolean(selector)) {
+        message = selector(requested, message);
+    }
+
+    var is_distinct = roots.is_distinct = true;
+
+    if(Boolean(comparator)) {
+        is_distinct = roots.is_distinct = !comparator(requested, node, message);
+    }
+
+    if (is_distinct) {
+        node = replace_node(parent, node, message, key, roots.lru);
+        node = graph_node(root, parent, node, key, inc_generation());
+        update_graph(parent, size - node.$size, roots.version, roots.lru);
+
+        json[jsonkey] = clone(roots, node, type, node && node.value);
+        roots.hasValue = true;
+    }
+    nodes[_cache] = node;
+}
+
+function onEdge(pathmap, keys_stack, depth, roots, parents, nodes, requested, optimized, key, keyset) {
+
+    var json;
+    var node = nodes[_cache];
+    var type = is_object(node) && node.$type || (node = undefined);
+
+    promote(roots.lru, node);
+
+    if (roots.is_distinct === true) {
+        roots.is_distinct = false;
+        set_successful_paths(roots, requested, optimized);
+        if (keyset == null && !roots.hasValue && (keyset = get_valid_key(optimized)) == null) {
+            node = clone(roots, node, type, node && node.value);
+            json = roots[_jsong];
+            json.$type = node.$type;
+            json.value = node.value;
+        }
+        roots.hasValue = true;
+    }
+}
+},{"113":113,"117":117,"123":123,"125":125,"126":126,"127":127,"131":131,"136":136,"138":138,"140":140,"141":141,"143":143,"146":146,"147":147,"148":148,"149":149,"150":150,"151":151,"154":154,"96":96}],106:[function(require,module,exports){
+module.exports = set_json_sparse_as_json_sparse;
+
+var $path = require(151);
+var $error = require(150);
+var $atom = require(149);
+
+var clone = require(116);
+var array_clone = require(113);
+
+var options = require(136);
+var walk_path_map = require(155);
+
+var is_object = require(131);
+
+var get_valid_key = require(125);
+var create_branch = require(123);
+var wrap_node = require(148);
+var replace_node = require(140);
+var graph_node = require(126);
+var update_back_refs = require(146);
+var update_graph = require(147);
+var inc_generation = require(127);
+
+var set_node_if_error = require(143);
+var set_successful_paths = require(141);
+
+var positions = require(138);
+var _cache = positions.cache;
+var _message = positions.message;
+var _jsong = positions.jsong;
+var _json = positions.json;
+
+function set_json_sparse_as_json_sparse(model, pathmaps, values, error_selector, comparator) {
+
+    var roots = options([], model, error_selector, comparator);
+    var index = -1;
+    var count = pathmaps.length;
+    var nodes = roots.nodes;
+    var parents = array_clone(nodes);
+    var requested = [];
+    var optimized = [];
+    var keys_stack = [];
+    var json = values[0];
+    var hasValue;
+
+    roots[_cache] = roots.root;
+    roots[_json] = parents[_json] = nodes[_json] = json.json || (json.json = {});
+
+    while (++index < count) {
+        var pathmap = pathmaps[index].json;
+        walk_path_map(onNode, onEdge, pathmap, keys_stack, 0, roots, parents, nodes, requested, optimized);
+    }
+
+    hasValue = roots.hasValue;
+    if (hasValue) {
+        json.json = roots[_json];
+    } else {
+        delete json.json;
+    }
+
+    return {
+        values: values,
+        errors: roots.errors,
+        hasValue: hasValue,
+        requestedPaths: roots.requestedPaths,
+        optimizedPaths: roots.optimizedPaths,
+        requestedMissingPaths: roots.requestedMissingPaths,
+        optimizedMissingPaths: roots.optimizedMissingPaths
+    };
+}
+
+function onNode(pathmap, roots, parents, nodes, requested, optimized, is_reference, is_branch, key, keyset, is_keyset) {
+
+    var parent, json, jsonkey;
+
+    if (key == null) {
+        if ((key = get_valid_key(optimized)) == null) {
+            return;
+        }
+        jsonkey = get_valid_key(requested);
+        json = parents[_json];
+        parent = parents[_cache];
+    } else {
+        jsonkey = key;
+        json = nodes[_json];
+        parent = nodes[_cache];
+    }
+
+    var node = parent[key],
+        type;
+
+    if (is_reference) {
+        type = is_object(node) && node.$type || undefined;
+        type = type && is_branch && "." || type;
+        node = create_branch(roots, parent, node, type, key);
+        parents[_cache] = parent;
+        nodes[_cache] = node;
+        return;
+    }
+
+    parents[_json] = json;
+
+    if (is_branch) {
+        type = is_object(node) && node.$type || undefined;
+        node = create_branch(roots, parent, node, type, key);
+        parents[_cache] = nodes[_cache] = node;
+        nodes[_json] = json[jsonkey] || (json[jsonkey] = {});
+        return;
+    }
+
+    var selector = roots.error_selector;
+    var comparator = roots.comparator;
+    var root = roots[_cache];
+    var size = is_object(node) && node.$size || 0;
+    var message = pathmap;
+
+    type = is_object(message) && message.$type || undefined;
+    message = wrap_node(message, type, Boolean(type) ? message.value : message);
+    type || (type = $atom);
+
+    if (type == $error && Boolean(selector)) {
+        message = selector(requested, message);
+    }
+
+    var is_distinct = roots.is_distinct = true;
+
+    if(Boolean(comparator)) {
+        is_distinct = roots.is_distinct = !comparator(requested, node, message);
+    }
+
+    if (is_distinct) {
+        node = replace_node(parent, node, message, key, roots.lru);
+        node = graph_node(root, parent, node, key, inc_generation());
+        update_graph(parent, size - node.$size, roots.version, roots.lru);
+    }
+    nodes[_cache] = node;
+}
+
+function onEdge(pathmap, keys_stack, depth, roots, parents, nodes, requested, optimized, key, keyset) {
+
+    var json;
+    var node = nodes[_cache];
+    var type = is_object(node) && node.$type || (node = undefined);
+
+    var isError = set_node_if_error(roots, node, type, requested);
+
+    if(isError) {
+        return;
+    }
+
+    if (roots.is_distinct === true) {
+        roots.is_distinct = false;
+        set_successful_paths(roots, requested, optimized);
+        if (keyset == null && !roots.hasValue && (keyset = get_valid_key(optimized)) == null) {
+            node = clone(roots, node, type, node && node.value);
+            json = roots[_json];
+            json.$type = node.$type;
+            json.value = node.value;
+        } else {
+            json = parents[_json];
+            json[key] = clone(roots, node, type, node && node.value);
+        }
+        roots.hasValue = true;
+    }
+}
+},{"113":113,"116":116,"123":123,"125":125,"126":126,"127":127,"131":131,"136":136,"138":138,"140":140,"141":141,"143":143,"146":146,"147":147,"148":148,"149":149,"150":150,"151":151,"155":155}],107:[function(require,module,exports){
+module.exports = set_path_map_as_json_values;
+
+var $error = require(150);
+var $atom = require(149);
+
+var clone = require(116);
+var array_clone = require(113);
+
+var options = require(136);
+var walk_path_map = require(155);
+
+var is_object = require(131);
+
+var get_valid_key = require(125);
+var create_branch = require(123);
+var wrap_node = require(148);
+var replace_node = require(140);
+var graph_node = require(126);
+var update_back_refs = require(146);
+var update_graph = require(147);
+var inc_generation = require(127);
+
+var set_node_if_error = require(143);
+var set_successful_paths = require(141);
+
+var positions = require(138);
+var _cache = positions.cache;
+var _message = positions.message;
+var _jsong = positions.jsong;
+var _json = positions.json;
+
+function set_path_map_as_json_values(model, pathmaps, onNext, error_selector, comparator) {
+
+    var roots = options([], model, error_selector, comparator);
+    var index = -1;
+    var count = pathmaps.length;
+    var nodes = roots.nodes;
+    var parents = array_clone(nodes);
+    var requested = [];
+    var optimized = [];
+    var keys_stack = [];
+    roots[_cache] = roots.root;
+    roots.onNext = onNext;
+
+    while (++index < count) {
+        var pathmap = pathmaps[index].json;
+        walk_path_map(onNode, onEdge, pathmap, keys_stack, 0, roots, parents, nodes, requested, optimized);
+    }
+
+    return {
+        values: null,
+        errors: roots.errors,
+        requestedPaths: roots.requestedPaths,
+        optimizedPaths: roots.optimizedPaths,
+        requestedMissingPaths: roots.requestedMissingPaths,
+        optimizedMissingPaths: roots.optimizedMissingPaths
+    };
+}
+
+function onNode(pathmap, roots, parents, nodes, requested, optimized, is_reference, is_branch, key, keyset, is_keyset) {
+
+    var parent;
+
+    if (key == null) {
+        if ((key = get_valid_key(optimized)) == null) {
+            return;
+        }
+        parent = parents[_cache];
+    } else {
+        parent = nodes[_cache];
+    }
+
+    var node = parent[key],
+        type;
+
+    if (is_reference) {
+        type = is_object(node) && node.$type || undefined;
+        type = type && is_branch && "." || type;
+        node = create_branch(roots, parent, node, type, key);
+        parents[_cache] = parent;
+        nodes[_cache] = node;
+        return;
+    }
+
+    if (is_branch) {
+        type = is_object(node) && node.$type || undefined;
+        node = create_branch(roots, parent, node, type, key);
+        parents[_cache] = nodes[_cache] = node;
+        return;
+    }
+
+    var selector = roots.error_selector;
+    var comparator = roots.comparator;
+    var root = roots[_cache];
+    var size = is_object(node) && node.$size || 0;
+    var message = pathmap;
+
+    type = is_object(message) && message.$type || undefined;
+    message = wrap_node(message, type, Boolean(type) ? message.value : message);
+    type || (type = $atom);
+
+    if (type == $error && Boolean(selector)) {
+        message = selector(requested, message);
+    }
+
+    var is_distinct = roots.is_distinct = true;
+
+    if(Boolean(comparator)) {
+        is_distinct = roots.is_distinct = !comparator(requested, node, message);
+    }
+
+    if (is_distinct) {
+        node = replace_node(parent, node, message, key, roots.lru);
+        node = graph_node(root, parent, node, key, inc_generation());
+        update_graph(parent, size - node.$size, roots.version, roots.lru);
+    }
+
+    nodes[_cache] = node;
+}
+
+function onEdge(pathmap, keys_stack, depth, roots, parents, nodes, requested, optimized, key, keyset) {
+
+    var node = nodes[_cache];
+    var type = is_object(node) && node.$type || (node = undefined);
+
+    var isError = set_node_if_error(roots, node, type, requested);
+
+    if(isError) {
+        return;
+    }
+
+    if (roots.is_distinct === true) {
+        roots.is_distinct = false;
+        set_successful_paths(roots, requested, optimized);
+        roots.onNext({
+            path: array_clone(requested),
+            value: clone(roots, node, type, node && node.value)
+        });
+    }
+}
+},{"113":113,"116":116,"123":123,"125":125,"126":126,"127":127,"131":131,"136":136,"138":138,"140":140,"141":141,"143":143,"146":146,"147":147,"148":148,"149":149,"150":150,"155":155}],108:[function(require,module,exports){
+module.exports = set_json_values_as_json_dense;
+
+var $path = require(151);
+var $error = require(150);
+var $atom = require(149);
+
+var clone = require(116);
+var array_clone = require(113);
+
+var options = require(136);
+var walk_path_set = require(157);
+
+var is_object = require(131);
+
+var get_valid_key = require(125);
+var create_branch = require(123);
+var wrap_node = require(148);
+var invalidate_node = require(129);
+var replace_node = require(140);
+var graph_node = require(126);
+var update_back_refs = require(146);
+var update_graph = require(147);
+var inc_generation = require(127);
+
+var set_node_if_missing_path = require(144);
+var set_node_if_error = require(143);
+var set_successful_paths = require(141);
+
+var positions = require(138);
+var _cache = positions.cache;
+var _message = positions.message;
+var _jsong = positions.jsong;
+var _json = positions.json;
+
+function set_json_values_as_json_dense(model, pathvalues, values, error_selector, comparator) {
+
+    var roots = options([], model, error_selector, comparator);
+    var index = -1;
+    var count = pathvalues.length;
+    var nodes = roots.nodes;
+    var parents = array_clone(nodes);
+    var requested = [];
+    var optimized = [];
+    var json, hasValue, hasValues;
+
+    roots[_cache] = roots.root;
+
+    while (++index < count) {
+
+        json = values && values[index];
+        if (is_object(json)) {
+            roots.json = roots[_json] = parents[_json] = nodes[_json] = json.json || (json.json = {})
+        } else {
+            roots.json = roots[_json] = parents[_json] = nodes[_json] = undefined;
+        }
+
+        var pv = pathvalues[index];
+        var pathset = pv.path;
+        roots.value = pv.value;
+        roots.index = index;
+
+        walk_path_set(onNode, onEdge, pathset, 0, roots, parents, nodes, requested, optimized);
+
+        hasValue = roots.hasValue;
+        if (Boolean(hasValue)) {
+            hasValues = true;
+            if (is_object(json)) {
+                json.json = roots.json;
+            }
+            delete roots.json;
+            delete roots.hasValue;
+        } else if (is_object(json)) {
+            delete json.json;
+        }
+    }
+
+    return {
+        values: values,
+        errors: roots.errors,
+        hasValue: hasValues,
+        requestedPaths: roots.requestedPaths,
+        optimizedPaths: roots.optimizedPaths,
+        requestedMissingPaths: roots.requestedMissingPaths,
+        optimizedMissingPaths: roots.optimizedMissingPaths
+    };
+}
+
+function onNode(pathset, roots, parents, nodes, requested, optimized, is_reference, is_branch, key, keyset, is_keyset) {
+
+    var parent, json;
+
+    if (key == null) {
+        if ((key = get_valid_key(optimized)) == null) {
+            return;
+        }
+        json = parents[_json];
+        parent = parents[_cache];
+    } else {
+        json = is_keyset && nodes[_json] || parents[_json];
+        parent = nodes[_cache];
+    }
+
+    var node = parent[key],
+        type;
+
+    if (is_reference) {
+        type = is_object(node) && node.$type || undefined;
+        type = type && is_branch && "." || type;
+        node = create_branch(roots, parent, node, type, key);
+        parents[_cache] = parent;
+        nodes[_cache] = node;
+        return;
+    }
+
+    parents[_json] = json;
+
+    if (is_branch) {
+        type = is_object(node) && node.$type || undefined;
+        node = create_branch(roots, parent, node, type, key);
+        parents[_cache] = parent;
+        nodes[_cache] = node;
+        if (is_keyset && Boolean(json)) {
+            nodes[_json] = json[keyset] || (json[keyset] = {});
+        }
+        return;
+    }
+
+    var selector = roots.error_selector;
+    var comparator = roots.comparator;
+    var root = roots[_cache];
+    var size = is_object(node) && node.$size || 0;
+    var message = roots.value;
+
+    if (message === undefined && roots.no_data_source) {
+        invalidate_node(parent, node, key, roots.lru);
+        update_graph(parent, size, roots.version, roots.lru);
+        node = undefined;
+    } else {
+        type = is_object(message) && message.$type || undefined;
+        message = wrap_node(message, type, Boolean(type) ? message.value : message);
+        type || (type = $atom);
+
+        if (type == $error && Boolean(selector)) {
+            message = selector(requested, message);
+        }
+
+        var is_distinct = roots.is_distinct = true;
+
+        if(Boolean(comparator)) {
+            is_distinct = roots.is_distinct = !comparator(requested, node, message);
+        }
+
+        if (is_distinct) {
+            node = replace_node(parent, node, message, key, roots.lru);
+            node = graph_node(root, parent, node, key, inc_generation());
+            update_graph(parent, size - node.$size, roots.version, roots.lru);
+        }
+    }
+
+    nodes[_cache] = node;
+}
+
+function onEdge(pathset, depth, roots, parents, nodes, requested, optimized, key, keyset) {
+
+    var json;
+    var node = nodes[_cache];
+    var type = is_object(node) && node.$type || (node = undefined);
+    var isMissingPath = set_node_if_missing_path(roots, node, type, pathset, depth, requested, optimized);
+
+    if(isMissingPath) {
+        return;
+    }
+
+    var isError = set_node_if_error(roots, node, type, requested);
+
+    if(isError) {
+        return;
+    }
+
+    if (roots.is_distinct === true) {
+        roots.is_distinct = false;
+        set_successful_paths(roots, requested, optimized);
+        if (keyset == null) {
+            roots.json = clone(roots, node, type, node && node.value);
+        } else if (Boolean(json = parents[_json])) {
+            json[keyset] = clone(roots, node, type, node && node.value);
+        }
+        roots.hasValue = true;
+    }
+}
+},{"113":113,"116":116,"123":123,"125":125,"126":126,"127":127,"129":129,"131":131,"136":136,"138":138,"140":140,"141":141,"143":143,"144":144,"146":146,"147":147,"148":148,"149":149,"150":150,"151":151,"157":157}],109:[function(require,module,exports){
+module.exports = set_json_values_as_json_graph;
+
+var $path = require(151);
+var $error = require(150);
+var $atom = require(149);
+
+var clone = require(117);
+var array_clone = require(113);
+
+var options = require(136);
+var walk_path_set = require(156);
+
+var is_object = require(131);
+
+var get_valid_key = require(125);
+var create_branch = require(123);
+var wrap_node = require(148);
+var invalidate_node = require(129);
+var replace_node = require(140);
+var graph_node = require(126);
+var update_back_refs = require(146);
+var update_graph = require(147);
+var inc_generation = require(127);
+
+var set_node_if_missing_path = require(144);
+var set_node_if_error = require(143);
+var set_successful_paths = require(141);
+
+var promote = require(96);
+
+var positions = require(138);
+var _cache = positions.cache;
+var _message = positions.message;
+var _jsong = positions.jsong;
+var _json = positions.json;
+
+function set_json_values_as_json_graph(model, pathvalues, values, error_selector, comparator) {
+
+    var roots = options([], model, error_selector, comparator);
+    var index = -1;
+    var count = pathvalues.length;
+    var nodes = roots.nodes;
+    var parents = array_clone(nodes);
+    var requested = [];
+    var optimized = [];
+    var json = values[0];
+    var hasValue;
+
+    roots[_cache] = roots.root;
+    roots[_jsong] = parents[_jsong] = nodes[_jsong] = json.jsong || (json.jsong = {});
+    roots.requestedPaths = json.paths || (json.paths = roots.requestedPaths);
+
+    while (++index < count) {
+
+        var pv = pathvalues[index];
+        var pathset = pv.path;
+        roots.value = pv.value;
+
+        walk_path_set(onNode, onEdge, pathset, 0, roots, parents, nodes, requested, optimized);
+    }
+
+    hasValue = roots.hasValue;
+    if (hasValue) {
+        json.jsong = roots[_jsong];
+    } else {
+        delete json.jsong;
+        delete json.paths;
+    }
+
+    return {
+        values: values,
+        errors: roots.errors,
+        hasValue: hasValue,
+        requestedPaths: roots.requestedPaths,
+        optimizedPaths: roots.optimizedPaths,
+        requestedMissingPaths: roots.requestedMissingPaths,
+        optimizedMissingPaths: roots.optimizedMissingPaths
+    };
+}
+
+function onNode(pathset, roots, parents, nodes, requested, optimized, is_reference, is_branch, key, keyset, is_keyset) {
+
+    var parent, json;
+
+    if (key == null) {
+        if ((key = get_valid_key(optimized)) == null) {
+            return;
+        }
+        json = parents[_jsong];
+        parent = parents[_cache];
+    } else {
+        json = nodes[_jsong];
+        parent = nodes[_cache];
+    }
+
+    var jsonkey = key;
+    var node = parent[key],
+        type;
+
+    if (is_reference) {
+        type = is_object(node) && node.$type || undefined;
+        type = type && is_branch && "." || type;
+        node = create_branch(roots, parent, node, type, key);
+        parents[_cache] = parent;
+        nodes[_cache] = node;
+        parents[_jsong] = json;
+        if (type == $path) {
+            json[jsonkey] = clone(roots, node, type, node.value);
+            roots.hasValue = true;
+        } else {
+            nodes[_jsong] = json[jsonkey] || (json[jsonkey] = {});
+        }
+        return;
+    }
+
+    if (is_branch) {
+        type = is_object(node) && node.$type || undefined;
+        node = create_branch(roots, parent, node, type, key);
+        type = node.$type;
+        parents[_cache] = parent;
+        nodes[_cache] = node;
+        parents[_jsong] = json;
+        if (type == $path) {
+            json[jsonkey] = clone(roots, node, type, node.value);
+            roots.hasValue = true;
+        } else {
+            nodes[_jsong] = json[jsonkey] || (json[jsonkey] = {});
+        }
+        return;
+    }
+
+    var selector = roots.error_selector;
+    var comparator = roots.comparator;
+    var root = roots[_cache];
+    var size = is_object(node) && node.$size || 0;
+    var message = roots.value;
+
+    if (message === undefined && roots.no_data_source) {
+        invalidate_node(parent, node, key, roots.lru);
+        update_graph(parent, size, roots.version, roots.lru);
+        node = undefined;
+    } else {
+        type = is_object(message) && message.$type || undefined;
+        message = wrap_node(message, type, Boolean(type) ? message.value : message);
+        type || (type = $atom);
+
+        if (type == $error && Boolean(selector)) {
+            message = selector(requested, message);
+        }
+
+        var is_distinct = roots.is_distinct = true;
+
+        if(Boolean(comparator)) {
+            is_distinct = roots.is_distinct = !comparator(requested, node, message);
+        }
+
+        if (is_distinct) {
+            node = replace_node(parent, node, message, key, roots.lru);
+            node = graph_node(root, parent, node, key, inc_generation());
+            update_graph(parent, size - node.$size, roots.version, roots.lru);
+
+            json[jsonkey] = clone(roots, node, type, node && node.value);
+            roots.hasValue = true;
+        }
+    }
+    nodes[_cache] = node;
+}
+
+function onEdge(pathset, depth, roots, parents, nodes, requested, optimized, key, keyset) {
+
+    var json;
+    var node = nodes[_cache];
+    var type = is_object(node) && node.$type || (node = undefined);
+    var isMissingPath = set_node_if_missing_path(roots, node, type, pathset, depth, requested, optimized)
+
+    if(isMissingPath) {
+        return;
+    }
+
+    promote(roots.lru, node);
+
+    if (roots.is_distinct === true) {
+        roots.is_distinct = false;
+        set_successful_paths(roots, requested, optimized);
+        if (keyset == null && !roots.hasValue && (keyset = get_valid_key(optimized)) == null) {
+            node = clone(roots, node, type, node && node.value);
+            json = roots[_jsong];
+            json.$type = node.$type;
+            json.value = node.value;
+        }
+        roots.hasValue = true;
+    }
+}
+},{"113":113,"117":117,"123":123,"125":125,"126":126,"127":127,"129":129,"131":131,"136":136,"138":138,"140":140,"141":141,"143":143,"144":144,"146":146,"147":147,"148":148,"149":149,"150":150,"151":151,"156":156,"96":96}],110:[function(require,module,exports){
+module.exports = set_json_values_as_json_sparse;
+
+var $path = require(151);
+var $error = require(150);
+var $atom = require(149);
+
+var clone = require(116);
+var array_clone = require(113);
+
+var options = require(136);
+var walk_path_set = require(157);
+
+var is_object = require(131);
+
+var get_valid_key = require(125);
+var create_branch = require(123);
+var wrap_node = require(148);
+var invalidate_node = require(129);
+var replace_node = require(140);
+var graph_node = require(126);
+var update_back_refs = require(146);
+var update_graph = require(147);
+var inc_generation = require(127);
+
+var set_node_if_missing_path = require(144);
+var set_node_if_error = require(143);
+var set_successful_paths = require(141);
+
+var positions = require(138);
+var _cache = positions.cache;
+var _message = positions.message;
+var _jsong = positions.jsong;
+var _json = positions.json;
+
+function set_json_values_as_json_sparse(model, pathvalues, values, error_selector, comparator) {
+
+    var roots = options([], model, error_selector, comparator);
+    var index = -1;
+    var count = pathvalues.length;
+    var nodes = roots.nodes;
+    var parents = array_clone(nodes);
+    var requested = [];
+    var optimized = [];
+    var json = values[0];
+    var hasValue;
+
+    roots[_cache] = roots.root;
+    roots[_json] = parents[_json] = nodes[_json] = json.json || (json.json = {});
+
+    while (++index < count) {
+
+        var pv = pathvalues[index];
+        var pathset = pv.path;
+        roots.value = pv.value;
+
+        walk_path_set(onNode, onEdge, pathset, 0, roots, parents, nodes, requested, optimized);
+    }
+
+    hasValue = roots.hasValue;
+    if (hasValue) {
+        json.json = roots[_json];
+    } else {
+        delete json.json;
+    }
+
+    return {
+        values: values,
+        errors: roots.errors,
+        hasValue: hasValue,
+        requestedPaths: roots.requestedPaths,
+        optimizedPaths: roots.optimizedPaths,
+        requestedMissingPaths: roots.requestedMissingPaths,
+        optimizedMissingPaths: roots.optimizedMissingPaths
+    };
+}
+
+function onNode(pathset, roots, parents, nodes, requested, optimized, is_reference, is_branch, key, keyset, is_keyset) {
+
+    var parent, json, jsonkey;
+
+    if (key == null) {
+        if ((key = get_valid_key(optimized)) == null) {
+            return;
+        }
+        jsonkey = get_valid_key(requested);
+        json = parents[_json];
+        parent = parents[_cache];
+    } else {
+        jsonkey = key;
+        json = nodes[_json];
+        parent = nodes[_cache];
+    }
+
+    var node = parent[key],
+        type;
+
+    if (is_reference) {
+        type = is_object(node) && node.$type || undefined;
+        type = type && is_branch && "." || type;
+        node = create_branch(roots, parent, node, type, key);
+        parents[_cache] = parent;
+        nodes[_cache] = node;
+        return;
+    }
+
+    parents[_json] = json;
+
+    if (is_branch) {
+        type = is_object(node) && node.$type || undefined;
+        node = create_branch(roots, parent, node, type, key);
+        parents[_cache] = parent;
+        nodes[_cache] = node;
+        nodes[_json] = json[jsonkey] || (json[jsonkey] = {});
+        return;
+    }
+
+    var selector = roots.error_selector;
+    var comparator = roots.comparator;
+    var root = roots[_cache];
+    var size = is_object(node) && node.$size || 0;
+    var message = roots.value;
+
+    if (message === undefined && roots.no_data_source) {
+        invalidate_node(parent, node, key, roots.lru);
+        update_graph(parent, size, roots.version, roots.lru);
+        node = undefined;
+    } else {
+        type = is_object(message) && message.$type || undefined;
+        message = wrap_node(message, type, Boolean(type) ? message.value : message);
+        type || (type = $atom);
+
+        if (type == $error && Boolean(selector)) {
+            message = selector(requested, message);
+        }
+
+        var is_distinct = roots.is_distinct = true;
+
+        if(Boolean(comparator)) {
+            is_distinct = roots.is_distinct = !comparator(requested, node, message);
+        }
+
+        if (is_distinct) {
+            node = replace_node(parent, node, message, key, roots.lru);
+            node = graph_node(root, parent, node, key, inc_generation());
+            update_graph(parent, size - node.$size, roots.version, roots.lru);
+        }
+    }
+    nodes[_cache] = node;
+}
+
+function onEdge(pathset, depth, roots, parents, nodes, requested, optimized, key, keyset) {
+
+    var json;
+    var node = nodes[_cache];
+    var type = is_object(node) && node.$type || (node = undefined);
+    var isMissingPath = set_node_if_missing_path(roots, node, type, pathset, depth, requested, optimized);
+    
+    if(isMissingPath) {
+        return;
+    }
+    
+    var isError = set_node_if_error(roots, node, type, requested);
+    
+    if(isError) {
+        return;
+    }
+    
+    if (roots.is_distinct === true) {
+        roots.is_distinct = false;
+        set_successful_paths(roots, requested, optimized);
+        if (keyset == null && !roots.hasValue && (keyset = get_valid_key(optimized)) == null) {
+            node = clone(roots, node, type, node && node.value);
+            json = roots[_json];
+            json.$type = node.$type;
+            json.value = node.value;
+        } else {
+            json = parents[_json];
+            json[key] = clone(roots, node, type, node && node.value);
+        }
+        roots.hasValue = true;
+    }
+}
+},{"113":113,"116":116,"123":123,"125":125,"126":126,"127":127,"129":129,"131":131,"136":136,"138":138,"140":140,"141":141,"143":143,"144":144,"146":146,"147":147,"148":148,"149":149,"150":150,"151":151,"157":157}],111:[function(require,module,exports){
+module.exports = set_json_values_as_json_values;
+
+var $error = require(150);
+var $atom = require(149);
+
+var clone = require(116);
+var array_clone = require(113);
+
+var options = require(136);
+var walk_path_set = require(157);
+
+var is_object = require(131);
+
+var get_valid_key = require(125);
+var create_branch = require(123);
+var wrap_node = require(148);
+var invalidate_node = require(129);
+var replace_node = require(140);
+var graph_node = require(126);
+var update_back_refs = require(146);
+var update_graph = require(147);
+var inc_generation = require(127);
+
+var set_node_if_missing_path = require(144);
+var set_node_if_error = require(143);
+var set_successful_paths = require(141);
+
+var positions = require(138);
+var _cache = positions.cache;
+var _message = positions.message;
+var _jsong = positions.jsong;
+var _json = positions.json;
+
+/**
+ * TODO: CR More comments.
+ * Sets a list of PathValues into the cache and calls the onNext for each value.
+ */
+function set_json_values_as_json_values(model, pathvalues, onNext, error_selector, comparator) {
+
+    // TODO: CR Rename options to setup set state
+    var roots = options([], model, error_selector, comparator);
+    var pathsIndex = -1;
+    var pathsCount = pathvalues.length;
+    var nodes = roots.nodes;
+    var parents = array_clone(nodes);
+    var requestedPath = [];
+    var optimizedPath = [];
+
+    // TODO: CR Rename node array indicies
+    roots[_cache] = roots.root;
+    roots.onNext = onNext;
+
+    while (++pathsIndex < pathsCount) {
+        var pv = pathvalues[pathsIndex];
+        var pathset = pv.path;
+        roots.value = pv.value;
+        walk_path_set(onNode, onValueType, pathset, 0, roots, parents, nodes, requestedPath, optimizedPath);
+    }
+
+    return {
+        values: null,
+        errors: roots.errors,
+        requestedPaths: roots.requestedPaths,
+        optimizedPaths: roots.optimizedPaths,
+        requestedMissingPaths: roots.requestedMissingPaths,
+        optimizedMissingPaths: roots.optimizedMissingPaths
+    };
+}
+
+// TODO: CR
+// - comment parents and nodes initial state
+// - comment parents and nodes mutation
+
+function onNode(pathset, roots, parents, nodes, requested, optimized, is_reference, is_branch, key, keyset, is_keyset) {
+
+    var parent;
+
+    if (key == null) {
+        if ((key = get_valid_key(optimized)) == null) {
+            return;
+        }
+        parent = parents[_cache];
+    } else {
+        parent = nodes[_cache];
+    }
+
+    var node = parent[key],
+        type;
+
+    if (is_reference) {
+        type = is_object(node) && node.$type || undefined;
+        type = type && is_branch && "." || type;
+        node = create_branch(roots, parent, node, type, key);
+        parents[_cache] = parent;
+        nodes[_cache] = node;
+        return;
+    }
+
+    if (is_branch) {
+        type = is_object(node) && node.$type || undefined;
+        node = create_branch(roots, parent, node, type, key);
+        parents[_cache] = parent;
+        nodes[_cache] = node;
+        return;
+    }
+
+    var selector = roots.error_selector;
+    var comparator = roots.comparator;
+    var root = roots[_cache];
+    var size = is_object(node) && node.$size || 0;
+    var message = roots.value;
+
+    if (message === undefined && roots.no_data_source) {
+        invalidate_node(parent, node, key, roots.lru);
+        update_graph(parent, size, roots.version, roots.lru);
+        node = undefined;
+    } else {
+        type = is_object(message) && message.$type || undefined;
+        message = wrap_node(message, type, Boolean(type) ? message.value : message);
+        type || (type = $atom);
+
+        if (type == $error && Boolean(selector)) {
+            message = selector(requested, message);
+        }
+
+        var is_distinct = roots.is_distinct = true;
+
+        if(Boolean(comparator)) {
+            is_distinct = roots.is_distinct = !comparator(requested, node, message);
+        }
+
+        if (is_distinct) {
+            node = replace_node(parent, node, message, key, roots.lru);
+            node = graph_node(root, parent, node, key, inc_generation());
+            update_graph(parent, size - node.$size, roots.version, roots.lru);
+        }
+    }
+    nodes[_cache] = node;
+}
+
+// TODO: CR describe onValueType's job
+function onValueType(pathset, depth, roots, parents, nodes, requested, optimized, key, keyset) {
+
+    var node = nodes[_cache];
+    var type = is_object(node) && node.$type || (node = undefined);
+    var isMissingPath = set_node_if_missing_path(roots, node, type, pathset, depth, requested, optimized);
+
+    if (isMissingPath) {
+        return;
+    }
+
+    var isError = set_node_if_error(roots, node, type, requested);
+
+    if (isError) {
+        return;
+    }
+
+    if (roots.is_distinct === true) {
+        // TODO: CR Explain what's happening here.
+        roots.is_distinct = false;
+        set_successful_paths(roots, requested, optimized);
+        roots.onNext({
+            path: array_clone(requested),
+            value: clone(roots, node, type, node && node.value)
+        });
+    }
+}
+},{"113":113,"116":116,"123":123,"125":125,"126":126,"127":127,"129":129,"131":131,"136":136,"138":138,"140":140,"141":141,"143":143,"144":144,"146":146,"147":147,"148":148,"149":149,"150":150,"157":157}],112:[function(require,module,exports){
+module.exports = function(array, value) {
+    var i = -1;
+    var n = array.length;
+    var array2 = new Array(n + 1);
+    while(++i < n) { array2[i] = array[i]; }
+    array2[i] = value;
+    return array2;
+};
+},{}],113:[function(require,module,exports){
+module.exports = function(array) {
+    var i = -1;
+    var n = array.length;
+    var array2 = new Array(n);
+    while(++i < n) { array2[i] = array[i]; }
+    return array2;
+};
+},{}],114:[function(require,module,exports){
+module.exports = function(array, selector) {
+    var i = -1;
+    var n = array.length;
+    var array2 = new Array(n);
+    while(++i < n) { array2[i] = selector(array[i], i, array); }
+    return array2;
+}
+},{}],115:[function(require,module,exports){
+module.exports = function(array, index) {
+    var i = -1;
+    var n = Math.max(array.length - index, 0);
+    var array2 = new Array(n);
+    while(++i < n) { array2[i] = array[i + index]; }
+    return array2;
+};
+},{}],116:[function(require,module,exports){
+var $atom = require(149);
+var clone = require(121);
+module.exports = function(roots, node, type, value) {
+
+    if (node == null || value === undefined) {
+        return { $type: $atom };
+    }
+
+    if (roots.boxed) {
+        return Boolean(type) && clone(node) || node;
+    }
+
+    return value;
+};
+
+},{"121":121,"149":149}],117:[function(require,module,exports){
+var $atom = require(149);
+var clone = require(121);
+var is_primitive = require(132);
+module.exports = function(roots, node, type, value) {
+
+    if(node == null || value === undefined) {
+        return { $type: $atom };
+    }
+
+    if(roots.boxed == true) {
+        return Boolean(type) && clone(node) || node;
+    }
+
+    if(!type || (type === $atom && is_primitive(value))) {
+        return value;
+    }
+
+    return clone(node);
+}
+
+},{"121":121,"132":132,"149":149}],118:[function(require,module,exports){
+var clone_requested_path = require(120);
+var clone_optimized_path = require(119);
+module.exports = function clone_missing_path_sets(roots, pathset, depth, requested, optimized) {
+    roots.requestedMissingPaths.push(clone_requested_path(roots.bound, requested, pathset, depth, roots.index));
+    roots.optimizedMissingPaths.push(clone_optimized_path(optimized, pathset, depth));
+}
+},{"119":119,"120":120}],119:[function(require,module,exports){
+module.exports = function(optimized, pathset, depth) {
+    var x;
+    var i = -1;
+    var j = depth - 1;
+    var n = optimized.length;
+    var m = pathset.length;
+    var array2 = [];
+    while(++i < n) {
+        array2[i] = optimized[i];
+    }
+    while(++j < m) {
+        if((x = pathset[j]) != null) {
+            array2[i++] = x;
+        }
+    }
+    return array2;
+}
+},{}],120:[function(require,module,exports){
+var is_object = require(131);
+module.exports = function(bound, requested, pathset, depth, index) {
+    var x;
+    var i = -1;
+    var j = -1;
+    var l = 0;
+    var m = requested.length;
+    var n = bound.length;
+    var array2 = [];
+    while(++i < n) {
+        array2[i] = bound[i];
+    }
+    while(++j < m) {
+        if((x = requested[j]) != null) {
+            if(is_object(pathset[l++])) {
+                array2[i++] = [x];
+            } else {
+                array2[i++] = x;
+            }
+        }
+    }
+    m = n + l + pathset.length - depth;
+    while(i < m) {
+        array2[i++] = pathset[l++];
+    }
+    if(index != null) {
+        array2.pathSetIndex = index;
+    }
+    return array2;
+}
+},{"131":131}],121:[function(require,module,exports){
+var is_object = require(131);
+var prefix = require(83);
+
+module.exports = function(value) {
+    var dest = value, src = dest, i = -1, n, keys, key;
+    if(is_object(dest)) {
+        dest = {};
+        keys = Object.keys(src);
+        n = keys.length;
+        while(++i < n) {
+            key = keys[i];
+            if(key[0] !== prefix) {
+                dest[key] = src[key];
+            }
+        }
+    }
+    return dest;
+}
+},{"131":131,"83":83}],122:[function(require,module,exports){
+var array_map = require(114);
+var is_array = Array.isArray;
+var is_primitive = require(132);
+
+module.exports = function collapse(pathmap) {
+    return array_map(buildQueries(pathmap), collapseRangeIndexes);
+};
+
+// Note: export this for testing
+module.exports.buildQueries = buildQueries;
+
+/**
+ * Collapse range indexers, e.g. when there is a continuous
+ * range in an array, turn it into an object instead:
+ *
+ * [1,2,3,4,5,6] => {"from":1, "to":6}
+ *
+ */
+function collapseRangeIndexes(pathset) {
+    
+    var keysetIndex = -1;
+    var keysetCount = pathset.length;
+
+    while (++keysetIndex < keysetCount) {
+
+        var keyset = pathset[keysetIndex];
+
+        if (is_array(keyset)) {
+
+            // Do we need to dedupe an indexer keyset if they're duplicate consecutive integers?
+            // var hash = {};
+            var isSparseRange = true;
+            var keyIndex = -1;
+            var keyCount = keyset.length - 1;
+
+            while (++keyIndex <= keyCount) {
+
+                var key = keyset[keyIndex];
+
+                if (!isNumber(key) /* || hash[key] === true*/ ) {
+                    isSparseRange = false;
+                    break;
+                }
+                // hash[key] = true;
+                // Cast number indexes to integers.
+                keyset[keyIndex] = parseInt(key, 10);
+            }
+
+            if (isSparseRange === true) {
+                
+                keyset.sort(sortListAscending);
+                
+                var from = keyset[0];
+                var to = keyset[keyCount];
+                
+                // If we re-introduce deduped integer indexers, change this comparson to "===".
+                if (to - from <= keyCount) {
+                    pathset[keysetIndex] = {
+                        from: from,
+                        to: to
+                    };
+                }
+            }
+        }
+    }
+    
+    return pathset;
+}
+
+function sortListAscending(a, b) {
+    return a - b;
+}
+
+/**
+ * Builds the set of collapsed
+ * queries by traversing the tree
+ * once
+ */
+
+/* jshint forin: false */
+function buildQueries(pathmap) {
+
+    if (is_primitive(pathmap)) {
+        return [[]];
+    }
+
+    var keys = Object.keys(pathmap);
+    var keysIndex = -1;
+    var keysCount = keys.length;
+    
+    if (keysCount === 0) {
+        return [[]];
+    }
+
+    var subPaths = {};
+    var subPath, subPathKeys, subPathSets, clone, j, k, x;
+
+    while (++keysIndex < keysCount) {
+        
+        var key = keys[keysIndex];
+        var pathsets = buildQueries(pathmap[key]);
+        var pathsetsKey = createKey(pathsets);
+        
+        subPath = subPaths[pathsetsKey] || (subPaths[pathsetsKey] = {
+            head: [],
+            tail: pathsets
+        });
+        subPathKeys = subPath.head;
+        subPathKeys[subPathKeys.length] = isNumber(key) ? parseInt(key, 10) : key;
+    }
+
+    var results = [];
+    var resultsLength = 0;
+
+    for(pathsetsKey in subPaths) {
+        
+        subPath = subPaths[pathsetsKey];
+        subPathKeys = subPath.head;
+        subPathSets = subPath.tail;
+        
+        var firstSubPathsKey = subPathKeys[0];
+        var subPathKeysCount = subPathKeys.length;
+        
+        var subPathSetsIndex = -1;
+        var subPathSetsCount = subPathSets.length;
+        
+        while(++subPathSetsIndex < subPathSetsCount) {
+            
+            var pathset = subPathSets[subPathSetsIndex];
+            var pathsetClone = [];
+            
+            if(firstSubPathsKey !== "") {
+                
+                pathsetClone[0] = subPathKeysCount === 1 ? firstSubPathsKey : subPathKeys;
+                
+                var pathsetIndex = -1;
+                var pathsetCount = pathset.length;
+                
+                while(++pathsetIndex < pathsetCount) {
+                    pathsetClone[pathsetIndex + 1] = pathset[pathsetIndex];
+                }
+            }
+            
+            results[resultsLength++] = pathsetClone;
+        }
+    }
+    
+    return results;
+}
+
+/**
+ * Return true if argument is a number or can be cast to a number
+ */
+function isNumber(val) {
+    // parseFloat NaNs numeric-cast false positives (null|true|false|"")
+    // ...but misinterprets leading-number strings, particularly hex literals ("0x...")
+    // subtraction forces infinities to NaN
+    // adding 1 corrects loss of precision from parseFloat (#15100)
+    return !is_array(val) && (val - parseFloat(val) + 1) >= 0;
+}
+
+/**
+ * allUnique
+ * return true if every number in an array is unique
+ */
+function allUnique(arr) {
+    var hash = {},
+        index, count;
+    for (index = 0, count = arr.length; index < count; index++) {
+        if (hash[arr[index]]) {
+            return false;
+        }
+        hash[arr[index]] = true;
+    }
+    return true;
+}
+
+/**
+ * Create a unique hash key for a set of paths
+ */
+function createKey(list) {
+    return JSON.stringify(sortListOfLists(list));
+}
+
+/**
+ * Sort a list-of-lists
+ * Used for generating a unique hash key for each subtree; used by the memoization
+ */
+function sortListOfLists(list) {
+    var index = 0;
+    var result = [];
+    var listIndex = -1;
+    var listCount = list.length;
+    while(++listIndex < listCount) {
+        var value = list[listIndex];
+        result[index++] = is_array(value) ?
+            sortListOfLists(value) :
+            value;
+    }
+    return result.sort();
+}
+},{"114":114,"132":132}],123:[function(require,module,exports){
+// TODO: rename path to ref
+var $ref = require(151);
+var $expired = "expired";
+var replace_node = require(140);
+var graph_node = require(126);
+var update_back_refs = require(146);
+var is_primitive = require(132);
+var is_expired = require(130);
+
+// TODO: comment about what happens if node is a branch vs leaf.
+module.exports = function create_branch(roots, parent, node, type, key) {
+
+    if(Boolean(type) && is_expired(roots, node)) {
+        type = $expired;
+    }
+
+    if((Boolean(type) && type != $ref) || is_primitive(node)) {
+        node = replace_node(parent, node, {}, key, roots.lru);
+        node = graph_node(roots[0], parent, node, key, 0);
+        node = update_back_refs(node, roots.version);
+    }
+    return node;
+}
+},{"126":126,"130":130,"132":132,"140":140,"146":146,"151":151}],124:[function(require,module,exports){
+var __ref = require(86);
+var __context = require(75);
+var __ref_index = require(85);
+var __refs_length = require(87);
+
+module.exports = function(node) {
+    var ref, i = -1, n = node[__refs_length] || 0;
+    while(++i < n) {
+        if((ref = node[__ref + i]) !== undefined) {
+            ref[__context] = ref[__ref_index] = node[__ref + i] = undefined;
+        }
+    }
+    node[__refs_length] = undefined
+}
+},{"75":75,"85":85,"86":86,"87":87}],125:[function(require,module,exports){
+module.exports = function(path) {
+    var key, index = path.length - 1;
+    do {
+        if((key = path[index]) != null) {
+            return key;
+        }
+    } while(--index > -1);
+    return null;
+}
+},{}],126:[function(require,module,exports){
+var __parent = require(82);
+var __key = require(79);
+var __generation = require(76);
+
+module.exports = function(root, parent, node, key, generation) {
+    node[__parent] = parent;
+    node[__key] = key;
+    node[__generation] = generation;
+    return node;
+}
+},{"76":76,"79":79,"82":82}],127:[function(require,module,exports){
+var generation = 0;
+module.exports = function() { return generation++; }
+},{}],128:[function(require,module,exports){
+var version = 0;
+module.exports = function() { return version++; }
+},{}],129:[function(require,module,exports){
+module.exports = invalidate;
+
+var is_object = require(131);
+var remove_node = require(139);
+var prefix = require(83);
+
+function invalidate(parent, node, key, lru) {
+    if(remove_node(parent, node, key, lru)) {
+        var type = is_object(node) && node.$type || undefined;
+        if(type == null) {
+            var keys = Object.keys(node);
+            for(var i = -1, n = keys.length; ++i < n;) {
+                var key = keys[i];
+                if(key[0] !== prefix && key[0] !== "$") {
+                    invalidate(node, node[key], key, lru);
+                }
+            }
+        }
+        return true;
+    }
+    return false;
+}
+},{"131":131,"139":139,"83":83}],130:[function(require,module,exports){
+var $expires_now = require(153);
+var $expires_never = require(152);
+var __invalidated = require(78);
+var now = require(135);
+var splice = require(97);
+
+module.exports = function isExpired(roots, node) {
+    var expires = node.$expires;
+    if((expires != null                            ) && (
+        expires != $expires_never                  ) && (
+        expires == $expires_now || expires < now()))    {
+        if(!node[__invalidated]) {
+            node[__invalidated] = true;
+            roots.expired.push(node);
+            splice(roots.lru, node);
+        }
+        return true;
+    }
+    return false;
+}
+
+},{"135":135,"152":152,"153":153,"78":78,"97":97}],131:[function(require,module,exports){
+var obj_typeof = "object";
+module.exports = function(value) {
+    return value != null && typeof value == obj_typeof;
+}
+},{}],132:[function(require,module,exports){
+var obj_typeof = "object";
+module.exports = function(value) {
+    return value == null || typeof value != obj_typeof;
+}
+},{}],133:[function(require,module,exports){
+module.exports = key_to_keyset;
+
+var __offset = require(81);
+var is_array = Array.isArray;
+var is_object = require(131);
+
+function key_to_keyset(key, iskeyset) {
+    if(iskeyset) {
+        if(is_array(key)) {
+            key = key[key[__offset]];
+            return key_to_keyset(key, is_object(key));
+        } else {
+            return key[__offset];
+        }
+    }
+    return key;
+}
+
+
+},{"131":131,"81":81}],134:[function(require,module,exports){
+
+var $self = "./";
+var $path = require(151);
+var $atom = require(149);
+var $expires_now = require(153);
+
+var is_object = require(131);
+var is_primitive = require(132);
+var is_expired = require(130);
+var promote = require(96);
+var wrap_node = require(148);
+var graph_node = require(126);
+var replace_node = require(140);
+var update_graph  = require(147);
+var inc_generation = require(127);
+var invalidate_node = require(129);
+
+module.exports = function(roots, parent, node, messageParent, message, key, requested) {
+
+    var type, messageType, node_is_object, message_is_object;
+
+    // If the cache and message are the same, we can probably return early:
+    // - If they're both null, return null.
+    // - If they're both branches, return the branch.
+    // - If they're both edges, continue below.
+    if(node == message) {
+        if(node == null) {
+            return null;
+        } else if((node_is_object = is_object(node))) {
+            type = node.$type;
+            if(type == null) {
+                if(node[$self] == null) {
+                    return graph_node(roots[0], parent, node, key, 0);
+                }
+                return node;
+            }
+        }
+    } else if((node_is_object = is_object(node))) {
+        type = node.$type;
+    }
+
+    var value, messageValue;
+
+    if(type == $path) {
+        if(message == null) {
+            // If the cache is an expired reference, but the message
+            // is empty, remove the cache value and return undefined
+            // so we build a missing path.
+            if(is_expired(roots, node)) {
+                invalidate_node(parent, node, key, roots.lru);
+                return undefined;
+            }
+            // If the cache has a reference and the message is empty,
+            // leave the cache alone and follow the reference.
+            return node;
+        } else if((message_is_object = is_object(message))) {
+            messageType = message.$type;
+            // If the cache and the message are both references,
+            // check if we need to replace the cache reference.
+            if(messageType == $path) {
+                if(node === message) {
+                    // If the cache and message are the same reference,
+                    // we performed a whole-branch merge of one of the
+                    // grandparents. If we've previously graphed this
+                    // reference, break early.
+                    if(node[$self] != null) {
+                        return node;
+                    }
+                }
+                // If the message doesn't expire immediately and is newer than the
+                // cache (or either cache or message don't have timestamps), attempt
+                // to use the message value.
+                // Note: Number and `undefined` compared LT/GT to `undefined` is `false`.
+                else if((
+                    is_expired(roots, message) === false) && ((
+                    message.$timestamp < node.$timestamp) === false)) {
+
+                    // Compare the cache and message references.
+                    // - If they're the same, break early so we don't insert.
+                    // - If they're different, replace the cache reference.
+
+                    value = node.value;
+                    messageValue = message.value;
+
+                    var count = value.length;
+
+                    // If the reference lengths are equal, check their keys for equality.
+                    if(count === messageValue.length) {
+                        while(--count > -1) {
+                            // If any of their keys are different, replace the reference
+                            // in the cache with the reference in the message.
+                            if(value[count] !== messageValue[count]) {
+                                break;
+                            }
+                        }
+                        // If all their keys are equal, leave the cache value alone.
+                        if(count === -1) {
+                            return node;
+                        }
+                    }
+                }
+            }
+        }
+    } else {
+        if((message_is_object = is_object(message))) {
+            messageType = message.$type;
+        }
+        if(node_is_object && !type) {
+            // Otherwise if the cache is a branch and the message is either
+            // null or also a branch, continue with the cache branch.
+            if(message == null || (message_is_object && !messageType)) {
+                return node;
+            }
+        }
+    }
+
+    // If the message is an expired edge, report it back out so we don't build a missing path, but
+    // don't insert it into the cache. If a value exists in the cache that didn't come from a
+    // whole-branch grandparent merge, remove the cache value.
+    if(Boolean(messageType) && Boolean(message[$self]) && is_expired(roots, message)) {
+        if(node_is_object && node != message) {
+            invalidate_node(parent, node, key, roots.lru);
+        }
+        return message;
+    }
+    // If the cache is a value, but the message is a branch, merge the branch over the value.
+    else if(Boolean(type) && message_is_object && !messageType) {
+        node = replace_node(parent, node, message, key, roots.lru);
+        return graph_node(roots[0], parent, node, key, 0);
+    }
+    // If the message is a value, insert it into the cache.
+    else if(!message_is_object || Boolean(messageType)) {
+        var offset = 0;
+        // If we've arrived at this message value, but didn't perform a whole-branch merge
+        // on one of its ancestors, replace the cache node with the message value.
+        if(node != message) {
+            messageValue || (messageValue = Boolean(messageType) ? message.value : message);
+            message = wrap_node(message, messageType, messageValue);
+            var comparator = roots.comparator;
+            var is_distinct = roots.is_distinct = true;
+            if(Boolean(comparator)) {
+                is_distinct = roots.is_distinct = !comparator(requested, node, message);
+            }
+            if(is_distinct) {
+                var size = node_is_object && node.$size || 0;
+                var messageSize = message.$size;
+                offset = size - messageSize;
+
+                node = replace_node(parent, node, message, key, roots.lru);
+                update_graph(parent, offset, roots.version, roots.lru);
+                node = graph_node(roots[0], parent, node, key, inc_generation());
+            }
+        }
+        // If the cache and the message are the same value, we branch-merged one of its
+        // ancestors. Give the message a $size and $type, attach its graph pointers, and
+        // update the cache sizes and generations.
+        else if(node_is_object && node[$self] == null) {
+            roots.is_distinct = true;
+            node = parent[key] = wrap_node(node, type, node.value);
+            offset = -node.$size;
+            update_graph(parent, offset, roots.version, roots.lru);
+            node = graph_node(roots[0], parent, node, key, inc_generation());
+        }
+        // Otherwise, cache and message are the same primitive value. Wrap in a atom and insert.
+        else {
+            roots.is_distinct = true;
+            node = parent[key] = wrap_node(node, type, node);
+            offset = -node.$size;
+            update_graph(parent, offset, roots.version, roots.lru);
+            node = graph_node(roots[0], parent, node, key, inc_generation());
+        }
+        // If the node is already expired, return undefined to build a missing path.
+        // if(is_expired(roots, node)) {
+        //     return undefined;
+        // }
+
+        // Promote the message edge in the LRU.
+        promote(roots.lru, node);
+    }
+    // If we get here, the cache is empty and the message is a branch.
+    // Merge the whole branch over.
+    else if(node == null) {
+        node = parent[key] = graph_node(roots[0], parent, message, key, 0);
+    }
+
+    return node;
+}
+
+},{"126":126,"127":127,"129":129,"130":130,"131":131,"132":132,"140":140,"147":147,"148":148,"149":149,"151":151,"153":153,"96":96}],135:[function(require,module,exports){
+module.exports = Date.now;
+},{}],136:[function(require,module,exports){
+var inc_version = require(128);
+var getBoundValue = require(58);
+
+/**
+ * TODO: more options state tracking comments.
+ */
+module.exports = function(options, model, error_selector, comparator) {
+    
+    var bound = options.bound     || (options.bound                 = model._path || []);
+    var root  = options.root      || (options.root                  = model._cache);
+    var nodes = options.nodes     || (options.nodes                 = []);
+    var lru   = options.lru       || (options.lru                   = model._root);
+    options.expired               || (options.expired               = lru.expired);
+    options.errors                || (options.errors                = []);
+    options.requestedPaths        || (options.requestedPaths        = []);
+    options.optimizedPaths        || (options.optimizedPaths        = []);
+    options.requestedMissingPaths || (options.requestedMissingPaths = []);
+    options.optimizedMissingPaths || (options.optimizedMissingPaths = []);
+    options.boxed  = model._boxed || false;
+    options.materialized = model._materialized;
+    options.errorsAsValues = model._treatErrorsAsValues || false;
+    options.no_data_source = model._dataSource == null;
+    options.version = model._version = inc_version();
+    
+    options.offset || (options.offset = 0);
+    options.error_selector = error_selector || model._errorSelector;
+    options.comparator = comparator;
+    
+    if(bound.length) {
+        nodes[0] = getBoundValue(model, bound).value;
+    } else {
+        nodes[0] = root;
+    }
+    
+    return options;
+};
+},{"128":128,"58":58}],137:[function(require,module,exports){
+module.exports = permute_keyset;
+
+var __offset = require(81);
+var is_array = Array.isArray;
+var is_object = require(131);
+
+function permute_keyset(key) {
+    if(is_array(key)) {
+        if(key.length == 0) {
+            return false;
+        }
+        if(key[__offset] === undefined) {
+            return permute_keyset(key[key[__offset] = 0]) || true;
+        } else if(permute_keyset(key[key[__offset]])) {
+            return true;
+        } else if(++key[__offset] >= key.length) {
+            key[__offset] = undefined;
+            return false;
+        } else {
+            return true;
+        }
+    } else if(is_object(key)) {
+        if(key[__offset] === undefined) {
+            key[__offset] = (key.from || (key.from = 0)) - 1;
+            if(key.to === undefined) {
+                if(key.length === undefined) {
+                    throw new Error("Range keysets must specify at least one index to retrieve.");
+                } else if(key.length === 0) {
+                    return false;
+                }
+                key.to = key.from + (key.length || 1) - 1;
+            }
+        }
+        
+        if(++key[__offset] > key.to) {
+            key[__offset] = key.from - 1;
+            return false;
+        }
+        
+        return true;
+    }
+    
+    return false;
+}
+
+
+},{"131":131,"81":81}],138:[function(require,module,exports){
+module.exports = {
+    cache: 0,
+    message: 1,
+    jsong: 2,
+    json: 3
+};
+},{}],139:[function(require,module,exports){
+var $path = require(151);
+var __parent = require(82);
+var unlink = require(145);
+var delete_back_refs = require(124);
+var splice = require(97);
+var is_object = require(131);
+
+module.exports = function(parent, node, key, lru) {
+    if(is_object(node)) {
+        var type  = node.$type;
+        if(Boolean(type)) {
+            if(type == $path) { unlink(node); }
+            splice(lru, node);
+        }
+        delete_back_refs(node);
+        parent[key] = node[__parent] = undefined;
+        return true;
+    }
+    return false;
+}
+
+},{"124":124,"131":131,"145":145,"151":151,"82":82,"97":97}],140:[function(require,module,exports){
+var transfer_back_refs = require(142);
+var invalidate_node = require(129);
+
+module.exports = function(parent, node, replacement, key, lru) {
+    if(node != null && node !== replacement && typeof node == "object") {
+        transfer_back_refs(node, replacement);
+        invalidate_node(parent, node, key, lru);
+    }
+    return parent[key] = replacement;
+}
+},{"129":129,"142":142}],141:[function(require,module,exports){
+var array_slice = require(115);
+var array_clone = require(113);
+module.exports = function cloneSuccessPaths(roots, requested, optimized) {
+    roots.requestedPaths.push(array_slice(requested, roots.offset));
+    roots.optimizedPaths.push(array_clone(optimized));
+}
+},{"113":113,"115":115}],142:[function(require,module,exports){
+var __ref = require(86);
+var __context = require(75);
+var __refs_length = require(87);
+
+module.exports = function(node, dest) {
+    var nodeRefsLength = node[__refs_length] || 0,
+        destRefsLength = dest[__refs_length] || 0,
+        i = -1, ref;
+    while(++i < nodeRefsLength) {
+        ref = node[__ref + i];
+        if(ref !== undefined) {
+            ref[__context] = dest;
+            dest[__ref + (destRefsLength + i)] = ref;
+            node[__ref + i] = undefined;
+        }
+    }
+    dest[__refs_length] = nodeRefsLength + destRefsLength;
+    node[__refs_length] = ref = undefined;
+}
+},{"75":75,"86":86,"87":87}],143:[function(require,module,exports){
+var $error = require(150);
+var promote = require(96);
+var array_clone = require(113);
+var clone = require(121);
+module.exports = function treatNodeAsError(roots, node, type, path) {
+    if(node == null) {
+        return false;
+    }
+    promote(roots.lru, node);
+    if(type != $error || roots.errorsAsValues) {
+        return false;
+    }
+    roots.errors.push({
+        path: array_clone(path),
+        value: roots.boxed && clone(node) || node.value
+    });
+    return true;
+};
+
+},{"113":113,"121":121,"150":150,"96":96}],144:[function(require,module,exports){
+var $atom = require(149);
+var clone_misses = require(118);
+var is_expired = require(130);
+
+module.exports = function treatNodeAsMissingPathSet(roots, node, type, pathset, depth, requested, optimized) {
+    var dematerialized = !roots.materialized;
+    if(node == null && dematerialized) {
+        clone_misses(roots, pathset, depth, requested, optimized);
+        return true;
+    } else if(Boolean(type)) {
+        if(type == $atom && node.value === undefined && dematerialized && !roots.boxed) {
+            // Don't clone the missing paths because we found a value, but don't want to report it.
+            // TODO: CR Explain weirdness further.
+            return true;
+        } else if(is_expired(roots, node)) {
+            clone_misses(roots, pathset, depth, requested, optimized);
+            return true;
+        }
+    }
+    return false;
+};
+
+},{"118":118,"130":130,"149":149}],145:[function(require,module,exports){
+var __ref = require(86);
+var __context = require(75);
+var __ref_index = require(85);
+var __refs_length = require(87);
+
+module.exports = function(ref) {
+    var destination = ref[__context];
+    if(destination) {
+        var i = (ref[__ref_index] || 0) - 1,
+            n = (destination[__refs_length] || 0) - 1;
+        while(++i <= n) {
+            destination[__ref + i] = destination[__ref + (i + 1)];
+        }
+        destination[__refs_length] = n;
+        ref[__ref_index] = ref[__context] = destination = undefined;
+    }
+}
+},{"75":75,"85":85,"86":86,"87":87}],146:[function(require,module,exports){
+module.exports = update_back_refs;
+
+var __ref = require(86);
+var __parent = require(82);
+var __version = require(89);
+var __generation = require(76);
+var __refs_length = require(87);
+
+var generation = require(127);
+
+function update_back_refs(node, version) {
+    if(node && node[__version] !== version) {
+        node[__version] = version;
+        node[__generation] = generation();
+        update_back_refs(node[__parent], version);
+        var i = -1, n = node[__refs_length] || 0;
+        while(++i < n) {
+            update_back_refs(node[__ref + i], version);
+        }
+    }
+    return node;
+}
+
+},{"127":127,"76":76,"82":82,"86":86,"87":87,"89":89}],147:[function(require,module,exports){
+var __key = require(79);
+var __version = require(89);
+var __parent = require(82);
+var remove_node = require(139);
+var update_back_refs = require(146);
+
+module.exports = function(node, offset, version, lru) {
+    var child;
+    while((child = node)) {
+        node = child[__parent];
+        if((child.$size = (child.$size || 0) - offset) <= 0 && node != null) {
+            remove_node(node, child, child[__key], lru);
+        } else if(child[__version] !== version) {
+            update_back_refs(child, version);
+        }
+    }
+}
+},{"139":139,"146":146,"79":79,"82":82,"89":89}],148:[function(require,module,exports){
+var $path = require(151);
+var $error = require(150);
+var $atom = require(149);
+
+var now = require(135);
+var clone = require(121);
+var is_array = Array.isArray;
+var is_object = require(131);
+
+// TODO: CR Wraps a node for insertion.
+// TODO: CR Define default atom size values.
+module.exports = function wrap_node(node, type, value) {
+
+    var dest = node, size = 0;
+
+    if(Boolean(type)) {
+        dest = clone(node);
+        size = dest.$size;
+    // }
+    // if(type == $path) {
+    //     dest = clone(node);
+    //     size = 50 + (value.length || 1);
+    // } else if(is_object(node) && (type || (type = node.$type))) {
+    //     dest = clone(node);
+    //     size = dest.$size;
+    } else {
+        dest = { value: value };
+        type = $atom;
+    }
+
+    if(size <= 0 || size == null) {
+        switch(typeof value) {
+            case "number":
+            case "boolean":
+            case "function":
+            case "undefined":
+                size = 51;
+                break;
+            case "object":
+                size = is_array(value) && (50 + value.length) || 51;
+                break;
+            case "string":
+                size = 50 + value.length;
+                break;
+        }
+    }
+
+    // TODO: Is it intended that null or 0 will effectively be treated as undefined? Other places see 0 treated specially as EXPIRE_NOW, but not possible to get into that state through this. Maybe occurs elsewhere?
+    var expires = is_object(node) && node.$expires || undefined;
+    if(typeof expires === "number" && expires < 0) {
+        dest.$expires = now() + (expires * -1);
+    }
+
+    dest.$type = type;
+    dest.$size = size;
+
+    return dest;
+}
+
+},{"121":121,"131":131,"135":135,"149":149,"150":150,"151":151}],149:[function(require,module,exports){
+module.exports = "atom";
+
+},{}],150:[function(require,module,exports){
+module.exports = "error";
+},{}],151:[function(require,module,exports){
+module.exports = "ref";
+},{}],152:[function(require,module,exports){
+module.exports = 1;
+},{}],153:[function(require,module,exports){
+module.exports = 0;
+},{}],154:[function(require,module,exports){
+module.exports = walk_path_map;
+
+var prefix = require(83);
+var $path = require(151);
+
+var walk_reference = require(158);
+
+var array_slice = require(115);
+var array_clone    = require(113);
+var array_append   = require(112);
+
+var is_expired = require(130);
+var is_primitive = require(132);
+var is_object = require(131);
+var is_array = Array.isArray;
+
+var promote = require(96);
+
+var positions = require(138);
+var _cache = positions.cache;
+var _message = positions.message;
+var _jsong = positions.jsong;
+var _json = positions.json;
+
+function walk_path_map(onNode, onValueType, pathmap, keys_stack, depth, roots, parents, nodes, requested, optimized, key, keyset, is_keyset) {
+
+    var node = nodes[_cache];
+
+    if(is_primitive(pathmap) || is_primitive(node)) {
+        return onValueType(pathmap, keys_stack, depth, roots, parents, nodes, requested, optimized, key, keyset);
+    }
+
+    var type = node.$type;
+
+    while(type === $path) {
+
+        if(is_expired(roots, node)) {
+            nodes[_cache] = undefined;
+            return onValueType(pathmap, keys_stack, depth, roots, parents, nodes, requested, optimized, key, keyset);
+        }
+
+        promote(roots.lru, node);
+
+        var container = node;
+        var reference = node.value;
+
+        nodes[_cache] = parents[_cache] = roots[_cache];
+        nodes[_jsong] = parents[_jsong] = roots[_jsong];
+        nodes[_message] = parents[_message] = roots[_message];
+
+        walk_reference(onNode, container, reference, roots, parents, nodes, requested, optimized);
+
+        node = nodes[_cache];
+
+        if(node == null) {
+            optimized = array_clone(reference);
+            return onValueType(pathmap, keys_stack, depth, roots, parents, nodes, requested, optimized, key, keyset);
+        } else if(is_primitive(node) || ((type = node.$type) && type != $path)) {
+            onNode(pathmap, roots, parents, nodes, requested, optimized, false, null, keyset, false);
+            return onValueType(pathmap, keys_stack, depth, roots, parents, nodes, array_append(requested, null), optimized, key, keyset);
+        }
+    }
+
+    if(type != null) {
+        return onValueType(pathmap, keys_stack, depth, roots, parents, nodes, requested, optimized, key, keyset);
+    }
+
+    var keys = keys_stack[depth] = Object.keys(pathmap);
+
+    if(keys.length == 0) {
+        return onValueType(pathmap, keys_stack, depth, roots, parents, nodes, requested, optimized, key, keyset);
+    }
+
+    var is_outer_keyset = keys.length > 1;
+
+    for(var i = -1, n = keys.length; ++i < n;) {
+
+        var inner_key = keys[i];
+
+        if((inner_key[0] === prefix) || (inner_key[0] === "$")) {
+            continue;
+        }
+
+        var inner_keyset = is_outer_keyset ? inner_key : keyset;
+        var nodes2 = array_clone(nodes);
+        var parents2 = array_clone(parents);
+        var pathmap2 = pathmap[inner_key];
+        var requested2, optimized2, is_branch;
+        var has_child_key = false;
+
+        var is_branch = is_object(pathmap2) && !pathmap2.$type;// && !is_array(pathmap2);
+        if(is_branch) {
+            for(child_key in pathmap2) {
+                if((child_key[0] === prefix) || (child_key[0] === "$")) {
+                    continue;
+                }
+                child_key = pathmap2.hasOwnProperty(child_key);
+                break;
+            }
+            is_branch = child_key === true;
+        }
+
+        requested2 = array_append(requested, inner_key);
+        optimized2 = array_append(optimized, inner_key);
+        onNode(pathmap2, roots, parents2, nodes2, requested2, optimized2, false, is_branch, inner_key, inner_keyset, is_outer_keyset);
+
+        if(is_branch) {
+            walk_path_map(onNode, onValueType,
+                pathmap2, keys_stack, depth + 1,
+                roots, parents2, nodes2,
+                requested2, optimized2,
+                inner_key, inner_keyset, is_outer_keyset
+            );
+        } else {
+            onValueType(pathmap2, keys_stack, depth + 1, roots, parents2, nodes2, requested2, optimized2, inner_key, inner_keyset);
+        }
+    }
+}
+
+},{"112":112,"113":113,"115":115,"130":130,"131":131,"132":132,"138":138,"151":151,"158":158,"83":83,"96":96}],155:[function(require,module,exports){
+module.exports = walk_path_map;
+
+var prefix = require(83);
+var __context = require(75);
+var $path = require(151);
+
+var walk_reference = require(158);
+
+var array_slice = require(115);
+var array_clone    = require(113);
+var array_append   = require(112);
+
+var is_expired = require(130);
+var is_primitive = require(132);
+var is_object = require(131);
+var is_array = Array.isArray;
+
+var promote = require(96);
+
+var positions = require(138);
+var _cache = positions.cache;
+var _message = positions.message;
+var _jsong = positions.jsong;
+var _json = positions.json;
+
+function walk_path_map(onNode, onValueType, pathmap, keys_stack, depth, roots, parents, nodes, requested, optimized, key, keyset, is_keyset) {
+
+    var node = nodes[_cache];
+
+    if(is_primitive(pathmap) || is_primitive(node)) {
+        return onValueType(pathmap, keys_stack, depth, roots, parents, nodes, requested, optimized, key, keyset);
+    }
+
+    var type = node.$type;
+
+    while(type === $path) {
+
+        if(is_expired(roots, node)) {
+            nodes[_cache] = undefined;
+            return onValueType(pathmap, keys_stack, depth, roots, parents, nodes, requested, optimized, key, keyset);
+        }
+
+        promote(roots.lru, node);
+
+        var container = node;
+        var reference = node.value;
+        node = node[__context];
+
+        if(node != null) {
+            type = node.$type;
+            optimized = array_clone(reference);
+            nodes[_cache] = node;
+        } else {
+
+            nodes[_cache] = parents[_cache] = roots[_cache];
+
+            walk_reference(onNode, container, reference, roots, parents, nodes, requested, optimized);
+
+            node = nodes[_cache];
+
+            if(node == null) {
+                optimized = array_clone(reference);
+                return onValueType(pathmap, keys_stack, depth, roots, parents, nodes, requested, optimized, key, keyset);
+            } else if(is_primitive(node) || ((type = node.$type) && type != $path)) {
+                onNode(pathmap, roots, parents, nodes, requested, optimized, false, null, keyset, false);
+                return onValueType(pathmap, keys_stack, depth, roots, parents, nodes, array_append(requested, null), optimized, key, keyset);
+            }
+        }
+    }
+
+    if(type != null) {
+        return onValueType(pathmap, keys_stack, depth, roots, parents, nodes, requested, optimized, key, keyset);
+    }
+
+    var keys = keys_stack[depth] = Object.keys(pathmap);
+
+    if(keys.length == 0) {
+        return onValueType(pathmap, keys_stack, depth, roots, parents, nodes, requested, optimized, key, keyset);
+    }
+
+    var is_outer_keyset = keys.length > 1;
+
+    for(var i = -1, n = keys.length; ++i < n;) {
+
+        var inner_key = keys[i];
+
+        if((inner_key[0] === prefix) || (inner_key[0] === "$")) {
+            continue;
+        }
+
+        var inner_keyset = is_outer_keyset ? inner_key : keyset;
+        var nodes2 = array_clone(nodes);
+        var parents2 = array_clone(parents);
+        var pathmap2 = pathmap[inner_key];
+        var requested2, optimized2, is_branch;
+        var child_key = false;
+
+        var is_branch = is_object(pathmap2) && !pathmap2.$type;// && !is_array(pathmap2);
+        if(is_branch) {
+            for(child_key in pathmap2) {
+                if((child_key[0] === prefix) || (child_key[0] === "$")) {
+                    continue;
+                }
+                child_key = pathmap2.hasOwnProperty(child_key);
+                break;
+            }
+            is_branch = child_key === true;
+        }
+
+        if(inner_key == "null") {
+            requested2 = array_append(requested, null);
+            optimized2 = array_clone(optimized);
+            inner_key  = key;
+            inner_keyset = keyset;
+            pathmap2 = pathmap;
+            onNode(pathmap2, roots, parents2, nodes2, requested2, optimized2, false, is_branch, null, inner_keyset, false);
+        } else {
+            requested2 = array_append(requested, inner_key);
+            optimized2 = array_append(optimized, inner_key);
+            onNode(pathmap2, roots, parents2, nodes2, requested2, optimized2, false, is_branch, inner_key, inner_keyset, is_outer_keyset);
+        }
+
+        if(is_branch) {
+            walk_path_map(onNode, onValueType,
+                pathmap2, keys_stack, depth + 1,
+                roots, parents2, nodes2,
+                requested2, optimized2,
+                inner_key, inner_keyset, is_outer_keyset
+            );
+        } else {
+            onValueType(pathmap2, keys_stack, depth + 1, roots, parents2, nodes2, requested2, optimized2, inner_key, inner_keyset);
+        }
+    }
+}
+
+},{"112":112,"113":113,"115":115,"130":130,"131":131,"132":132,"138":138,"151":151,"158":158,"75":75,"83":83,"96":96}],156:[function(require,module,exports){
+module.exports = walk_path_set;
+
+var $path = require(151);
+var empty_array = new Array(0);
+
+var walk_reference = require(158);
+
+var array_slice    = require(115);
+var array_clone    = require(113);
+var array_append   = require(112);
+
+var is_expired = require(130);
+var is_primitive = require(132);
+var is_object = require(131);
+
+var keyset_to_key  = require(133);
+var permute_keyset = require(137);
+
+var promote = require(96);
+
+var positions = require(138);
+var _cache = positions.cache;
+var _message = positions.message;
+var _jsong = positions.jsong;
+var _json = positions.json;
+
+function walk_path_set(onNode, onValueType, pathset, depth, roots, parents, nodes, requested, optimized, key, keyset, is_keyset) {
+
+    var node = nodes[_cache];
+
+    if(depth >= pathset.length || is_primitive(node)) {
+        return onValueType(pathset, depth, roots, parents, nodes, requested, optimized, key, keyset);
+    }
+
+    var type = node.$type;
+
+    while(type === $path) {
+
+        if(is_expired(roots, node)) {
+            nodes[_cache] = undefined;
+            return onValueType(pathset, depth, roots, parents, nodes, requested, optimized, key, keyset);
+        }
+
+        promote(roots.lru, node);
+
+        var container = node;
+        var reference = node.value;
+
+        nodes[_cache] = parents[_cache] = roots[_cache];
+        nodes[_jsong] = parents[_jsong] = roots[_jsong];
+        nodes[_message] = parents[_message] = roots[_message];
+
+        walk_reference(onNode, container, reference, roots, parents, nodes, requested, optimized);
+
+        node = nodes[_cache];
+
+        if(node == null) {
+            optimized = array_clone(reference);
+            return onValueType(pathset, depth, roots, parents, nodes, requested, optimized, key, keyset);
+        } else if(is_primitive(node) || ((type = node.$type) && type != $path)) {
+            onNode(pathset, roots, parents, nodes, requested, optimized, false, false, null, keyset, false);
+            return onValueType(pathset, depth, roots, parents, nodes, array_append(requested, null), optimized, key, keyset);
+        }
+    }
+
+    if(type != null) {
+        return onValueType(pathset, depth, roots, parents, nodes, requested, optimized, key, keyset);
+    }
+
+    var outer_key = pathset[depth];
+    var is_outer_keyset = is_object(outer_key);
+    var is_branch = depth < pathset.length - 1;
+    var run_once = false;
+
+    while(is_outer_keyset && permute_keyset(outer_key) && (run_once = true) || (run_once = !run_once)) {
+        var inner_key, inner_keyset;
+
+        if(is_outer_keyset === true) {
+            inner_key = keyset_to_key(outer_key, true);
+            inner_keyset = inner_key;
+        } else {
+            inner_key = outer_key;
+            inner_keyset = keyset;
+        }
+
+        var nodes2 = array_clone(nodes);
+        var parents2 = array_clone(parents);
+        var requested2, optimized2;
+
+        if(inner_key == null) {
+            requested2 = array_append(requested, null);
+            optimized2 = array_clone(optimized);
+            // optimized2 = optimized;
+            inner_key = key;
+            inner_keyset = keyset;
+            onNode(pathset, roots, parents2, nodes2, requested2, optimized2, false, is_branch, null, inner_keyset, false);
+        } else {
+            requested2 = array_append(requested, inner_key);
+            optimized2 = array_append(optimized, inner_key);
+            onNode(pathset, roots, parents2, nodes2, requested2, optimized2, false, is_branch, inner_key, inner_keyset, is_outer_keyset);
+        }
+
+        walk_path_set(onNode, onValueType,
+            pathset, depth + 1,
+            roots, parents2, nodes2,
+            requested2, optimized2,
+            inner_key, inner_keyset, is_outer_keyset
+        );
+    }
+}
+
+},{"112":112,"113":113,"115":115,"130":130,"131":131,"132":132,"133":133,"137":137,"138":138,"151":151,"158":158,"96":96}],157:[function(require,module,exports){
+module.exports = walk_path_set;
+
+var __context = require(75);
+var $path = require(151);
+
+var walk_reference = require(158);
+
+var array_slice    = require(115);
+var array_clone    = require(113);
+var array_append   = require(112);
+
+var is_expired = require(130);
+var is_primitive = require(132);
+var is_object = require(131);
+
+var keyset_to_key  = require(133);
+var permute_keyset = require(137);
+
+var promote = require(96);
+
+var positions = require(138);
+var _cache = positions.cache;
+var _message = positions.message;
+var _jsong = positions.jsong;
+var _json = positions.json;
+
+function walk_path_set(onNode, onValueType, pathset, depth, roots, parents, nodes, requested, optimized, key, keyset, is_keyset) {
+
+    var node = nodes[_cache];
+
+    if(depth >= pathset.length || is_primitive(node)) {
+        return onValueType(pathset, depth, roots, parents, nodes, requested, optimized, key, keyset);
+    }
+
+    var type = node.$type;
+
+    while(type === $path) {
+
+        if(is_expired(roots, node)) {
+            nodes[_cache] = undefined;
+            return onValueType(pathset, depth, roots, parents, nodes, requested, optimized, key, keyset);
+        }
+
+        promote(roots.lru, node);
+
+        var container = node;
+        var reference = node.value;
+        node = node[__context];
+
+        if(node != null) {
+            type = node.$type;
+            optimized = array_clone(reference);
+            nodes[_cache]  = node;
+        } else {
+
+            nodes[_cache] = parents[_cache] = roots[_cache];
+
+            walk_reference(onNode, container, reference, roots, parents, nodes, requested, optimized);
+
+            node = nodes[_cache];
+
+            if(node == null) {
+                optimized = array_clone(reference);
+                return onValueType(pathset, depth, roots, parents, nodes, requested, optimized, key, keyset);
+            } else if(is_primitive(node) || ((type = node.$type) && type != $path)) {
+                onNode(pathset, roots, parents, nodes, requested, optimized, false, false, null, keyset, false);
+                return onValueType(pathset, depth, roots, parents, nodes, array_append(requested, null), optimized, key, keyset);
+            }
+        }
+    }
+
+    if(type != null) {
+        return onValueType(pathset, depth, roots, parents, nodes, requested, optimized, key, keyset);
+    }
+
+    var outer_key = pathset[depth];
+    var is_outer_keyset = is_object(outer_key);
+    var is_branch = depth < pathset.length - 1;
+    var run_once = false;
+
+    while(is_outer_keyset && permute_keyset(outer_key) && (run_once = true) || (run_once = !run_once)) {
+
+        var inner_key, inner_keyset;
+
+        if(is_outer_keyset === true) {
+            inner_key = keyset_to_key(outer_key, true);
+            inner_keyset = inner_key;
+        } else {
+            inner_key = outer_key;
+            inner_keyset = keyset;
+        }
+
+        var nodes2 = array_clone(nodes);
+        var parents2 = array_clone(parents);
+        var requested2, optimized2;
+
+        if(inner_key == null) {
+            requested2 = array_append(requested, null);
+            optimized2 = array_clone(optimized);
+            // optimized2 = optimized;
+            inner_key = key;
+            inner_keyset = keyset;
+            onNode(pathset, roots, parents2, nodes2, requested2, optimized2, false, is_branch, null, inner_keyset, false);
+        } else {
+            requested2 = array_append(requested, inner_key);
+            optimized2 = array_append(optimized, inner_key);
+            onNode(pathset, roots, parents2, nodes2, requested2, optimized2, false, is_branch, inner_key, inner_keyset, is_outer_keyset);
+        }
+
+        walk_path_set(onNode, onValueType,
+            pathset, depth + 1,
+            roots, parents2, nodes2,
+            requested2, optimized2,
+            inner_key, inner_keyset, is_outer_keyset
+        );
+    }
+}
+
+},{"112":112,"113":113,"115":115,"130":130,"131":131,"132":132,"133":133,"137":137,"138":138,"151":151,"158":158,"75":75,"96":96}],158:[function(require,module,exports){
+module.exports = walk_reference;
+
+var prefix = require(83);
+var __ref = require(86);
+var __context = require(75);
+var __ref_index = require(85);
+var __refs_length = require(87);
+
+var is_object      = require(131);
+var is_primitive   = require(132);
+var array_slice    = require(115);
+var array_append   = require(112);
+
+var positions = require(138);
+var _cache = positions.cache;
+var _message = positions.message;
+var _jsong = positions.jsong;
+var _json = positions.json;
+
+function walk_reference(onNode, container, reference, roots, parents, nodes, requested, optimized) {
+
+    optimized.length = 0;
+
+    var index = -1;
+    var count = reference.length;
+    var node, key, keyset;
+
+    while(++index < count) {
+
+        node = nodes[_cache];
+
+        if(node == null) {
+            return nodes;
+        } else if(is_primitive(node) || node.$type) {
+            onNode(reference, roots, parents, nodes, requested, optimized, true, false, keyset, null, false);
+            return nodes;
+        }
+
+        do {
+            key = reference[index];
+            if(key != null) {
+                keyset = key;
+                optimized.push(key);
+                onNode(reference, roots, parents, nodes, requested, optimized, true, index < count - 1, key, null, false);
+                break;
+            }
+        } while(++index < count);
+    }
+
+    node = nodes[_cache];
+
+    if(is_object(node) && container[__context] !== node) {
+        var backrefs = node[__refs_length] || 0;
+        node[__refs_length] = backrefs + 1;
+        node[__ref + backrefs] = container;
+        container[__context]    = node;
+        container[__ref_index]  = backrefs;
+    }
+
+    return nodes;
+}
+
+},{"112":112,"115":115,"131":131,"132":132,"138":138,"75":75,"83":83,"85":85,"86":86,"87":87}],159:[function(require,module,exports){
+module.exports = function(x) {
+    return x;
+};
+
+},{}],160:[function(require,module,exports){
+var Observer = require(161);
+var Disposable = require(164);
+
+function Observable(s) {
+    this._subscribe = s;
+};
+
+Observable.create = Observable.createWithDisposable = function create(s) {
+    return new Observable(s);
+};
+
+Observable.fastCreateWithDisposable = Observable.create;
+
+Observable["return"] = function returnValue(value) {
+    return Observable.create(function(observer) {
+        observer.onNext(value);
+        observer.onCompleted();
+    });
+};
+
+Observable.returnValue = Observable["return"];
+Observable.fastReturnValue = Observable["return"];
+
+Observable["throw"] = function throwError(e) {
+    return Observable.create(function(observer) {
+        observer.onError(e);
+    });
+};
+
+Observable.throwError = Observable["throw"];
+
+Observable.empty = function empty() {
+    return Observable.create(function(observer) {
+        observer.onCompleted();
+    });
+};
+
+Observable.defer = function defer(observableFactory) {
+    return Observable.create(function(observer) {
+        return observableFactory().subscribe(observer);
+    });
+};
+
+Observable.of = function of() {
+    var len = arguments.length, args = new Array(len);
+    for(var i = 0; i < len; i++) { args[i] = arguments[i]; }
+    return Observable.create(function(observer) {
+        var errorOcurred = false;
+        try {
+            for(var i = 0; i < len; ++i) {
+                observer.onNext(args[i]);
+            }
+        } catch(e) {
+            errorOcurred = true;
+            observer.onError(e);
+        }
+        if (errorOcurred !== true) {
+            observer.onCompleted();
+        }
+    });
+};
+
+Observable.from = function from(x) {
+    if (Array.isArray(x)) {
+        return Observable.create(function(observer) {
+            var err = false;
+            x.forEach(function(el) {
+                try {
+                    observer.onNext(el);
+                } catch (e) {
+                    err = true;
+                    observer.onError(e);
+                }
+            });
+
+            if (!err) {
+                observer.onCompleted();
+            }
+        });
+    }
+};
+Observable.fromArray = Observable.from;
+
+Observable.prototype.subscribe = function subscribe(n, e, c) {
+    return fixDisposable(this._subscribe(
+        (n && typeof n === 'object') ?
+        n :
+        Observer.create(n, e, c)
+    ));
+};
+
+function fixDisposable(disposable) {
+    switch(typeof disposable) {
+        case "function":
+            return new Disposable(disposable);
+        case "object":
+            return disposable || Disposable.empty;
+        default:
+            return Disposable.empty;
+    }
+}
+
+module.exports = Observable;
+},{"161":161,"164":164}],161:[function(require,module,exports){
+var I = require(159);
+var Observer = module.exports = function Observer(n, e, c) {
+    this.onNext =       n || I;
+    this.onError =      e || I;
+    this.onCompleted =  c || I;
+};
+
+Observer.create = function(n, e, c) {
+    return new Observer(n, e, c);
+};
+
+
+},{"159":159}],162:[function(require,module,exports){
+var Subject = module.exports = function Subject() {
+    this.observers = [];
+};
+Subject.prototype.subscribe = function(subscriber) {
+    var a = this.observers,
+        n = a.length;
+    a[n] = subscriber;
+    return {
+        dispose: function() {
+            a.splice(n, 1);
+        }
+    };
+};
+Subject.prototype.onNext = function(x) {
+    var listeners = this.observers.concat(),
+        i = -1, n = listeners.length;
+    while(++i < n) {
+        listeners[i].onNext(x);
+    }
+};
+Subject.prototype.onError = function(e) {
+    var listeners = this.observers.concat(),
+        i  = -1, n = listeners.length;
+    this.observers.length = 0;
+    while(++i < n) {
+        listeners[i].onError(e);
+    }
+};
+Subject.prototype.onCompleted = function() {
+    var listeners = this.observers.concat(),
+        i  = -1, n = listeners.length;
+    this.observers.length = 0;
+    while(++i < n) {
+        listeners[i].onCompleted();
+    }
+};
+
+},{}],163:[function(require,module,exports){
+var Disposable = require(164);
+
+function CompositeDisposable() {
+    this.length = 0;
+    this.disposables = [];
+    if(arguments.length) {
+        this.add.apply(this, arguments);
+    }
+}
+
+CompositeDisposable.prototype = Object.create(Disposable.prototype);
+
+CompositeDisposable.prototype.add = function() {
+    var disposables = this.disposables;
+    var args = [];
+    var argsLen = arguments.length;
+    var argsIdx = -1;
+    while(++argsIdx < argsLen) {
+        args[argsIdx] = arguments[argsIdx];
+    }
+    if(argsLen > 0) {
+        argsIdx = -1;
+        argsLen = args.length;
+        while(++argsIdx < argsLen) {
+            var disposable = args[argsIdx];
+            if(Array.isArray(disposable)) {
+                argsLen = args.push.apply(args, disposable);
+            } else if(!!disposable) {
+                switch(typeof disposable) {
+                    case "function":
+                        disposables.push(new Disposable(disposable));
+                        break;
+                    case "object":
+                        if(typeof disposable.dispose === "function") {
+                            disposables.push(disposable);
+                        }
+                        break;
+                }
+            }
+        }
+    }
+    if(this.disposed) {
+        this.action();
+    }
+    this.length = disposables.length;
+    return this;
+};
+
+CompositeDisposable.prototype.remove = function() {
+    var disposables = this.disposables;
+    var args = [];
+    var argsLen = arguments.length;
+    var argsIdx = -1;
+    while(++argsIdx < argsLen) {
+        args[argsIdx] = arguments[argsIdx];
+    }
+    if(argsLen > 0) {
+        argsIdx = -1;
+        argsLen = args.length;
+        while(++argsIdx < argsLen) {
+            var disposable = args[argsIdx];
+            if(Array.isArray(disposable)) {
+                argsLen = args.push.apply(args, disposable);
+            } else if(!!disposable) {
+                var disposableIndex = disposables.indexOf(disposable);
+                if(~disposableIndex) {
+                    disposables.splice(disposableIndex, 1);
+                }
+            }
+        }
+    }
+    this.length = disposables.length;
+    return this;
+}
+
+CompositeDisposable.prototype.action = function() {
+    this.disposed = true;
+    var disposables = this.disposables;
+    var disposablesCount = disposables.length;
+    while(--disposablesCount > -1) {
+        var disposable = disposables[disposablesCount];
+        disposables.length = disposablesCount;
+        disposable.dispose();
+    }
+};
+
+module.exports = CompositeDisposable;
+},{"164":164}],164:[function(require,module,exports){
+function Disposable(a) {
+    this.action = a;
+};
+
+Disposable.create = function(a) {
+    return new Disposable(a);
+};
+
+Disposable.empty = new Disposable(function(){});
+
+Disposable.prototype.dispose = function() {
+    if(typeof this.action === 'function') {
+        this.action();
+    }
+};
+
+module.exports = Disposable;
+},{}],165:[function(require,module,exports){
+var Disposable = require(164);
+
+function SerialDisposable() {
+    if(arguments.length > 0) {
+        this.setDisposable(arguments[0]);
+    }
+}
+
+SerialDisposable.prototype = Object.create(Disposable.prototype);
+
+SerialDisposable.prototype.action = function() {
+    if(this.disposable) {
+        this.disposable.dispose();
+        this.disposable = undefined;
+    }
+    this.disposed = true;
+};
+
+SerialDisposable.prototype.setDisposable = function(d) {
+    if(this.disposed) {
+        d.dispose();
+    } else {
+        if(this.disposable) {
+            this.disposable.dispose();
+        }
+        this.disposable = d;
+    }
+};
+
+module.exports = SerialDisposable;
+},{"164":164}],166:[function(require,module,exports){
+(function (global){
+var Rx;
+
+if (typeof window !== "undefined" && typeof window["Rx"] !== "undefined") {
+    // Browser environment
+    Rx = window["Rx"];
+} else if (typeof global !== "undefined" && typeof global["Rx"] !== "undefined") {
+    // Node.js environment
+    Rx = global["Rx"];
+} else if (typeof require !== 'undefined' || typeof window !== 'undefined' && window.require) {
+    var r = typeof require !== 'undefined' && require || window.require;
+    try {
+        // CommonJS environment with rx module
+        Rx = r("rx");
+    } catch(e) {
+        Rx = undefined;
+    }
+}
+
+if (Rx === undefined) {
+    
+    var Observable = require(160);
+    
+    Observable.prototype.catchException = require(167);
+    Observable.prototype.concat = require(169);
+    Observable.prototype.concatAll = require(168);
+    Observable.prototype.defaultIfEmpty = require(170);
+    Observable.prototype.doAction = require(171);
+    Observable.prototype.flatMap = require(172);
+    Observable.prototype.last = require(173);
+    Observable.prototype.map = require(174);
+    Observable.prototype.materialize = require(175);
+    Observable.prototype.mergeAll = require(176);
+    Observable.prototype.reduce = require(177);
+    Observable.prototype.retry = require(178);
+    Observable.prototype.toArray = require(179);
+    
+    Observable.prototype["catch"] = Observable.prototype.catchException;
+    Observable.prototype["do"] = Observable.prototype.doAction;
+    Observable.prototype.forEach = Observable.prototype.subscribe;
+    Observable.prototype.select = Observable.prototype.map;
+    Observable.prototype.selectMany = Observable.prototype.flatMap;
+    
+    Rx = {
+        Disposable: require(164),
+        CompositeDisposable: require(163),
+        SerialDisposable: require(165),
+        Observable: Observable,
+        Observer: require(161),
+        Subject: require(162),
+    };
+}
+
+module.exports = Rx;
+
+}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
+},{"160":160,"161":161,"162":162,"163":163,"164":164,"165":165,"167":167,"168":168,"169":169,"170":170,"171":171,"172":172,"173":173,"174":174,"175":175,"176":176,"177":177,"178":178,"179":179}],167:[function(require,module,exports){
+var Observable = require(160);
+var CompositeDisposable = require(163);
+var SerialDisposable = require(165);
+
+module.exports = function catchException(next) {
+    var source = this;
+    return Observable.create(function(o) {
+        var m = new SerialDisposable();
+        m.setDisposable(source.subscribe(
+            function(x) { o.onNext(x); },
+            function(e) {
+                m.setDisposable(((typeof next === 'function') ? next(e) : next).subscribe(o));
+            },
+            function() { o.onCompleted(); }
+        ))
+        return m;
+    });
+}
+},{"160":160,"163":163,"165":165}],168:[function(require,module,exports){
+var Observable = require(160);
+var Disposable = require(164);
+var CompositeDisposable = require(163);
+var SerialDisposable = require(165);
+
+module.exports = function concatAll() {
+    var source = this;
+    return Observable.create(function(observer) {
+        
+        var m = new SerialDisposable();
+        var group = new CompositeDisposable(m);
+        var isStopped = false;
+        var buffer = [];
+        
+        m.setDisposable(source.subscribe(function(innerObs) {
+            if(group.length > 1) {
+                buffer.push(innerObs);
+                return;
+            }
+            subscribe(innerObs);
+        },
+        function(e) { observer.onError(e); },
+        function( ) {
+            isStopped = true;
+            if(group.length === 1 && buffer.length === 0) {
+                observer.onCompleted();
+            }
+        }));
+        
+        function subscribe(innerObs) {
+            var innerDisposable = new SerialDisposable();
+            group.add(innerDisposable);
+            innerDisposable.setDisposable(innerObs.subscribe(
+                function(x) { observer.onNext(x); },
+                function(e) { observer.onError(e); },
+                function( ) {
+                    group.remove(innerDisposable);
+                    if(buffer.length > 0) {
+                        subscribe(buffer.shift());
+                    } else if(isStopped && group.length === 1) {
+                        observer.onCompleted();
+                    }
+                }));
+        }
+        
+        return group;
+    });
+};
+},{"160":160,"163":163,"164":164,"165":165}],169:[function(require,module,exports){
+var Observable = require(160);
+
+module.exports = function concat() {
+    var len = arguments.length;
+    var observables = new Array(len + 1);
+    observables[0] = this;
+    for(var i = 0; i < len; i++) { observables[i + 1] = arguments[i]; }
+    return Observable.from(observables).concatAll();
+};
+},{"160":160}],170:[function(require,module,exports){
+var Observable = require(160);
+
+module.exports = function defaultIfEmpty(value) {
+    var source = this;
+    return Observable.create(function(observer) {
+        var hasValue = false;
+        return source.subscribe(function(x) {
+            hasValue = true;
+            observer.onNext(x);
+        },
+        function(e) { observer.onError(e); },
+        function( ) {
+            if(!hasValue) {
+                observer.onNext(value);
+            }
+            observer.onCompleted();
+        })
+    });
+};
+},{"160":160}],171:[function(require,module,exports){
+var Observable = require(160);
+var Observer = require(161);
+
+module.exports = function doAction() {
+    var actions = arguments[0];
+    if (typeof arguments[0] === "function" ||
+        typeof arguments[1] === "function" ||
+        typeof arguments[2] === "function" ){
+        actions = Observer.create.apply(Observer, arguments);
+    }
+    var source = this;
+    return Observable.create(function(observer) {
+        return source.subscribe(
+            function(x) {
+                actions.onNext(x);
+                observer.onNext(x);
+            },
+            function(e) {
+                actions.onError(e);
+                observer.onError(e);
+            },
+            function( ) {
+                actions.onCompleted();
+                observer.onCompleted();
+            });
+    });
+};
+
+},{"160":160,"161":161}],172:[function(require,module,exports){
+var Observable = require(160);
+module.exports = function flatMap(selector) {
+    if(Boolean(selector) && typeof selector === "object") {
+        var obs = selector;
+        selector = function() { return obs; };
+    }
+    return this.map(selector).mergeAll();
+}
+},{"160":160}],173:[function(require,module,exports){
+var Observable = require(160);
+
+module.exports = function last() {
+    var source = this;
+    return Observable.create(function (observer) {
+        var value;
+        var hasValue = false;
+        return source.subscribe(
+            function onNext(x) {
+                value = x;
+                hasValue = true;
+            },
+            function onError(e) { observer.onError(e); },
+            function onCompleted() {
+                if (hasValue) {
+                    observer.onNext(value);
+                    observer.onCompleted();
+                } else {
+                    observer.onError(new Error("Sequence contains no elements."));
+                }
+            });
+    });
+};
+},{"160":160}],174:[function(require,module,exports){
+var Observable = require(160);
+
+module.exports = function map(selector) {
+    var source = this;
+    return Observable.create(function(observer) {
+        return source.subscribe(
+            function(x) {
+                try {
+                    var errored = false;
+                    var value = selector(x);
+                } catch(e) {
+                    errored = true;
+                    observer.onError(e);
+                } finally {
+                    if(errored === false) {
+                        observer.onNext(value);
+                    }
+                }
+            },
+            function(e) { observer.onError(e); },
+            function( ) { observer.onCompleted(); }
+        )
+    });
+};
+},{"160":160}],175:[function(require,module,exports){
+var Observable = require(160);
+
+module.exports = function materialize() {
+    var source = this;
+    return Observable.create(function(observer) {
+        source.subscribe(function(x) {
+            try {
+                observer.onNext({kind: 'N', value: x});
+            } catch(e) {
+                observer.onError(e);
+            }
+        }, function(err) {
+            observer.onNext({kind: 'E', value: err});
+            observer.onCompleted();
+        }, function() {
+            observer.onNext({kind: 'C'});
+            observer.onCompleted();
+        });
+    });
+}
+},{"160":160}],176:[function(require,module,exports){
+var Observable = require(160);
+var Disposable = require(164);
+var CompositeDisposable = require(163);
+var SerialDisposable = require(165);
+
+module.exports = function mergeAll() {
+    var source = this;
+    return Observable.create(function(observer) {
+        var m = new SerialDisposable();
+        var group = new CompositeDisposable(m);
+        var isStopped = false;
+        m.setDisposable(source.subscribe(function(innerObs) {
+            var innerDisposable = new SerialDisposable();
+            group.add(innerDisposable);
+            innerDisposable.setDisposable(innerObs.subscribe(
+                function(x) { observer.onNext(x); },
+                function(e) { observer.onError(e); },
+                function( ) {
+                    group.remove(innerDisposable);
+                    if(isStopped && group.length === 1) {
+                        observer.onCompleted();
+                    }
+                }));
+        },
+        function(e) { observer.onError(e); },
+        function( ) {
+            isStopped = true;
+            if(group.length === 1) {
+                observer.onCompleted();
+            }
+        }));
+        return group;
+    });
+};
+},{"160":160,"163":163,"164":164,"165":165}],177:[function(require,module,exports){
+var Observable = require(160);
+
+module.exports = function reduce(selector, seedValue) {
+    var source = this;
+    var hasSeed = arguments.length > 1;
+    return Observable.create(function(observer) {
+        var accValue = seedValue;
+        var hasValue = false;
+        return source.subscribe(
+            function(x) {
+                try {
+                    if(hasValue || (hasValue = hasSeed)) {
+                        accValue = selector(accValue, x);
+                        return;
+                    }
+                    accValue = x;
+                    hasValue = true;
+                } catch (e) {
+                    observer.onError(e);
+                }
+            },
+            function(e) { observer.onError(e); },
+            function( ) {
+                if(hasValue || hasSeed) {
+                    observer.onNext(accValue);
+                }
+                observer.onCompleted();
+            });
+    });
+}
+},{"160":160}],178:[function(require,module,exports){
+var Observable = require(160);
+var SerialDisposable = require(165);
+
+module.exports = function retry(retryTotal) {
+    retryTotal || (retryTotal = 1);
+    var source = this;
+    return Observable.create(function(observer) {
+        
+        var retryCount = 0;
+        var disposable = new SerialDisposable();
+        
+        disposable.setDisposable(subscribe(observer));
+        
+        return disposable;
+        
+        function subscribe(observer) {
+            return source.subscribe(
+                function(x) { observer.onNext(x); },
+                function(e) {
+                    if(++retryCount > retryTotal) {
+                        observer.onError(e);
+                        return;
+                    }
+                    disposable.setDisposable(subscribe(observer));
+                },
+                function( ) { observer.onCompleted(); }
+            );
+        };
+    });
+};
+},{"160":160,"165":165}],179:[function(require,module,exports){
+var Observable = require(160);
+
+module.exports = function toArray() {
+    var source = this;
+    return Observable.create(function(observer) {
+        var list = [];
+        return source.subscribe(
+            function(x) { list.push(x); },
+            function(e) { observer.onError(e); },
+            function( ) {
+                observer.onNext(list);
+                observer.onCompleted();
+            });
+    });
+};
+},{"160":160}],180:[function(require,module,exports){
+module.exports = {
+    integers: 'integers',
+    ranges: 'ranges',
+    keys: 'keys'
+};
+
+},{}],181:[function(require,module,exports){
+var TokenTypes = {
+    token: 'token',
+    dotSeparator: '.',
+    commaSeparator: ',',
+    openingBracket: '[',
+    closingBracket: ']',
+    openingBrace: '{',
+    closingBrace: '}',
+    escape: '\\',
+    space: ' ',
+    colon: ':',
+    quote: 'quote',
+    unknown: 'unknown'
+};
+
+module.exports = TokenTypes;
+
+},{}],182:[function(require,module,exports){
+module.exports = {
+    indexer: {
+        nested: 'Indexers cannot be nested.',
+        needQuotes: 'unquoted indexers must be numeric.',
+        empty: 'cannot have empty indexers.',
+        leadingDot: 'Indexers cannot have leading dots.',
+        leadingComma: 'Indexers cannot have leading comma.',
+        requiresComma: 'Indexers require commas between indexer args.',
+        routedTokens: 'Only one token can be used per indexer when specifying routed tokens.'
+    },
+    range: {
+        precedingNaN: 'ranges must be preceded by numbers.',
+        suceedingNaN: 'ranges must be suceeded by numbers.'
+    },
+    routed: {
+        invalid: 'Invalid routed token.  only integers|ranges|keys are supported.'
+    },
+    quote: {
+        empty: 'cannot have empty quoted keys.',
+        illegalEscape: 'Invalid escape character.  Only quotes are escapable.'
+    },
+    unexpectedToken: 'Unexpected token.',
+    invalidIdentifier: 'Invalid Identifier.',
+    invalidPath: 'Please provide a valid path.',
+    throwError: function(err, tokenizer, token) {
+        if (token) {
+            throw err + ' -- ' + tokenizer.parseString + ' with next token: ' + token;
+        }
+        throw err + ' -- ' + tokenizer.parseString;
+    }
+};
+
+
+},{}],183:[function(require,module,exports){
+var Tokenizer = require(189);
+var head = require(184);
+var RoutedTokens = require(180);
+
+var parser = function parser(string, extendedRules) {
+    return head(new Tokenizer(string, extendedRules));
+};
+
+module.exports = parser;
+
+// Constructs the paths from paths / pathValues that have strings.
+// If it does not have a string, just moves the value into the return
+// results.
+parser.fromPathsOrPathValues = function(paths, ext) {
+    var out = [];
+    for (i = 0, len = paths.length; i < len; i++) {
+
+        // Is the path a string
+        if (typeof paths[i] === 'string') {
+            out[i] = parser(paths[i], ext);
+        }
+
+        // is the path a path value with a string value.
+        else if (typeof paths[i].path === 'string') {
+            out[i] = {
+                path: parser(paths[i].path, ext), value: paths[i].value
+            };
+        }
+
+        // just copy it over.
+        else {
+            out[i] = paths[i];
+        }
+    }
+
+    return out;
+};
+
+// If the argument is a string, this with convert, else just return
+// the path provided.
+parser.fromPath = function(path, ext) {
+    if (typeof path === 'string') {
+        return parser(path, ext);
+    }
+    return path;
+};
+
+// Potential routed tokens.
+parser.RoutedTokens = RoutedTokens;
+
+},{"180":180,"184":184,"189":189}],184:[function(require,module,exports){
+var TokenTypes = require(181);
+var E = require(182);
+var indexer = require(185);
+
+/**
+ * The top level of the parse tree.  This returns the generated path
+ * from the tokenizer.
+ */
+module.exports = function head(tokenizer) {
+    var token = tokenizer.next();
+    var state = {};
+    var out = [];
+
+    while (!token.done) {
+
+        switch (token.type) {
+            case TokenTypes.token:
+                var first = +token.token[0];
+                if (!isNaN(first)) {
+                    E.throwError(E.invalidIdentifier, tokenizer);
+                }
+                out[out.length] = token.token;
+                break;
+
+            // dotSeparators at the top level have no meaning
+            case TokenTypes.dotSeparator:
+                if (out.length === 0) {
+                    E.throwError(E.unexpectedToken, tokenizer);
+                }
+                break;
+
+            // Spaces do nothing.
+            case TokenTypes.space:
+                // NOTE: Spaces at the top level are allowed.
+                // titlesById  .summary is a valid path.
+                break;
+
+
+            // Its time to decend the parse tree.
+            case TokenTypes.openingBracket:
+                indexer(tokenizer, token, state, out);
+                break;
+
+            default:
+                E.throwError(E.unexpectedToken, tokenizer);
+                break;
+        }
+
+        // Keep cycling through the tokenizer.
+        token = tokenizer.next();
+    }
+
+    if (out.length === 0) {
+        E.throwError(E.invalidPath, tokenizer);
+    }
+
+    return out;
+};
+
+
+},{"181":181,"182":182,"185":185}],185:[function(require,module,exports){
+var TokenTypes = require(181);
+var E = require(182);
+var idxE = E.indexer;
+var range = require(187);
+var quote = require(186);
+var routed = require(188);
+
+/**
+ * The indexer is all the logic that happens in between
+ * the '[', opening bracket, and ']' closing bracket.
+ */
+module.exports = function indexer(tokenizer, openingToken, state, out) {
+    var token = tokenizer.next();
+    var done = false;
+    var allowedMaxLength = 1;
+    var routedIndexer = false;
+
+    // State variables
+    state.indexer = [];
+
+    while (!token.done) {
+
+        switch (token.type) {
+            case TokenTypes.token:
+            case TokenTypes.quote:
+
+                // ensures that token adders are properly delimited.
+                if (state.indexer.length === allowedMaxLength) {
+                    E.throwError(idxE.requiresComma, tokenizer);
+                }
+                break;
+        }
+
+        switch (token.type) {
+            // Extended syntax case
+            case TokenTypes.openingBrace:
+                routedIndexer = true;
+                routed(tokenizer, token, state, out);
+                break;
+
+
+            case TokenTypes.token:
+                var t = +token.token;
+                if (isNaN(t)) {
+                    E.throwError(idxE.needQuotes, tokenizer);
+                }
+                state.indexer[state.indexer.length] = t;
+                break;
+
+            // dotSeparators at the top level have no meaning
+            case TokenTypes.dotSeparator:
+                if (!state.indexer.length) {
+                    E.throwError(idxE.leadingDot, tokenizer);
+                }
+                range(tokenizer, token, state, out);
+                break;
+
+            // Spaces do nothing.
+            case TokenTypes.space:
+                break;
+
+            case TokenTypes.closingBracket:
+                done = true;
+                break;
+
+
+            // The quotes require their own tree due to what can be in it.
+            case TokenTypes.quote:
+                quote(tokenizer, token, state, out);
+                break;
+
+
+            // Its time to decend the parse tree.
+            case TokenTypes.openingBracket:
+                E.throwError(idxE.nested, tokenizer);
+                break;
+
+            case TokenTypes.commaSeparator:
+                ++allowedMaxLength;
+                break;
+
+            default:
+                E.throwError(idxE.unexpectedToken, tokenizer);
+        }
+
+        // If done, leave loop
+        if (done) {
+            break;
+        }
+
+        // Keep cycling through the tokenizer.
+        token = tokenizer.next();
+    }
+
+    if (state.indexer.length === 0) {
+        E.throwError(idxE.empty, tokenizer);
+    }
+
+    if (state.indexer.length > 1 && routedIndexer) {
+        E.throwError(idxE.routedTokens, tokenizer);
+    }
+
+    // Remember, if an array of 1, keySets will be generated.
+    if (state.indexer.length === 1) {
+        state.indexer = state.indexer[0];
+    }
+
+    out[out.length] = state.indexer;
+
+    // Clean state.
+    state.indexer = undefined;
+};
+
+
+},{"181":181,"182":182,"186":186,"187":187,"188":188}],186:[function(require,module,exports){
+var TokenTypes = require(181);
+var E = require(182);
+var quoteE = E.quote;
+
+/**
+ * quote is all the parse tree in between quotes.  This includes the only
+ * escaping logic.
+ *
+ * parse-tree:
+ * <opening-quote>(.|(<escape><opening-quote>))*<opening-quote>
+ */
+module.exports = function quote(tokenizer, openingToken, state, out) {
+    var token = tokenizer.next();
+    var innerToken = '';
+    var openingQuote = openingToken.token;
+    var escaping = false;
+    var done = false;
+
+    while (!token.done) {
+
+        switch (token.type) {
+            case TokenTypes.token:
+            case TokenTypes.space:
+
+            case TokenTypes.dotSeparator:
+            case TokenTypes.commaSeparator:
+
+            case TokenTypes.openingBracket:
+            case TokenTypes.closingBracket:
+            case TokenTypes.openingBrace:
+            case TokenTypes.closingBrace:
+                if (escaping) {
+                    E.throwError(quoteE.illegalEscape, tokenizer);
+                }
+
+                innerToken += token.token;
+                break;
+
+
+            case TokenTypes.quote:
+                // the simple case.  We are escaping
+                if (escaping) {
+                    innerToken += token.token;
+                    escaping = false;
+                }
+
+                // its not a quote that is the opening quote
+                else if (token.token !== openingQuote) {
+                    innerToken += token.token;
+                }
+
+                // last thing left.  Its a quote that is the opening quote
+                // therefore we must produce the inner token of the indexer.
+                else {
+                    done = true;
+                }
+
+                break;
+            case TokenTypes.escape:
+                escaping = true;
+                break;
+
+            default:
+                E.throwError(E.unexpectedToken, tokenizer);
+        }
+
+        // If done, leave loop
+        if (done) {
+            break;
+        }
+
+        // Keep cycling through the tokenizer.
+        token = tokenizer.next();
+    }
+
+    if (innerToken.length === 0) {
+        E.throwError(quoteE.empty, tokenizer);
+    }
+
+    state.indexer[state.indexer.length] = innerToken;
+};
+
+
+},{"181":181,"182":182}],187:[function(require,module,exports){
+var Tokenizer = require(189);
+var TokenTypes = require(181);
+var E = require(182);
+
+/**
+ * The indexer is all the logic that happens in between
+ * the '[', opening bracket, and ']' closing bracket.
+ */
+module.exports = function range(tokenizer, openingToken, state, out) {
+    var token = tokenizer.peek();
+    var dotCount = 1;
+    var done = false;
+    var inclusive = true;
+
+    // Grab the last token off the stack.  Must be an integer.
+    var idx = state.indexer.length - 1;
+    var from = Tokenizer.toNumber(state.indexer[idx]);
+    var to;
+
+    if (isNaN(from)) {
+        E.throwError(E.range.precedingNaN, tokenizer);
+    }
+
+    // Why is number checking so difficult in javascript.
+
+    while (!done && !token.done) {
+
+        switch (token.type) {
+
+            // dotSeparators at the top level have no meaning
+            case TokenTypes.dotSeparator:
+                if (dotCount === 3) {
+                    E.throwError(E.unexpectedToken, tokenizer);
+                }
+                ++dotCount;
+
+                if (dotCount === 3) {
+                    inclusive = false;
+                }
+                break;
+
+            case TokenTypes.token:
+                // move the tokenizer forward and save to.
+                to = Tokenizer.toNumber(tokenizer.next().token);
+
+                // throw potential error.
+                if (isNaN(to)) {
+                    E.throwError(E.range.suceedingNaN, tokenizer);
+                }
+
+                done = true;
+                break;
+
+            default:
+                done = true;
+                break;
+        }
+
+        // Keep cycling through the tokenizer.  But ranges have to peek
+        // before they go to the next token since there is no 'terminating'
+        // character.
+        if (!done) {
+            tokenizer.next();
+
+            // go to the next token without consuming.
+            token = tokenizer.peek();
+        }
+
+        // break and remove state information.
+        else {
+            break;
+        }
+    }
+
+    state.indexer[idx] = {from: from, to: inclusive ? to : to - 1};
+};
+
+
+},{"181":181,"182":182,"189":189}],188:[function(require,module,exports){
+var TokenTypes = require(181);
+var RoutedTokens = require(180);
+var E = require(182);
+var routedE = E.routed;
+
+/**
+ * The routing logic.
+ *
+ * parse-tree:
+ * <opening-brace><routed-token>(:<token>)<closing-brace>
+ */
+module.exports = function routed(tokenizer, openingToken, state, out) {
+    var routeToken = tokenizer.next();
+    var named = false;
+    var name = '';
+
+    // ensure the routed token is a valid ident.
+    switch (routeToken.token) {
+        case RoutedTokens.integers:
+        case RoutedTokens.ranges:
+        case RoutedTokens.keys:
+            //valid
+            break;
+        default:
+            E.throwError(routedE.invalid, tokenizer);
+            break;
+    }
+
+    // Now its time for colon or ending brace.
+    var next = tokenizer.next();
+
+    // we are parsing a named identifier.
+    if (next.type === TokenTypes.colon) {
+        named = true;
+
+        // Get the token name.
+        next = tokenizer.next();
+        if (next.type !== TokenTypes.token) {
+            E.throwError(routedE.invalid, tokenizer);
+        }
+        name = next.token;
+
+        // move to the closing brace.
+        next = tokenizer.next();
+    }
+
+    // must close with a brace.
+
+    if (next.type === TokenTypes.closingBrace) {
+        var outputToken = {
+            type: routeToken.token,
+            named: named,
+            name: name
+        };
+        state.indexer[state.indexer.length] = outputToken;
+    }
+
+    // closing brace expected
+    else {
+        E.throwError(routedE.invalid, tokenizer);
+    }
+
+};
+
+
+},{"180":180,"181":181,"182":182}],189:[function(require,module,exports){
+var TokenTypes = require(181);
+var DOT_SEPARATOR = '.';
+var COMMA_SEPARATOR = ',';
+var OPENING_BRACKET = '[';
+var CLOSING_BRACKET = ']';
+var OPENING_BRACE = '{';
+var CLOSING_BRACE = '}';
+var COLON = ':';
+var ESCAPE = '\\';
+var DOUBLE_OUOTES = '"';
+var SINGE_OUOTES = "'";
+var SPACE = " ";
+var SPECIAL_CHARACTERS = '\\\'"[]., ';
+var EXT_SPECIAL_CHARACTERS = '\\{}\'"[]., :';
+
+var Tokenizer = module.exports = function(string, ext) {
+    this._string = string;
+    this._idx = -1;
+    this._extended = ext;
+    this.parseString = '';
+};
+
+Tokenizer.prototype = {
+    /**
+     * grabs the next token either from the peek operation or generates the
+     * next token.
+     */
+    next: function() {
+        var nextToken = this._nextToken ?
+            this._nextToken : getNext(this._string, this._idx, this._extended);
+
+        this._idx = nextToken.idx;
+        this._nextToken = false;
+        this.parseString += nextToken.token.token;
+
+        return nextToken.token;
+    },
+
+    /**
+     * will peak but not increment the tokenizer
+     */
+    peek: function() {
+        var nextToken = this._nextToken ?
+            this._nextToken : getNext(this._string, this._idx, this._extended);
+        this._nextToken = nextToken;
+
+        return nextToken.token;
+    }
+};
+
+Tokenizer.toNumber = function toNumber(x) {
+    if (!isNaN(+x)) {
+        return +x;
+    }
+    return NaN;
+};
+
+function toOutput(token, type, done) {
+    return {
+        token: token,
+        done: done,
+        type: type
+    };
+}
+
+function getNext(string, idx, ext) {
+    var output = false;
+    var token = '';
+    var specialChars = ext ?
+        EXT_SPECIAL_CHARACTERS : SPECIAL_CHARACTERS;
+    do {
+
+        done = idx + 1 >= string.length;
+        if (done) {
+            break;
+>>>>>>> 6b8733c... Removes falcor-observable, imports rx/dist/rx, fixes BatchedRequest canceling, moves comparator and errorSelector to the ModelRoot, removes the promise collection guards, fixes bind and bindSync anomalies.
         }
     } else if(typeof cache === "undefined") {
         this._cache = {};
@@ -306,6 +9981,7 @@ Model.prototype.setCache = function setCache(cacheOrJSONGraphEnvelope) {
     return this;
 };
 
+<<<<<<< HEAD
 /**
  * Get the local {@link JSONGraph} cache. This method can be a useful to store the state of the cache
  * @param {...Array.<PathSet>} [pathSets] - The path(s) to retrieve. If no paths are specified, the entire {@link JSONGraph} is returned
@@ -479,21 +10155,368 @@ Model.prototype._invalidatePathMapsAsJSON = require(47);
 },{"10":10,"104":104,"105":105,"106":106,"107":107,"108":108,"11":11,"12":12,"127":127,"128":128,"129":129,"13":13,"14":14,"15":15,"16":16,"20":20,"3":3,"333":333,"4":4,"47":47,"48":48,"49":49,"5":5,"55":55,"57":57,"58":58,"6":6,"60":60,"62":62,"63":63,"64":64,"65":65,"66":66,"67":67,"68":68,"69":69,"70":70,"71":71,"72":72,"73":73,"74":74,"75":75,"76":76,"77":77,"78":78,"79":79,"81":81,"85":85,"9":9,"95":95,"99":99}],3:[function(require,module,exports){
 function ModelDataSourceAdapter(model) {
     this._model = model.materialize().boxValues().treatErrorsAsValues();
+=======
+        // we have to peek at the next token
+        var character = string[idx + 1];
+
+        if (character !== undefined &&
+            specialChars.indexOf(character) === -1) {
+
+            token += character;
+            ++idx;
+            continue;
+        }
+
+        // The token to delimiting character transition.
+        else if (token.length) {
+            break;
+        }
+
+        ++idx;
+        var type;
+        switch (character) {
+            case DOT_SEPARATOR:
+                type = TokenTypes.dotSeparator;
+                break;
+            case COMMA_SEPARATOR:
+                type = TokenTypes.commaSeparator;
+                break;
+            case OPENING_BRACKET:
+                type = TokenTypes.openingBracket;
+                break;
+            case CLOSING_BRACKET:
+                type = TokenTypes.closingBracket;
+                break;
+            case OPENING_BRACE:
+                type = TokenTypes.openingBrace;
+                break;
+            case CLOSING_BRACE:
+                type = TokenTypes.closingBrace;
+                break;
+            case SPACE:
+                type = TokenTypes.space;
+                break;
+            case DOUBLE_OUOTES:
+            case SINGE_OUOTES:
+                type = TokenTypes.quote;
+                break;
+            case ESCAPE:
+                type = TokenTypes.escape;
+                break;
+            case COLON:
+                type = TokenTypes.colon;
+                break;
+            default:
+                type = TokenTypes.unknown;
+                break;
+        }
+        output = toOutput(character, type, false);
+        break;
+    } while (!done);
+
+    if (!output && token.length) {
+        output = toOutput(token, TokenTypes.token, false);
+    }
+
+    if (!output) {
+        output = {done: true};
+    }
+
+    return {
+        token: output,
+        idx: idx
+    };
 }
 
-ModelDataSourceAdapter.prototype = {
-    get: function(pathSets) {
-        return this._model.get.apply(this._model, pathSets).toJSONG();
+
+
+},{"181":181}],190:[function(require,module,exports){
+'use strict';
+var falcor = require(8);
+
+var request = require(194);
+var buildQueryObject = require(191);
+var isArray = Array.isArray;
+
+function XMLHttpSource(jsongUrl, timeout) {
+    this._jsongUrl = jsongUrl;
+    this._timeout = timeout || 15000;
+}
+
+XMLHttpSource.prototype = {
+    /**
+     * @inheritDoc DataSource#get
+     */
+    get: function (pathSet) {
+        var method = 'GET';
+        var config = buildQueryObject(this._jsongUrl, method, {
+            paths: pathSet,
+            method: 'get'
+        });
+        return request(method, config);
     },
-    set: function(jsongResponse) {
-        return this._model.set(jsongResponse).toJSONG();
+    /**
+     * @inheritDoc DataSource#set
+     */
+    set: function (jsongEnv) {
+        var method = 'POST';
+        var config = buildQueryObject(this._jsongUrl, method, {
+            jsong: jsongEnv,
+            method: 'set'
+        });
+        return request(method, config);
     },
-    call: function(path, args, suffixes, paths) {
-        var params = [path, args, suffixes].concat(paths);
-        return this._model.call.apply(this._model, params).toJSONG();
+
+    /**
+     * @inheritDoc DataSource#call
+     */
+    call: function (callPath, args, pathSuffix, paths) {
+        var method = 'POST';
+        var queryData = [];
+        args = args || [];
+        pathSuffix = pathSuffix || [];
+        paths = paths || [];
+
+        queryData.push('method=call');
+        queryData.push('callPath=' + encodeURIComponent(JSON.stringify(callPath)));
+        queryData.push('arguments=' + encodeURIComponent(JSON.stringify(args)));
+        queryData.push('pathSuffixes=' + encodeURIComponent(JSON.stringify(pathSuffix)));
+        queryData.push('paths=' + encodeURIComponent(JSON.stringify(paths)));
+
+        var config = buildQueryObject(this._jsongUrl, method, queryData.join('&'));
+        return request(method, config);
+    }
+};
+// ES6 modules
+XMLHttpSource.XMLHttpSource = XMLHttpSource;
+XMLHttpSource['default'] = XMLHttpSource;
+// commonjs
+module.exports = XMLHttpSource;
+
+},{"191":191,"194":194,"8":8}],191:[function(require,module,exports){
+'use strict';
+module.exports = function buildQueryObject(url, method, queryData) {
+    var qData = [];
+    var keys;
+    var data = {url: url};
+
+    if (typeof queryData === 'string') {
+        qData.push(queryData);
+    } else {
+
+        keys = Object.keys(queryData);
+        keys.forEach(function (k) {
+            var value = typeof queryData[k] === 'object' ? JSON.stringify(queryData[k]) : queryData[k];
+            qData.push(k + '=' + value);
+        });
+    }
+
+    if (method === 'GET') {
+        data.url += '?' + qData.join('&');
+    } else {
+        data.data = qData.join('&');
+    }
+
+    return data;
+};
+
+},{}],192:[function(require,module,exports){
+(function (global){
+'use strict';
+// Get CORS support even for older IE
+module.exports = function getCORSRequest() {
+    var xhr = new global.XMLHttpRequest();
+    if ('withCredentials' in xhr) {
+        return xhr;
+    } else if (!!global.XDomainRequest) {
+        return new XDomainRequest();
+    } else {
+        throw new Error('CORS is not supported by your browser');
     }
 };
 
+}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
+},{}],193:[function(require,module,exports){
+(function (global){
+'use strict';
+module.exports = function getXMLHttpRequest() {
+    var progId,
+        progIds,
+        i;
+    if (global.XMLHttpRequest) {
+      return new global.XMLHttpRequest();
+    } else {
+      try {
+        progIds = ['Msxml2.XMLHTTP', 'Microsoft.XMLHTTP', 'Msxml2.XMLHTTP.4.0'];
+        for (i = 0; i < 3; i++) {
+            try {
+                progId = progIds[i];
+                if (new global.ActiveXObject(progId)) {
+                    break;
+                }
+            } catch(e) { }
+        }
+        return new global.ActiveXObject(progId);
+      } catch (e) {
+        throw new Error('XMLHttpRequest is not supported by your browser');
+      }
+    }
+};
+
+}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
+},{}],194:[function(require,module,exports){
+(function (global){
+'use strict';
+var Observable = require(8).Observable;
+var getXMLHttpRequest = require(193);
+var getCORSRequest = require(192);
+var hasOwnProp = Object.prototype.hasOwnProperty;
+
+function request(method, options) {
+    return Observable.create(function(observer) {
+        var config = {
+            method: 'GET',
+            crossDomain: false,
+            contentType: 'application/x-www-form-urlencoded; charset=UTF-8',
+            async: true,
+            headers: {},
+            responseType: 'json'
+        };
+        var xhr,
+            progressObserver,
+            isDone,
+            headers,
+            header,
+            prop;
+
+        if (typeof options === 'string') {
+            config.url = options;
+        } else {
+            for (prop in options) {
+                if (hasOwnProp.call(options, prop)) {
+                    config[prop] = options[prop];
+                }
+            }
+        }
+
+        try {
+            xhr = config.crossDomain ? getCORSRequest() : getXMLHttpRequest();
+        } catch (err) {
+            observer.onError(err);
+        }
+
+        // Add request with Headers
+        if (!config.crossDomain && !config.headers['X-Requested-With']) {
+          config.headers['X-Requested-With'] = 'XMLHttpRequest';
+        }
+
+        // Progress
+        progressObserver = config.progressObserver;
+
+
+        try {
+            // Takes the url and opens the connection
+            if (config.user) {
+                xhr.open(method || config.method, config.url, config.async, config.user, config.password);
+            } else {
+                xhr.open(method || config.method, config.url, config.async);
+            }
+
+            // Sets timeout information
+            xhr.timeout = config.timeout;
+
+            // Anything but explicit false results in true.
+            xhr.withCredentials = config.withCredentials !== false;
+
+            // Fills the request headers
+            headers = config.headers;
+            for (header in headers) {
+                if (hasOwnProp.call(headers, header)) {
+                    xhr.setRequestHeader(header, headers[header]);
+                }
+            }
+
+            // Sends the request.
+            if (!!xhr.upload || (!('withCredentials' in xhr) && !!global.XDomainRequest)) {
+                // Link the response methods
+                xhr.onload = function onload(e) {
+                    onXhrLoad(observer, progressObserver, xhr, xhr.status, e);
+                    isDone = true;
+                };
+
+                // Progress
+                if (progressObserver) {
+                    xhr.onprogress = function onprogress(e) {
+                        progressObserver.onNext(e);
+                    };
+                }
+
+                // Error
+                xhr.onerror = function onerror(e) {
+                    onXhrError(observer, progressObserver, xhr, xhr.status, e);
+                    isDone = true;
+                };
+
+                // Abort
+                xhr.onabort = function onabort(e) {
+                    onXhrError(observer, progressObserver, xhr, xhr.status, e);
+                    isDone = true;
+                };
+
+            // Legacy
+            } else {
+
+                xhr.onreadystatechange = function onreadystatechange(e) {
+                    // Complete
+                    if (xhr.readyState === 4) {
+                        var status = xhr.status === 1223 ? 204 : xhr.status;
+                        onXhrLoad(observer, config.progressObserver, xhr, status, e);
+                        isDone = true;
+                    }
+                };
+            }
+
+            // Timeout
+            xhr.ontimeout = function ontimeout(e) {
+                onXhrError(observer, progressObserver, xhr, 'timeout error', e);
+                isDone = true;
+            };
+
+            // Send Request
+            xhr.send(config.data);
+
+        } catch (e) {
+            observer.onError(e);
+        }
+        // Dispose
+        return function dispose() {
+            // Doesn't work in IE9
+            if (!isDone && xhr.readyState !== 4) {
+                xhr.abort();
+            }
+        };//Dispose
+    });
+}
+
+/*
+ * General handling of a successfully completed request (that had a 200 response code)
+ */
+function _handleXhrComplete(observer, data) {
+    observer.onNext(data);
+    observer.onCompleted();
+>>>>>>> 6b8733c... Removes falcor-observable, imports rx/dist/rx, fixes BatchedRequest canceling, moves comparator and errorSelector to the ModelRoot, removes the promise collection guards, fixes bind and bindSync anomalies.
+}
+
+/*
+ * General handling of ultimate failure (after appropriate retries)
+ */
+function _handleXhrError(observer, textStatus, errorThrown) {
+    // IE9: cross-domain request may be considered errors
+    if (!errorThrown) {
+        errorThrown = new Error(textStatus);
+    }
+
+<<<<<<< HEAD
 module.exports = ModelDataSourceAdapter;
 },{}],4:[function(require,module,exports){
 var is_function = require(104);
@@ -623,8 +10646,311 @@ module.exports = function bindSync(path) {
         } else if(node.value === void 0) {
             return undefined;
         }
+=======
+    observer.onError(errorThrown);
+}
+
+function onXhrLoad(observer, progressObserver, xhr, status, e) {
+    var responseData,
+        responseObject;
+        // responseType;
+
+    // If there's no observer, the request has been (or is being) cancelled.
+    if (xhr && observer) {
+        responseData = ('response' in xhr) ? xhr.response : xhr.responseText;
+
+        // If there is a progress observer
+        if (progressObserver) {
+            _handleXhrComplete(progressObserver, e);
+        }
+
+        //
+        if ((status >= 200 && status <= 399)) {
+            try {
+                responseData = JSON.parse(responseData || '');
+            } catch (e) {
+                _handleXhrError(observer, 'invalid json', e);
+            }
+
+            return _handleXhrComplete(observer, responseData);
+
+        } else if (status === 401 || status === 403 || status === 407) {
+
+            return _handleXhrError(observer, responseData);
+
+        } else if (status === 410) {
+            // TODO: Retry ?
+            return _handleXhrError(observer, responseData);
+
+        } else if (status === 408 || status === 504) {
+            // TODO: Retry ?
+            return _handleXhrError(observer, responseData);
+
+        } else {
+
+            return _handleXhrError(observer, responseData || ('Response code ' + status));
+
+        }//if
+    }//if
+}//onXhrLoad
+
+function onXhrError(observer, progressObserver, xhr, status, e) {
+    if (progressObserver) {
+        _handleXhrError(progressObserver, xhr, e);
+    }
+    _handleXhrError(observer, status || xhr.statusText || 'request error', e);
+}
+
+module.exports = request;
+
+}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
+},{"192":192,"193":193,"8":8}],195:[function(require,module,exports){
+arguments[4][180][0].apply(exports,arguments)
+},{"180":180}],196:[function(require,module,exports){
+arguments[4][181][0].apply(exports,arguments)
+},{"181":181}],197:[function(require,module,exports){
+arguments[4][182][0].apply(exports,arguments)
+},{"182":182}],198:[function(require,module,exports){
+arguments[4][183][0].apply(exports,arguments)
+},{"183":183,"195":195,"199":199,"204":204}],199:[function(require,module,exports){
+arguments[4][184][0].apply(exports,arguments)
+},{"184":184,"196":196,"197":197,"200":200}],200:[function(require,module,exports){
+arguments[4][185][0].apply(exports,arguments)
+},{"185":185,"196":196,"197":197,"201":201,"202":202,"203":203}],201:[function(require,module,exports){
+arguments[4][186][0].apply(exports,arguments)
+},{"186":186,"196":196,"197":197}],202:[function(require,module,exports){
+arguments[4][187][0].apply(exports,arguments)
+},{"187":187,"196":196,"197":197,"204":204}],203:[function(require,module,exports){
+arguments[4][188][0].apply(exports,arguments)
+},{"188":188,"195":195,"196":196,"197":197}],204:[function(require,module,exports){
+arguments[4][189][0].apply(exports,arguments)
+},{"189":189,"196":196}],205:[function(require,module,exports){
+var $ref = require(331);
+var $atom = require(329);
+var $error = require(330);
+
+var ModelRoot = require(207);
+var ModelDataSourceAdapter = require(206);
+
+var RequestQueue = require(257);
+var GetResponse = require(260);
+var SetResponse = require(264);
+var CallResponse = require(259);
+var InvalidateResponse = require(262);
+
+var ASAPScheduler = require(265);
+var TimeoutScheduler = require(267);
+var ImmediateScheduler = require(266);
+
+var identity = require(301);
+var array_clone = require(283);
+var array_slice = require(287);
+
+var collect_lru = require(251);
+var pathSyntax = require(198);
+
+var get_size = require(297);
+var is_object = require(309);
+var is_function = require(306);
+var is_path_value = require(310);
+var is_json_envelope = require(307);
+var is_json_graph_envelope = require(308);
+
+var set_cache = require(268);
+var set_json_graph_as_json_dense = require(269);
+
+module.exports = Model;
+
+Model.ref = function ref(path) {
+    return { $type: $ref, value: pathSyntax.fromPath(path) };
+};
+
+Model.atom = function atom(value) {
+    return { $type: $atom, value: value };
+};
+
+Model.error = function error(error) {
+    return { $type: $error, value: error };
+};
+
+Model.pathValue = function pathValue(path, value) {
+    return { path: pathSyntax.fromPath(path), value: value };
+};
+
+/**
+ * A Model object is used to execute commands against a {@link JSONGraph} object. {@link Model}s can work with a local JSONGraph cache, or it can work with a remote {@link JSONGraph} object through a {@link DataSource}.
+ * @constructor
+ * @param {?Object} options - A set of options to customize behavior
+ * @param {?DataSource} options.source - A data source to retrieve and manage the {@link JSONGraph}
+ * @param {?JSONGraph} options.cache - Initial state of the {@link JSONGraph}
+ * @param {?number} options.maxSize - The maximum size of the cache
+ * @param {?number} options.collectRatio - The ratio of the maximum size to collect when the maxSize is exceeded
+ * @param {?Model~errorSelector} options.errorSelector - A function used to translate errors before they are returned
+ */
+function Model(options) {
+
+    options = options || {};
+
+    this._root = options._root || new ModelRoot(options);
+    this._path = options.path || options._path || [];
+    this._scheduler = options.scheduler || options._scheduler || new ImmediateScheduler();
+    this._source = options.source || options._source;
+    this._request = options.request || options._request || new RequestQueue(this, this._scheduler);
+    this._router = options.router || options._router;
+
+    if(options.boxed || options.hasOwnProperty("_boxed")) {
+        this._boxed = options.boxed || options._boxed;
     }
 
+    if(options.materialized || options.hasOwnProperty("_materialized")) {
+        this._materialized = options.materialized || options._materialized;
+    }
+
+    if(typeof options.treatErrorsAsValues === "boolean") {
+        this._treatErrorsAsValues = options.treatErrorsAsValues;
+    } else if(options.hasOwnProperty("_treatErrorsAsValues")) {
+        this._treatErrorsAsValues = options._treatErrorsAsValues;
+    }
+
+    if(options.cache) {
+        this.setCache(options.cache);
+    } else if(options._cache) {
+        this._cache = options._cache;
+    } else {
+        this._cache = {};
+    }
+}
+
+Model.prototype.constructor = Model;
+
+Model.prototype._materialized = false;
+Model.prototype._boxed = false;
+Model.prototype._progressive = false;
+Model.prototype._treatErrorsAsValues = false;
+Model.prototype._maxSize = Math.pow(2, 53) - 1;
+Model.prototype._collectRatio = 0.75;
+
+/**
+ * The get method retrieves several {@link Path}s or {@link PathSet}s from a {@link Model}. The get method is versatile and may be called in several different ways, allowing you to make different trade-offs between performance and expressiveness. The simplest invocation returns an ModelResponse stream that contains a JSON object with all of the requested values. An optional selector function can also be passed in order to translate the retrieved data before it appears in the Observable stream. If a selector function is provided, the output will be an Observable stream with the result of the selector function invocation instead of a ModelResponse stream.
+ If you intend to transform the JSON data into another form, specifying a selector function may be more efficient. The selector function is run once all of the requested path values are available. In the body of the selector function, you can read data from the Model's cache using {@link Model.prototype.getValueSync} and transform it directly into its final representation (ex. an HTML string). This technique can reduce allocations by preventing the get method from copying the data in {@link Model}'s cache into an intermediary JSON representation.
+ Instead of directly accessing the cache within the selector function, you can optionally pass arguments to the selector function and they will be automatically bound to the corresponding {@link Path} or {@link PathSet} passed to the get method. If a {@link Path} is bound to a selector function argument, the function argument will contain the value found at that path. However if a {@link PathSet} is bound to a selector function argument, the function argument will be a JSON structure containing all of the path values. Using argument binding can provide a good balance between allocations and expressiveness. For more detail on how {@link Path}s and {@link PathSet}s are bound to selector function arguments, see the examples below.
+ * @function
+ * @param {...PathSet} path - The path(s) to retrieve
+ * @param {?Function} selector - The callback to execute once all of the paths have been retrieved
+ * @return {ModelResponse.<JSONEnvelope>|Observable} - The requested data as JSON, or the result of the optional selector function.
+ */
+Model.prototype.get = function get() {
+    var args;
+    var argsIdx = -1;
+    var argsLen = arguments.length;
+    var selector = arguments[argsLen - 1];
+    if(is_function(selector)) {
+        argsLen = argsLen - 1;
+    } else {
+        selector = undefined;
+    }
+    args = new Array(argsLen);
+    while(++argsIdx < argsLen) {
+        args[argsIdx] = arguments[argsIdx];
+    }
+    return GetResponse.create(this, args, selector);
+};
+
+/**
+ * Sets the value at one or more places in the JSONGraph model. The set method accepts one or more {@link PathValue}s, each of which is a combination of a location in the document and the value to place there.  In addition to accepting  {@link PathValue}s, the set method also returns the values after the set operation is complete.
+ * @function
+ * @param {...(PathValue | JSONGraphEnvelope | JSONEnvelope)} value - A value or collection of values to set into the Model.
+ * @return {ModelResponse.<JSON> | Observable} - An {@link Observable} stream containing the values in the JSONGraph model after the set was attempted.
+ */
+Model.prototype.set = function set() {
+    var args;
+    var argsIdx = -1;
+    var argsLen = arguments.length;
+    var selector = arguments[argsLen - 1];
+    if(is_function(selector)) {
+        argsLen = argsLen - 1;
+    } else {
+        selector = undefined;
+    }
+    args = new Array(argsLen);
+    while(++argsIdx < argsLen) {
+        args[argsIdx] = arguments[argsIdx];
+    }
+    return SetResponse.create(this, args, selector);
+};
+
+/*
+ * Invoke a function
+ * @function
+ * @param {Path} functionPath - The path to the function to invoke
+ * @param {Array.<Object>} args - The arguments to pass to the function
+ * @param {Array.<PathSet>} pathSuffixes - The paths to retrieve from objects returned from the function
+ * @param {Array.<PathSet>} calleePaths - The paths to retrieve from function callee after successful function execution
+ * @param {Function} selector The selector function
+ * @returns {ModelResponse.<*> | Observable} The {JSONGraph} fragment and associated metadata returned from the invoked function
+ */
+Model.prototype.call = function call() {
+    var args;
+    var argsIdx = -1;
+    var argsLen = arguments.length;
+    var selector = arguments[argsLen - 1];
+    if(is_function(selector)) {
+        argsLen = argsLen - 1;
+    } else {
+        selector = undefined;
+    }
+    args = new Array(argsLen);
+    while(++argsIdx < argsLen) {
+        args[argsIdx] = arguments[argsIdx];
+    }
+    return CallResponse.create(this, args, selector);
+};
+
+Model.prototype.invalidate = function invalidate() {
+    var args;
+    var argsIdx = -1;
+    var argsLen = arguments.length;
+    var selector = arguments[argsLen - 1];
+    if(is_function(selector)) {
+        argsLen = argsLen - 1;
+    } else {
+        selector = undefined;
+    }
+    args = new Array(argsLen);
+    while(++argsIdx < argsLen) {
+        args[argsIdx] = arguments[argsIdx];
+    }
+    InvalidateResponse.create(this, args, selector).subscribe();
+    return this;
+};
+
+
+/**
+ * Returns a clone of the {@link Model} bound to a location within the {@link JSONGraph}. The bound location is never a {@link Reference}: any {@link Reference}s encountered while resolving the bound {@link Path} are always replaced with the {@link Reference}s target value. For subsequent operations on the {@link Model}, all paths will be evaluated relative to the bound path. Bind allows you to:
+ * - Expose only a fragment of the {@link JSONGraph} to components, rather than the entire graph
+ * - Hide the location of a {@link JSONGraph} fragment from components
+ * - Optimize for executing multiple operations and path looksup at/below the same location in the {@link JSONGraph}
+ * @param {Path} boundPath - The path to bind to
+ * @param {...PathSet} relativePathsToPreload - Paths to preload before Model is created. These paths are relative to the bound path.
+ * @return {Observable.<Model>} - An Observable stream with a single value, the bound {@link Model}, or an empty stream if nothing is found at the path
+*/
+Model.prototype.bind = require(208);
+
+/**
+ * Synchronously returns a clone of the {@link Model} bound to a location within the {@link JSONGraph}. Unlike bind or bindSync, softBind never optimizes its path.  Soft bind is ideal if you want to retrieve the bound path every time, rather than retrieve the optimized path once and then always retrieve paths from that object in the JSON Graph. For example, if you always wanted to retrieve the name from the first item in a list you could softBind to the path "list[0]".
+ * @param {Path} path - The path prefix to retrieve every time an operation is executed on a Model.
+ * @return {Model}
+ */
+Model.prototype.softBind = function softBind(path) {
+    path = pathSyntax.fromPath(path);
+    if(Array.isArray(path) === false) {
+        throw new Error("Model#softBind must be called with an Array path.");
+>>>>>>> 6b8733c... Removes falcor-observable, imports rx/dist/rx, fixes BatchedRequest canceling, moves comparator and errorSelector to the ModelRoot, removes the promise collection guards, fixes bind and bindSync anomalies.
+    }
+    return this.clone({ _path: path });
+};
+
+<<<<<<< HEAD
     return this.clone({ _path: path });
 };
 
@@ -1557,9 +11883,1169 @@ module.exports = function onValue(model, node, seedOrFunction, outerResults, per
                 seedOrFunction.paths.push(permuteRequested);
             }
             break;
+=======
+/**
+ * Get data for a single {@link Path}
+ * @param {Path} path - The path to retrieve
+ * @return {Observable.<*>} - The value for the path
+ * @example
+ var model = new falcor.Model({source: new falcor.HttpDataSource("/model.json") });
+
+ model.
+     getValue('user.name').
+     subscribe(function(name) {
+         console.log(name);
+     });
+
+ // The code above prints "Jim" to the console.
+ */
+Model.prototype.getValue = function getValue(path) {
+    return this.get(path, identity);
+};
+
+Model.prototype.setValue = function setValue(path, value) {
+    path = pathSyntax.fromPath(path);
+    value = is_path_value(path) ? path : Model.pathValue(path, value);
+    return this.set(value, identity);
+};
+
+// TODO: Does not throw if given a PathSet rather than a Path, not sure if it should or not.
+// TODO: Doc not accurate? I was able to invoke directly against the Model, perhaps because I don't have a data source?
+// TODO: Not clear on what it means to "retrieve objects in addition to JSONGraph values"
+/**
+ * Synchronously retrieves a single path from the local {@link Model} only and will not retrieve missing paths from the {@link DataSource}. This method can only be invoked when the {@link Model} does not have a {@link DataSource} or from within a selector function. See {@link Model.prototype.get}. The getValueSync method differs from the asynchronous get methods (ex. get, getValues) in that it can be used to retrieve objects in addition to JSONGraph values.
+ * @arg {Path} path - The path to retrieve
+ * @return {*} - The value for the specified path
+ */
+Model.prototype.getValueSync = require(223);
+
+Model.prototype.setValueSync = require(281);
+
+Model.prototype.bindSync = require(209);
+
+/**
+ * Set the local cache to a {@link JSONGraph} fragment. This method can be a useful way of mocking a remote document, or restoring the local cache from a previously stored state
+ * @param {JSONGraph} jsonGraph - The {@link JSONGraph} fragment to use as the local cache
+ */
+Model.prototype.setCache = function setCache(cacheOrJSONGraphEnvelope) {
+    var cache = this._cache;
+    if(cacheOrJSONGraphEnvelope !== cache) {
+        var modelRoot = this._root;
+        this._cache = {};
+        if(typeof cache !== "undefined") {
+            collect_lru(modelRoot, modelRoot.expired, get_size(cache), 0);
+        }
+        if(is_json_graph_envelope(cacheOrJSONGraphEnvelope)) {
+            set_json_graph_as_json_dense(this, [cacheOrJSONGraphEnvelope], []);
+        } else if(is_json_envelope(cacheOrJSONGraphEnvelope)) {
+            set_cache(this, cacheOrJSONGraphEnvelope.json);
+        } else if(is_object(cacheOrJSONGraphEnvelope)) {
+            set_cache(this, cacheOrJSONGraphEnvelope);
+        }
+    } else if(typeof cache === "undefined") {
+        this._cache = {};
+    }
+    return this;
+};
+
+/**
+ * Get the local {@link JSONGraph} cache. This method can be a useful to store the state of the cache
+ * @param {...Array.<PathSet>} [pathSets] - The path(s) to retrieve. If no paths are specified, the entire {@link JSONGraph} is returned
+ * @return {JSONGraph} jsonGraph - A {@link JSONGraph} fragment
+ * @example
+ // Storing the boxshot of the first 10 titles in the first 10 genreLists to local storage.
+ localStorage.setItem('cache', JSON.stringify(model.getCache("genreLists[0...10][0...10].boxshot")));
+ */
+Model.prototype.getCache = function getCache() {
+    var paths = array_slice(arguments);
+    if(paths.length === 0) {
+        paths[0] = { json: this._cache };
+    }
+    var result;
+    this.get.apply(this.
+            withoutDataSource().
+            boxValues().
+            treatErrorsAsValues().
+            materialize(), paths).
+        toJSONG().
+        subscribe(function(envelope) {
+            result = envelope.jsong;
+        });
+    return result;
+};
+
+Model.prototype.getGeneration = function getGeneration(path) {
+    path = path && pathSyntax.fromPath(path) || [];
+    if (Array.isArray(path) === false) {
+        throw new Error("Model#getGenerationSync must be called with an Array path.");
+    }
+    if (this._path.length) {
+        path = this._path.concat(path);
+    }
+    return this._getGeneration(this, path);
+};
+
+Model.prototype.syncCheck = function syncCheck(name) {
+    if (Boolean(this._source) && this._root.syncRefCount <= 0 && this._root.unsafeMode === false) {
+        throw new Error("Model#" + name + " may only be called within the context of a request selector.");
+    }
+    return true;
+};
+
+Model.prototype.clone = function clone(opts) {
+    var clone = new Model(this);
+    for(var key in opts) {
+        var value = opts[key];
+        if(value === "delete") {
+            delete clone[key];
+        } else {
+            clone[key] = value;
+        }
+    }
+    return clone;
+};
+
+// TODO: Should we be clearer this only applies to "get" operations? I'm assuming that is true
+/**
+ * Returns a clone of the {@link Model} that eanbles batching. Within the configured time period, paths for operations of the same type are collected and executed on the {@link DataSource} in a batch. Batching can make more efficient use of the {@link DataSource} depending on its implementation, for example, reducing the number of HTTP requests to the server
+ * @param {?Scheduler|number} schedulerOrDelay - Either a {@link Scheduler} that determines when to send a batch to the {@link DataSource}, or the number in milliseconds to collect a batch before sending to the {@link DataSource}. If this parameter is omitted, then batch collection ends at the end of the next tick.
+ * @return {Model}
+ */
+Model.prototype.batch = function batch(schedulerOrDelay) {
+    if(typeof schedulerOrDelay === "number") {
+        schedulerOrDelay = new TimeoutScheduler(Math.round(Math.abs(schedulerOrDelay)));
+    } else if(!schedulerOrDelay || !schedulerOrDelay.schedule) {
+        schedulerOrDelay = new ASAPScheduler();
+    }
+    return this.clone({ _request: new RequestQueue(this, schedulerOrDelay) });
+};
+
+/**
+ * Returns a clone of the {@link Model} that disables batching. This is the default mode. Each operation will be executed on the {@link DataSource} separately
+ * @name unbatch
+ * @memberof Model.prototype
+ * @function
+ * @return {Model} a {@link Model} that batches requests of the same type and sends them to the data source together.
+ */
+Model.prototype.unbatch = function unbatch() {
+    return this.clone({ _request: new RequestQueue(this, new ImmediateScheduler()) });
+};
+
+// TODO: Add example of treatErrorsAsValues
+/**
+ * Returns a clone of the {@link Model} that treats errors as values. Errors will be reported in the same callback used to report data. Errors will appear as objects in responses, rather than being sent to the {@link Observable~onErrorCallback} callback of the {@link ModelResponse}.
+ * @return {Model}
+ */
+Model.prototype.treatErrorsAsValues = function treatErrorsAsValues() {
+    return this.clone({ _treatErrorsAsValues: true });
+};
+
+Model.prototype.asDataSource = function asDataSource() {
+    return new ModelDataSourceAdapter(this);
+};
+
+Model.prototype.materialize = function materialize() {
+    return this.clone({ _materialized: true });
+};
+
+Model.prototype.dematerialize = function materialize() {
+    return this.clone({ _materialized: "delete" });
+};
+
+/**
+ * Returns a clone of the {@link Model} that boxes values returning the wrapper ({@link Atom}, {@link Reference}, or {@link Error}), rather than the value inside it. This allows any metadata attached to the wrapper to be inspected
+ * @return {Model}
+ */
+Model.prototype.boxValues = function boxValues() {
+    return this.clone({ _boxed: true });
+};
+
+/**
+ * Returns a clone of the {@link Model} that unboxes values, returning the value inside of the wrapper ({@link Atom}, {@link Reference}, or {@link Error}), rather than the wrapper itself. This is the default mode.
+ * @return {Model}
+ */
+Model.prototype.unboxValues = function unboxValues() {
+    return this.clone({ _boxed: "delete" });
+};
+
+/**
+ * Returns a clone of the {@link Model} that only uses the local {@link JSONGraph} and never uses a {@link DataSource} to retrieve missing paths
+ * @return {Model}
+ */
+Model.prototype.withoutDataSource = function withoutDataSource() {
+    return this.clone({ _source: "delete" });
+};
+
+Model.prototype.toJSON = function toJSON() {
+    return { $type: "ref", value: this._path };
+};
+
+Model.prototype.getPath = function getPath() {
+    return array_clone(this._path);
+};
+
+var get_walk = require(219);
+
+Model.prototype._getBoundValue = require(216);
+Model.prototype._getGeneration = require(217);
+Model.prototype._getValueSync = require(218);
+Model.prototype._getPathSetsAsValues = require(215)(get_walk);
+Model.prototype._getPathSetsAsJSON = require(212)(get_walk);
+Model.prototype._getPathSetsAsPathMap = require(214)(get_walk);
+Model.prototype._getPathSetsAsJSONG = require(213)(get_walk);
+Model.prototype._getPathMapsAsValues = require(215)(get_walk);
+Model.prototype._getPathMapsAsJSON = require(212)(get_walk);
+Model.prototype._getPathMapsAsPathMap = require(214)(get_walk);
+Model.prototype._getPathMapsAsJSONG = require(213)(get_walk);
+
+Model.prototype._setPathValuesAsJSON = require(277);
+Model.prototype._setPathValuesAsJSONG = require(278);
+Model.prototype._setPathValuesAsPathMap = require(279);
+Model.prototype._setPathValuesAsValues = require(280);
+
+Model.prototype._setPathMapsAsJSON = require(273);
+Model.prototype._setPathMapsAsJSONG = require(274);
+Model.prototype._setPathMapsAsPathMap = require(275);
+Model.prototype._setPathMapsAsValues = require(276);
+
+Model.prototype._setJSONGsAsJSON = require(269);
+Model.prototype._setJSONGsAsJSONG = require(270);
+Model.prototype._setJSONGsAsPathMap = require(271);
+Model.prototype._setJSONGsAsValues = require(272);
+
+Model.prototype._setCache = require(268);
+
+Model.prototype._invalidatePathSetsAsJSON = require(250);
+Model.prototype._invalidatePathMapsAsJSON = require(249);
+
+},{"198":198,"206":206,"207":207,"208":208,"209":209,"212":212,"213":213,"214":214,"215":215,"216":216,"217":217,"218":218,"219":219,"223":223,"249":249,"250":250,"251":251,"257":257,"259":259,"260":260,"262":262,"264":264,"265":265,"266":266,"267":267,"268":268,"269":269,"270":270,"271":271,"272":272,"273":273,"274":274,"275":275,"276":276,"277":277,"278":278,"279":279,"280":280,"281":281,"283":283,"287":287,"297":297,"301":301,"306":306,"307":307,"308":308,"309":309,"310":310,"329":329,"330":330,"331":331}],206:[function(require,module,exports){
+arguments[4][12][0].apply(exports,arguments)
+},{"12":12}],207:[function(require,module,exports){
+var is_function = require(306);
+var ImmediateScheduler = require(266);
+
+function ModelRoot(options) {
+
+    options = options || {};
+
+    this.syncRefCount = 0;
+    this.expired = options.expired || [];
+    this.unsafeMode = options.unsafeMode || false;
+    this.collectionScheduler = options.collectionScheduler || new ImmediateScheduler();
+
+    if(is_function(options.comparator)) {
+        this.comparator = options.comparator;
+    }
+
+    if(is_function(options.errorSelector)) {
+        this.errorSelector = options.errorSelector;
+    }
+
+    if(is_function(options.onChange)) {
+        this.onChange = options.onChange;
     }
 };
 
+ModelRoot.prototype.errorSelector = function errorSelector(x, y) { return y; };
+ModelRoot.prototype.comparator = function comparator(a, b) {
+    if (Boolean(a) && typeof a === "object" && a.hasOwnProperty("value") &&
+        Boolean(b) && typeof b === "object" && b.hasOwnProperty("value")) {
+        return a.value === b.value;
+    }
+    return a === b;
+};
+
+module.exports = ModelRoot;
+},{"266":266,"306":306}],208:[function(require,module,exports){
+var noop = require(314);
+var Rx = require(346);;
+var is_path_value = require(310);
+var pathSyntax = require(198);
+var InvalidModelError = require(210);
+
+module.exports = function bind(boundPath) {
+
+    var model = this;
+    var modelRoot = model._root;
+    var pathsIndex = -1;
+    var pathsCount = arguments.length - 1;
+    var paths = new Array(pathsCount);
+
+    boundPath = pathSyntax.fromPath(boundPath);
+
+    while(++pathsIndex < pathsCount) {
+        paths[pathsIndex] = pathSyntax.fromPath(arguments[pathsIndex + 1]);
+    }
+
+    if(modelRoot.syncRefCount <= 0 && pathsCount === 0) {
+        throw new Error("Model#bind requires at least one value path.");
+    }
+
+    return Rx.Observable.defer(function() {
+        var value;
+        var errorHappened = false;
+        try {
+            ++modelRoot.syncRefCount;
+            value = model.bindSync(boundPath);
+        } catch(e) {
+            value = e;
+            errorHappened = true;
+        } finally {
+            --modelRoot.syncRefCount;
+            return errorHappened ?
+                Rx.Observable["throw"](value) :
+                Rx.Observable["return"](value)
+        }
+    }).
+    flatMap(function(boundModel) {
+        if(Boolean(boundModel)) {
+            if(pathsCount > 0) {
+                return boundModel.get.apply(boundModel, paths.concat(function() {
+                    return boundModel;
+                }))["catch"](Rx.Observable.empty());
+            }
+            return Rx.Observable["return"](boundModel);
+        } else if(pathsCount > 0) {
+            return model.get.apply(model, paths.map(function(path) {
+                    return boundPath.concat(path);
+                }).concat(function() {
+                    return model.bindSync(boundPath);
+                }));
+        }
+        return Rx.Observable.empty();
+    });
+};
+
+},{"198":198,"210":210,"310":310,"314":314,"346":346}],209:[function(require,module,exports){
+var noop = require(314);
+var $error = require(330);
+var pathSyntax = require(198);
+var getBoundValue = require(216);
+var get_type = require(298);
+
+module.exports = function bindSync(path) {
+
+    path = pathSyntax.fromPath(path);
+
+    if (!Array.isArray(path)) {
+        throw new Error("Model#bindSync must be called with an Array path.");
+    }
+
+    var boundValue = this.syncCheck("bindSync") && getBoundValue(this, this._path.concat(path));
+
+    var path = boundValue.path;
+    var node = boundValue.value;
+    var found = boundValue.found;
+    var shorted = boundValue.shorted;
+    var type;
+
+    if(!found) {
+        return undefined;
+    } else if(Boolean(node) && (type = get_type(node))) {
+        if(type === $error) {
+            if (this._boxed) {
+                throw node;
+            }
+            throw node.value;
+        } else if(node.value === void 0) {
+            return undefined;
+        }
+    }
+
+    return this.clone({ _path: path });
+};
+
+},{"198":198,"216":216,"298":298,"314":314,"330":330}],210:[function(require,module,exports){
+/**
+ * An InvalidModelError can only happen when a user binds, whether sync
+ * or async to shorted value.  See the unit tests for examples.
+ *
+ * @param {String} message
+ */
+function InvalidModelError(boundPath, shortedPath) {
+    this.message = 'The boundPath of the model is not valid since a value or error was found before the path end.';
+    this.stack = (new Error()).stack;
+    this.boundPath = boundPath;
+    this.shortedPath = shortedPath;
+};
+
+// instanceof will be an error, but stack will be correct because its defined in the constructor.
+InvalidModelError.prototype = new Error();
+InvalidModelError.prototype.name = 'InvalidModel';
+
+module.exports = InvalidModelError;
+},{}],211:[function(require,module,exports){
+var hardLink = require(225);
+var createHardlink = hardLink.create;
+var onValue = require(222);
+var isExpired = require(226);
+var $ref = require(331);
+var __context = require(234);
+var promote = require(229).promote;
+
+function followReference(model, root, node, referenceContainer, reference, seed, outputFormat) {
+
+    var depth = 0;
+    var k, next;
+
+    while (true) { //eslint-disable-line no-constant-condition
+        if (depth === 0 && referenceContainer[__context]) {
+            depth = reference.length;
+            next = referenceContainer[__context];
+        } else {
+            k = reference[depth++];
+            next = node[k];
+        }
+        if (next) {
+            var type = next.$type;
+            var value = type && next.value || next;
+
+            if (depth < reference.length) {
+                if (type) {
+                    node = next;
+                    break;
+                }
+
+                node = next;
+                continue;
+            }
+
+            // We need to report a value or follow another reference.
+            else {
+
+                node = next;
+
+                if (type && isExpired(next)) {
+                    break;
+                }
+
+                if (!referenceContainer[__context]) {
+                    createHardlink(referenceContainer, next);
+                }
+
+                // Restart the reference follower.
+                if (type === $ref) {
+                    if (outputFormat === 'JSONG') {
+                        onValue(model, next, seed, null, null, reference, null, outputFormat);
+                    } else {
+                        promote(model, next);
+                    }
+
+                    depth = 0;
+                    reference = value;
+                    referenceContainer = next;
+                    node = root;
+                    continue;
+                }
+
+                break;
+            }
+        } else {
+            node = undefined;
+        }
+        break;
+    }
+
+
+    if (depth < reference.length && node !== undefined) {
+        var ref = [];
+        for (var i = 0; i < depth; i++) {
+            ref[i] = reference[i];
+        }
+        reference = ref;
+    }
+
+    return [node, reference];
+}
+
+module.exports = followReference;
+
+},{"222":222,"225":225,"226":226,"229":229,"234":234,"331":331}],212:[function(require,module,exports){
+var getBoundValue = require(216);
+var isPathValue = require(228);
+module.exports = function(walk) {
+    return function getAsJSON(model, paths, values) {
+        var results = {
+            values: [],
+            errors: [],
+            requestedPaths: [],
+            optimizedPaths: [],
+            requestedMissingPaths: [],
+            optimizedMissingPaths: []
+        };
+        var requestedMissingPaths = results.requestedMissingPaths;
+        var inputFormat = Array.isArray(paths[0]) || isPathValue(paths[0]) ?
+            'Paths' : 'JSON';
+        var cache = model._cache;
+        var boundPath = model._path;
+        var currentCachePosition;
+        var missingIdx = 0;
+        var boundOptimizedPath, optimizedPath;
+        var i, j, len, bLen;
+
+        results.values = values;
+        if (!values) {
+            values = [];
+        }
+        if (boundPath.length) {
+            var boundValue = getBoundValue(model, boundPath);
+            currentCachePosition = boundValue.value;
+            optimizedPath = boundOptimizedPath = boundValue.path;
+        } else {
+            currentCachePosition = cache;
+            optimizedPath = boundOptimizedPath = [];
+        }
+
+        for (i = 0, len = paths.length; i < len; i++) {
+            var valueNode = undefined;
+            var pathSet = paths[i];
+            if (values[i]) {
+                valueNode = values[i];
+            }
+            if (len > 1) {
+                optimizedPath = [];
+                for (j = 0, bLen = boundOptimizedPath.length; j < bLen; j++) {
+                    optimizedPath[j] = boundOptimizedPath[j];
+                }
+            }
+            if(inputFormat == 'JSON') {
+                pathSet = pathSet.json;
+            } else if (pathSet.path) {
+                pathSet = pathSet.path;
+            }
+
+            walk(model, cache, currentCachePosition, pathSet, 0, valueNode, [], results, optimizedPath, [], inputFormat, 'JSON');
+            if (missingIdx < requestedMissingPaths.length) {
+                for (j = missingIdx, length = requestedMissingPaths.length; j < length; j++) {
+                    requestedMissingPaths[j].pathSetIndex = i;
+                }
+                missingIdx = length;
+            }
+        }
+
+        return results;
+    };
+};
+
+
+},{"216":216,"228":228}],213:[function(require,module,exports){
+var getBoundValue = require(216);
+var isPathValue = require(228);
+module.exports = function(walk) {
+    return function getAsJSONG(model, paths, values) {
+        var results = {
+            values: [],
+            errors: [],
+            requestedPaths: [],
+            optimizedPaths: [],
+            requestedMissingPaths: [],
+            optimizedMissingPaths: []
+        };
+        var inputFormat = Array.isArray(paths[0]) || isPathValue(paths[0]) ?
+            'Paths' : 'JSON';
+        results.values = values;
+        var cache = model._cache;
+        var boundPath = model._path;
+        var currentCachePosition;
+        if (boundPath.length) {
+            throw 'It is not legal to use the JSON Graph format from a bound Model. JSON Graph format can only be used from a root model.';
+        } else {
+            currentCachePosition = cache;
+        }
+
+        for (var i = 0, len = paths.length; i < len; i++) {
+            var pathSet = paths[i];
+            if(inputFormat == 'JSON') {
+                pathSet = pathSet.json;
+            } else if (pathSet.path) {
+                pathSet = pathSet.path;
+            }
+            walk(model, cache, currentCachePosition, pathSet, 0, values[0], [], results, [], [], inputFormat, 'JSONG');
+        }
+        return results;
+    };
+};
+
+
+},{"216":216,"228":228}],214:[function(require,module,exports){
+var getBoundValue = require(216);
+var isPathValue = require(228);
+module.exports = function(walk) {
+    return function getAsPathMap(model, paths, values) {
+        var valueNode;
+        var results = {
+            values: [],
+            errors: [],
+            requestedPaths: [],
+            optimizedPaths: [],
+            requestedMissingPaths: [],
+            optimizedMissingPaths: []
+        };
+        var inputFormat = Array.isArray(paths[0]) || isPathValue(paths[0]) ?
+            'Paths' : 'JSON';
+        valueNode = values[0];
+        results.values = values;
+
+        var cache = model._cache;
+        var boundPath = model._path;
+        var currentCachePosition;
+        var optimizedPath, boundOptimizedPath;
+        if (boundPath.length) {
+            var boundValue = getBoundValue(model, boundPath);
+            currentCachePosition = boundValue.value;
+            optimizedPath = boundOptimizedPath = boundValue.path;
+        } else {
+            currentCachePosition = cache;
+            optimizedPath = boundOptimizedPath = [];
+        }
+
+        for (var i = 0, len = paths.length; i < len; i++) {
+            if (len > 1) {
+                optimizedPath = [];
+                for (j = 0, bLen = boundOptimizedPath.length; j < bLen; j++) {
+                    optimizedPath[j] = boundOptimizedPath[j];
+                }
+            }
+            var pathSet = paths[i];
+            if(inputFormat == 'JSON') {
+                pathSet = pathSet.json;
+            } else if (pathSet.path) {
+                pathSet = pathSet.path;
+            }
+            walk(model, cache, currentCachePosition, pathSet, 0, valueNode, [], results, optimizedPath, [], inputFormat, 'PathMap');
+        }
+        return results;
+    };
+};
+
+},{"216":216,"228":228}],215:[function(require,module,exports){
+var getBoundValue = require(216);
+var isPathValue = require(228);
+module.exports = function(walk) {
+    return function getAsValues(model, paths, onNext) {
+        var results = {
+            values: [],
+            errors: [],
+            requestedPaths: [],
+            optimizedPaths: [],
+            requestedMissingPaths: [],
+            optimizedMissingPaths: []
+        };
+        var inputFormat = Array.isArray(paths[0]) || isPathValue(paths[0]) ?
+            'Paths' : 'JSON';
+        var cache = model._cache;
+        var boundPath = model._path;
+        var currentCachePosition;
+        var optimizedPath, boundOptimizedPath;
+        if (boundPath.length) {
+            var boundValue = getBoundValue(model, boundPath);
+            currentCachePosition = boundValue.value;
+            optimizedPath = boundOptimizedPath = boundValue.path;
+        } else {
+            currentCachePosition = cache;
+            optimizedPath = boundOptimizedPath = [];
+        }
+
+        for (var i = 0, len = paths.length; i < len; i++) {
+            if (len > 1) {
+                optimizedPath = [];
+                for (j = 0, bLen = boundOptimizedPath.length; j < bLen; j++) {
+                    optimizedPath[j] = boundOptimizedPath[j];
+                }
+            }
+            var pathSet = paths[i];
+            if(inputFormat == 'JSON') {
+                pathSet = pathSet.json;
+            } else if (pathSet.path) {
+                pathSet = pathSet.path;
+            }
+            walk(model, cache, currentCachePosition, pathSet, 0, onNext, null, results, optimizedPath, [], inputFormat, 'Values');
+        }
+        return results;
+    };
+};
+
+
+},{"216":216,"228":228}],216:[function(require,module,exports){
+var getValueSync = require(218);
+var InvalidModelError = require(210);
+
+module.exports = function getBoundValue(model, path) {
+
+    var boundPath = path;
+    var boxed, materialized,
+        treatErrorsAsValues,
+        value, shorted, found;
+
+    boxed = model._boxed;
+    materialized = model._materialized;
+    treatErrorsAsValues = model._treatErrorsAsValues;
+
+    model._boxed = true;
+    model._materialized = true;
+    model._treatErrorsAsValues = true;
+
+    value = getValueSync(model, path.concat(null), true);
+
+    model._boxed = boxed;
+    model._materialized = materialized;
+    model._treatErrorsAsValues = treatErrorsAsValues;
+
+    path = value.optimizedPath;
+    shorted = value.shorted;
+    found = value.found;
+    value = value.value;
+
+    while (path.length && path[path.length - 1] === null) {
+        path.pop();
+    }
+
+    if(found && shorted) {
+        throw new InvalidModelError(boundPath, path);
+    }
+
+    return {
+        path: path,
+        value: value,
+        shorted: shorted,
+        found: found
+    };
+};
+
+
+},{"210":210,"218":218}],217:[function(require,module,exports){
+var __generation = require(235);
+
+module.exports = function _getGeneration(model, path) {
+    // ultra fast clone for boxed values.
+    var gen = model._getValueSync({
+        _boxed: true,
+        _root: model._root,
+        _cache: model._cache,
+        _treatErrorsAsValues: model._treatErrorsAsValues
+    }, path, true).value;
+    return gen && gen[__generation];
+};
+
+},{"235":235}],218:[function(require,module,exports){
+var followReference = require(211);
+var clone = require(224);
+var isExpired = require(226);
+var promote = require(229).promote;
+var $ref = require(331);
+var $atom = require(329);
+var $error = require(330);
+
+module.exports = function getValueSync(model, simplePath, noClone) {
+    var root = model._cache;
+    var len = simplePath.length;
+    var optimizedPath = [];
+    var shorted = false, shouldShort = false;
+    var depth = 0;
+    var key, i, next = root, type, curr = root, out, ref, refNode;
+    var found = true;
+
+    do {
+        key = simplePath[depth++];
+        if (key !== null) {
+            next = curr[key];
+            optimizedPath[optimizedPath.length] = key;
+        }
+
+        if (!next) {
+            out = undefined;
+            shorted = true;
+            found = false;
+            break;
+        }
+
+        type = next.$type;
+
+        // Up to the last key we follow references
+        if (depth < len) {
+            if (type === $ref) {
+                ref = followReference(model, root, root, next, next.value);
+                refNode = ref[0];
+
+                if (!refNode) {
+                    out = undefined;
+                    break;
+                }
+                type = refNode.$type;
+                next = refNode;
+                optimizedPath = ref[1].slice(0);
+            }
+
+            if (type) {
+                break;
+            }
+        }
+        // If there is a value, then we have great success, else, report an undefined.
+        else {
+            out = next;
+        }
+        curr = next;
+
+    } while (next && depth < len);
+
+    if (depth < len) {
+        // Unfortunately, if all that follows are nulls, then we have not shorted.
+        for (i = depth; i < len; ++i) {
+            if (simplePath[depth] !== null) {
+                shouldShort = true;
+                break;
+            }
+        }
+        // if we should short or report value.  Values are reported on nulls.
+        if (shouldShort) {
+            shorted = true;
+            out = undefined;
+        } else {
+            out = next;
+        }
+
+        for (i = depth; i < len; ++i) {
+            optimizedPath[optimizedPath.length] = simplePath[i];
+        }
+    }
+
+    // promotes if not expired
+    if (out) {
+        if (isExpired(out)) {
+            out = undefined;
+        } else {
+            promote(model, out);
+        }
+    }
+
+    if (out && out.$type === $error && !model._treatErrorsAsValues) {
+        throw {
+            path: depth === len ? simplePath : simplePath.slice(0, depth),
+            value: out.value
+        };
+    } else if (out && model._boxed) {
+        out = Boolean(type) && !noClone ? clone(out) : out;
+    } else if (!out && model._materialized) {
+        out = {$type: $atom};
+    } else if (out) {
+        out = out.value;
+    }
+
+    return {
+        value: out,
+        shorted: shorted,
+        optimizedPath: optimizedPath,
+        found: found
+    };
+};
+
+},{"211":211,"224":224,"226":226,"229":229,"329":329,"330":330,"331":331}],219:[function(require,module,exports){
+var followReference = require(211);
+var onError = require(220);
+var onMissing = require(221);
+var onValue = require(222);
+var lru = require(229);
+var hardLink = require(225);
+var isMaterialized = require(227);
+var removeHardlink = hardLink.remove;
+var splice = lru.splice;
+var isExpired = require(226);
+var permuteKey = require(230);
+var $ref = require(331);
+var $error = require(330);
+var __invalidated = require(237);
+var prefix = require(242);
+
+function getWalk(model, root, curr, pathOrJSON, depth, seedOrFunction, positionalInfo, outerResults, optimizedPath, requestedPath, inputFormat, outputFormat, fromReference) {
+    if ((!curr || curr && curr.$type) &&
+        evaluateNode(model, curr, pathOrJSON, depth, seedOrFunction, requestedPath, optimizedPath, positionalInfo, outerResults, outputFormat, fromReference)) {
+        return;
+    }
+
+    // We continue the search to the end of the path/json structure.
+    else {
+
+        // Base case of the searching:  Have we hit the end of the road?
+        // Paths
+        // 1) depth === path.length
+        // PathMaps (json input)
+        // 2) if its an object with no keys
+        // 3) its a non-object
+        var jsonQuery = inputFormat === 'JSON';
+        var atEndOfJSONQuery = false;
+        var k, i, len;
+        if (jsonQuery) {
+            // it has a $type property means we have hit a end.
+            if (pathOrJSON && pathOrJSON.$type) {
+                atEndOfJSONQuery = true;
+            }
+
+            else if (pathOrJSON && typeof pathOrJSON === 'object') {
+                k = Object.keys(pathOrJSON);
+
+                // Parses out all the prefix keys so that later parts
+                // of the algorithm do not have to consider them.
+                var parsedKeys = [];
+                var parsedKeysLength = -1;
+                for (i = 0, len = k.length; i < len; ++i) {
+                    if (k[i][0] !== prefix && k[i][0] !== '$') {
+                        parsedKeys[++parsedKeysLength] = k[i];
+                    }
+                }
+                k = parsedKeys;
+                if (k.length === 1) {
+                    k = k[0];
+                }
+            }
+
+            // found a primitive, we hit the end.
+            else {
+                atEndOfJSONQuery = true;
+            }
+        } else {
+            k = pathOrJSON[depth];
+        }
+
+        // BaseCase: we have hit the end of our query without finding a 'leaf' node, therefore emit missing.
+        if (atEndOfJSONQuery || !jsonQuery && depth === pathOrJSON.length) {
+            if (isMaterialized(model)) {
+                onValue(model, curr, seedOrFunction, outerResults, requestedPath, optimizedPath, positionalInfo, outputFormat, fromReference);
+                return;
+            }
+            onMissing(model, curr, pathOrJSON, depth, seedOrFunction, outerResults, requestedPath, optimizedPath, positionalInfo, outputFormat);
+            return;
+        }
+
+        var memo = {done: false};
+        var permutePosition = positionalInfo;
+        var permuteRequested = requestedPath;
+        var permuteOptimized = optimizedPath;
+        var asJSONG = outputFormat === 'JSONG';
+        var asJSON = outputFormat === 'JSON';
+        var isKeySet = false;
+        var hasChildren = false;
+        depth++;
+
+        var key;
+        if (k && typeof k === 'object') {
+            memo.isArray = Array.isArray(k);
+            memo.arrOffset = 0;
+
+            key = permuteKey(k, memo);
+            isKeySet = true;
+
+            // The complex key provided is actual empty
+            if (memo.done) {
+                return;
+            }
+        } else {
+            key = k;
+            memo.done = true;
+        }
+
+        if (asJSON && isKeySet) {
+            permutePosition = [];
+            for (i = 0, len = positionalInfo.length; i < len; i++) {
+                permutePosition[i] = positionalInfo[i];
+            }
+            permutePosition.push(depth - 1);
+        }
+
+        do {
+            fromReference = false;
+            if (!memo.done) {
+                permuteOptimized = [];
+                permuteRequested = [];
+                for (i = 0, len = requestedPath.length; i < len; i++) {
+                    permuteRequested[i] = requestedPath[i];
+                }
+                for (i = 0, len = optimizedPath.length; i < len; i++) {
+                    permuteOptimized[i] = optimizedPath[i];
+                }
+            }
+
+            var nextPathOrPathMap = jsonQuery ? pathOrJSON[key] : pathOrJSON;
+            if (jsonQuery && nextPathOrPathMap) {
+                if (typeof nextPathOrPathMap === 'object') {
+                    if (nextPathOrPathMap.$type) {
+                        hasChildren = false;
+                    } else {
+                        hasChildren = Object.keys(nextPathOrPathMap).length > 0;
+                    }
+                }
+            }
+
+            var next;
+            if (key === null || jsonQuery && key === '__null') {
+                next = curr;
+            } else {
+                next = curr[key];
+                permuteOptimized.push(key);
+                permuteRequested.push(key);
+            }
+
+            if (next) {
+                var nType = next.$type;
+                var value = nType && next.value || next;
+
+                if (jsonQuery && hasChildren || !jsonQuery && depth < pathOrJSON.length) {
+
+                    if (nType && nType === $ref && !isExpired(next)) {
+                        if (asJSONG) {
+                            onValue(model, next, seedOrFunction, outerResults, false, permuteOptimized, permutePosition, outputFormat);
+                        }
+                        var ref = followReference(model, root, root, next, value, seedOrFunction, outputFormat);
+                        fromReference = true;
+                        next = ref[0];
+                        var refPath = ref[1];
+
+                        permuteOptimized = [];
+                        for (i = 0, len = refPath.length; i < len; i++) {
+                            permuteOptimized[i] = refPath[i];
+                        }
+                    }
+                }
+            }
+            getWalk(model, root, next, nextPathOrPathMap, depth, seedOrFunction, permutePosition, outerResults, permuteOptimized, permuteRequested, inputFormat, outputFormat, fromReference);
+
+            if (!memo.done) {
+                key = permuteKey(k, memo);
+            }
+
+        } while (!memo.done);
+    }
+}
+
+function evaluateNode(model, curr, pathOrJSON, depth, seedOrFunction, requestedPath, optimizedPath, positionalInfo, outerResults, outputFormat, fromReference) {
+    // BaseCase: This position does not exist, emit missing.
+    if (!curr) {
+        if (isMaterialized(model)) {
+            onValue(model, curr, seedOrFunction, outerResults, requestedPath, optimizedPath, positionalInfo, outputFormat, fromReference);
+        } else {
+            onMissing(model, curr, pathOrJSON, depth, seedOrFunction, outerResults, requestedPath, optimizedPath, positionalInfo, outputFormat);
+        }
+        return true;
+    }
+
+    var currType = curr.$type;
+
+    positionalInfo = positionalInfo || [];
+
+    // The Base Cases.  There is a type, therefore we have hit a 'leaf' node.
+    if (currType === $error) {
+        if (fromReference) {
+            requestedPath.push(null);
+        }
+        if (outputFormat === 'JSONG' || model._treatErrorsAsValues) {
+            onValue(model, curr, seedOrFunction, outerResults, requestedPath, optimizedPath, positionalInfo, outputFormat, fromReference);
+        } else {
+            onError(model, curr, requestedPath, optimizedPath, outerResults);
+        }
+    }
+
+    // Else we have found a value, emit the current position information.
+    else {
+        if (isExpired(curr)) {
+            if (!curr[__invalidated]) {
+                splice(model, curr);
+                removeHardlink(curr);
+            }
+            onMissing(model, curr, pathOrJSON, depth, seedOrFunction, outerResults, requestedPath, optimizedPath, positionalInfo, outputFormat);
+        } else {
+            onValue(model, curr, seedOrFunction, outerResults, requestedPath, optimizedPath, positionalInfo, outputFormat, fromReference);
+        }
+    }
+
+    return true;
+}
+
+module.exports = getWalk;
+
+},{"211":211,"220":220,"221":221,"222":222,"225":225,"226":226,"227":227,"229":229,"230":230,"237":237,"242":242,"330":330,"331":331}],220:[function(require,module,exports){
+var lru = require(229);
+var clone = require(224);
+var promote = lru.promote;
+module.exports = function onError(model, node, permuteRequested, permuteOptimized, outerResults) {
+    var value = node.value;
+
+    if (model._boxed) {
+        value = clone(node);
+    }
+    outerResults.errors.push({path: permuteRequested, value: value});
+    promote(model, node);
+};
+
+
+},{"224":224,"229":229}],221:[function(require,module,exports){
+var support = require(232);
+var fastCat = support.fastCat,
+    fastCatSkipNulls = support.fastCatSkipNulls,
+    fastCopy = support.fastCopy;
+var isExpired = require(226);
+var spreadJSON = require(231);
+var clone = require(224);
+
+module.exports = function onMissing(model, node, path, depth, seedOrFunction, outerResults, permuteRequested, permuteOptimized, permutePosition, outputFormat) {
+    var pathSlice;
+    if (Array.isArray(path)) {
+        if (depth < path.length) {
+            pathSlice = fastCopy(path, depth);
+        } else {
+            pathSlice = [];
+        }
+
+        concatAndInsertMissing(pathSlice, outerResults, permuteRequested, permuteOptimized, permutePosition, outputFormat);
+    } else {
+        pathSlice = [];
+        spreadJSON(path, pathSlice);
+
+        for (var i = 0, len = pathSlice.length; i < len; i++) {
+            concatAndInsertMissing(pathSlice[i], outerResults, permuteRequested, permuteOptimized, permutePosition, outputFormat, true);
+        }
+    }
+};
+
+function concatAndInsertMissing(remainingPath, results, permuteRequested, permuteOptimized, permutePosition, outputFormat, __null) {
+    var i = 0, len;
+    if (__null) {
+        for (i = 0, len = remainingPath.length; i < len; i++) {
+            if (remainingPath[i] === '__null') {
+                remainingPath[i] = null;
+            }
+        }
+    }
+    if (outputFormat === 'JSON') {
+        permuteRequested = fastCat(permuteRequested, remainingPath);
+        for (i = 0, len = permutePosition.length; i < len; i++) {
+            var idx = permutePosition[i];
+            var r = permuteRequested[idx];
+            permuteRequested[idx] = [r];
+        }
+        results.requestedMissingPaths.push(permuteRequested);
+        results.optimizedMissingPaths.push(fastCatSkipNulls(permuteOptimized, remainingPath));
+    } else {
+        results.requestedMissingPaths.push(fastCat(permuteRequested, remainingPath));
+        results.optimizedMissingPaths.push(fastCatSkipNulls(permuteOptimized, remainingPath));
+    }
+}
+
+
+},{"224":224,"226":226,"231":231,"232":232}],222:[function(require,module,exports){
+var lru = require(229);
+var clone = require(224);
+var promote = lru.promote;
+var $ref = require(331);
+var $atom = require(329);
+var $error = require(330);
+module.exports = function onValue(model, node, seedOrFunction, outerResults, permuteRequested, permuteOptimized, permutePosition, outputFormat, fromReference) {
+    var i, len, k, key, curr, prev, prevK;
+    var materialized = false, valueNode;
+    if (node) {
+        promote(model, node);
+>>>>>>> 6b8733c... Removes falcor-observable, imports rx/dist/rx, fixes BatchedRequest canceling, moves comparator and errorSelector to the ModelRoot, removes the promise collection guards, fixes bind and bindSync anomalies.
+    }
+
+<<<<<<< HEAD
 
 
 },{"127":127,"128":128,"129":129,"21":21,"26":26}],20:[function(require,module,exports){
@@ -1648,6 +13134,145 @@ module.exports = function isMaterialized(model) {
 },{}],25:[function(require,module,exports){
 module.exports = function isPathValue(x) {
     return x.path && x.value;
+=======
+    if (!node || node.value === undefined) {
+        materialized = model._materialized;
+    }
+
+    // materialized
+    if (materialized) {
+        valueNode = {$type: $atom};
+    }
+
+    // Boxed Mode will clone the node.
+    else if (model._boxed) {
+        valueNode = clone(node);
+    }
+
+    // JSONG always clones the node.
+    else if (node.$type === $ref || node.$type === $error) {
+        if (outputFormat === 'JSONG') {
+            valueNode = clone(node);
+        } else {
+            valueNode = node.value;
+        }
+    }
+
+    else {
+        if (outputFormat === 'JSONG') {
+            if (typeof node.value === 'object') {
+                valueNode = clone(node);
+            } else {
+                valueNode = node.value;
+            }
+        } else {
+            valueNode = node.value;
+        }
+    }
+
+
+    if (permuteRequested) {
+        if (fromReference && permuteRequested[permuteRequested.length - 1] !== null) {
+            permuteRequested.push(null);
+        }
+        outerResults.requestedPaths.push(permuteRequested);
+        outerResults.optimizedPaths.push(permuteOptimized);
+    }
+
+    switch (outputFormat) {
+
+        case 'Values':
+            // Its difficult to invert this statement, so for now i am going
+            // to leave it as is.  This just prevents onNexts from happening on
+            // undefined nodes
+            if (valueNode === undefined ||
+                !materialized && !model._boxed && valueNode &&
+                valueNode.$type === $atom && valueNode.value === undefined) {
+                return;
+            }
+            seedOrFunction({path: permuteRequested, value: valueNode});
+            break;
+
+        case 'PathMap':
+            len = permuteRequested.length - 1;
+            if (len === -1) {
+                seedOrFunction.json = valueNode;
+            } else {
+                curr = seedOrFunction.json;
+                if (!curr) {
+                    curr = seedOrFunction.json = {};
+                }
+                for (i = 0; i < len; i++) {
+                    k = permuteRequested[i];
+                    if (!curr[k]) {
+                        curr[k] = {};
+                    }
+                    prev = curr;
+                    prevK = k;
+                    curr = curr[k];
+                }
+                k = permuteRequested[i];
+                if (k !== null) {
+                    curr[k] = valueNode;
+                } else {
+                    prev[prevK] = valueNode;
+                }
+            }
+            break;
+
+        case 'JSON':
+            if (seedOrFunction) {
+                if (permutePosition.length) {
+                    if (!seedOrFunction.json) {
+                        seedOrFunction.json = {};
+                    }
+                    curr = seedOrFunction.json;
+                    for (i = 0, len = permutePosition.length - 1; i < len; i++) {
+                        k = permutePosition[i];
+                        key = permuteRequested[k];
+
+                        if (!curr[key]) {
+                            curr[key] = {};
+                        }
+                        curr = curr[key];
+                    }
+
+                    // assign the last
+                    k = permutePosition[i];
+                    key = permuteRequested[k];
+                    curr[key] = valueNode;
+                } else {
+                    seedOrFunction.json = valueNode;
+                }
+            }
+            break;
+
+        case 'JSONG':
+            curr = seedOrFunction.jsong;
+            if (!curr) {
+                curr = seedOrFunction.jsong = {};
+                seedOrFunction.paths = [];
+            }
+            for (i = 0, len = permuteOptimized.length - 1; i < len; i++) {
+                key = permuteOptimized[i];
+
+                if (!curr[key]) {
+                    curr[key] = {};
+                }
+                curr = curr[key];
+            }
+
+            // assign the last
+            key = permuteOptimized[i];
+
+            // TODO: Special case? do string comparisons make big difference?
+            curr[key] = materialized ? {$type: $atom} : valueNode;
+            if (permuteRequested) {
+                seedOrFunction.paths.push(permuteRequested);
+            }
+            break;
+    }
+>>>>>>> 6b8733c... Removes falcor-observable, imports rx/dist/rx, fixes BatchedRequest canceling, moves comparator and errorSelector to the ModelRoot, removes the promise collection guards, fixes bind and bindSync anomalies.
 };
 },{}],26:[function(require,module,exports){
 var __head = require(34);
@@ -1656,6 +13281,7 @@ var __next = require(37);
 var __prev = require(41);
 var __invalidated = require(35);
 
+<<<<<<< HEAD
 // [H] -> Next -> ... -> [T]
 // [T] -> Prev -> ... -> [H]
 function lruPromote(model, object) {
@@ -1810,6 +13436,211 @@ function fastCopy(arr, i) {
 }
 
 function fastCatSkipNulls(arr1, arr2) {
+=======
+
+
+},{"224":224,"229":229,"329":329,"330":330,"331":331}],223:[function(require,module,exports){
+var pathSyntax = require(198);
+
+module.exports = function getValueSync(path) {
+    path = pathSyntax.fromPath(path);
+    if (Array.isArray(path) === false) {
+        throw new Error("Model#getValueSync must be called with an Array path.");
+    }
+    if (this._path.length) {
+        path = this._path.concat(path);
+    }
+    return this.syncCheck("getValueSync") && this._getValueSync(this, path).value;
+};
+},{"198":198}],224:[function(require,module,exports){
+// Copies the node
+var prefix = require(242);
+module.exports = function clone(node) {
+    var outValue, i, len;
+    var keys = Object.keys(node);
+    outValue = {};
+    for (i = 0, len = keys.length; i < len; i++) {
+        var k = keys[i];
+        if (k[0] === prefix) {
+            continue;
+        }
+        outValue[k] = node[k];
+    }
+    return outValue;
+};
+
+
+},{"242":242}],225:[function(require,module,exports){
+var __ref = require(245);
+var __context = require(234);
+var __ref_index = require(244);
+var __refs_length = require(246);
+
+function createHardlink(from, to) {
+    
+    // create a back reference
+    var backRefs  = to[__refs_length] || 0;
+    to[__ref + backRefs] = from;
+    to[__refs_length] = backRefs + 1;
+    
+    // create a hard reference
+    from[__ref_index] = backRefs;
+    from[__context] = to;
+}
+
+function removeHardlink(cacheObject) {
+    var context = cacheObject[__context];
+    if (context) {
+        var idx = cacheObject[__ref_index];
+        var len = context[__refs_length];
+        
+        while (idx < len) {
+            context[__ref + idx] = context[__ref + idx + 1];
+            ++idx;
+        }
+        
+        context[__refs_length] = len - 1;
+        cacheObject[__context] = undefined;
+        cacheObject[__ref_index] = undefined;
+    }
+}
+
+module.exports = {
+    create: createHardlink,
+    remove: removeHardlink
+};
+
+},{"234":234,"244":244,"245":245,"246":246}],226:[function(require,module,exports){
+var now = require(315);
+module.exports = function isExpired(node) {
+    var $expires = node.$expires === undefined && -1 || node.$expires;
+    return $expires !== -1 && $expires !== 1 && ($expires === 0 || $expires < now());
+};
+
+},{"315":315}],227:[function(require,module,exports){
+module.exports = function isMaterialized(model) {
+    return model._materialized && !(model._router || model._source);
+};
+
+},{}],228:[function(require,module,exports){
+module.exports = function isPathValue(x) {
+    return x.path && x.value;
+};
+},{}],229:[function(require,module,exports){
+var __head = require(236);
+var __tail = require(247);
+var __next = require(239);
+var __prev = require(243);
+var __invalidated = require(237);
+
+// [H] -> Next -> ... -> [T]
+// [T] -> Prev -> ... -> [H]
+function lruPromote(model, object) {
+    var root = model._root;
+    var head = root[__head];
+    if (head === object) {
+        return;
+    }
+
+    // First insert
+    if (!head) {
+        root[__head] = object;
+        return;
+    }
+
+    // The head and the tail need to separate
+    if (!root[__tail]) {
+        root[__head] = object;
+        root[__tail] = head;
+        object[__next] = head;
+        
+        // Now tail
+        head[__prev] = object;
+        return;
+    }
+
+    // Its in the cache.  Splice out.
+    var prev = object[__prev];
+    var next = object[__next];
+    if (next) {
+        next[__prev] = prev;
+    }
+    if (prev) {
+        prev[__next] = next;
+    }
+    object[__prev] = undefined;
+
+    // Insert into head position
+    root[__head] = object;
+    object[__next] = head;
+    head[__prev] = object;
+}
+
+function lruSplice(model, object) {
+    var root = model._root;
+
+    // Its in the cache.  Splice out.
+    var prev = object[__prev];
+    var next = object[__next];
+    if (next) {
+        next[__prev] = prev;
+    }
+    if (prev) {
+        prev[__next] = next;
+    }
+    object[__prev] = undefined;
+    
+    if (object === root[__head]) {
+        root[__head] = undefined;
+    }
+    if (object === root[__tail]) {
+        root[__tail] = undefined;
+    }
+    object[__invalidated] = true;
+    root.expired.push(object);
+}
+
+module.exports = {
+    promote: lruPromote,
+    splice: lruSplice
+};
+},{"236":236,"237":237,"239":239,"243":243,"247":247}],230:[function(require,module,exports){
+arguments[4][72][0].apply(exports,arguments)
+},{"72":72}],231:[function(require,module,exports){
+var fastCopy = require(232).fastCopy;
+module.exports = function spreadJSON(root, bins, bin) {
+    bin = bin || [];
+    if (!bins.length) {
+        bins.push(bin);
+    }
+    if (!root || typeof root !== 'object' || root.$type) {
+        return [];
+    }
+    var keys = Object.keys(root);
+    if (keys.length === 1) {
+        bin.push(keys[0]);
+        spreadJSON(root[keys[0]], bins, bin);
+    } else {
+        for (var i = 0, len = keys.length; i < len; i++) {
+            var k = keys[i];
+            var nextBin = fastCopy(bin);
+            nextBin.push(k);
+            bins.push(nextBin);
+            spreadJSON(root[k], bins, nextBin);
+        }
+    }
+};
+
+},{"232":232}],232:[function(require,module,exports){
+function fastCopy(arr, i) {
+    var a = [], len, j;
+    for (j = 0, i = i || 0, len = arr.length; i < len; j++, i++) {
+        a[j] = arr[i];
+    }
+    return a;
+}
+
+function fastCatSkipNulls(arr1, arr2) {
     var a = [], i, len, j;
     for (i = 0, len = arr1.length; i < len; i++) {
         a[i] = arr1[i];
@@ -1822,6 +13653,25 @@ function fastCatSkipNulls(arr1, arr2) {
     return a;
 }
 
+function fastCat(arr1, arr2) {
+>>>>>>> 6b8733c... Removes falcor-observable, imports rx/dist/rx, fixes BatchedRequest canceling, moves comparator and errorSelector to the ModelRoot, removes the promise collection guards, fixes bind and bindSync anomalies.
+    var a = [], i, len, j;
+    for (i = 0, len = arr1.length; i < len; i++) {
+        a[i] = arr1[i];
+    }
+    for (j = 0, len = arr2.length; j < len; j++) {
+<<<<<<< HEAD
+        if (arr2[j] !== null) {
+            a[i++] = arr2[j];
+        }
+=======
+        a[i++] = arr2[j];
+>>>>>>> 6b8733c... Removes falcor-observable, imports rx/dist/rx, fixes BatchedRequest canceling, moves comparator and errorSelector to the ModelRoot, removes the promise collection guards, fixes bind and bindSync anomalies.
+    }
+    return a;
+}
+
+<<<<<<< HEAD
 function fastCat(arr1, arr2) {
     var a = [], i, len, j;
     for (i = 0, len = arr1.length; i < len; i++) {
@@ -1940,6 +13790,108 @@ function invalidate_json_sparse_as_json_dense(model, pathmaps, values, error_sel
             roots.json = roots[_json] = parents[_json] = nodes[_json] = undefined;
         }
 
+=======
+
+
+module.exports = {
+    fastCat: fastCat,
+    fastCatSkipNulls: fastCatSkipNulls,
+    fastCopy: fastCopy
+};
+
+},{}],233:[function(require,module,exports){
+var Rx = require(346);
+
+function falcor(opts) {
+    return new falcor.Model(opts);
+}
+
+if(typeof Promise !== "undefined" && Promise) {
+    falcor.Promise = Promise;
+} else {
+    falcor.Promise = require(339);
+}
+
+module.exports = falcor;
+
+falcor.Model = require(205);
+
+},{"205":205,"339":339,"346":346}],234:[function(require,module,exports){
+module.exports = require(242) + "context";
+},{"242":242}],235:[function(require,module,exports){
+module.exports = require(242) + "generation";
+},{"242":242}],236:[function(require,module,exports){
+module.exports = require(242) + "head";
+},{"242":242}],237:[function(require,module,exports){
+module.exports = require(242) + "invalidated";
+},{"242":242}],238:[function(require,module,exports){
+module.exports = require(242) + "key";
+},{"242":242}],239:[function(require,module,exports){
+module.exports = require(242) + "next";
+},{"242":242}],240:[function(require,module,exports){
+module.exports = require(242) + "offset";
+},{"242":242}],241:[function(require,module,exports){
+module.exports = require(242) + "parent";
+},{"242":242}],242:[function(require,module,exports){
+arguments[4][83][0].apply(exports,arguments)
+},{"83":83}],243:[function(require,module,exports){
+module.exports = require(242) + "prev";
+},{"242":242}],244:[function(require,module,exports){
+module.exports = require(242) + "ref-index";
+},{"242":242}],245:[function(require,module,exports){
+module.exports = require(242) + "ref";
+},{"242":242}],246:[function(require,module,exports){
+module.exports = require(242) + "refs-length";
+},{"242":242}],247:[function(require,module,exports){
+module.exports = require(242) + "tail";
+},{"242":242}],248:[function(require,module,exports){
+module.exports = require(242) + "version";
+},{"242":242}],249:[function(require,module,exports){
+module.exports = invalidate_json_sparse_as_json_dense;
+
+var clone = require(288);
+var array_clone = require(283);
+var array_slice = require(287);
+
+var options = require(316);
+var walk_path_map = require(335);
+
+var is_object = require(309);
+
+var get_valid_key = require(299);
+var update_graph = require(327);
+var invalidate_node = require(304);
+
+var positions = require(318);
+var _cache = positions.cache;
+var _message = positions.message;
+var _jsong = positions.jsong;
+var _json = positions.json;
+
+function invalidate_json_sparse_as_json_dense(model, pathmaps, values, error_selector, comparator) {
+
+    var roots = options([], model, error_selector, comparator);
+    var index = -1;
+    var count = pathmaps.length;
+    var nodes = roots.nodes;
+    var parents = array_clone(nodes);
+    var requested = [];
+    var optimized = array_clone(roots.bound);
+    var keys_stack = [];
+    var json, hasValue, hasValues;
+
+    roots[_cache] = roots.root;
+
+    while (++index < count) {
+
+        json = values && values[index];
+        if (is_object(json)) {
+            roots.json = roots[_json] = parents[_json] = nodes[_json] = json.json || (json.json = {})
+        } else {
+            roots.json = roots[_json] = parents[_json] = nodes[_json] = undefined;
+        }
+
+>>>>>>> 6b8733c... Removes falcor-observable, imports rx/dist/rx, fixes BatchedRequest canceling, moves comparator and errorSelector to the ModelRoot, removes the promise collection guards, fixes bind and bindSync anomalies.
         var pathmap = pathmaps[index].json;
         roots.index = index;
 
@@ -2025,6 +13977,7 @@ function onEdge(pathmap, keys_stack, depth, roots, parents, nodes, requested, op
     roots.hasValue = true;
     roots.requestedPaths.push(array_slice(requested, roots.offset));
 }
+<<<<<<< HEAD
 },{"102":102,"107":107,"114":114,"116":116,"125":125,"133":133,"81":81,"85":85,"86":86,"97":97}],48:[function(require,module,exports){
 module.exports = invalidate_path_sets_as_json_dense;
 
@@ -2042,6 +13995,25 @@ var update_graph = require(125);
 var invalidate_node = require(102);
 
 var positions = require(116);
+=======
+},{"283":283,"287":287,"288":288,"299":299,"304":304,"309":309,"316":316,"318":318,"327":327,"335":335}],250:[function(require,module,exports){
+module.exports = invalidate_path_sets_as_json_dense;
+
+var clone = require(288);
+var array_clone = require(283);
+var array_slice = require(287);
+
+var options = require(316);
+var walk_path_set = require(337);
+
+var is_object = require(309);
+
+var get_valid_key = require(299);
+var update_graph = require(327);
+var invalidate_node = require(304);
+
+var positions = require(318);
+>>>>>>> 6b8733c... Removes falcor-observable, imports rx/dist/rx, fixes BatchedRequest canceling, moves comparator and errorSelector to the ModelRoot, removes the promise collection guards, fixes bind and bindSync anomalies.
 var _cache = positions.cache;
 var _message = positions.message;
 var _jsong = positions.jsong;
@@ -2147,6 +14119,7 @@ function onEdge(pathset, depth, roots, parents, nodes, requested, optimized, key
     roots.hasValue = true;
     roots.requestedPaths.push(array_slice(requested, roots.offset));
 }
+<<<<<<< HEAD
 },{"102":102,"107":107,"114":114,"116":116,"125":125,"135":135,"81":81,"85":85,"86":86,"97":97}],49:[function(require,module,exports){
 var __key  = require(36);
 var __parent = require(39);
@@ -2158,12 +14131,26 @@ var __prev = require(41);
 
 var remove_node = require(117);
 var update_graph = require(125);
+=======
+},{"283":283,"287":287,"288":288,"299":299,"304":304,"309":309,"316":316,"318":318,"327":327,"337":337}],251:[function(require,module,exports){
+var __key  = require(238);
+var __parent = require(241);
+
+var __head = require(236);
+var __tail = require(247);
+var __next = require(239);
+var __prev = require(243);
+
+var remove_node = require(319);
+var update_graph = require(327);
+>>>>>>> 6b8733c... Removes falcor-observable, imports rx/dist/rx, fixes BatchedRequest canceling, moves comparator and errorSelector to the ModelRoot, removes the promise collection guards, fixes bind and bindSync anomalies.
 
 module.exports = function collect(lru, expired, total, max, ratio, version) {
     
     if(typeof ratio !== "number") {
         ratio = 0.75;
     }
+<<<<<<< HEAD
 
     var shouldUpdate = typeof version === "number";
     var targetSize = max * ratio;
@@ -2239,6 +14226,102 @@ module.exports = function lru_splice(root, node) {
     (node === tail) && (root[__tail] = root[__prev] = prev);
     node[__next] = node[__prev] = undefined;
     head = tail = next = prev = undefined;
+=======
+    
+    var shouldUpdate = typeof version === "number";
+    var targetSize = max * ratio;
+    var parent, node, size;
+    
+    while(!!(node = expired.pop())) {
+        size = node.$size || 0;
+        total -= size;
+        if(shouldUpdate === true) {
+            update_graph(node, size, version, lru);
+        } else if(parent = node[__parent]) {
+            remove_node(parent, node, node[__key], lru);
+        }
+    }
+    
+    if(total >= max) {
+        var prev = lru[__tail];
+        while((total >= targetSize) && !!(node = prev)) {
+            prev = prev[__prev];
+            size = node.$size || 0;
+            total -= size;
+            if(shouldUpdate === true) {
+                update_graph(node, size, version, lru);
+            }
+        }
+        
+        if((lru[__tail] = lru[__prev] = prev) == null) {
+            lru[__head] = lru[__next] = undefined;
+        } else {
+            prev[__next] = undefined;
+        }
+    }
+};
+},{"236":236,"238":238,"239":239,"241":241,"243":243,"247":247,"319":319,"327":327}],252:[function(require,module,exports){
+var $expires_never = require(332);
+var __head = require(236);
+var __tail = require(247);
+var __next = require(239);
+var __prev = require(243);
+
+var is_object = require(309);
+
+module.exports = function lru_promote(root, node) {
+    if(is_object(node) && (node.$expires !== $expires_never)) {
+        var head = root[__head], tail = root[__tail],
+            next = node[__next], prev = node[__prev];
+        if (node !== head) {
+            (next != null && typeof next === "object") && (next[__prev] = prev);
+            (prev != null && typeof prev === "object") && (prev[__next] = next);
+            (next = head) && (head != null && typeof head === "object") && (head[__prev] = node);
+            (root[__head] = root[__next] = head = node);
+            (head[__next] = next);
+            (head[__prev] = undefined);
+        }
+        if (tail == null || node === tail) {
+            root[__tail] = root[__prev] = tail = prev || node;
+        }
+    }
+    return node;
+};
+},{"236":236,"239":239,"243":243,"247":247,"309":309,"332":332}],253:[function(require,module,exports){
+var __head = require(236);
+var __tail = require(247);
+var __next = require(239);
+var __prev = require(243);
+
+module.exports = function lru_splice(root, node) {
+    var head = root[__head], tail = root[__tail],
+        next = node[__next], prev = node[__prev];
+    (next != null && typeof next === "object") && (next[__prev] = prev);
+    (prev != null && typeof prev === "object") && (prev[__next] = next);
+    (node === head) && (root[__head] = root[__next] = next);
+    (node === tail) && (root[__tail] = root[__prev] = prev);
+    node[__next] = node[__prev] = undefined;
+    head = tail = next = prev = undefined;
+};
+},{"236":236,"239":239,"243":243,"247":247}],254:[function(require,module,exports){
+var Rx = require(346);;
+var Observer = Rx.Observer;
+
+var Request = require(256);
+
+function BatchedRequest() {
+    Request.call(this);
+}
+
+BatchedRequest.create = Request.create;
+
+BatchedRequest.prototype = Object.create(Request.prototype);
+BatchedRequest.prototype.constructor = BatchedRequest;
+
+BatchedRequest.prototype.getSourceObservable = function getSourceObservable() {
+    return this.refCountedObservable || (
+        this.refCountedObservable = this.replay(null, 1).refCount());
+>>>>>>> 6b8733c... Removes falcor-observable, imports rx/dist/rx, fixes BatchedRequest canceling, moves comparator and errorSelector to the ModelRoot, removes the promise collection guards, fixes bind and bindSync anomalies.
 };
 },{"34":34,"37":37,"41":41,"45":45}],52:[function(require,module,exports){
 var Rx = require(349);
@@ -2246,6 +14329,7 @@ var Observer = Rx.Observer;
 var Observable = Rx.Observable;
 var immediateScheduler = Rx.Scheduler.immediate;
 
+<<<<<<< HEAD
 var Request = require(54);
 
 function BatchedRequest() {
@@ -2587,8 +14671,140 @@ RequestQueue.prototype.get = function getRequest(paths) {
                     if (--requestCount === 0) {
                         break;
                     }
+=======
+module.exports = BatchedRequest;
+},{"256":256,"346":346}],255:[function(require,module,exports){
+var Rx = require(346);;
+var Observer = Rx.Observer;
+
+var BatchedRequest = require(254);
+
+var collapse = require(294)
+var array_map = require(286);
+
+var set_json_graph_as_json_dense = require(269);
+var set_json_values_as_json_dense = require(277);
+
+var empty_array = new Array(0);
+
+function GetRequest() {
+    BatchedRequest.call(this);
+}
+
+GetRequest.create = BatchedRequest.create;
+
+GetRequest.prototype = Object.create(BatchedRequest.prototype);
+GetRequest.prototype.constructor = GetRequest;
+
+GetRequest.prototype.method = "get";
+
+GetRequest.prototype.getSourceArgs = function getSourceArgs() {
+    return (this.paths = collapse(this.pathmap));
+};
+
+GetRequest.prototype.getSourceObserver = function getSourceObserver(observer) {
+
+    var model = this.model;
+    var bound = model._path;
+    var paths = this.paths;
+    var modelRoot = model._root;
+    var errorSelector = modelRoot.errorSelector;
+    var comparator = modelRoot.comparator;
+
+    return BatchedRequest.prototype.getSourceObserver.call(this, Observer.create(
+        function onNext(jsonGraphEnvelope) {
+
+            model._path = empty_array;
+
+            set_json_graph_as_json_dense(model, [{
+                paths: paths, jsonGraph: jsonGraphEnvelope.jsonGraph
+            }], empty_array, errorSelector, comparator);
+
+            model._path = bound;
+
+            observer.onNext(jsonGraphEnvelope);
+        },
+        function onError(error) {
+
+            model._path = empty_array;
+
+            set_json_values_as_json_dense(model, array_map(paths, function(path) {
+                return { path: path, value: error };
+            }), empty_array, errorSelector, comparator);
+
+            model._path = bound;
+
+            observer.onError(error);
+        },
+        function onCompleted() {
+            observer.onCompleted();
+        }
+    ));
+};
+
+module.exports = GetRequest;
+},{"254":254,"269":269,"277":277,"286":286,"294":294,"346":346}],256:[function(require,module,exports){
+var Rx = require(346);;
+var Observer = Rx.Observer;
+var Observable = Rx.Observable;
+var Disposable = Rx.Disposable;
+var SerialDisposable = Rx.SerialDisposable;
+var CompositeDisposable = Rx.CompositeDisposable;
+
+var collapse = require(294);
+var permute_keyset = require(317);
+var keyset_to_key = require(312);
+
+var is_array = Array.isArray;
+var is_object = require(309);
+var is_primitive = require(311);
+
+function Request() {
+    this.length = 0;
+    this.pending = false;
+    this.pathmap = Object.create(null);
+    Observable.call(this, this._subscribe);
+}
+
+Request.create = function create(queue, model, index) {
+    var request = new this();
+    request.queue = queue;
+    request.model = model;
+    request.index = index;
+    return request;
+}
+
+Request.prototype = Object.create(Observable.prototype);
+
+Request.prototype.constructor = Request;
+
+Request.prototype.insertPath = function insertPathIntoRequest(path, union, parent, index, count) {
+
+    index = index || 0;
+    count = count || path.length - 1;
+    parent = parent || this.pathmap;
+
+    if(parent == null) {
+        return false;
+    }
+
+    var key, node;
+    var keyset = path[index];
+    var is_keyset = is_object(keyset);
+    var run_once = false;
+
+    while(is_keyset && permute_keyset(keyset) && (run_once = true) || (run_once = !run_once)) {
+        key = keyset_to_key(keyset, is_keyset);
+        node = parent[key];
+        if(index < count) {
+            if(node == null) {
+                if(union) {
+                    return false;
+>>>>>>> 6b8733c... Removes falcor-observable, imports rx/dist/rx, fixes BatchedRequest canceling, moves comparator and errorSelector to the ModelRoot, removes the promise collection guards, fixes bind and bindSync anomalies.
                 }
+                node = parent[key] = Object.create(null);
             }
+<<<<<<< HEAD
         }));
     });
 };
@@ -2629,8 +14845,20 @@ RequestQueue.prototype.distributePaths = function distributePathsAcrossRequests(
                 participatingRequests[requestIndex] = request;
                 continue insert_path;
             }
+=======
+            if(this.insertPath(path, union, node, index + 1, count) === false) {
+                return false;
+            }
+        } else {
+            parent[key] = (node || 0) + 1;
+            this.length += 1;
+>>>>>>> 6b8733c... Removes falcor-observable, imports rx/dist/rx, fixes BatchedRequest canceling, moves comparator and errorSelector to the ModelRoot, removes the promise collection guards, fixes bind and bindSync anomalies.
         }
+    }
+    return true;
+};
 
+<<<<<<< HEAD
         if (!pendingRequest) {
             pendingRequest = RequestType.create(this, model, this.total++);
             requests[requestIndex] = pendingRequest;
@@ -3032,9 +15260,559 @@ function subscribeToResponse(observer) {
                 })
             };
         });
+=======
+Request.prototype.removePath = function removePathFromRequest(path, parent, index, count) {
+
+    index = index || 0;
+    count = count || path.length - 1;
+    parent = parent || this.pathmap;
+
+    if(parent == null) {
+        return true;
+    }
+
+    var key, node, deleted = 0;
+    var keyset = path[index];
+    var is_keyset = is_object(keyset);
+    var run_once = false;
+
+    while(is_keyset && permute_keyset(keyset) && (run_once = true) || (run_once = !run_once)) {
+        key = keyset_to_key(keyset, is_keyset);
+        node = parent[key];
+        if(node == null) {
+            continue;
+        }
+        if(index < count) {
+            deleted += this.removePath(path, node, index + 1, count);
+            var emptyNodeKey = void 0;
+            for(emptyNodeKey in node) {
+                break;
+            }
+            if(emptyNodeKey === void 0) {
+                delete parent[key];
+            }
+        } else {
+            if((parent[key] = --node) === 0) {
+                delete parent[key];
+            }
+            deleted += 1;
+            this.length -= 1;
+        }
+    }
+
+    return deleted;
+};
+
+Request.prototype.getSourceObserver = function getSourceObserver(observer) {
+    var request = this;
+    return Observer.create(
+        function onNext(envelope) {
+            envelope.jsonGraph = envelope.jsonGraph ||
+                envelope.jsong  ||
+                envelope.values ||
+                envelope.value;
+            envelope.index = request.index;
+            observer.onNext(envelope);
+        },
+        function onError(e) {
+            request.pending = false;
+            observer.onError(e);
+        },
+        function onCompleted() {
+            request.pending = false;
+            observer.onCompleted();
+        });
+};
+
+Request.prototype._subscribe = function _subscribe(observer) {
+
+    var request = this;
+    var queue = this.queue;
+
+    request.pending = true;
+
+    var isDisposed = false;
+    var sourceSubscription = new SerialDisposable();
+    var queueDisposable = Disposable.create(function () {
+        if (!isDisposed) {
+            isDisposed = true;
+            request.pending = false;
+            queue && queue._remove(request);
+        }
+    });
+
+    var disposables = new CompositeDisposable(sourceSubscription, queueDisposable);
+
+    sourceSubscription.setDisposable(
+        this.model._source[this.method](this.getSourceArgs())
+            .subscribe(
+                this.getSourceObserver(observer)
+    ));
+
+    return disposables;
+};
+
+module.exports = Request;
+},{"294":294,"309":309,"311":311,"312":312,"317":317,"346":346}],257:[function(require,module,exports){
+var Rx = require(346);;
+var Observable = Rx.Observable;
+var SerialDisposable = Rx.SerialDisposable;
+
+var GetRequest = require(255);
+var SetRequest = require(258);
+
+var prefix = require(242);
+var get_type = require(298);
+var is_object = require(309);
+var array_clone = require(283);
+
+function RequestQueue(model, scheduler) {
+    this.total = 0;
+    this.model = model;
+    this.requests = [];
+    this.scheduler = scheduler;
+}
+
+RequestQueue.prototype.get = function getRequest(paths) {
+
+    var requests = this.distributePaths(paths, this.requests, GetRequest);
+
+    return (Observable.create(function(observer) {
+
+        var m = new SerialDisposable();
+
+        m.setDisposable(Observable.fromArray(requests.map(function(request) {
+            return request.getSourceObservable();
+        })).subscribe(observer));
+
+        return function dispose() {
+            m.dispose();
+            var paths2 = array_clone(paths);
+            var pathCount = paths2.length;
+            var requestIndex = -1;
+            var requestCount = requests.length;
+            while(pathCount > 0 && ++requestIndex < requestCount) {
+                var request = requests[requestIndex];
+                if(!request.pending) {
+                    continue;
+                }
+                var pathIndex = -1;
+                while(++pathIndex < pathCount) {
+                    var path = paths2[pathIndex];
+                    if(request.removePath(path)) {
+                        paths2.splice(pathIndex--, 1);
+                        if(--pathCount === 0) {
+                            break;
+                        }
+                    }
+                }
+            }
+        };
+    })
+    .mergeAll()
+    .reduce(this.mergeJSONGraphs, {
+        index: -1,
+        jsonGraph: {}
+    })
+    .map(function (response) {
+        return {
+            paths: paths,
+            index: response.index,
+            jsonGraph: response.jsonGraph
+        };
+    })
+    .subscribeOn(this.scheduler));
+};
+
+RequestQueue.prototype.set = function setRequest(jsonGraphEnvelope) {
+    return SetRequest.create(this.model, jsonGraphEnvelope);
+}
+
+RequestQueue.prototype._remove = function removeRequest(request) {
+    var requests = this.requests;
+    var index = requests.indexOf(request);
+    if (index != -1) {
+        requests.splice(index, 1);
     }
 };
 
+RequestQueue.prototype.distributePaths = function distributePathsAcrossRequests(paths, requests, RequestType) {
+
+    var model = this.model;
+    var pathsIndex = -1;
+    var pathsCount = paths.length;
+
+    var requestIndex = -1;
+    var requestCount = requests.length;
+    var participatingRequests = [];
+    var pendingRequest;
+
+    insert_path: while (++pathsIndex < pathsCount) {
+
+        var path = paths[pathsIndex];
+        var request = undefined;
+
+        requestIndex = -1;
+
+        while (++requestIndex < requestCount) {
+            request = requests[requestIndex];
+            if (request.insertPath(path, request.pending === false)) {
+                participatingRequests[requestIndex] = request;
+                continue insert_path;
+            }
+        }
+
+        if (!pendingRequest) {
+            pendingRequest = RequestType.create(this, model, this.total++);
+            requests[requestIndex] = pendingRequest;
+            participatingRequests[requestCount++] = pendingRequest;
+        }
+
+        pendingRequest.insertPath(path, false);
+    }
+
+    var pathRequests = [];
+    var pathRequestsIndex = -1;
+
+    requestIndex = -1;
+
+    while (++requestIndex < requestCount) {
+        request = participatingRequests[requestIndex];
+        if (request != null) {
+            pathRequests[++pathRequestsIndex] = request;
+        }
+    }
+
+    return pathRequests;
+};
+
+RequestQueue.prototype.mergeJSONGraphs = function mergeJSONGraphs(aggregate, response) {
+
+    var depth = 0;
+    var contexts = [];
+    var messages = [];
+    var keystack = [];
+    var latestIndex = aggregate.index;
+    var responseIndex = response.index;
+
+    aggregate.index = Math.max(latestIndex, responseIndex);
+
+    contexts[-1] = aggregate.jsonGraph || {};
+    messages[-1] = response.jsonGraph || {};
+
+    recursing: while (depth > -1) {
+
+        var context = contexts[depth - 1];
+        var message = messages[depth - 1];
+        var keys = keystack[depth - 1] || (keystack[depth - 1] = Object.keys(message));
+
+        while (keys.length > 0) {
+
+            var key = keys.pop();
+
+            if (key[0] === prefix) {
+                continue;
+            }
+
+            if (context.hasOwnProperty(key)) {
+                var node = context[key];
+                var nodeType = get_type(node);
+                var messageNode = message[key];
+                var messageType = get_type(messageNode);
+                if (is_object(node) && is_object(messageNode) && !nodeType && !messageType) {
+                    contexts[depth] = node;
+                    messages[depth] = messageNode;
+                    depth += 1;
+                    continue recursing;
+                } else if (responseIndex > latestIndex) {
+                    context[key] = messageNode;
+                }
+            } else {
+                context[key] = message[key];
+            }
+        }
+
+        depth -= 1;
+    }
+
+    return aggregate;
+};
+
+module.exports = RequestQueue;
+},{"242":242,"255":255,"258":258,"283":283,"298":298,"309":309,"346":346}],258:[function(require,module,exports){
+var Rx = require(346);;
+var Observer = Rx.Observer;
+
+var Request = require(256);
+
+var array_map = require(286);
+
+var set_json_graph_as_json_dense = require(269);
+var set_json_values_as_json_dense = require(277);
+
+var empty_array = new Array(0);
+
+function SetRequest() {
+    Request.call(this);
+}
+
+SetRequest.create = function create(model, jsonGraphEnvelope) {
+    var request = new SetRequest();
+    request.model = model;
+    request.jsonGraphEnvelope = jsonGraphEnvelope;
+    return request;
+};
+
+SetRequest.prototype = Object.create(Request.prototype);
+SetRequest.prototype.constructor = SetRequest;
+
+SetRequest.prototype.method = "set";
+SetRequest.prototype.insertPath = function () { return false; };
+SetRequest.prototype.removePath = function () { return 0 };
+
+SetRequest.prototype.getSourceArgs = function getSourceArgs() {
+    return this.jsonGraphEnvelope;
+};
+
+SetRequest.prototype.getSourceObserver = function getSourceObserver(observer) {
+
+    var model = this.model;
+    var bound = model._path;
+    var paths = this.jsonGraphEnvelope.paths;
+    var modelRoot = model._root;
+    var errorSelector = modelRoot.errorSelector;
+    var comparator = modelRoot.comparator;
+
+    return Request.prototype.getSourceObserver.call(this, Observer.create(
+        function onNext(jsonGraphEnvelope) {
+
+            model._path = empty_array;
+
+            set_json_graph_as_json_dense(model, [{
+                paths: paths, jsonGraph: jsonGraphEnvelope.jsonGraph
+            }], empty_array, errorSelector, comparator);
+
+            model._path = bound;
+
+            observer.onNext(jsonGraphEnvelope);
+        },
+        function onError(error) {
+
+            model._path = empty_array;
+
+            set_json_values_as_json_dense(model, array_map(paths, function(path) {
+                return { path: path, value: error };
+            }), empty_array, errorSelector, comparator);
+
+            model._path = bound;
+
+            observer.onError(error);
+        },
+        function onCompleted() {
+            observer.onCompleted();
+        }
+    ));
+};
+
+module.exports = SetRequest;
+},{"256":256,"269":269,"277":277,"286":286,"346":346}],259:[function(require,module,exports){
+var Rx = require(346);;
+var Observable = Rx.Observable;
+var Disposable = Rx.Disposable;
+var SerialDisposable = Rx.SerialDisposable;
+var CompositeDisposable = Rx.CompositeDisposable;
+
+var ModelResponse = require(263);
+
+var pathSyntax = require(198);
+
+var $ref = require(331);
+
+function CallResponse(subscribe) {
+    Observable.call(this, subscribe || subscribeToResponse);
+}
+
+CallResponse.create = ModelResponse.create;
+
+CallResponse.prototype = Object.create(Observable.prototype);
+CallResponse.prototype.constructor = CallResponse;
+
+CallResponse.prototype.invokeSourceRequest = function invokeSourceRequest(model) {
+    return this;
+};
+
+CallResponse.prototype.ensureCollect = function ensureCollect(model, initialVersion, pendingPromiseID) {
+    return this;
+};
+
+CallResponse.prototype.initialize = function initialize_response() {
+    return this;
+};
+
+function subscribeToResponse(observer) {
+
+    var args = this.args;
+    var model = this.model;
+    var selector = this.selector;
+
+    var callPath = pathSyntax.fromPath(args[0]);
+    var callArgs = args[1] || [];
+    var suffixes = (args[2] || []).map(pathSyntax.fromPath);
+    var extraPaths = (args[3] || []).map(pathSyntax.fromPath);
+
+    var rootModel = model.clone({ _path: [] });
+    var localRoot = rootModel.withoutDataSource();
+    var dataSource = model._source;
+    var boundPath = model._path;
+    var boundCallPath = boundPath.concat(callPath);
+    var boundThisPath = boundCallPath.slice(0, -1);
+
+    var setCallValuesObs = model
+        .withoutDataSource()
+        .get(callPath, function (localFn) {
+            return {
+                model: rootModel.bindSync(boundThisPath).boxValues(),
+                localFn: localFn
+            };
+        })
+        .flatMap(getLocalCallObs)
+        .defaultIfEmpty(getRemoteCallObs(dataSource))
+        .mergeAll()
+        .flatMap(setCallEnvelope);
+
+    var disposables = new CompositeDisposable();
+
+    disposables.add(setCallValuesObs.last().subscribe(function (envelope) {
+            var paths = envelope.paths;
+            var invalidated = envelope.invalidated;
+            if (selector) {
+                paths.push(function () {
+                    return selector.call(model, paths);
+                });
+            }
+            var innerObs = model.get.apply(model, paths);
+            if (observer.outputFormat === "AsJSONG") {
+                innerObs = innerObs.toJSONG().doAction(function (envelope) {
+                    envelope.invalidated = invalidated;
+                });
+            }
+            disposables.add(innerObs.subscribe(observer));
+        },
+        function (e) {
+            observer.onError(e);
+        }
+    ));
+
+    return disposables;
+
+    function getLocalCallObs(tuple) {
+
+        var localFn = tuple && tuple.localFn;
+
+        if (typeof localFn === "function") {
+
+            var localFnModel = tuple.model;
+            var localThisPath = localFnModel._path;
+
+            var remoteGetValues = localFn
+                .apply(localFnModel, callArgs)
+                .reduce(aggregateFnResults, {
+                    values: [],
+                    references: [],
+                    invalidations: [],
+                    localThisPath: localThisPath
+                })
+                .flatMap(setLocalValues)
+                .flatMap(getRemoteValues);
+
+            return Observable["return"](remoteGetValues);
+        }
+
+        return Observable.empty();
+
+        function aggregateFnResults(results, pathValue) {
+            var localThisPath = results.localThisPath;
+            if (Boolean(pathValue.invalidated)) {
+                results.invalidations.push(localThisPath.concat(pathValue.path));
+            } else {
+                var path = pathValue.path;
+                var value = pathValue.value;
+                if (Boolean(value) && typeof value === "object" && value.$type === $ref) {
+                    results.references.push({
+                        path: prependThisPath(path),
+                        value: pathValue.value
+                    });
+                } else {
+                    results.values.push({
+                        path: prependThisPath(path),
+                        value: pathValue.value
+                    });
+                }
+            }
+            return results;
+        }
+
+        function setLocalValues(results) {
+            var values = results.values.concat(results.references);
+            if (values.length > 0) {
+                return localRoot.set
+                    .apply(localRoot, values)
+                    .toJSONG()
+                    .map(function (envelope) {
+                        return { results: results, envelope: envelope };
+                    });
+            } else {
+                return Observable["return"]({
+                    results: results,
+                    envelope: { jsonGraph: {}, paths: [] }
+                });
+            }
+        }
+
+        function getRemoteValues(tuple) {
+
+            var envelope = tuple.envelope;
+            var results = tuple.results;
+            var values = results.values;
+            var references = results.references;
+            var invalidations = results.invalidations;
+
+            var rootValues = values.map(pluckPath).map(prependThisPath);
+            var rootSuffixes = references.reduce(prependRefToSuffixes, []);
+            var rootExtraPaths = extraPaths.map(prependThisPath);
+            var rootPaths = rootSuffixes.concat(rootExtraPaths);
+            var envelopeObs;
+
+            if (rootPaths.length > 0) {
+                envelopeObs = rootModel.get.apply(rootModel, rootValues.concat(rootPaths)).toJSONG();
+            } else {
+                envelopeObs = Observable["return"](envelope);
+            }
+
+            return envelopeObs.doAction(function (envelope) {
+                envelope.invalidated = invalidations;
+            });
+        }
+
+        function prependRefToSuffixes(refPaths, refPathValue) {
+            var refPath = refPathValue.path;
+            refPaths.push.apply(refPaths, suffixes.map(function (pathSuffix) {
+                return refPath.concat(pathSuffix);
+            }));
+            return refPaths;
+        }
+
+        function pluckPath(pathValue) {
+            return pathValue.path;
+        }
+
+        function prependThisPath(path) {
+            return boundThisPath.concat(path);
+        }
+>>>>>>> 6b8733c... Removes falcor-observable, imports rx/dist/rx, fixes BatchedRequest canceling, moves comparator and errorSelector to the ModelRoot, removes the promise collection guards, fixes bind and bindSync anomalies.
+    }
+
+<<<<<<< HEAD
 module.exports = CallResponse;
 },{"129":129,"333":333,"349":349,"61":61}],58:[function(require,module,exports){
 var Rx = require(349);
@@ -3069,6 +15847,83 @@ GetResponse.prototype.invokeSourceRequest = function invokeSourceRequest(model) 
 
         if (results && results.invokeSourceRequest === true) {
 
+=======
+    function getRemoteCallObs(dataSource) {
+
+        if (dataSource && typeof dataSource === "object") {
+            return dataSource
+                .call(callPath, callArgs, suffixes, extraPaths)
+                .map(invalidateLocalValues);
+                // .flatMap(invalidateLocalValues);
+        }
+
+        return Observable.empty();
+
+        function invalidateLocalValues(envelope) {
+            var invalidations = envelope.invalidated;
+            if (invalidations && invalidations.length) {
+                rootModel.invalidate.apply(rootModel, invalidations);
+                // return rootModel
+                //     .invalidate
+                //     .apply(rootModel, invalidations)
+                //     .map(function () {
+                //         return envelope;
+                //     });
+            }
+            // return Observable["return"](envelope);
+            return envelope;
+        }
+    }
+
+    function setCallEnvelope(envelope) {
+        return localRoot.set(envelope, function () {
+            return {
+                invalidated: envelope.invalidated,
+                paths: envelope.paths.map(function (path) {
+                    return path.slice(boundPath.length);
+                })
+            };
+        });
+    }
+};
+
+module.exports = CallResponse;
+},{"198":198,"263":263,"331":331,"346":346}],260:[function(require,module,exports){
+var Rx = require(346);;
+var Observable = Rx.Observable;
+var Disposable = Rx.Disposable;
+
+var IdempotentResponse = require(261);
+
+var array_map = require(286);
+var array_concat = require(284);
+var is_function = require(306);
+
+var set_json_graph_as_json_dense = require(269);
+var set_json_values_as_json_dense = require(277);
+
+var empty_array = new Array(0);
+
+function GetResponse(subscribe) {
+    IdempotentResponse.call(this, subscribe || subscribeToGetResponse);
+}
+
+GetResponse.create = IdempotentResponse.create;
+
+GetResponse.prototype = Object.create(IdempotentResponse.prototype);
+GetResponse.prototype.method = "get";
+GetResponse.prototype.constructor = GetResponse;
+
+GetResponse.prototype.invokeSourceRequest = function invokeSourceRequest(model) {
+
+    var source = this;
+    var caught = this["catch"](function getMissingPaths(results) {
+
+        if(results && results.invokeSourceRequest === true) {
+
+            var boundPath = model._path;
+            var requestedMissingPaths = results.requestedMissingPaths;
+>>>>>>> 6b8733c... Removes falcor-observable, imports rx/dist/rx, fixes BatchedRequest canceling, moves comparator and errorSelector to the ModelRoot, removes the promise collection guards, fixes bind and bindSync anomalies.
             var optimizedMissingPaths = results.optimizedMissingPaths;
 
             return (model._request.get(optimizedMissingPaths)[
@@ -3076,13 +15931,19 @@ GetResponse.prototype.invokeSourceRequest = function invokeSourceRequest(model) 
                     source.isCompleted = true;
                 })
                 .materialize()
+<<<<<<< HEAD
                 .flatMap(function (notification) {
                     if (notification.kind === "C") {
+=======
+                .flatMap(function(notification) {
+                    if(notification.kind === "C") {
+>>>>>>> 6b8733c... Removes falcor-observable, imports rx/dist/rx, fixes BatchedRequest canceling, moves comparator and errorSelector to the ModelRoot, removes the promise collection guards, fixes bind and bindSync anomalies.
                         return Observable.empty();
                     }
                     return caught;
                 }));
         }
+<<<<<<< HEAD
 
         return Observable["throw"](results);
     });
@@ -4019,15 +16880,545 @@ function set_json_graph_as_json_dense(model, envelopes, values, error_selector, 
         optimizedMissingPaths: roots.optimizedMissingPaths
     };
 }
+=======
 
-function onNode(pathset, roots, parents, nodes, requested, optimized, is_reference, is_branch, key, keyset, is_keyset) {
+        return Observable["throw"](results);
+    });
 
-    var parent, messageParent, json;
+    return new this.constructor(function(observer) {
+        return caught.subscribe(observer);
+    });
+};
 
-    if (key == null) {
-        if ((key = get_valid_key(optimized)) == null) {
-            return;
+function subscribeToGetResponse(observer) {
+
+    if(this.subscribeCount++ >= this.subscribeLimit) {
+        observer.onError("Loop kill switch thrown.");
+        return;
+    }
+
+    var model = this.model;
+    var modelRoot = model._root;
+    var method = this.method;
+    var boundPath = this.boundPath;
+    var outputFormat = this.outputFormat;
+
+    var isMaster = this.isMaster;
+    var isCompleted = this.isCompleted;
+    var isProgressive = this.isProgressive;
+    var asJSONG  = outputFormat === "AsJSONG";
+    var asValues = outputFormat === "AsValues";
+    var hasValue = false;
+
+    var errors = [];
+    var requestedMissingPaths = [];
+    var optimizedMissingPaths = [];
+
+    var groups = this.groups;
+    var groupIndex = -1;
+    var groupCount = groups.length;
+
+    while(++groupIndex < groupCount) {
+
+        var group = groups[groupIndex];
+        var groupValues = !asValues && group.values || function onPathValueNext(x) {
+            ++modelRoot.syncRefCount;
+            try {
+                observer.onNext(x);
+            } catch(e) {
+                throw e;
+            } finally {
+                --modelRoot.syncRefCount;
+            }
+        };
+
+        var inputType = group.inputType;
+        var methodArgs = group.arguments;
+
+        if(methodArgs.length > 0) {
+
+            var operationName = "_" + method + inputType + outputFormat;
+            var operationFunc = model[operationName];
+            var results = operationFunc(model, methodArgs, groupValues);
+
+            errors.push.apply(errors, results.errors);
+            requestedMissingPaths.push.apply(requestedMissingPaths, results.requestedMissingPaths);
+            optimizedMissingPaths.push.apply(optimizedMissingPaths, results.optimizedMissingPaths);
+
+            if(asValues) {
+                group.arguments = results.requestedMissingPaths;
+            } else  {
+                hasValue = hasValue || results.hasValue || results.requestedPaths.length > 0;
+            }
         }
+    }
+
+    isCompleted = isCompleted || requestedMissingPaths.length === 0;
+    var hasError = errors.length > 0;
+
+    try {
+        modelRoot.syncRefCount++;
+        if(hasValue && (isProgressive || isCompleted || isMaster)) {
+            var values = this.values;
+            var selector = this.selector;
+            if(is_function(selector)) {
+                observer.onNext(selector.apply(model, values.map(pluckJSON)));
+            } else {
+                var valueIndex = -1;
+                var valueCount = values.length;
+                while(++valueIndex < valueCount) {
+                    observer.onNext(values[valueIndex]);
+                }
+            }
+        }
+        if(isCompleted || isMaster) {
+            if(hasError) {
+                observer.onError(errors);
+            } else {
+                observer.onCompleted();
+            }
+        } else {
+            if(asJSONG) {
+                this.values[0].paths = [];
+            }
+            observer.onError({
+                method: method,
+                requestedMissingPaths: array_map(requestedMissingPaths, prependBoundPath),
+                optimizedMissingPaths: optimizedMissingPaths,
+                invokeSourceRequest: true
+            });
+        }
+    } catch(e) {
+        throw e;
+    } finally {
+        --modelRoot.syncRefCount;
+    }
+
+    return Disposable.empty;
+
+    function prependBoundPath(path) {
+        return array_concat(boundPath, path);
+    }
+}
+
+function pluckJSON(jsonEnvelope) {
+    return jsonEnvelope.json;
+}
+
+module.exports = GetResponse;
+},{"261":261,"269":269,"277":277,"284":284,"286":286,"306":306,"346":346}],261:[function(require,module,exports){
+var Rx = require(346);;
+var Disposable = Rx.Disposable;
+var Observable = Rx.Observable;
+var SerialDisposable = Rx.SerialDisposable;
+var CompositeDisposable = Rx.CompositeDisposable;
+
+var ModelResponse = require(263);
+
+var pathSyntax = require(198);
+
+var get_size = require(297);
+var collect_lru = require(251);
+var __version = require(248);
+
+var array_map = require(286);
+var array_clone = require(283);
+
+var is_array = Array.isArray;
+var is_object = require(309);
+var is_function = require(306);
+var is_path_value = require(310);
+var is_json_envelope = require(307);
+var is_json_graph_envelope = require(308);
+
+function IdempotentResponse(subscribe) {
+    Observable.call(this, subscribe);
+}
+
+IdempotentResponse.create = ModelResponse.create;
+
+IdempotentResponse.prototype = Object.create(Observable.prototype);
+IdempotentResponse.prototype.constructor = IdempotentResponse;
+
+IdempotentResponse.prototype.subscribeCount = 0;
+IdempotentResponse.prototype.subscribeLimit = 10;
+
+IdempotentResponse.prototype.initialize = function initialize_response() {
+
+    var model = this.model;
+    var method = this.method;
+    var selector = this.selector;
+    var outputFormat = this.outputFormat || "AsPathMap";
+    var isProgressive = this.isProgressive;
+    var values = [];
+    var seedIndex = 0;
+    var seedLimit = 0;
+
+    if(is_function(selector)) {
+        outputFormat = "AsJSON";
+        seedLimit = selector.length;
+        while(seedIndex < seedLimit) {
+            values[seedIndex++] = {};
+        }
+        seedIndex = 0;
+    } else if(outputFormat === "AsJSON") {
+        seedLimit = -1;
+    } else if(outputFormat === "AsValues") {
+        values[0] = {};
+        isProgressive = false;
+    } else {
+        values[0] = {};
+    }
+
+    var groups = [];
+    var args = this.args;
+
+    var group, groupType;
+
+    var argIndex = -1;
+    var argCount = args.length;
+
+    while(++argIndex < argCount) {
+        var seedCount = seedIndex + 1;
+        var arg = args[argIndex];
+        var argType;
+        if (is_array(arg) || typeof arg === "string") {
+            if(method === "set") {
+                throw new Error("Unrecognized argument " + (typeof arg) + " [" + String(arg) + "] " + "to Model#" + method + "");
+            } else {
+                arg = pathSyntax.fromPath(arg);
+                argType = "PathSets";
+            }
+        } else if (is_path_value(arg)) {
+            if(method === "set") {
+                arg.path = pathSyntax.fromPath(arg.path);
+                argType = "PathValues";
+            } else {
+                arg = pathSyntax.fromPath(arg.path);
+                argType = "PathSets";
+            }
+        } else if (is_json_graph_envelope(arg)) {
+            argType = "JSONGs";
+            arg.paths = array_map(arg.paths, pathSyntax.fromPath);
+            seedCount += arg.paths.length;
+        } else if (is_json_envelope(arg)) {
+            argType = "PathMaps";
+        } else {
+            throw new Error("Unrecognized argument " + (typeof arg) + " [" + String(arg) + "] " + "to Model#" + method + "");
+        }
+        if (groupType !== argType) {
+            groupType = argType;
+            group = { inputType: argType , arguments: [] };
+            groups.push(group);
+            if(outputFormat === "AsJSON") {
+                group.values = [];
+            } else if(outputFormat !== "AsValues") {
+                group.values = values;
+            }
+        }
+
+        group.arguments.push(arg);
+
+        if(outputFormat === "AsJSON") {
+            if(seedLimit === -1) {
+                while(seedIndex < seedCount) {
+                    group.values.push(values[seedIndex++] = {});
+                }
+            } else {
+                if(seedLimit < seedCount) {
+                    seedCount = seedLimit;
+                }
+                while(seedIndex < seedCount) {
+                    group.values.push(values[seedIndex++] = {});
+                }
+            }
+        }
+    }
+
+    this.boundPath = array_clone(model._path);
+    this.groups = groups;
+    this.outputFormat = outputFormat;
+    this.isProgressive = isProgressive;
+    this.isCompleted = false;
+    this.isMaster = model._source == null;
+    this.values = values;
+
+    return this;
+};
+
+IdempotentResponse.prototype.invokeSourceRequest = function invokeSourceRequest(model) {
+    return this;
+};
+
+IdempotentResponse.prototype.ensureCollect = function ensureCollect(model, initialVersion) {
+
+    var ensured = this["finally"](function ensureCollect() {
+
+        var modelRoot = model._root;
+        var modelCache = model._cache;
+        var newVersion = modelCache[__version];
+        var rootChangeHandler = modelRoot.onChange;
+
+        if(rootChangeHandler && initialVersion !== newVersion) {
+            rootChangeHandler();
+        }
+
+        modelRoot.collectionScheduler.schedule(function collectThisPass() {
+            collect_lru(modelRoot, modelRoot.expired, get_size(modelCache), model._maxSize, model._collectRatio);
+        });
+    });
+
+    return new this.constructor(function(observer) {
+        return ensured.subscribe(observer);
+    });
+};
+
+module.exports = IdempotentResponse;
+},{"198":198,"248":248,"251":251,"263":263,"283":283,"286":286,"297":297,"306":306,"307":307,"308":308,"309":309,"310":310,"346":346}],262:[function(require,module,exports){
+var Rx = require(346);;
+var Observable = Rx.Observable;
+var Disposable = Rx.Disposable;
+
+var IdempotentResponse = require(261);
+
+var empty_array = new Array(0);
+
+function InvalidateResponse(subscribe) {
+    IdempotentResponse.call(this, subscribe || subscribeToInvalidateResponse);
+}
+
+InvalidateResponse.create = IdempotentResponse.create;
+
+InvalidateResponse.prototype = Object.create(IdempotentResponse.prototype);
+InvalidateResponse.prototype.method = "invalidate";
+InvalidateResponse.prototype.constructor = InvalidateResponse;
+
+function subscribeToInvalidateResponse(observer) {
+
+    var model = this.model;
+    var method = this.method;
+
+    var groups = this.groups;
+    var groupIndex = -1;
+    var groupCount = groups.length;
+
+    while(++groupIndex < groupCount) {
+
+        var group = groups[groupIndex];
+        var inputType = group.inputType;
+        var methodArgs = group.arguments;
+
+        if(methodArgs.length > 0) {
+            var operationName = "_" + method + inputType + "AsJSON";
+            var operationFunc = model[operationName];
+            operationFunc(model, methodArgs, empty_array);
+        }
+    }
+
+    return Disposable.empty;
+}
+
+module.exports = InvalidateResponse;
+},{"261":261,"346":346}],263:[function(require,module,exports){
+var falcor = require(233);
+
+var Rx = require(346);;
+var Observable = Rx.Observable;
+
+var array_map = require(286);
+var array_slice = require(287);
+var array_clone = require(283);
+var array_concat = require(284);
+var array_flat_map = require(285);
+
+var is_array = Array.isArray;
+var is_object = require(309);
+var is_function = require(306);
+var is_path_value = require(310);
+var is_json_envelope = require(307);
+var is_json_graph_envelope = require(308);
+
+var noop = require(314);
+var __version = require(248);
+
+var jsongMixin = { outputFormat: { value: "AsJSONG" } };
+var valuesMixin = { outputFormat: { value: "AsValues" } };
+var pathMapMixin = { outputFormat: { value: "AsPathMap" } };
+var compactJSONMixin = { outputFormat: { value: "AsJSON" } };
+var progressiveMixin = { isProgressive: { value: true } };
+
+function ModelResponse(subscribe) {
+    this._subscribe = subscribe;
+};
+
+ModelResponse.create = function create(model, args, selector) {
+    var response = new ModelResponse(subscribeToResponse);
+    response.args = args;
+    response.type = this;
+    response.model = model;
+    response.selector = selector;
+    return response;
+};
+
+ModelResponse.prototype = Object.create(Observable.prototype);
+
+ModelResponse.prototype.constructor = ModelResponse;
+
+ModelResponse.prototype.mixin = function mixin() {
+    var self = this;
+    var mixins = array_slice(arguments);
+    return new self.constructor(function (observer) {
+        return self.subscribe(mixins.reduce(function (proto, mixin) {
+            return Object.create(proto, mixin);
+        }, observer));
+    });
+};
+
+ModelResponse.prototype.toPathValues = function toPathValues() {
+    return this.mixin(valuesMixin).asObservable();
+};
+
+ModelResponse.prototype.toCompactJSON = function toCompactJSON() {
+    return this.mixin(compactJSONMixin);
+};
+
+ModelResponse.prototype.toJSON = function toJSON() {
+    return this.mixin(pathMapMixin);
+};
+
+ModelResponse.prototype.toJSONG = function toJSONG() {
+    return this.mixin(jsongMixin);
+};
+
+ModelResponse.prototype.progressively = function progressively() {
+    return this.mixin(progressiveMixin);
+};
+
+ModelResponse.prototype.subscribe = function subscribe(a, b, c) {
+    if(!a || typeof a !== "object") {
+        a = { onNext: a || noop, onError: b || noop, onCompleted: c || noop };
+    }
+    var subscription = this._subscribe(a);
+    switch(typeof subscription) {
+        case "function":
+            return { dispose: subscription };
+        case "object":
+            return subscription || { dispose: noop };
+        default:
+            return { dispose: noop };
+    }
+};
+
+ModelResponse.prototype.then = function then(onNext, onError) {
+    var self = this;
+    return new falcor.Promise(function (resolve, reject) {
+        var value = undefined;
+        self.toArray().subscribe(
+            function (values) {
+                if (values.length <= 1) {
+                    value = values[0];
+                } else {
+                    value = values;
+                }
+            },
+            function (errors) {
+                resolve = undefined;
+                reject(errors);
+            },
+            function () {
+                if (Boolean(resolve)) {
+                    resolve(value);
+                }
+            }
+        );
+    }).then(onNext, onError);
+};
+
+function subscribeToResponse(observer) {
+
+    var model = this.model;
+    var response = new this.type();
+
+    response.model = model;
+    response.args = this.args;
+    response.selector = this.selector;
+    response.outputFormat = observer.outputFormat || "AsPathMap";
+    response.isProgressive = observer.isProgressive || false;
+    response.subscribeCount = 0;
+    response.subscribeLimit = observer.retryLimit || 10;
+
+    return (response
+        .initialize()
+        .invokeSourceRequest(model)
+        .ensureCollect(model, model._cache[__version])
+        .subscribe(observer));
+};
+
+module.exports = ModelResponse;
+},{"233":233,"248":248,"283":283,"284":284,"285":285,"286":286,"287":287,"306":306,"307":307,"308":308,"309":309,"310":310,"314":314,"346":346}],264:[function(require,module,exports){
+var Rx = require(346);;
+var Observable = Rx.Observable;
+var Disposable = Rx.Disposable;
+
+var IdempotentResponse = require(261);
+
+var array_map = require(286);
+var array_flat_map = require(285);
+var is_function = require(306);
+
+var set_json_graph_as_json_dense = require(269);
+var set_json_values_as_json_dense = require(277);
+
+var empty_array = new Array(0);
+
+function SetResponse(subscribe) {
+    IdempotentResponse.call(this, subscribe || subscribeToSetResponse);
+}
+
+SetResponse.create = IdempotentResponse.create;
+
+SetResponse.prototype = Object.create(IdempotentResponse.prototype);
+SetResponse.prototype.method = "set";
+SetResponse.prototype.constructor = SetResponse;
+
+SetResponse.prototype.invokeSourceRequest = function invokeSourceRequest(model) {
+
+    var source = this;
+    var caught = this["catch"](function setJSONGraph(results) {
+>>>>>>> 6b8733c... Removes falcor-observable, imports rx/dist/rx, fixes BatchedRequest canceling, moves comparator and errorSelector to the ModelRoot, removes the promise collection guards, fixes bind and bindSync anomalies.
+
+        if(results && results.invokeSourceRequest === true) {
+
+<<<<<<< HEAD
+    var parent, messageParent, json;
+=======
+            var envelope = {};
+            var boundPath = model._path;
+            var optimizedPaths = results.optimizedPaths;
+>>>>>>> 6b8733c... Removes falcor-observable, imports rx/dist/rx, fixes BatchedRequest canceling, moves comparator and errorSelector to the ModelRoot, removes the promise collection guards, fixes bind and bindSync anomalies.
+
+            model._path = empty_array;
+            model._getPathSetsAsJSONG(model, optimizedPaths, [envelope]);
+            model._path = boundPath;
+
+            return (model._request.set(envelope)[
+                "do"](
+                    function setResponseEnvelope(envelope) {
+                        source.isCompleted = optimizedPaths.length === envelope.paths.length;
+                    },
+                    function setResponseError(error) {
+                        source.isCompleted = true;
+                    }
+                )
+                .materialize()
+                .flatMap(function(notification) {
+                    if(notification.kind === "C") {
+                        return Observable.empty();
+                    }
+                    return caught;
+                }));
+        }
+<<<<<<< HEAD
         json = parents[_json];
         parent = parents[_cache];
         messageParent = parents[_message];
@@ -4170,10 +17561,141 @@ function set_json_graph_as_json_graph(model, envelopes, values, error_selector, 
         requestedMissingPaths: roots.requestedMissingPaths,
         optimizedMissingPaths: roots.optimizedMissingPaths
     };
+=======
+
+        return Observable["throw"](results);
+    });
+
+    return new this.constructor(function(observer) {
+        return caught.subscribe(observer);
+    });
+};
+
+function subscribeToSetResponse(observer) {
+
+    if(this.subscribeCount >= this.subscribeLimit) {
+        observer.onError("Loop kill switch thrown.");
+        return;
+    }
+
+    var model = this.model;
+    var modelRoot = model._root;
+    var method = this.method;
+    var boundPath = this.boundPath;
+    var outputFormat = this.outputFormat;
+    var errorSelector = modelRoot.errorSelector;
+    var comparator = this.subscribeCount++ > 0 && modelRoot.comparator || undefined;
+
+    var isMaster = this.isMaster;
+    var isCompleted = this.isCompleted;
+    var isProgressive = this.isProgressive;
+    var asJSONG  = outputFormat === "AsJSONG";
+    var asValues = outputFormat === "AsValues";
+    var hasValue = false;
+
+    var errors = [];
+    var optimizedPaths = [];
+
+    var groups = this.groups;
+    var groupIndex = -1;
+    var groupCount = groups.length;
+
+    if(isCompleted) {
+        method = "get";
+    }
+
+    while(++groupIndex < groupCount) {
+
+        var group = groups[groupIndex];
+        var groupValues = !asValues && group.values || function onPathValueNext(x) {
+            ++modelRoot.syncRefCount;
+            try {
+                observer.onNext(x);
+            } catch(e) {
+                throw e;
+            } finally {
+                --modelRoot.syncRefCount;
+            }
+        };
+
+        var inputType = group.inputType;
+        var methodArgs = group.arguments;
+
+        if(isCompleted) {
+            if(inputType === "PathValues") {
+                inputType = "PathSets";
+                methodArgs = array_map(methodArgs, pluckPath);
+            } else if(inputType === "JSONGs") {
+                inputType = "PathSets";
+                methodArgs = array_flat_map(methodArgs, pluckPaths);
+            }
+        }
+
+        if(methodArgs.length > 0) {
+
+            var operationName = "_" + method + inputType + outputFormat;
+            var operationFunc = model[operationName];
+            var results = operationFunc(model, methodArgs, groupValues, errorSelector, comparator);
+
+            errors.push.apply(errors, results.errors);
+            optimizedPaths.push.apply(optimizedPaths, results.optimizedPaths);
+
+            hasValue = !asValues && (hasValue || results.hasValue || results.requestedPaths.length > 0);
+        }
+    }
+
+    var hasError = errors.length > 0;
+
+    try {
+        modelRoot.syncRefCount++;
+        if(hasValue && (isProgressive || isCompleted || isMaster)) {
+            var values = this.values;
+            var selector = this.selector;
+            if(is_function(selector)) {
+                observer.onNext(selector.apply(model, values.map(pluckJSON)));
+            } else {
+                var valueIndex = -1;
+                var valueCount = values.length;
+                while(++valueIndex < valueCount) {
+                    observer.onNext(values[valueIndex]);
+                }
+            }
+        }
+        if(isCompleted || isMaster) {
+            if(hasError) {
+                observer.onError(errors);
+            } else {
+                observer.onCompleted();
+            }
+        } else {
+            if(asJSONG) {
+                this.values[0].paths = [];
+            }
+            observer.onError({
+                method: method,
+                optimizedPaths: optimizedPaths,
+                invokeSourceRequest: true
+            });
+        }
+    } catch(e) {
+        throw e;
+    } finally {
+        --modelRoot.syncRefCount;
+    }
+
+    return Disposable.empty;
 }
 
-function onNode(pathset, roots, parents, nodes, requested, optimized, is_reference, is_branch, key, keyset, is_keyset) {
+function pluckJSON(jsonEnvelope) {
+    return jsonEnvelope.json;
+>>>>>>> 6b8733c... Removes falcor-observable, imports rx/dist/rx, fixes BatchedRequest canceling, moves comparator and errorSelector to the ModelRoot, removes the promise collection guards, fixes bind and bindSync anomalies.
+}
 
+function pluckPath(pathValue) {
+    return pathValue.path;
+}
+
+<<<<<<< HEAD
     var parent, messageParent, json, jsonkey;
 
     if (key == null) {
@@ -4276,6 +17798,115 @@ var set_node_if_error = require(121);
 var set_successful_paths = require(119);
 
 var positions = require(116);
+=======
+function pluckPaths(jsonGraphEnvelope) {
+    return jsonGraphEnvelope.paths;
+}
+
+module.exports = SetResponse;
+},{"261":261,"269":269,"277":277,"285":285,"286":286,"306":306,"346":346}],265:[function(require,module,exports){
+var asap = require(2);
+var Rx = require(346);;
+var Disposable = Rx.Disposable;
+
+function ASAPScheduler() {
+    
+}
+
+ASAPScheduler.prototype.schedule = function schedule(action) {
+    asap(action);
+    return Disposable.empty;
+};
+
+ASAPScheduler.prototype.scheduleWithState = function scheduleWithState(state, action) {
+    var self = this;
+    asap(function() {
+        action(self, state);
+    });
+    return Disposable.empty;
+};
+
+module.exports = ASAPScheduler;
+},{"2":2,"346":346}],266:[function(require,module,exports){
+var Rx = require(346);;
+var Disposable = Rx.Disposable;
+
+function ImmediateScheduler() {
+    
+}
+
+ImmediateScheduler.prototype.schedule = function schedule(action) {
+    action();
+    return Disposable.empty;
+};
+
+ImmediateScheduler.prototype.scheduleWithState = function scheduleWithState(state, action) {
+    action(this, state);
+    return Disposable.empty;
+};
+
+module.exports = ImmediateScheduler;
+
+},{"346":346}],267:[function(require,module,exports){
+var Rx = require(346);;
+var Disposable = Rx.Disposable;
+
+function TimeoutScheduler(delay) {
+    this.delay = delay;
+}
+
+TimeoutScheduler.prototype.schedule = function schedule(action) {
+    var id = setTimeout(action, this.delay);
+    return Disposable.create(function() {
+        if(id !== undefined) {
+            clearTimeout(id);
+            id = undefined;
+        }
+    });
+};
+
+TimeoutScheduler.prototype.scheduleWithState = function scheduleWithState(state, action) {
+    var self = this;
+    var id = setTimeout(function() {
+        action(self, state);
+    }, this.delay);
+    return Disposable.create(function() {
+        if(id !== undefined) {
+            clearTimeout(id);
+            id = undefined;
+        }
+    });
+};
+
+module.exports = TimeoutScheduler;
+
+},{"346":346}],268:[function(require,module,exports){
+module.exports = set_cache;
+
+var $error = require(330);
+var $atom = require(329);
+
+var clone = require(288);
+var array_clone = require(283);
+
+var options = require(316);
+var walk_path_map = require(335);
+
+var is_object = require(309);
+
+var get_valid_key = require(299);
+var create_branch = require(295);
+var wrap_node = require(328);
+var replace_node = require(320);
+var graph_node = require(300);
+var update_back_refs = require(326);
+var update_graph = require(327);
+var inc_generation = require(302);
+
+var promote = require(252);
+
+var positions = require(318);
+>>>>>>> 6b8733c... Removes falcor-observable, imports rx/dist/rx, fixes BatchedRequest canceling, moves comparator and errorSelector to the ModelRoot, removes the promise collection guards, fixes bind and bindSync anomalies.
 var _cache = positions.cache;
 var _message = positions.message;
 var _jsong = positions.jsong;
@@ -4297,8 +17928,290 @@ function set_json_graph_as_json_sparse(model, envelopes, values, error_selector,
     var json = values[0];
     var hasValue;
 
+<<<<<<< HEAD
     roots[_cache] = roots.root;
     roots[_json] = parents[_json] = nodes[_json] = json.json || (json.json = {});
+=======
+function onNode(pathmap, roots, parents, nodes, requested, optimized, is_reference, is_branch, key, keyset, is_keyset) {
+
+    var parent;
+
+    if (key == null) {
+        if ((key = get_valid_key(optimized)) == null) {
+            return;
+        }
+        parent = parents[_cache];
+    } else {
+        parent = nodes[_cache];
+    }
+
+    var node = parent[key],
+        type;
+
+    if (is_branch) {
+        type = is_object(node) && node.$type || undefined;
+        node = create_branch(roots, parent, node, type, key);
+        parents[_cache] = nodes[_cache] = node;
+        return;
+    }
+
+    var selector = roots.error_selector;
+    var root = roots[_cache];
+    var size = is_object(node) && node.$size || 0;
+    var mess = pathmap;
+
+    type = is_object(mess) && mess.$type || undefined;
+    mess = wrap_node(mess, type, Boolean(type) ? mess.value : mess);
+    type || (type = $atom);
+
+    if (type == $error && Boolean(selector)) {
+        mess = selector(requested, mess);
+    }
+
+    node = replace_node(parent, node, mess, key, roots.lru);
+    node = graph_node(root, parent, node, key, inc_generation());
+    update_graph(parent, size - node.$size, roots.version, roots.lru);
+    nodes[_cache] = node;
+}
+
+function onEdge(pathmap, keys_stack, depth, roots, parents, nodes, requested, optimized, key, keyset) {
+    if(depth > 0) {
+        promote(roots.lru, nodes[_cache]);
+    }
+}
+},{"252":252,"283":283,"288":288,"295":295,"299":299,"300":300,"302":302,"309":309,"316":316,"318":318,"320":320,"326":326,"327":327,"328":328,"329":329,"330":330,"335":335}],269:[function(require,module,exports){
+module.exports = set_json_graph_as_json_dense;
+
+var $ref = require(331);
+
+var clone = require(288);
+var array_clone = require(283);
+
+var options = require(316);
+var walk_path_set = require(336);
+
+var is_object = require(309);
+
+var get_valid_key = require(299);
+var merge_node = require(313);
+
+var set_node_if_missing_path = require(324);
+var set_node_if_error = require(323);
+var set_successful_paths = require(321);
+
+var positions = require(318);
+var _cache = positions.cache;
+var _message = positions.message;
+var _jsong = positions.jsong;
+var _json = positions.json;
+
+function set_json_graph_as_json_dense(model, envelopes, values, error_selector, comparator) {
+
+    var roots = [];
+    roots.offset = model._path.length;
+    roots.bound = [];
+    roots = options(roots, model, error_selector, comparator);
+
+    var index = -1;
+    var index2 = -1;
+    var count = envelopes.length;
+    var nodes = roots.nodes;
+    var parents = array_clone(nodes);
+    var requested = [];
+    var optimized = [];
+    var json, hasValue, hasValues;
+
+    roots[_cache] = roots.root;
+>>>>>>> 6b8733c... Removes falcor-observable, imports rx/dist/rx, fixes BatchedRequest canceling, moves comparator and errorSelector to the ModelRoot, removes the promise collection guards, fixes bind and bindSync anomalies.
+
+    while (++index < count) {
+        var envelope = envelopes[index];
+        var pathsets = envelope.paths;
+        var jsong = envelope.jsonGraph || envelope.jsong || envelope.values || envelope.value;
+<<<<<<< HEAD
+        var index2 = -1;
+=======
+        var index3 = -1;
+>>>>>>> 6b8733c... Removes falcor-observable, imports rx/dist/rx, fixes BatchedRequest canceling, moves comparator and errorSelector to the ModelRoot, removes the promise collection guards, fixes bind and bindSync anomalies.
+        var count2 = pathsets.length;
+        roots[_message] = jsong;
+        nodes[_message] = jsong;
+        while (++index2 < count2) {
+            var pathset = pathsets[index2];
+            walk_path_set(onNode, onEdge, pathset, 0, roots, parents, nodes, requested, optimized);
+        }
+    }
+
+    hasValue = roots.hasValue;
+    if (hasValue) {
+        json.json = roots[_json];
+    } else {
+        delete json.json;
+    }
+
+    return {
+        values: values,
+        errors: roots.errors,
+<<<<<<< HEAD
+        hasValue: hasValue,
+=======
+        hasValue: hasValues,
+>>>>>>> 6b8733c... Removes falcor-observable, imports rx/dist/rx, fixes BatchedRequest canceling, moves comparator and errorSelector to the ModelRoot, removes the promise collection guards, fixes bind and bindSync anomalies.
+        requestedPaths: roots.requestedPaths,
+        optimizedPaths: roots.optimizedPaths,
+        requestedMissingPaths: roots.requestedMissingPaths,
+        optimizedMissingPaths: roots.optimizedMissingPaths
+    };
+}
+
+function onNode(pathset, roots, parents, nodes, requested, optimized, is_reference, is_branch, key, keyset, is_keyset) {
+
+    var parent, messageParent, json, jsonkey;
+
+    if (key == null) {
+        if ((key = get_valid_key(optimized)) == null) {
+            return;
+        }
+        jsonkey = get_valid_key(requested);
+        json = parents[_json];
+        parent = parents[_cache];
+        messageParent = parents[_message];
+    } else {
+        jsonkey = key;
+        json = nodes[_json];
+        parent = nodes[_cache];
+        messageParent = nodes[_message];
+    }
+
+    var node = parent[key];
+    var message = messageParent && messageParent[key];
+
+    nodes[_message] = message;
+    nodes[_cache] = node = merge_node(roots, parent, node, messageParent, message, key, requested);
+
+    if (is_reference) {
+        parents[_cache] = parent;
+        parents[_message] = messageParent;
+        return;
+    }
+
+    parents[_json] = json;
+
+    if (is_branch) {
+        var length = requested.length;
+        var offset = roots.offset;
+        var type = is_object(node) && node.$type || undefined;
+
+        parents[_cache] = node;
+        parents[_message] = message;
+        if ((length > offset) && (!type || type == $ref)) {
+            nodes[_json] = json[jsonkey] || (json[jsonkey] = {});
+        }
+    }
+}
+
+function onEdge(pathset, depth, roots, parents, nodes, requested, optimized, key, keyset) {
+
+    var json;
+    var node = nodes[_cache];
+    var type = is_object(node) && node.$type || (node = undefined);
+
+    var isMissingPath = set_node_if_missing_path(roots, node, type, pathset, depth, requested, optimized);
+
+    if (isMissingPath) {
+        return;
+    }
+
+    var isError = set_node_if_error(roots, node, type, requested);
+
+    if (isError) {
+        return;
+    }
+
+    if (roots.is_distinct === true) {
+        roots.is_distinct = false;
+        set_successful_paths(roots, requested, optimized);
+        if (keyset == null && !roots.hasValue && (keyset = get_valid_key(optimized)) == null) {
+            node = clone(roots, node, type, node && node.value);
+            json = roots[_json];
+            json.$type = node.$type;
+            json.value = node.value;
+        } else {
+            json = parents[_json];
+            json[key] = clone(roots, node, type, node && node.value);
+        }
+        roots.hasValue = true;
+    }
+}
+<<<<<<< HEAD
+},{"107":107,"111":111,"114":114,"116":116,"119":119,"121":121,"122":122,"129":129,"134":134,"81":81,"86":86,"97":97}],70:[function(require,module,exports){
+module.exports = set_json_graph_as_json_values;
+
+var $ref = require(129);
+
+var clone = require(86);
+var array_clone = require(81);
+var array_slice = require(85);
+
+var options = require(114);
+var walk_path_set = require(134);
+
+var is_object = require(107);
+
+var get_valid_key = require(97);
+var merge_node = require(111);
+
+var set_node_if_missing_path = require(122);
+var set_node_if_error = require(121);
+var set_successful_paths = require(119);
+
+var positions = require(116);
+=======
+},{"283":283,"288":288,"299":299,"309":309,"313":313,"316":316,"318":318,"321":321,"323":323,"324":324,"331":331,"336":336}],270:[function(require,module,exports){
+module.exports = set_json_graph_as_json_graph;
+
+var $ref = require(331);
+
+var clone = require(289);
+var array_clone = require(283);
+
+var options = require(316);
+var walk_path_set = require(336);
+
+var is_object = require(309);
+
+var get_valid_key = require(299);
+var merge_node = require(313);
+
+var set_node_if_missing_path = require(324);
+var set_node_if_error = require(323);
+var set_successful_paths = require(321);
+
+var promote = require(252);
+
+var positions = require(318);
+>>>>>>> 6b8733c... Removes falcor-observable, imports rx/dist/rx, fixes BatchedRequest canceling, moves comparator and errorSelector to the ModelRoot, removes the promise collection guards, fixes bind and bindSync anomalies.
+var _cache = positions.cache;
+var _message = positions.message;
+var _jsong = positions.jsong;
+var _json = positions.json;
+
+function set_json_graph_as_json_values(model, envelopes, onNext, error_selector, comparator) {
+
+    var roots = [];
+    roots.offset = model._path.length;
+    roots.bound = [];
+    roots = options(roots, model, error_selector, comparator);
+
+    var index = -1;
+    var count = envelopes.length;
+    var nodes = roots.nodes;
+    var parents = array_clone(nodes);
+    var requested = [];
+    var optimized = [];
+
+    roots[_cache] = roots.root;
+    roots.onNext = onNext;
 
     while (++index < count) {
         var envelope = envelopes[index];
@@ -4314,6 +18227,199 @@ function set_json_graph_as_json_sparse(model, envelopes, values, error_selector,
         }
     }
 
+    return {
+        values: null,
+        errors: roots.errors,
+        hasValue: hasValue,
+        requestedPaths: roots.requestedPaths,
+        optimizedPaths: roots.optimizedPaths,
+        requestedMissingPaths: roots.requestedMissingPaths,
+        optimizedMissingPaths: roots.optimizedMissingPaths
+    };
+}
+
+function onNode(pathset, roots, parents, nodes, requested, optimized, is_reference, is_branch, key, keyset) {
+
+    var parent, messageParent;
+
+    if (key == null) {
+        if ((key = get_valid_key(optimized)) == null) {
+            return;
+        }
+        parent = parents[_cache];
+        messageParent = parents[_message];
+    } else {
+        parent = nodes[_cache];
+        messageParent = nodes[_message];
+    }
+
+    var node = parent[key];
+    var message = messageParent && messageParent[key];
+
+    nodes[_message] = message;
+    nodes[_cache] = node = merge_node(roots, parent, node, messageParent, message, key, requested);
+
+    var type = is_object(node) && node.$type || undefined;
+
+    if (is_reference) {
+        parents[_cache] = parent;
+        parents[_message] = messageParent;
+<<<<<<< HEAD
+=======
+        parents[_jsong] = json;
+        if (type === $ref) {
+            json[jsonkey] = clone(roots, node, type, node.value);
+            roots.hasValue = true;
+        } else {
+            nodes[_jsong] = json[jsonkey] || (json[jsonkey] = {});
+        }
+>>>>>>> 6b8733c... Removes falcor-observable, imports rx/dist/rx, fixes BatchedRequest canceling, moves comparator and errorSelector to the ModelRoot, removes the promise collection guards, fixes bind and bindSync anomalies.
+        return;
+    }
+
+    if (is_branch) {
+        parents[_cache] = node;
+        parents[_message] = message;
+<<<<<<< HEAD
+=======
+        parents[_jsong] = json;
+        if (type === $ref) {
+            json[jsonkey] = clone(roots, node, type, node.value);
+            roots.hasValue = true;
+        } else {
+            nodes[_jsong] = json[jsonkey] || (json[jsonkey] = {});
+        }
+        return;
+    }
+
+    if(roots.is_distinct === true) {
+        roots.is_distinct = false;
+        json[jsonkey] = clone(roots, node, type, node && node.value);
+        roots.hasValue = true;
+>>>>>>> 6b8733c... Removes falcor-observable, imports rx/dist/rx, fixes BatchedRequest canceling, moves comparator and errorSelector to the ModelRoot, removes the promise collection guards, fixes bind and bindSync anomalies.
+    }
+}
+
+function onEdge(pathset, depth, roots, parents, nodes, requested, optimized, key, keyset, is_keyset) {
+
+    var node = nodes[_cache];
+    var type = is_object(node) && node.$type || (node = undefined);
+    var isMissingPath = set_node_if_missing_path(roots, node, type, pathset, depth, requested, optimized);
+
+    if (isMissingPath) {
+        return;
+    }
+
+    var isError = set_node_if_error(roots, node, type, requested);
+
+    if (isError) {
+        return;
+    }
+
+    if (roots.is_distinct === true) {
+        roots.is_distinct = false;
+        set_successful_paths(roots, requested, optimized);
+        roots.onNext({
+            path: array_slice(requested, roots.offset),
+            value: clone(roots, node, type, node && node.value)
+        });
+    }
+}
+<<<<<<< HEAD
+},{"107":107,"111":111,"114":114,"116":116,"119":119,"121":121,"122":122,"129":129,"134":134,"81":81,"85":85,"86":86,"97":97}],71:[function(require,module,exports){
+module.exports = set_json_sparse_as_json_dense;
+
+var $ref = require(129);
+var $error = require(128);
+var $atom = require(127);
+
+var clone = require(86);
+var array_clone = require(81);
+
+var options = require(114);
+var walk_path_map = require(133);
+
+var is_object = require(107);
+
+var get_valid_key = require(97);
+var create_branch = require(93);
+var wrap_node = require(126);
+var replace_node = require(118);
+var graph_node = require(98);
+var update_back_refs = require(124);
+var update_graph = require(125);
+var inc_generation = require(100);
+
+var set_node_if_error = require(121);
+var set_successful_paths = require(119);
+
+var positions = require(116);
+=======
+},{"252":252,"283":283,"289":289,"299":299,"309":309,"313":313,"316":316,"318":318,"321":321,"323":323,"324":324,"331":331,"336":336}],271:[function(require,module,exports){
+module.exports = set_json_graph_as_json_sparse;
+
+var $ref = require(331);
+
+var clone = require(288);
+var array_clone = require(283);
+
+var options = require(316);
+var walk_path_set = require(336);
+
+var is_object = require(309);
+
+var get_valid_key = require(299);
+var merge_node = require(313);
+
+var set_node_if_missing_path = require(324);
+var set_node_if_error = require(323);
+var set_successful_paths = require(321);
+
+var positions = require(318);
+>>>>>>> 6b8733c... Removes falcor-observable, imports rx/dist/rx, fixes BatchedRequest canceling, moves comparator and errorSelector to the ModelRoot, removes the promise collection guards, fixes bind and bindSync anomalies.
+var _cache = positions.cache;
+var _message = positions.message;
+var _jsong = positions.jsong;
+var _json = positions.json;
+
+function set_json_sparse_as_json_dense(model, pathmaps, values, error_selector, comparator) {
+
+    var roots = options([], model, error_selector, comparator);
+    var index = -1;
+    var count = pathmaps.length;
+    var nodes = roots.nodes;
+    var parents = array_clone(nodes);
+    var requested = [];
+    var optimized = array_clone(roots.bound);
+    var keys_stack = [];
+    var json, hasValue, hasValues;
+
+    roots[_cache] = roots.root;
+
+    while (++index < count) {
+<<<<<<< HEAD
+
+        json = values && values[index];
+        if (is_object(json)) {
+            roots.json = roots[_json] = parents[_json] = nodes[_json] = json.json || (json.json = {})
+        } else {
+            roots.json = roots[_json] = parents[_json] = nodes[_json] = undefined;
+=======
+        var envelope = envelopes[index];
+        var pathsets = envelope.paths;
+        var jsong = envelope.jsonGraph || envelope.jsong || envelope.values || envelope.value;
+        var index2 = -1;
+        var count2 = pathsets.length;
+        roots[_message] = jsong;
+        nodes[_message] = jsong;
+        while (++index2 < count2) {
+            var pathset = pathsets[index2];
+            walk_path_set(onNode, onEdge, pathset, 0, roots, parents, nodes, requested, optimized);
+>>>>>>> 6b8733c... Removes falcor-observable, imports rx/dist/rx, fixes BatchedRequest canceling, moves comparator and errorSelector to the ModelRoot, removes the promise collection guards, fixes bind and bindSync anomalies.
+        }
+
+<<<<<<< HEAD
+=======
     hasValue = roots.hasValue;
     if (hasValue) {
         json.json = roots[_json];
@@ -4411,28 +18517,28 @@ function onEdge(pathset, depth, roots, parents, nodes, requested, optimized, key
         roots.hasValue = true;
     }
 }
-},{"107":107,"111":111,"114":114,"116":116,"119":119,"121":121,"122":122,"129":129,"134":134,"81":81,"86":86,"97":97}],70:[function(require,module,exports){
+},{"283":283,"288":288,"299":299,"309":309,"313":313,"316":316,"318":318,"321":321,"323":323,"324":324,"331":331,"336":336}],272:[function(require,module,exports){
 module.exports = set_json_graph_as_json_values;
 
-var $ref = require(129);
+var $ref = require(331);
 
-var clone = require(86);
-var array_clone = require(81);
-var array_slice = require(85);
+var clone = require(288);
+var array_clone = require(283);
+var array_slice = require(287);
 
-var options = require(114);
-var walk_path_set = require(134);
+var options = require(316);
+var walk_path_set = require(336);
 
-var is_object = require(107);
+var is_object = require(309);
 
-var get_valid_key = require(97);
-var merge_node = require(111);
+var get_valid_key = require(299);
+var merge_node = require(313);
 
-var set_node_if_missing_path = require(122);
-var set_node_if_error = require(121);
-var set_successful_paths = require(119);
+var set_node_if_missing_path = require(324);
+var set_node_if_error = require(323);
+var set_successful_paths = require(321);
 
-var positions = require(116);
+var positions = require(318);
 var _cache = positions.cache;
 var _message = positions.message;
 var _jsong = positions.jsong;
@@ -4537,34 +18643,34 @@ function onEdge(pathset, depth, roots, parents, nodes, requested, optimized, key
         });
     }
 }
-},{"107":107,"111":111,"114":114,"116":116,"119":119,"121":121,"122":122,"129":129,"134":134,"81":81,"85":85,"86":86,"97":97}],71:[function(require,module,exports){
+},{"283":283,"287":287,"288":288,"299":299,"309":309,"313":313,"316":316,"318":318,"321":321,"323":323,"324":324,"331":331,"336":336}],273:[function(require,module,exports){
 module.exports = set_json_sparse_as_json_dense;
 
-var $ref = require(129);
-var $error = require(128);
-var $atom = require(127);
+var $ref = require(331);
+var $error = require(330);
+var $atom = require(329);
 
-var clone = require(86);
-var array_clone = require(81);
+var clone = require(288);
+var array_clone = require(283);
 
-var options = require(114);
-var walk_path_map = require(133);
+var options = require(316);
+var walk_path_map = require(335);
 
-var is_object = require(107);
+var is_object = require(309);
 
-var get_valid_key = require(97);
-var create_branch = require(93);
-var wrap_node = require(126);
-var replace_node = require(118);
-var graph_node = require(98);
-var update_back_refs = require(124);
-var update_graph = require(125);
-var inc_generation = require(100);
+var get_valid_key = require(299);
+var create_branch = require(295);
+var wrap_node = require(328);
+var replace_node = require(320);
+var graph_node = require(300);
+var update_back_refs = require(326);
+var update_graph = require(327);
+var inc_generation = require(302);
 
-var set_node_if_error = require(121);
-var set_successful_paths = require(119);
+var set_node_if_error = require(323);
+var set_successful_paths = require(321);
 
-var positions = require(116);
+var positions = require(318);
 var _cache = positions.cache;
 var _message = positions.message;
 var _jsong = positions.jsong;
@@ -4593,6 +18699,7 @@ function set_json_sparse_as_json_dense(model, pathmaps, values, error_selector, 
             roots.json = roots[_json] = parents[_json] = nodes[_json] = undefined;
         }
 
+>>>>>>> 6b8733c... Removes falcor-observable, imports rx/dist/rx, fixes BatchedRequest canceling, moves comparator and errorSelector to the ModelRoot, removes the promise collection guards, fixes bind and bindSync anomalies.
         var pathmap = pathmaps[index].json;
         roots.index = index;
 
@@ -4712,6 +18819,7 @@ function onEdge(pathmap, keys_stack, depth, roots, parents, nodes, requested, op
         roots.hasValue = true;
     }
 }
+<<<<<<< HEAD
 },{"100":100,"107":107,"114":114,"116":116,"118":118,"119":119,"121":121,"124":124,"125":125,"126":126,"127":127,"128":128,"129":129,"133":133,"81":81,"86":86,"93":93,"97":97,"98":98}],72:[function(require,module,exports){
 module.exports = set_json_sparse_as_json_graph;
 
@@ -4742,6 +18850,38 @@ var set_successful_paths = require(119);
 var promote = require(50);
 
 var positions = require(116);
+=======
+},{"283":283,"288":288,"295":295,"299":299,"300":300,"302":302,"309":309,"316":316,"318":318,"320":320,"321":321,"323":323,"326":326,"327":327,"328":328,"329":329,"330":330,"331":331,"335":335}],274:[function(require,module,exports){
+module.exports = set_json_sparse_as_json_graph;
+
+var $ref = require(331);
+var $error = require(330);
+var $atom = require(329);
+
+var clone = require(289);
+var array_clone = require(283);
+
+var options = require(316);
+var walk_path_map = require(334);
+
+var is_object = require(309);
+
+var get_valid_key = require(299);
+var create_branch = require(295);
+var wrap_node = require(328);
+var replace_node = require(320);
+var graph_node = require(300);
+var update_back_refs = require(326);
+var update_graph = require(327);
+var inc_generation = require(302);
+
+var set_node_if_error = require(323);
+var set_successful_paths = require(321);
+
+var promote = require(252);
+
+var positions = require(318);
+>>>>>>> 6b8733c... Removes falcor-observable, imports rx/dist/rx, fixes BatchedRequest canceling, moves comparator and errorSelector to the ModelRoot, removes the promise collection guards, fixes bind and bindSync anomalies.
 var _cache = positions.cache;
 var _message = positions.message;
 var _jsong = positions.jsong;
@@ -4889,6 +19029,7 @@ function onEdge(pathmap, keys_stack, depth, roots, parents, nodes, requested, op
         roots.hasValue = true;
     }
 }
+<<<<<<< HEAD
 },{"100":100,"107":107,"114":114,"116":116,"118":118,"119":119,"121":121,"124":124,"125":125,"126":126,"127":127,"128":128,"129":129,"132":132,"50":50,"81":81,"87":87,"93":93,"97":97,"98":98}],73:[function(require,module,exports){
 module.exports = set_json_sparse_as_json_sparse;
 
@@ -4917,6 +19058,36 @@ var set_node_if_error = require(121);
 var set_successful_paths = require(119);
 
 var positions = require(116);
+=======
+},{"252":252,"283":283,"289":289,"295":295,"299":299,"300":300,"302":302,"309":309,"316":316,"318":318,"320":320,"321":321,"323":323,"326":326,"327":327,"328":328,"329":329,"330":330,"331":331,"334":334}],275:[function(require,module,exports){
+module.exports = set_json_sparse_as_json_sparse;
+
+var $ref = require(331);
+var $error = require(330);
+var $atom = require(329);
+
+var clone = require(288);
+var array_clone = require(283);
+
+var options = require(316);
+var walk_path_map = require(335);
+
+var is_object = require(309);
+
+var get_valid_key = require(299);
+var create_branch = require(295);
+var wrap_node = require(328);
+var replace_node = require(320);
+var graph_node = require(300);
+var update_back_refs = require(326);
+var update_graph = require(327);
+var inc_generation = require(302);
+
+var set_node_if_error = require(323);
+var set_successful_paths = require(321);
+
+var positions = require(318);
+>>>>>>> 6b8733c... Removes falcor-observable, imports rx/dist/rx, fixes BatchedRequest canceling, moves comparator and errorSelector to the ModelRoot, removes the promise collection guards, fixes bind and bindSync anomalies.
 var _cache = positions.cache;
 var _message = positions.message;
 var _jsong = positions.jsong;
@@ -5055,6 +19226,7 @@ function onEdge(pathmap, keys_stack, depth, roots, parents, nodes, requested, op
         roots.hasValue = true;
     }
 }
+<<<<<<< HEAD
 },{"100":100,"107":107,"114":114,"116":116,"118":118,"119":119,"121":121,"124":124,"125":125,"126":126,"127":127,"128":128,"129":129,"133":133,"81":81,"86":86,"93":93,"97":97,"98":98}],74:[function(require,module,exports){
 module.exports = set_path_map_as_json_values;
 
@@ -5082,6 +19254,35 @@ var set_node_if_error = require(121);
 var set_successful_paths = require(119);
 
 var positions = require(116);
+=======
+},{"283":283,"288":288,"295":295,"299":299,"300":300,"302":302,"309":309,"316":316,"318":318,"320":320,"321":321,"323":323,"326":326,"327":327,"328":328,"329":329,"330":330,"331":331,"335":335}],276:[function(require,module,exports){
+module.exports = set_path_map_as_json_values;
+
+var $error = require(330);
+var $atom = require(329);
+
+var clone = require(288);
+var array_clone = require(283);
+
+var options = require(316);
+var walk_path_map = require(335);
+
+var is_object = require(309);
+
+var get_valid_key = require(299);
+var create_branch = require(295);
+var wrap_node = require(328);
+var replace_node = require(320);
+var graph_node = require(300);
+var update_back_refs = require(326);
+var update_graph = require(327);
+var inc_generation = require(302);
+
+var set_node_if_error = require(323);
+var set_successful_paths = require(321);
+
+var positions = require(318);
+>>>>>>> 6b8733c... Removes falcor-observable, imports rx/dist/rx, fixes BatchedRequest canceling, moves comparator and errorSelector to the ModelRoot, removes the promise collection guards, fixes bind and bindSync anomalies.
 var _cache = positions.cache;
 var _message = positions.message;
 var _jsong = positions.jsong;
@@ -5196,6 +19397,7 @@ function onEdge(pathmap, keys_stack, depth, roots, parents, nodes, requested, op
         });
     }
 }
+<<<<<<< HEAD
 },{"100":100,"107":107,"114":114,"116":116,"118":118,"119":119,"121":121,"124":124,"125":125,"126":126,"127":127,"128":128,"133":133,"81":81,"86":86,"93":93,"97":97,"98":98}],75:[function(require,module,exports){
 module.exports = set_json_values_as_json_dense;
 
@@ -5226,6 +19428,38 @@ var set_node_if_error = require(121);
 var set_successful_paths = require(119);
 
 var positions = require(116);
+=======
+},{"283":283,"288":288,"295":295,"299":299,"300":300,"302":302,"309":309,"316":316,"318":318,"320":320,"321":321,"323":323,"326":326,"327":327,"328":328,"329":329,"330":330,"335":335}],277:[function(require,module,exports){
+module.exports = set_json_values_as_json_dense;
+
+var $ref = require(331);
+var $error = require(330);
+var $atom = require(329);
+
+var clone = require(288);
+var array_clone = require(283);
+
+var options = require(316);
+var walk_path_set = require(337);
+
+var is_object = require(309);
+
+var get_valid_key = require(299);
+var create_branch = require(295);
+var wrap_node = require(328);
+var invalidate_node = require(304);
+var replace_node = require(320);
+var graph_node = require(300);
+var update_back_refs = require(326);
+var update_graph = require(327);
+var inc_generation = require(302);
+
+var set_node_if_missing_path = require(324);
+var set_node_if_error = require(323);
+var set_successful_paths = require(321);
+
+var positions = require(318);
+>>>>>>> 6b8733c... Removes falcor-observable, imports rx/dist/rx, fixes BatchedRequest canceling, moves comparator and errorSelector to the ModelRoot, removes the promise collection guards, fixes bind and bindSync anomalies.
 var _cache = positions.cache;
 var _message = positions.message;
 var _jsong = positions.jsong;
@@ -5387,6 +19621,7 @@ function onEdge(pathset, depth, roots, parents, nodes, requested, optimized, key
         roots.hasValue = true;
     }
 }
+<<<<<<< HEAD
 },{"100":100,"102":102,"107":107,"114":114,"116":116,"118":118,"119":119,"121":121,"122":122,"124":124,"125":125,"126":126,"127":127,"128":128,"129":129,"135":135,"81":81,"86":86,"93":93,"97":97,"98":98}],76:[function(require,module,exports){
 module.exports = set_json_values_as_json_graph;
 
@@ -5419,6 +19654,40 @@ var set_successful_paths = require(119);
 var promote = require(50);
 
 var positions = require(116);
+=======
+},{"283":283,"288":288,"295":295,"299":299,"300":300,"302":302,"304":304,"309":309,"316":316,"318":318,"320":320,"321":321,"323":323,"324":324,"326":326,"327":327,"328":328,"329":329,"330":330,"331":331,"337":337}],278:[function(require,module,exports){
+module.exports = set_json_values_as_json_graph;
+
+var $ref = require(331);
+var $error = require(330);
+var $atom = require(329);
+
+var clone = require(289);
+var array_clone = require(283);
+
+var options = require(316);
+var walk_path_set = require(336);
+
+var is_object = require(309);
+
+var get_valid_key = require(299);
+var create_branch = require(295);
+var wrap_node = require(328);
+var invalidate_node = require(304);
+var replace_node = require(320);
+var graph_node = require(300);
+var update_back_refs = require(326);
+var update_graph = require(327);
+var inc_generation = require(302);
+
+var set_node_if_missing_path = require(324);
+var set_node_if_error = require(323);
+var set_successful_paths = require(321);
+
+var promote = require(252);
+
+var positions = require(318);
+>>>>>>> 6b8733c... Removes falcor-observable, imports rx/dist/rx, fixes BatchedRequest canceling, moves comparator and errorSelector to the ModelRoot, removes the promise collection guards, fixes bind and bindSync anomalies.
 var _cache = positions.cache;
 var _message = positions.message;
 var _jsong = positions.jsong;
@@ -5581,6 +19850,7 @@ function onEdge(pathset, depth, roots, parents, nodes, requested, optimized, key
         roots.hasValue = true;
     }
 }
+<<<<<<< HEAD
 },{"100":100,"102":102,"107":107,"114":114,"116":116,"118":118,"119":119,"121":121,"122":122,"124":124,"125":125,"126":126,"127":127,"128":128,"129":129,"134":134,"50":50,"81":81,"87":87,"93":93,"97":97,"98":98}],77:[function(require,module,exports){
 module.exports = set_json_values_as_json_sparse;
 
@@ -5611,6 +19881,38 @@ var set_node_if_error = require(121);
 var set_successful_paths = require(119);
 
 var positions = require(116);
+=======
+},{"252":252,"283":283,"289":289,"295":295,"299":299,"300":300,"302":302,"304":304,"309":309,"316":316,"318":318,"320":320,"321":321,"323":323,"324":324,"326":326,"327":327,"328":328,"329":329,"330":330,"331":331,"336":336}],279:[function(require,module,exports){
+module.exports = set_json_values_as_json_sparse;
+
+var $ref = require(331);
+var $error = require(330);
+var $atom = require(329);
+
+var clone = require(288);
+var array_clone = require(283);
+
+var options = require(316);
+var walk_path_set = require(337);
+
+var is_object = require(309);
+
+var get_valid_key = require(299);
+var create_branch = require(295);
+var wrap_node = require(328);
+var invalidate_node = require(304);
+var replace_node = require(320);
+var graph_node = require(300);
+var update_back_refs = require(326);
+var update_graph = require(327);
+var inc_generation = require(302);
+
+var set_node_if_missing_path = require(324);
+var set_node_if_error = require(323);
+var set_successful_paths = require(321);
+
+var positions = require(318);
+>>>>>>> 6b8733c... Removes falcor-observable, imports rx/dist/rx, fixes BatchedRequest canceling, moves comparator and errorSelector to the ModelRoot, removes the promise collection guards, fixes bind and bindSync anomalies.
 var _cache = positions.cache;
 var _message = positions.message;
 var _jsong = positions.jsong;
@@ -5764,6 +20066,7 @@ function onEdge(pathset, depth, roots, parents, nodes, requested, optimized, key
         roots.hasValue = true;
     }
 }
+<<<<<<< HEAD
 },{"100":100,"102":102,"107":107,"114":114,"116":116,"118":118,"119":119,"121":121,"122":122,"124":124,"125":125,"126":126,"127":127,"128":128,"129":129,"135":135,"81":81,"86":86,"93":93,"97":97,"98":98}],78:[function(require,module,exports){
 module.exports = set_json_values_as_json_values;
 
@@ -5793,6 +20096,37 @@ var set_node_if_error = require(121);
 var set_successful_paths = require(119);
 
 var positions = require(116);
+=======
+},{"283":283,"288":288,"295":295,"299":299,"300":300,"302":302,"304":304,"309":309,"316":316,"318":318,"320":320,"321":321,"323":323,"324":324,"326":326,"327":327,"328":328,"329":329,"330":330,"331":331,"337":337}],280:[function(require,module,exports){
+module.exports = set_json_values_as_json_values;
+
+var $error = require(330);
+var $atom = require(329);
+
+var clone = require(288);
+var array_clone = require(283);
+
+var options = require(316);
+var walk_path_set = require(337);
+
+var is_object = require(309);
+
+var get_valid_key = require(299);
+var create_branch = require(295);
+var wrap_node = require(328);
+var invalidate_node = require(304);
+var replace_node = require(320);
+var graph_node = require(300);
+var update_back_refs = require(326);
+var update_graph = require(327);
+var inc_generation = require(302);
+
+var set_node_if_missing_path = require(324);
+var set_node_if_error = require(323);
+var set_successful_paths = require(321);
+
+var positions = require(318);
+>>>>>>> 6b8733c... Removes falcor-observable, imports rx/dist/rx, fixes BatchedRequest canceling, moves comparator and errorSelector to the ModelRoot, removes the promise collection guards, fixes bind and bindSync anomalies.
 var _cache = positions.cache;
 var _message = positions.message;
 var _jsong = positions.jsong;
@@ -5932,6 +20266,7 @@ function onValueType(pathset, depth, roots, parents, nodes, requested, optimized
         });
     }
 }
+<<<<<<< HEAD
 },{"100":100,"102":102,"107":107,"114":114,"116":116,"118":118,"119":119,"121":121,"122":122,"124":124,"125":125,"126":126,"127":127,"128":128,"135":135,"81":81,"86":86,"93":93,"97":97,"98":98}],79:[function(require,module,exports){
 var $error = require(128);
 var pathSyntax = require(333);
@@ -5939,6 +20274,15 @@ var get_type = require(96);
 var is_object = require(107);
 var is_path_value = require(108);
 var set_json_values_as_json_dense = require(75);
+=======
+},{"283":283,"288":288,"295":295,"299":299,"300":300,"302":302,"304":304,"309":309,"316":316,"318":318,"320":320,"321":321,"323":323,"324":324,"326":326,"327":327,"328":328,"329":329,"330":330,"337":337}],281:[function(require,module,exports){
+var $error = require(330);
+var pathSyntax = require(198);
+var get_type = require(298);
+var is_object = require(309);
+var is_path_value = require(310);
+var set_json_values_as_json_dense = require(277);
+>>>>>>> 6b8733c... Removes falcor-observable, imports rx/dist/rx, fixes BatchedRequest canceling, moves comparator and errorSelector to the ModelRoot, removes the promise collection guards, fixes bind and bindSync anomalies.
 
 module.exports = function setValueSync(path, value, errorSelector, comparator) {
 
@@ -5957,11 +20301,19 @@ module.exports = function setValueSync(path, value, errorSelector, comparator) {
     }
 
     if(typeof errorSelector !== "function") {
+<<<<<<< HEAD
         errorSelector = this._root._errorSelector;
     }
 
     if(typeof comparator !== "function") {
         comparator = this._root._comparator;
+=======
+        errorSelector = this._errorSelector;
+    }
+
+    if(typeof comparator !== "function") {
+        comparator = this._comparator;
+>>>>>>> 6b8733c... Removes falcor-observable, imports rx/dist/rx, fixes BatchedRequest canceling, moves comparator and errorSelector to the ModelRoot, removes the promise collection guards, fixes bind and bindSync anomalies.
     }
 
     if(this.syncCheck("setValueSync")) {
@@ -5995,7 +20347,11 @@ module.exports = function setValueSync(path, value, errorSelector, comparator) {
         }
     }
 };
+<<<<<<< HEAD
 },{"107":107,"108":108,"128":128,"333":333,"75":75,"96":96}],80:[function(require,module,exports){
+=======
+},{"198":198,"277":277,"298":298,"309":309,"310":310,"330":330}],282:[function(require,module,exports){
+>>>>>>> 6b8733c... Removes falcor-observable, imports rx/dist/rx, fixes BatchedRequest canceling, moves comparator and errorSelector to the ModelRoot, removes the promise collection guards, fixes bind and bindSync anomalies.
 module.exports = function array_append(array, value) {
     var i = -1;
     var n = array.length;
@@ -6004,7 +20360,11 @@ module.exports = function array_append(array, value) {
     array2[i] = value;
     return array2;
 };
+<<<<<<< HEAD
 },{}],81:[function(require,module,exports){
+=======
+},{}],283:[function(require,module,exports){
+>>>>>>> 6b8733c... Removes falcor-observable, imports rx/dist/rx, fixes BatchedRequest canceling, moves comparator and errorSelector to the ModelRoot, removes the promise collection guards, fixes bind and bindSync anomalies.
 module.exports = function array_clone(array) {
     if(!array) { return array; };
     var i = -1;
@@ -6013,7 +20373,11 @@ module.exports = function array_clone(array) {
     while(++i < n) { array2[i] = array[i]; }
     return array2;
 };
+<<<<<<< HEAD
 },{}],82:[function(require,module,exports){
+=======
+},{}],284:[function(require,module,exports){
+>>>>>>> 6b8733c... Removes falcor-observable, imports rx/dist/rx, fixes BatchedRequest canceling, moves comparator and errorSelector to the ModelRoot, removes the promise collection guards, fixes bind and bindSync anomalies.
 module.exports = function array_concat(array, other) {
     if(!array) { return other; };
     var i = -1, j = -1;
@@ -6024,7 +20388,11 @@ module.exports = function array_concat(array, other) {
     while(++j < m) { array2[i++] = other[j]; }
     return array2;
 };
+<<<<<<< HEAD
 },{}],83:[function(require,module,exports){
+=======
+},{}],285:[function(require,module,exports){
+>>>>>>> 6b8733c... Removes falcor-observable, imports rx/dist/rx, fixes BatchedRequest canceling, moves comparator and errorSelector to the ModelRoot, removes the promise collection guards, fixes bind and bindSync anomalies.
 module.exports = function array_flat_map(array, selector) {
     var index = -1;
     var i = -1;
@@ -6040,7 +20408,11 @@ module.exports = function array_flat_map(array, selector) {
     }
     return array2;
 }
+<<<<<<< HEAD
 },{}],84:[function(require,module,exports){
+=======
+},{}],286:[function(require,module,exports){
+>>>>>>> 6b8733c... Removes falcor-observable, imports rx/dist/rx, fixes BatchedRequest canceling, moves comparator and errorSelector to the ModelRoot, removes the promise collection guards, fixes bind and bindSync anomalies.
 module.exports = function array_map(array, selector) {
     var i = -1;
     var n = array.length;
@@ -6048,7 +20420,11 @@ module.exports = function array_map(array, selector) {
     while(++i < n) { array2[i] = selector(array[i], i, array); }
     return array2;
 }
+<<<<<<< HEAD
 },{}],85:[function(require,module,exports){
+=======
+},{}],287:[function(require,module,exports){
+>>>>>>> 6b8733c... Removes falcor-observable, imports rx/dist/rx, fixes BatchedRequest canceling, moves comparator and errorSelector to the ModelRoot, removes the promise collection guards, fixes bind and bindSync anomalies.
 module.exports = function array_slice(array, index) {
     index || (index = 0);
     var i = -1;
@@ -6057,9 +20433,15 @@ module.exports = function array_slice(array, index) {
     while(++i < n) { array2[i] = array[i + index]; }
     return array2;
 };
+<<<<<<< HEAD
 },{}],86:[function(require,module,exports){
 var $atom = require(127);
 var clone = require(91);
+=======
+},{}],288:[function(require,module,exports){
+var $atom = require(329);
+var clone = require(293);
+>>>>>>> 6b8733c... Removes falcor-observable, imports rx/dist/rx, fixes BatchedRequest canceling, moves comparator and errorSelector to the ModelRoot, removes the promise collection guards, fixes bind and bindSync anomalies.
 module.exports = function clone_json_dense(roots, node, type, value) {
 
     if (node == null || value === undefined) {
@@ -6073,10 +20455,17 @@ module.exports = function clone_json_dense(roots, node, type, value) {
     return value;
 };
 
+<<<<<<< HEAD
 },{"127":127,"91":91}],87:[function(require,module,exports){
 var $atom = require(127);
 var clone = require(91);
 var is_primitive = require(109);
+=======
+},{"293":293,"329":329}],289:[function(require,module,exports){
+var $atom = require(329);
+var clone = require(293);
+var is_primitive = require(311);
+>>>>>>> 6b8733c... Removes falcor-observable, imports rx/dist/rx, fixes BatchedRequest canceling, moves comparator and errorSelector to the ModelRoot, removes the promise collection guards, fixes bind and bindSync anomalies.
 module.exports = function clone_json_graph(roots, node, type, value) {
 
     if(node == null || value === undefined) {
@@ -6093,14 +20482,24 @@ module.exports = function clone_json_graph(roots, node, type, value) {
 
     return clone(node);
 };
+<<<<<<< HEAD
 },{"109":109,"127":127,"91":91}],88:[function(require,module,exports){
 var clone_requested_path = require(90);
 var clone_optimized_path = require(89);
+=======
+},{"293":293,"311":311,"329":329}],290:[function(require,module,exports){
+var clone_requested_path = require(292);
+var clone_optimized_path = require(291);
+>>>>>>> 6b8733c... Removes falcor-observable, imports rx/dist/rx, fixes BatchedRequest canceling, moves comparator and errorSelector to the ModelRoot, removes the promise collection guards, fixes bind and bindSync anomalies.
 module.exports = function clone_missing_path_sets(roots, pathset, depth, requested, optimized) {
     roots.requestedMissingPaths.push(clone_requested_path(roots.bound, requested, pathset, depth, roots.index));
     roots.optimizedMissingPaths.push(clone_optimized_path(optimized, pathset, depth));
 }
+<<<<<<< HEAD
 },{"89":89,"90":90}],89:[function(require,module,exports){
+=======
+},{"291":291,"292":292}],291:[function(require,module,exports){
+>>>>>>> 6b8733c... Removes falcor-observable, imports rx/dist/rx, fixes BatchedRequest canceling, moves comparator and errorSelector to the ModelRoot, removes the promise collection guards, fixes bind and bindSync anomalies.
 module.exports = function clone_optimized_path(optimized, pathset, depth) {
     var x;
     var i = -1;
@@ -6118,8 +20517,13 @@ module.exports = function clone_optimized_path(optimized, pathset, depth) {
     }
     return array2;
 };
+<<<<<<< HEAD
 },{}],90:[function(require,module,exports){
 var is_object = require(107);
+=======
+},{}],292:[function(require,module,exports){
+var is_object = require(309);
+>>>>>>> 6b8733c... Removes falcor-observable, imports rx/dist/rx, fixes BatchedRequest canceling, moves comparator and errorSelector to the ModelRoot, removes the promise collection guards, fixes bind and bindSync anomalies.
 module.exports = function clone_requested_path(bound, requested, pathset, depth, index) {
     var x;
     var i = -1;
@@ -6149,9 +20553,15 @@ module.exports = function clone_requested_path(bound, requested, pathset, depth,
     }
     return array2;
 };
+<<<<<<< HEAD
 },{"107":107}],91:[function(require,module,exports){
 var is_object = require(107);
 var prefix = require(40);
+=======
+},{"309":309}],293:[function(require,module,exports){
+var is_object = require(309);
+var prefix = require(242);
+>>>>>>> 6b8733c... Removes falcor-observable, imports rx/dist/rx, fixes BatchedRequest canceling, moves comparator and errorSelector to the ModelRoot, removes the promise collection guards, fixes bind and bindSync anomalies.
 
 module.exports = function clone(value) {
     var dest = value, src = dest, i = -1, n, keys, key;
@@ -6168,6 +20578,7 @@ module.exports = function clone(value) {
     }
     return dest;
 };
+<<<<<<< HEAD
 },{"107":107,"40":40}],92:[function(require,module,exports){
 var is_array = Array.isArray;
 var is_object = require(107);
@@ -6370,6 +20781,157 @@ function getHashCode(key) {
         code = (code << 5) + code + key.charCodeAt(index);
     }
     return String(code);
+=======
+},{"242":242,"309":309}],294:[function(require,module,exports){
+var __prefix = require(242);
+var array_map = require(286);
+var is_array = Array.isArray;
+var is_primitive = require(311);
+
+module.exports = function collapse(pathmap) {
+    return array_map(buildQueries(pathmap), collapseRangeIndexes);
+};
+
+// Note: export this for testing
+module.exports.buildQueries = buildQueries;
+
+/**
+ * Collapse range indexers, e.g. when there is a continuous
+ * range in an array, turn it into an object instead:
+ *
+ * [1,2,3,4,5,6] => {"from":1, "to":6}
+ *
+ */
+function collapseRangeIndexes(pathset) {
+    
+    var keysetIndex = -1;
+    var keysetCount = pathset.length;
+
+    while (++keysetIndex < keysetCount) {
+
+        var keyset = pathset[keysetIndex];
+
+        if (is_array(keyset)) {
+
+            // Do we need to dedupe an indexer keyset if they're duplicate consecutive integers?
+            // var hash = {};
+            var isSparseRange = true;
+            var keyIndex = -1;
+            var keyCount = keyset.length - 1;
+
+            while (++keyIndex <= keyCount) {
+
+                var key = keyset[keyIndex];
+
+                if (!isNumber(key) /* || hash[key] === true*/ ) {
+                    isSparseRange = false;
+                    break;
+                }
+                // hash[key] = true;
+                // Cast number indexes to integers.
+                keyset[keyIndex] = parseInt(key, 10);
+            }
+
+            if (isSparseRange === true) {
+                
+                keyset.sort(sortListAscending);
+                
+                var from = keyset[0];
+                var to = keyset[keyCount];
+                
+                // If we re-introduce deduped integer indexers, change this comparson to "===".
+                if (to - from <= keyCount) {
+                    pathset[keysetIndex] = {
+                        from: from,
+                        to: to
+                    };
+                }
+            }
+        }
+    }
+    
+    return pathset;
+}
+
+function sortListAscending(a, b) {
+    return a - b;
+}
+
+/**
+ * Builds the set of collapsed
+ * queries by traversing the tree
+ * once
+ */
+
+/* jshint forin: false */
+function buildQueries(pathmap) {
+
+    if (is_primitive(pathmap)) {
+        return [[]];
+    }
+
+    var subPaths = Object.create(null);
+    var subPath, subPathKeys, subPathSets, clone, j, k, x;
+
+    for(var key in pathmap) {
+
+        if(key[0] === __prefix) {
+            continue;
+        }
+
+        var pathsets = buildQueries(pathmap[key]);
+        var pathsetsKey = createKey(pathsets);
+        
+        subPath = subPaths[pathsetsKey] || (subPaths[pathsetsKey] = {
+            head: [],
+            tail: pathsets
+        });
+        subPathKeys = subPath.head;
+        subPathKeys[subPathKeys.length] = isNumber(key) ? parseInt(key, 10) : key;
+    }
+
+    var results = [];
+    var resultsLength = 0;
+
+    for(pathsetsKey in subPaths) {
+        
+        subPath = subPaths[pathsetsKey];
+        subPathKeys = subPath.head;
+        subPathSets = subPath.tail;
+        
+        var firstSubPathsKey = subPathKeys[0];
+        var subPathKeysCount = subPathKeys.length;
+        
+        var subPathSetsIndex = -1;
+        var subPathSetsCount = subPathSets.length;
+        
+        while(++subPathSetsIndex < subPathSetsCount) {
+            
+            var pathset = subPathSets[subPathSetsIndex];
+            var pathsetClone = [];
+            
+            if(firstSubPathsKey !== "") {
+                
+                pathsetClone[0] = subPathKeysCount === 1 ? firstSubPathsKey : subPathKeys;
+                
+                var pathsetIndex = -1;
+                var pathsetCount = pathset.length;
+                
+                while(++pathsetIndex < pathsetCount) {
+                    pathsetClone[pathsetIndex + 1] = pathset[pathsetIndex];
+                }
+            }
+            
+            results[resultsLength++] = pathsetClone;
+        }
+    }
+    
+    if(resultsLength === 0) {
+        results[0] = [];
+    }
+    
+    return results;
+>>>>>>> 6b8733c... Removes falcor-observable, imports rx/dist/rx, fixes BatchedRequest canceling, moves comparator and errorSelector to the ModelRoot, removes the promise collection guards, fixes bind and bindSync anomalies.
 }
 
 /**
@@ -6382,6 +20944,7 @@ function isNumber(val) {
     // adding 1 corrects loss of precision from parseFloat (#15100)
     return !is_array(val) && (val - parseFloat(val) + 1) >= 0;
 }
+<<<<<<< HEAD
 },{"107":107}],93:[function(require,module,exports){
 var $ref = require(129);
 var $expired = "expired";
@@ -6390,6 +20953,57 @@ var graph_node = require(98);
 var update_back_refs = require(124);
 var is_primitive = require(109);
 var is_expired = require(103);
+=======
+
+/**
+ * allUnique
+ * return true if every number in an array is unique
+ */
+function allUnique(arr) {
+    var hash = {},
+        index, count;
+    for (index = 0, count = arr.length; index < count; index++) {
+        if (hash[arr[index]]) {
+            return false;
+        }
+        hash[arr[index]] = true;
+    }
+    return true;
+}
+
+/**
+ * Create a unique hash key for a set of paths
+ */
+function createKey(list) {
+    return JSON.stringify(sortListOfLists(list));
+}
+
+/**
+ * Sort a list-of-lists
+ * Used for generating a unique hash key for each subtree; used by the memoization
+ */
+function sortListOfLists(list) {
+    var index = 0;
+    var result = [];
+    var listIndex = -1;
+    var listCount = list.length;
+    while(++listIndex < listCount) {
+        var value = list[listIndex];
+        result[index++] = is_array(value) ?
+            sortListOfLists(value) :
+            value;
+    }
+    return result.sort();
+}
+},{"242":242,"286":286,"311":311}],295:[function(require,module,exports){
+var $ref = require(331);
+var $expired = "expired";
+var replace_node = require(320);
+var graph_node = require(300);
+var update_back_refs = require(326);
+var is_primitive = require(311);
+var is_expired = require(305);
+>>>>>>> 6b8733c... Removes falcor-observable, imports rx/dist/rx, fixes BatchedRequest canceling, moves comparator and errorSelector to the ModelRoot, removes the promise collection guards, fixes bind and bindSync anomalies.
 
 // TODO: comment about what happens if node is a branch vs leaf.
 module.exports = function create_branch(roots, parent, node, type, key) {
@@ -6405,11 +21019,19 @@ module.exports = function create_branch(roots, parent, node, type, key) {
     }
     return node;
 }
+<<<<<<< HEAD
 },{"103":103,"109":109,"118":118,"124":124,"129":129,"98":98}],94:[function(require,module,exports){
 var __ref = require(43);
 var __context = require(31);
 var __ref_index = require(42);
 var __refs_length = require(44);
+=======
+},{"300":300,"305":305,"311":311,"320":320,"326":326,"331":331}],296:[function(require,module,exports){
+var __ref = require(245);
+var __context = require(234);
+var __ref_index = require(244);
+var __refs_length = require(246);
+>>>>>>> 6b8733c... Removes falcor-observable, imports rx/dist/rx, fixes BatchedRequest canceling, moves comparator and errorSelector to the ModelRoot, removes the promise collection guards, fixes bind and bindSync anomalies.
 
 module.exports = function delete_back_refs(node) {
     var ref, i = -1, n = node[__refs_length] || 0;
@@ -6420,6 +21042,7 @@ module.exports = function delete_back_refs(node) {
     }
     node[__refs_length] = undefined
 };
+<<<<<<< HEAD
 },{"31":31,"42":42,"43":43,"44":44}],95:[function(require,module,exports){
 var is_object = require(107);
 module.exports = function get_size(node) {
@@ -6427,6 +21050,15 @@ module.exports = function get_size(node) {
 };
 },{"107":107}],96:[function(require,module,exports){
 var is_object = require(107);
+=======
+},{"234":234,"244":244,"245":245,"246":246}],297:[function(require,module,exports){
+var is_object = require(309);
+module.exports = function get_size(node) {
+    return is_object(node) && node.$size || 0;
+};
+},{"309":309}],298:[function(require,module,exports){
+var is_object = require(309);
+>>>>>>> 6b8733c... Removes falcor-observable, imports rx/dist/rx, fixes BatchedRequest canceling, moves comparator and errorSelector to the ModelRoot, removes the promise collection guards, fixes bind and bindSync anomalies.
 
 module.exports = function get_type(node, anyType) {
     var type = is_object(node) && node.$type || undefined;
@@ -6435,7 +21067,11 @@ module.exports = function get_type(node, anyType) {
     }
     return type;
 };
+<<<<<<< HEAD
 },{"107":107}],97:[function(require,module,exports){
+=======
+},{"309":309}],299:[function(require,module,exports){
+>>>>>>> 6b8733c... Removes falcor-observable, imports rx/dist/rx, fixes BatchedRequest canceling, moves comparator and errorSelector to the ModelRoot, removes the promise collection guards, fixes bind and bindSync anomalies.
 module.exports = function get_valid_key(path) {
     var key, index = path.length - 1;
     do {
@@ -6445,10 +21081,17 @@ module.exports = function get_valid_key(path) {
     } while(--index > -1);
     return null;
 };
+<<<<<<< HEAD
 },{}],98:[function(require,module,exports){
 var __parent = require(39);
 var __key = require(36);
 var __generation = require(33);
+=======
+},{}],300:[function(require,module,exports){
+var __parent = require(241);
+var __key = require(238);
+var __generation = require(235);
+>>>>>>> 6b8733c... Removes falcor-observable, imports rx/dist/rx, fixes BatchedRequest canceling, moves comparator and errorSelector to the ModelRoot, removes the promise collection guards, fixes bind and bindSync anomalies.
 
 module.exports = function graph_node(root, parent, node, key, generation) {
     node[__parent] = parent;
@@ -6456,6 +21099,7 @@ module.exports = function graph_node(root, parent, node, key, generation) {
     node[__generation] = generation;
     return node;
 };
+<<<<<<< HEAD
 },{"33":33,"36":36,"39":39}],99:[function(require,module,exports){
 module.exports = function identity(x) { return x; };
 },{}],100:[function(require,module,exports){
@@ -6468,6 +21112,20 @@ module.exports = function increment_version() { return version++; };
 var is_object = require(107);
 var remove_node = require(117);
 var prefix = require(40);
+=======
+},{"235":235,"238":238,"241":241}],301:[function(require,module,exports){
+module.exports = function identity(x) { return x; };
+},{}],302:[function(require,module,exports){
+var generation = 0;
+module.exports = function increment_generation() { return generation++; };
+},{}],303:[function(require,module,exports){
+var version = 0;
+module.exports = function increment_version() { return version++; };
+},{}],304:[function(require,module,exports){
+var is_object = require(309);
+var remove_node = require(319);
+var prefix = require(242);
+>>>>>>> 6b8733c... Removes falcor-observable, imports rx/dist/rx, fixes BatchedRequest canceling, moves comparator and errorSelector to the ModelRoot, removes the promise collection guards, fixes bind and bindSync anomalies.
 
 module.exports = function invalidate_node(parent, node, key, lru) {
     if(remove_node(parent, node, key, lru)) {
@@ -6485,12 +21143,21 @@ module.exports = function invalidate_node(parent, node, key, lru) {
     }
     return false;
 };
+<<<<<<< HEAD
 },{"107":107,"117":117,"40":40}],103:[function(require,module,exports){
 var $expires_now = require(131);
 var $expires_never = require(130);
 var __invalidated = require(35);
 var now = require(113);
 var splice = require(51);
+=======
+},{"242":242,"309":309,"319":319}],305:[function(require,module,exports){
+var $expires_now = require(333);
+var $expires_never = require(332);
+var __invalidated = require(237);
+var now = require(315);
+var splice = require(253);
+>>>>>>> 6b8733c... Removes falcor-observable, imports rx/dist/rx, fixes BatchedRequest canceling, moves comparator and errorSelector to the ModelRoot, removes the promise collection guards, fixes bind and bindSync anomalies.
 
 module.exports = function isExpired(roots, node) {
     var expires = node.$expires;
@@ -6507,21 +21174,36 @@ module.exports = function isExpired(roots, node) {
     return false;
 }
 
+<<<<<<< HEAD
 },{"113":113,"130":130,"131":131,"35":35,"51":51}],104:[function(require,module,exports){
+=======
+},{"237":237,"253":253,"315":315,"332":332,"333":333}],306:[function(require,module,exports){
+>>>>>>> 6b8733c... Removes falcor-observable, imports rx/dist/rx, fixes BatchedRequest canceling, moves comparator and errorSelector to the ModelRoot, removes the promise collection guards, fixes bind and bindSync anomalies.
 var function_typeof = "function";
 
 module.exports = function is_function(func) {
     return Boolean(func) && typeof func === function_typeof;
 };
+<<<<<<< HEAD
 },{}],105:[function(require,module,exports){
 var is_object = require(107);
+=======
+},{}],307:[function(require,module,exports){
+var is_object = require(309);
+>>>>>>> 6b8733c... Removes falcor-observable, imports rx/dist/rx, fixes BatchedRequest canceling, moves comparator and errorSelector to the ModelRoot, removes the promise collection guards, fixes bind and bindSync anomalies.
 
 module.exports = function is_json_graph_envelope(envelope) {
     return is_object(envelope) && ("json" in envelope);
 };
+<<<<<<< HEAD
 },{"107":107}],106:[function(require,module,exports){
 var is_array = Array.isArray;
 var is_object = require(107);
+=======
+},{"309":309}],308:[function(require,module,exports){
+var is_array = Array.isArray;
+var is_object = require(309);
+>>>>>>> 6b8733c... Removes falcor-observable, imports rx/dist/rx, fixes BatchedRequest canceling, moves comparator and errorSelector to the ModelRoot, removes the promise collection guards, fixes bind and bindSync anomalies.
 
 module.exports = function is_json_graph_envelope(envelope) {
     return is_object(envelope) && is_array(envelope.paths) && (
@@ -6532,14 +21214,24 @@ module.exports = function is_json_graph_envelope(envelope) {
         is_object(envelope.value)
     );
 };
+<<<<<<< HEAD
 },{"107":107}],107:[function(require,module,exports){
+=======
+},{"309":309}],309:[function(require,module,exports){
+>>>>>>> 6b8733c... Removes falcor-observable, imports rx/dist/rx, fixes BatchedRequest canceling, moves comparator and errorSelector to the ModelRoot, removes the promise collection guards, fixes bind and bindSync anomalies.
 var obj_typeof = "object";
 module.exports = function is_object(value) {
     return value != null && typeof value == obj_typeof;
 };
+<<<<<<< HEAD
 },{}],108:[function(require,module,exports){
 var is_array = Array.isArray;
 var is_object = require(107);
+=======
+},{}],310:[function(require,module,exports){
+var is_array = Array.isArray;
+var is_object = require(309);
+>>>>>>> 6b8733c... Removes falcor-observable, imports rx/dist/rx, fixes BatchedRequest canceling, moves comparator and errorSelector to the ModelRoot, removes the promise collection guards, fixes bind and bindSync anomalies.
 
 module.exports = function is_path_value(pathValue) {
     return is_object(pathValue) &&  (
@@ -6547,15 +21239,26 @@ module.exports = function is_path_value(pathValue) {
             typeof pathValue.path === "string"
         ));
 };
+<<<<<<< HEAD
 },{"107":107}],109:[function(require,module,exports){
+=======
+},{"309":309}],311:[function(require,module,exports){
+>>>>>>> 6b8733c... Removes falcor-observable, imports rx/dist/rx, fixes BatchedRequest canceling, moves comparator and errorSelector to the ModelRoot, removes the promise collection guards, fixes bind and bindSync anomalies.
 var obj_typeof = "object";
 module.exports = function is_primitive(value) {
     return value == null || typeof value != obj_typeof;
 };
+<<<<<<< HEAD
 },{}],110:[function(require,module,exports){
 var __offset = require(38);
 var is_array = Array.isArray;
 var is_object = require(107);
+=======
+},{}],312:[function(require,module,exports){
+var __offset = require(240);
+var is_array = Array.isArray;
+var is_object = require(309);
+>>>>>>> 6b8733c... Removes falcor-observable, imports rx/dist/rx, fixes BatchedRequest canceling, moves comparator and errorSelector to the ModelRoot, removes the promise collection guards, fixes bind and bindSync anomalies.
 
 module.exports = function key_to_keyset(key, iskeyset) {
     if(iskeyset) {
@@ -6568,6 +21271,7 @@ module.exports = function key_to_keyset(key, iskeyset) {
     }
     return key;
 };
+<<<<<<< HEAD
 },{"107":107,"38":38}],111:[function(require,module,exports){
 var __parent = require(39);
 var $ref = require(129);
@@ -6584,6 +21288,24 @@ var replace_node = require(118);
 var update_graph  = require(125);
 var inc_generation = require(100);
 var invalidate_node = require(102);
+=======
+},{"240":240,"309":309}],313:[function(require,module,exports){
+var __parent = require(241);
+var $ref = require(331);
+var $atom = require(329);
+var $expires_now = require(333);
+
+var is_object = require(309);
+var is_primitive = require(311);
+var is_expired = require(305);
+var promote = require(252);
+var wrap_node = require(328);
+var graph_node = require(300);
+var replace_node = require(320);
+var update_graph  = require(327);
+var inc_generation = require(302);
+var invalidate_node = require(304);
+>>>>>>> 6b8733c... Removes falcor-observable, imports rx/dist/rx, fixes BatchedRequest canceling, moves comparator and errorSelector to the ModelRoot, removes the promise collection guards, fixes bind and bindSync anomalies.
 
 module.exports = function merge_node(roots, parent, node, messageParent, message, key, requested) {
 
@@ -6756,6 +21478,7 @@ module.exports = function merge_node(roots, parent, node, messageParent, message
     return node;
 }
 
+<<<<<<< HEAD
 },{"100":100,"102":102,"103":103,"107":107,"109":109,"118":118,"125":125,"126":126,"127":127,"129":129,"131":131,"39":39,"50":50,"98":98}],112:[function(require,module,exports){
 module.exports = function noop() {};
 },{}],113:[function(require,module,exports){
@@ -6763,6 +21486,15 @@ module.exports = Date.now;
 },{}],114:[function(require,module,exports){
 var inc_version = require(101);
 var getBoundValue = require(13);
+=======
+},{"241":241,"252":252,"300":300,"302":302,"304":304,"305":305,"309":309,"311":311,"320":320,"327":327,"328":328,"329":329,"331":331,"333":333}],314:[function(require,module,exports){
+module.exports = function noop() {};
+},{}],315:[function(require,module,exports){
+arguments[4][135][0].apply(exports,arguments)
+},{"135":135}],316:[function(require,module,exports){
+var inc_version = require(303);
+var getBoundValue = require(216);
+>>>>>>> 6b8733c... Removes falcor-observable, imports rx/dist/rx, fixes BatchedRequest canceling, moves comparator and errorSelector to the ModelRoot, removes the promise collection guards, fixes bind and bindSync anomalies.
 
 /**
  * TODO: more options state tracking comments.
@@ -6797,10 +21529,17 @@ module.exports = function get_initial_state(options, model, error_selector, comp
     
     return options;
 };
+<<<<<<< HEAD
 },{"101":101,"13":13}],115:[function(require,module,exports){
 var __offset = require(38);
 var is_array = Array.isArray;
 var is_object = require(107);
+=======
+},{"216":216,"303":303}],317:[function(require,module,exports){
+var __offset = require(240);
+var is_array = Array.isArray;
+var is_object = require(309);
+>>>>>>> 6b8733c... Removes falcor-observable, imports rx/dist/rx, fixes BatchedRequest canceling, moves comparator and errorSelector to the ModelRoot, removes the promise collection guards, fixes bind and bindSync anomalies.
 
 module.exports = function permute_keyset(key) {
     if(is_array(key)) {
@@ -6839,6 +21578,7 @@ module.exports = function permute_keyset(key) {
     }
     
     return false;
+<<<<<<< HEAD
 };
 },{"107":107,"38":38}],116:[function(require,module,exports){
 module.exports = {
@@ -6854,6 +21594,18 @@ var unlink = require(123);
 var delete_back_refs = require(94);
 var splice = require(51);
 var is_object = require(107);
+=======
+};
+},{"240":240,"309":309}],318:[function(require,module,exports){
+arguments[4][138][0].apply(exports,arguments)
+},{"138":138}],319:[function(require,module,exports){
+var $ref = require(331);
+var __parent = require(241);
+var unlink = require(325);
+var delete_back_refs = require(296);
+var splice = require(253);
+var is_object = require(309);
+>>>>>>> 6b8733c... Removes falcor-observable, imports rx/dist/rx, fixes BatchedRequest canceling, moves comparator and errorSelector to the ModelRoot, removes the promise collection guards, fixes bind and bindSync anomalies.
 
 module.exports = function remove_node(parent, node, key, lru) {
     if(is_object(node)) {
@@ -6869,9 +21621,15 @@ module.exports = function remove_node(parent, node, key, lru) {
     return false;
 }
 
+<<<<<<< HEAD
 },{"107":107,"123":123,"129":129,"39":39,"51":51,"94":94}],118:[function(require,module,exports){
 var transfer_back_refs = require(120);
 var invalidate_node = require(102);
+=======
+},{"241":241,"253":253,"296":296,"309":309,"325":325,"331":331}],320:[function(require,module,exports){
+var transfer_back_refs = require(322);
+var invalidate_node = require(304);
+>>>>>>> 6b8733c... Removes falcor-observable, imports rx/dist/rx, fixes BatchedRequest canceling, moves comparator and errorSelector to the ModelRoot, removes the promise collection guards, fixes bind and bindSync anomalies.
 
 module.exports = function replace_node(parent, node, replacement, key, lru) {
     if(node != null && node !== replacement && typeof node == "object") {
@@ -6880,18 +21638,31 @@ module.exports = function replace_node(parent, node, replacement, key, lru) {
     }
     return parent[key] = replacement;
 }
+<<<<<<< HEAD
 },{"102":102,"120":120}],119:[function(require,module,exports){
 var array_slice = require(85);
 var array_clone = require(81);
+=======
+},{"304":304,"322":322}],321:[function(require,module,exports){
+var array_slice = require(287);
+var array_clone = require(283);
+>>>>>>> 6b8733c... Removes falcor-observable, imports rx/dist/rx, fixes BatchedRequest canceling, moves comparator and errorSelector to the ModelRoot, removes the promise collection guards, fixes bind and bindSync anomalies.
 
 module.exports = function cloneSuccessPaths(roots, requested, optimized) {
     roots.requestedPaths.push(array_slice(requested, roots.offset));
     roots.optimizedPaths.push(array_clone(optimized));
 }
+<<<<<<< HEAD
 },{"81":81,"85":85}],120:[function(require,module,exports){
 var __ref = require(43);
 var __context = require(31);
 var __refs_length = require(44);
+=======
+},{"283":283,"287":287}],322:[function(require,module,exports){
+var __ref = require(245);
+var __context = require(234);
+var __refs_length = require(246);
+>>>>>>> 6b8733c... Removes falcor-observable, imports rx/dist/rx, fixes BatchedRequest canceling, moves comparator and errorSelector to the ModelRoot, removes the promise collection guards, fixes bind and bindSync anomalies.
 
 module.exports = function transfer_back_references(node, dest) {
     var nodeRefsLength = node[__refs_length] || 0,
@@ -6908,11 +21679,19 @@ module.exports = function transfer_back_references(node, dest) {
     dest[__refs_length] = nodeRefsLength + destRefsLength;
     node[__refs_length] = ref = undefined;
 }
+<<<<<<< HEAD
 },{"31":31,"43":43,"44":44}],121:[function(require,module,exports){
 var $error = require(128);
 var promote = require(50);
 var array_clone = require(81);
 var clone = require(91);
+=======
+},{"234":234,"245":245,"246":246}],323:[function(require,module,exports){
+var $error = require(330);
+var promote = require(252);
+var array_clone = require(283);
+var clone = require(293);
+>>>>>>> 6b8733c... Removes falcor-observable, imports rx/dist/rx, fixes BatchedRequest canceling, moves comparator and errorSelector to the ModelRoot, removes the promise collection guards, fixes bind and bindSync anomalies.
 
 module.exports = function treatNodeAsError(roots, node, type, path) {
     if(node == null) {
@@ -6929,10 +21708,17 @@ module.exports = function treatNodeAsError(roots, node, type, path) {
     return true;
 };
 
+<<<<<<< HEAD
 },{"128":128,"50":50,"81":81,"91":91}],122:[function(require,module,exports){
 var $atom = require(127);
 var clone_misses = require(88);
 var is_expired = require(103);
+=======
+},{"252":252,"283":283,"293":293,"330":330}],324:[function(require,module,exports){
+var $atom = require(329);
+var clone_misses = require(290);
+var is_expired = require(305);
+>>>>>>> 6b8733c... Removes falcor-observable, imports rx/dist/rx, fixes BatchedRequest canceling, moves comparator and errorSelector to the ModelRoot, removes the promise collection guards, fixes bind and bindSync anomalies.
 
 module.exports = function treatNodeAsMissingPathSet(roots, node, type, pathset, depth, requested, optimized) {
     var dematerialized = !roots.materialized;
@@ -6952,11 +21738,19 @@ module.exports = function treatNodeAsMissingPathSet(roots, node, type, pathset, 
     return false;
 };
 
+<<<<<<< HEAD
 },{"103":103,"127":127,"88":88}],123:[function(require,module,exports){
 var __ref = require(43);
 var __context = require(31);
 var __ref_index = require(42);
 var __refs_length = require(44);
+=======
+},{"290":290,"305":305,"329":329}],325:[function(require,module,exports){
+var __ref = require(245);
+var __context = require(234);
+var __ref_index = require(244);
+var __refs_length = require(246);
+>>>>>>> 6b8733c... Removes falcor-observable, imports rx/dist/rx, fixes BatchedRequest canceling, moves comparator and errorSelector to the ModelRoot, removes the promise collection guards, fixes bind and bindSync anomalies.
 
 module.exports = function unlink_ref(ref) {
     var destination = ref[__context];
@@ -6970,6 +21764,7 @@ module.exports = function unlink_ref(ref) {
         ref[__ref_index] = ref[__context] = destination = undefined;
     }
 }
+<<<<<<< HEAD
 },{"31":31,"42":42,"43":43,"44":44}],124:[function(require,module,exports){
 var __ref = require(43);
 var __parent = require(39);
@@ -6979,6 +21774,17 @@ var __refs_length = require(44);
 
 var generation = require(100);
 
+=======
+},{"234":234,"244":244,"245":245,"246":246}],326:[function(require,module,exports){
+var __ref = require(245);
+var __parent = require(241);
+var __version = require(248);
+var __generation = require(235);
+var __refs_length = require(246);
+
+var generation = require(302);
+
+>>>>>>> 6b8733c... Removes falcor-observable, imports rx/dist/rx, fixes BatchedRequest canceling, moves comparator and errorSelector to the ModelRoot, removes the promise collection guards, fixes bind and bindSync anomalies.
 module.exports = function update_back_refs(node, version) {
     if(node && node[__version] !== version) {
         node[__version] = version;
@@ -6992,12 +21798,21 @@ module.exports = function update_back_refs(node, version) {
     return node;
 }
 
+<<<<<<< HEAD
 },{"100":100,"33":33,"39":39,"43":43,"44":44,"46":46}],125:[function(require,module,exports){
 var __key = require(36);
 var __version = require(46);
 var __parent = require(39);
 var remove_node = require(117);
 var update_back_refs = require(124);
+=======
+},{"235":235,"241":241,"245":245,"246":246,"248":248,"302":302}],327:[function(require,module,exports){
+var __key = require(238);
+var __version = require(248);
+var __parent = require(241);
+var remove_node = require(319);
+var update_back_refs = require(326);
+>>>>>>> 6b8733c... Removes falcor-observable, imports rx/dist/rx, fixes BatchedRequest canceling, moves comparator and errorSelector to the ModelRoot, removes the promise collection guards, fixes bind and bindSync anomalies.
 
 module.exports = function update_graph(node, offset, version, lru) {
     var child;
@@ -7010,6 +21825,7 @@ module.exports = function update_graph(node, offset, version, lru) {
         }
     }
 };
+<<<<<<< HEAD
 },{"117":117,"124":124,"36":36,"39":39,"46":46}],126:[function(require,module,exports){
 var $ref = require(129);
 var $error = require(128);
@@ -7019,6 +21835,17 @@ var now = require(113);
 var clone = require(91);
 var is_array = Array.isArray;
 var is_object = require(107);
+=======
+},{"238":238,"241":241,"248":248,"319":319,"326":326}],328:[function(require,module,exports){
+var $ref = require(331);
+var $error = require(330);
+var $atom = require(329);
+
+var now = require(315);
+var clone = require(293);
+var is_array = Array.isArray;
+var is_object = require(309);
+>>>>>>> 6b8733c... Removes falcor-observable, imports rx/dist/rx, fixes BatchedRequest canceling, moves comparator and errorSelector to the ModelRoot, removes the promise collection guards, fixes bind and bindSync anomalies.
 
 // TODO: CR Wraps a node for insertion.
 // TODO: CR Define default atom size values.
@@ -7069,6 +21896,7 @@ module.exports = function wrap_node(node, type, value) {
     return dest;
 }
 
+<<<<<<< HEAD
 },{"107":107,"113":113,"127":127,"128":128,"129":129,"91":91}],127:[function(require,module,exports){
 module.exports = "atom";
 
@@ -7100,6 +21928,38 @@ var is_array = Array.isArray;
 var promote = require(50);
 
 var positions = require(116);
+=======
+},{"293":293,"309":309,"315":315,"329":329,"330":330,"331":331}],329:[function(require,module,exports){
+arguments[4][149][0].apply(exports,arguments)
+},{"149":149}],330:[function(require,module,exports){
+arguments[4][150][0].apply(exports,arguments)
+},{"150":150}],331:[function(require,module,exports){
+arguments[4][151][0].apply(exports,arguments)
+},{"151":151}],332:[function(require,module,exports){
+arguments[4][152][0].apply(exports,arguments)
+},{"152":152}],333:[function(require,module,exports){
+arguments[4][153][0].apply(exports,arguments)
+},{"153":153}],334:[function(require,module,exports){
+module.exports = walk_path_map;
+
+var prefix = require(242);
+var $ref = require(331);
+
+var walk_reference = require(338);
+
+var array_slice = require(287);
+var array_clone    = require(283);
+var array_append   = require(282);
+
+var is_expired = require(305);
+var is_primitive = require(311);
+var is_object = require(309);
+var is_array = Array.isArray;
+
+var promote = require(252);
+
+var positions = require(318);
+>>>>>>> 6b8733c... Removes falcor-observable, imports rx/dist/rx, fixes BatchedRequest canceling, moves comparator and errorSelector to the ModelRoot, removes the promise collection guards, fixes bind and bindSync anomalies.
 var _cache = positions.cache;
 var _message = positions.message;
 var _jsong = positions.jsong;
@@ -7200,6 +22060,7 @@ function walk_path_map(onNode, onValueType, pathmap, keys_stack, depth, roots, p
     }
 }
 
+<<<<<<< HEAD
 },{"103":103,"107":107,"109":109,"116":116,"129":129,"136":136,"40":40,"50":50,"80":80,"81":81,"85":85}],133:[function(require,module,exports){
 module.exports = walk_path_map;
 
@@ -7221,6 +22082,29 @@ var is_array = Array.isArray;
 var promote = require(50);
 
 var positions = require(116);
+=======
+},{"242":242,"252":252,"282":282,"283":283,"287":287,"305":305,"309":309,"311":311,"318":318,"331":331,"338":338}],335:[function(require,module,exports){
+module.exports = walk_path_map;
+
+var prefix = require(242);
+var __context = require(234);
+var $ref = require(331);
+
+var walk_reference = require(338);
+
+var array_slice = require(287);
+var array_clone    = require(283);
+var array_append   = require(282);
+
+var is_expired = require(305);
+var is_primitive = require(311);
+var is_object = require(309);
+var is_array = Array.isArray;
+
+var promote = require(252);
+
+var positions = require(318);
+>>>>>>> 6b8733c... Removes falcor-observable, imports rx/dist/rx, fixes BatchedRequest canceling, moves comparator and errorSelector to the ModelRoot, removes the promise collection guards, fixes bind and bindSync anomalies.
 var _cache = positions.cache;
 var _message = positions.message;
 var _jsong = positions.jsong;
@@ -7237,6 +22121,7 @@ function walk_path_map(onNode, onValueType, pathmap, keys_stack, depth, roots, p
     var type = node.$type;
 
     while(type === $ref) {
+<<<<<<< HEAD
 
         if(is_expired(roots, node)) {
             nodes[_cache] = undefined;
@@ -7485,10 +22370,12 @@ function walk_path_set(onNode, onValueType, pathset, depth, roots, parents, node
     var type = node.$type;
 
     while(type === $ref) {
+=======
+>>>>>>> 6b8733c... Removes falcor-observable, imports rx/dist/rx, fixes BatchedRequest canceling, moves comparator and errorSelector to the ModelRoot, removes the promise collection guards, fixes bind and bindSync anomalies.
 
         if(is_expired(roots, node)) {
             nodes[_cache] = undefined;
-            return onValueType(pathset, depth, roots, parents, nodes, requested, optimized, key, keyset);
+            return onValueType(pathmap, keys_stack, depth, roots, parents, nodes, requested, optimized, key, keyset);
         }
 
         promote(roots.lru, node);
@@ -7500,7 +22387,7 @@ function walk_path_set(onNode, onValueType, pathset, depth, roots, parents, node
         if(node != null) {
             type = node.$type;
             optimized = array_clone(reference);
-            nodes[_cache]  = node;
+            nodes[_cache] = node;
         } else {
 
             nodes[_cache] = parents[_cache] = roots[_cache];
@@ -7511,49 +22398,71 @@ function walk_path_set(onNode, onValueType, pathset, depth, roots, parents, node
 
             if(node == null) {
                 optimized = array_clone(reference);
+<<<<<<< HEAD
                 return onValueType(pathset, depth, roots, parents, nodes, requested, optimized, key, keyset);
             } else if(is_primitive(node) || ((type = node.$type) && type != $ref)) {
                 onNode(pathset, roots, parents, nodes, requested, optimized, false, false, null, keyset, false);
                 return onValueType(pathset, depth, roots, parents, nodes, array_append(requested, null), optimized, key, keyset);
+=======
+                return onValueType(pathmap, keys_stack, depth, roots, parents, nodes, requested, optimized, key, keyset);
+            } else if(is_primitive(node) || ((type = node.$type) && type != $ref)) {
+                onNode(pathmap, roots, parents, nodes, requested, optimized, false, null, keyset, false);
+                return onValueType(pathmap, keys_stack, depth, roots, parents, nodes, array_append(requested, null), optimized, key, keyset);
+>>>>>>> 6b8733c... Removes falcor-observable, imports rx/dist/rx, fixes BatchedRequest canceling, moves comparator and errorSelector to the ModelRoot, removes the promise collection guards, fixes bind and bindSync anomalies.
             }
         }
     }
 
     if(type != null) {
-        return onValueType(pathset, depth, roots, parents, nodes, requested, optimized, key, keyset);
+        return onValueType(pathmap, keys_stack, depth, roots, parents, nodes, requested, optimized, key, keyset);
     }
 
-    var outer_key = pathset[depth];
-    var is_outer_keyset = is_object(outer_key);
-    var is_branch = depth < pathset.length - 1;
-    var run_once = false;
+    var keys = keys_stack[depth] = Object.keys(pathmap);
 
-    while(is_outer_keyset && permute_keyset(outer_key) && (run_once = true) || (run_once = !run_once)) {
+    if(keys.length == 0) {
+        return onValueType(pathmap, keys_stack, depth, roots, parents, nodes, requested, optimized, key, keyset);
+    }
 
-        var inner_key, inner_keyset;
+    var is_outer_keyset = keys.length > 1;
 
-        if(is_outer_keyset === true) {
-            inner_key = keyset_to_key(outer_key, true);
-            inner_keyset = inner_key;
-        } else {
-            inner_key = outer_key;
-            inner_keyset = keyset;
+    for(var i = -1, n = keys.length; ++i < n;) {
+
+        var inner_key = keys[i];
+
+        if((inner_key[0] === prefix) || (inner_key[0] === "$")) {
+            continue;
         }
 
+        var inner_keyset = is_outer_keyset ? inner_key : keyset;
         var nodes2 = array_clone(nodes);
         var parents2 = array_clone(parents);
-        var requested2, optimized2;
+        var pathmap2 = pathmap[inner_key];
+        var requested2, optimized2, is_branch;
+        var child_key = false;
 
-        if(inner_key == null) {
+        var is_branch = is_object(pathmap2) && !pathmap2.$type;// && !is_array(pathmap2);
+        if(is_branch) {
+            for(child_key in pathmap2) {
+                if((child_key[0] === prefix) || (child_key[0] === "$")) {
+                    continue;
+                }
+                child_key = pathmap2.hasOwnProperty(child_key);
+                break;
+            }
+            is_branch = child_key === true;
+        }
+
+        if(inner_key == "null") {
             requested2 = array_append(requested, null);
             optimized2 = array_clone(optimized);
-            // optimized2 = optimized;
-            inner_key = key;
+            inner_key  = key;
             inner_keyset = keyset;
-            onNode(pathset, roots, parents2, nodes2, requested2, optimized2, false, is_branch, null, inner_keyset, false);
+            pathmap2 = pathmap;
+            onNode(pathmap2, roots, parents2, nodes2, requested2, optimized2, false, is_branch, null, inner_keyset, false);
         } else {
             requested2 = array_append(requested, inner_key);
             optimized2 = array_append(optimized, inner_key);
+<<<<<<< HEAD
             onNode(pathset, roots, parents2, nodes2, requested2, optimized2, false, is_branch, inner_key, inner_keyset, is_outer_keyset);
         }
 
@@ -7764,235 +22673,215 @@ function flush() {
             }
             queue.length -= index;
             index = 0;
+=======
+            onNode(pathmap2, roots, parents2, nodes2, requested2, optimized2, false, is_branch, inner_key, inner_keyset, is_outer_keyset);
+        }
+
+        if(is_branch) {
+            walk_path_map(onNode, onValueType,
+                pathmap2, keys_stack, depth + 1,
+                roots, parents2, nodes2,
+                requested2, optimized2,
+                inner_key, inner_keyset, is_outer_keyset
+            );
+        } else {
+            onValueType(pathmap2, keys_stack, depth + 1, roots, parents2, nodes2, requested2, optimized2, inner_key, inner_keyset);
+>>>>>>> 6b8733c... Removes falcor-observable, imports rx/dist/rx, fixes BatchedRequest canceling, moves comparator and errorSelector to the ModelRoot, removes the promise collection guards, fixes bind and bindSync anomalies.
         }
     }
-    queue.length = 0;
-    index = 0;
-    flushing = false;
 }
 
-// `requestFlush` is implemented using a strategy based on data collected from
-// every available SauceLabs Selenium web driver worker at time of writing.
-// https://docs.google.com/spreadsheets/d/1mG-5UYGup5qxGdEMWkhP6BWCz053NUb2E1QoUTU16uA/edit#gid=783724593
+},{"234":234,"242":242,"252":252,"282":282,"283":283,"287":287,"305":305,"309":309,"311":311,"318":318,"331":331,"338":338}],336:[function(require,module,exports){
+module.exports = walk_path_set;
 
-// Safari 6 and 6.1 for desktop, iPad, and iPhone are the only browsers that
-// have WebKitMutationObserver but not un-prefixed MutationObserver.
-// Must use `global` instead of `window` to work in both frames and web
-// workers. `global` is a provision of Browserify, Mr, Mrs, or Mop.
-var BrowserMutationObserver = global.MutationObserver || global.WebKitMutationObserver;
+var $ref = require(331);
 
-// MutationObservers are desirable because they have high priority and work
-// reliably everywhere they are implemented.
-// They are implemented in all modern browsers.
-//
-// - Android 4-4.3
-// - Chrome 26-34
-// - Firefox 14-29
-// - Internet Explorer 11
-// - iPad Safari 6-7.1
-// - iPhone Safari 7-7.1
-// - Safari 6-7
-if (typeof BrowserMutationObserver === "function") {
-    requestFlush = makeRequestCallFromMutationObserver(flush);
+var walk_reference = require(338);
 
-// MessageChannels are desirable because they give direct access to the HTML
-// task queue, are implemented in Internet Explorer 10, Safari 5.0-1, and Opera
-// 11-12, and in web workers in many engines.
-// Although message channels yield to any queued rendering and IO tasks, they
-// would be better than imposing the 4ms delay of timers.
-// However, they do not work reliably in Internet Explorer or Safari.
+var array_slice    = require(287);
+var array_clone    = require(283);
+var array_append   = require(282);
 
-// Internet Explorer 10 is the only browser that has setImmediate but does
-// not have MutationObservers.
-// Although setImmediate yields to the browser's renderer, it would be
-// preferrable to falling back to setTimeout since it does not have
-// the minimum 4ms penalty.
-// Unfortunately there appears to be a bug in Internet Explorer 10 Mobile (and
-// Desktop to a lesser extent) that renders both setImmediate and
-// MessageChannel useless for the purposes of ASAP.
-// https://github.com/kriskowal/q/issues/396
+var is_expired = require(305);
+var is_primitive = require(311);
+var is_object = require(309);
 
-// Timers are implemented universally.
-// We fall back to timers in workers in most engines, and in foreground
-// contexts in the following browsers.
-// However, note that even this simple case requires nuances to operate in a
-// broad spectrum of browsers.
-//
-// - Firefox 3-13
-// - Internet Explorer 6-9
-// - iPad Safari 4.3
-// - Lynx 2.8.7
-} else {
-    requestFlush = makeRequestCallFromTimer(flush);
-}
+var keyset_to_key  = require(312);
+var permute_keyset = require(317);
 
-// `requestFlush` requests that the high priority event queue be flushed as
-// soon as possible.
-// This is useful to prevent an error thrown in a task from stalling the event
-// queue if the exception handled by Node.js’s
-// `process.on("uncaughtException")` or by a domain.
-rawAsap.requestFlush = requestFlush;
+var promote = require(252);
 
-// To request a high priority event, we induce a mutation observer by toggling
-// the text of a text node between "1" and "-1".
-function makeRequestCallFromMutationObserver(callback) {
-    var toggle = 1;
-    var observer = new BrowserMutationObserver(callback);
-    var node = document.createTextNode("");
-    observer.observe(node, {characterData: true});
-    return function requestCall() {
-        toggle = -toggle;
-        node.data = toggle;
-    };
-}
+var positions = require(318);
+var _cache = positions.cache;
+var _message = positions.message;
+var _jsong = positions.jsong;
+var _json = positions.json;
 
-// The message channel technique was discovered by Malte Ubl and was the
-// original foundation for this library.
-// http://www.nonblocking.io/2011/06/windownexttick.html
+function walk_path_set(onNode, onValueType, pathset, depth, roots, parents, nodes, requested, optimized, key, keyset, is_keyset) {
 
-// Safari 6.0.5 (at least) intermittently fails to create message ports on a
-// page's first load. Thankfully, this version of Safari supports
-// MutationObservers, so we don't need to fall back in that case.
+    var node = nodes[_cache];
 
-// function makeRequestCallFromMessageChannel(callback) {
-//     var channel = new MessageChannel();
-//     channel.port1.onmessage = callback;
-//     return function requestCall() {
-//         channel.port2.postMessage(0);
-//     };
-// }
+    if(depth >= pathset.length || is_primitive(node)) {
+        return onValueType(pathset, depth, roots, parents, nodes, requested, optimized, key, keyset);
+    }
 
-// For reasons explained above, we are also unable to use `setImmediate`
-// under any circumstances.
-// Even if we were, there is another bug in Internet Explorer 10.
-// It is not sufficient to assign `setImmediate` to `requestFlush` because
-// `setImmediate` must be called *by name* and therefore must be wrapped in a
-// closure.
-// Never forget.
+    var type = node.$type;
 
-// function makeRequestCallFromSetImmediate(callback) {
-//     return function requestCall() {
-//         setImmediate(callback);
-//     };
-// }
+    while(type === $ref) {
 
-// Safari 6.0 has a problem where timers will get lost while the user is
-// scrolling. This problem does not impact ASAP because Safari 6.0 supports
-// mutation observers, so that implementation is used instead.
-// However, if we ever elect to use timers in Safari, the prevalent work-around
-// is to add a scroll event listener that calls for a flush.
-
-// `setTimeout` does not call the passed callback if the delay is less than
-// approximately 7 in web workers in Firefox 8 through 18, and sometimes not
-// even then.
-
-function makeRequestCallFromTimer(callback) {
-    return function requestCall() {
-        // We dispatch a timeout with a specified delay of 0 for engines that
-        // can reliably accommodate that request. This will usually be snapped
-        // to a 4 milisecond delay, but once we're flushing, there's no delay
-        // between events.
-        var timeoutHandle = setTimeout(handleTimer, 0);
-        // However, since this timer gets frequently dropped in Firefox
-        // workers, we enlist an interval handle that will try to fire
-        // an event 20 times per second until it succeeds.
-        var intervalHandle = setInterval(handleTimer, 50);
-
-        function handleTimer() {
-            // Whichever timer succeeds will cancel both timers and
-            // execute the callback.
-            clearTimeout(timeoutHandle);
-            clearInterval(intervalHandle);
-            callback();
+        if(is_expired(roots, node)) {
+            nodes[_cache] = undefined;
+            return onValueType(pathset, depth, roots, parents, nodes, requested, optimized, key, keyset);
         }
-    };
+
+        promote(roots.lru, node);
+
+        var container = node;
+        var reference = node.value;
+
+        nodes[_cache] = parents[_cache] = roots[_cache];
+        nodes[_jsong] = parents[_jsong] = roots[_jsong];
+        nodes[_message] = parents[_message] = roots[_message];
+
+        walk_reference(onNode, container, reference, roots, parents, nodes, requested, optimized);
+
+        node = nodes[_cache];
+
+        if(node == null) {
+            optimized = array_clone(reference);
+            return onValueType(pathset, depth, roots, parents, nodes, requested, optimized, key, keyset);
+        } else if(is_primitive(node) || ((type = node.$type) && type != $ref)) {
+            onNode(pathset, roots, parents, nodes, requested, optimized, false, false, null, keyset, false);
+            return onValueType(pathset, depth, roots, parents, nodes, array_append(requested, null), optimized, key, keyset);
+        }
+    }
+
+    if(type != null) {
+        return onValueType(pathset, depth, roots, parents, nodes, requested, optimized, key, keyset);
+    }
+
+    var outer_key = pathset[depth];
+    var is_outer_keyset = is_object(outer_key);
+    var is_branch = depth < pathset.length - 1;
+    var run_once = false;
+
+    while(is_outer_keyset && permute_keyset(outer_key) && (run_once = true) || (run_once = !run_once)) {
+        var inner_key, inner_keyset;
+
+        if(is_outer_keyset === true) {
+            inner_key = keyset_to_key(outer_key, true);
+            inner_keyset = inner_key;
+        } else {
+            inner_key = outer_key;
+            inner_keyset = keyset;
+        }
+
+        var nodes2 = array_clone(nodes);
+        var parents2 = array_clone(parents);
+        var requested2, optimized2;
+
+        if(inner_key == null) {
+            requested2 = array_append(requested, null);
+            optimized2 = array_clone(optimized);
+            // optimized2 = optimized;
+            inner_key = key;
+            inner_keyset = keyset;
+            onNode(pathset, roots, parents2, nodes2, requested2, optimized2, false, is_branch, null, inner_keyset, false);
+        } else {
+            requested2 = array_append(requested, inner_key);
+            optimized2 = array_append(optimized, inner_key);
+            onNode(pathset, roots, parents2, nodes2, requested2, optimized2, false, is_branch, inner_key, inner_keyset, is_outer_keyset);
+        }
+
+        walk_path_set(onNode, onValueType,
+            pathset, depth + 1,
+            roots, parents2, nodes2,
+            requested2, optimized2,
+            inner_key, inner_keyset, is_outer_keyset
+        );
+    }
 }
 
-// This is for `asap.js` only.
-// Its name will be periodically randomized to break any code that depends on
-// its existence.
-rawAsap.makeRequestCallFromTimer = makeRequestCallFromTimer;
+},{"252":252,"282":282,"283":283,"287":287,"305":305,"309":309,"311":311,"312":312,"317":317,"318":318,"331":331,"338":338}],337:[function(require,module,exports){
+module.exports = walk_path_set;
 
-// ASAP was originally a nextTick shim included in Q. This was factored out
-// into this ASAP package. It was later adapted to RSVP which made further
-// amendments. These decisions, particularly to marginalize MessageChannel and
-// to capture the MutationObserver implementation in a closure, were integrated
-// back into ASAP proper.
-// https://github.com/tildeio/rsvp.js/blob/cddf7232546a9cf858524b75cde6f9edf72620a7/lib/rsvp/asap.js
+var __context = require(234);
+var $ref = require(331);
 
+<<<<<<< HEAD
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 },{}],139:[function(require,module,exports){
 (function (process){
 "use strict";
+=======
+var walk_reference = require(338);
 
-var domain; // The domain module is executed on demand
-var hasSetImmediate = typeof setImmediate === "function";
+var array_slice    = require(287);
+var array_clone    = require(283);
+var array_append   = require(282);
 
-// Use the fastest means possible to execute a task in its own turn, with
-// priority over other events including network IO events in Node.js.
-//
-// An exception thrown by a task will permanently interrupt the processing of
-// subsequent tasks. The higher level `asap` function ensures that if an
-// exception is thrown by a task, that the task queue will continue flushing as
-// soon as possible, but if you use `rawAsap` directly, you are responsible to
-// either ensure that no exceptions are thrown from your task, or to manually
-// call `rawAsap.requestFlush` if an exception is thrown.
-module.exports = rawAsap;
-function rawAsap(task) {
-    if (!queue.length) {
-        requestFlush();
-        flushing = true;
+var is_expired = require(305);
+var is_primitive = require(311);
+var is_object = require(309);
+
+var keyset_to_key  = require(312);
+var permute_keyset = require(317);
+
+var promote = require(252);
+
+var positions = require(318);
+var _cache = positions.cache;
+var _message = positions.message;
+var _jsong = positions.jsong;
+var _json = positions.json;
+
+function walk_path_set(onNode, onValueType, pathset, depth, roots, parents, nodes, requested, optimized, key, keyset, is_keyset) {
+
+    var node = nodes[_cache];
+
+    if(depth >= pathset.length || is_primitive(node)) {
+        return onValueType(pathset, depth, roots, parents, nodes, requested, optimized, key, keyset);
     }
-    // Avoids a function call
-    queue[queue.length] = task;
-}
 
-var queue = [];
-// Once a flush has been requested, no further calls to `requestFlush` are
-// necessary until the next `flush` completes.
-var flushing = false;
-// The position of the next task to execute in the task queue. This is
-// preserved between calls to `flush` so that it can be resumed if
-// a task throws an exception.
-var index = 0;
-// If a task schedules additional tasks recursively, the task queue can grow
-// unbounded. To prevent memory excaustion, the task queue will periodically
-// truncate already-completed tasks.
-var capacity = 1024;
+    var type = node.$type;
 
-// The flush function processes all tasks that have been scheduled with
-// `rawAsap` unless and until one of those tasks throws an exception.
-// If a task throws an exception, `flush` ensures that its state will remain
-// consistent and will resume where it left off when called again.
-// However, `flush` does not make any arrangements to be called again if an
-// exception is thrown.
-function flush() {
-    while (index < queue.length) {
-        var currentIndex = index;
-        // Advance the index before calling the task. This ensures that we will
-        // begin flushing on the next task the task throws an error.
-        index = index + 1;
-        queue[currentIndex].call();
-        // Prevent leaking memory for long chains of recursive calls to `asap`.
-        // If we call `asap` within tasks scheduled by `asap`, the queue will
-        // grow, but to avoid an O(n) walk for every task we execute, we don't
-        // shift tasks off the queue after they have been executed.
-        // Instead, we periodically shift 1024 tasks off the queue.
-        if (index > capacity) {
-            // Manually shift all values starting at the index back to the
-            // beginning of the queue.
-            for (var scan = 0, newLength = queue.length - index; scan < newLength; scan++) {
-                queue[scan] = queue[scan + index];
+    while(type === $ref) {
+
+        if(is_expired(roots, node)) {
+            nodes[_cache] = undefined;
+            return onValueType(pathset, depth, roots, parents, nodes, requested, optimized, key, keyset);
+        }
+
+        promote(roots.lru, node);
+
+        var container = node;
+        var reference = node.value;
+        node = node[__context];
+>>>>>>> 6b8733c... Removes falcor-observable, imports rx/dist/rx, fixes BatchedRequest canceling, moves comparator and errorSelector to the ModelRoot, removes the promise collection guards, fixes bind and bindSync anomalies.
+
+        if(node != null) {
+            type = node.$type;
+            optimized = array_clone(reference);
+            nodes[_cache]  = node;
+        } else {
+
+            nodes[_cache] = parents[_cache] = roots[_cache];
+
+            walk_reference(onNode, container, reference, roots, parents, nodes, requested, optimized);
+
+            node = nodes[_cache];
+
+            if(node == null) {
+                optimized = array_clone(reference);
+                return onValueType(pathset, depth, roots, parents, nodes, requested, optimized, key, keyset);
+            } else if(is_primitive(node) || ((type = node.$type) && type != $ref)) {
+                onNode(pathset, roots, parents, nodes, requested, optimized, false, false, null, keyset, false);
+                return onValueType(pathset, depth, roots, parents, nodes, array_append(requested, null), optimized, key, keyset);
             }
-            queue.length -= index;
-            index = 0;
         }
     }
-    queue.length = 0;
-    index = 0;
-    flushing = false;
-}
 
+<<<<<<< HEAD
 rawAsap.requestFlush = requestFlush;
 function requestFlush() {
     // Ensure flushing is not bound to any domain.
@@ -8006,41 +22895,43 @@ function requestFlush() {
             domain = require(140);
         }
         domain.active = process.domain = null;
+=======
+    if(type != null) {
+        return onValueType(pathset, depth, roots, parents, nodes, requested, optimized, key, keyset);
+>>>>>>> 6b8733c... Removes falcor-observable, imports rx/dist/rx, fixes BatchedRequest canceling, moves comparator and errorSelector to the ModelRoot, removes the promise collection guards, fixes bind and bindSync anomalies.
     }
 
-    // `setImmediate` is slower that `process.nextTick`, but `process.nextTick`
-    // cannot handle recursion.
-    // `requestFlush` will only be called recursively from `asap.js`, to resume
-    // flushing after an error is thrown into a domain.
-    // Conveniently, `setImmediate` was introduced in the same version
-    // `process.nextTick` started throwing recursion errors.
-    if (flushing && hasSetImmediate) {
-        setImmediate(flush);
-    } else {
-        process.nextTick(flush);
-    }
+    var outer_key = pathset[depth];
+    var is_outer_keyset = is_object(outer_key);
+    var is_branch = depth < pathset.length - 1;
+    var run_once = false;
 
-    if (parentDomain) {
-        domain.active = process.domain = parentDomain;
-    }
-}
+    while(is_outer_keyset && permute_keyset(outer_key) && (run_once = true) || (run_once = !run_once)) {
 
+<<<<<<< HEAD
 }).call(this,require(142))
 },{"140":140,"142":142}],140:[function(require,module,exports){
 /*global define:false require:false */
 module.exports = (function(){
 	// Import Events
 	var events = require(141)
+=======
+        var inner_key, inner_keyset;
+>>>>>>> 6b8733c... Removes falcor-observable, imports rx/dist/rx, fixes BatchedRequest canceling, moves comparator and errorSelector to the ModelRoot, removes the promise collection guards, fixes bind and bindSync anomalies.
 
-	// Export Domain
-	var domain = {}
-	domain.createDomain = domain.create = function(){
-		var d = new events.EventEmitter()
+        if(is_outer_keyset === true) {
+            inner_key = keyset_to_key(outer_key, true);
+            inner_keyset = inner_key;
+        } else {
+            inner_key = outer_key;
+            inner_keyset = keyset;
+        }
 
-		function emitError(e) {
-			d.emit('error', e)
-		}
+        var nodes2 = array_clone(nodes);
+        var parents2 = array_clone(parents);
+        var requested2, optimized2;
 
+<<<<<<< HEAD
 		d.add = function(emitter){
 			emitter.on('error', emitError)
 		}
@@ -8115,380 +23006,635 @@ module.exports = (function(){
 // DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
 // OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
 // USE OR OTHER DEALINGS IN THE SOFTWARE.
+=======
+        if(inner_key == null) {
+            requested2 = array_append(requested, null);
+            optimized2 = array_clone(optimized);
+            // optimized2 = optimized;
+            inner_key = key;
+            inner_keyset = keyset;
+            onNode(pathset, roots, parents2, nodes2, requested2, optimized2, false, is_branch, null, inner_keyset, false);
+        } else {
+            requested2 = array_append(requested, inner_key);
+            optimized2 = array_append(optimized, inner_key);
+            onNode(pathset, roots, parents2, nodes2, requested2, optimized2, false, is_branch, inner_key, inner_keyset, is_outer_keyset);
+        }
+>>>>>>> 6b8733c... Removes falcor-observable, imports rx/dist/rx, fixes BatchedRequest canceling, moves comparator and errorSelector to the ModelRoot, removes the promise collection guards, fixes bind and bindSync anomalies.
 
-function EventEmitter() {
-  this._events = this._events || {};
-  this._maxListeners = this._maxListeners || undefined;
+        walk_path_set(onNode, onValueType,
+            pathset, depth + 1,
+            roots, parents2, nodes2,
+            requested2, optimized2,
+            inner_key, inner_keyset, is_outer_keyset
+        );
+    }
 }
-module.exports = EventEmitter;
 
-// Backwards-compat with node 0.10.x
-EventEmitter.EventEmitter = EventEmitter;
+},{"234":234,"252":252,"282":282,"283":283,"287":287,"305":305,"309":309,"311":311,"312":312,"317":317,"318":318,"331":331,"338":338}],338:[function(require,module,exports){
+module.exports = walk_reference;
 
-EventEmitter.prototype._events = undefined;
-EventEmitter.prototype._maxListeners = undefined;
+var prefix = require(242);
+var __ref = require(245);
+var __context = require(234);
+var __ref_index = require(244);
+var __refs_length = require(246);
 
-// By default EventEmitters will print a warning if more than 10 listeners are
-// added to it. This is a useful default which helps finding memory leaks.
-EventEmitter.defaultMaxListeners = 10;
+var is_object      = require(309);
+var is_primitive   = require(311);
+var array_slice    = require(287);
+var array_append   = require(282);
 
-// Obviously not all Emitters should be limited to 10. This function allows
-// that to be increased. Set to zero for unlimited.
-EventEmitter.prototype.setMaxListeners = function(n) {
-  if (!isNumber(n) || n < 0 || isNaN(n))
-    throw TypeError('n must be a positive number');
-  this._maxListeners = n;
-  return this;
-};
+var positions = require(318);
+var _cache = positions.cache;
+var _message = positions.message;
+var _jsong = positions.jsong;
+var _json = positions.json;
 
-EventEmitter.prototype.emit = function(type) {
-  var er, handler, len, args, i, listeners;
+function walk_reference(onNode, container, reference, roots, parents, nodes, requested, optimized) {
 
-  if (!this._events)
-    this._events = {};
+    optimized.length = 0;
 
-  // If there is no 'error' event listener then throw.
-  if (type === 'error') {
-    if (!this._events.error ||
-        (isObject(this._events.error) && !this._events.error.length)) {
-      er = arguments[1];
-      if (er instanceof Error) {
-        throw er; // Unhandled 'error' event
-      }
-      throw TypeError('Uncaught, unspecified "error" event.');
+    var index = -1;
+    var count = reference.length;
+    var node, key, keyset;
+
+    while(++index < count) {
+
+        node = nodes[_cache];
+
+        if(node == null) {
+            return nodes;
+        } else if(is_primitive(node) || node.$type) {
+            onNode(reference, roots, parents, nodes, requested, optimized, true, false, keyset, null, false);
+            return nodes;
+        }
+
+        do {
+            key = reference[index];
+            if(key != null) {
+                keyset = key;
+                optimized.push(key);
+                onNode(reference, roots, parents, nodes, requested, optimized, true, index < count - 1, key, null, false);
+                break;
+            }
+        } while(++index < count);
     }
-  }
 
-  handler = this._events[type];
+    node = nodes[_cache];
 
-  if (isUndefined(handler))
-    return false;
-
-  if (isFunction(handler)) {
-    switch (arguments.length) {
-      // fast cases
-      case 1:
-        handler.call(this);
-        break;
-      case 2:
-        handler.call(this, arguments[1]);
-        break;
-      case 3:
-        handler.call(this, arguments[1], arguments[2]);
-        break;
-      // slower
-      default:
-        len = arguments.length;
-        args = new Array(len - 1);
-        for (i = 1; i < len; i++)
-          args[i - 1] = arguments[i];
-        handler.apply(this, args);
+    if(is_object(node) && container[__context] !== node) {
+        var backrefs = node[__refs_length] || 0;
+        node[__refs_length] = backrefs + 1;
+        node[__ref + backrefs] = container;
+        container[__context]    = node;
+        container[__ref_index]  = backrefs;
     }
-  } else if (isObject(handler)) {
-    len = arguments.length;
-    args = new Array(len - 1);
-    for (i = 1; i < len; i++)
-      args[i - 1] = arguments[i];
 
-    listeners = handler.slice();
-    len = listeners.length;
-    for (i = 0; i < len; i++)
-      listeners[i].apply(this, args);
+    return nodes;
+}
+
+},{"234":234,"242":242,"244":244,"245":245,"246":246,"282":282,"287":287,"309":309,"311":311,"318":318}],339:[function(require,module,exports){
+'use strict';
+
+module.exports = require(344)
+
+},{"344":344}],340:[function(require,module,exports){
+'use strict';
+
+var asap = require(4)
+
+function noop() {};
+
+// States:
+//
+// 0 - pending
+// 1 - fulfilled with _value
+// 2 - rejected with _value
+// 3 - adopted the state of another promise, _value
+//
+// once the state is no longer pending (0) it is immutable
+
+// All `_` prefixed properties will be reduced to `_{random number}`
+// at build time to obfuscate them and discourage their use.
+// We don't use symbols or Object.defineProperty to fully hide them
+// because the performance isn't good enough.
+
+
+// to avoid using try/catch inside critical functions, we
+// extract them to here.
+var LAST_ERROR = null;
+var IS_ERROR = {};
+function getThen(obj) {
+  try {
+    return obj.then;
+  } catch (ex) {
+    LAST_ERROR = ex;
+    return IS_ERROR;
   }
+}
 
-  return true;
+function tryCallOne(fn, a) {
+  try {
+    return fn(a);
+  } catch (ex) {
+    LAST_ERROR = ex;
+    return IS_ERROR;
+  }
+}
+function tryCallTwo(fn, a, b) {
+  try {
+    fn(a, b);
+  } catch (ex) {
+    LAST_ERROR = ex;
+    return IS_ERROR;
+  }
+}
+
+module.exports = Promise;
+function Promise(fn) {
+  if (typeof this !== 'object') throw new TypeError('Promises must be constructed via new')
+  if (typeof fn !== 'function') throw new TypeError('not a function')
+  this._71 = 0;
+  this._18 = null;
+  this._61 = [];
+  if (fn === noop) return;
+  doResolve(fn, this);
+}
+Promise.prototype._10 = function (onFulfilled, onRejected) {
+  var self = this;
+  return new this.constructor(function (resolve, reject) {
+    var res = new Promise(noop);
+    res.then(resolve, reject);
+    self._24(new Handler(onFulfilled, onRejected, res));
+  });
 };
-
-EventEmitter.prototype.addListener = function(type, listener) {
-  var m;
-
-  if (!isFunction(listener))
-    throw TypeError('listener must be a function');
-
-  if (!this._events)
-    this._events = {};
-
-  // To avoid recursion in the case that type === "newListener"! Before
-  // adding it to the listeners, first emit "newListener".
-  if (this._events.newListener)
-    this.emit('newListener', type,
-              isFunction(listener.listener) ?
-              listener.listener : listener);
-
-  if (!this._events[type])
-    // Optimize the case of one listener. Don't need the extra array object.
-    this._events[type] = listener;
-  else if (isObject(this._events[type]))
-    // If we've already got an array, just append.
-    this._events[type].push(listener);
-  else
-    // Adding the second element, need to change to array.
-    this._events[type] = [this._events[type], listener];
-
-  // Check for listener leak
-  if (isObject(this._events[type]) && !this._events[type].warned) {
-    var m;
-    if (!isUndefined(this._maxListeners)) {
-      m = this._maxListeners;
+Promise.prototype.then = function(onFulfilled, onRejected) {
+  if (this.constructor !== Promise) return this._10(onFulfilled, onRejected);
+  var res = new Promise(noop);
+  this._24(new Handler(onFulfilled, onRejected, res));
+  return res;
+};
+Promise.prototype._24 = function(deferred) {
+  if (this._71 === 3) {
+    this._18._24(deferred);
+    return;
+  }
+  if (this._71 === 0) {
+    this._61.push(deferred);
+    return;
+  }
+  var state = this._71;
+  var value = this._18;
+  asap(function() {
+    var cb = state === 1 ? deferred.onFulfilled : deferred.onRejected
+    if (cb === null) {
+      (state === 1 ? deferred.promise._82(value) : deferred.promise._67(value))
+      return
+    }
+    var ret = tryCallOne(cb, value);
+    if (ret === IS_ERROR) {
+      deferred.promise._67(LAST_ERROR)
     } else {
-      m = EventEmitter.defaultMaxListeners;
+      deferred.promise._82(ret)
     }
+  });
+};
+Promise.prototype._82 = function(newValue) {
+  //Promise Resolution Procedure: https://github.com/promises-aplus/promises-spec#the-promise-resolution-procedure
+  if (newValue === this) {
+    return this._67(new TypeError('A promise cannot be resolved with itself.'))
+  }
+  if (newValue && (typeof newValue === 'object' || typeof newValue === 'function')) {
+    var then = getThen(newValue);
+    if (then === IS_ERROR) {
+      return this._67(LAST_ERROR);
+    }
+    if (
+      then === this.then &&
+      newValue instanceof Promise &&
+      newValue._24 === this._24
+    ) {
+      this._71 = 3;
+      this._18 = newValue;
+      for (var i = 0; i < this._61.length; i++) {
+        newValue._24(this._61[i]);
+      }
+      return;
+    } else if (typeof then === 'function') {
+      doResolve(then.bind(newValue), this)
+      return
+    }
+  }
+  this._71 = 1
+  this._18 = newValue
+  this._94()
+}
 
-    if (m && m > 0 && this._events[type].length > m) {
-      this._events[type].warned = true;
-      console.error('(node) warning: possible EventEmitter memory ' +
-                    'leak detected. %d listeners added. ' +
-                    'Use emitter.setMaxListeners() to increase limit.',
-                    this._events[type].length);
-      if (typeof console.trace === 'function') {
-        // not supported in IE 10
-        console.trace();
+Promise.prototype._67 = function (newValue) {
+  this._71 = 2
+  this._18 = newValue
+  this._94()
+}
+Promise.prototype._94 = function () {
+  for (var i = 0; i < this._61.length; i++)
+    this._24(this._61[i])
+  this._61 = null
+}
+
+
+function Handler(onFulfilled, onRejected, promise){
+  this.onFulfilled = typeof onFulfilled === 'function' ? onFulfilled : null
+  this.onRejected = typeof onRejected === 'function' ? onRejected : null
+  this.promise = promise;
+}
+
+/**
+ * Take a potentially misbehaving resolver function and make sure
+ * onFulfilled and onRejected are only called once.
+ *
+ * Makes no guarantees about asynchrony.
+ */
+function doResolve(fn, promise) {
+  var done = false;
+  var res = tryCallTwo(fn, function (value) {
+    if (done) return
+    done = true
+    promise._82(value)
+  }, function (reason) {
+    if (done) return
+    done = true
+    promise._67(reason)
+  })
+  if (!done && res === IS_ERROR) {
+    done = true
+    promise._67(LAST_ERROR)
+  }
+}
+},{"4":4}],341:[function(require,module,exports){
+'use strict';
+
+var Promise = require(340)
+
+module.exports = Promise
+Promise.prototype.done = function (onFulfilled, onRejected) {
+  var self = arguments.length ? this.then.apply(this, arguments) : this
+  self.then(null, function (err) {
+    setTimeout(function () {
+      throw err
+    }, 0)
+  })
+}
+},{"340":340}],342:[function(require,module,exports){
+'use strict';
+
+//This file contains the ES6 extensions to the core Promises/A+ API
+
+var Promise = require(340)
+var asap = require(4)
+
+module.exports = Promise
+
+/* Static Functions */
+
+function ValuePromise(value) {
+  this.then = function (onFulfilled) {
+    if (typeof onFulfilled !== 'function') return this
+    return new Promise(function (resolve, reject) {
+      asap(function () {
+        try {
+          resolve(onFulfilled(value))
+        } catch (ex) {
+          reject(ex);
+        }
+      })
+    })
+  }
+}
+ValuePromise.prototype = Promise.prototype
+
+var TRUE = new ValuePromise(true)
+var FALSE = new ValuePromise(false)
+var NULL = new ValuePromise(null)
+var UNDEFINED = new ValuePromise(undefined)
+var ZERO = new ValuePromise(0)
+var EMPTYSTRING = new ValuePromise('')
+
+Promise.resolve = function (value) {
+  if (value instanceof Promise) return value
+
+  if (value === null) return NULL
+  if (value === undefined) return UNDEFINED
+  if (value === true) return TRUE
+  if (value === false) return FALSE
+  if (value === 0) return ZERO
+  if (value === '') return EMPTYSTRING
+
+  if (typeof value === 'object' || typeof value === 'function') {
+    try {
+      var then = value.then
+      if (typeof then === 'function') {
+        return new Promise(then.bind(value))
+      }
+    } catch (ex) {
+      return new Promise(function (resolve, reject) {
+        reject(ex)
+      })
+    }
+  }
+
+  return new ValuePromise(value)
+}
+
+Promise.all = function (arr) {
+  var args = Array.prototype.slice.call(arr)
+
+  return new Promise(function (resolve, reject) {
+    if (args.length === 0) return resolve([])
+    var remaining = args.length
+    function res(i, val) {
+      if (val && (typeof val === 'object' || typeof val === 'function')) {
+        var then = val.then
+        if (typeof then === 'function') {
+          then.call(val, function (val) { res(i, val) }, reject)
+          return
+        }
+      }
+      args[i] = val
+      if (--remaining === 0) {
+        resolve(args);
+      }
+    }
+    for (var i = 0; i < args.length; i++) {
+      res(i, args[i])
+    }
+  })
+}
+
+Promise.reject = function (value) {
+  return new Promise(function (resolve, reject) { 
+    reject(value);
+  });
+}
+
+Promise.race = function (values) {
+  return new Promise(function (resolve, reject) { 
+    values.forEach(function(value){
+      Promise.resolve(value).then(resolve, reject);
+    })
+  });
+}
+
+/* Prototype Methods */
+
+Promise.prototype['catch'] = function (onRejected) {
+  return this.then(null, onRejected);
+}
+
+},{"340":340,"4":4}],343:[function(require,module,exports){
+'use strict';
+
+var Promise = require(340)
+
+module.exports = Promise
+Promise.prototype['finally'] = function (f) {
+  return this.then(function (value) {
+    return Promise.resolve(f()).then(function () {
+      return value
+    })
+  }, function (err) {
+    return Promise.resolve(f()).then(function () {
+      throw err
+    })
+  })
+}
+
+},{"340":340}],344:[function(require,module,exports){
+'use strict';
+
+module.exports = require(340)
+require(341)
+require(343)
+require(342)
+require(345)
+
+},{"340":340,"341":341,"342":342,"343":343,"345":345}],345:[function(require,module,exports){
+'use strict';
+
+//This file contains then/promise specific extensions that are only useful for node.js interop
+
+var Promise = require(340)
+var asap = require(2)
+
+module.exports = Promise
+
+/* Static Functions */
+
+Promise.denodeify = function (fn, argumentCount) {
+  argumentCount = argumentCount || Infinity
+  return function () {
+    var self = this
+    var args = Array.prototype.slice.call(arguments)
+    return new Promise(function (resolve, reject) {
+      while (args.length && args.length > argumentCount) {
+        args.pop()
+      }
+      args.push(function (err, res) {
+        if (err) reject(err)
+        else resolve(res)
+      })
+      var res = fn.apply(self, args)
+      if (res && (typeof res === 'object' || typeof res === 'function') && typeof res.then === 'function') {
+        resolve(res)
+      }
+    })
+  }
+}
+Promise.nodeify = function (fn) {
+  return function () {
+    var args = Array.prototype.slice.call(arguments)
+    var callback = typeof args[args.length - 1] === 'function' ? args.pop() : null
+    var ctx = this
+    try {
+      return fn.apply(this, arguments).nodeify(callback, ctx)
+    } catch (ex) {
+      if (callback === null || typeof callback == 'undefined') {
+        return new Promise(function (resolve, reject) { reject(ex) })
+      } else {
+        asap(function () {
+          callback.call(ctx, ex)
+        })
       }
     }
   }
-
-  return this;
-};
-
-EventEmitter.prototype.on = EventEmitter.prototype.addListener;
-
-EventEmitter.prototype.once = function(type, listener) {
-  if (!isFunction(listener))
-    throw TypeError('listener must be a function');
-
-  var fired = false;
-
-  function g() {
-    this.removeListener(type, g);
-
-    if (!fired) {
-      fired = true;
-      listener.apply(this, arguments);
-    }
-  }
-
-  g.listener = listener;
-  this.on(type, g);
-
-  return this;
-};
-
-// emits a 'removeListener' event iff the listener was removed
-EventEmitter.prototype.removeListener = function(type, listener) {
-  var list, position, length, i;
-
-  if (!isFunction(listener))
-    throw TypeError('listener must be a function');
-
-  if (!this._events || !this._events[type])
-    return this;
-
-  list = this._events[type];
-  length = list.length;
-  position = -1;
-
-  if (list === listener ||
-      (isFunction(list.listener) && list.listener === listener)) {
-    delete this._events[type];
-    if (this._events.removeListener)
-      this.emit('removeListener', type, listener);
-
-  } else if (isObject(list)) {
-    for (i = length; i-- > 0;) {
-      if (list[i] === listener ||
-          (list[i].listener && list[i].listener === listener)) {
-        position = i;
-        break;
-      }
-    }
-
-    if (position < 0)
-      return this;
-
-    if (list.length === 1) {
-      list.length = 0;
-      delete this._events[type];
-    } else {
-      list.splice(position, 1);
-    }
-
-    if (this._events.removeListener)
-      this.emit('removeListener', type, listener);
-  }
-
-  return this;
-};
-
-EventEmitter.prototype.removeAllListeners = function(type) {
-  var key, listeners;
-
-  if (!this._events)
-    return this;
-
-  // not listening for removeListener, no need to emit
-  if (!this._events.removeListener) {
-    if (arguments.length === 0)
-      this._events = {};
-    else if (this._events[type])
-      delete this._events[type];
-    return this;
-  }
-
-  // emit removeListener for all listeners on all events
-  if (arguments.length === 0) {
-    for (key in this._events) {
-      if (key === 'removeListener') continue;
-      this.removeAllListeners(key);
-    }
-    this.removeAllListeners('removeListener');
-    this._events = {};
-    return this;
-  }
-
-  listeners = this._events[type];
-
-  if (isFunction(listeners)) {
-    this.removeListener(type, listeners);
-  } else {
-    // LIFO order
-    while (listeners.length)
-      this.removeListener(type, listeners[listeners.length - 1]);
-  }
-  delete this._events[type];
-
-  return this;
-};
-
-EventEmitter.prototype.listeners = function(type) {
-  var ret;
-  if (!this._events || !this._events[type])
-    ret = [];
-  else if (isFunction(this._events[type]))
-    ret = [this._events[type]];
-  else
-    ret = this._events[type].slice();
-  return ret;
-};
-
-EventEmitter.listenerCount = function(emitter, type) {
-  var ret;
-  if (!emitter._events || !emitter._events[type])
-    ret = 0;
-  else if (isFunction(emitter._events[type]))
-    ret = 1;
-  else
-    ret = emitter._events[type].length;
-  return ret;
-};
-
-function isFunction(arg) {
-  return typeof arg === 'function';
 }
 
-function isNumber(arg) {
-  return typeof arg === 'number';
+Promise.prototype.nodeify = function (callback, ctx) {
+  if (typeof callback != 'function') return this
+
+  this.then(function (value) {
+    asap(function () {
+      callback.call(ctx, null, value)
+    })
+  }, function (err) {
+    asap(function () {
+      callback.call(ctx, err)
+    })
+  })
 }
 
-function isObject(arg) {
-  return typeof arg === 'object' && arg !== null;
-}
-
-function isUndefined(arg) {
-  return arg === void 0;
-}
-
+<<<<<<< HEAD
 },{}],142:[function(require,module,exports){
 // shim for using process in browser
+=======
+},{"2":2,"340":340}],346:[function(require,module,exports){
+(function (process,global){
+// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
-var process = module.exports = {};
-var queue = [];
-var draining = false;
-var currentQueue;
-var queueIndex = -1;
+;(function (undefined) {
 
-function cleanUpNextTick() {
-    draining = false;
-    if (currentQueue.length) {
-        queue = currentQueue.concat(queue);
-    } else {
-        queueIndex = -1;
-    }
-    if (queue.length) {
-        drainQueue();
-    }
-}
+  var objectTypes = {
+    'boolean': false,
+    'function': true,
+    'object': true,
+    'number': false,
+    'string': false,
+    'undefined': false
+  };
 
-function drainQueue() {
-    if (draining) {
-        return;
-    }
-    var timeout = setTimeout(cleanUpNextTick);
-    draining = true;
+  var root = (objectTypes[typeof window] && window) || this,
+    freeExports = objectTypes[typeof exports] && exports && !exports.nodeType && exports,
+    freeModule = objectTypes[typeof module] && module && !module.nodeType && module,
+    moduleExports = freeModule && freeModule.exports === freeExports && freeExports,
+    freeGlobal = objectTypes[typeof global] && global;
 
-    var len = queue.length;
-    while(len) {
-        currentQueue = queue;
-        queue = [];
-        while (++queueIndex < len) {
-            currentQueue[queueIndex].run();
+  if (freeGlobal && (freeGlobal.global === freeGlobal || freeGlobal.window === freeGlobal)) {
+    root = freeGlobal;
+  }
+>>>>>>> 6b8733c... Removes falcor-observable, imports rx/dist/rx, fixes BatchedRequest canceling, moves comparator and errorSelector to the ModelRoot, removes the promise collection guards, fixes bind and bindSync anomalies.
+
+  var Rx = {
+      internals: {},
+      config: {
+        Promise: root.Promise
+      },
+      helpers: { }
+  };
+
+  // Defaults
+  var noop = Rx.helpers.noop = function () { },
+    notDefined = Rx.helpers.notDefined = function (x) { return typeof x === 'undefined'; },
+    identity = Rx.helpers.identity = function (x) { return x; },
+    pluck = Rx.helpers.pluck = function (property) { return function (x) { return x[property]; }; },
+    just = Rx.helpers.just = function (value) { return function () { return value; }; },
+    defaultNow = Rx.helpers.defaultNow = Date.now,
+    defaultComparer = Rx.helpers.defaultComparer = function (x, y) { return isEqual(x, y); },
+    defaultSubComparer = Rx.helpers.defaultSubComparer = function (x, y) { return x > y ? 1 : (x < y ? -1 : 0); },
+    defaultKeySerializer = Rx.helpers.defaultKeySerializer = function (x) { return x.toString(); },
+    defaultError = Rx.helpers.defaultError = function (err) { throw err; },
+    isPromise = Rx.helpers.isPromise = function (p) { return !!p && typeof p.subscribe !== 'function' && typeof p.then === 'function'; },
+    asArray = Rx.helpers.asArray = function () { return Array.prototype.slice.call(arguments); },
+    not = Rx.helpers.not = function (a) { return !a; },
+    isFunction = Rx.helpers.isFunction = (function () {
+
+      var isFn = function (value) {
+        return typeof value == 'function' || false;
+      }
+
+      // fallback for older versions of Chrome and Safari
+      if (isFn(/x/)) {
+        isFn = function(value) {
+          return typeof value == 'function' && toString.call(value) == '[object Function]';
+        };
+      }
+
+      return isFn;
+    }());
+
+  function cloneArray(arr) { for(var a = [], i = 0, len = arr.length; i < len; i++) { a.push(arr[i]); } return a;}
+
+  Rx.config.longStackSupport = false;
+  var hasStacks = false;
+  try {
+    throw new Error();
+  } catch (e) {
+    hasStacks = !!e.stack;
+  }
+
+  // All code after this point will be filtered from stack traces reported by RxJS
+  var rStartingLine = captureLine(), rFileName;
+
+  var STACK_JUMP_SEPARATOR = "From previous event:";
+
+  function makeStackTraceLong(error, observable) {
+      // If possible, transform the error stack trace by removing Node and RxJS
+      // cruft, then concatenating with the stack trace of `observable`.
+      if (hasStacks &&
+          observable.stack &&
+          typeof error === "object" &&
+          error !== null &&
+          error.stack &&
+          error.stack.indexOf(STACK_JUMP_SEPARATOR) === -1
+      ) {
+        var stacks = [];
+        for (var o = observable; !!o; o = o.source) {
+          if (o.stack) {
+            stacks.unshift(o.stack);
+          }
         }
-        queueIndex = -1;
-        len = queue.length;
+        stacks.unshift(error.stack);
+
+        var concatedStacks = stacks.join("\n" + STACK_JUMP_SEPARATOR + "\n");
+        error.stack = filterStackString(concatedStacks);
     }
-    currentQueue = null;
-    draining = false;
-    clearTimeout(timeout);
-}
+  }
 
-process.nextTick = function (fun) {
-    var args = new Array(arguments.length - 1);
-    if (arguments.length > 1) {
-        for (var i = 1; i < arguments.length; i++) {
-            args[i - 1] = arguments[i];
-        }
+  function filterStackString(stackString) {
+    var lines = stackString.split("\n"),
+        desiredLines = [];
+    for (var i = 0, len = lines.length; i < len; i++) {
+      var line = lines[i];
+
+      if (!isInternalFrame(line) && !isNodeFrame(line) && line) {
+        desiredLines.push(line);
+      }
     }
-    queue.push(new Item(fun, args));
-    if (queue.length === 1 && !draining) {
-        setTimeout(drainQueue, 0);
+    return desiredLines.join("\n");
+  }
+
+  function isInternalFrame(stackLine) {
+    var fileNameAndLineNumber = getFileNameAndLineNumber(stackLine);
+    if (!fileNameAndLineNumber) {
+      return false;
     }
-};
+    var fileName = fileNameAndLineNumber[0], lineNumber = fileNameAndLineNumber[1];
 
-// v8 likes predictible objects
-function Item(fun, array) {
-    this.fun = fun;
-    this.array = array;
-}
-Item.prototype.run = function () {
-    this.fun.apply(null, this.array);
-};
-process.title = 'browser';
-process.browser = true;
-process.env = {};
-process.argv = [];
-process.version = ''; // empty string to avoid regexp issues
-process.versions = {};
+    return fileName === rFileName &&
+      lineNumber >= rStartingLine &&
+      lineNumber <= rEndingLine;
+  }
 
-function noop() {}
+  function isNodeFrame(stackLine) {
+    return stackLine.indexOf("(module.js:") !== -1 ||
+      stackLine.indexOf("(node.js:") !== -1;
+  }
 
-process.on = noop;
-process.addListener = noop;
-process.once = noop;
-process.off = noop;
-process.removeListener = noop;
-process.removeAllListeners = noop;
-process.emit = noop;
+  function captureLine() {
+    if (!hasStacks) { return; }
 
-process.binding = function (name) {
-    throw new Error('process.binding is not supported');
-};
+    try {
+      throw new Error();
+    } catch (e) {
+      var lines = e.stack.split("\n");
+      var firstLine = lines[0].indexOf("@") > 0 ? lines[1] : lines[2];
+      var fileNameAndLineNumber = getFileNameAndLineNumber(firstLine);
+      if (!fileNameAndLineNumber) { return; }
 
-// TODO(shtylman)
-process.cwd = function () { return '/' };
-process.chdir = function (dir) {
-    throw new Error('process.chdir is not supported');
-};
-process.umask = function() { return 0; };
+      rFileName = fileNameAndLineNumber[0];
+      return fileNameAndLineNumber[1];
+    }
+  }
 
+<<<<<<< HEAD
 },{}],143:[function(require,module,exports){
 var falcor = require(150);
 var get = require(197);
@@ -8987,9 +24133,951 @@ Model.prototype = {
     },
     toJSON: function() {
         return { $type: "ref", value: this._path };
-    }
-};
+=======
+  function getFileNameAndLineNumber(stackLine) {
+    // Named functions: "at functionName (filename:lineNumber:columnNumber)"
+    var attempt1 = /at .+ \((.+):(\d+):(?:\d+)\)$/.exec(stackLine);
+    if (attempt1) { return [attempt1[1], Number(attempt1[2])]; }
 
+    // Anonymous functions: "at filename:lineNumber:columnNumber"
+    var attempt2 = /at ([^ ]+):(\d+):(?:\d+)$/.exec(stackLine);
+    if (attempt2) { return [attempt2[1], Number(attempt2[2])]; }
+
+    // Firefox style: "function@filename:lineNumber or @filename:lineNumber"
+    var attempt3 = /.*@(.+):(\d+)$/.exec(stackLine);
+    if (attempt3) { return [attempt3[1], Number(attempt3[2])]; }
+  }
+
+  var EmptyError = Rx.EmptyError = function() {
+    this.message = 'Sequence contains no elements.';
+    Error.call(this);
+  };
+  EmptyError.prototype = Error.prototype;
+
+  var ObjectDisposedError = Rx.ObjectDisposedError = function() {
+    this.message = 'Object has been disposed';
+    Error.call(this);
+  };
+  ObjectDisposedError.prototype = Error.prototype;
+
+  var ArgumentOutOfRangeError = Rx.ArgumentOutOfRangeError = function () {
+    this.message = 'Argument out of range';
+    Error.call(this);
+  };
+  ArgumentOutOfRangeError.prototype = Error.prototype;
+
+  var NotSupportedError = Rx.NotSupportedError = function (message) {
+    this.message = message || 'This operation is not supported';
+    Error.call(this);
+  };
+  NotSupportedError.prototype = Error.prototype;
+
+  var NotImplementedError = Rx.NotImplementedError = function (message) {
+    this.message = message || 'This operation is not implemented';
+    Error.call(this);
+  };
+  NotImplementedError.prototype = Error.prototype;
+
+  var notImplemented = Rx.helpers.notImplemented = function () {
+    throw new NotImplementedError();
+  };
+
+  var notSupported = Rx.helpers.notSupported = function () {
+    throw new NotSupportedError();
+  };
+
+  // Shim in iterator support
+  var $iterator$ = (typeof Symbol === 'function' && Symbol.iterator) ||
+    '_es6shim_iterator_';
+  // Bug for mozilla version
+  if (root.Set && typeof new root.Set()['@@iterator'] === 'function') {
+    $iterator$ = '@@iterator';
+  }
+
+  var doneEnumerator = Rx.doneEnumerator = { done: true, value: undefined };
+
+  var isIterable = Rx.helpers.isIterable = function (o) {
+    return o[$iterator$] !== undefined;
+  }
+
+  var isArrayLike = Rx.helpers.isArrayLike = function (o) {
+    return o && o.length !== undefined;
+  }
+
+  Rx.helpers.iterator = $iterator$;
+
+  var bindCallback = Rx.internals.bindCallback = function (func, thisArg, argCount) {
+    if (typeof thisArg === 'undefined') { return func; }
+    switch(argCount) {
+      case 0:
+        return function() {
+          return func.call(thisArg)
+        };
+      case 1:
+        return function(arg) {
+          return func.call(thisArg, arg);
+        }
+      case 2:
+        return function(value, index) {
+          return func.call(thisArg, value, index);
+        };
+      case 3:
+        return function(value, index, collection) {
+          return func.call(thisArg, value, index, collection);
+        };
+    }
+
+    return function() {
+      return func.apply(thisArg, arguments);
+    };
+  };
+
+  /** Used to determine if values are of the language type Object */
+  var dontEnums = ['toString',
+    'toLocaleString',
+    'valueOf',
+    'hasOwnProperty',
+    'isPrototypeOf',
+    'propertyIsEnumerable',
+    'constructor'],
+  dontEnumsLength = dontEnums.length;
+
+  /** `Object#toString` result shortcuts */
+  var argsClass = '[object Arguments]',
+    arrayClass = '[object Array]',
+    boolClass = '[object Boolean]',
+    dateClass = '[object Date]',
+    errorClass = '[object Error]',
+    funcClass = '[object Function]',
+    numberClass = '[object Number]',
+    objectClass = '[object Object]',
+    regexpClass = '[object RegExp]',
+    stringClass = '[object String]';
+
+  var toString = Object.prototype.toString,
+    hasOwnProperty = Object.prototype.hasOwnProperty,
+    supportsArgsClass = toString.call(arguments) == argsClass, // For less <IE9 && FF<4
+    supportNodeClass,
+    errorProto = Error.prototype,
+    objectProto = Object.prototype,
+    stringProto = String.prototype,
+    propertyIsEnumerable = objectProto.propertyIsEnumerable;
+
+  try {
+    supportNodeClass = !(toString.call(document) == objectClass && !({ 'toString': 0 } + ''));
+  } catch (e) {
+    supportNodeClass = true;
+  }
+
+  var nonEnumProps = {};
+  nonEnumProps[arrayClass] = nonEnumProps[dateClass] = nonEnumProps[numberClass] = { 'constructor': true, 'toLocaleString': true, 'toString': true, 'valueOf': true };
+  nonEnumProps[boolClass] = nonEnumProps[stringClass] = { 'constructor': true, 'toString': true, 'valueOf': true };
+  nonEnumProps[errorClass] = nonEnumProps[funcClass] = nonEnumProps[regexpClass] = { 'constructor': true, 'toString': true };
+  nonEnumProps[objectClass] = { 'constructor': true };
+
+  var support = {};
+  (function () {
+    var ctor = function() { this.x = 1; },
+      props = [];
+
+    ctor.prototype = { 'valueOf': 1, 'y': 1 };
+    for (var key in new ctor) { props.push(key); }
+    for (key in arguments) { }
+
+    // Detect if `name` or `message` properties of `Error.prototype` are enumerable by default.
+    support.enumErrorProps = propertyIsEnumerable.call(errorProto, 'message') || propertyIsEnumerable.call(errorProto, 'name');
+
+    // Detect if `prototype` properties are enumerable by default.
+    support.enumPrototypes = propertyIsEnumerable.call(ctor, 'prototype');
+
+    // Detect if `arguments` object indexes are non-enumerable
+    support.nonEnumArgs = key != 0;
+
+    // Detect if properties shadowing those on `Object.prototype` are non-enumerable.
+    support.nonEnumShadows = !/valueOf/.test(props);
+  }(1));
+
+  var isObject = Rx.internals.isObject = function(value) {
+    var type = typeof value;
+    return value && (type == 'function' || type == 'object') || false;
+  };
+
+  function keysIn(object) {
+    var result = [];
+    if (!isObject(object)) {
+      return result;
+    }
+    if (support.nonEnumArgs && object.length && isArguments(object)) {
+      object = slice.call(object);
+    }
+    var skipProto = support.enumPrototypes && typeof object == 'function',
+        skipErrorProps = support.enumErrorProps && (object === errorProto || object instanceof Error);
+
+    for (var key in object) {
+      if (!(skipProto && key == 'prototype') &&
+          !(skipErrorProps && (key == 'message' || key == 'name'))) {
+        result.push(key);
+      }
+    }
+
+    if (support.nonEnumShadows && object !== objectProto) {
+      var ctor = object.constructor,
+          index = -1,
+          length = dontEnumsLength;
+
+      if (object === (ctor && ctor.prototype)) {
+        var className = object === stringProto ? stringClass : object === errorProto ? errorClass : toString.call(object),
+            nonEnum = nonEnumProps[className];
+      }
+      while (++index < length) {
+        key = dontEnums[index];
+        if (!(nonEnum && nonEnum[key]) && hasOwnProperty.call(object, key)) {
+          result.push(key);
+        }
+      }
+    }
+    return result;
+  }
+
+  function internalFor(object, callback, keysFunc) {
+    var index = -1,
+      props = keysFunc(object),
+      length = props.length;
+
+    while (++index < length) {
+      var key = props[index];
+      if (callback(object[key], key, object) === false) {
+        break;
+      }
+    }
+    return object;
+  }
+
+  function internalForIn(object, callback) {
+    return internalFor(object, callback, keysIn);
+  }
+
+  function isNode(value) {
+    // IE < 9 presents DOM nodes as `Object` objects except they have `toString`
+    // methods that are `typeof` "string" and still can coerce nodes to strings
+    return typeof value.toString != 'function' && typeof (value + '') == 'string';
+  }
+
+  var isArguments = function(value) {
+    return (value && typeof value == 'object') ? toString.call(value) == argsClass : false;
+  }
+
+  // fallback for browsers that can't detect `arguments` objects by [[Class]]
+  if (!supportsArgsClass) {
+    isArguments = function(value) {
+      return (value && typeof value == 'object') ? hasOwnProperty.call(value, 'callee') : false;
+    };
+  }
+
+  var isEqual = Rx.internals.isEqual = function (x, y) {
+    return deepEquals(x, y, [], []);
+  };
+
+  /** @private
+   * Used for deep comparison
+   **/
+  function deepEquals(a, b, stackA, stackB) {
+    // exit early for identical values
+    if (a === b) {
+      // treat `+0` vs. `-0` as not equal
+      return a !== 0 || (1 / a == 1 / b);
+    }
+
+    var type = typeof a,
+        otherType = typeof b;
+
+    // exit early for unlike primitive values
+    if (a === a && (a == null || b == null ||
+        (type != 'function' && type != 'object' && otherType != 'function' && otherType != 'object'))) {
+      return false;
+    }
+
+    // compare [[Class]] names
+    var className = toString.call(a),
+        otherClass = toString.call(b);
+
+    if (className == argsClass) {
+      className = objectClass;
+    }
+    if (otherClass == argsClass) {
+      otherClass = objectClass;
+    }
+    if (className != otherClass) {
+      return false;
+    }
+    switch (className) {
+      case boolClass:
+      case dateClass:
+        // coerce dates and booleans to numbers, dates to milliseconds and booleans
+        // to `1` or `0` treating invalid dates coerced to `NaN` as not equal
+        return +a == +b;
+
+      case numberClass:
+        // treat `NaN` vs. `NaN` as equal
+        return (a != +a) ?
+          b != +b :
+          // but treat `-0` vs. `+0` as not equal
+          (a == 0 ? (1 / a == 1 / b) : a == +b);
+
+      case regexpClass:
+      case stringClass:
+        // coerce regexes to strings (http://es5.github.io/#x15.10.6.4)
+        // treat string primitives and their corresponding object instances as equal
+        return a == String(b);
+    }
+    var isArr = className == arrayClass;
+    if (!isArr) {
+
+      // exit for functions and DOM nodes
+      if (className != objectClass || (!support.nodeClass && (isNode(a) || isNode(b)))) {
+        return false;
+      }
+      // in older versions of Opera, `arguments` objects have `Array` constructors
+      var ctorA = !support.argsObject && isArguments(a) ? Object : a.constructor,
+          ctorB = !support.argsObject && isArguments(b) ? Object : b.constructor;
+
+      // non `Object` object instances with different constructors are not equal
+      if (ctorA != ctorB &&
+            !(hasOwnProperty.call(a, 'constructor') && hasOwnProperty.call(b, 'constructor')) &&
+            !(isFunction(ctorA) && ctorA instanceof ctorA && isFunction(ctorB) && ctorB instanceof ctorB) &&
+            ('constructor' in a && 'constructor' in b)
+          ) {
+        return false;
+      }
+    }
+    // assume cyclic structures are equal
+    // the algorithm for detecting cyclic structures is adapted from ES 5.1
+    // section 15.12.3, abstract operation `JO` (http://es5.github.io/#x15.12.3)
+    var initedStack = !stackA;
+    stackA || (stackA = []);
+    stackB || (stackB = []);
+
+    var length = stackA.length;
+    while (length--) {
+      if (stackA[length] == a) {
+        return stackB[length] == b;
+      }
+    }
+    var size = 0;
+    var result = true;
+
+    // add `a` and `b` to the stack of traversed objects
+    stackA.push(a);
+    stackB.push(b);
+
+    // recursively compare objects and arrays (susceptible to call stack limits)
+    if (isArr) {
+      // compare lengths to determine if a deep comparison is necessary
+      length = a.length;
+      size = b.length;
+      result = size == length;
+
+      if (result) {
+        // deep compare the contents, ignoring non-numeric properties
+        while (size--) {
+          var index = length,
+              value = b[size];
+
+          if (!(result = deepEquals(a[size], value, stackA, stackB))) {
+            break;
+          }
+        }
+      }
+    }
+    else {
+      // deep compare objects using `forIn`, instead of `forOwn`, to avoid `Object.keys`
+      // which, in this case, is more costly
+      internalForIn(b, function(value, key, b) {
+        if (hasOwnProperty.call(b, key)) {
+          // count the number of properties.
+          size++;
+          // deep compare each property value.
+          return (result = hasOwnProperty.call(a, key) && deepEquals(a[key], value, stackA, stackB));
+        }
+      });
+
+      if (result) {
+        // ensure both objects have the same number of properties
+        internalForIn(a, function(value, key, a) {
+          if (hasOwnProperty.call(a, key)) {
+            // `size` will be `-1` if `a` has more properties than `b`
+            return (result = --size > -1);
+          }
+        });
+      }
+    }
+    stackA.pop();
+    stackB.pop();
+
+    return result;
+  }
+
+  var hasProp = {}.hasOwnProperty,
+      slice = Array.prototype.slice;
+
+  var inherits = this.inherits = Rx.internals.inherits = function (child, parent) {
+    function __() { this.constructor = child; }
+    __.prototype = parent.prototype;
+    child.prototype = new __();
+  };
+
+  var addProperties = Rx.internals.addProperties = function (obj) {
+    for(var sources = [], i = 1, len = arguments.length; i < len; i++) { sources.push(arguments[i]); }
+    for (var idx = 0, ln = sources.length; idx < ln; idx++) {
+      var source = sources[idx];
+      for (var prop in source) {
+        obj[prop] = source[prop];
+      }
+    }
+  };
+
+  // Rx Utils
+  var addRef = Rx.internals.addRef = function (xs, r) {
+    return new AnonymousObservable(function (observer) {
+      return new CompositeDisposable(r.getDisposable(), xs.subscribe(observer));
+    });
+  };
+
+  function arrayInitialize(count, factory) {
+    var a = new Array(count);
+    for (var i = 0; i < count; i++) {
+      a[i] = factory();
+    }
+    return a;
+  }
+
+  var errorObj = {e: {}};
+  var tryCatchTarget;
+  function tryCatcher() {
+    try {
+      return tryCatchTarget.apply(this, arguments);
+    } catch (e) {
+      errorObj.e = e;
+      return errorObj;
+    }
+  }
+  function tryCatch(fn) {
+    if (!isFunction(fn)) { throw new TypeError('fn must be a function'); }
+    tryCatchTarget = fn;
+    return tryCatcher;
+  }
+  function thrower(e) {
+    throw e;
+  }
+
+  // Collections
+  function IndexedItem(id, value) {
+    this.id = id;
+    this.value = value;
+  }
+
+  IndexedItem.prototype.compareTo = function (other) {
+    var c = this.value.compareTo(other.value);
+    c === 0 && (c = this.id - other.id);
+    return c;
+  };
+
+  // Priority Queue for Scheduling
+  var PriorityQueue = Rx.internals.PriorityQueue = function (capacity) {
+    this.items = new Array(capacity);
+    this.length = 0;
+  };
+
+  var priorityProto = PriorityQueue.prototype;
+  priorityProto.isHigherPriority = function (left, right) {
+    return this.items[left].compareTo(this.items[right]) < 0;
+  };
+
+  priorityProto.percolate = function (index) {
+    if (index >= this.length || index < 0) { return; }
+    var parent = index - 1 >> 1;
+    if (parent < 0 || parent === index) { return; }
+    if (this.isHigherPriority(index, parent)) {
+      var temp = this.items[index];
+      this.items[index] = this.items[parent];
+      this.items[parent] = temp;
+      this.percolate(parent);
+    }
+  };
+
+  priorityProto.heapify = function (index) {
+    +index || (index = 0);
+    if (index >= this.length || index < 0) { return; }
+    var left = 2 * index + 1,
+        right = 2 * index + 2,
+        first = index;
+    if (left < this.length && this.isHigherPriority(left, first)) {
+      first = left;
+    }
+    if (right < this.length && this.isHigherPriority(right, first)) {
+      first = right;
+    }
+    if (first !== index) {
+      var temp = this.items[index];
+      this.items[index] = this.items[first];
+      this.items[first] = temp;
+      this.heapify(first);
+    }
+  };
+
+  priorityProto.peek = function () { return this.items[0].value; };
+
+  priorityProto.removeAt = function (index) {
+    this.items[index] = this.items[--this.length];
+    this.items[this.length] = undefined;
+    this.heapify();
+  };
+
+  priorityProto.dequeue = function () {
+    var result = this.peek();
+    this.removeAt(0);
+    return result;
+  };
+
+  priorityProto.enqueue = function (item) {
+    var index = this.length++;
+    this.items[index] = new IndexedItem(PriorityQueue.count++, item);
+    this.percolate(index);
+  };
+
+  priorityProto.remove = function (item) {
+    for (var i = 0; i < this.length; i++) {
+      if (this.items[i].value === item) {
+        this.removeAt(i);
+        return true;
+      }
+    }
+    return false;
+  };
+  PriorityQueue.count = 0;
+
+  /**
+   * Represents a group of disposable resources that are disposed together.
+   * @constructor
+   */
+  var CompositeDisposable = Rx.CompositeDisposable = function () {
+    var args = [], i, len;
+    if (Array.isArray(arguments[0])) {
+      args = arguments[0];
+      len = args.length;
+    } else {
+      len = arguments.length;
+      args = new Array(len);
+      for(i = 0; i < len; i++) { args[i] = arguments[i]; }
+    }
+    for(i = 0; i < len; i++) {
+      if (!isDisposable(args[i])) { throw new TypeError('Not a disposable'); }
+    }
+    this.disposables = args;
+    this.isDisposed = false;
+    this.length = args.length;
+  };
+
+  var CompositeDisposablePrototype = CompositeDisposable.prototype;
+
+  /**
+   * Adds a disposable to the CompositeDisposable or disposes the disposable if the CompositeDisposable is disposed.
+   * @param {Mixed} item Disposable to add.
+   */
+  CompositeDisposablePrototype.add = function (item) {
+    if (this.isDisposed) {
+      item.dispose();
+    } else {
+      this.disposables.push(item);
+      this.length++;
+    }
+  };
+
+  /**
+   * Removes and disposes the first occurrence of a disposable from the CompositeDisposable.
+   * @param {Mixed} item Disposable to remove.
+   * @returns {Boolean} true if found; false otherwise.
+   */
+  CompositeDisposablePrototype.remove = function (item) {
+    var shouldDispose = false;
+    if (!this.isDisposed) {
+      var idx = this.disposables.indexOf(item);
+      if (idx !== -1) {
+        shouldDispose = true;
+        this.disposables.splice(idx, 1);
+        this.length--;
+        item.dispose();
+      }
+    }
+    return shouldDispose;
+  };
+
+  /**
+   *  Disposes all disposables in the group and removes them from the group.
+   */
+  CompositeDisposablePrototype.dispose = function () {
+    if (!this.isDisposed) {
+      this.isDisposed = true;
+      var len = this.disposables.length, currentDisposables = new Array(len);
+      for(var i = 0; i < len; i++) { currentDisposables[i] = this.disposables[i]; }
+      this.disposables = [];
+      this.length = 0;
+
+      for (i = 0; i < len; i++) {
+        currentDisposables[i].dispose();
+      }
+    }
+  };
+
+  /**
+   * Provides a set of static methods for creating Disposables.
+   * @param {Function} dispose Action to run during the first call to dispose. The action is guaranteed to be run at most once.
+   */
+  var Disposable = Rx.Disposable = function (action) {
+    this.isDisposed = false;
+    this.action = action || noop;
+  };
+
+  /** Performs the task of cleaning up resources. */
+  Disposable.prototype.dispose = function () {
+    if (!this.isDisposed) {
+      this.action();
+      this.isDisposed = true;
+    }
+  };
+
+  /**
+   * Creates a disposable object that invokes the specified action when disposed.
+   * @param {Function} dispose Action to run during the first call to dispose. The action is guaranteed to be run at most once.
+   * @return {Disposable} The disposable object that runs the given action upon disposal.
+   */
+  var disposableCreate = Disposable.create = function (action) { return new Disposable(action); };
+
+  /**
+   * Gets the disposable that does nothing when disposed.
+   */
+  var disposableEmpty = Disposable.empty = { dispose: noop };
+
+  /**
+   * Validates whether the given object is a disposable
+   * @param {Object} Object to test whether it has a dispose method
+   * @returns {Boolean} true if a disposable object, else false.
+   */
+  var isDisposable = Disposable.isDisposable = function (d) {
+    return d && isFunction(d.dispose);
+  };
+
+  var checkDisposed = Disposable.checkDisposed = function (disposable) {
+    if (disposable.isDisposed) { throw new ObjectDisposedError(); }
+  };
+
+  // Single assignment
+  var SingleAssignmentDisposable = Rx.SingleAssignmentDisposable = function () {
+    this.isDisposed = false;
+    this.current = null;
+  };
+  SingleAssignmentDisposable.prototype.getDisposable = function () {
+    return this.current;
+  };
+  SingleAssignmentDisposable.prototype.setDisposable = function (value) {
+    if (this.current) { throw new Error('Disposable has already been assigned'); }
+    var shouldDispose = this.isDisposed;
+    !shouldDispose && (this.current = value);
+    shouldDispose && value && value.dispose();
+  };
+  SingleAssignmentDisposable.prototype.dispose = function () {
+    if (!this.isDisposed) {
+      this.isDisposed = true;
+      var old = this.current;
+      this.current = null;
+    }
+    old && old.dispose();
+  };
+
+  // Multiple assignment disposable
+  var SerialDisposable = Rx.SerialDisposable = function () {
+    this.isDisposed = false;
+    this.current = null;
+  };
+  SerialDisposable.prototype.getDisposable = function () {
+    return this.current;
+  };
+  SerialDisposable.prototype.setDisposable = function (value) {
+    var shouldDispose = this.isDisposed;
+    if (!shouldDispose) {
+      var old = this.current;
+      this.current = value;
+    }
+    old && old.dispose();
+    shouldDispose && value && value.dispose();
+  };
+  SerialDisposable.prototype.dispose = function () {
+    if (!this.isDisposed) {
+      this.isDisposed = true;
+      var old = this.current;
+      this.current = null;
+    }
+    old && old.dispose();
+  };
+
+  /**
+   * Represents a disposable resource that only disposes its underlying disposable resource when all dependent disposable objects have been disposed.
+   */
+  var RefCountDisposable = Rx.RefCountDisposable = (function () {
+
+    function InnerDisposable(disposable) {
+      this.disposable = disposable;
+      this.disposable.count++;
+      this.isInnerDisposed = false;
+    }
+
+    InnerDisposable.prototype.dispose = function () {
+      if (!this.disposable.isDisposed && !this.isInnerDisposed) {
+        this.isInnerDisposed = true;
+        this.disposable.count--;
+        if (this.disposable.count === 0 && this.disposable.isPrimaryDisposed) {
+          this.disposable.isDisposed = true;
+          this.disposable.underlyingDisposable.dispose();
+        }
+      }
+    };
+
+    /**
+     * Initializes a new instance of the RefCountDisposable with the specified disposable.
+     * @constructor
+     * @param {Disposable} disposable Underlying disposable.
+      */
+    function RefCountDisposable(disposable) {
+      this.underlyingDisposable = disposable;
+      this.isDisposed = false;
+      this.isPrimaryDisposed = false;
+      this.count = 0;
+    }
+
+    /**
+     * Disposes the underlying disposable only when all dependent disposables have been disposed
+     */
+    RefCountDisposable.prototype.dispose = function () {
+      if (!this.isDisposed && !this.isPrimaryDisposed) {
+        this.isPrimaryDisposed = true;
+        if (this.count === 0) {
+          this.isDisposed = true;
+          this.underlyingDisposable.dispose();
+        }
+      }
+    };
+
+    /**
+     * Returns a dependent disposable that when disposed decreases the refcount on the underlying disposable.
+     * @returns {Disposable} A dependent disposable contributing to the reference count that manages the underlying disposable's lifetime.
+     */
+    RefCountDisposable.prototype.getDisposable = function () {
+      return this.isDisposed ? disposableEmpty : new InnerDisposable(this);
+    };
+
+    return RefCountDisposable;
+  })();
+
+  function ScheduledDisposable(scheduler, disposable) {
+    this.scheduler = scheduler;
+    this.disposable = disposable;
+    this.isDisposed = false;
+  }
+
+  function scheduleItem(s, self) {
+    if (!self.isDisposed) {
+      self.isDisposed = true;
+      self.disposable.dispose();
+    }
+  }
+
+  ScheduledDisposable.prototype.dispose = function () {
+    this.scheduler.scheduleWithState(this, scheduleItem);
+  };
+
+  var ScheduledItem = Rx.internals.ScheduledItem = function (scheduler, state, action, dueTime, comparer) {
+    this.scheduler = scheduler;
+    this.state = state;
+    this.action = action;
+    this.dueTime = dueTime;
+    this.comparer = comparer || defaultSubComparer;
+    this.disposable = new SingleAssignmentDisposable();
+  }
+
+  ScheduledItem.prototype.invoke = function () {
+    this.disposable.setDisposable(this.invokeCore());
+  };
+
+  ScheduledItem.prototype.compareTo = function (other) {
+    return this.comparer(this.dueTime, other.dueTime);
+  };
+
+  ScheduledItem.prototype.isCancelled = function () {
+    return this.disposable.isDisposed;
+  };
+
+  ScheduledItem.prototype.invokeCore = function () {
+    return this.action(this.scheduler, this.state);
+  };
+
+  /** Provides a set of static properties to access commonly used schedulers. */
+  var Scheduler = Rx.Scheduler = (function () {
+
+    function Scheduler(now, schedule, scheduleRelative, scheduleAbsolute) {
+      this.now = now;
+      this._schedule = schedule;
+      this._scheduleRelative = scheduleRelative;
+      this._scheduleAbsolute = scheduleAbsolute;
+    }
+
+    /** Determines whether the given object is a scheduler */
+    Scheduler.isScheduler = function (s) {
+      return s instanceof Scheduler;
+    }
+
+    function invokeAction(scheduler, action) {
+      action();
+      return disposableEmpty;
+    }
+
+    var schedulerProto = Scheduler.prototype;
+
+    /**
+     * Schedules an action to be executed.
+     * @param {Function} action Action to execute.
+     * @returns {Disposable} The disposable object used to cancel the scheduled action (best effort).
+     */
+    schedulerProto.schedule = function (action) {
+      return this._schedule(action, invokeAction);
+    };
+
+    /**
+     * Schedules an action to be executed.
+     * @param state State passed to the action to be executed.
+     * @param {Function} action Action to be executed.
+     * @returns {Disposable} The disposable object used to cancel the scheduled action (best effort).
+     */
+    schedulerProto.scheduleWithState = function (state, action) {
+      return this._schedule(state, action);
+    };
+
+    /**
+     * Schedules an action to be executed after the specified relative due time.
+     * @param {Function} action Action to execute.
+     * @param {Number} dueTime Relative time after which to execute the action.
+     * @returns {Disposable} The disposable object used to cancel the scheduled action (best effort).
+     */
+    schedulerProto.scheduleWithRelative = function (dueTime, action) {
+      return this._scheduleRelative(action, dueTime, invokeAction);
+    };
+
+    /**
+     * Schedules an action to be executed after dueTime.
+     * @param state State passed to the action to be executed.
+     * @param {Function} action Action to be executed.
+     * @param {Number} dueTime Relative time after which to execute the action.
+     * @returns {Disposable} The disposable object used to cancel the scheduled action (best effort).
+     */
+    schedulerProto.scheduleWithRelativeAndState = function (state, dueTime, action) {
+      return this._scheduleRelative(state, dueTime, action);
+    };
+
+    /**
+     * Schedules an action to be executed at the specified absolute due time.
+     * @param {Function} action Action to execute.
+     * @param {Number} dueTime Absolute time at which to execute the action.
+     * @returns {Disposable} The disposable object used to cancel the scheduled action (best effort).
+      */
+    schedulerProto.scheduleWithAbsolute = function (dueTime, action) {
+      return this._scheduleAbsolute(action, dueTime, invokeAction);
+    };
+
+    /**
+     * Schedules an action to be executed at dueTime.
+     * @param {Mixed} state State passed to the action to be executed.
+     * @param {Function} action Action to be executed.
+     * @param {Number}dueTime Absolute time at which to execute the action.
+     * @returns {Disposable} The disposable object used to cancel the scheduled action (best effort).
+     */
+    schedulerProto.scheduleWithAbsoluteAndState = function (state, dueTime, action) {
+      return this._scheduleAbsolute(state, dueTime, action);
+    };
+
+    /** Gets the current time according to the local machine's system clock. */
+    Scheduler.now = defaultNow;
+
+    /**
+     * Normalizes the specified TimeSpan value to a positive value.
+     * @param {Number} timeSpan The time span value to normalize.
+     * @returns {Number} The specified TimeSpan value if it is zero or positive; otherwise, 0
+     */
+    Scheduler.normalize = function (timeSpan) {
+      timeSpan < 0 && (timeSpan = 0);
+      return timeSpan;
+    };
+
+    return Scheduler;
+  }());
+
+  var normalizeTime = Scheduler.normalize, isScheduler = Scheduler.isScheduler;
+
+  (function (schedulerProto) {
+
+    function invokeRecImmediate(scheduler, pair) {
+      var state = pair[0], action = pair[1], group = new CompositeDisposable();
+
+      function recursiveAction(state1) {
+        action(state1, function (state2) {
+          var isAdded = false, isDone = false,
+          d = scheduler.scheduleWithState(state2, function (scheduler1, state3) {
+            if (isAdded) {
+              group.remove(d);
+            } else {
+              isDone = true;
+            }
+            recursiveAction(state3);
+            return disposableEmpty;
+          });
+          if (!isDone) {
+            group.add(d);
+            isAdded = true;
+          }
+        });
+      }
+      recursiveAction(state);
+      return group;
+    }
+
+    function invokeRecDate(scheduler, pair, method) {
+      var state = pair[0], action = pair[1], group = new CompositeDisposable();
+      function recursiveAction(state1) {
+        action(state1, function (state2, dueTime1) {
+          var isAdded = false, isDone = false,
+          d = scheduler[method](state2, dueTime1, function (scheduler1, state3) {
+            if (isAdded) {
+              group.remove(d);
+            } else {
+              isDone = true;
+            }
+            recursiveAction(state3);
+            return disposableEmpty;
+          });
+          if (!isDone) {
+            group.add(d);
+            isAdded = true;
+          }
+        });
+      };
+      recursiveAction(state);
+      return group;
+    }
+
+    function scheduleInnerRecursive(action, self) {
+      action(function(dt) { self(action, dt); });
+>>>>>>> 6b8733c... Removes falcor-observable, imports rx/dist/rx, fixes BatchedRequest canceling, moves comparator and errorSelector to the ModelRoot, removes the promise collection guards, fixes bind and bindSync anomalies.
+    }
+
+<<<<<<< HEAD
 },{"144":144,"147":147,"148":148,"149":149,"151":151,"152":152,"153":153,"158":158,"184":184,"185":185,"186":186,"187":187,"193":193,"194":194,"230":230,"284":284,"285":285,"286":286,"318":318}],147:[function(require,module,exports){
 arguments[4][3][0].apply(exports,arguments)
 },{"3":3}],148:[function(require,module,exports){
@@ -20914,6 +37002,394 @@ Promise.prototype.nodeify = function (callback, ctx) {
         return new CatchScheduler(scheduler, this._handler);
     };
 
+=======
+    /**
+     * Schedules an action to be executed recursively.
+     * @param {Function} action Action to execute recursively. The parameter passed to the action is used to trigger recursive scheduling of the action.
+     * @returns {Disposable} The disposable object used to cancel the scheduled action (best effort).
+     */
+    schedulerProto.scheduleRecursive = function (action) {
+      return this.scheduleRecursiveWithState(action, scheduleInnerRecursive);
+    };
+
+    /**
+     * Schedules an action to be executed recursively.
+     * @param {Mixed} state State passed to the action to be executed.
+     * @param {Function} action Action to execute recursively. The last parameter passed to the action is used to trigger recursive scheduling of the action, passing in recursive invocation state.
+     * @returns {Disposable} The disposable object used to cancel the scheduled action (best effort).
+     */
+    schedulerProto.scheduleRecursiveWithState = function (state, action) {
+      return this.scheduleWithState([state, action], invokeRecImmediate);
+    };
+
+    /**
+     * Schedules an action to be executed recursively after a specified relative due time.
+     * @param {Function} action Action to execute recursively. The parameter passed to the action is used to trigger recursive scheduling of the action at the specified relative time.
+     * @param {Number}dueTime Relative time after which to execute the action for the first time.
+     * @returns {Disposable} The disposable object used to cancel the scheduled action (best effort).
+     */
+    schedulerProto.scheduleRecursiveWithRelative = function (dueTime, action) {
+      return this.scheduleRecursiveWithRelativeAndState(action, dueTime, scheduleInnerRecursive);
+    };
+
+    /**
+     * Schedules an action to be executed recursively after a specified relative due time.
+     * @param {Mixed} state State passed to the action to be executed.
+     * @param {Function} action Action to execute recursively. The last parameter passed to the action is used to trigger recursive scheduling of the action, passing in the recursive due time and invocation state.
+     * @param {Number}dueTime Relative time after which to execute the action for the first time.
+     * @returns {Disposable} The disposable object used to cancel the scheduled action (best effort).
+     */
+    schedulerProto.scheduleRecursiveWithRelativeAndState = function (state, dueTime, action) {
+      return this._scheduleRelative([state, action], dueTime, function (s, p) {
+        return invokeRecDate(s, p, 'scheduleWithRelativeAndState');
+      });
+    };
+
+    /**
+     * Schedules an action to be executed recursively at a specified absolute due time.
+     * @param {Function} action Action to execute recursively. The parameter passed to the action is used to trigger recursive scheduling of the action at the specified absolute time.
+     * @param {Number}dueTime Absolute time at which to execute the action for the first time.
+     * @returns {Disposable} The disposable object used to cancel the scheduled action (best effort).
+     */
+    schedulerProto.scheduleRecursiveWithAbsolute = function (dueTime, action) {
+      return this.scheduleRecursiveWithAbsoluteAndState(action, dueTime, scheduleInnerRecursive);
+    };
+
+    /**
+     * Schedules an action to be executed recursively at a specified absolute due time.
+     * @param {Mixed} state State passed to the action to be executed.
+     * @param {Function} action Action to execute recursively. The last parameter passed to the action is used to trigger recursive scheduling of the action, passing in the recursive due time and invocation state.
+     * @param {Number}dueTime Absolute time at which to execute the action for the first time.
+     * @returns {Disposable} The disposable object used to cancel the scheduled action (best effort).
+     */
+    schedulerProto.scheduleRecursiveWithAbsoluteAndState = function (state, dueTime, action) {
+      return this._scheduleAbsolute([state, action], dueTime, function (s, p) {
+        return invokeRecDate(s, p, 'scheduleWithAbsoluteAndState');
+      });
+    };
+  }(Scheduler.prototype));
+
+  (function (schedulerProto) {
+
+    /**
+     * Schedules a periodic piece of work by dynamically discovering the scheduler's capabilities. The periodic task will be scheduled using window.setInterval for the base implementation.
+     * @param {Number} period Period for running the work periodically.
+     * @param {Function} action Action to be executed.
+     * @returns {Disposable} The disposable object used to cancel the scheduled recurring action (best effort).
+     */
+    Scheduler.prototype.schedulePeriodic = function (period, action) {
+      return this.schedulePeriodicWithState(null, period, action);
+    };
+
+    /**
+     * Schedules a periodic piece of work by dynamically discovering the scheduler's capabilities. The periodic task will be scheduled using window.setInterval for the base implementation.
+     * @param {Mixed} state Initial state passed to the action upon the first iteration.
+     * @param {Number} period Period for running the work periodically.
+     * @param {Function} action Action to be executed, potentially updating the state.
+     * @returns {Disposable} The disposable object used to cancel the scheduled recurring action (best effort).
+     */
+    Scheduler.prototype.schedulePeriodicWithState = function(state, period, action) {
+      if (typeof root.setInterval === 'undefined') { throw new NotSupportedError(); }
+      period = normalizeTime(period);
+      var s = state, id = root.setInterval(function () { s = action(s); }, period);
+      return disposableCreate(function () { root.clearInterval(id); });
+    };
+
+  }(Scheduler.prototype));
+
+  (function (schedulerProto) {
+    /**
+     * Returns a scheduler that wraps the original scheduler, adding exception handling for scheduled actions.
+     * @param {Function} handler Handler that's run if an exception is caught. The exception will be rethrown if the handler returns false.
+     * @returns {Scheduler} Wrapper around the original scheduler, enforcing exception handling.
+     */
+    schedulerProto.catchError = schedulerProto['catch'] = function (handler) {
+      return new CatchScheduler(this, handler);
+    };
+  }(Scheduler.prototype));
+
+  var SchedulePeriodicRecursive = Rx.internals.SchedulePeriodicRecursive = (function () {
+    function tick(command, recurse) {
+      recurse(0, this._period);
+      try {
+        this._state = this._action(this._state);
+      } catch (e) {
+        this._cancel.dispose();
+        throw e;
+      }
+    }
+
+    function SchedulePeriodicRecursive(scheduler, state, period, action) {
+      this._scheduler = scheduler;
+      this._state = state;
+      this._period = period;
+      this._action = action;
+    }
+
+    SchedulePeriodicRecursive.prototype.start = function () {
+      var d = new SingleAssignmentDisposable();
+      this._cancel = d;
+      d.setDisposable(this._scheduler.scheduleRecursiveWithRelativeAndState(0, this._period, tick.bind(this)));
+
+      return d;
+    };
+
+    return SchedulePeriodicRecursive;
+  }());
+
+  /** Gets a scheduler that schedules work immediately on the current thread. */
+  var immediateScheduler = Scheduler.immediate = (function () {
+    function scheduleNow(state, action) { return action(this, state); }
+    return new Scheduler(defaultNow, scheduleNow, notSupported, notSupported);
+  }());
+
+  /**
+   * Gets a scheduler that schedules work as soon as possible on the current thread.
+   */
+  var currentThreadScheduler = Scheduler.currentThread = (function () {
+    var queue;
+
+    function runTrampoline () {
+      while (queue.length > 0) {
+        var item = queue.dequeue();
+        !item.isCancelled() && item.invoke();
+      }
+    }
+
+    function scheduleNow(state, action) {
+      var si = new ScheduledItem(this, state, action, this.now());
+
+      if (!queue) {
+        queue = new PriorityQueue(4);
+        queue.enqueue(si);
+
+        var result = tryCatch(runTrampoline)();
+        queue = null;
+        if (result === errorObj) { return thrower(result.e); }
+      } else {
+        queue.enqueue(si);
+      }
+      return si.disposable;
+    }
+
+    var currentScheduler = new Scheduler(defaultNow, scheduleNow, notSupported, notSupported);
+    currentScheduler.scheduleRequired = function () { return !queue; };
+
+    return currentScheduler;
+  }());
+
+  var scheduleMethod, clearMethod;
+
+  var localTimer = (function () {
+    var localSetTimeout, localClearTimeout = noop;
+    if (!!root.setTimeout) {
+      localSetTimeout = root.setTimeout;
+      localClearTimeout = root.clearTimeout;
+    } else if (!!root.WScript) {
+      localSetTimeout = function (fn, time) {
+        root.WScript.Sleep(time);
+        fn();
+      };
+    } else {
+      throw new NotSupportedError();
+    }
+
+    return {
+      setTimeout: localSetTimeout,
+      clearTimeout: localClearTimeout
+    };
+  }());
+  var localSetTimeout = localTimer.setTimeout,
+    localClearTimeout = localTimer.clearTimeout;
+
+  (function () {
+
+    var nextHandle = 1, tasksByHandle = {}, currentlyRunning = false;
+
+    clearMethod = function (handle) {
+      delete tasksByHandle[handle];
+    };
+
+    function runTask(handle) {
+      if (currentlyRunning) {
+        localSetTimeout(function () { runTask(handle) }, 0);
+      } else {
+        var task = tasksByHandle[handle];
+        if (task) {
+          currentlyRunning = true;
+          var result = tryCatch(task)();
+          clearMethod(handle);
+          currentlyRunning = false;
+          if (result === errorObj) { return thrower(result.e); }
+        }
+      }
+    }
+
+    var reNative = RegExp('^' +
+      String(toString)
+        .replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+        .replace(/toString| for [^\]]+/g, '.*?') + '$'
+    );
+
+    var setImmediate = typeof (setImmediate = freeGlobal && moduleExports && freeGlobal.setImmediate) == 'function' &&
+      !reNative.test(setImmediate) && setImmediate;
+
+    function postMessageSupported () {
+      // Ensure not in a worker
+      if (!root.postMessage || root.importScripts) { return false; }
+      var isAsync = false, oldHandler = root.onmessage;
+      // Test for async
+      root.onmessage = function () { isAsync = true; };
+      root.postMessage('', '*');
+      root.onmessage = oldHandler;
+
+      return isAsync;
+    }
+
+    // Use in order, setImmediate, nextTick, postMessage, MessageChannel, script readystatechanged, setTimeout
+    if (isFunction(setImmediate)) {
+      scheduleMethod = function (action) {
+        var id = nextHandle++;
+        tasksByHandle[id] = action;
+        setImmediate(function () { runTask(id); });
+
+        return id;
+      };
+    } else if (typeof process !== 'undefined' && {}.toString.call(process) === '[object process]') {
+      scheduleMethod = function (action) {
+        var id = nextHandle++;
+        tasksByHandle[id] = action;
+        process.nextTick(function () { runTask(id); });
+
+        return id;
+      };
+    } else if (postMessageSupported()) {
+      var MSG_PREFIX = 'ms.rx.schedule' + Math.random();
+
+      function onGlobalPostMessage(event) {
+        // Only if we're a match to avoid any other global events
+        if (typeof event.data === 'string' && event.data.substring(0, MSG_PREFIX.length) === MSG_PREFIX) {
+          runTask(event.data.substring(MSG_PREFIX.length));
+        }
+      }
+
+      if (root.addEventListener) {
+        root.addEventListener('message', onGlobalPostMessage, false);
+      } else if (root.attachEvent) {
+        root.attachEvent('onmessage', onGlobalPostMessage);
+      } else {
+        root.onmessage = onGlobalPostMessage;
+      }
+
+      scheduleMethod = function (action) {
+        var id = nextHandle++;
+        tasksByHandle[id] = action;
+        root.postMessage(MSG_PREFIX + currentId, '*');
+        return id;
+      };
+    } else if (!!root.MessageChannel) {
+      var channel = new root.MessageChannel();
+
+      channel.port1.onmessage = function (e) { runTask(e.data); };
+
+      scheduleMethod = function (action) {
+        var id = nextHandle++;
+        tasksByHandle[id] = action;
+        channel.port2.postMessage(id);
+        return id;
+      };
+    } else if ('document' in root && 'onreadystatechange' in root.document.createElement('script')) {
+
+      scheduleMethod = function (action) {
+        var scriptElement = root.document.createElement('script');
+        var id = nextHandle++;
+        tasksByHandle[id] = action;
+
+        scriptElement.onreadystatechange = function () {
+          runTask(id);
+          scriptElement.onreadystatechange = null;
+          scriptElement.parentNode.removeChild(scriptElement);
+          scriptElement = null;
+        };
+        root.document.documentElement.appendChild(scriptElement);
+        return id;
+      };
+
+    } else {
+      scheduleMethod = function (action) {
+        var id = nextHandle++;
+        tasksByHandle[id] = action;
+        localSetTimeout(function () {
+          runTask(id);
+        }, 0);
+
+        return id;
+      };
+    }
+  }());
+
+  /**
+   * Gets a scheduler that schedules work via a timed callback based upon platform.
+   */
+  var timeoutScheduler = Scheduler.timeout = Scheduler['default'] = (function () {
+
+    function scheduleNow(state, action) {
+      var scheduler = this, disposable = new SingleAssignmentDisposable();
+      var id = scheduleMethod(function () {
+        !disposable.isDisposed && disposable.setDisposable(action(scheduler, state));
+      });
+      return new CompositeDisposable(disposable, disposableCreate(function () {
+        clearMethod(id);
+      }));
+    }
+
+    function scheduleRelative(state, dueTime, action) {
+      var scheduler = this, dt = Scheduler.normalize(dueTime), disposable = new SingleAssignmentDisposable();
+      if (dt === 0) { return scheduler.scheduleWithState(state, action); }
+      var id = localSetTimeout(function () {
+        !disposable.isDisposed && disposable.setDisposable(action(scheduler, state));
+      }, dt);
+      return new CompositeDisposable(disposable, disposableCreate(function () {
+        localClearTimeout(id);
+      }));
+    }
+
+    function scheduleAbsolute(state, dueTime, action) {
+      return this.scheduleWithRelativeAndState(state, dueTime - this.now(), action);
+    }
+
+    return new Scheduler(defaultNow, scheduleNow, scheduleRelative, scheduleAbsolute);
+  })();
+
+  var CatchScheduler = (function (__super__) {
+
+    function scheduleNow(state, action) {
+      return this._scheduler.scheduleWithState(state, this._wrap(action));
+    }
+
+    function scheduleRelative(state, dueTime, action) {
+      return this._scheduler.scheduleWithRelativeAndState(state, dueTime, this._wrap(action));
+    }
+
+    function scheduleAbsolute(state, dueTime, action) {
+      return this._scheduler.scheduleWithAbsoluteAndState(state, dueTime, this._wrap(action));
+    }
+
+    inherits(CatchScheduler, __super__);
+
+    function CatchScheduler(scheduler, handler) {
+      this._scheduler = scheduler;
+      this._handler = handler;
+      this._recursiveOriginal = null;
+      this._recursiveWrapper = null;
+      __super__.call(this, this._scheduler.now.bind(this._scheduler), scheduleNow, scheduleRelative, scheduleAbsolute);
+    }
+
+    CatchScheduler.prototype._clone = function (scheduler) {
+        return new CatchScheduler(scheduler, this._handler);
+    };
+
+>>>>>>> 6b8733c... Removes falcor-observable, imports rx/dist/rx, fixes BatchedRequest canceling, moves comparator and errorSelector to the ModelRoot, removes the promise collection guards, fixes bind and bindSync anomalies.
     CatchScheduler.prototype._wrap = function (action) {
       var parent = this;
       return function (self, state) {
@@ -21302,6 +37778,7 @@ Promise.prototype.nodeify = function (callback, ctx) {
       var self = this;
       this.queue.push(function () { self.observer.onError(e); });
     };
+<<<<<<< HEAD
 
     ScheduledObserver.prototype.completed = function () {
       var self = this;
@@ -21346,6 +37823,52 @@ Promise.prototype.nodeify = function (callback, ctx) {
   var ObserveOnObserver = (function (__super__) {
     inherits(ObserveOnObserver, __super__);
 
+=======
+
+    ScheduledObserver.prototype.completed = function () {
+      var self = this;
+      this.queue.push(function () { self.observer.onCompleted(); });
+    };
+
+    ScheduledObserver.prototype.ensureActive = function () {
+      var isOwner = false, parent = this;
+      if (!this.hasFaulted && this.queue.length > 0) {
+        isOwner = !this.isAcquired;
+        this.isAcquired = true;
+      }
+      if (isOwner) {
+        this.disposable.setDisposable(this.scheduler.scheduleRecursive(function (self) {
+          var work;
+          if (parent.queue.length > 0) {
+            work = parent.queue.shift();
+          } else {
+            parent.isAcquired = false;
+            return;
+          }
+          try {
+            work();
+          } catch (ex) {
+            parent.queue = [];
+            parent.hasFaulted = true;
+            throw ex;
+          }
+          self();
+        }));
+      }
+    };
+
+    ScheduledObserver.prototype.dispose = function () {
+      __super__.prototype.dispose.call(this);
+      this.disposable.dispose();
+    };
+
+    return ScheduledObserver;
+  }(AbstractObserver));
+
+  var ObserveOnObserver = (function (__super__) {
+    inherits(ObserveOnObserver, __super__);
+
+>>>>>>> 6b8733c... Removes falcor-observable, imports rx/dist/rx, fixes BatchedRequest canceling, moves comparator and errorSelector to the ModelRoot, removes the promise collection guards, fixes bind and bindSync anomalies.
     function ObserveOnObserver(scheduler, observer, cancel) {
       __super__.call(this, scheduler, observer);
       this._cancel = cancel;
@@ -25029,6 +41552,11 @@ Promise.prototype.nodeify = function (callback, ctx) {
 
 }.call(this));
 
+<<<<<<< HEAD
 }).call(this,require(142),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 },{"142":142}]},{},[1])(1)
+=======
+}).call(this,require(7),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
+},{"7":7}]},{},[1])(1)
+>>>>>>> 6b8733c... Removes falcor-observable, imports rx/dist/rx, fixes BatchedRequest canceling, moves comparator and errorSelector to the ModelRoot, removes the promise collection guards, fixes bind and bindSync anomalies.
 });
