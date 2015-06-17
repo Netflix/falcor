@@ -114,10 +114,9 @@ describe('Cache Only', function() {
                 subscribe(noOp, done, done);
         });
         it('should dedupe values with a comparator', function(done) {
-            var model = new Model({cache: Cache()});
-            model.
-                set({ path: ["genreList", 0], value: Model.ref(["lists", "abcd"]) }).
-                withComparator(function(path, a, b) {
+            var model = new Model({
+                cache: Cache(),
+                comparator: function compare(path, a, b) {
                     var aRef = a.value;
                     var bRef = b.value;
                     if(aRef.length !== bRef.length) {
@@ -130,7 +129,10 @@ describe('Cache Only', function() {
                         }
                     }
                     return true;
-                }).
+                }
+            });
+            model.
+                set({ path: ["genreList", 0], value: Model.ref(["lists", "abcd"]) }).
                 toPathValues().
                 count().
                 subscribe(function(total) {

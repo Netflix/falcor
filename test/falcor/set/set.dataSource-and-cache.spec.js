@@ -275,16 +275,16 @@ describe('DataSource and Cache', function() {
     });
     it('should do an error set and project it.', function(done) {
         var model = new Model({
-            source: new ErrorDataSource(503, "Timeout")
+            source: new ErrorDataSource(503, "Timeout"),
+            errorSelector: function mapError(path, value) {
+                value.$foo = 'bar';
+                return value;
+            }
         });
         var called = false;
         model.
             boxValues().
             set({path: ['genreList', 0, 0, 'summary'], value: 5}).
-            withErrorSelector(function(path, value) {
-                value.$foo = 'bar';
-                return value;
-            }).
             doAction(function(x) {
                 expect(false, 'onNext should not be called.').to.be.ok;
             }, function(e) {
