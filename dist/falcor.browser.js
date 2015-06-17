@@ -13250,8 +13250,16 @@ var SerialDisposable = Rx.SerialDisposable;
             }
             getWalk(model, root, next, nextPathOrPathMap, depth, seedOrFunction, permutePosition, outerResults, permuteOptimized, permuteRequested, inputFormat, outputFormat, fromReference);
 
+<<<<<<< HEAD
             if (!memo.done) {
                 key = permuteKey(k, memo);
+=======
+        while (++requestIndex < requestCount) {
+            request = requests[requestIndex];
+            if (request.insertPath(path, request.pending)) {
+                participatingRequests[requestIndex] = request;
+                continue insert_path;
+>>>>>>> 1d4671c... Builds dist.
             }
 
         } while (!memo.done);
