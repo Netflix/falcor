@@ -12631,7 +12631,7 @@ RequestQueue.prototype.distributePaths = function distributePathsAcrossRequests(
 
         while (++requestIndex < requestCount) {
             request = requests[requestIndex];
-            if (request.insertPath(path, request.pending === false)) {
+            if (request.insertPath(path, request.pending)) {
                 participatingRequests[requestIndex] = request;
                 continue insert_path;
             }
