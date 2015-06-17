@@ -6,13 +6,8 @@ describe("root onChange handler", function () {
     it("is called when the root's version changes", function () {
         var changed = false;
         var model = new Model({
-            root: {
-                expired: [],
-                syncRefCount: 0,
-                unsafeMode: false,
-                onChange: function () {
-                    changed = true;
-                }
+            onChange: function () {
+                changed = true;
             }
         });
 

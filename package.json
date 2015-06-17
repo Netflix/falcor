@@ -70,10 +70,9 @@
     "xmlhttprequest": "~1.7.0"
   },
   "dependencies": {
-    "rx": "git+ssh://git@github.com:Reactive-Extensions/RxJS.git",
+    "rx": "2.5.3",
     "promise": "7.0.0",
     "asap": "~2.0.3",
-    "falcor-observable": "git+ssh://git@github.com/Netflix/falcor-observable.git",
     "falcor-path-syntax": "git+ssh://git@github.com/Netflix/falcor-path-syntax.git"
   }
 }

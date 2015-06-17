@@ -36,12 +36,7 @@ describe("Bind-On", function() {
                 dataModel.bindSync(["genreList", 0]);
             } catch (e) {
                 throwError = true;
-                testRunner.compare({
-                    path: ['genreList', 0],
-                    value: {
-                        message: 'The humans are dead.'
-                    }
-                }, e);
+                testRunner.compare({ message: 'The humans are dead.' }, e);
             }
             expect(throwError).to.be.ok;
         });
@@ -92,16 +87,7 @@ describe("Bind-On", function() {
                 doAction(
                     function() { throw 'onNext should not happen.'; },
                     function(e) {
-                        testRunner.compare([{
-                            path: ['genreList', 0],
-                            value: {
-                                // $type: $error,
-                                // $size: 51,
-                                // value: {
-                                    message: 'The humans are dead.'
-                                // }
-                            }
-                        }], e);
+                        testRunner.compare({ message: 'The humans are dead.' }, e);
                         throwError = true;
                     },
                     function() { throw 'onCompleted should not happen.'; }).

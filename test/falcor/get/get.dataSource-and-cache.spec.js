@@ -162,7 +162,7 @@ describe('DataSource and Partial Cache', function() {
             var model = new falcor.Model({
                 source: {
                     get: function() {
-                        return falcor.Observable.of({
+                        return Rx.Observable.of({
                             paths: [["user", "age"]],
                             value: {
                                 user: {
