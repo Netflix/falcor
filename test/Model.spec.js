@@ -1,6 +1,57 @@
 var Rx = require("rx");
-var jsong = require("falcor");
-var Model = jsong.Model;
+var falcor = require("falcor");
+var Model = falcor.Model;
+
+function ResponseObservable(response) {
+    this.response = response;
+}
+
+ResponseObservable.prototype = Object.create(Rx.Observable.prototype);
+
+ResponseObservable.prototype._subscribe = function(observer) {
+    return this.response.subscribe(observer);
+};
+
+ResponseObservable.prototype.toPathValues = function() {
+    return new ResponseObservable(this.response.toPathValues.apply(this.response, arguments));
+};
+
+ResponseObservable.prototype.toCompactJSON = function() {
+    return new ResponseObservable(this.response.toCompactJSON.apply(this.response, arguments));
+};
+
+ResponseObservable.prototype.toJSON = function() {
+    return new ResponseObservable(this.response.toJSON.apply(this.response, arguments));
+};
+
+ResponseObservable.prototype.toJSONG = function() {
+    return this.response.toJSONG.apply(this.response, arguments);
+};
+
+ResponseObservable.prototype.progressively = function() {
+    return new ResponseObservable(this.response.progressively.apply(this.response, arguments));
+};
+
+ResponseObservable.prototype.then = function() {
+    return this.response.then.apply(this.response, arguments);
+};
+
+var modelGet = Model.prototype.get;
+var modelSet = Model.prototype.set;
+var modelCall = Model.prototype.call;
+
+Model.prototype.get = function() {
+    return new ResponseObservable(modelGet.apply(this, arguments));
+};
+
+Model.prototype.set = function() {
+    return new ResponseObservable(modelSet.apply(this, arguments));
+};
+
+Model.prototype.call = function() {
+    return new ResponseObservable(modelCall.apply(this, arguments));
+};
+
 var testRunner = require('./testRunner');
 var chai = require("chai");
 var expect = chai.expect;
@@ -50,4 +101,3 @@ describe("Model", function() {
         });
     });
 });
-

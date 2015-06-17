@@ -11,13 +11,16 @@ var expect = chai.expect;
 var References = Expected.References;
 var Values = Expected.Values;
 var requestTestRunner = require("../../requestTestRunner");
+var ModelRoot = require("falcor/ModelRoot");
 
 describe("RequestQueue", function() {
+    var modelRoot = new ModelRoot();
     var nextTick = new ASAPScheduler();
     var nextSlice = new TimeoutScheduler(16);
     var immediate = new ImmediateScheduler();
     var dataSource = new LocalDataSource(Cache());
     var dataModel = {
+        _root: modelRoot,
         _source: dataSource
     };
 
@@ -91,7 +94,7 @@ describe("RequestQueue", function() {
 
     it("should have multiple requests batched across pending source requests.", function(done) {
         var dataSource = new LocalDataSource(Cache(), {wait:100});
-        var dataModel = { _source: dataSource };
+        var dataModel = { _root: modelRoot, _source: dataSource };
         var queue = new RequestQueue(dataModel, nextTick);
         var checks = 0;
         function onNext(x) {
@@ -109,7 +112,7 @@ describe("RequestQueue", function() {
 
     it("should merge multiple JSONGraph Envelopes from batched pending source requests.", function(done) {
         var dataSource = new LocalDataSource(Cache(), {wait:100});
-        var dataModel = { _source: dataSource };
+        var dataModel = { _root: modelRoot, _source: dataSource };
         var queue = new RequestQueue(dataModel, nextTick);
         var checks = 0;
         function onNext(x) {
