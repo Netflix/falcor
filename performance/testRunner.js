@@ -1,14 +1,19 @@
-function runner(Benchmark, testCfg, count, done) {
+var Benchmark = require('benchmark');
+
+function runner(testCfg, count, done) {
     var testSuiteCount = 0;
+
+    debugger;
+
     var names = Object.keys(testCfg.tests);
     var totalResults = names.
         reduce(function(acc, n) {
             acc[n] = [];
             return acc;
         }, {});
-    
+
     function recurse() {
-        _runner(Benchmark, testCfg, function(results) {
+        _runner(testCfg, function(results) {
             testSuiteCount++;
             console.warn('Test Count ' + testSuiteCount);
             results.forEach(function(r) {
@@ -27,7 +32,7 @@ function runner(Benchmark, testCfg, count, done) {
                         return acc;
                     }, []);
                 var csv = [];
-                
+
                 for (var i = 0; i < count + 1; i++) {
                     var csvRow = [];
                     for (var j = 0; j < transform.length; j++) {
@@ -41,11 +46,11 @@ function runner(Benchmark, testCfg, count, done) {
             }
         });
     }
-    
+
     recurse();
 };
 
-function _runner(Benchmark, testCfg, done) {
+function _runner(testCfg, done) {
     var countDone = 0;
     var suite = new Benchmark.Suite(testCfg.name);
     var results = [];
