@@ -1,28 +1,4 @@
-var testConfig = require('./testConfig')();
-var _ = require('lodash');
-
-var models = testConfig.models;
-var formats = testConfig.formats;
-var tests = testConfig.get;
-
-var DEFAULTS = {
-    iterations: 2,
-    tests: {
-        'scrollGallery': tests.scrollGallery,
-        'simple': tests.simple,
-        'reference': tests.reference,
-        'complex': tests.complex
-    },
-    formats: formats,
-    models: {
-        'modelWithoutSource' : models.model,
-        'modelWithSource' : models.modelWithSource
-    }
-};
-
-module.exports = function (config) {
-
-    config = _.assign({}, DEFAULTS, config);
+module.exports = function testGenerator(config) {
 
     var generatedTests = {};
 
@@ -31,21 +7,19 @@ module.exports = function (config) {
     var models = config.models;
     var formats = config.formats || [null];
 
-    var testName;
-    var modelName;
+    var test;
     var i;
+    var model;
 
-    for (testName in tests) {
+    for (test in tests) {
         for (i = 0; i < iterations; i++) {
-            for (modelName in models) {
+            for (model in models) {
 
                 formats.forEach(function(format) {
+                    var testGenerator = tests[test];
+                    var testName = test + ' (' + model + ', ' + format + ') ' + i;
 
-                    var testGenerator = tests[testName];
-                    var testLongName = testName + ' (' + modelName + ':' + format + ') ' + i;
-                    var model = models[modelName];
-
-                    generatedTests[testLongName] = (format) ?
+                    generatedTests[testName] = (format) ?
                         testGenerator(model, format) :
                         testGenerator(model);
                 });

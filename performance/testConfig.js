@@ -5,16 +5,15 @@ var setTests = require('./tests/set');
 var mergeTests = require('./tests/merge');
 
 module.exports = function() {
-
     return {
         suite: {
-            name: 'Falcor'
+            name: 'Falcor',
+            async: false
         },
         models: models,
-        formats: ['JSON', 'JSONG', 'Value', 'PathMap'],
+        formats: ['Value', 'JSON', 'PathMap', 'JSONG'],
         get: getTests,
         set: setTests,
         merge: mergeTests
     };
-
 };

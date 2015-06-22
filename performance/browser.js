@@ -1,18 +1,6 @@
-var testConfig = require('./testConfig')();
 var testRunner = require('./testRunner');
-var testReporter = require('./reporters/browserTestReporter');
+var testConfig = require('./testConfig')();
 var testSuiteGenerator = require('./testSuiteGenerator');
-var CSVFormatter = require('./formatter/CSVFormatter');
-
-var compose = function(f, g) {
-    return function(v) {
-        return f(g(v));
-    };
-};
-
-var curry = function(fn, arg) {
-    return fn.bind(null, arg);
-};
 
 var models = testConfig.models;
 var formats = testConfig.formats;
@@ -20,17 +8,44 @@ var tests = testConfig.get;
 var suite = testConfig.suite;
 
 suite.tests = testSuiteGenerator({
-    iterations: 10,
+
+    iterations: 1,
+
     models: {
-        'model': models.modelWithSource
+        'model' : models.model,
+        'macro' : models.macro
     },
-    formats: ['PathMap', 'JSON']
+
+    tests: {
+        'simple': tests.syncSimple,
+        'reference': tests.syncReference
+    }
+
 });
 
-var env = navigator.userAgent;
-var logger = console.log.bind(console);
-var resultsReporter = compose(testReporter.resultsReporter, CSVFormatter.toTable);
-var benchmarkReporter = compose(testReporter.benchmarkReporter, curry(CSVFormatter.toRow, env));
+testRunner(suite, 10, function(totalResults) {
+    console.log(totalResults.join('\n'));
+});
 
-testRunner(suite, env, benchmarkReporter, resultsReporter, logger);
 
+/*
+var testConfig = require('./testConfig');
+var testRunner = require('./testRunner');
+
+var config = testConfig.config;
+var models = testConfig.models;
+
+var macroSimple = testConfig.get.syncSimple(models.macro);
+var modelSimple = testConfig.get.syncSimple(models.model);
+var macroReference = testConfig.get.syncReference(models.macro);
+var modelReference = testConfig.get.syncReference(models.model);
+
+testConfig.repeatInConfig('macro-sync-simple', 1, macroSimple, config.tests);
+testConfig.repeatInConfig('model-sync-simple', 1, modelSimple, config.tests);
+testConfig.repeatInConfig('macro-sync-reference', 1, macroReference, config.tests);
+testConfig.repeatInConfig('model-sync-reference', 1, modelReference, config.tests);
+
+testRunner(config, 10, function(totalResults) {
+    console.log(totalResults.join('\n'));
+});
+*/

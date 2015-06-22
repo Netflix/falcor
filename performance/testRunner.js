@@ -1,113 +1,92 @@
 var Benchmark = require('benchmark');
-var CSVFormatter = require('./formatter/CSVFormatter');
 
-var KARMA = global.__karma__;
+function runner(testCfg, count, done) {
+    var testSuiteCount = 0;
 
-function createSuite(testCfg, iteration) {
+    debugger;
 
-    var tests = testCfg.tests;
-    var testName;
+    var names = Object.keys(testCfg.tests);
+    var totalResults = names.
+        reduce(function(acc, n) {
+            acc[n] = [];
+            return acc;
+        }, {});
 
-    var suite = ((KARMA) ? global.suite : Benchmark.Suite)(testCfg.name + ':' + iteration, function() {});
+    function recurse() {
+        _runner(testCfg, function(results) {
+            testSuiteCount++;
+            console.warn('Test Count ' + testSuiteCount);
+            results.forEach(function(r) {
+                totalResults[r.name].push(r);
+            });
+            if (testSuiteCount === count) {
+                var transform = Object.
+                    keys(totalResults).
+                    reduce(function(acc, name) {
+                        var results = totalResults[name];
+                        var row = [name];
+                        results.forEach(function(r) {
+                            row.push(r.hz);
+                        });
+                        acc.push(row);
+                        return acc;
+                    }, []);
+                var csv = [];
 
-    for (testName in tests) {
-        if (KARMA) {
-            global.benchmark(testName, tests[testName], {defer: false});
-        } else {
-            suite.add(testName, tests[testName], {defer: false});
+                for (var i = 0; i < count + 1; i++) {
+                    var csvRow = [];
+                    for (var j = 0; j < transform.length; j++) {
+                        csvRow[j] = transform[j][i];
+                    }
+                    csv[i] = csvRow;
+                }
+                done(csv);
+            } else {
+                recurse();
+            }
+        });
+    }
+
+    recurse();
+};
+
+function _runner(testCfg, done) {
+    var countDone = 0;
+    var suite = new Benchmark.Suite(testCfg.name);
+    var results = [];
+    var tests = testCfg.tests,
+        testCount = 0;
+    for (var testName in tests) {
+        var testFn = tests[testName];
+        if (typeof testFn === 'function') {
+            suite.add(testName, testFn);
+            testCount++;
         }
     }
 
-    return suite;
-}
-
-function createSuites(testCfg, iterations) {
-    var suites = [];
-
-    for (var i = 0; i < iterations; i++) {
-        suites.push(createSuite(testCfg, i));
-    }
-
-    return suites;
-}
-
-function runner(testCfg, env, onBenchmarkComplete, onComplete, log) {
-
-    var suites = createSuites(testCfg, 1);
-
-    if (!KARMA) {
-        run(suites, env, onBenchmarkComplete, onComplete, log);
-    } else {
-        // KARMA will run the global "suites"
-    }
-}
-
-function runGC() {
-    var jscontext;
-
-    if (typeof global !== 'undefined' && global && global.gc) {
-        jscontext = global;
-    } else if (typeof window !== 'undefined' && window && window.gc) {
-        jscontext = window;
-    }
-
-    if (jscontext) {
-        jscontext.gc();
-        return true;
-    }
-
-    return false;
-}
-
-function run(suites, env, onBenchmarkComplete, onComplete, log) {
-
-    var results = {};
-
-    log('Running Perf Tests');
-
-    var _run = function() {
-
-        suites.shift().
-            on('cycle', function (event) {
-
-                if(runGC()) {
-                    log('Ran GC between benchmarks');
-                }
-
-                var benchmark = event.target;
-                var suite = benchmark.suite = this.name;
-
-                var tests = results[env] = results[env] || {};
-
-                tests[suite] = tests[suite] || [];
-                tests[suite].push(benchmark);
-
-                if (onBenchmarkComplete) {
-                    onBenchmarkComplete(benchmark);
-                }
-            }).
-            on('error', function(e) {
-                var error = e.target.error;
-
-                log(error);
-                log(error.stack);
-            }).
-            on('complete', function() {
-                log('Perf Tests Complete');
-                if (suites.length === 0) {
-                    if (onComplete) {
-                        onComplete(results);
-                    }
-                } else {
-                    _run();
-                }
-            }).
-            run({
-                async: true
+    suite.
+        on('cycle', function (event) {
+            countDone++;
+            var str = countDone + ' out of ' + suite.length + ' completed';
+            console.warn(str);
+            results.push({
+                name: event.target.name,
+                hz: event.target.hz,
+                deviation: event.target.stats.deviation
             });
-    };
+        }).
+        on('complete', function () {
+            done(results);
+        });
 
-    _run();
+    setTimeout(function () {
+        // Note: run in timeout so that
+        // script runner doesn't log an invalid error that it timed out
+        suite.run({
+            async: !!testCfg.async
+        });
+    }, 50);
 }
 
 module.exports = runner;
+
