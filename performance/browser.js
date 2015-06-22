@@ -1,8 +1,37 @@
-var Rx = require('rx');
-global.Rx = Rx;
-var testConfig = require('./testConfig')();
 var testRunner = require('./testRunner');
-var benchmark = require('benchmark');
+var testConfig = require('./testConfig')();
+var testSuiteGenerator = require('./testSuiteGenerator');
+
+var models = testConfig.models;
+var formats = testConfig.formats;
+var tests = testConfig.get;
+var suite = testConfig.suite;
+
+suite.tests = testSuiteGenerator({
+
+    iterations: 1,
+
+    models: {
+        'model' : models.model,
+        'macro' : models.macro
+    },
+
+    tests: {
+        'simple': tests.syncSimple,
+        'reference': tests.syncReference
+    }
+
+});
+
+testRunner(suite, 10, function(totalResults) {
+    console.log(totalResults.join('\n'));
+});
+
+
+/*
+var testConfig = require('./testConfig');
+var testRunner = require('./testRunner');
+
 var config = testConfig.config;
 var models = testConfig.models;
 
@@ -15,8 +44,8 @@ testConfig.repeatInConfig('macro-sync-simple', 1, macroSimple, config.tests);
 testConfig.repeatInConfig('model-sync-simple', 1, modelSimple, config.tests);
 testConfig.repeatInConfig('macro-sync-reference', 1, macroReference, config.tests);
 testConfig.repeatInConfig('model-sync-reference', 1, modelReference, config.tests);
-testRunner(benchmark, config, 10, function(totalResults) {
+
+testRunner(config, 10, function(totalResults) {
     console.log(totalResults.join('\n'));
 });
-
-
+*/

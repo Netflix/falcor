@@ -1,41 +1,19 @@
-var falcor = require('./../index');
-var Cache = require('./../test/data/Cache');
-var _Legacy = require('./legacy');
-var getOps = require('./get');
-var setOps = require('./set');
-var mergeOps = require('./merge');
-var E_model = new falcor.Model();
-var model = new falcor.Model({cache: Cache()});
-var macro = _Legacy.getMacroModel();
-var mdp = _Legacy.getMdpModel();
-var noOp = function() {};
+var models = require('./models')();
 
-macro._root.unsafeMode = true;
-model._root.unsafeMode = true;
-
-function repeatInConfig(name, count, test, config) {
-    for (var i = 0; i < count; i++) {
-        config[name + ' ' + i] = test;
-    }
-}
+var getTests = require('./tests/get');
+var setTests = require('./tests/set');
+var mergeTests = require('./tests/merge');
 
 module.exports = function() {
-    var config = {
-        name: 'Falcor',
-        async: false,
-        tests: {}
-    };
     return {
-        config: config,
-        models: {
-            model: model,
-            macro: macro,
-            emptyModel: E_model,
-            mdp: mdp
+        suite: {
+            name: 'Falcor',
+            async: false
         },
-        repeatInConfig: repeatInConfig,
-        get: getOps,
-        set: setOps,
-        merge: mergeOps
+        models: models,
+        formats: ['Value', 'JSON', 'PathMap', 'JSONG'],
+        get: getTests,
+        set: setTests,
+        merge: mergeTests
     };
 };
