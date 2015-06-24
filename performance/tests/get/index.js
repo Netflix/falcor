@@ -1,7 +1,14 @@
 var noOp = function() {};
 
 module.exports = {
+
     syncSimple: function(model, format) {
+        return function() {
+            model.getValueSync(['videos', 1234, 'summary']);
+        };
+    },
+
+    syncReference: function(model) {
         return function() {
             model.getValueSync(['videos', 1234, 'summary']);
         };
