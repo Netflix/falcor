@@ -5,6 +5,7 @@ var setTests = require('./tests/set');
 var mergeTests = require('./tests/merge');
 
 module.exports = function() {
+
     return {
         suite: {
             name: 'Falcor',
@@ -16,4 +17,5 @@ module.exports = function() {
         set: setTests,
         merge: mergeTests
     };
+
 };
