@@ -1,4 +1,5 @@
 var fs = require('fs');
+<<<<<<< HEAD
 var mkdirp = require('mkdirp');
 var path = require('path');
 var dirPath = path.resolve(__dirname, '../out');
@@ -42,3 +43,9 @@ function getFileName() {
     }
     return DEFAULT_NAME;
 };
+=======
+
+module.exports = function(totalResults) {
+    fs.writeFileSync('out.csv', totalResults.join('\n'));
+};
+>>>>>>> 5e1882f... More refactoring/cleanup

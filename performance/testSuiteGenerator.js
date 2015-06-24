@@ -1,4 +1,4 @@
-module.exports = function testGenerator(config) {
+module.exports = function (config) {
 
     var generatedTests = {};
 
@@ -7,19 +7,21 @@ module.exports = function testGenerator(config) {
     var models = config.models;
     var formats = config.formats || [null];
 
-    var test;
+    var testName;
+    var modelName;
     var i;
-    var model;
 
-    for (test in tests) {
+    for (testName in tests) {
         for (i = 0; i < iterations; i++) {
-            for (model in models) {
+            for (modelName in models) {
 
                 formats.forEach(function(format) {
-                    var testGenerator = tests[test];
-                    var testName = test + ' (' + model + ', ' + format + ') ' + i;
 
-                    generatedTests[testName] = (format) ?
+                    var testGenerator = tests[testName];
+                    var testLongName = testName + ' (' + modelName + ':' + format + ') ' + i;
+                    var model = models[modelName];
+
+                    generatedTests[testLongName] = (format) ?
                         testGenerator(model, format) :
                         testGenerator(model);
                 });
