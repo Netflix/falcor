@@ -1,6 +1,7 @@
 var testRunner = require('./testRunner');
-var testSuiteGenerator = require('./testSuiteGenerator');
+var testReporter = require('./reporters/nodeTestReporter');
 var testConfig = require('./testConfig')();
+var testSuiteGenerator = require('./testSuiteGenerator');
 
 var models = testConfig.models;
 var formats = testConfig.formats;
@@ -16,19 +17,12 @@ suite.tests = testSuiteGenerator({
         'mock' : models.mock
     },
 
-    formats: [
-        'JSON',
-        'Value',
-        'PathMap',
-        'JSONG'
-    ],
+    formats: formats,
 
     tests: {
-        'gallery values': tests.scrollGallery
+        'scrollGallery': tests.scrollGallery
     }
 
 });
 
-testRunner(suite, 10, function(totalResults) {
-    require('fs').writeFileSync('out.csv', totalResults.join('\n'));
-});
+testRunner(suite, 2, testReporter);

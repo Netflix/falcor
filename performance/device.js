@@ -17,6 +17,8 @@ suite.tests = testSuiteGenerator({
         'mdp' : models.mdp
     },
 
+    formats: testConfig.formats,
+
     tests: {
         'simple': tests.simple,
         'reference': tests.reference,
@@ -26,3 +28,7 @@ suite.tests = testSuiteGenerator({
 });
 
 onTestsLoaded(suite);
+
+// Gibbon Runner
+// nrdp.tvuitest.message
+// nrdp.tvuitest.finish

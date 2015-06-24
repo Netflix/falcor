@@ -1,52 +1,53 @@
-
 module.exports = {
-    startup: startup,
-    scrollingGallery: scrollingGallery
+
+    startup: function(model, format) {
+
+        var envelopes = [startupRequest()];
+
+        switch (format) {
+            case 'JSON':
+                return function() {
+                    model._setJSONGsAsJSON(model, envelopes, [{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{}]);
+                };
+            case 'JSONG':
+                return function() {
+                    model._setJSONGsAsJSONG(model, envelopes, [{}]);
+                };
+            case 'PathMap':
+                return function() {
+                    model._setJSONGsAsPathMap(model, envelopes, [{}]);
+                };
+            case 'Value':
+                return function() {
+                    model._setJSONGsAsValues(model, envelopes, []);
+                };
+        }
+    },
+
+    scrollingGallery: function(model, format) {
+
+        var envelopes = [scrollingGalleryRequest()];
+
+        switch (format) {
+            case 'JSON':
+                return function() {
+                    model._setJSONGsAsJSON(model, envelopes, [{}]);
+                };
+            case 'JSONG':
+                return function() {
+                    model._setJSONGsAsJSONG(model, envelopes, [{}]);
+                };
+            case 'PathMap':
+                return function() {
+                    model._setJSONGsAsPathMap(model, envelopes, [{}]);
+                };
+            case 'Value':
+                return function() {
+                    model._setJSONGsAsValues(model, envelopes, []);
+                };
+        }
+    }
 };
-
-function startup(model, format) {
-    var envelopes = [startupRequest()];
-    switch (format) {
-        case 'JSON':
-            return function() {
-                model._setJSONGsAsJSON(model, envelopes, [{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{}]);
-            };
-        case 'JSONG':
-            return function() {
-                model._setJSONGsAsJSONG(model, envelopes, [{}]);
-            };
-        case 'PathMap':
-            return function() {
-                model._setJSONGsAsPathMap(model, envelopes, [{}]);
-            };
-        case 'Value':
-            return function() {
-                model._setJSONGsAsValues(model, envelopes, []);
-            };
-    }
-}
-
-function scrollingGallery(model, format) {
-    var envelopes = [scrollingGalleryRequest()];
-    switch (format) {
-        case 'JSON':
-            return function() {
-                model._setJSONGsAsJSON(model, envelopes, [{}]);
-            };
-        case 'JSONG':
-            return function() {
-                model._setJSONGsAsJSONG(model, envelopes, [{}]);
-            };
-        case 'PathMap':
-            return function() {
-                model._setJSONGsAsPathMap(model, envelopes, [{}]);
-            };
-        case 'Value':
-            return function() {
-                model._setJSONGsAsValues(model, envelopes, []);
-            };
-    }
-}
 
 function scrollingGalleryRequest() {
     return {
