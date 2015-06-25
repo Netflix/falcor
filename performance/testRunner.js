@@ -1,81 +1,81 @@
 var Benchmark = require('benchmark');
-var csvFormatter = require('./testResultsCSVFormatter');
+var KARMA = global.__karma__;
 
-function createSuite(testCfg) {
+function createSuite(testCfg, iteration) {
 
     var tests = testCfg.tests;
     var testName;
 
-    var suite = new Benchmark.Suite(testCfg.name);
+    var suite = ((KARMA) ? global.suite : Benchmark.Suite)(testCfg.name + ':' + iteration, function(){});
 
     for (testName in tests) {
-        suite.add(testName, tests[testName]);
+        if (KARMA) {
+            global.benchmark(testName, tests[testName]);
+        } else {
+            suite.add(testName, tests[testName]);
+        }
     }
 
     return suite;
 }
 
-function runner(testCfg, iterations, onTestComplete) {
+function createSuites(testCfg, iterations) {
+    var suites = [];
 
-    var suite = createSuite(testCfg);
-    var iteration = 0;
-    var async = Boolean(testCfg.async);
+    for (var i = 0; i < iterations; i++) {
+        suites.push(createSuite(testCfg, i));
+    }
 
-    var totalResults = Object.
-        keys(testCfg.tests).
-        reduce(function(results, testName) {
-            results[testName] = [];
-            return results;
-        }, {});
-
-    var onIterationComplete = function(results) {
-
-        iteration++;
-
-        console.warn('Iteration ' + iteration);
-
-        results.forEach(function(r) {
-            totalResults[r.name].push(r);
-        });
-
-        if (iteration === iterations) {
-            onTestComplete(csvFormatter(totalResults, iterations));
-        } else {
-            run(suite, Boolean(testCfg.async), onIterationComplete);
-        }
-    };
-
-    run(suite, async, onIterationComplete);
+    return suites;
 }
 
-function run(suite, async, onIterationComplete) {
+function runner(testCfg, iterations, onComplete) {
 
-    var testsRun = 0;
-    var results = [];
+    var suites = createSuites(testCfg, iterations);
+    if (!KARMA) {
+        run(suites, onComplete);
+    } else {
+        // KARMA will run the global "suites"
+    }
+}
 
-    suite.off();
-    suite.reset();
+function run(suites, onComplete) {
 
-    suite.
-        on('cycle', function (event) {
+    var results = {};
 
-            testsRun++;
+    var _run = function() {
 
-            console.warn(testsRun + ' out of ' + event.currentTarget.length + ' completed');
+        suites.shift().
+            on('start', function() {
+                console.log(this.name);
+            }).
+            on('cycle', function (event) {
+                var benchmarkName = event.target.name;
 
-            results.push({
-                name: event.target.name,
-                hz: event.target.hz,
-                deviation: event.target.stats.deviation
+                console.log(benchmarkName + ":::" + JSON.stringify(event.target.hz));
+
+                results[benchmarkName] = results[benchmarkName] || [];
+                results[benchmarkName].push({
+                    hz: event.target.hz,
+                    deviation: event.target.stats.deviation
+                });
+            }).
+            on('error', function(e) {
+                console.log(e.target.error);
+            }).
+            on('complete', function() {
+                if (suites.length === 0) {
+                    onComplete(results);
+                } else {
+                    _run();
+                }
+            }).
+            run({
+                async: true
             });
-        }).
-        on('complete', function() {
-            onIterationComplete(results);
-        }).
-        run({
-            async: async,
-            delay: 0.01   // secs
-        });
+    };
+
+    _run();
 }
 
 module.exports = runner;
