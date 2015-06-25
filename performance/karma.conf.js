@@ -10,7 +10,8 @@ module.exports = function(config) {
         'karma-junit-reporter',
         'karma-chrome-launcher',
         'karma-firefox-launcher',
-        require('./performance/reporters/benchmark-csv-reporter'),
+        'karma-safari-launcher',
+        require('./reporters/karmaBenchmarkCSVReporter'),
     ],
 
     // use dots reporter, as travis terminal does not support escaping sequences
@@ -23,7 +24,7 @@ module.exports = function(config) {
 
     // list of files / patterns to load in the browser
     files: [
-        'performance/bin/browser.js'
+        'bin/browser.js'
     ],
 
     // list of files to exclude
@@ -58,7 +59,8 @@ module.exports = function(config) {
     // CLI --browsers Chrome,Firefox,Safari
     browsers: [
       'Chrome',
-      'Firefox'
+      'Firefox',
+      'Safari'
     ],
 
     // Serve html files using html2js
@@ -67,13 +69,19 @@ module.exports = function(config) {
 
     // Configure the jUnit reporter
     junitReporter: {
-      outputFile: 'junit-benchmark-results.xml',
+      outputFile: 'out/junit-benchmark.xml',
       suite: 'unit'
+    },
+
+    benchmarkCSVReporter: {
+      outputFile: 'out/browser-benchmark.csv'
     },
 
     // If browser does not capture in given timeout [ms], kill it
     // CLI --capture-timeout 5000
-    captureTimeout: 20000,
+    captureTimeout: 30000,
+
+    browserNoActivityTimeout: 30000,
 
     // Auto run tests on start (when browsers are captured) and exit
     // CLI --single-run --no-single-run
@@ -82,6 +90,6 @@ module.exports = function(config) {
 
     // report which specs are slower than 500ms
     // CLI --report-slower-than 500
-    reportSlowerThan: 500
+    reportSlowerThan: 30000
   });
 };

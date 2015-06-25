@@ -1,3 +1,3 @@
-module.exports = function(totalResults) {
-    console.log(totalResults);
+module.exports = function(results) {
+    console.log(results);
 };
