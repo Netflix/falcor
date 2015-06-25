@@ -58,7 +58,9 @@ module.exports = function(config) {
     // - IE (only Windows)
     // CLI --browsers Chrome,Firefox,Safari
     browsers: [
-      'Chrome'
+      'Chrome',
+      'Firefox',
+      'Safari'
     ],
 
     // Serve html files using html2js

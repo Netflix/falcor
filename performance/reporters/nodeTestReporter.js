@@ -1,56 +1,16 @@
 var fs = require('fs');
-<<<<<<< HEAD
 var mkdirp = require('mkdirp');
 var path = require('path');
-var dirPath = path.resolve(__dirname, '../out');
 
-var DEFAULT_NAME = 'node-benchmark.csv';
-var COMMAND_OPTION = '-n';
+var filepath = 'out/node-benchmark.csv';
 
-module.exports = {
-    resultsReporter: function (results) {
-        var filePath = path.resolve(dirPath, getFileName());
-        mkdirp(path.dirname(filePath), function (err) {
-            if (err) {
-                console.error('\nError writing file: ' + filePath);
-            } else {
-                fs.writeFileSync(filePath, results);
-                console.info('\nCreated output file: ' + filePath);
-            }
-        });
-    },
-
-
-    benchmarkReporter: function (benchmark) {
-        console.info(benchmark);
-    }
+module.exports = function(results) {
+    mkdirp(path.dirname(filepath), function (err) {
+        if (err) {
+            console.error('\nError writing file: ' + filepath);
+        } else {
+            fs.writeFileSync(filepath, results);
+            console.info('\nCreated output file: ' + filepath);
+        }
+    });
 };
-
-function getFileName() {
-    if (typeof process !== 'undefined') {
-        var name = DEFAULT_NAME;
-        var foundName = false;
-        process.argv.forEach(function(x) {
-            if (x === COMMAND_OPTION) {
-                foundName = true;
-            }
-
-            else if (foundName) {
-                name = x;
-            }
-        });
-        return name;
-    }
-    return DEFAULT_NAME;
-};
-=======
-
-module.exports = function(totalResults) {
-<<<<<<< HEAD
-    fs.writeFileSync('out.csv', totalResults.join('\n'));
-};
->>>>>>> 5e1882f... More refactoring/cleanup
-=======
-    fs.writeFileSync('out.csv', totalResults);
-};
->>>>>>> 243f2bc... Added Karma hooks
