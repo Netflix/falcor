@@ -1,5 +1,5 @@
 var fs = require('fs');
 
 module.exports = function(totalResults) {
-    fs.writeFileSync('out.csv', totalResults.join('\n'));
+    fs.writeFileSync('out.csv', totalResults);
 };

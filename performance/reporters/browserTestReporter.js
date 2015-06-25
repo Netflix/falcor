@@ -1,3 +1,3 @@
 module.exports = function(totalResults) {
-    console.log(totalResults.join('\n'));
+    console.log(totalResults);
 };

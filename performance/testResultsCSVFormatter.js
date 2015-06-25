@@ -1,28 +1,15 @@
-module.exports = function formatResultsAsCSV(totalResults, count) {
+module.exports = function (writer) {
 
-    var transform = Object.
-            keys(totalResults).
-            reduce(function(acc, name) {
-                var results = totalResults[name];
-                var row = [name];
-                results.forEach(function(r) {
-                    row.push(r.hz);
-                });
-                acc.push(row);
-                return acc;
-            }, []);
+    return function(results) {
+        var table = [];
+        var row;
+        var test;
 
-    var csv = [];
-
-    for (var i = 0; i < count + 1; i++) {
-        var csvRow = [];
-
-        for (var j = 0; j < transform.length; j++) {
-            csvRow[j] = transform[j][i];
+        for (test in results) {
+            row = [test].concat(JSON.stringify(results[test]));
+            table.push(row.join(','));
         }
 
-        csv[i] = csvRow;
-    }
-
-    return csv;
-}
+        writer(table.join('\n'));
+    };
+};
