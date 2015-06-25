@@ -2,7 +2,7 @@ var testRunner = require('./testRunner');
 var testReporter = require('./reporters/nodeTestReporter');
 var testConfig = require('./testConfig')();
 var testSuiteGenerator = require('./testSuiteGenerator');
-var csvFormatter = require('./testResultsCSVFormatter');
+var CSVFormatter = require('./formatter/CSVFormatter');
 
 var models = testConfig.models;
 var formats = testConfig.formats;
@@ -26,4 +26,4 @@ suite.tests = testSuiteGenerator({
 
 });
 
-testRunner(suite, 2, csvFormatter(testReporter));
+testRunner(suite, 2, CSVFormatter.pipe(CSVFormatter.toTable, testReporter));
