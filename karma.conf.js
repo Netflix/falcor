@@ -5,15 +5,25 @@ module.exports = function(config) {
 
     frameworks: ['benchmark'],
 
+    plugins: [
+        'karma-benchmark',
+        'karma-junit-reporter',
+        'karma-chrome-launcher',
+        'karma-firefox-launcher',
+        require('./performance/reporters/benchmark-csv-reporter'),
+    ],
+
     // use dots reporter, as travis terminal does not support escaping sequences
     // possible values: 'dots', 'progress'
     // CLI --reporters progress
-    reporters: ['benchmark'],
-    reporters: ['junit'],
+    reporters: [
+        'benchmarkcsv',
+        'junit'
+    ],
 
     // list of files / patterns to load in the browser
     files: [
-	'performance/bin/browser.js'
+        'performance/bin/browser.js'
     ],
 
     // list of files to exclude
@@ -47,7 +57,8 @@ module.exports = function(config) {
     // - IE (only Windows)
     // CLI --browsers Chrome,Firefox,Safari
     browsers: [
-      'Chrome'
+      'Chrome',
+      'Firefox'
     ],
 
     // Serve html files using html2js
