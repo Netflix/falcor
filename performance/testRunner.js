@@ -1,4 +1,6 @@
 var Benchmark = require('benchmark');
+var CSVFormatter = require('./formatter/CSVFormatter');
+
 var KARMA = global.__karma__;
 
 function createSuite(testCfg, iteration) {
@@ -47,23 +49,25 @@ function run(suites, onComplete) {
     var _run = function() {
 
         suites.shift().
-            on('start', function() {
-                console.log(this.name);
-            }).
             on('cycle', function (event) {
-                var benchmarkName = event.target.name;
 
-                console.log(benchmarkName + ":::" + JSON.stringify(event.target.hz));
+                var env = 'ENV';
 
-                results[benchmarkName] = results[benchmarkName] || [];
-                results[benchmarkName].push({
-                    hz: event.target.hz,
-                    deviation: event.target.stats.deviation
-                });
+                var benchmark = event.target;
+                var suite = benchmark.suite = this.name;
+
+                var tests = results[env] = results[env] || {};
+
+                tests[suite] = tests[suite] || [];
+                tests[suite].push(benchmark);
+
+                console.info(CSVFormatter.toRow(benchmark, env));
             }).
+            /*
             on('error', function(e) {
                 console.log(e.target.error);
             }).
+            */
             on('complete', function() {
                 if (suites.length === 0) {
                     onComplete(results);
