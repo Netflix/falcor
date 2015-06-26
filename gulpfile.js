@@ -29,24 +29,6 @@ gulp.task('lint', function() {
 
 gulp.task('doc', ['clean.doc', 'doc-d']);
 
-/*
-gulp.task('doc-p', function() {
-    return gulp.src('lib/docs.js').
-        pipe(jsdoc.parser({
-            plugins: ['plugins/markdown'],
-            name: 'Falcor',
-            description: 'Here is the desc.',
-            licenses: ['Apache License Version 2'],
-            version: '0.1.5'
-        })).
-        pipe(gulp.dest('./tmp/doc'));
-});
-gulp.task('doc-d', ['clean.doc', 'doc-p'], function() {
-    return gulp.src('tmp/doc/jsdoc.json').
-        pipe(jsdoc.generator('doc'));
-});
-*/
-
 gulp.task('doc-d', gulpShell.task([
     './node_modules/.bin/jsdoc lib -r -d doc -c ./build/jsdoc.json --verbose'
 ]));

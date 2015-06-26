@@ -31,18 +31,18 @@ function createSuites(testCfg, iterations) {
     return suites;
 }
 
-function runner(testCfg, iterations, onComplete) {
+function runner(testCfg, iterations, env, onComplete) {
 
     var suites = createSuites(testCfg, iterations);
 
     if (!KARMA) {
-        run(suites, onComplete);
+        run(suites, env, onComplete);
     } else {
         // KARMA will run the global "suites"
     }
 }
 
-function run(suites, onComplete) {
+function run(suites, env, onComplete) {
 
     var results = {};
 
@@ -50,8 +50,6 @@ function run(suites, onComplete) {
 
         suites.shift().
             on('cycle', function (event) {
-
-                var env = 'ENV';
 
                 var benchmark = event.target;
                 var suite = benchmark.suite = this.name;
