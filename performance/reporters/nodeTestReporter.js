@@ -2,7 +2,7 @@ var fs = require('fs');
 var mkdirp = require('mkdirp');
 var path = require('path');
 
-var filepath = 'out/node-benchmark.csv';
+var filepath = path.resolve(__dirname, '../out/node-benchmark.csv');
 
 module.exports = function(results) {
     mkdirp(path.dirname(filepath), function (err) {
