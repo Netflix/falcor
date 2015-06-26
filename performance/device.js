@@ -28,7 +28,3 @@ suite.tests = testSuiteGenerator({
 });
 
 onTestsLoaded(suite);
-
-// Gibbon Runner
-// nrdp.tvuitest.message
-// nrdp.tvuitest.finish
