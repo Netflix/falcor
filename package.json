@@ -21,7 +21,8 @@
     "test": "gulp test-coverage",
     "dist": "gulp build",
     "doc": "gulp doc",
-    "deploy-ghpages": "./build/deploy-ghpages.sh"
+    "deploy-ghpages": "./build/deploy-ghpages.sh",
+    "perf": "gulp perf-run"
   },
   "files": [
     "build",

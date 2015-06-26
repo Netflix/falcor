@@ -26,4 +26,4 @@ suite.tests = testSuiteGenerator({
 
 });
 
-testRunner(suite, 2, CSVFormatter.pipe(CSVFormatter.toTable, testReporter));
+testRunner(suite, 2, 'node ' + process.version, CSVFormatter.pipe(CSVFormatter.toTable, testReporter));
