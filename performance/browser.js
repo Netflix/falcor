@@ -25,4 +25,4 @@ suite.tests = testSuiteGenerator({
 
 });
 
-testRunner(suite, 2, CSVFormatter.pipe(CSVFormatter.toTable, testReporter));
+testRunner(suite, 2, navigator.userAgent, CSVFormatter.pipe(CSVFormatter.toTable, testReporter));

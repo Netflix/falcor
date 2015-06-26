@@ -1,13 +1,8 @@
 var gulp = require('gulp');
-var rename = require('gulp-rename');
 var concat = require('gulp-concat');
-var browserify = require('browserify');
-var Transform = require('stream').Transform;
-var Rx = require('rx');
-var Observable = Rx.Observable;
-var fs = require('fs');
-var path = require('path');
 var vinyl = require('vinyl-source-stream');
+var browserify = require('browserify');
+var gulpShell = require('gulp-shell');
 
 gulp.task('perf', ['perf-device']);
 gulp.task('perf-update', runner);
@@ -16,10 +11,20 @@ gulp.task('perf-device', ['perf-assemble'], runner);
 gulp.task('perf-browser', ['perf-assemble-browser'], runner);
 gulp.task('perf-assemble-browser', ['clean.perf'], browser);
 gulp.task('perf-all', ['perf-device', 'perf-browser']);
+gulp.task('perf-run', ['perf-device', 'perf-browser'], run());
+
+function run() {
+    return gulpShell.task([
+        'karma start ./performance/karma.conf.js',
+        'node ./performance/node.js'
+    ], {
+        ignoreErrors:true
+    });
+}
 
 function assemble() {
     return browserify('./performance/testConfig.js', {
-            standalone: 'testConfig' 
+            standalone: 'testConfig'
         }).
         bundle().
         pipe(vinyl('assembledPerf.js')).
@@ -28,7 +33,7 @@ function assemble() {
 
 function browser() {
     return browserify('./performance/browser.js', {
-            standalone: 'browser' 
+            standalone: 'browser'
         }).
         bundle().
         pipe(vinyl('browser.js')).
