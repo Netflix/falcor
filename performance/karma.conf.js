@@ -59,8 +59,7 @@ module.exports = function(config) {
     // CLI --browsers Chrome,Firefox,Safari
     browsers: [
       'Chrome',
-      'Firefox',
-      'Safari'
+      'Firefox'
     ],
 
     // Serve html files using html2js

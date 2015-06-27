@@ -14,13 +14,19 @@ suite.tests = testSuiteGenerator({
     iterations: 1,
 
     models: {
-        'model': models.model,
-        'macro': models.macro
+        'model': models.model
     },
+
+    formats: [
+        'JSON'
+    ],
 
     tests: {
         'sync-simple': tests.syncSimple,
-        'sync-reference': tests.syncReference
+        'sync-reference': tests.syncReference,
+        'simple': tests.simple,
+        'complex': tests.complex,
+        'reference': tests.reference
     }
 
 });
