@@ -1,6 +1,6 @@
+var testConfig = require('./testConfig')();
 var testRunner = require('./testRunner');
 var testReporter = require('./reporters/nodeTestReporter');
-var testConfig = require('./testConfig')();
 var testSuiteGenerator = require('./testSuiteGenerator');
 var CSVFormatter = require('./formatter/CSVFormatter');
 
@@ -14,14 +14,19 @@ suite.tests = testSuiteGenerator({
     iterations: 1,
 
     models: {
-        'model' : models.model,
-        'mock' : models.mock
+        'model': models.model
     },
 
-    formats: formats,
+    formats: [
+        'JSON'
+    ],
 
     tests: {
-        'scrollGallery': tests.scrollGallery
+        'sync-simple': tests.syncSimple,
+        'sync-reference': tests.syncReference,
+        'simple': tests.simple,
+        'complex': tests.complex,
+        'reference': tests.reference
     }
 
 });
