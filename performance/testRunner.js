@@ -59,7 +59,7 @@ function run(suites, env, onComplete) {
                 tests[suite] = tests[suite] || [];
                 tests[suite].push(benchmark);
 
-                console.info(CSVFormatter.toRow(benchmark, env));
+                typeof console !== 'undefined' && console.warn(CSVFormatter.toRow(benchmark, env));
             }).
             /*
             on('error', function(e) {
