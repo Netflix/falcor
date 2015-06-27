@@ -12,12 +12,12 @@ var BenchCSVReporter = function(baseReporterDecorator, config, logger, helper) {
        RESULTS STRUCTURE:
 
             <env>: {
-                <suiteName>: [{
-                    name,
-                    hz,
-                    suite,
-                    stats
-                    ...
+                <suiteName>: [
+                    {
+                    suite: <suiteName>,
+                    name: <benchName>,
+                    hz: ...,
+                    stats: {...}
                 }]
             }
        }
