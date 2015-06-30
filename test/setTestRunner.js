@@ -107,7 +107,7 @@ function setTestRunner(data, options) {
                     // Note: JSONG should have all the required references
                     if (prefix !== 'setJSONGs') {
                         query.forEach(function(q) {
-                            var paths = q.path || q.paths || collapse.buildQueries(removeLeafs(_.cloneDeep(q)));
+                            var paths = q.path || q.paths || collapse.pathmapToPathsets(removeLeafs(_.cloneDeep(q))).sets;
                             options.fillReferences && fillInReferences(model, paths);
                             if (options.hardLink) {
                                 model._getPathSetsAsValues(model, [paths]);
