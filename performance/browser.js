@@ -1,22 +1,28 @@
-var Rx = require('rx');
-global.Rx = Rx;
 var testConfig = require('./testConfig')();
 var testRunner = require('./testRunner');
-var benchmark = require('benchmark');
-var config = testConfig.config;
+var testReporter = require('./reporters/browserTestReporter');
+var testSuiteGenerator = require('./testSuiteGenerator');
+var CSVFormatter = require('./formatter/CSVFormatter');
+
 var models = testConfig.models;
+var formats = testConfig.formats;
+var tests = testConfig.get;
+var suite = testConfig.suite;
 
-var macroSimple = testConfig.get.syncSimple(models.macro);
-var modelSimple = testConfig.get.syncSimple(models.model);
-var macroReference = testConfig.get.syncReference(models.macro);
-var modelReference = testConfig.get.syncReference(models.model);
+suite.tests = testSuiteGenerator({
 
-testConfig.repeatInConfig('macro-sync-simple', 1, macroSimple, config.tests);
-testConfig.repeatInConfig('model-sync-simple', 1, modelSimple, config.tests);
-testConfig.repeatInConfig('macro-sync-reference', 1, macroReference, config.tests);
-testConfig.repeatInConfig('model-sync-reference', 1, modelReference, config.tests);
-testRunner(benchmark, config, 10, function(totalResults) {
-    console.log(totalResults.join('\n'));
+    iterations: 1,
+
+    models: {
+        'model': models.model,
+        'macro': models.macro
+    },
+
+    tests: {
+        'sync-simple': tests.syncSimple,
+        'sync-reference': tests.syncReference
+    }
+
 });
 
-
+testRunner(suite, 2, navigator.userAgent, CSVFormatter.pipe(CSVFormatter.toTable, testReporter));
