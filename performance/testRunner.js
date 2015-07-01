@@ -66,6 +66,7 @@ function run(suites, env, onComplete) {
             on('error', function(e) {
                 console.log('ran.error');
                 console.log(e.target.error);
+                console.log(e.target.error.stack);
             }).
             on('complete', function() {
                 console.log('ran.completed');

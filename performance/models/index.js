@@ -15,8 +15,13 @@ module.exports = function() {
     var model = new falcor.Model({cache: Cache()});
     model._root.unsafeMode = true;
 
-    var modelWithStore = new falcor.Model({dataSource: new LocalDataStore(Cache())});
+    var modelWithStore = new falcor.Model({source: new LocalDataStore(Cache())});
     modelWithStore._root.unsafeMode = true;
+    var modelGet = modelWithStore.get.bind(modelWithStore);
+    modelWithStore.get = function() {
+        modelWithStore._cache = {};
+        return modelGet.apply(modelWithStore, arguments);
+    };
 
     var macroModel = legacyFalcor.getMacroModel();
     macroModel._root.unsafeMode = true;
