@@ -82,16 +82,24 @@ module.exports = {
             case 'JSON':
                 return function(done) {
                     model.
-                        get.apply(model, scrollingRequest.concat(function(a,b,c,d) {
-                            done && done.resolve();
+                        get.apply(model, simpleRequest.concat(function(a, b, c, d) {
+                            return [a, b, c, d];
                         })).
-                        subscribe();
+                        subscribe(function(next) {
+                            console.log(format,
+                                JSON.stringify(next));
+                        }, noOp, function() {
+                            done && done.resolve();
+                        });
                 };
             case 'JSONG':
                 return function(done) {
                     model.get.apply(model, scrollingRequest).
                         toJSONG().
                         subscribe(function(next) {
+                            console.log(format,
+                                JSON.stringify(next));
+                        }, noOp, function() {
                             done && done.resolve();
                         });
                 };
@@ -99,6 +107,9 @@ module.exports = {
                 return function(done) {
                     model.get.apply(model, scrollingRequest).
                         subscribe(function(next) {
+                            console.log(format,
+                                JSON.stringify(next));
+                        }, noOp, function() {
                             done && done.resolve();
                         });
                 };
@@ -106,7 +117,10 @@ module.exports = {
                 return function(done) {
                     model.get.apply(model, scrollingRequest).
                         toPathValues().
-                        subscribe(noOp, noOp, function(next) {
+                        subscribe(function(next) {
+                            console.log(format,
+                                JSON.stringify(next));
+                        }, noOp, function() {
                             done && done.resolve();
                         });
                 };
@@ -120,15 +134,25 @@ module.exports = {
         switch (format) {
             case 'JSON':
                 return function(done) {
-                    model.get.apply(model, simpleRequest, function(a) {
-                        done && done.resolve();
-                    });
+                    model.
+                        get.apply(model, simpleRequest.concat(function(a) {
+                            return a;
+                        })).
+                        subscribe(function(next) {
+                            console.log(format,
+                                JSON.stringify(next));
+                        }, noOp, function() {
+                            done && done.resolve();
+                        });
                 };
             case 'JSONG':
                 return function(done) {
                     model.get.apply(model, simpleRequest).
                         toJSONG().
                         subscribe(function(next) {
+                            console.log(format,
+                                JSON.stringify(next));
+                        }, noOp, function() {
                             done && done.resolve();
                         });
                 };
@@ -136,6 +160,9 @@ module.exports = {
                 return function(done) {
                     model.get.apply(model, simpleRequest).
                         subscribe(function(next) {
+                            console.log(format,
+                                JSON.stringify(next));
+                        }, noOp, function() {
                             done && done.resolve();
                         });
                 };
@@ -144,6 +171,9 @@ module.exports = {
                     model.get.apply(model, simpleRequest).
                         toPathValues().
                         subscribe(function(next) {
+                            console.log(format,
+                                JSON.stringify(next));
+                        }, noOp, function() {
                             done && done.resolve();
                         });
                 };
@@ -157,15 +187,25 @@ module.exports = {
         switch (format) {
             case 'JSON':
                 return function(done) {
-                    model.get.apply(model, referenceRequest, function(a) {
-                        done && done.resolve();
-                    });
+                    model.
+                        get.apply(model, simpleRequest.concat(function(a) {
+                            return a;
+                        })).
+                        subscribe(function(next) {
+                            console.log(format,
+                                JSON.stringify(next));
+                        }, noOp, function() {
+                            done && done.resolve();
+                        });
                 };
             case 'JSONG':
                 return function(done) {
                     model.get.apply(model, referenceRequest).
                         toJSONG().
                         subscribe(function(next) {
+                            console.log(format,
+                                JSON.stringify(next));
+                        }, noOp, function() {
                             done && done.resolve();
                         });
                 };
@@ -173,6 +213,9 @@ module.exports = {
                 return function(done) {
                     model.get.apply(model, referenceRequest).
                         subscribe(function(next) {
+                            console.log(format,
+                                JSON.stringify(next));
+                        }, noOp, function() {
                             done && done.resolve();
                         });
                 };
@@ -181,6 +224,9 @@ module.exports = {
                     model.get.apply(model, referenceRequest).
                         toPathValues().
                         subscribe(function(next) {
+                            console.log(format,
+                                JSON.stringify(next));
+                        }, noOp, function() {
                             done && done.resolve();
                         });
                 };
@@ -194,15 +240,25 @@ module.exports = {
         switch (format) {
             case 'JSON':
                 return function(done) {
-                    model.get.apply(model, complexRequest, function(a) {
-                        done && done.resolve();
-                    });
+                    model.
+                        get.apply(model, simpleRequest.concat(function(a) {
+                            return a;
+                        })).
+                        subscribe(function(next) {
+                            console.log(format,
+                                JSON.stringify(next));
+                        }, noOp, function() {
+                            done && done.resolve();
+                        });
                 };
             case 'JSONG':
                 return function(done) {
                     model.get.apply(model, complexRequest).
                         toJSONG().
                         subscribe(function(next) {
+                            console.log(format,
+                                JSON.stringify(next));
+                        }, noOp, function() {
                             done && done.resolve();
                         });
                 };
@@ -210,6 +266,9 @@ module.exports = {
                 return function(done) {
                     model.get.apply(model, complexRequest).
                         subscribe(function(next) {
+                            console.log(format,
+                                JSON.stringify(next));
+                        }, noOp, function() {
                             done && done.resolve();
                         });
                 };
@@ -218,6 +277,9 @@ module.exports = {
                     model.get.apply(model, complexRequest).
                         toPathValues().
                         subscribe(function(next) {
+                            console.log(format,
+                                JSON.stringify(next));
+                        }, noOp, function() {
                             done && done.resolve();
                         });
                 };
