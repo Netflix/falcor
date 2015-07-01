@@ -107,7 +107,7 @@ function setTestRunner(data, options) {
                     // Note: JSONG should have all the required references
                     if (prefix !== 'setJSONGs') {
                         query.forEach(function(q) {
-                            var paths = q.path || q.paths || collapse.pathmapToPathsets(removeLeafs(_.cloneDeep(q))).sets;
+                            var paths = q.path || q.paths || pathmapToPathsets(removeLeafs(_.cloneDeep(q))).sets;
                             options.fillReferences && fillInReferences(model, paths);
                             if (options.hardLink) {
                                 model._getPathSetsAsValues(model, [paths]);
@@ -175,6 +175,101 @@ function getCountArrayOrFunction(data, suffix, expected, testRunner) {
     }
     var count = data.count === undefined ? 1 : 0;
     return Array(count).join(",").split(",").map(function() { return {}; });
+}
+
+/**
+ * Builds the set of collapsed
+ * queries by traversing the tree
+ * once
+ */
+
+/* jshint forin: false */
+function pathmapToPathsets(pathmap, pathmapKey) {
+
+    var key;
+    var subs = Object.create(null);
+    var subKeys = "";
+    var pathsets = [];
+    var pathsetsLength = 0;
+
+    var subPath, subPathKeys, subPathKeysCount,
+        subPathSets, subPathSetsCount, subPathSetsIndex;
+
+    for(key in pathmap) {
+        if(key === __count) {
+            if(pathmapKey !== void 0) {
+                subs[__prefix + pathmapKey] = {
+                    key: pathmapKey,
+                    keys: empty_array,
+                    sets: empty_array
+                };
+            }
+            delete pathmap[key];
+        } else if(key[0] === __prefix) {
+            continue;
+        } else {
+            subPath = pathmapToPathsets(pathmap[key], key);
+            subPathKeys = subPath.key;
+            subPathSets = subs[subPathKeys] || (subs[subPathKeys] = {
+                key: subPathKeys,
+                keys: [],
+                sets: subPath.sets
+            });
+            subPathSets.key = key + ", " + subPathSets.key;
+            subPathSets.keys.push(isNumber(key) ? parseInt(key, 10) : key);
+        }
+    }
+
+    var pathset, pathsetCount, pathsetIndex,
+        pathsetClone, firstSubPathsKey;
+
+    for(key in subs) {
+
+        subPath = subs[key];
+        subPathKeys = subPath.keys;
+        subPathKeysCount = subPathKeys.length;
+
+        if(subPathKeysCount > 0) {
+
+            subKeys += (subKeys ? ", " : "") + "[" + subPath.key + "]";
+            subPathSets = subPath.sets;
+            subPathSetsIndex = -1;
+            subPathSetsCount = subPathSets.length;
+            firstSubPathsKey = subPathKeys[0];
+
+            while(++subPathSetsIndex < subPathSetsCount) {
+
+                pathset = subPathSets[subPathSetsIndex];
+                pathsetIndex = -1;
+                pathsetCount = pathset.length;
+                pathsetClone = new Array(pathsetCount);
+
+                if(subPathKeysCount > 1) {
+                    pathsetClone[0] = subPathKeys;
+                } else {
+                    pathsetClone[0] = firstSubPathsKey;
+                }
+
+                while(++pathsetIndex < pathsetCount) {
+                    pathsetClone[pathsetIndex + 1] = pathset[pathsetIndex];
+                }
+
+                pathsets[pathsetsLength++] = pathsetClone;
+            }
+        } else {
+            subKeys += subKeys ? ", []" : "[]";
+            pathsets[pathsetsLength++] = empty_array;
+        }
+    }
+
+    if(pathsetsLength === 0) {
+        pathsets[0] = empty_array;
+    }
+
+    return {
+        key: subKeys || "[]",
+        sets: pathsets
+    };
 }
 
 module.exports = setTestRunner;
