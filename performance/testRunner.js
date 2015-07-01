@@ -68,6 +68,7 @@ function run(suites, env, onBenchmarkComplete, onComplete) {
             on('error', function(e) {
                 console.log('ran.error');
                 console.log(e.target.error);
+                console.log(e.target.error.stack);
             }).
             on('complete', function() {
                 console.log('ran.completed');
