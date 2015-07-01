@@ -8,24 +8,24 @@ describe("collapse", function() {
             lolomo: 1
         }, {
             lolomo: {
+                summary: 1,
                 13: 1,
-                14: 1,
-                summary: 1
+                14: 1
             }
         }, {
             lolomo: {
-                13: {
-                    summary: 1
-                },
-                14: {
-                    summary: 1
-                },
                 15: {
                     rating: 1,
                     summary: 1
                 },
+                13: {
+                    summary: 1
+                },
                 16: {
                     rating: 1,
+                    summary: 1
+                },
+                14: {
                     summary: 1
                 },
                 17: {
@@ -54,16 +54,16 @@ describe("collapse", function() {
         ).to.equal(true);
 
         expect((third[0] === "lolomo") && (
-            third[1]["from"] === 15)   && (
-            third[1]["to"] === 17)     && (
-            third[2][0] === "rating")  && (
-            third[2][1] === "summary")
+            third[1]["from"] === 13)   && (
+            third[1]["to"] === 14)     && (
+            third[2] === "summary")
         ).to.equal(true);
 
         expect((fourth[0] === "lolomo") && (
-            fourth[1]["from"] === 13)   && (
-            fourth[1]["to"] === 14)     && (
-            fourth[2] === "summary")
+            fourth[1]["from"] === 15)   && (
+            fourth[1]["to"] === 17)     && (
+            fourth[2][0] === "rating")  && (
+            fourth[2][1] === "summary")
         ).to.equal(true);
     });
 });
