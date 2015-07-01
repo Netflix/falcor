@@ -14,7 +14,8 @@ suite.tests = testSuiteGenerator({
     iterations: 1,
 
     models: {
-        'model' : models.model
+        'model' : models.model,
+        'modelWithStore' : models.modelWithStore,
     },
 
     formats: formats,
