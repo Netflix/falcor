@@ -8,13 +8,13 @@ function createSuite(testCfg, iteration) {
     var tests = testCfg.tests;
     var testName;
 
-    var suite = ((KARMA) ? global.suite : Benchmark.Suite)(testCfg.name + ':' + iteration, function(){});
+    var suite = ((KARMA) ? global.suite : Benchmark.Suite)(testCfg.name + ':' + iteration, function() {});
 
     for (testName in tests) {
         if (KARMA) {
-            global.benchmark(testName, tests[testName]);
+            global.benchmark(testName, tests[testName], {defer: true});
         } else {
-            suite.add(testName, tests[testName]);
+            suite.add(testName, tests[testName], {defer: true});
         }
     }
 
@@ -46,11 +46,13 @@ function run(suites, env, onBenchmarkComplete, onComplete) {
 
     var results = {};
 
+    console.log('about to run');
+    debugger
     var _run = function() {
 
         suites.shift().
             on('cycle', function (event) {
-
+                console.log('ran.cycle');
                 var benchmark = event.target;
                 var suite = benchmark.suite = this.name;
 
@@ -63,12 +65,12 @@ function run(suites, env, onBenchmarkComplete, onComplete) {
                     onBenchmarkComplete(benchmark);
                 }
             }).
-            /*
             on('error', function(e) {
+                console.log('ran.error');
                 console.log(e.target.error);
             }).
-            */
             on('complete', function() {
+                console.log('ran.completed');
                 if (suites.length === 0) {
                     if (onComplete) {
                         onComplete(results);
