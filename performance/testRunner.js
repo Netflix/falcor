@@ -12,9 +12,9 @@ function createSuite(testCfg, iteration) {
 
     for (testName in tests) {
         if (KARMA) {
-            global.benchmark(testName, tests[testName], {defer: true});
+            global.benchmark(testName, tests[testName], {defer: false});
         } else {
-            suite.add(testName, tests[testName], {defer: true});
+            suite.add(testName, tests[testName], {defer: false});
         }
     }
 
