@@ -14,11 +14,7 @@ var TESTS = {
     'complex': tests.complex
 };
 suite.tests = testSuiteGenerator({
-    iterations: 3,
-    formats: ['Value'],
-    tests: TESTS,
-    models: {
-        modelWithSource: models.modelWithSource
-    }
+    iterations: 10,
+    formats: ['JSON']
 });
 testRunner(suite, 'node ' + process.version, CSVFormatter.pipe(CSVFormatter.toTable, testReporter));
