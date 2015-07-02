@@ -1,8 +1,18 @@
+var testConfig = require('./testConfig')();
 var testRunner = require('./testRunner');
 var testReporter = require('./reporters/nodeTestReporter');
-var testConfig = require('./testConfig')();
 var testSuiteGenerator = require('./testSuiteGenerator');
 var CSVFormatter = require('./formatter/CSVFormatter');
+
+var compose = function(f, g) {
+    return function(v) {
+        return f(g(v));
+    };
+};
+
+var curry = function(fn, arg) {
+    return fn.bind(null, arg);
+};
 
 var models = testConfig.models;
 var formats = testConfig.formats;
@@ -14,16 +24,25 @@ suite.tests = testSuiteGenerator({
     iterations: 1,
 
     models: {
-        'model' : models.model,
-        'mock' : models.mock
+        'model': models.model
     },
 
-    formats: formats,
+    formats: [
+        'JSON'
+    ],
 
     tests: {
-        'scrollGallery': tests.scrollGallery
+        'sync-simple': tests.syncSimple,
+        'sync-reference': tests.syncReference,
+        'simple': tests.simple,
+        'complex': tests.complex,
+        'reference': tests.reference
     }
 
 });
 
-testRunner(suite, 2, 'node ' + process.version, CSVFormatter.pipe(CSVFormatter.toTable, testReporter));
+var env = 'node ' + process.version;
+var resultsReporter = compose(testReporter.resultsReporter, CSVFormatter.toTable);
+var benchmarkReporter = compose(testReporter.benchmarkReporter, curry(CSVFormatter.toRow, env));
+
+testRunner(suite, 2, env, benchmarkReporter, resultsReporter);

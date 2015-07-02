@@ -9,7 +9,7 @@ var gulpShell = require('gulp-shell');
 require('./build/gulp-clean');
 require('./build/gulp-build');
 require('./build/gulp-test');
-require('./build/performance/gulp-perf');
+require('./build/gulp-perf');
 
 var srcDir = 'lib';
 
