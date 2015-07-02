@@ -9,5 +9,7 @@ var formats = testConfig.formats;
 var tests = testConfig.get;
 var suite = testConfig.suite;
 
-suite.tests = testSuiteGenerator();
-testRunner(suite, 10, 'node ' + process.version, CSVFormatter.pipe(CSVFormatter.toTable, testReporter));
+suite.tests = testSuiteGenerator({
+    formats: ['Value']
+});
+testRunner(suite, 3, 'node ' + process.version, CSVFormatter.pipe(CSVFormatter.toTable, testReporter));
