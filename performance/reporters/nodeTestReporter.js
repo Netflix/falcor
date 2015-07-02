@@ -21,6 +21,7 @@ module.exports = function(results) {
 };
 
 function getFileName() {
+    debugger
     if (typeof process !== 'undefined') {
         var name = DEFAULT_NAME;
         var foundName = false;
@@ -33,7 +34,7 @@ function getFileName() {
                 name = x;
             }
         });
-        return foundName;
+        return name;
     }
     return DEFAULT_NAME;
 };
