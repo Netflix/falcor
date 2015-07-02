@@ -14,16 +14,17 @@ suite.tests = testSuiteGenerator({
     iterations: 1,
 
     models: {
-        'modelWithStore' : models.modelWithStore
+        'modelWithoutSource' : models.model,
+        'modelWithSource' : models.modelWithSource
     },
 
     formats: formats,
 
     tests: {
-        'scrollGallery': tests.scrollGallery
-        //'simple': tests.simple,
-        //'reference': tests.reference,
-        //'complex': tests.complex
+        'scrollGallery': tests.scrollGallery,
+        'simple': tests.simple,
+        'reference': tests.reference,
+        'complex': tests.complex
     }
 
 });
