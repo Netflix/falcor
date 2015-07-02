@@ -24,7 +24,8 @@ suite.tests = testSuiteGenerator({
     iterations: 1,
 
     models: {
-        'model': models.model
+        'modelWithoutSource': models.model,
+        'modelWithSource': models.modelWithSource
     },
 
     formats: [
