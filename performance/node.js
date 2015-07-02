@@ -14,7 +14,7 @@ suite.tests = testSuiteGenerator({
     iterations: 1,
 
     models: {
-        'modelWithoutSource' : models.model,
+        //'modelWithoutSource' : models.model,
         'modelWithSource' : models.modelWithSource
     },
 
@@ -29,4 +29,4 @@ suite.tests = testSuiteGenerator({
 
 });
 
-testRunner(suite, 2, 'node ' + process.version, CSVFormatter.pipe(CSVFormatter.toTable, testReporter));
+testRunner(suite, 10, 'node ' + process.version, CSVFormatter.pipe(CSVFormatter.toTable, testReporter));
