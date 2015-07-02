@@ -97,17 +97,18 @@ module.exports = function transformCSVResults(results) {
         }, []).
         reduce(function(acc, x) {
             x.forEach(function(infoAndCycles, i) {
-                if (!acc[i + 1]) {
-                    acc[i + 1] = [];
+                if (!acc[i + 2]) {
+                    acc[i + 2] = [];
                 }
                 if (i === 0) {
-                    acc[0].push(infoAndCycles[0].test);
+                    acc[0].push(infoAndCycles[0].output);
+                    acc[1].push(infoAndCycles[0].test);
                 }
 
-                acc[i + 1].push(infoAndCycles[1]);
+                acc[i + 2].push(infoAndCycles[1]);
             });
             return acc;
-        }, [[]]).
+        }, [[], []]).
         map(function(x) {
             return x.join(',');
         }).
