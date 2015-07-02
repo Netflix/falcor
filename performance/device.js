@@ -8,23 +8,5 @@ var formats = testConfig.formats;
 var tests = testConfig.get;
 var suite = testConfig.suite;
 
-suite.tests = testSuiteGenerator({
-
-    iterations: 15,
-
-    models: {
-        'model' : models.model,
-        'mdp' : models.mdp
-    },
-
-    formats: testConfig.formats,
-
-    tests: {
-        'simple': tests.simple,
-        'reference': tests.reference,
-        'complex': tests.complex,
-        'scrollGallery': tests.scrollGallery
-    }
-});
-
+suite.tests = testSuiteGenerator();
 onTestsLoaded(suite);
