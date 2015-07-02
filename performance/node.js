@@ -20,10 +20,10 @@ suite.tests = testSuiteGenerator({
     formats: formats,
 
     tests: {
-        'scrollGallery': tests.scrollGallery,
-        'simple': tests.simple,
-        'reference': tests.reference,
-        'complex': tests.complex
+        'scrollGallery': tests.scrollGallery
+        //'simple': tests.simple,
+        //'reference': tests.reference,
+        //'complex': tests.complex
     }
 
 });

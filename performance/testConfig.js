@@ -11,7 +11,7 @@ module.exports = function() {
             name: 'Falcor'
         },
         models: models,
-        formats: ['Value', 'JSON', 'JSONG', 'PathMap'],
+        formats: ['JSON'],
         get: getTests,
         set: setTests,
         merge: mergeTests
