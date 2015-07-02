@@ -1,4 +1,5 @@
 var noOp = function() {};
+var debug = false;
 
 module.exports = {
 
@@ -14,58 +15,113 @@ module.exports = {
         };
     },
 
-    startup: function(model, format) {
-        var startupRequest = [
-            ["startup"],
-            ["appconfig"],
-            ["languages"],
-            ["geolocation"],
-            ["user"],
-            ["uiexperience"],
-            ["lolomo", "summary"],
-            ["lolomo", {"to": 60}, "summary"],
-            ["lolomo", 0, "billboardData"],
-            ["lolomo", 0, 0, "postcard"],
-            ["profilesList", {"to": 4}, "avatar", "images", "byWidth", [32, 64, 80, 100, 112, 160, 200, 320]],
-            ["profilesList", {"to": 4}, "summary"]            ["profilesList", "summary"],
-            ["profilesList", "availableAvatarsList", {"to": 18}, "images", "byWidth", [32, 64, 80, 100, 112, 160, 200, 320]],
-            ["profilesList", "availableAvatarsList", {"to": 18}, "summary"],
-            ["profilesList", "availableAvatarsList", "summary"],
-            ["profiles", "hasSeenPromoGate"],
-            ["lolomo", "maxExperience"],
-            ["lolomo", 0, 0, "evidence"],
-            ["lolomo", 0, 0, "item", ["info", "summary", "outline", "rating", "heroImages"]]
+    simple: function(model, format) {
+        var simpleRequest = [
+            ['videos', 1234, 'summary']
         ];
-
         switch (format) {
             case 'JSON':
                 return function(done) {
-                    model.get.apply(model, startupRequest, function(a,b,c,d,e,f,g,h,i,h,j,k,l,m,n,o,p,q,r,s,t) {
-                        done && done.resolve();
-                    });
+                    var obs = model.
+                        get.apply(model, simpleRequest.concat(function(a) {
+                            return a;
+                        }));
+                    run(obs, format, done);
                 };
             case 'JSONG':
                 return function(done) {
-                    model.get.apply(model, startupRequest).
-                        toJSONG().
-                        subscribe(function(next) {
-                            done && done.resolve();
-                        });
+                    run(
+                        model.get.apply(model, scrollingRequest).toJSONG(),
+                        format,
+                        done);
                 };
             case 'PathMap':
                 return function(done) {
-                    model.get.apply(model, startupRequest).
-                        subscribe(function(next) {
-                            done && done.resolve();
-                        });
+                    run(
+                        model.get.apply(model, scrollingRequest),
+                        format,
+                        done);
                 };
             case 'Value':
                 return function(done) {
-                    model.get.apply(model, startupRequest).
-                        toPathValues().
-                        subscribe(noOp, noOp, function(next) {
-                            done && done.resolve();
-                        });
+                    run(
+                        model.get.apply(model, scrollingRequest).toPathValues(),
+                        format,
+                        done);
+                };
+        }
+    },
+
+    reference: function(model, format) {
+        var referenceRequest = [
+            ['genreList', 0, 0, 'summary']
+        ];
+        switch (format) {
+            case 'JSON':
+                return function(done) {
+                    var obs = model.
+                        get.apply(model, simpleRequest.concat(function(a) {
+                            return a;
+                        }));
+                    run(obs, format, done);
+                };
+            case 'JSONG':
+                return function(done) {
+                    run(
+                        model.get.apply(model, scrollingRequest).toJSONG(),
+                        format,
+                        done);
+                };
+            case 'PathMap':
+                return function(done) {
+                    run(
+                        model.get.apply(model, scrollingRequest),
+                        format,
+                        done);
+                };
+            case 'Value':
+                return function(done) {
+                    run(
+                        model.get.apply(model, scrollingRequest).toPathValues(),
+                        format,
+                        done);
+                };
+        }
+    },
+
+    complex: function(model, format) {
+        var complexRequest = [
+            ['genreList', 0, {to:9}, 'summary']
+        ];
+        switch (format) {
+            case 'JSON':
+                return function(done) {
+                    var obs = model.
+                        get.apply(model, simpleRequest.concat(function(a) {
+                            return a;
+                        }));
+                    run(obs, format, done);
+                };
+            case 'JSONG':
+                return function(done) {
+                    run(
+                        model.get.apply(model, scrollingRequest).toJSONG(),
+                        format,
+                        done);
+                };
+            case 'PathMap':
+                return function(done) {
+                    run(
+                        model.get.apply(model, scrollingRequest),
+                        format,
+                        done);
+                };
+            case 'Value':
+                return function(done) {
+                    run(
+                        model.get.apply(model, scrollingRequest).toPathValues(),
+                        format,
+                        done);
                 };
         }
     },
@@ -81,208 +137,43 @@ module.exports = {
         switch (format) {
             case 'JSON':
                 return function(done) {
-                    model.
-                        get.apply(model, simpleRequest.concat(function(a, b, c, d) {
+                    var obs = model.
+                        get.apply(model, scrollingRequest.concat(function(a, b, c, d) {
                             return [a, b, c, d];
-                        })).
-                        subscribe(function(next) {
-                            console.log(format,
-                                JSON.stringify(next));
-                        }, noOp, function() {
-                            done && done.resolve();
-                        });
+                        }));
+                    run(obs, format, done);
                 };
             case 'JSONG':
                 return function(done) {
-                    model.get.apply(model, scrollingRequest).
-                        toJSONG().
-                        subscribe(function(next) {
-                            console.log(format,
-                                JSON.stringify(next));
-                        }, noOp, function() {
-                            done && done.resolve();
-                        });
+                    run(
+                        model.get.apply(model, scrollingRequest).toJSONG(),
+                        format,
+                        done);
                 };
             case 'PathMap':
                 return function(done) {
-                    model.get.apply(model, scrollingRequest).
-                        subscribe(function(next) {
-                            console.log(format,
-                                JSON.stringify(next));
-                        }, noOp, function() {
-                            done && done.resolve();
-                        });
+                    run(
+                        model.get.apply(model, scrollingRequest),
+                        format,
+                        done);
                 };
             case 'Value':
                 return function(done) {
-                    model.get.apply(model, scrollingRequest).
-                        toPathValues().
-                        subscribe(function(next) {
-                            console.log(format,
-                                JSON.stringify(next));
-                        }, noOp, function() {
-                            done && done.resolve();
-                        });
+                    run(
+                        model.get.apply(model, scrollingRequest).toPathValues(),
+                        format,
+                        done);
                 };
         }
     },
 
-    simple: function(model, format) {
-        var simpleRequest = [
-            ['videos', 1234, 'summary']
-        ];
-        switch (format) {
-            case 'JSON':
-                return function(done) {
-                    model.
-                        get.apply(model, simpleRequest.concat(function(a) {
-                            return a;
-                        })).
-                        subscribe(function(next) {
-                            console.log(format,
-                                JSON.stringify(next));
-                        }, noOp, function() {
-                            done && done.resolve();
-                        });
-                };
-            case 'JSONG':
-                return function(done) {
-                    model.get.apply(model, simpleRequest).
-                        toJSONG().
-                        subscribe(function(next) {
-                            console.log(format,
-                                JSON.stringify(next));
-                        }, noOp, function() {
-                            done && done.resolve();
-                        });
-                };
-            case 'PathMap':
-                return function(done) {
-                    model.get.apply(model, simpleRequest).
-                        subscribe(function(next) {
-                            console.log(format,
-                                JSON.stringify(next));
-                        }, noOp, function() {
-                            done && done.resolve();
-                        });
-                };
-            case 'Value':
-                return function(done) {
-                    model.get.apply(model, simpleRequest).
-                        toPathValues().
-                        subscribe(function(next) {
-                            console.log(format,
-                                JSON.stringify(next));
-                        }, noOp, function() {
-                            done && done.resolve();
-                        });
-                };
-        }
-    },
-
-    reference: function(model, format) {
-        var referenceRequest = [
-            ['genreList', 0, 0, 'summary']
-        ];
-        switch (format) {
-            case 'JSON':
-                return function(done) {
-                    model.
-                        get.apply(model, simpleRequest.concat(function(a) {
-                            return a;
-                        })).
-                        subscribe(function(next) {
-                            console.log(format,
-                                JSON.stringify(next));
-                        }, noOp, function() {
-                            done && done.resolve();
-                        });
-                };
-            case 'JSONG':
-                return function(done) {
-                    model.get.apply(model, referenceRequest).
-                        toJSONG().
-                        subscribe(function(next) {
-                            console.log(format,
-                                JSON.stringify(next));
-                        }, noOp, function() {
-                            done && done.resolve();
-                        });
-                };
-            case 'PathMap':
-                return function(done) {
-                    model.get.apply(model, referenceRequest).
-                        subscribe(function(next) {
-                            console.log(format,
-                                JSON.stringify(next));
-                        }, noOp, function() {
-                            done && done.resolve();
-                        });
-                };
-            case 'Value':
-                return function(done) {
-                    model.get.apply(model, referenceRequest).
-                        toPathValues().
-                        subscribe(function(next) {
-                            console.log(format,
-                                JSON.stringify(next));
-                        }, noOp, function() {
-                            done && done.resolve();
-                        });
-                };
-        }
-    },
-
-    complex: function(model, format) {
-        var complexRequest = [
-            ['genreList', 0, {to:9}, 'summary']
-        ];
-        switch (format) {
-            case 'JSON':
-                return function(done) {
-                    model.
-                        get.apply(model, simpleRequest.concat(function(a) {
-                            return a;
-                        })).
-                        subscribe(function(next) {
-                            console.log(format,
-                                JSON.stringify(next));
-                        }, noOp, function() {
-                            done && done.resolve();
-                        });
-                };
-            case 'JSONG':
-                return function(done) {
-                    model.get.apply(model, complexRequest).
-                        toJSONG().
-                        subscribe(function(next) {
-                            console.log(format,
-                                JSON.stringify(next));
-                        }, noOp, function() {
-                            done && done.resolve();
-                        });
-                };
-            case 'PathMap':
-                return function(done) {
-                    model.get.apply(model, complexRequest).
-                        subscribe(function(next) {
-                            console.log(format,
-                                JSON.stringify(next));
-                        }, noOp, function() {
-                            done && done.resolve();
-                        });
-                };
-            case 'Value':
-                return function(done) {
-                    model.get.apply(model, complexRequest).
-                        toPathValues().
-                        subscribe(function(next) {
-                            console.log(format,
-                                JSON.stringify(next));
-                        }, noOp, function() {
-                            done && done.resolve();
-                        });
-                };
-        }
-    }
 };
+
+function run(obs, format, done) {
+    obs.
+        subscribe(function(next) {
+            debug && console.log(format, JSON.stringify(next));
+        }, noOp, function() {
+            done && done.resolve();
+        });
+}
