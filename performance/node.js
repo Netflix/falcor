@@ -18,6 +18,6 @@ suite.tests = testSuiteGenerator({
     models: {
         'model': models.modelWithSource
     },
-    formats: ['JSON']
+    formats: ['Value']
 });
 testRunner(suite, 'node ' + process.version, CSVFormatter.pipe(CSVFormatter.toTable, testReporter));
