@@ -10,7 +10,7 @@ module.exports = function(results) {
     debugger
     var filePath = path.resolve(dirPath, getFileName());
     results = transformCSVResults(results);
-    mkdirp(path.dirname(filepath), function (err) {
+    mkdirp(path.dirname(filePath), function (err) {
         if (err) {
             console.error('\nError writing file: ' + filePath);
         } else {
