@@ -8,8 +8,7 @@ module.exports = function() {
 
     return {
         suite: {
-            name: 'Falcor',
-            async: false
+            name: 'Falcor'
         },
         models: models,
         formats: ['Value', 'JSON', 'PathMap', 'JSONG'],

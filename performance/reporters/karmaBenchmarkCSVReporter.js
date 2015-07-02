@@ -58,7 +58,7 @@ var BenchCSVReporter = function(baseReporterDecorator, config, logger, helper) {
         tests[suite] = tests[suite] || [];
         tests[suite].push(benchmark);
 
-        log.info(CSVFormatter.toRow(benchmark, env));
+        log.info(CSVFormatter.toRow(env, benchmark));
     };
 };
 

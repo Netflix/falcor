@@ -1,4 +1,4 @@
-var benchmarkToRow = function(benchmark, env) {
+var benchmarkToRow = function(env, benchmark) {
 
     if (!env) {
         env = "ENV";
@@ -24,7 +24,7 @@ var resultsToTable = function(results) {
         suites = results[env];
         for (suite in suites) {
             suites[suite].forEach(function(benchmark) {
-                table.push(benchmarkToRow(benchmark, env));
+                table.push(benchmarkToRow(env, benchmark));
             });
         }
     }
@@ -33,14 +33,6 @@ var resultsToTable = function(results) {
 };
 
 module.exports = {
-
     toRow: benchmarkToRow,
-
-    toTable: resultsToTable,
-
-    pipe: function(resultsFormatter, writer) {
-        return function(results) {
-            writer(resultsFormatter(results));
-        };
-    }
+    toTable: resultsToTable
 };
