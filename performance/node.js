@@ -9,7 +9,16 @@ var formats = testConfig.formats;
 var tests = testConfig.get;
 var suite = testConfig.suite;
 
+var TESTS = {
+    'scrollGallery': tests.scrollGallery,
+    'complex': tests.complex
+};
 suite.tests = testSuiteGenerator({
-    formats: ['Value']
+    iterations: 3,
+    formats: ['Value'],
+    tests: TESTS,
+    models: {
+        modelWithSource: models.modelWithSource
+    }
 });
-testRunner(suite, 3, 'node ' + process.version, CSVFormatter.pipe(CSVFormatter.toTable, testReporter));
+testRunner(suite, 'node ' + process.version, CSVFormatter.pipe(CSVFormatter.toTable, testReporter));
