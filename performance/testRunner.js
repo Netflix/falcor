@@ -31,9 +31,9 @@ function createSuites(testCfg, iterations) {
     return suites;
 }
 
-function runner(testCfg, iterations, env, onComplete) {
+function runner(testCfg, env, onComplete) {
 
-    var suites = createSuites(testCfg, iterations);
+    var suites = createSuites(testCfg, 1);
 
     if (!KARMA) {
         run(suites, env, onComplete);
