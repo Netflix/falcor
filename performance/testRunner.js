@@ -53,6 +53,14 @@ function run(suites, env, onBenchmarkComplete, onComplete) {
         suites.shift().
             on('cycle', function (event) {
                 console.log('ran.cycle');
+                if (typeof global !== 'undefined' && global && global.gc) {
+                    console.log('ran.cycle.gc');
+                    global.gc();
+                }
+                else if (typeof window !== 'undefined' && window && window.gc) {
+                    console.log('ran.cycle.gc');
+                    window.gc();
+                }
                 var benchmark = event.target;
                 var suite = benchmark.suite = this.name;
 
