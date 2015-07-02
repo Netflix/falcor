@@ -31,21 +31,21 @@ module.exports = {
             case 'JSONG':
                 return function(done) {
                     run(
-                        model.get.apply(model, scrollingRequest).toJSONG(),
+                        model.get.apply(model, simpleRequest).toJSONG(),
                         format,
                         done);
                 };
             case 'PathMap':
                 return function(done) {
                     run(
-                        model.get.apply(model, scrollingRequest),
+                        model.get.apply(model, simpleRequest),
                         format,
                         done);
                 };
             case 'Value':
                 return function(done) {
                     run(
-                        model.get.apply(model, scrollingRequest).toPathValues(),
+                        model.get.apply(model, simpleRequest).toPathValues(),
                         format,
                         done);
                 };
@@ -60,7 +60,7 @@ module.exports = {
             case 'JSON':
                 return function(done) {
                     var obs = model.
-                        get.apply(model, simpleRequest.concat(function(a) {
+                        get.apply(model, referenceRequest.concat(function(a) {
                             return a;
                         }));
                     run(obs, format, done);
@@ -68,21 +68,21 @@ module.exports = {
             case 'JSONG':
                 return function(done) {
                     run(
-                        model.get.apply(model, scrollingRequest).toJSONG(),
+                        model.get.apply(model, referenceRequest).toJSONG(),
                         format,
                         done);
                 };
             case 'PathMap':
                 return function(done) {
                     run(
-                        model.get.apply(model, scrollingRequest),
+                        model.get.apply(model, referenceRequest),
                         format,
                         done);
                 };
             case 'Value':
                 return function(done) {
                     run(
-                        model.get.apply(model, scrollingRequest).toPathValues(),
+                        model.get.apply(model, referenceRequest).toPathValues(),
                         format,
                         done);
                 };
@@ -97,7 +97,7 @@ module.exports = {
             case 'JSON':
                 return function(done) {
                     var obs = model.
-                        get.apply(model, simpleRequest.concat(function(a) {
+                        get.apply(model, complexRequest.concat(function(a) {
                             return a;
                         }));
                     run(obs, format, done);
@@ -105,21 +105,21 @@ module.exports = {
             case 'JSONG':
                 return function(done) {
                     run(
-                        model.get.apply(model, scrollingRequest).toJSONG(),
+                        model.get.apply(model, complexRequest).toJSONG(),
                         format,
                         done);
                 };
             case 'PathMap':
                 return function(done) {
                     run(
-                        model.get.apply(model, scrollingRequest),
+                        model.get.apply(model, complexRequest),
                         format,
                         done);
                 };
             case 'Value':
                 return function(done) {
                     run(
-                        model.get.apply(model, scrollingRequest).toPathValues(),
+                        model.get.apply(model, complexRequest).toPathValues(),
                         format,
                         done);
                 };
