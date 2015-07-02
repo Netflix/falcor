@@ -15,12 +15,12 @@ module.exports = function() {
     var model = new falcor.Model({cache: Cache()});
     model._root.unsafeMode = true;
 
-    var modelWithStore = new falcor.Model({source: new LocalDataStore(Cache())});
-    modelWithStore._root.unsafeMode = true;
-    var modelGet = modelWithStore.get.bind(modelWithStore);
-    modelWithStore.get = function() {
-        modelWithStore._cache = {};
-        return modelGet.apply(modelWithStore, arguments);
+    var modelWithSource = new falcor.Model({source: new LocalDataStore(Cache())});
+    modelWithSource._root.unsafeMode = true;
+    var modelGet = modelWithSource.get.bind(modelWithSource);
+    modelWithSource.get = function() {
+        modelWithSource._cache = {};
+        return modelGet.apply(modelWithSource, arguments);
     };
 
     var macroModel = legacyFalcor.getMacroModel();
@@ -31,6 +31,6 @@ module.exports = function() {
         empty: emptyModel,
         macro: macroModel,
         mdp: mdpModel,
-        modelWithStore: modelWithStore
+        modelWithSource: modelWithSource
     };
 };
