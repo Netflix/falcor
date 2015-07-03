@@ -1,87 +1,88 @@
-function runner(Benchmark, testCfg, count, done) {
-    var testSuiteCount = 0;
-    var names = Object.keys(testCfg.tests);
-    var totalResults = names.
-        reduce(function(acc, n) {
-            acc[n] = [];
-            return acc;
-        }, {});
-    
-    function recurse() {
-        _runner(Benchmark, testCfg, function(results) {
-            testSuiteCount++;
-            console.warn('Test Count ' + testSuiteCount);
-            results.forEach(function(r) {
-                totalResults[r.name].push(r);
-            });
-            if (testSuiteCount === count) {
-                var transform = Object.
-                    keys(totalResults).
-                    reduce(function(acc, name) {
-                        var results = totalResults[name];
-                        var row = [name];
-                        results.forEach(function(r) {
-                            row.push(r.hz);
-                        });
-                        acc.push(row);
-                        return acc;
-                    }, []);
-                var csv = [];
-                
-                for (var i = 0; i < count + 1; i++) {
-                    var csvRow = [];
-                    for (var j = 0; j < transform.length; j++) {
-                        csvRow[j] = transform[j][i];
-                    }
-                    csv[i] = csvRow;
-                }
-                done(csv);
-            } else {
-                recurse();
-            }
-        });
-    }
-    
-    recurse();
-};
+var Benchmark = require('benchmark');
+var CSVFormatter = require('./formatter/CSVFormatter');
 
-function _runner(Benchmark, testCfg, done) {
-    var countDone = 0;
-    var suite = new Benchmark.Suite(testCfg.name);
-    var results = [];
-    var tests = testCfg.tests,
-        testCount = 0;
-    for (var testName in tests) {
-        var testFn = tests[testName];
-        if (typeof testFn === 'function') {
-            suite.add(testName, testFn);
-            testCount++;
+var KARMA = global.__karma__;
+
+function createSuite(testCfg, iteration) {
+
+    var tests = testCfg.tests;
+    var testName;
+
+    var suite = ((KARMA) ? global.suite : Benchmark.Suite)(testCfg.name + ':' + iteration, function(){});
+
+    for (testName in tests) {
+        if (KARMA) {
+            global.benchmark(testName, tests[testName]);
+        } else {
+            suite.add(testName, tests[testName]);
         }
     }
 
-    suite.
-        on('cycle', function (event) {
-            countDone++;
-            var str = countDone + ' out of ' + suite.length + ' completed';
-            console.warn(str);
-            results.push({
-                name: event.target.name,
-                hz: event.target.hz,
-                deviation: event.target.stats.deviation
-            });
-        }).
-        on('complete', function () {
-            done(results);
-        });
+    return suite;
+}
 
-    setTimeout(function () {
-        // Note: run in timeout so that
-        // script runner doesn't log an invalid error that it timed out
-        suite.run({
-            async: !!testCfg.async
-        });
-    }, 50);
+function createSuites(testCfg, iterations) {
+    var suites = [];
+
+    for (var i = 0; i < iterations; i++) {
+        suites.push(createSuite(testCfg, i));
+    }
+
+    return suites;
+}
+
+function runner(testCfg, iterations, env, onBenchmarkComplete, onComplete) {
+
+    var suites = createSuites(testCfg, iterations);
+
+    if (!KARMA) {
+        run(suites, env, onBenchmarkComplete, onComplete);
+    } else {
+        // KARMA will run the global "suites"
+    }
+}
+
+function run(suites, env, onBenchmarkComplete, onComplete) {
+
+    var results = {};
+
+    var _run = function() {
+
+        suites.shift().
+            on('cycle', function (event) {
+
+                var benchmark = event.target;
+                var suite = benchmark.suite = this.name;
+
+                var tests = results[env] = results[env] || {};
+
+                tests[suite] = tests[suite] || [];
+                tests[suite].push(benchmark);
+
+                if (onBenchmarkComplete) {
+                    onBenchmarkComplete(benchmark);
+                }
+            }).
+            /*
+            on('error', function(e) {
+                console.log(e.target.error);
+            }).
+            */
+            on('complete', function() {
+                if (suites.length === 0) {
+                    if (onComplete) {
+                        onComplete(results);
+                    }
+                } else {
+                    _run();
+                }
+            }).
+            run({
+                async: true
+            });
+    };
+
+    _run();
 }
 
 module.exports = runner;
-
