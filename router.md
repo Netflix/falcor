@@ -14,25 +14,24 @@ Rather than serve static resources from disk, many RESTful Application servers u
 
 For example here is a Router defined for Node's ExpressJS MVC framework which uses a route to match a request for a TODO resource by ID:
 
-
-
-
-
 (Example of what I said above, with a mocked up query by ID  to a back end data source)
+
 ```JavaScript
-//defined for Node's ExpressJS MVC framework?
-var router = new Router([{
-    route: "todosById[{integers:ids}].name",
-    get: function(pathSet) {
-        return pathSet.ids.map(function(id) {
-            return {
-                path: ['todosById', id, 'name'],
-                value: "get milk from corner store."
-            }
-        })
+
+var express = require('express');
+var serviceLayer = require('serviceLayer');
+var app = express();
+
+app.get('/todo/:todoid', function(req, res) {
+  serviceLayer.getUser(req.params.username, function(error, data) {
+    if (error) {
+        res.status(500).send("Couldn't retrieve this user!");
     }
-}]);
-}]);
+    else {
+        res.send(JSON.stringify(data);
+    }
+  });
+});
 ```
 
 Routers allow application servers to remain stateless. Instead of storing state on the application server, requests for information are matched against URL patterns and requests for data are routed to persistent data stores.
