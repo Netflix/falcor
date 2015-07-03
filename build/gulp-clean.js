@@ -2,7 +2,7 @@ var gulp = require("gulp");
 var clean = require("gulp-clean");
 
 gulp.task("clean.perf", function() {
-    return gulp.src(["./performance/bin"]).
+    return gulp.src(["./performance/bin", "./performance/out"]).
         pipe(clean());
 });
 

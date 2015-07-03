@@ -13,8 +13,10 @@ var chai = require("chai");
 var expect = chai.expect;
 var noOp = function() {};
 var InvalidModelError = require('falcor/errors/InvalidModelError');
-var $atom = require('falcor/types/atom');
-var $error = require('falcor/types/error');
+var $atom = require("falcor/types/atom");
+var $error = require("falcor/types/error");
+var $ref = require("falcor/types/ref");
+var sinon = require('sinon');
 
 describe("Bind-Short", function() {
     describe('Sync', function() {
@@ -120,6 +122,52 @@ describe("Bind-Short", function() {
                     }
                     done(e);
                 }, done);
+        });
+
+        it('should ensure that bind correctly makes a request to the dataStore.', function(done) {
+            var onGet = sinon.spy();
+            var onNext = sinon.spy();
+
+            var dataModel = new Model({
+                cache: {
+                    genreList: {
+                        '0':  { '$type': $ref, 'value': ['lists', 'abcd'] },
+
+                    },
+                    'lists': {
+                        'abcd': {
+                            '0':  { '$type': $ref, 'value': ['videos', 1234] }
+                        }
+                    }
+                },
+                source: new LocalDataSource(Cache(), {
+                    onGet: onGet
+                })
+            });
+
+            var throwError = false;
+            dataModel.
+                bind(['genreList', 0, 0], ['summary']).
+                subscribe(onNext, done, function() {
+                    var error = false;
+                    try {
+                        expect(onGet.called).to.be.ok;
+                        expect(onGet.getCall(0).args[1]).to.deep.equals([
+                            ['videos', 1234, 'summary']
+                        ]);
+                        expect(onNext.called).to.be.ok;
+                        expect(onNext.getCall(0).args[0]._path).to.deep.equals([
+                            'videos', 1234
+                        ]);
+                    } catch (e) {
+                        error = e;
+                    }
+
+                    if (error) {
+                        return done(error);
+                    }
+                    return done();
+                });
         });
     });
 });

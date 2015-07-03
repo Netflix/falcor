@@ -1,7 +1,7 @@
 {
   "name": "falcor",
-  "version": "0.0.22",
-  "main": "./lib/index.js",
+  "version": "0.0.23",
+  "main": "./index.js",
   "homepage": "https://github.com/Netflix/falcor",
   "author": {
     "name": "Netflix",
@@ -21,6 +21,7 @@
     "test": "gulp test-coverage",
     "dist": "gulp build",
     "doc": "gulp doc",
+    "perf": "gulp perf-run",
     "deploy-ghpages": "./build/deploy-ghpages.sh",
     "postinstall": "node -e \" var s='../lib',d='node_modules/falcor',fs=require('fs'); fs.readlink(d,function(err, xl){if(!xl){fs.symlinkSync(s, d,'dir');}})\""
   },
@@ -33,7 +34,6 @@
   ],
   "devDependencies": {
     "benchmark": "^1.0.0",
-    "benchmarks": "^0.1.2",
     "browserify": "10.2.0",
     "bundle-collapser": "1.2.0",
     "chai": "~1.9.1",
@@ -58,9 +58,16 @@
     "gulp-shell": "~0.4.1",
     "istanbul": "~0.3.2",
     "jsdoc": "~3.3.0-beta3",
+    "karma": "^0.12.37",
+    "karma-benchmark": "^0.4.0",
+    "karma-chrome-launcher": "^0.2.0",
+    "karma-firefox-launcher": "^0.1.6",
+    "karma-junit-reporter": "^0.2.2",
+    "karma-safari-launcher": "^0.1.1",
     "lodash": "~2.4.1",
     "minifyify": "7.0.0",
     "minimist": "~1.1.0",
+    "mkdirp": "^0.5.1",
     "mocha": "~1.21.4",
     "run-sequence": "^1.0.2",
     "through2": "~0.6.1",
@@ -70,9 +77,10 @@
     "xmlhttprequest": "~1.7.0"
   },
   "dependencies": {
-    "rx": "2.5.3",
-    "promise": "7.0.0",
     "asap": "~2.0.3",
-    "falcor-path-syntax": "git+ssh://git@github.com/Netflix/falcor-path-syntax.git"
+    "falcor-path-syntax": "git+ssh://git@github.com/Netflix/falcor-path-syntax.git",
+    "promise": "7.0.0",
+    "rx": "2.5.3",
+    "sinon": "^1.15.4"
   }
 }
