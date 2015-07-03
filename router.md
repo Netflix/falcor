@@ -2,7 +2,7 @@
 
 A Falcor Router is an implementation of the DataSource interface. Falcor Model objects use DataSources to retrieve JSON Graph data. However Models typically run on the client and Routers typically run on the Application server. As a result communication between a Model and the Router is typically remoted across the network using an HttpDataSource.
 
-(Diagram)
+![Router Diagram](https://netflix.github.com/falcor/routerdiagram.png)
 
 A Router works by matching requested paths against a "virtual" JSON Graph object. The JSON Graph object is referred to as "virtual", because the object rarely exists anywhere - in memory or on disk. Instead when paths are requested from the Router, the Router typically creates the necessary subsets of the JSON Graph on-demand by retrieving the necessary data from persistent data stores. Once the newly-created subset of the JSON Graph has been delivered to the caller, the Router frees the memory. This allows the Application Server running the Router to remain stateless, and keep the application’s data in one or more persistent data stores.
 
