@@ -23,4 +23,9 @@ suite.tests = testSuiteGenerator({
     iterations: 10
 });
 
-testRunner(suite, navigator.userAgent, CSVFormatter.pipe(CSVFormatter.toTable, testReporter));
+var env = navigator.userAgent;
+var resultsReporter = compose(testReporter.resultsReporter, CSVFormatter.toTable);
+var benchmarkReporter = compose(testReporter.benchmarkReporter, curry(CSVFormatter.toRow, env));
+
+testRunner(suite, env, benchmarkReporter, resultsReporter);
+
