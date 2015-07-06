@@ -31,18 +31,18 @@ function createSuites(testCfg, iterations) {
     return suites;
 }
 
-function runner(testCfg, env, onComplete) {
+function runner(testCfg, env, onBenchmarkComplete, onComplete) {
 
     var suites = createSuites(testCfg, 1);
 
     if (!KARMA) {
-        run(suites, env, onComplete);
+        run(suites, env, onBenchmarkComplete, onComplete);
     } else {
         // KARMA will run the global "suites"
     }
 }
 
-function run(suites, env, onComplete) {
+function run(suites, env, onBenchmarkComplete, onComplete) {
 
     var results = {};
 
@@ -69,7 +69,9 @@ function run(suites, env, onComplete) {
                 tests[suite] = tests[suite] || [];
                 tests[suite].push(benchmark);
 
-                console.info(CSVFormatter.toRow(benchmark, env));
+                if (onBenchmarkComplete) {
+                    onBenchmarkComplete(benchmark);
+                }
             }).
             on('error', function(e) {
                 console.log('ran.error');
@@ -79,7 +81,9 @@ function run(suites, env, onComplete) {
             on('complete', function() {
                 console.log('ran.completed');
                 if (suites.length === 0) {
-                    onComplete(results);
+                    if (onComplete) {
+                        onComplete(results);
+                    }
                 } else {
                     _run();
                 }
