@@ -1,6 +1,3 @@
-var Rx = require('rx');
-global.Rx = Rx;
-
 var falcor = require('./../../index');
 var legacyFalcor = require('./legacy');
 
@@ -13,7 +10,6 @@ var prev = require('./../../lib/internal/prev');
 
 module.exports = function() {
 
-    var mdpModel = legacyFalcor.getMdpModel();
     var emptyModel = new falcor.Model();
 
     var model = new falcor.Model({cache: Cache()});
@@ -31,15 +27,10 @@ module.exports = function() {
         modelWithSource._root.expired = [];
         return modelGet.apply(modelWithSource, arguments);
     };
-
-    var macroModel = legacyFalcor.getMacroModel();
-    macroModel._root.unsafeMode = true;
-
+   
     return {
         model: model,
         empty: emptyModel,
-        macro: macroModel,
-        mdp: mdpModel,
         modelWithSource: modelWithSource
     };
 };
