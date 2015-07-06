@@ -10,7 +10,6 @@ var prev = require('./../../lib/internal/prev');
 
 module.exports = function() {
 
-    var mockModel = mock(Cache());
     var emptyModel = new falcor.Model();
 
     var model = new falcor.Model({cache: Cache()});
