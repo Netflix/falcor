@@ -16,9 +16,13 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
 >>>>>>> 6b4c63c... Includes dependency on rx.aggregates and rx.binding
 var Rx = require(161) && require(159) && require(160);
+=======
+var Rx = require(162) && require(160) && require(161);
+>>>>>>> 3f41169... Updates performance index to require "falcor" module instead of by relative path.
 
 function falcor(opts) {
     return new falcor.Model(opts);
@@ -27,7 +31,7 @@ function falcor(opts) {
 if(typeof Promise !== "undefined" && Promise) {
     falcor.Promise = Promise;
 } else {
-    falcor.Promise = require(152);
+    falcor.Promise = require(153);
 }
 
 module.exports = falcor;
@@ -35,12 +39,16 @@ module.exports = falcor;
 falcor.Model = require(2);
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 },{"152":152,"159":159,"160":160,"161":161,"2":2}],2:[function(require,module,exports){
 var $ref = require(128);
 var $atom = require(126);
 var $error = require(127);
 =======
 },{"152":152,"159":159,"160":160,"161":161,"18":18}],2:[function(require,module,exports){
+=======
+},{"153":153,"160":160,"161":161,"162":162,"18":18}],2:[function(require,module,exports){
+>>>>>>> 3f41169... Updates performance index to require "falcor" module instead of by relative path.
 "use strict";
 >>>>>>> 6b4c63c... Includes dependency on rx.aggregates and rx.binding
 
@@ -883,9 +891,22 @@ module.exports = function bindSync(path) {
 
     path = pathSyntax.fromPath(path);
 
+<<<<<<< HEAD
     if (!Array.isArray(path)) {
         throw new Error("Model#bindSync must be called with an Array path.");
     }
+=======
+// Constructs the paths from paths / pathValues that have strings.
+// If it does not have a string, just moves the value into the return
+// results.
+parser.fromPathsOrPathValues = function(paths, ext) {
+    if (!paths) {
+        return [];
+    }
+
+    var out = [];
+    for (i = 0, len = paths.length; i < len; i++) {
+>>>>>>> 3f41169... Updates performance index to require "falcor" module instead of by relative path.
 
     var boundValue = this.syncCheck("bindSync") && getBoundValue(this, this._path.concat(path));
 
@@ -911,6 +932,7 @@ module.exports = function bindSync(path) {
     return this.clone({ _path: path });
 };
 
+<<<<<<< HEAD
 },{"111":111,"127":127,"13":13,"145":145,"95":95}],7:[function(require,module,exports){
 /**
  * An InvalidModelError can only happen when a user binds, whether sync
@@ -923,6 +945,20 @@ function InvalidModelError(boundPath, shortedPath) {
     this.stack = (new Error()).stack;
     this.boundPath = boundPath;
     this.shortedPath = shortedPath;
+=======
+// If the argument is a string, this with convert, else just return
+// the path provided.
+parser.fromPath = function(path, ext) {
+    if (!path) {
+        return [];
+    }
+
+    if (typeof path === 'string') {
+        return parser(path, ext);
+    }
+
+    return path;
+>>>>>>> 3f41169... Updates performance index to require "falcor" module instead of by relative path.
 };
 
 // instanceof will be an error, but stack will be correct because its defined in the constructor.
@@ -1257,8 +1293,15 @@ EventEmitter.prototype.setMaxListeners = function(n) {
   return this;
 };
 
+<<<<<<< HEAD
 EventEmitter.prototype.emit = function(type) {
   var er, handler, len, args, i, listeners;
+=======
+            default:
+                E.throwError(E.unexpectedToken, tokenizer);
+                break;
+        }
+>>>>>>> 3f41169... Updates performance index to require "falcor" module instead of by relative path.
 
   if (!this._events)
     this._events = {};
@@ -1888,15 +1931,23 @@ var $error = require(127);
 var __invalidated = require(34);
 var prefix = require(39);
 
+<<<<<<< HEAD
 function getWalk(model, root, curr, pathOrJSON, depth, seedOrFunction, positionalInfo, outerResults, optimizedPath, requestedPath, inputFormat, outputFormat, fromReference) {
     if ((!curr || curr && curr.$type) &&
         evaluateNode(model, curr, pathOrJSON, depth, seedOrFunction, requestedPath, optimizedPath, positionalInfo, outerResults, outputFormat, fromReference)) {
         return;
     }
+=======
+},{"9":9}],18:[function(require,module,exports){
+var $ref = require(145);
+var $atom = require(143);
+var $error = require(144);
+>>>>>>> 3f41169... Updates performance index to require "falcor" module instead of by relative path.
 
     // We continue the search to the end of the path/json structure.
     else {
 
+<<<<<<< HEAD
         // Base case of the searching:  Have we hit the end of the road?
         // Paths
         // 1) depth === path.length
@@ -1957,6 +2008,34 @@ function getWalk(model, root, curr, pathOrJSON, depth, seedOrFunction, positiona
         var isKeySet = false;
         var hasChildren = false;
         depth++;
+=======
+var RequestQueue = require(71);
+var GetResponse = require(74);
+var SetResponse = require(78);
+var CallResponse = require(73);
+var InvalidateResponse = require(76);
+
+var ASAPScheduler = require(79);
+var TimeoutScheduler = require(81);
+var ImmediateScheduler = require(80);
+
+var identity = require(115);
+var array_clone = require(97);
+var array_slice = require(101);
+
+var collect_lru = require(65);
+var pathSyntax = require(11);
+
+var get_size = require(111);
+var is_object = require(123);
+var is_function = require(120);
+var is_path_value = require(124);
+var is_json_envelope = require(121);
+var is_json_graph_envelope = require(122);
+
+var set_cache = require(82);
+var set_json_graph_as_json_dense = require(83);
+>>>>>>> 3f41169... Updates performance index to require "falcor" module instead of by relative path.
 
         var key;
         if (k && typeof k === 'object') {
@@ -2132,6 +2211,7 @@ function drainQueue() {
     if (draining) {
         return;
     }
+<<<<<<< HEAD
     var timeout = setTimeout(cleanUpNextTick);
     draining = true;
 
@@ -2149,6 +2229,22 @@ function drainQueue() {
     draining = false;
     clearTimeout(timeout);
 }
+=======
+    InvalidateResponse.create(this, args, selector).subscribe();
+    return this;
+};
+
+/**
+ * Returns a clone of the {@link Model} bound to a location within the {@link JSONGraph}. The bound location is never a {@link Reference}: any {@link Reference}s encountered while resolving the bound {@link Path} are always replaced with the {@link Reference}s target value. For subsequent operations on the {@link Model}, all paths will be evaluated relative to the bound path. Bind allows you to:
+ * - Expose only a fragment of the {@link JSONGraph} to components, rather than the entire graph
+ * - Hide the location of a {@link JSONGraph} fragment from components
+ * - Optimize for executing multiple operations and path looksup at/below the same location in the {@link JSONGraph}
+ * @param {Path} boundPath - The path to bind to
+ * @param {...PathSet} relativePathsToPreload - Paths to preload before Model is created. These paths are relative to the bound path.
+ * @return {Observable.<Model>} - An Observable stream with a single value, the bound {@link Model}, or an empty stream if nothing is found at the path
+*/
+Model.prototype.bind = require(21);
+>>>>>>> 3f41169... Updates performance index to require "falcor" module instead of by relative path.
 
 process.nextTick = function (fun) {
     var args = new Array(arguments.length - 1);
@@ -2215,6 +2311,7 @@ module.exports = {
     keys: 'keys'
 };
 
+<<<<<<< HEAD
 },{}],9:[function(require,module,exports){
 var TokenTypes = {
     token: 'token',
@@ -2230,6 +2327,9 @@ var TokenTypes = {
     quote: 'quote',
     unknown: 'unknown'
 };
+=======
+Model.prototype.setValueSync = require(95);
+>>>>>>> 3f41169... Updates performance index to require "falcor" module instead of by relative path.
 
 module.exports = TokenTypes;
 
@@ -2354,6 +2454,7 @@ parser.fromPath = function(path, ext) {
 
 module.exports = getWalk;
 
+<<<<<<< HEAD
 },{"127":127,"128":128,"17":17,"18":18,"19":19,"22":22,"23":23,"24":24,"26":26,"27":27,"34":34,"39":39,"8":8}],17:[function(require,module,exports){
 var lru = require(26);
 var clone = require(21);
@@ -2391,6 +2492,32 @@ module.exports = function onMissing(model, node, path, depth, seedOrFunction, ou
     } else {
         pathSlice = [];
         spreadJSON(path, pathSlice);
+=======
+Model.prototype._setPathValuesAsJSON = require(91);
+Model.prototype._setPathValuesAsJSONG = require(92);
+Model.prototype._setPathValuesAsPathMap = require(93);
+Model.prototype._setPathValuesAsValues = require(94);
+
+Model.prototype._setPathMapsAsJSON = require(87);
+Model.prototype._setPathMapsAsJSONG = require(88);
+Model.prototype._setPathMapsAsPathMap = require(89);
+Model.prototype._setPathMapsAsValues = require(90);
+
+Model.prototype._setJSONGsAsJSON = require(83);
+Model.prototype._setJSONGsAsJSONG = require(84);
+Model.prototype._setJSONGsAsPathMap = require(85);
+Model.prototype._setJSONGsAsValues = require(86);
+
+Model.prototype._setCache = require(82);
+
+Model.prototype._invalidatePathSetsAsJSON = require(64);
+Model.prototype._invalidatePathMapsAsJSON = require(63);
+
+},{"101":101,"11":11,"111":111,"115":115,"120":120,"121":121,"122":122,"123":123,"124":124,"143":143,"144":144,"145":145,"19":19,"20":20,"21":21,"22":22,"25":25,"26":26,"27":27,"28":28,"29":29,"30":30,"31":31,"32":32,"36":36,"63":63,"64":64,"65":65,"71":71,"73":73,"74":74,"76":76,"78":78,"79":79,"80":80,"81":81,"82":82,"83":83,"84":84,"85":85,"86":86,"87":87,"88":88,"89":89,"90":90,"91":91,"92":92,"93":93,"94":94,"95":95,"97":97}],19:[function(require,module,exports){
+function ModelDataSourceAdapter(model) {
+    this._model = model.materialize().boxValues().treatErrorsAsValues();
+}
+>>>>>>> 3f41169... Updates performance index to require "falcor" module instead of by relative path.
 
         for (var i = 0, len = pathSlice.length; i < len; i++) {
             concatAndInsertMissing(pathSlice[i], outerResults, permuteRequested, permuteOptimized, permutePosition, outputFormat, true);
@@ -2398,6 +2525,7 @@ module.exports = function onMissing(model, node, path, depth, seedOrFunction, ou
     }
 };
 
+<<<<<<< HEAD
 function concatAndInsertMissing(remainingPath, results, permuteRequested, permuteOptimized, permutePosition, outputFormat, __null) {
     var i = 0, len;
     if (__null) {
@@ -2421,6 +2549,14 @@ function concatAndInsertMissing(remainingPath, results, permuteRequested, permut
         results.optimizedMissingPaths.push(fastCatSkipNulls(permuteOptimized, remainingPath));
     }
 }
+=======
+module.exports = ModelDataSourceAdapter;
+},{}],20:[function(require,module,exports){
+var is_function = require(120);
+var ImmediateScheduler = require(80);
+
+function ModelRoot(options) {
+>>>>>>> 3f41169... Updates performance index to require "falcor" module instead of by relative path.
 
 
 },{"21":21,"23":23,"28":28,"29":29}],19:[function(require,module,exports){
@@ -2459,6 +2595,18 @@ module.exports = function onValue(model, node, seedOrFunction, outerResults, per
             valueNode = node.value;
         }
     }
+<<<<<<< HEAD
+=======
+    return a === b;
+};
+
+module.exports = ModelRoot;
+},{"120":120,"80":80}],21:[function(require,module,exports){
+var Rx = require(162);
+var pathSyntax = require(11);
+
+module.exports = function bind(boundPath) {
+>>>>>>> 3f41169... Updates performance index to require "falcor" module instead of by relative path.
 
     else {
         if (outputFormat === 'JSONG') {
@@ -2492,6 +2640,7 @@ module.exports = function onValue(model, node, seedOrFunction, outerResults, per
                 valueNode.$type === $atom && valueNode.value === undefined) {
                 return;
             }
+<<<<<<< HEAD
             seedOrFunction({path: permuteRequested, value: valueNode});
             break;
 
@@ -2521,6 +2670,27 @@ module.exports = function onValue(model, node, seedOrFunction, outerResults, per
                 }
             }
             break;
+=======
+            return Rx.Observable["return"](boundModel);
+        } else if(pathsCount > 0) {
+            return (model.get.apply(model, paths.map(function(path) {
+                    return boundPath.concat(path);
+                }).concat(function() {
+                    return model.bind(boundPath);
+                }))
+                .mergeAll());
+        }
+        return Rx.Observable.empty();
+    });
+};
+
+},{"11":11,"162":162}],22:[function(require,module,exports){
+var noop = require(128);
+var $error = require(144);
+var pathSyntax = require(11);
+var getBoundValue = require(29);
+var get_type = require(112);
+>>>>>>> 3f41169... Updates performance index to require "falcor" module instead of by relative path.
 
         case 'JSON':
             if (seedOrFunction) {
@@ -2576,10 +2746,38 @@ module.exports = function onValue(model, node, seedOrFunction, outerResults, per
     }
 };
 
+<<<<<<< HEAD
+=======
+},{"11":11,"112":112,"128":128,"144":144,"29":29}],23:[function(require,module,exports){
+/**
+ * An InvalidModelError can only happen when a user binds, whether sync
+ * or async to shorted value.  See the unit tests for examples.
+ *
+ * @param {String} message
+ */
+function InvalidModelError(boundPath, shortedPath) {
+    this.message = 'The boundPath of the model is not valid since a value or error was found before the path end.';
+    this.stack = (new Error()).stack;
+    this.boundPath = boundPath;
+    this.shortedPath = shortedPath;
+};
+>>>>>>> 3f41169... Updates performance index to require "falcor" module instead of by relative path.
 
 
+<<<<<<< HEAD
 },{"126":126,"127":127,"128":128,"21":21,"26":26}],20:[function(require,module,exports){
 var pathSyntax = require(145);
+=======
+module.exports = InvalidModelError;
+},{}],24:[function(require,module,exports){
+var hardLink = require(38);
+var createHardlink = hardLink.create;
+var onValue = require(35);
+var isExpired = require(39);
+var $ref = require(145);
+var __context = require(47);
+var promote = require(42).promote;
+>>>>>>> 3f41169... Updates performance index to require "falcor" module instead of by relative path.
 
 module.exports = function getValueSync(path) {
     path = pathSyntax.fromPath(path);
@@ -2718,6 +2916,7 @@ function lruPromote(model, object) {
 function lruSplice(model, object) {
     var root = model._root;
 
+<<<<<<< HEAD
     // Its in the cache.  Splice out.
     var prev = object[__prev];
     var next = object[__next];
@@ -2738,6 +2937,30 @@ function lruSplice(model, object) {
     object[__invalidated] = true;
     root.expired.push(object);
 }
+=======
+},{"145":145,"35":35,"38":38,"39":39,"42":42,"47":47}],25:[function(require,module,exports){
+var getBoundValue = require(29);
+var isPathValue = require(41);
+module.exports = function(walk) {
+    return function getAsJSON(model, paths, values) {
+        var results = {
+            values: [],
+            errors: [],
+            requestedPaths: [],
+            optimizedPaths: [],
+            requestedMissingPaths: [],
+            optimizedMissingPaths: []
+        };
+        var requestedMissingPaths = results.requestedMissingPaths;
+        var inputFormat = Array.isArray(paths[0]) || isPathValue(paths[0]) ?
+            'Paths' : 'JSON';
+        var cache = model._cache;
+        var boundPath = model._path;
+        var currentCachePosition;
+        var missingIdx = 0;
+        var boundOptimizedPath, optimizedPath;
+        var i, j, len, bLen;
+>>>>>>> 3f41169... Updates performance index to require "falcor" module instead of by relative path.
 
 module.exports = {
     promote: lruPromote,
@@ -2920,12 +3143,28 @@ module.exports = function indexer(tokenizer, openingToken, state, out) {
                 done = true;
                 break;
 
+<<<<<<< HEAD
+=======
+},{"23":23,"31":31}],30:[function(require,module,exports){
+var __generation = require(49);
+>>>>>>> 3f41169... Updates performance index to require "falcor" module instead of by relative path.
 
             // The quotes require their own tree due to what can be in it.
             case TokenTypes.quote:
                 quote(tokenizer, token, state, out);
                 break;
 
+<<<<<<< HEAD
+=======
+},{"49":49}],31:[function(require,module,exports){
+var followReference = require(24);
+var clone = require(37);
+var isExpired = require(39);
+var promote = require(42).promote;
+var $ref = require(145);
+var $atom = require(143);
+var $error = require(144);
+>>>>>>> 3f41169... Updates performance index to require "falcor" module instead of by relative path.
 
             // Its time to decend the parse tree.
             case TokenTypes.openingBracket:
@@ -2953,9 +3192,24 @@ module.exports = function indexer(tokenizer, openingToken, state, out) {
         E.throwError(idxE.empty, tokenizer);
     }
 
+<<<<<<< HEAD
     if (state.indexer.length > 1 && routedIndexer) {
         E.throwError(idxE.routedTokens, tokenizer);
     }
+=======
+                // The next node is also set to undefined because nothing
+                // could be found, this reference points to nothing, so
+                // nothing must be returned.
+                if (!refNode) {
+                    out = undefined;
+                    next = undefined;
+                    break;
+                }
+                type = refNode.$type;
+                next = refNode;
+                optimizedPath = ref[1].slice(0);
+            }
+>>>>>>> 3f41169... Updates performance index to require "falcor" module instead of by relative path.
 
     // Remember, if an array of 1, keySets will be generated.
     if (state.indexer.length === 1) {
@@ -2990,9 +3244,28 @@ module.exports = function quote(tokenizer, openingToken, state, out) {
 
     while (!token.done) {
 
+<<<<<<< HEAD
         switch (token.type) {
             case TokenTypes.token:
             case TokenTypes.space:
+=======
+},{"143":143,"144":144,"145":145,"24":24,"37":37,"39":39,"42":42}],32:[function(require,module,exports){
+var followReference = require(24);
+var onError = require(33);
+var onMissing = require(34);
+var onValue = require(35);
+var lru = require(42);
+var hardLink = require(38);
+var isMaterialized = require(40);
+var removeHardlink = hardLink.remove;
+var splice = lru.splice;
+var isExpired = require(39);
+var permuteKey = require(43);
+var $ref = require(145);
+var $error = require(144);
+var __invalidated = require(51);
+var prefix = require(56);
+>>>>>>> 3f41169... Updates performance index to require "falcor" module instead of by relative path.
 
             case TokenTypes.dotSeparator:
             case TokenTypes.commaSeparator:
@@ -3228,6 +3501,22 @@ module.exports = function permuteKey(key, memo) {
             memo.done = true;
             return '';
         }
+<<<<<<< HEAD
+=======
+    }
+
+    return true;
+}
+
+module.exports = getWalk;
+
+},{"144":144,"145":145,"24":24,"33":33,"34":34,"35":35,"38":38,"39":39,"40":40,"42":42,"43":43,"51":51,"56":56}],33:[function(require,module,exports){
+var lru = require(42);
+var clone = require(37);
+var promote = lru.promote;
+module.exports = function onError(model, node, permuteRequested, permuteOptimized, outerResults) {
+    var value = node.value;
+>>>>>>> 3f41169... Updates performance index to require "falcor" module instead of by relative path.
 
         return memo.rangeOffset++;
     }
@@ -3281,10 +3570,26 @@ function fastCatSkipNulls(arr1, arr2) {
     return a;
 }
 
+<<<<<<< HEAD
 function fastCat(arr1, arr2) {
     var a = [], i, len, j;
     for (i = 0, len = arr1.length; i < len; i++) {
         a[i] = arr1[i];
+=======
+
+},{"37":37,"39":39,"44":44,"45":45}],35:[function(require,module,exports){
+var lru = require(42);
+var clone = require(37);
+var promote = lru.promote;
+var $ref = require(145);
+var $atom = require(143);
+var $error = require(144);
+module.exports = function onValue(model, node, seedOrFunction, outerResults, permuteRequested, permuteOptimized, permutePosition, outputFormat, fromReference) {
+    var i, len, k, key, curr, prev, prevK;
+    var materialized = false, valueNode;
+    if (node) {
+        promote(model, node);
+>>>>>>> 3f41169... Updates performance index to require "falcor" module instead of by relative path.
     }
     for (j = 0, len = arr2.length; j < len; j++) {
         a[i++] = arr2[j];
@@ -3478,11 +3783,43 @@ var array_slice = require(84);
 var options = require(113);
 var walk_path_set = require(134);
 
+<<<<<<< HEAD
 var is_object = require(106);
 
 var get_valid_key = require(96);
 var update_graph = require(124);
 var invalidate_node = require(101);
+=======
+},{"143":143,"144":144,"145":145,"37":37,"42":42}],36:[function(require,module,exports){
+var pathSyntax = require(11);
+
+module.exports = function getValueSync(path) {
+    path = pathSyntax.fromPath(path);
+    if (Array.isArray(path) === false) {
+        throw new Error("Model#getValueSync must be called with an Array path.");
+    }
+    if (this._path.length) {
+        path = this._path.concat(path);
+    }
+    return this.syncCheck("getValueSync") && this._getValueSync(this, path).value;
+};
+},{"11":11}],37:[function(require,module,exports){
+// Copies the node
+var prefix = require(56);
+module.exports = function clone(node) {
+    var outValue, i, len;
+    var keys = Object.keys(node);
+    outValue = {};
+    for (i = 0, len = keys.length; i < len; i++) {
+        var k = keys[i];
+        if (k[0] === prefix) {
+            continue;
+        }
+        outValue[k] = node[k];
+    }
+    return outValue;
+};
+>>>>>>> 3f41169... Updates performance index to require "falcor" module instead of by relative path.
 
 var positions = require(115);
 var _cache = positions.cache;
@@ -3490,7 +3827,15 @@ var _message = positions.message;
 var _jsong = positions.jsong;
 var _json = positions.json;
 
+<<<<<<< HEAD
 function invalidate_path_sets_as_json_dense(model, pathsets, values) {
+=======
+},{"56":56}],38:[function(require,module,exports){
+var __ref = require(59);
+var __context = require(47);
+var __ref_index = require(58);
+var __refs_length = require(60);
+>>>>>>> 3f41169... Updates performance index to require "falcor" module instead of by relative path.
 
     var roots = options([], model);
     var index = -1;
@@ -3536,6 +3881,7 @@ function invalidate_path_sets_as_json_dense(model, pathsets, values) {
 
 function onNode(pathset, roots, parents, nodes, requested, optimized, is_reference, is_branch, key, keyset, is_keyset) {
 
+<<<<<<< HEAD
     var parent, json;
 
     if (key == null) {
@@ -3550,6 +3896,30 @@ function onNode(pathset, roots, parents, nodes, requested, optimized, is_referen
     }
 
     var node = parent[key];
+=======
+},{"47":47,"58":58,"59":59,"60":60}],39:[function(require,module,exports){
+var now = require(129);
+module.exports = function isExpired(node) {
+    var $expires = node.$expires === undefined && -1 || node.$expires;
+    return $expires !== -1 && $expires !== 1 && ($expires === 0 || $expires < now());
+};
+
+},{"129":129}],40:[function(require,module,exports){
+module.exports = function isMaterialized(model) {
+    return model._materialized && !(model._router || model._source);
+};
+
+},{}],41:[function(require,module,exports){
+module.exports = function isPathValue(x) {
+    return x.path && x.value;
+};
+},{}],42:[function(require,module,exports){
+var __head = require(50);
+var __tail = require(61);
+var __next = require(53);
+var __prev = require(57);
+var __invalidated = require(51);
+>>>>>>> 3f41169... Updates performance index to require "falcor" module instead of by relative path.
 
     if (is_reference) {
         parents[_cache] = parent;
@@ -3608,9 +3978,23 @@ module.exports = function collect(lru, expired, total, max, ratio, version) {
         ratio = 0.75;
     }
 
+<<<<<<< HEAD
     var shouldUpdate = typeof version === "number";
     var targetSize = max * ratio;
     var parent, node, size;
+=======
+module.exports = {
+    promote: lruPromote,
+    splice: lruSplice
+};
+},{"50":50,"51":51,"53":53,"57":57,"61":61}],43:[function(require,module,exports){
+module.exports = function permuteKey(key, memo) {
+    if (memo.isArray) {
+        if (memo.loaded && memo.rangeOffset > memo.to) {
+            memo.arrOffset++;
+            memo.loaded = false;
+        }
+>>>>>>> 3f41169... Updates performance index to require "falcor" module instead of by relative path.
 
     while(!!(node = expired.pop())) {
         size = node.$size || 0;
@@ -3761,6 +4145,7 @@ GetRequest.prototype.constructor = GetRequest;
 
 GetRequest.prototype.method = "get";
 
+<<<<<<< HEAD
 GetRequest.prototype.getSourceArgs = function getSourceArgs() {
     return (this.paths = collapse(this.pathmaps));
 };
@@ -3785,6 +4170,68 @@ GetRequest.prototype.getSourceObserver = function getSourceObserver(observer) {
             }], empty_array, errorSelector, comparator);
 
             model._path = bound;
+=======
+},{}],46:[function(require,module,exports){
+arguments[4][1][0].apply(exports,arguments)
+},{"1":1,"153":153,"160":160,"161":161,"162":162,"18":18}],47:[function(require,module,exports){
+module.exports = require(56) + "context";
+},{"56":56}],48:[function(require,module,exports){
+module.exports = require(56) + "count";
+},{"56":56}],49:[function(require,module,exports){
+module.exports = require(56) + "generation";
+},{"56":56}],50:[function(require,module,exports){
+module.exports = require(56) + "head";
+},{"56":56}],51:[function(require,module,exports){
+module.exports = require(56) + "invalidated";
+},{"56":56}],52:[function(require,module,exports){
+module.exports = require(56) + "key";
+},{"56":56}],53:[function(require,module,exports){
+module.exports = require(56) + "next";
+},{"56":56}],54:[function(require,module,exports){
+module.exports = require(56) + "offset";
+},{"56":56}],55:[function(require,module,exports){
+module.exports = require(56) + "parent";
+},{"56":56}],56:[function(require,module,exports){
+/**
+ * http://en.wikipedia.org/wiki/Delimiter#ASCII_delimited_text
+ * record separator character.
+ */
+module.exports = String.fromCharCode(30);
+
+},{}],57:[function(require,module,exports){
+module.exports = require(56) + "prev";
+},{"56":56}],58:[function(require,module,exports){
+module.exports = require(56) + "ref-index";
+},{"56":56}],59:[function(require,module,exports){
+module.exports = require(56) + "ref";
+},{"56":56}],60:[function(require,module,exports){
+module.exports = require(56) + "refs-length";
+},{"56":56}],61:[function(require,module,exports){
+module.exports = require(56) + "tail";
+},{"56":56}],62:[function(require,module,exports){
+module.exports = require(56) + "version";
+},{"56":56}],63:[function(require,module,exports){
+module.exports = invalidate_json_sparse_as_json_dense;
+
+var clone = require(102);
+var array_clone = require(97);
+var array_slice = require(101);
+
+var options = require(130);
+var walk_path_map = require(149);
+
+var is_object = require(123);
+
+var get_valid_key = require(113);
+var update_graph = require(141);
+var invalidate_node = require(118);
+
+var positions = require(132);
+var _cache = positions.cache;
+var _message = positions.message;
+var _jsong = positions.jsong;
+var _json = positions.json;
+>>>>>>> 3f41169... Updates performance index to require "falcor" module instead of by relative path.
 
             observer.onNext(jsonGraphEnvelope);
         },
@@ -3901,6 +4348,7 @@ module.exports = function range(tokenizer, openingToken, state, out) {
     if (isNaN(from)) {
         E.throwError(E.range.precedingNaN, tokenizer);
     }
+<<<<<<< HEAD
 
     // Why is number checking so difficult in javascript.
 
@@ -3919,6 +4367,32 @@ module.exports = function range(tokenizer, openingToken, state, out) {
                     inclusive = false;
                 }
                 break;
+=======
+    roots.hasValue = true;
+    roots.requestedPaths.push(array_slice(requested, roots.offset));
+}
+},{"101":101,"102":102,"113":113,"118":118,"123":123,"130":130,"132":132,"141":141,"149":149,"97":97}],64:[function(require,module,exports){
+module.exports = invalidate_path_sets_as_json_dense;
+
+var clone = require(102);
+var array_clone = require(97);
+var array_slice = require(101);
+
+var options = require(130);
+var walk_path_set = require(151);
+
+var is_object = require(123);
+
+var get_valid_key = require(113);
+var update_graph = require(141);
+var invalidate_node = require(118);
+
+var positions = require(132);
+var _cache = positions.cache;
+var _message = positions.message;
+var _jsong = positions.jsong;
+var _json = positions.json;
+>>>>>>> 3f41169... Updates performance index to require "falcor" module instead of by relative path.
 
             case TokenTypes.token:
                 // move the tokenizer forward and save to.
@@ -4047,6 +4521,7 @@ var SPACE = " ";
 var SPECIAL_CHARACTERS = '\\\'"[]., ';
 var EXT_SPECIAL_CHARACTERS = '\\{}\'"[]., :';
 
+<<<<<<< HEAD
 var Tokenizer = module.exports = function(string, ext) {
     this._string = string;
     this._idx = -1;
@@ -4088,6 +4563,74 @@ Tokenizer.toNumber = function toNumber(x) {
     }
     return NaN;
 };
+=======
+    if (keyset == null) {
+        roots.json = clone(roots, node, type, node && node.value);
+    } else if (Boolean(json = parents[_json])) {
+        json[keyset] = clone(roots, node, type, node && node.value);
+    }
+    roots.hasValue = true;
+    roots.requestedPaths.push(array_slice(requested, roots.offset));
+}
+},{"101":101,"102":102,"113":113,"118":118,"123":123,"130":130,"132":132,"141":141,"151":151,"97":97}],65:[function(require,module,exports){
+var __key  = require(52);
+var __parent = require(55);
+
+var __head = require(50);
+var __tail = require(61);
+var __next = require(53);
+var __prev = require(57);
+
+var remove_node = require(133);
+var update_graph = require(141);
+
+module.exports = function collect(lru, expired, total, max, ratio, version) {
+    
+    if(typeof ratio !== "number") {
+        ratio = 0.75;
+    }
+
+    var shouldUpdate = typeof version === "number";
+    var targetSize = max * ratio;
+    var parent, node, size;
+
+    while(!!(node = expired.pop())) {
+        size = node.$size || 0;
+        total -= size;
+        if(shouldUpdate === true) {
+            update_graph(node, size, version, lru);
+        } else if(parent = node[__parent]) {
+            remove_node(parent, node, node[__key], lru);
+        }
+    }
+
+    if(total >= max) {
+        var prev = lru[__tail];
+        while((total >= targetSize) && !!(node = prev)) {
+            prev = prev[__prev];
+            size = node.$size || 0;
+            total -= size;
+            if(shouldUpdate === true) {
+                update_graph(node, size, version, lru);
+            }
+        }
+        
+        if((lru[__tail] = lru[__prev] = prev) == null) {
+            lru[__head] = lru[__next] = undefined;
+        } else {
+            prev[__next] = undefined;
+        }
+    }
+};
+},{"133":133,"141":141,"50":50,"52":52,"53":53,"55":55,"57":57,"61":61}],66:[function(require,module,exports){
+var $expires_never = require(146);
+var __head = require(50);
+var __tail = require(61);
+var __next = require(53);
+var __prev = require(57);
+
+var is_object = require(123);
+>>>>>>> 3f41169... Updates performance index to require "falcor" module instead of by relative path.
 
 function toOutput(token, type, done) {
     return {
@@ -4108,12 +4651,41 @@ function getNext(string, idx, ext) {
         if (done) {
             break;
         }
+<<<<<<< HEAD
 
         // we have to peek at the next token
         var character = string[idx + 1];
 
         if (character !== undefined &&
             specialChars.indexOf(character) === -1) {
+=======
+    }
+    return node;
+};
+},{"123":123,"146":146,"50":50,"53":53,"57":57,"61":61}],67:[function(require,module,exports){
+var __head = require(50);
+var __tail = require(61);
+var __next = require(53);
+var __prev = require(57);
+
+module.exports = function lru_splice(root, node) {
+    var head = root[__head], tail = root[__tail],
+        next = node[__next], prev = node[__prev];
+    (next != null && typeof next === "object") && (next[__prev] = prev);
+    (prev != null && typeof prev === "object") && (prev[__next] = next);
+    (node === head) && (root[__head] = root[__next] = next);
+    (node === tail) && (root[__tail] = root[__prev] = prev);
+    node[__next] = node[__prev] = undefined;
+    head = tail = next = prev = undefined;
+};
+},{"50":50,"53":53,"57":57,"61":61}],68:[function(require,module,exports){
+var Rx = require(162);
+var Observer = Rx.Observer;
+var Observable = Rx.Observable;
+var immediateScheduler = Rx.Scheduler.immediate;
+
+var Request = require(70);
+>>>>>>> 3f41169... Updates performance index to require "falcor" module instead of by relative path.
 
             token += character;
             ++idx;
@@ -4167,6 +4739,7 @@ function getNext(string, idx, ext) {
         break;
     } while (!done);
 
+<<<<<<< HEAD
     if (!output && token.length) {
         output = toOutput(token, TokenTypes.token, false);
     }
@@ -4182,13 +4755,58 @@ function getNext(string, idx, ext) {
 module.exports = RequestQueue;
 },{"111":111,"122":122,"161":161,"55":55,"68":68,"71":71,"96":96}],71:[function(require,module,exports){
 var Rx = require(161);;
+=======
+BatchedRequest.prototype.getSourceObservable = function getSourceObservable() {
+
+    if (this.refCountedObservable) {
+        return this.refCountedObservable;
+    }
+
+    var count = 0;
+    var source = this;
+    var subject = new Rx.ReplaySubject(null, null, immediateScheduler);
+    var connection = null;
+
+    return (this.refCountedObservable = Observable.create(function subscribe(observer) {
+        if (++count === 1 && !connection) {
+            connection = source.subscribe(subject);
+        }
+        var subscription = subject.subscribe(observer);
+        return function dispose() {
+            subscription.dispose();
+            if (--count === 0) {
+                connection.dispose();
+            }
+        }
+    }));
+};
+
+module.exports = BatchedRequest;
+},{"162":162,"70":70}],69:[function(require,module,exports){
+var Rx = require(162);
+>>>>>>> 3f41169... Updates performance index to require "falcor" module instead of by relative path.
 var Observer = Rx.Observer;
 >>>>>>> 6b4c63c... Includes dependency on rx.aggregates and rx.binding
 
+<<<<<<< HEAD
     return {
         token: output,
         idx: idx
     };
+=======
+var BatchedRequest = require(68);
+
+var collapse = require(108)
+var array_map = require(100);
+
+var set_json_graph_as_json_dense = require(83);
+var set_json_values_as_json_dense = require(91);
+
+var empty_array = new Array(0);
+
+function GetRequest() {
+    BatchedRequest.call(this);
+>>>>>>> 3f41169... Updates performance index to require "falcor" module instead of by relative path.
 }
 
 
@@ -4198,8 +4816,14 @@ var $ref = require(144);
 var $atom = require(142);
 var $error = require(143);
 
+<<<<<<< HEAD
 var ModelRoot = require(20);
 var ModelDataSourceAdapter = require(19);
+=======
+GetRequest.prototype.getSourceArgs = function getSourceArgs() {
+    return (this.paths = collapse(this.pathmaps));
+};
+>>>>>>> 3f41169... Updates performance index to require "falcor" module instead of by relative path.
 
 var RequestQueue = require(70);
 var GetResponse = require(73);
@@ -4218,12 +4842,19 @@ var array_slice = require(100);
 var collect_lru = require(64);
 var pathSyntax = require(11);
 
+<<<<<<< HEAD
 var get_size = require(110);
 var is_object = require(122);
 var is_function = require(119);
 var is_path_value = require(123);
 var is_json_envelope = require(120);
 var is_json_graph_envelope = require(121);
+=======
+            set_json_graph_as_json_dense(model, [{
+                paths: paths,
+                jsonGraph: jsonGraphEnvelope.jsonGraph
+            }], empty_array, errorSelector, comparator);
+>>>>>>> 3f41169... Updates performance index to require "falcor" module instead of by relative path.
 
 var set_cache = require(81);
 var set_json_graph_as_json_dense = require(82);
@@ -4234,9 +4865,18 @@ Model.ref = function ref(path) {
     return { $type: $ref, value: pathSyntax.fromPath(path) };
 };
 
+<<<<<<< HEAD
 Model.atom = function atom(value) {
     return { $type: $atom, value: value };
 };
+=======
+            set_json_values_as_json_dense(model, array_map(paths, function (path) {
+                return {
+                    path: path,
+                    value: error
+                };
+            }), empty_array, errorSelector, comparator);
+>>>>>>> 3f41169... Updates performance index to require "falcor" module instead of by relative path.
 
 Model.error = function error(error) {
     return { $type: $error, value: error };
@@ -4246,6 +4886,7 @@ Model.pathValue = function pathValue(path, value) {
     return { path: pathSyntax.fromPath(path), value: value };
 };
 
+<<<<<<< HEAD
 /**
  * A Model object is used to execute commands against a {@link JSONGraph} object. {@link Model}s can work with a local JSONGraph cache, or it can work with a remote {@link JSONGraph} object through a {@link DataSource}.
  * @constructor
@@ -4271,12 +4912,19 @@ function Model(options) {
 module.exports = SetRequest;
 },{"161":161,"69":69,"82":82,"90":90,"99":99}],72:[function(require,module,exports){
 var Rx = require(161);;
+=======
+module.exports = GetRequest;
+},{"100":100,"108":108,"162":162,"68":68,"83":83,"91":91}],70:[function(require,module,exports){
+var Rx = require(162);
+var Observer = Rx.Observer;
+>>>>>>> 3f41169... Updates performance index to require "falcor" module instead of by relative path.
 var Observable = Rx.Observable;
 var Disposable = Rx.Disposable;
 var SerialDisposable = Rx.SerialDisposable;
 var CompositeDisposable = Rx.CompositeDisposable;
 >>>>>>> 6b4c63c... Includes dependency on rx.aggregates and rx.binding
 
+<<<<<<< HEAD
     if(options.boxed || options.hasOwnProperty("_boxed")) {
         this._boxed = options.boxed || options._boxed;
     }
@@ -4299,6 +4947,32 @@ var CompositeDisposable = Rx.CompositeDisposable;
         this._cache = {};
     }
 }
+=======
+var collapse = require(108);
+var permute_keyset = require(131);
+var keyset_to_key = require(126);
+
+var is_array = Array.isArray;
+var is_object = require(123);
+var is_primitive = require(125);
+
+var __count = require(48);
+
+function Request() {
+    this.length = 0;
+    this.pending = false;
+    this.pathmaps = [];
+    Observable.call(this, this._subscribe);
+}
+
+Request.create = function create(queue, model, index) {
+    var request = new this();
+    request.queue = queue;
+    request.model = model;
+    request.index = index;
+    return request;
+};
+>>>>>>> 3f41169... Updates performance index to require "falcor" module instead of by relative path.
 
 Model.prototype.constructor = Model;
 
@@ -4309,6 +4983,7 @@ Model.prototype._treatErrorsAsValues = false;
 Model.prototype._maxSize = Math.pow(2, 53) - 1;
 Model.prototype._collectRatio = 0.75;
 
+<<<<<<< HEAD
 /**
  * The get method retrieves several {@link Path}s or {@link PathSet}s from a {@link Model}. The get method is versatile and may be called in several different ways, allowing you to make different trade-offs between performance and expressiveness. The simplest invocation returns an ModelResponse stream that contains a JSON object with all of the requested values. An optional selector function can also be passed in order to translate the retrieved data before it appears in the Observable stream. If a selector function is provided, the output will be an Observable stream with the result of the selector function invocation instead of a ModelResponse stream.
  If you intend to transform the JSON data into another form, specifying a selector function may be more efficient. The selector function is run once all of the requested path values are available. In the body of the selector function, you can read data from the Model's cache using {@link Model.prototype.getValueSync} and transform it directly into its final representation (ex. an HTML string). This technique can reduce allocations by preventing the get method from copying the data in {@link Model}'s cache into an intermediary JSON representation.
@@ -4355,6 +5030,14 @@ Model.prototype.set = function set() {
     while(++argsIdx < argsLen) {
         args[argsIdx] = arguments[argsIdx];
 >>>>>>> 6b8733c... Removes falcor-observable, imports rx/dist/rx, fixes BatchedRequest canceling, moves comparator and errorSelector to the ModelRoot, removes the promise collection guards, fixes bind and bindSync anomalies.
+=======
+    index = index || 0;
+    count = count || path.length - 1;
+    parent = parent || this.pathmaps[count + 1] || (this.pathmaps[count + 1] = Object.create(null));
+
+    if (parent == null) {
+        return false;
+>>>>>>> 3f41169... Updates performance index to require "falcor" module instead of by relative path.
     }
     return SetResponse.create(this, args, selector);
 };
@@ -4518,6 +5201,7 @@ Request.prototype._subscribe = function _subscribe(observer) {
 };
 
 module.exports = Request;
+<<<<<<< HEAD
 },{"106":106,"108":108,"109":109,"114":114,"161":161,"31":31,"91":91}],54:[function(require,module,exports){
 var Rx = require(161);
 var Observable = Rx.Observable;
@@ -4530,6 +5214,20 @@ var prefix = require(39);
 var get_type = require(95);
 var is_object = require(106);
 var array_clone = require(80);
+=======
+},{"108":108,"123":123,"125":125,"126":126,"131":131,"162":162,"48":48}],71:[function(require,module,exports){
+var Rx = require(162);
+var Observable = Rx.Observable;
+var SerialDisposable = Rx.SerialDisposable;
+
+var GetRequest = require(69);
+var SetRequest = require(72);
+
+var prefix = require(56);
+var get_type = require(112);
+var is_object = require(123);
+var array_clone = require(97);
+>>>>>>> 3f41169... Updates performance index to require "falcor" module instead of by relative path.
 
 function RequestQueue(model, scheduler) {
     this.total = 0;
@@ -4718,6 +5416,7 @@ var Disposable = Rx.Disposable;
 };
 
 module.exports = RequestQueue;
+<<<<<<< HEAD
 },{"106":106,"161":161,"39":39,"52":52,"55":55,"80":80,"95":95}],55:[function(require,module,exports){
 var Rx = require(161);
 var Observer = Rx.Observer;
@@ -4728,6 +5427,18 @@ var array_map = require(83);
 
 var set_json_graph_as_json_dense = require(66);
 var set_json_values_as_json_dense = require(74);
+=======
+},{"112":112,"123":123,"162":162,"56":56,"69":69,"72":72,"97":97}],72:[function(require,module,exports){
+var Rx = require(162);
+var Observer = Rx.Observer;
+
+var Request = require(70);
+
+var array_map = require(100);
+
+var set_json_graph_as_json_dense = require(83);
+var set_json_values_as_json_dense = require(91);
+>>>>>>> 3f41169... Updates performance index to require "falcor" module instead of by relative path.
 
 var empty_array = new Array(0);
 
@@ -4802,18 +5513,31 @@ SetRequest.prototype.getSourceObserver = function getSourceObserver(observer) {
 };
 
 module.exports = SetRequest;
+<<<<<<< HEAD
 },{"161":161,"53":53,"66":66,"74":74,"83":83}],56:[function(require,module,exports){
 var Rx = require(161);
+=======
+},{"100":100,"162":162,"70":70,"83":83,"91":91}],73:[function(require,module,exports){
+var Rx = require(162);
+>>>>>>> 3f41169... Updates performance index to require "falcor" module instead of by relative path.
 var Observable = Rx.Observable;
 var Disposable = Rx.Disposable;
 var SerialDisposable = Rx.SerialDisposable;
 var CompositeDisposable = Rx.CompositeDisposable;
 
+<<<<<<< HEAD
 var ModelResponse = require(60);
+=======
+var ModelResponse = require(77);
+>>>>>>> 3f41169... Updates performance index to require "falcor" module instead of by relative path.
 
 var pathSyntax = require(145);
 
+<<<<<<< HEAD
 var $ref = require(128);
+=======
+var $ref = require(145);
+>>>>>>> 3f41169... Updates performance index to require "falcor" module instead of by relative path.
 
 function CallResponse(subscribe) {
     Observable.call(this, subscribe || subscribeToResponse);
@@ -5083,6 +5807,7 @@ var Disposable = Rx.Disposable;
 };
 
 module.exports = CallResponse;
+<<<<<<< HEAD
 },{"128":128,"145":145,"161":161,"60":60}],57:[function(require,module,exports){
 var Rx = require(161);
 =======
@@ -5106,6 +5831,21 @@ var is_function = require(103);
 
 var set_json_graph_as_json_dense = require(66);
 var set_json_values_as_json_dense = require(74);
+=======
+},{"11":11,"145":145,"162":162,"77":77}],74:[function(require,module,exports){
+var Rx = require(162);
+var Observable = Rx.Observable;
+var Disposable = Rx.Disposable;
+
+var IdempotentResponse = require(75);
+
+var array_map = require(100);
+var array_concat = require(98);
+var is_function = require(120);
+
+var set_json_graph_as_json_dense = require(83);
+var set_json_values_as_json_dense = require(91);
+>>>>>>> 3f41169... Updates performance index to require "falcor" module instead of by relative path.
 
 var empty_array = new Array(0);
 
@@ -5135,6 +5875,7 @@ GetResponse.prototype.invokeSourceRequest = function invokeSourceRequest(model) 
                 .materialize()
                 .flatMap(function (notification) {
                     if (notification.kind === "C") {
+<<<<<<< HEAD
                         return Observable.empty();
                     }
                     return caught;
@@ -5247,6 +5988,8 @@ SetResponse.prototype.invokeSourceRequest = function invokeSourceRequest(model) 
                 .materialize()
                 .flatMap(function(notification) {
                     if(notification.kind === "C") {
+=======
+>>>>>>> 3f41169... Updates performance index to require "falcor" module instead of by relative path.
                         return Observable.empty();
                     }
                     return caught;
@@ -5256,14 +5999,21 @@ SetResponse.prototype.invokeSourceRequest = function invokeSourceRequest(model) 
         return Observable["throw"](results);
     });
 
-    return new this.constructor(function(observer) {
+    return new this.constructor(function (observer) {
         return caught.subscribe(observer);
     });
 };
 
+<<<<<<< HEAD
 function subscribeToSetResponse(observer) {
 
     if(this.subscribeCount >= this.subscribeLimit) {
+=======
+// Executes the local cache search for the GetResponse's operation groups.
+function subscribeToGetResponse(observer) {
+
+    if (this.subscribeCount++ >= this.subscribeLimit) {
+>>>>>>> 3f41169... Updates performance index to require "falcor" module instead of by relative path.
         observer.onError("Loop kill switch thrown.");
         return;
     }
@@ -5279,7 +6029,7 @@ function subscribeToSetResponse(observer) {
     var isMaster = this.isMaster;
     var isCompleted = this.isCompleted;
     var isProgressive = this.isProgressive;
-    var asJSONG  = outputFormat === "AsJSONG";
+    var asJSONG = outputFormat === "AsJSONG";
     var asValues = outputFormat === "AsValues";
     var hasValue = false;
 
@@ -5380,6 +6130,7 @@ function pluckJSON(jsonEnvelope) {
 
 <<<<<<< HEAD
 module.exports = GetResponse;
+<<<<<<< HEAD
 },{"103":103,"161":161,"58":58,"66":66,"74":74,"81":81,"83":83}],58:[function(require,module,exports){
 var Rx = require(161);
 =======
@@ -5396,15 +6147,24 @@ module.exports = SetResponse;
 var asap = require(2);
 var Rx = require(161);;
 >>>>>>> 6b4c63c... Includes dependency on rx.aggregates and rx.binding
+=======
+},{"100":100,"120":120,"162":162,"75":75,"83":83,"91":91,"98":98}],75:[function(require,module,exports){
+var Rx = require(162);
+>>>>>>> 3f41169... Updates performance index to require "falcor" module instead of by relative path.
 var Disposable = Rx.Disposable;
 var Observable = Rx.Observable;
 var SerialDisposable = Rx.SerialDisposable;
 var CompositeDisposable = Rx.CompositeDisposable;
 
+<<<<<<< HEAD
 var ModelResponse = require(60);
+=======
+var ModelResponse = require(77);
+>>>>>>> 3f41169... Updates performance index to require "falcor" module instead of by relative path.
 
 var pathSyntax = require(145);
 
+<<<<<<< HEAD
 var get_size = require(94);
 var collect_lru = require(48);
 var __version = require(45);
@@ -5425,6 +6185,21 @@ var is_function = require(103);
 var is_path_value = require(107);
 var is_json_envelope = require(104);
 var is_json_graph_envelope = require(105);
+=======
+var get_size = require(111);
+var collect_lru = require(65);
+var __version = require(62);
+
+var array_map = require(100);
+var array_clone = require(97);
+
+var is_array = Array.isArray;
+var is_object = require(123);
+var is_function = require(120);
+var is_path_value = require(124);
+var is_json_envelope = require(121);
+var is_json_graph_envelope = require(122);
+>>>>>>> 3f41169... Updates performance index to require "falcor" module instead of by relative path.
 
 function IdempotentResponse(subscribe) {
     Observable.call(this, subscribe);
@@ -5580,12 +6355,21 @@ IdempotentResponse.prototype.ensureCollect = function ensureCollect(model, initi
 };
 
 module.exports = IdempotentResponse;
+<<<<<<< HEAD
 },{"103":103,"104":104,"105":105,"106":106,"107":107,"145":145,"161":161,"45":45,"48":48,"60":60,"80":80,"83":83,"94":94}],59:[function(require,module,exports){
 var Rx = require(161);
 var Observable = Rx.Observable;
 var Disposable = Rx.Disposable;
 
 var IdempotentResponse = require(58);
+=======
+},{"100":100,"11":11,"111":111,"120":120,"121":121,"122":122,"123":123,"124":124,"162":162,"62":62,"65":65,"77":77,"97":97}],76:[function(require,module,exports){
+var Rx = require(162);
+var Observable = Rx.Observable;
+var Disposable = Rx.Disposable;
+
+var IdempotentResponse = require(75);
+>>>>>>> 3f41169... Updates performance index to require "falcor" module instead of by relative path.
 
 var empty_array = new Array(0);
 
@@ -5625,6 +6409,7 @@ function subscribeToInvalidateResponse(observer) {
 }
 
 module.exports = InvalidateResponse;
+<<<<<<< HEAD
 },{"161":161,"58":58}],60:[function(require,module,exports){
 var falcor = require("./../");
 
@@ -5646,6 +6431,29 @@ var is_json_graph_envelope = require(105);
 
 var noop = require(111);
 var __version = require(45);
+=======
+},{"162":162,"75":75}],77:[function(require,module,exports){
+var falcor = require(46);
+
+var Rx = require(162);
+var Observable = Rx.Observable;
+
+var array_map = require(100);
+var array_slice = require(101);
+var array_clone = require(97);
+var array_concat = require(98);
+var array_flat_map = require(99);
+
+var is_array = Array.isArray;
+var is_object = require(123);
+var is_function = require(120);
+var is_path_value = require(124);
+var is_json_envelope = require(121);
+var is_json_graph_envelope = require(122);
+
+var noop = require(128);
+var __version = require(62);
+>>>>>>> 3f41169... Updates performance index to require "falcor" module instead of by relative path.
 
 var jsongMixin = { outputFormat: { value: "AsJSONG" } };
 var valuesMixin = { outputFormat: { value: "AsValues" } };
@@ -5762,6 +6570,7 @@ function subscribeToResponse(observer) {
 };
 
 module.exports = ModelResponse;
+<<<<<<< HEAD
 },{"103":103,"104":104,"105":105,"106":106,"107":107,"111":111,"161":161,"45":45,"80":80,"81":81,"82":82,"83":83,"84":84,"undefined":undefined}],61:[function(require,module,exports){
 var Rx = require(161);
 var Observable = Rx.Observable;
@@ -5775,6 +6584,21 @@ var is_function = require(103);
 
 var set_json_graph_as_json_dense = require(66);
 var set_json_values_as_json_dense = require(74);
+=======
+},{"100":100,"101":101,"120":120,"121":121,"122":122,"123":123,"124":124,"128":128,"162":162,"46":46,"62":62,"97":97,"98":98,"99":99}],78:[function(require,module,exports){
+var Rx = require(162);
+var Observable = Rx.Observable;
+var Disposable = Rx.Disposable;
+
+var IdempotentResponse = require(75);
+
+var array_map = require(100);
+var array_flat_map = require(99);
+var is_function = require(120);
+
+var set_json_graph_as_json_dense = require(83);
+var set_json_values_as_json_dense = require(91);
+>>>>>>> 3f41169... Updates performance index to require "falcor" module instead of by relative path.
 
 var empty_array = new Array(0);
 
@@ -5957,9 +6781,15 @@ function pluckPaths(jsonGraphEnvelope) {
 }
 
 module.exports = SetResponse;
+<<<<<<< HEAD
 },{"103":103,"161":161,"58":58,"66":66,"74":74,"82":82,"83":83}],62:[function(require,module,exports){
 var asap = require(136);
 var Rx = require(161);
+=======
+},{"100":100,"120":120,"162":162,"75":75,"83":83,"91":91,"99":99}],79:[function(require,module,exports){
+var asap = require(2);
+var Rx = require(162);
+>>>>>>> 3f41169... Updates performance index to require "falcor" module instead of by relative path.
 var Disposable = Rx.Disposable;
 
 function ASAPScheduler() {
@@ -5980,8 +6810,13 @@ ASAPScheduler.prototype.scheduleWithState = function scheduleWithState(state, ac
 };
 
 module.exports = ASAPScheduler;
+<<<<<<< HEAD
 },{"136":136,"161":161}],63:[function(require,module,exports){
 var Rx = require(161);
+=======
+},{"162":162,"2":2}],80:[function(require,module,exports){
+var Rx = require(162);
+>>>>>>> 3f41169... Updates performance index to require "falcor" module instead of by relative path.
 var Disposable = Rx.Disposable;
 
 function ImmediateScheduler() {
@@ -6000,8 +6835,13 @@ ImmediateScheduler.prototype.scheduleWithState = function scheduleWithState(stat
 
 module.exports = ImmediateScheduler;
 
+<<<<<<< HEAD
 },{"161":161}],64:[function(require,module,exports){
 var Rx = require(161);
+=======
+},{"162":162}],81:[function(require,module,exports){
+var Rx = require(162);
+>>>>>>> 3f41169... Updates performance index to require "falcor" module instead of by relative path.
 var Disposable = Rx.Disposable;
 
 function TimeoutScheduler(delay) {
@@ -6033,6 +6873,7 @@ TimeoutScheduler.prototype.scheduleWithState = function scheduleWithState(state,
 
 module.exports = TimeoutScheduler;
 
+<<<<<<< HEAD
 },{"161":161}],65:[function(require,module,exports){
 module.exports = set_cache;
 
@@ -6059,6 +6900,34 @@ var inc_generation = require(99);
 var promote = require(49);
 
 var positions = require(115);
+=======
+},{"162":162}],82:[function(require,module,exports){
+module.exports = set_cache;
+
+var $error = require(144);
+var $atom = require(143);
+
+var clone = require(102);
+var array_clone = require(97);
+
+var options = require(130);
+var walk_path_map = require(149);
+
+var is_object = require(123);
+
+var get_valid_key = require(113);
+var create_branch = require(109);
+var wrap_node = require(142);
+var replace_node = require(134);
+var graph_node = require(114);
+var update_back_refs = require(140);
+var update_graph = require(141);
+var inc_generation = require(116);
+
+var promote = require(66);
+
+var positions = require(132);
+>>>>>>> 3f41169... Updates performance index to require "falcor" module instead of by relative path.
 var _cache = positions.cache;
 var _message = positions.message;
 var _jsong = positions.jsong;
@@ -6182,6 +7051,7 @@ Model.prototype.getCache = function getCache() {
     if(paths.length === 0) {
         paths[0] = { json: this._cache };
     }
+<<<<<<< HEAD
     var result;
     this.get.apply(this.
             withoutDataSource().
@@ -6264,6 +7134,34 @@ Model.prototype.treatErrorsAsValues = function treatErrorsAsValues() {
 Model.prototype.asDataSource = function asDataSource() {
     return new ModelDataSourceAdapter(this);
 };
+=======
+}
+},{"102":102,"109":109,"113":113,"114":114,"116":116,"123":123,"130":130,"132":132,"134":134,"140":140,"141":141,"142":142,"143":143,"144":144,"149":149,"66":66,"97":97}],83:[function(require,module,exports){
+module.exports = set_json_graph_as_json_dense;
+
+var $ref = require(145);
+
+var clone = require(102);
+var array_clone = require(97);
+
+var options = require(130);
+var walk_path_set = require(150);
+
+var is_object = require(123);
+
+var get_valid_key = require(113);
+var merge_node = require(127);
+
+var set_node_if_missing_path = require(138);
+var set_node_if_error = require(137);
+var set_successful_paths = require(135);
+
+var positions = require(132);
+var _cache = positions.cache;
+var _message = positions.message;
+var _jsong = positions.jsong;
+var _json = positions.json;
+>>>>>>> 3f41169... Updates performance index to require "falcor" module instead of by relative path.
 
 Model.prototype.materialize = function materialize() {
     return this.clone({ _materialized: true });
@@ -6390,6 +7288,7 @@ ModelRoot.prototype.comparator = function comparator(a, b) {
         Boolean(b) && typeof b === "object" && b.hasOwnProperty("value")) {
         return a.value === b.value;
     }
+<<<<<<< HEAD
     return a === b;
 };
 
@@ -6460,6 +7359,36 @@ var $error = require(143);
 var pathSyntax = require(11);
 var getBoundValue = require(29);
 var get_type = require(111);
+=======
+}
+},{"102":102,"113":113,"123":123,"127":127,"130":130,"132":132,"135":135,"137":137,"138":138,"145":145,"150":150,"97":97}],84:[function(require,module,exports){
+module.exports = set_json_graph_as_json_graph;
+
+var $ref = require(145);
+
+var clone = require(103);
+var array_clone = require(97);
+
+var options = require(130);
+var walk_path_set = require(150);
+
+var is_object = require(123);
+
+var get_valid_key = require(113);
+var merge_node = require(127);
+
+var set_node_if_missing_path = require(138);
+var set_node_if_error = require(137);
+var set_successful_paths = require(135);
+
+var promote = require(66);
+
+var positions = require(132);
+var _cache = positions.cache;
+var _message = positions.message;
+var _jsong = positions.jsong;
+var _json = positions.json;
+>>>>>>> 3f41169... Updates performance index to require "falcor" module instead of by relative path.
 
 module.exports = function bindSync(path) {
 
@@ -6583,6 +7512,7 @@ function followReference(model, root, node, referenceContainer, reference, seed,
         }
         break;
     }
+<<<<<<< HEAD
 
 
     if (depth < reference.length && node !== undefined) {
@@ -6620,6 +7550,35 @@ module.exports = function(walk) {
         var missingIdx = 0;
         var boundOptimizedPath, optimizedPath;
         var i, j, len, bLen;
+=======
+    roots.hasValue = true;
+}
+},{"103":103,"113":113,"123":123,"127":127,"130":130,"132":132,"135":135,"137":137,"138":138,"145":145,"150":150,"66":66,"97":97}],85:[function(require,module,exports){
+module.exports = set_json_graph_as_json_sparse;
+
+var $ref = require(145);
+
+var clone = require(102);
+var array_clone = require(97);
+
+var options = require(130);
+var walk_path_set = require(150);
+
+var is_object = require(123);
+
+var get_valid_key = require(113);
+var merge_node = require(127);
+
+var set_node_if_missing_path = require(138);
+var set_node_if_error = require(137);
+var set_successful_paths = require(135);
+
+var positions = require(132);
+var _cache = positions.cache;
+var _message = positions.message;
+var _jsong = positions.jsong;
+var _json = positions.json;
+>>>>>>> 3f41169... Updates performance index to require "falcor" module instead of by relative path.
 
         results.values = values;
         if (!values) {
@@ -6823,6 +7782,7 @@ module.exports = function getBoundValue(model, path) {
     model._materialized = true;
     model._treatErrorsAsValues = true;
 
+<<<<<<< HEAD
     value = getValueSync(model, path.concat(null), true);
 
     model._boxed = boxed;
@@ -6853,6 +7813,49 @@ module.exports = function getBoundValue(model, path) {
 
 },{"23":23,"31":31}],30:[function(require,module,exports){
 var __generation = require(48);
+=======
+    if (roots.is_distinct === true) {
+        roots.is_distinct = false;
+        set_successful_paths(roots, requested, optimized);
+        if (keyset == null && !roots.hasValue && (keyset = get_valid_key(optimized)) == null) {
+            node = clone(roots, node, type, node && node.value);
+            json = roots[_json];
+            json.$type = node.$type;
+            json.value = node.value;
+        } else {
+            json = parents[_json];
+            json[key] = clone(roots, node, type, node && node.value);
+        }
+        roots.hasValue = true;
+    }
+}
+},{"102":102,"113":113,"123":123,"127":127,"130":130,"132":132,"135":135,"137":137,"138":138,"145":145,"150":150,"97":97}],86:[function(require,module,exports){
+module.exports = set_json_graph_as_json_values;
+
+var $ref = require(145);
+
+var clone = require(102);
+var array_clone = require(97);
+var array_slice = require(101);
+
+var options = require(130);
+var walk_path_set = require(150);
+
+var is_object = require(123);
+
+var get_valid_key = require(113);
+var merge_node = require(127);
+
+var set_node_if_missing_path = require(138);
+var set_node_if_error = require(137);
+var set_successful_paths = require(135);
+
+var positions = require(132);
+var _cache = positions.cache;
+var _message = positions.message;
+var _jsong = positions.jsong;
+var _json = positions.json;
+>>>>>>> 3f41169... Updates performance index to require "falcor" module instead of by relative path.
 
 module.exports = function _getGeneration(model, path) {
     // ultra fast clone for boxed values.
@@ -6969,6 +7972,7 @@ module.exports = function getValueSync(model, simplePath, noClone) {
         out = out.value;
     }
 
+<<<<<<< HEAD
     return {
         value: out,
         shorted: shorted,
@@ -7043,6 +8047,49 @@ function getWalk(model, root, curr, pathOrJSON, depth, seedOrFunction, positiona
         } else {
             k = pathOrJSON[depth];
         }
+=======
+    if (roots.is_distinct === true) {
+        roots.is_distinct = false;
+        set_successful_paths(roots, requested, optimized);
+        roots.onNext({
+            path: array_slice(requested, roots.offset),
+            value: clone(roots, node, type, node && node.value)
+        });
+    }
+}
+},{"101":101,"102":102,"113":113,"123":123,"127":127,"130":130,"132":132,"135":135,"137":137,"138":138,"145":145,"150":150,"97":97}],87:[function(require,module,exports){
+module.exports = set_json_sparse_as_json_dense;
+
+var $ref = require(145);
+var $error = require(144);
+var $atom = require(143);
+
+var clone = require(102);
+var array_clone = require(97);
+
+var options = require(130);
+var walk_path_map = require(149);
+
+var is_object = require(123);
+
+var get_valid_key = require(113);
+var create_branch = require(109);
+var wrap_node = require(142);
+var replace_node = require(134);
+var graph_node = require(114);
+var update_back_refs = require(140);
+var update_graph = require(141);
+var inc_generation = require(116);
+
+var set_node_if_error = require(137);
+var set_successful_paths = require(135);
+
+var positions = require(132);
+var _cache = positions.cache;
+var _message = positions.message;
+var _jsong = positions.jsong;
+var _json = positions.json;
+>>>>>>> 3f41169... Updates performance index to require "falcor" module instead of by relative path.
 
         // BaseCase: we have hit the end of our query without finding a 'leaf' node, therefore emit missing.
         if (atEndOfJSONQuery || !jsonQuery && depth === pathOrJSON.length) {
@@ -7211,6 +8258,7 @@ var walk_path_set = require(133);
 
 var is_object = require(106);
 
+<<<<<<< HEAD
 var get_valid_key = require(96);
 var merge_node = require(110);
 
@@ -7259,6 +8307,53 @@ module.exports = function onMissing(model, node, path, depth, seedOrFunction, ou
         } else {
             pathSlice = [];
         }
+=======
+    if (roots.is_distinct === true) {
+        roots.is_distinct = false;
+        set_successful_paths(roots, requested, optimized);
+        if (keyset == null) {
+            roots.json = clone(roots, node, type, node && node.value);
+        } else if (Boolean(json = parents[_json])) {
+            json[keyset] = clone(roots, node, type, node && node.value);
+        }
+        roots.hasValue = true;
+    }
+}
+},{"102":102,"109":109,"113":113,"114":114,"116":116,"123":123,"130":130,"132":132,"134":134,"135":135,"137":137,"140":140,"141":141,"142":142,"143":143,"144":144,"145":145,"149":149,"97":97}],88:[function(require,module,exports){
+module.exports = set_json_sparse_as_json_graph;
+
+var $ref = require(145);
+var $error = require(144);
+var $atom = require(143);
+
+var clone = require(103);
+var array_clone = require(97);
+
+var options = require(130);
+var walk_path_map = require(148);
+
+var is_object = require(123);
+
+var get_valid_key = require(113);
+var create_branch = require(109);
+var wrap_node = require(142);
+var replace_node = require(134);
+var graph_node = require(114);
+var update_back_refs = require(140);
+var update_graph = require(141);
+var inc_generation = require(116);
+
+var set_node_if_error = require(137);
+var set_successful_paths = require(135);
+
+var promote = require(66);
+
+var positions = require(132);
+var _cache = positions.cache;
+var _message = positions.message;
+var _jsong = positions.jsong;
+var _json = positions.json;
+>>>>>>> 3f41169... Updates performance index to require "falcor" module instead of by relative path.
 
         concatAndInsertMissing(pathSlice, outerResults, permuteRequested, permuteOptimized, permutePosition, outputFormat);
     } else {
@@ -7506,6 +8601,7 @@ module.exports = function clone(node) {
     }
 <<<<<<< HEAD
 }
+<<<<<<< HEAD
 },{"106":106,"110":110,"113":113,"115":115,"118":118,"120":120,"121":121,"128":128,"133":133,"80":80,"85":85,"96":96}],67:[function(require,module,exports){
 module.exports = set_json_graph_as_json_graph;
 
@@ -7529,6 +8625,36 @@ var set_successful_paths = require(118);
 var promote = require(49);
 
 var positions = require(115);
+=======
+},{"103":103,"109":109,"113":113,"114":114,"116":116,"123":123,"130":130,"132":132,"134":134,"135":135,"137":137,"140":140,"141":141,"142":142,"143":143,"144":144,"145":145,"148":148,"66":66,"97":97}],89:[function(require,module,exports){
+module.exports = set_json_sparse_as_json_sparse;
+
+var $ref = require(145);
+var $error = require(144);
+var $atom = require(143);
+
+var clone = require(102);
+var array_clone = require(97);
+
+var options = require(130);
+var walk_path_map = require(149);
+
+var is_object = require(123);
+
+var get_valid_key = require(113);
+var create_branch = require(109);
+var wrap_node = require(142);
+var replace_node = require(134);
+var graph_node = require(114);
+var update_back_refs = require(140);
+var update_graph = require(141);
+var inc_generation = require(116);
+
+var set_node_if_error = require(137);
+var set_successful_paths = require(135);
+
+var positions = require(132);
+>>>>>>> 3f41169... Updates performance index to require "falcor" module instead of by relative path.
 var _cache = positions.cache;
 var _message = positions.message;
 var _jsong = positions.jsong;
@@ -7631,6 +8757,7 @@ function lruPromote(model, object) {
         return;
 >>>>>>> 6b8733c... Removes falcor-observable, imports rx/dist/rx, fixes BatchedRequest canceling, moves comparator and errorSelector to the ModelRoot, removes the promise collection guards, fixes bind and bindSync anomalies.
     }
+<<<<<<< HEAD
 
     // The head and the tail need to separate
     if (!root[__tail]) {
@@ -7641,6 +8768,57 @@ function lruPromote(model, object) {
         // Now tail
         head[__prev] = object;
         return;
+=======
+}
+},{"102":102,"109":109,"113":113,"114":114,"116":116,"123":123,"130":130,"132":132,"134":134,"135":135,"137":137,"140":140,"141":141,"142":142,"143":143,"144":144,"145":145,"149":149,"97":97}],90:[function(require,module,exports){
+module.exports = set_path_map_as_json_values;
+
+var $error = require(144);
+var $atom = require(143);
+
+var clone = require(102);
+var array_clone = require(97);
+
+var options = require(130);
+var walk_path_map = require(149);
+
+var is_object = require(123);
+
+var get_valid_key = require(113);
+var create_branch = require(109);
+var wrap_node = require(142);
+var replace_node = require(134);
+var graph_node = require(114);
+var update_back_refs = require(140);
+var update_graph = require(141);
+var inc_generation = require(116);
+
+var set_node_if_error = require(137);
+var set_successful_paths = require(135);
+
+var positions = require(132);
+var _cache = positions.cache;
+var _message = positions.message;
+var _jsong = positions.jsong;
+var _json = positions.json;
+
+function set_path_map_as_json_values(model, pathmaps, onNext, error_selector, comparator) {
+
+    var roots = options([], model, error_selector, comparator);
+    var index = -1;
+    var count = pathmaps.length;
+    var nodes = roots.nodes;
+    var parents = array_clone(nodes);
+    var requested = [];
+    var optimized = array_clone(roots.bound);
+    var keys_stack = [];
+    roots[_cache] = roots.root;
+    roots.onNext = onNext;
+
+    while (++index < count) {
+        var pathmap = pathmaps[index].json;
+        walk_path_map(onNode, onEdge, pathmap, keys_stack, 0, roots, parents, nodes, requested, optimized);
+>>>>>>> 3f41169... Updates performance index to require "falcor" module instead of by relative path.
     }
 
 <<<<<<< HEAD
@@ -7809,6 +8987,7 @@ function fastCopy(arr, i) {
     }
     return a;
 }
+<<<<<<< HEAD
 
 function fastCatSkipNulls(arr1, arr2) {
     var a = [], i, len, j;
@@ -7911,15 +9090,47 @@ var array_slice = require(100);
 
 var options = require(129);
 var walk_path_map = require(148);
+=======
+},{"102":102,"109":109,"113":113,"114":114,"116":116,"123":123,"130":130,"132":132,"134":134,"135":135,"137":137,"140":140,"141":141,"142":142,"143":143,"144":144,"149":149,"97":97}],91:[function(require,module,exports){
+module.exports = set_json_values_as_json_dense;
 
-var is_object = require(122);
+var $ref = require(145);
+var $error = require(144);
+var $atom = require(143);
 
+var clone = require(102);
+var array_clone = require(97);
+
+var options = require(130);
+var walk_path_set = require(151);
+>>>>>>> 3f41169... Updates performance index to require "falcor" module instead of by relative path.
+
+var is_object = require(123);
+
+<<<<<<< HEAD
 var get_valid_key = require(112);
 var update_graph = require(140);
 var invalidate_node = require(117);
 
 var positions = require(131);
 >>>>>>> 6b8733c... Removes falcor-observable, imports rx/dist/rx, fixes BatchedRequest canceling, moves comparator and errorSelector to the ModelRoot, removes the promise collection guards, fixes bind and bindSync anomalies.
+=======
+var get_valid_key = require(113);
+var create_branch = require(109);
+var wrap_node = require(142);
+var invalidate_node = require(118);
+var replace_node = require(134);
+var graph_node = require(114);
+var update_back_refs = require(140);
+var update_graph = require(141);
+var inc_generation = require(116);
+
+var set_node_if_missing_path = require(138);
+var set_node_if_error = require(137);
+var set_successful_paths = require(135);
+
+var positions = require(132);
+>>>>>>> 3f41169... Updates performance index to require "falcor" module instead of by relative path.
 var _cache = positions.cache;
 var _message = positions.message;
 var _jsong = positions.jsong;
@@ -8184,6 +9395,7 @@ var $atom = require(126);
 var clone = require(85);
 var array_clone = require(80);
 
+<<<<<<< HEAD
 var options = require(113);
 var walk_path_map = require(132);
 
@@ -8211,16 +9423,60 @@ var array_clone = require(96);
 var array_slice = require(100);
 
 var options = require(129);
+=======
+    if (roots.is_distinct === true) {
+        roots.is_distinct = false;
+        set_successful_paths(roots, requested, optimized);
+        if (keyset == null) {
+            roots.json = clone(roots, node, type, node && node.value);
+        } else if (Boolean(json = parents[_json])) {
+            json[keyset] = clone(roots, node, type, node && node.value);
+        }
+        roots.hasValue = true;
+    }
+}
+},{"102":102,"109":109,"113":113,"114":114,"116":116,"118":118,"123":123,"130":130,"132":132,"134":134,"135":135,"137":137,"138":138,"140":140,"141":141,"142":142,"143":143,"144":144,"145":145,"151":151,"97":97}],92:[function(require,module,exports){
+module.exports = set_json_values_as_json_graph;
+
+var $ref = require(145);
+var $error = require(144);
+var $atom = require(143);
+
+var clone = require(103);
+var array_clone = require(97);
+
+var options = require(130);
+>>>>>>> 3f41169... Updates performance index to require "falcor" module instead of by relative path.
 var walk_path_set = require(150);
 
-var is_object = require(122);
+var is_object = require(123);
 
+<<<<<<< HEAD
 var get_valid_key = require(112);
 var update_graph = require(140);
 var invalidate_node = require(117);
 
 var positions = require(131);
 >>>>>>> 6b8733c... Removes falcor-observable, imports rx/dist/rx, fixes BatchedRequest canceling, moves comparator and errorSelector to the ModelRoot, removes the promise collection guards, fixes bind and bindSync anomalies.
+=======
+var get_valid_key = require(113);
+var create_branch = require(109);
+var wrap_node = require(142);
+var invalidate_node = require(118);
+var replace_node = require(134);
+var graph_node = require(114);
+var update_back_refs = require(140);
+var update_graph = require(141);
+var inc_generation = require(116);
+
+var set_node_if_missing_path = require(138);
+var set_node_if_error = require(137);
+var set_successful_paths = require(135);
+
+var promote = require(66);
+
+var positions = require(132);
+>>>>>>> 3f41169... Updates performance index to require "falcor" module instead of by relative path.
 var _cache = positions.cache;
 var _message = positions.message;
 var _jsong = positions.jsong;
@@ -8365,6 +9621,7 @@ module.exports = function collect(lru, expired, total, max, ratio, version) {
     }
 <<<<<<< HEAD
 }
+<<<<<<< HEAD
 },{"106":106,"113":113,"115":115,"117":117,"118":118,"120":120,"123":123,"124":124,"125":125,"126":126,"127":127,"128":128,"132":132,"80":80,"85":85,"92":92,"96":96,"97":97,"99":99}],71:[function(require,module,exports){
 module.exports = set_json_sparse_as_json_graph;
 
@@ -8395,6 +9652,38 @@ var set_successful_paths = require(118);
 var promote = require(49);
 
 var positions = require(115);
+=======
+},{"103":103,"109":109,"113":113,"114":114,"116":116,"118":118,"123":123,"130":130,"132":132,"134":134,"135":135,"137":137,"138":138,"140":140,"141":141,"142":142,"143":143,"144":144,"145":145,"150":150,"66":66,"97":97}],93:[function(require,module,exports){
+module.exports = set_json_values_as_json_sparse;
+
+var $ref = require(145);
+var $error = require(144);
+var $atom = require(143);
+
+var clone = require(102);
+var array_clone = require(97);
+
+var options = require(130);
+var walk_path_set = require(151);
+
+var is_object = require(123);
+
+var get_valid_key = require(113);
+var create_branch = require(109);
+var wrap_node = require(142);
+var invalidate_node = require(118);
+var replace_node = require(134);
+var graph_node = require(114);
+var update_back_refs = require(140);
+var update_graph = require(141);
+var inc_generation = require(116);
+
+var set_node_if_missing_path = require(138);
+var set_node_if_error = require(137);
+var set_successful_paths = require(135);
+
+var positions = require(132);
+>>>>>>> 3f41169... Updates performance index to require "falcor" module instead of by relative path.
 var _cache = positions.cache;
 var _message = positions.message;
 var _jsong = positions.jsong;
@@ -8570,6 +9859,7 @@ GetRequest.prototype.getSourceObserver = function getSourceObserver(observer) {
                 return { path: path, value: error };
             }), empty_array, errorSelector, comparator);
 
+<<<<<<< HEAD
             model._path = bound;
 
             observer.onError(error);
@@ -8614,6 +9904,71 @@ Request.create = function create(queue, model, index) {
 }
 
 Request.prototype = Object.create(Observable.prototype);
+=======
+    var json;
+    var node = nodes[_cache];
+    var type = is_object(node) && node.$type || (node = undefined);
+    var isMissingPath = set_node_if_missing_path(roots, node, type, pathset, depth, requested, optimized);
+    
+    if(isMissingPath) {
+        return;
+    }
+    
+    var isError = set_node_if_error(roots, node, type, requested);
+    
+    if(isError) {
+        return;
+    }
+    
+    if (roots.is_distinct === true) {
+        roots.is_distinct = false;
+        set_successful_paths(roots, requested, optimized);
+        if (keyset == null && !roots.hasValue && (keyset = get_valid_key(optimized)) == null) {
+            node = clone(roots, node, type, node && node.value);
+            json = roots[_json];
+            json.$type = node.$type;
+            json.value = node.value;
+        } else {
+            json = parents[_json];
+            json[key] = clone(roots, node, type, node && node.value);
+        }
+        roots.hasValue = true;
+    }
+}
+},{"102":102,"109":109,"113":113,"114":114,"116":116,"118":118,"123":123,"130":130,"132":132,"134":134,"135":135,"137":137,"138":138,"140":140,"141":141,"142":142,"143":143,"144":144,"145":145,"151":151,"97":97}],94:[function(require,module,exports){
+module.exports = set_json_values_as_json_values;
+
+var $error = require(144);
+var $atom = require(143);
+
+var clone = require(102);
+var array_clone = require(97);
+
+var options = require(130);
+var walk_path_set = require(151);
+
+var is_object = require(123);
+
+var get_valid_key = require(113);
+var create_branch = require(109);
+var wrap_node = require(142);
+var invalidate_node = require(118);
+var replace_node = require(134);
+var graph_node = require(114);
+var update_back_refs = require(140);
+var update_graph = require(141);
+var inc_generation = require(116);
+
+var set_node_if_missing_path = require(138);
+var set_node_if_error = require(137);
+var set_successful_paths = require(135);
+
+var positions = require(132);
+var _cache = positions.cache;
+var _message = positions.message;
+var _jsong = positions.jsong;
+var _json = positions.json;
+>>>>>>> 3f41169... Updates performance index to require "falcor" module instead of by relative path.
 
 Request.prototype.constructor = Request;
 
@@ -8771,8 +10126,28 @@ var update_back_refs = require(123);
 var update_graph = require(124);
 var inc_generation = require(99);
 
+<<<<<<< HEAD
 var set_node_if_error = require(120);
 var set_successful_paths = require(118);
+=======
+    if (roots.is_distinct === true) {
+        // TODO: CR Explain what's happening here.
+        roots.is_distinct = false;
+        set_successful_paths(roots, requested, optimized);
+        roots.onNext({
+            path: array_clone(requested),
+            value: clone(roots, node, type, node && node.value)
+        });
+    }
+}
+},{"102":102,"109":109,"113":113,"114":114,"116":116,"118":118,"123":123,"130":130,"132":132,"134":134,"135":135,"137":137,"138":138,"140":140,"141":141,"142":142,"143":143,"144":144,"151":151,"97":97}],95:[function(require,module,exports){
+var $error = require(144);
+var pathSyntax = require(11);
+var get_type = require(112);
+var is_object = require(123);
+var is_path_value = require(124);
+var set_json_values_as_json_dense = require(91);
+>>>>>>> 3f41169... Updates performance index to require "falcor" module instead of by relative path.
 
 var positions = require(115);
 var _cache = positions.cache;
@@ -8793,6 +10168,7 @@ var _json = positions.json;
     return disposables;
 };
 
+<<<<<<< HEAD
 module.exports = Request;
 },{"107":107,"122":122,"124":124,"125":125,"130":130,"159":159}],70:[function(require,module,exports){
 var Rx = require(159);;
@@ -8801,6 +10177,15 @@ var SerialDisposable = Rx.SerialDisposable;
 
 var GetRequest = require(68);
 var SetRequest = require(71);
+=======
+    if(typeof errorSelector !== "function") {
+        errorSelector = this._root._errorSelector;
+    }
+
+    if(typeof comparator !== "function") {
+        comparator = this._root._comparator;
+    }
+>>>>>>> 3f41169... Updates performance index to require "falcor" module instead of by relative path.
 
 var prefix = require(55);
 var get_type = require(111);
@@ -8890,6 +10275,75 @@ RequestQueue.prototype._remove = function removeRequest(request) {
         requests.splice(index, 1);
     }
 };
+<<<<<<< HEAD
+=======
+},{"11":11,"112":112,"123":123,"124":124,"144":144,"91":91}],96:[function(require,module,exports){
+module.exports = function array_append(array, value) {
+    var i = -1;
+    var n = array.length;
+    var array2 = new Array(n + 1);
+    while(++i < n) { array2[i] = array[i]; }
+    array2[i] = value;
+    return array2;
+};
+},{}],97:[function(require,module,exports){
+module.exports = function array_clone(array) {
+    if(!array) { return array; };
+    var i = -1;
+    var n = array.length;
+    var array2 = new Array(n);
+    while(++i < n) { array2[i] = array[i]; }
+    return array2;
+};
+},{}],98:[function(require,module,exports){
+module.exports = function array_concat(array, other) {
+    if(!array) { return other; };
+    var i = -1, j = -1;
+    var n = array.length;
+    var m = other.length;
+    var array2 = new Array(n + m);
+    while(++i < n) { array2[i] = array[i]; }
+    while(++j < m) { array2[i++] = other[j]; }
+    return array2;
+};
+},{}],99:[function(require,module,exports){
+module.exports = function array_flat_map(array, selector) {
+    var index = -1;
+    var i = -1;
+    var n = array.length;
+    var array2 = new Array(n);
+    while(++i < n) {
+        var array3 = selector(array[i], i, array);
+        var j = -1;
+        var k = array3.length;
+        while(++j < k) {
+            array2[++index] = array3[j];
+        }
+    }
+    return array2;
+}
+},{}],100:[function(require,module,exports){
+module.exports = function array_map(array, selector) {
+    var i = -1;
+    var n = array.length;
+    var array2 = new Array(n);
+    while(++i < n) { array2[i] = selector(array[i], i, array); }
+    return array2;
+}
+},{}],101:[function(require,module,exports){
+module.exports = function array_slice(array, index) {
+    index || (index = 0);
+    var i = -1;
+    var n = Math.max(array.length - index, 0);
+    var array2 = new Array(n);
+    while(++i < n) { array2[i] = array[i + index]; }
+    return array2;
+};
+},{}],102:[function(require,module,exports){
+var $atom = require(143);
+var clone = require(107);
+module.exports = function clone_json_dense(roots, node, type, value) {
+>>>>>>> 3f41169... Updates performance index to require "falcor" module instead of by relative path.
 
 RequestQueue.prototype.distributePaths = function distributePathsAcrossRequests(paths, requests, RequestType) {
 
@@ -8902,7 +10356,15 @@ RequestQueue.prototype.distributePaths = function distributePathsAcrossRequests(
     var participatingRequests = [];
     var pendingRequest;
 
+<<<<<<< HEAD
     insert_path: while (++pathsIndex < pathsCount) {
+=======
+},{"107":107,"143":143}],103:[function(require,module,exports){
+var $atom = require(143);
+var clone = require(107);
+var is_primitive = require(125);
+module.exports = function clone_json_graph(roots, node, type, value) {
+>>>>>>> 3f41169... Updates performance index to require "falcor" module instead of by relative path.
 
         var path = paths[pathsIndex];
         var request = undefined;
@@ -8917,14 +10379,41 @@ RequestQueue.prototype.distributePaths = function distributePathsAcrossRequests(
             }
         }
 
+<<<<<<< HEAD
         if (!pendingRequest) {
             pendingRequest = RequestType.create(this, model, this.total++);
             requests[requestIndex] = pendingRequest;
             participatingRequests[requestCount++] = pendingRequest;
+=======
+    return clone(node);
+};
+},{"107":107,"125":125,"143":143}],104:[function(require,module,exports){
+var clone_requested_path = require(106);
+var clone_optimized_path = require(105);
+module.exports = function clone_missing_path_sets(roots, pathset, depth, requested, optimized) {
+    roots.requestedMissingPaths.push(clone_requested_path(roots.bound, requested, pathset, depth, roots.index));
+    roots.optimizedMissingPaths.push(clone_optimized_path(optimized, pathset, depth));
+}
+},{"105":105,"106":106}],105:[function(require,module,exports){
+module.exports = function clone_optimized_path(optimized, pathset, depth) {
+    var x;
+    var i = -1;
+    var j = depth - 1;
+    var n = optimized.length;
+    var m = pathset.length;
+    var array2 = [];
+    while(++i < n) {
+        array2[i] = optimized[i];
+    }
+    while(++j < m) {
+        if((x = pathset[j]) != null) {
+            array2[i++] = x;
+>>>>>>> 3f41169... Updates performance index to require "falcor" module instead of by relative path.
         }
 
         pendingRequest.insertPath(path, false);
     }
+<<<<<<< HEAD
 
     var pathRequests = [];
     var pathRequestsIndex = -1;
@@ -8935,11 +10424,41 @@ RequestQueue.prototype.distributePaths = function distributePathsAcrossRequests(
         request = participatingRequests[requestIndex];
         if (request != null) {
             pathRequests[++pathRequestsIndex] = request;
+=======
+    return array2;
+};
+},{}],106:[function(require,module,exports){
+var is_object = require(123);
+module.exports = function clone_requested_path(bound, requested, pathset, depth, index) {
+    var x;
+    var i = -1;
+    var j = -1;
+    var l = 0;
+    var m = requested.length;
+    var n = bound.length;
+    var array2 = [];
+    while(++i < n) {
+        array2[i] = bound[i];
+    }
+    while(++j < m) {
+        if((x = requested[j]) != null) {
+            if(is_object(pathset[l++])) {
+                array2[i++] = [x];
+            } else {
+                array2[i++] = x;
+            }
+>>>>>>> 3f41169... Updates performance index to require "falcor" module instead of by relative path.
         }
     }
 
     return pathRequests;
 };
+<<<<<<< HEAD
+=======
+},{"123":123}],107:[function(require,module,exports){
+var is_object = require(123);
+var prefix = require(56);
+>>>>>>> 3f41169... Updates performance index to require "falcor" module instead of by relative path.
 
 RequestQueue.prototype.mergeJSONGraphs = function mergeJSONGraphs(aggregate, response) {
 
@@ -8967,6 +10486,7 @@ RequestQueue.prototype.mergeJSONGraphs = function mergeJSONGraphs(aggregate, res
         }
         roots.hasValue = true;
     }
+<<<<<<< HEAD
 }
 },{"106":106,"113":113,"115":115,"117":117,"118":118,"120":120,"123":123,"124":124,"125":125,"126":126,"127":127,"128":128,"132":132,"80":80,"85":85,"92":92,"96":96,"97":97,"99":99}],73:[function(require,module,exports){
 module.exports = set_path_map_as_json_values;
@@ -9015,8 +10535,79 @@ var _json = positions.json;
 
             if (key[0] === prefix) {
                 continue;
-            }
+=======
+    return dest;
+};
+},{"123":123,"56":56}],108:[function(require,module,exports){
+var is_array = Array.isArray;
+var is_object = require(123);
 
+/* jshint forin: false */
+module.exports = function collapse(lengths) {
+    var pathmap;
+    var allPaths = [];
+    var allPathsLength = 0;
+    for (var length in lengths) {
+        if (isNumber(length) && is_object(pathmap = lengths[length])) {
+            var paths = collapsePathMap(pathmap, 0, parseInt(length, 10)).sets;
+            var pathsIndex = -1;
+            var pathsCount = paths.length;
+            while (++pathsIndex < pathsCount) {
+                allPaths[allPathsLength++] = collapsePathSetIndexes(paths[pathsIndex]);
+            }
+        }
+    }
+    return allPaths;
+};
+
+function collapsePathMap(pathmap, depth, length) {
+
+    var key;
+    var code = getHashCode(String(depth));
+    var subs = Object.create(null);
+
+    var codes = [];
+    var codesIndex = -1;
+    var codesCount = 0;
+
+    var pathsets = [];
+    var pathsetsCount = 0;
+
+    var subPath, subCode,
+        subKeys, subKeysIndex, subKeysCount,
+        subSets, subSetsIndex, subSetsCount,
+        pathset, pathsetIndex, pathsetCount,
+        firstSubKey, pathsetClone;
+
+    subKeys = [];
+    subKeysIndex = -1;
+
+    if (depth < length - 1) {
+
+        subKeysCount = getSortedKeys(pathmap, subKeys);
+
+        while (++subKeysIndex < subKeysCount) {
+            key = subKeys[subKeysIndex];
+            subPath = collapsePathMap(pathmap[key], depth + 1, length);
+            subCode = subPath.code;
+            if(subs[subCode]) {
+                subPath = subs[subCode];
+            } else {
+                codes[codesCount++] = subCode;
+                subPath = subs[subCode] = {
+                    keys: [],
+                    sets: subPath.sets
+                };
+>>>>>>> 3f41169... Updates performance index to require "falcor" module instead of by relative path.
+            }
+            code = getHashCode(code + key + subCode);
+
+            isNumber(key) &&
+                subPath.keys.push(parseInt(key, 10)) ||
+                subPath.keys.push(key);
+        }
+
+<<<<<<< HEAD
             if (context.hasOwnProperty(key)) {
                 var node = context[key];
                 var nodeType = get_type(node);
@@ -9029,11 +10620,41 @@ var _json = positions.json;
                     continue recursing;
                 } else if (responseIndex > latestIndex) {
                     context[key] = messageNode;
+=======
+        while(++codesIndex < codesCount) {
+
+            key = codes[codesIndex];
+            subPath = subs[key];
+            subKeys = subPath.keys;
+            subKeysCount = subKeys.length;
+
+            if (subKeysCount > 0) {
+
+                subSets = subPath.sets;
+                subSetsIndex = -1;
+                subSetsCount = subSets.length;
+                firstSubKey = subKeys[0];
+
+                while (++subSetsIndex < subSetsCount) {
+
+                    pathset = subSets[subSetsIndex];
+                    pathsetIndex = -1;
+                    pathsetCount = pathset.length;
+                    pathsetClone = new Array(pathsetCount + 1);
+                    pathsetClone[0] = subKeysCount > 1 && subKeys || firstSubKey;
+
+                    while (++pathsetIndex < pathsetCount) {
+                        pathsetClone[pathsetIndex + 1] = pathset[pathsetIndex];
+                    }
+
+                    pathsets[pathsetsCount++] = pathsetClone;
+>>>>>>> 3f41169... Updates performance index to require "falcor" module instead of by relative path.
                 }
             } else {
                 context[key] = message[key];
             }
         }
+<<<<<<< HEAD
 
         depth -= 1;
     }
@@ -9135,6 +10756,132 @@ SetRequest.prototype.getSourceObserver = function getSourceObserver(observer) {
 }
 },{"106":106,"113":113,"115":115,"117":117,"118":118,"120":120,"123":123,"124":124,"125":125,"126":126,"127":127,"132":132,"80":80,"85":85,"92":92,"96":96,"97":97,"99":99}],74:[function(require,module,exports){
 module.exports = set_json_values_as_json_dense;
+=======
+    } else {
+        subKeysCount = getSortedKeys(pathmap, subKeys);
+        if (subKeysCount > 1) {
+            pathsets[pathsetsCount++] = [subKeys];
+        } else {
+            pathsets[pathsetsCount++] = subKeys;
+        }
+        while (++subKeysIndex < subKeysCount) {
+            code = getHashCode(code + subKeys[subKeysIndex]);
+        }
+    }
+
+    return {
+        code: code,
+        sets: pathsets
+    };
+}
+
+function collapsePathSetIndexes(pathset) {
+
+    var keysetIndex = -1;
+    var keysetCount = pathset.length;
+
+    while (++keysetIndex < keysetCount) {
+        var keyset = pathset[keysetIndex];
+        if (is_array(keyset)) {
+            pathset[keysetIndex] = collapseIndex(keyset);
+        }
+    }
+
+    return pathset;
+}
+
+/**
+ * Collapse range indexers, e.g. when there is a continuous
+ * range in an array, turn it into an object instead:
+ *
+ * [1,2,3,4,5,6] => {"from":1, "to":6}
+ *
+ */
+function collapseIndex(keyset) {
+
+    // Do we need to dedupe an indexer keyset if they're duplicate consecutive integers?
+    // var hash = {};
+    var keyIndex = -1;
+    var keyCount = keyset.length - 1;
+    var isSparseRange = keyCount > 0;
+
+    while (++keyIndex <= keyCount) {
+
+        var key = keyset[keyIndex];
+
+        if (!isNumber(key) /* || hash[key] === true*/ ) {
+            isSparseRange = false;
+            break;
+        }
+        // hash[key] = true;
+        // Cast number indexes to integers.
+        keyset[keyIndex] = parseInt(key, 10);
+    }
+
+    if (isSparseRange === true) {
+
+        keyset.sort(sortListAscending);
+
+        var from = keyset[0];
+        var to = keyset[keyCount];
+
+        // If we re-introduce deduped integer indexers, change this comparson to "===".
+        if (to - from <= keyCount) {
+            return {
+                from: from,
+                to: to
+            };
+        }
+    }
+
+    return keyset;
+}
+
+function sortListAscending(a, b) {
+    return a - b;
+}
+
+/* jshint forin: false */
+function getSortedKeys(map, keys, sort) {
+    var len = 0;
+    for (var key in map) {
+        keys[len++] = key;
+    }
+    if (len > 1) {
+        keys.sort(sort);
+    }
+    return len;
+}
+
+function getHashCode(key) {
+    var code = 5381;
+    var index = -1;
+    var count = key.length;
+    while (++index < count) {
+        code = (code << 5) + code + key.charCodeAt(index);
+    }
+    return String(code);
+}
+
+/**
+ * Return true if argument is a number or can be cast to a number
+ */
+function isNumber(val) {
+    // parseFloat NaNs numeric-cast false positives (null|true|false|"")
+    // ...but misinterprets leading-number strings, particularly hex literals ("0x...")
+    // subtraction forces infinities to NaN
+    // adding 1 corrects loss of precision from parseFloat (#15100)
+    return !is_array(val) && (val - parseFloat(val) + 1) >= 0;
+}
+},{"123":123}],109:[function(require,module,exports){
+var $ref = require(145);
+var $expired = "expired";
+var replace_node = require(134);
+var graph_node = require(114);
+var update_back_refs = require(140);
+var is_primitive = require(125);
+var is_expired = require(119);
+>>>>>>> 3f41169... Updates performance index to require "falcor" module instead of by relative path.
 
 var $ref = require(128);
 var $error = require(127);
@@ -9143,6 +10890,7 @@ var $atom = require(126);
 var clone = require(85);
 var array_clone = require(80);
 
+<<<<<<< HEAD
 var options = require(113);
 var walk_path_set = require(134);
 
@@ -9161,6 +10909,78 @@ var inc_generation = require(99);
 var set_node_if_missing_path = require(121);
 var set_node_if_error = require(120);
 var set_successful_paths = require(118);
+=======
+    if((Boolean(type) && type != $ref) || is_primitive(node)) {
+        node = replace_node(parent, node, {}, key, roots.lru);
+        node = graph_node(roots[0], parent, node, key, 0);
+        node = update_back_refs(node, roots.version);
+    }
+    return node;
+}
+},{"114":114,"119":119,"125":125,"134":134,"140":140,"145":145}],110:[function(require,module,exports){
+var __ref = require(59);
+var __context = require(47);
+var __ref_index = require(58);
+var __refs_length = require(60);
+
+module.exports = function delete_back_refs(node) {
+    var ref, i = -1, n = node[__refs_length] || 0;
+    while(++i < n) {
+        if((ref = node[__ref + i]) !== undefined) {
+            ref[__context] = ref[__ref_index] = node[__ref + i] = undefined;
+        }
+    }
+    node[__refs_length] = undefined
+};
+},{"47":47,"58":58,"59":59,"60":60}],111:[function(require,module,exports){
+var is_object = require(123);
+module.exports = function get_size(node) {
+    return is_object(node) && node.$size || 0;
+};
+},{"123":123}],112:[function(require,module,exports){
+var is_object = require(123);
+
+module.exports = function get_type(node, anyType) {
+    var type = is_object(node) && node.$type || undefined;
+    if(anyType && type) {
+        return "branch";
+    }
+    return type;
+};
+},{"123":123}],113:[function(require,module,exports){
+module.exports = function get_valid_key(path) {
+    var key, index = path.length - 1;
+    do {
+        if((key = path[index]) != null) {
+            return key;
+        }
+    } while(--index > -1);
+    return null;
+};
+},{}],114:[function(require,module,exports){
+var __parent = require(55);
+var __key = require(52);
+var __generation = require(49);
+
+module.exports = function graph_node(root, parent, node, key, generation) {
+    node[__parent] = parent;
+    node[__key] = key;
+    node[__generation] = generation;
+    return node;
+};
+},{"49":49,"52":52,"55":55}],115:[function(require,module,exports){
+module.exports = function identity(x) { return x; };
+},{}],116:[function(require,module,exports){
+var generation = 0;
+module.exports = function increment_generation() { return generation++; };
+},{}],117:[function(require,module,exports){
+var version = 0;
+module.exports = function increment_version() { return version++; };
+},{}],118:[function(require,module,exports){
+var is_object = require(123);
+var remove_node = require(133);
+var prefix = require(56);
+>>>>>>> 3f41169... Updates performance index to require "falcor" module instead of by relative path.
 
 var positions = require(115);
 var _cache = positions.cache;
@@ -9175,6 +10995,15 @@ var _json = positions.json;
         }
     ));
 };
+<<<<<<< HEAD
+=======
+},{"123":123,"133":133,"56":56}],119:[function(require,module,exports){
+var $expires_now = require(147);
+var $expires_never = require(146);
+var __invalidated = require(51);
+var now = require(129);
+var splice = require(67);
+>>>>>>> 3f41169... Updates performance index to require "falcor" module instead of by relative path.
 
 module.exports = SetRequest;
 },{"159":159,"69":69,"82":82,"90":90,"99":99}],72:[function(require,module,exports){
@@ -9194,15 +11023,27 @@ function CallResponse(subscribe) {
     Observable.call(this, subscribe || subscribeToResponse);
 }
 
+<<<<<<< HEAD
 CallResponse.create = ModelResponse.create;
 
 CallResponse.prototype = Object.create(Observable.prototype);
 CallResponse.prototype.constructor = CallResponse;
 >>>>>>> 6b8733c... Removes falcor-observable, imports rx/dist/rx, fixes BatchedRequest canceling, moves comparator and errorSelector to the ModelRoot, removes the promise collection guards, fixes bind and bindSync anomalies.
+=======
+},{"129":129,"146":146,"147":147,"51":51,"67":67}],120:[function(require,module,exports){
+var function_typeof = "function";
+
+module.exports = function is_function(func) {
+    return Boolean(func) && typeof func === function_typeof;
+};
+},{}],121:[function(require,module,exports){
+var is_object = require(123);
+>>>>>>> 3f41169... Updates performance index to require "falcor" module instead of by relative path.
 
 CallResponse.prototype.invokeSourceRequest = function invokeSourceRequest(model) {
     return this;
 };
+<<<<<<< HEAD
 
 <<<<<<< HEAD
     var roots = options([], model, error_selector, comparator);
@@ -9228,6 +11069,73 @@ function subscribeToResponse(observer) {
     var args = this.args;
     var model = this.model;
     var selector = this.selector;
+=======
+},{"123":123}],122:[function(require,module,exports){
+var is_array = Array.isArray;
+var is_object = require(123);
+
+module.exports = function is_json_graph_envelope(envelope) {
+    return is_object(envelope) && is_array(envelope.paths) && (
+        is_object(envelope.jsonGraph) ||
+        is_object(envelope.jsong)     ||
+        is_object(envelope.json)      ||
+        is_object(envelope.values)    ||
+        is_object(envelope.value)
+    );
+};
+},{"123":123}],123:[function(require,module,exports){
+var obj_typeof = "object";
+module.exports = function is_object(value) {
+    return value != null && typeof value == obj_typeof;
+};
+},{}],124:[function(require,module,exports){
+var is_array = Array.isArray;
+var is_object = require(123);
+
+module.exports = function is_path_value(pathValue) {
+    return is_object(pathValue) &&  (
+        is_array(pathValue.path) || (
+            typeof pathValue.path === "string"
+        ));
+};
+},{"123":123}],125:[function(require,module,exports){
+var obj_typeof = "object";
+module.exports = function is_primitive(value) {
+    return value == null || typeof value != obj_typeof;
+};
+},{}],126:[function(require,module,exports){
+var __offset = require(54);
+var is_array = Array.isArray;
+var is_object = require(123);
+
+module.exports = function key_to_keyset(key, iskeyset) {
+    if(iskeyset) {
+        if(is_array(key)) {
+            key = key[key[__offset]];
+            return key_to_keyset(key, is_object(key));
+        } else {
+            return key[__offset];
+        }
+    }
+    return key;
+};
+},{"123":123,"54":54}],127:[function(require,module,exports){
+var __parent = require(55);
+var $ref = require(145);
+var $atom = require(143);
+var $expires_now = require(147);
+
+var is_object = require(123);
+var is_primitive = require(125);
+var is_expired = require(119);
+var promote = require(66);
+var wrap_node = require(142);
+var graph_node = require(114);
+var replace_node = require(134);
+var update_graph  = require(141);
+var inc_generation = require(116);
+var invalidate_node = require(118);
+>>>>>>> 3f41169... Updates performance index to require "falcor" module instead of by relative path.
 
     var callPath = pathSyntax.fromPath(args[0]);
     var callArgs = args[1] || [];
@@ -9387,6 +11295,7 @@ function subscribeToResponse(observer) {
 
     function getRemoteCallObs(dataSource) {
 
+<<<<<<< HEAD
         if (dataSource && typeof dataSource === "object") {
             return dataSource
                 .call(callPath, callArgs, suffixes, extraPaths)
@@ -9395,6 +11304,53 @@ function subscribeToResponse(observer) {
         }
 
         return Observable.empty();
+=======
+},{"114":114,"116":116,"118":118,"119":119,"123":123,"125":125,"134":134,"141":141,"142":142,"143":143,"145":145,"147":147,"55":55,"66":66}],128:[function(require,module,exports){
+module.exports = function noop() {};
+},{}],129:[function(require,module,exports){
+module.exports = Date.now;
+},{}],130:[function(require,module,exports){
+var inc_version = require(117);
+var getBoundValue = require(29);
+
+/**
+ * TODO: more options state tracking comments.
+ */
+module.exports = function get_initial_state(options, model, error_selector, comparator) {
+    
+    var bound = options.bound     || (options.bound                 = model._path || []);
+    var root  = options.root      || (options.root                  = model._cache);
+    var nodes = options.nodes     || (options.nodes                 = []);
+    var lru   = options.lru       || (options.lru                   = model._root);
+    options.expired               || (options.expired               = lru.expired);
+    options.errors                || (options.errors                = []);
+    options.requestedPaths        || (options.requestedPaths        = []);
+    options.optimizedPaths        || (options.optimizedPaths        = []);
+    options.requestedMissingPaths || (options.requestedMissingPaths = []);
+    options.optimizedMissingPaths || (options.optimizedMissingPaths = []);
+    options.boxed  = model._boxed || false;
+    options.materialized = model._materialized;
+    options.errorsAsValues = model._treatErrorsAsValues || false;
+    options.no_data_source = model._source == null;
+    options.version = model._version = inc_version();
+    
+    options.offset || (options.offset = 0);
+    options.error_selector = error_selector || model._errorSelector;
+    options.comparator = comparator;
+    
+    if(bound.length) {
+        nodes[0] = getBoundValue(model, bound).value;
+    } else {
+        nodes[0] = root;
+    }
+    
+    return options;
+};
+},{"117":117,"29":29}],131:[function(require,module,exports){
+var __offset = require(54);
+var is_array = Array.isArray;
+var is_object = require(123);
+>>>>>>> 3f41169... Updates performance index to require "falcor" module instead of by relative path.
 
         function invalidateLocalValues(envelope) {
             var invalidations = envelope.invalidated;
@@ -9411,6 +11367,26 @@ function subscribeToResponse(observer) {
             return envelope;
         }
     }
+<<<<<<< HEAD
+=======
+    
+    return false;
+};
+},{"123":123,"54":54}],132:[function(require,module,exports){
+module.exports = {
+    cache: 0,
+    message: 1,
+    jsong: 2,
+    json: 3
+};
+},{}],133:[function(require,module,exports){
+var $ref = require(145);
+var __parent = require(55);
+var unlink = require(139);
+var delete_back_refs = require(110);
+var splice = require(67);
+var is_object = require(123);
+>>>>>>> 3f41169... Updates performance index to require "falcor" module instead of by relative path.
 
     function setCallEnvelope(envelope) {
         return localRoot.set(envelope, function () {
@@ -9424,6 +11400,7 @@ function subscribeToResponse(observer) {
     }
 };
 
+<<<<<<< HEAD
 module.exports = CallResponse;
 },{"11":11,"144":144,"159":159,"76":76}],73:[function(require,module,exports){
 var Rx = require(159);;
@@ -9431,6 +11408,22 @@ var Observable = Rx.Observable;
 var Disposable = Rx.Disposable;
 
 var IdempotentResponse = require(74);
+=======
+},{"110":110,"123":123,"139":139,"145":145,"55":55,"67":67}],134:[function(require,module,exports){
+var transfer_back_refs = require(136);
+var invalidate_node = require(118);
+
+module.exports = function replace_node(parent, node, replacement, key, lru) {
+    if(node != null && node !== replacement && typeof node == "object") {
+        transfer_back_refs(node, replacement);
+        invalidate_node(parent, node, key, lru);
+    }
+    return parent[key] = replacement;
+}
+},{"118":118,"136":136}],135:[function(require,module,exports){
+var array_slice = require(101);
+var array_clone = require(97);
+>>>>>>> 3f41169... Updates performance index to require "falcor" module instead of by relative path.
 
 var array_map = require(99);
 var array_concat = require(97);
@@ -9445,8 +11438,15 @@ function GetResponse(subscribe) {
     IdempotentResponse.call(this, subscribe || subscribeToGetResponse);
 }
 <<<<<<< HEAD
+<<<<<<< HEAD
 },{"101":101,"106":106,"113":113,"115":115,"117":117,"118":118,"120":120,"121":121,"123":123,"124":124,"125":125,"126":126,"127":127,"128":128,"134":134,"80":80,"85":85,"92":92,"96":96,"97":97,"99":99}],75:[function(require,module,exports){
 module.exports = set_json_values_as_json_graph;
+=======
+},{"101":101,"97":97}],136:[function(require,module,exports){
+var __ref = require(59);
+var __context = require(47);
+var __refs_length = require(60);
+>>>>>>> 3f41169... Updates performance index to require "falcor" module instead of by relative path.
 
 var $ref = require(128);
 var $error = require(127);
@@ -9512,6 +11512,18 @@ GetResponse.prototype.invokeSourceRequest = function invokeSourceRequest(model) 
                     return caught;
                 }));
         }
+<<<<<<< HEAD
+=======
+    }
+    dest[__refs_length] = nodeRefsLength + destRefsLength;
+    node[__refs_length] = ref = undefined;
+}
+},{"47":47,"59":59,"60":60}],137:[function(require,module,exports){
+var $error = require(144);
+var promote = require(66);
+var array_clone = require(97);
+var clone = require(107);
+>>>>>>> 3f41169... Updates performance index to require "falcor" module instead of by relative path.
 
         return Observable["throw"](results);
     });
@@ -9521,7 +11533,14 @@ GetResponse.prototype.invokeSourceRequest = function invokeSourceRequest(model) 
     });
 };
 
+<<<<<<< HEAD
 function subscribeToGetResponse(observer) {
+=======
+},{"107":107,"144":144,"66":66,"97":97}],138:[function(require,module,exports){
+var $atom = require(143);
+var clone_misses = require(104);
+var is_expired = require(119);
+>>>>>>> 3f41169... Updates performance index to require "falcor" module instead of by relative path.
 
     if(this.subscribeCount++ >= this.subscribeLimit) {
         observer.onError("Loop kill switch thrown.");
@@ -9529,11 +11548,19 @@ function subscribeToGetResponse(observer) {
     }
 >>>>>>> 6b8733c... Removes falcor-observable, imports rx/dist/rx, fixes BatchedRequest canceling, moves comparator and errorSelector to the ModelRoot, removes the promise collection guards, fixes bind and bindSync anomalies.
 
+<<<<<<< HEAD
     var model = this.model;
     var modelRoot = model._root;
     var method = this.method;
     var boundPath = this.boundPath;
     var outputFormat = this.outputFormat;
+=======
+},{"104":104,"119":119,"143":143}],139:[function(require,module,exports){
+var __ref = require(59);
+var __context = require(47);
+var __ref_index = require(58);
+var __refs_length = require(60);
+>>>>>>> 3f41169... Updates performance index to require "falcor" module instead of by relative path.
 
 <<<<<<< HEAD
     var roots = options([], model, error_selector, comparator);
@@ -19044,6 +21071,7 @@ Promise.prototype.nodeify = function (callback, ctx) {
         var concatedStacks = stacks.join("\n" + STACK_JUMP_SEPARATOR + "\n");
         error.stack = filterStackString(concatedStacks);
     }
+<<<<<<< HEAD
   }
 
   function filterStackString(stackString) {
@@ -19051,25 +21079,61 @@ Promise.prototype.nodeify = function (callback, ctx) {
         desiredLines = [];
     for (var i = 0, len = lines.length; i < len; i++) {
       var line = lines[i];
+=======
+}
+},{"47":47,"58":58,"59":59,"60":60}],140:[function(require,module,exports){
+var __ref = require(59);
+var __parent = require(55);
+var __version = require(62);
+var __generation = require(49);
+var __refs_length = require(60);
+
+var generation = require(116);
+>>>>>>> 3f41169... Updates performance index to require "falcor" module instead of by relative path.
 
       if (!isInternalFrame(line) && !isNodeFrame(line) && line) {
         desiredLines.push(line);
       }
     }
+<<<<<<< HEAD
     return desiredLines.join("\n");
   }
+=======
+    return node;
+}
+
+},{"116":116,"49":49,"55":55,"59":59,"60":60,"62":62}],141:[function(require,module,exports){
+var __key = require(52);
+var __version = require(62);
+var __parent = require(55);
+var remove_node = require(133);
+var update_back_refs = require(140);
+>>>>>>> 3f41169... Updates performance index to require "falcor" module instead of by relative path.
 
   function isInternalFrame(stackLine) {
     var fileNameAndLineNumber = getFileNameAndLineNumber(stackLine);
     if (!fileNameAndLineNumber) {
       return false;
     }
+<<<<<<< HEAD
     var fileName = fileNameAndLineNumber[0], lineNumber = fileNameAndLineNumber[1];
 
     return fileName === rFileName &&
       lineNumber >= rStartingLine &&
       lineNumber <= rEndingLine;
   }
+=======
+};
+},{"133":133,"140":140,"52":52,"55":55,"62":62}],142:[function(require,module,exports){
+var $ref = require(145);
+var $error = require(144);
+var $atom = require(143);
+
+var now = require(129);
+var clone = require(107);
+var is_array = Array.isArray;
+var is_object = require(123);
+>>>>>>> 3f41169... Updates performance index to require "falcor" module instead of by relative path.
 
   function isNodeFrame(stackLine) {
     return stackLine.indexOf("(module.js:") !== -1 ||
@@ -19112,6 +21176,7 @@ Promise.prototype.nodeify = function (callback, ctx) {
   };
   EmptyError.prototype = Error.prototype;
 
+<<<<<<< HEAD
   var ObjectDisposedError = Rx.ObjectDisposedError = function() {
     this.message = 'Object has been disposed';
     Error.call(this);
@@ -19157,6 +21222,43 @@ Promise.prototype.nodeify = function (callback, ctx) {
   var isIterable = Rx.helpers.isIterable = function (o) {
     return o[$iterator$] !== undefined;
   }
+=======
+},{"107":107,"123":123,"129":129,"143":143,"144":144,"145":145}],143:[function(require,module,exports){
+module.exports = "atom";
+
+},{}],144:[function(require,module,exports){
+module.exports = "error";
+},{}],145:[function(require,module,exports){
+module.exports = "ref";
+},{}],146:[function(require,module,exports){
+module.exports = 1;
+},{}],147:[function(require,module,exports){
+module.exports = 0;
+},{}],148:[function(require,module,exports){
+module.exports = walk_path_map;
+
+var prefix = require(56);
+var $ref = require(145);
+
+var walk_reference = require(152);
+
+var array_slice = require(101);
+var array_clone    = require(97);
+var array_append   = require(96);
+
+var is_expired = require(119);
+var is_primitive = require(125);
+var is_object = require(123);
+var is_array = Array.isArray;
+
+var promote = require(66);
+
+var positions = require(132);
+var _cache = positions.cache;
+var _message = positions.message;
+var _jsong = positions.jsong;
+var _json = positions.json;
+>>>>>>> 3f41169... Updates performance index to require "falcor" module instead of by relative path.
 
   var isArrayLike = Rx.helpers.isArrayLike = function (o) {
     return o && o.length !== undefined;
@@ -19345,6 +21447,7 @@ Promise.prototype.nodeify = function (callback, ctx) {
       // treat `+0` vs. `-0` as not equal
       return a !== 0 || (1 / a == 1 / b);
     }
+<<<<<<< HEAD
 
     var type = typeof a,
         otherType = typeof b;
@@ -19390,6 +21493,35 @@ Promise.prototype.nodeify = function (callback, ctx) {
     }
     var isArr = className == arrayClass;
     if (!isArr) {
+=======
+}
+
+},{"101":101,"119":119,"123":123,"125":125,"132":132,"145":145,"152":152,"56":56,"66":66,"96":96,"97":97}],149:[function(require,module,exports){
+module.exports = walk_path_map;
+
+var prefix = require(56);
+var __context = require(47);
+var $ref = require(145);
+
+var walk_reference = require(152);
+
+var array_slice = require(101);
+var array_clone    = require(97);
+var array_append   = require(96);
+
+var is_expired = require(119);
+var is_primitive = require(125);
+var is_object = require(123);
+var is_array = Array.isArray;
+
+var promote = require(66);
+
+var positions = require(132);
+var _cache = positions.cache;
+var _message = positions.message;
+var _jsong = positions.jsong;
+var _json = positions.json;
+>>>>>>> 3f41169... Updates performance index to require "falcor" module instead of by relative path.
 
       // exit for functions and DOM nodes
       if (className != objectClass || (!support.nodeClass && (isNode(a) || isNode(b)))) {
@@ -19622,6 +21754,7 @@ Promise.prototype.nodeify = function (callback, ctx) {
     var skipProto = support.enumPrototypes && typeof object == 'function',
         skipErrorProps = support.enumErrorProps && (object === errorProto || object instanceof Error);
 
+<<<<<<< HEAD
     for (var key in object) {
       if (!(skipProto && key == 'prototype') &&
           !(skipErrorProps && (key == 'message' || key == 'name'))) {
@@ -19675,6 +21808,33 @@ Promise.prototype.nodeify = function (callback, ctx) {
   var isArguments = function(value) {
     return (value && typeof value == 'object') ? toString.call(value) == argsClass : false;
   }
+=======
+},{"101":101,"119":119,"123":123,"125":125,"132":132,"145":145,"152":152,"47":47,"56":56,"66":66,"96":96,"97":97}],150:[function(require,module,exports){
+module.exports = walk_path_set;
+
+var $ref = require(145);
+
+var walk_reference = require(152);
+
+var array_slice    = require(101);
+var array_clone    = require(97);
+var array_append   = require(96);
+
+var is_expired = require(119);
+var is_primitive = require(125);
+var is_object = require(123);
+
+var keyset_to_key  = require(126);
+var permute_keyset = require(131);
+
+var promote = require(66);
+
+var positions = require(132);
+var _cache = positions.cache;
+var _message = positions.message;
+var _jsong = positions.jsong;
+var _json = positions.json;
+>>>>>>> 3f41169... Updates performance index to require "falcor" module instead of by relative path.
 
   // fallback for browsers that can't detect `arguments` objects by [[Class]]
   if (!supportsArgsClass) {
@@ -19845,6 +22005,7 @@ Promise.prototype.nodeify = function (callback, ctx) {
     }
   };
 
+<<<<<<< HEAD
   // Rx Utils
   var addRef = Rx.internals.addRef = function (xs, r) {
     return new AnonymousObservable(function (observer) {
@@ -19935,6 +22096,34 @@ Promise.prototype.nodeify = function (callback, ctx) {
   };
 
   priorityProto.peek = function () { return this.items[0].value; };
+=======
+},{"101":101,"119":119,"123":123,"125":125,"126":126,"131":131,"132":132,"145":145,"152":152,"66":66,"96":96,"97":97}],151:[function(require,module,exports){
+module.exports = walk_path_set;
+
+var __context = require(47);
+var $ref = require(145);
+
+var walk_reference = require(152);
+
+var array_slice    = require(101);
+var array_clone    = require(97);
+var array_append   = require(96);
+
+var is_expired = require(119);
+var is_primitive = require(125);
+var is_object = require(123);
+
+var keyset_to_key  = require(126);
+var permute_keyset = require(131);
+
+var promote = require(66);
+
+var positions = require(132);
+var _cache = positions.cache;
+var _message = positions.message;
+var _jsong = positions.jsong;
+var _json = positions.json;
+>>>>>>> 3f41169... Updates performance index to require "falcor" module instead of by relative path.
 
   priorityProto.removeAt = function (index) {
     this.items[index] = this.items[--this.length];
@@ -20176,6 +22365,7 @@ Promise.prototype.nodeify = function (callback, ctx) {
       }
     };
 
+<<<<<<< HEAD
     /**
      * Returns a dependent disposable that when disposed decreases the refcount on the underlying disposable.
      * @returns {Disposable} A dependent disposable contributing to the reference count that manages the underlying disposable's lifetime.
@@ -20212,6 +22402,36 @@ Promise.prototype.nodeify = function (callback, ctx) {
     this.comparer = comparer || defaultSubComparer;
     this.disposable = new SingleAssignmentDisposable();
   }
+=======
+        walk_path_set(onNode, onValueType,
+            pathset, depth + 1,
+            roots, parents2, nodes2,
+            requested2, optimized2,
+            inner_key, inner_keyset, is_outer_keyset
+        );
+    }
+}
+
+},{"101":101,"119":119,"123":123,"125":125,"126":126,"131":131,"132":132,"145":145,"152":152,"47":47,"66":66,"96":96,"97":97}],152:[function(require,module,exports){
+module.exports = walk_reference;
+
+var prefix = require(56);
+var __ref = require(59);
+var __context = require(47);
+var __ref_index = require(58);
+var __refs_length = require(60);
+
+var is_object      = require(123);
+var is_primitive   = require(125);
+var array_slice    = require(101);
+var array_append   = require(96);
+
+var positions = require(132);
+var _cache = positions.cache;
+var _message = positions.message;
+var _jsong = positions.jsong;
+var _json = positions.json;
+>>>>>>> 3f41169... Updates performance index to require "falcor" module instead of by relative path.
 
   ScheduledItem.prototype.invoke = function () {
     this.disposable.setDisposable(this.invokeCore());
@@ -20260,6 +22480,7 @@ Promise.prototype.nodeify = function (callback, ctx) {
       return this._schedule(action, invokeAction);
     };
 
+<<<<<<< HEAD
     /**
      * Schedules an action to be executed.
      * @param state State passed to the action to be executed.
@@ -20290,6 +22511,15 @@ Promise.prototype.nodeify = function (callback, ctx) {
     schedulerProto.scheduleWithRelativeAndState = function (state, dueTime, action) {
       return this._scheduleRelative(state, dueTime, action);
     };
+=======
+},{"101":101,"123":123,"125":125,"132":132,"47":47,"56":56,"58":58,"59":59,"60":60,"96":96}],153:[function(require,module,exports){
+'use strict';
+
+module.exports = require(158)
+
+},{"158":158}],154:[function(require,module,exports){
+'use strict';
+>>>>>>> 3f41169... Updates performance index to require "falcor" module instead of by relative path.
 
     /**
      * Schedules an action to be executed at the specified absolute due time.
@@ -20427,6 +22657,7 @@ Promise.prototype.nodeify = function (callback, ctx) {
       });
     };
 
+<<<<<<< HEAD
     /**
      * Schedules an action to be executed recursively at a specified absolute due time.
      * @param {Function} action Action to execute recursively. The parameter passed to the action is used to trigger recursive scheduling of the action at the specified absolute time.
@@ -20462,6 +22693,46 @@ Promise.prototype.nodeify = function (callback, ctx) {
     Scheduler.prototype.schedulePeriodic = function (period, action) {
       return this.schedulePeriodicWithState(null, period, action);
     };
+=======
+/**
+ * Take a potentially misbehaving resolver function and make sure
+ * onFulfilled and onRejected are only called once.
+ *
+ * Makes no guarantees about asynchrony.
+ */
+function doResolve(fn, promise) {
+  var done = false;
+  var res = tryCallTwo(fn, function (value) {
+    if (done) return
+    done = true
+    promise._82(value)
+  }, function (reason) {
+    if (done) return
+    done = true
+    promise._67(reason)
+  })
+  if (!done && res === IS_ERROR) {
+    done = true
+    promise._67(LAST_ERROR)
+  }
+}
+},{"4":4}],155:[function(require,module,exports){
+'use strict';
+
+var Promise = require(154)
+
+module.exports = Promise
+Promise.prototype.done = function (onFulfilled, onRejected) {
+  var self = arguments.length ? this.then.apply(this, arguments) : this
+  self.then(null, function (err) {
+    setTimeout(function () {
+      throw err
+    }, 0)
+  })
+}
+},{"154":154}],156:[function(require,module,exports){
+'use strict';
+>>>>>>> 3f41169... Updates performance index to require "falcor" module instead of by relative path.
 
     /**
      * Schedules a periodic piece of work by dynamically discovering the scheduler's capabilities. The periodic task will be scheduled using window.setInterval for the base implementation.
@@ -20477,6 +22748,7 @@ Promise.prototype.nodeify = function (callback, ctx) {
       return disposableCreate(function () { root.clearInterval(id); });
     };
 
+<<<<<<< HEAD
   }(Scheduler.prototype));
 
   (function (schedulerProto) {
@@ -20500,6 +22772,10 @@ Promise.prototype.nodeify = function (callback, ctx) {
         throw e;
       }
     }
+=======
+var Promise = require(154)
+var asap = require(4)
+>>>>>>> 3f41169... Updates performance index to require "falcor" module instead of by relative path.
 
     function SchedulePeriodicRecursive(scheduler, state, period, action) {
       this._scheduler = scheduler;
@@ -20628,6 +22904,7 @@ Promise.prototype.nodeify = function (callback, ctx) {
       return isAsync;
     }
 
+<<<<<<< HEAD
     // Use in order, setImmediate, nextTick, postMessage, MessageChannel, script readystatechanged, setTimeout
     if (isFunction(setImmediate)) {
       scheduleMethod = function (action) {
@@ -20642,12 +22919,19 @@ Promise.prototype.nodeify = function (callback, ctx) {
         var id = nextHandle++;
         tasksByHandle[id] = action;
         process.nextTick(function () { runTask(id); });
+=======
+},{"154":154,"4":4}],157:[function(require,module,exports){
+'use strict';
+
+var Promise = require(154)
+>>>>>>> 3f41169... Updates performance index to require "falcor" module instead of by relative path.
 
         return id;
       };
     } else if (postMessageSupported()) {
       var MSG_PREFIX = 'ms.rx.schedule' + Math.random();
 
+<<<<<<< HEAD
       function onGlobalPostMessage(event) {
         // Only if we're a match to avoid any other global events
         if (typeof event.data === 'string' && event.data.substring(0, MSG_PREFIX.length) === MSG_PREFIX) {
@@ -20671,9 +22955,23 @@ Promise.prototype.nodeify = function (callback, ctx) {
       };
     } else if (!!root.MessageChannel) {
       var channel = new root.MessageChannel();
+=======
+},{"154":154}],158:[function(require,module,exports){
+'use strict';
+
+module.exports = require(154)
+require(155)
+require(157)
+require(156)
+require(159)
+
+},{"154":154,"155":155,"156":156,"157":157,"159":159}],159:[function(require,module,exports){
+'use strict';
+>>>>>>> 3f41169... Updates performance index to require "falcor" module instead of by relative path.
 
       channel.port1.onmessage = function (e) { runTask(e.data); };
 
+<<<<<<< HEAD
       scheduleMethod = function (action) {
         var id = nextHandle++;
         tasksByHandle[id] = action;
@@ -20681,6 +22979,10 @@ Promise.prototype.nodeify = function (callback, ctx) {
         return id;
       };
     } else if ('document' in root && 'onreadystatechange' in root.document.createElement('script')) {
+=======
+var Promise = require(154)
+var asap = require(2)
+>>>>>>> 3f41169... Updates performance index to require "falcor" module instead of by relative path.
 
       scheduleMethod = function (action) {
         var scriptElement = root.document.createElement('script');
@@ -20741,10 +23043,14 @@ Promise.prototype.nodeify = function (callback, ctx) {
       return this.scheduleWithRelativeAndState(state, dueTime - this.now(), action);
     }
 
+<<<<<<< HEAD
     return new Scheduler(defaultNow, scheduleNow, scheduleRelative, scheduleAbsolute);
   })();
 =======
 },{"153":153,"2":2}],159:[function(require,module,exports){
+=======
+},{"154":154,"2":2}],160:[function(require,module,exports){
+>>>>>>> 3f41169... Updates performance index to require "falcor" module instead of by relative path.
 (function (global){
 // Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
@@ -20774,7 +23080,7 @@ Promise.prototype.nodeify = function (callback, ctx) {
             return factory(root, exports, Rx);
         });
     } else if (typeof module === 'object' && module && module.exports === freeExports) {
-        module.exports = factory(root, module.exports, require(161));
+        module.exports = factory(root, module.exports, require(162));
     } else {
         root.Rx = factory(root, {}, root.Rx);
     }
@@ -21586,7 +23892,7 @@ Promise.prototype.nodeify = function (callback, ctx) {
 }));
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"161":161}],160:[function(require,module,exports){
+},{"162":162}],161:[function(require,module,exports){
 (function (global){
 // Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
@@ -21616,7 +23922,7 @@ Promise.prototype.nodeify = function (callback, ctx) {
             return factory(root, exports, Rx);
         });
     } else if (typeof module === 'object' && module && module.exports === freeExports) {
-        module.exports = factory(root, module.exports, require(161));
+        module.exports = factory(root, module.exports, require(162));
     } else {
         root.Rx = factory(root, {}, root.Rx);
     }
@@ -22109,7 +24415,7 @@ Promise.prototype.nodeify = function (callback, ctx) {
 }));
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"161":161}],161:[function(require,module,exports){
+},{"162":162}],162:[function(require,module,exports){
 (function (process,global){
 // Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 >>>>>>> 6b4c63c... Includes dependency on rx.aggregates and rx.binding

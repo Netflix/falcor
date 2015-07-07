@@ -1,4 +1,4 @@
-var falcor = require('./../../index');
+var falcor = require('falcor');
 var legacyFalcor = require('./legacy');
 
 var Cache = require('./../../test/data/Cache');
