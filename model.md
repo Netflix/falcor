@@ -243,31 +243,55 @@ If you are certain that an Object or Array will remain a constant size, you can 
 
 ## Understanding Paths
 
-Every Model is associated with a particular location within a JSON object. That location is described using a Path. A Path is a sequence of keys, which is evaluated from the root of the Model's associated JSON object. 
-
-When executing JSON operations, Paths are passed to the Model to specify which values should be transformed/retrieved.
+A Path is a sequence of keys, which is evaluated from the root of a JSON object. A path refers to a location within a JSON object. When executing JSON operations, Paths are passed to the Model to specify which values in the Model's associated JSON object should be transformed/retrieved.
 
 ~~~js
-model.get("todos[0].name").subscribe(function(response) {
- console.log(response.json.todos[0].name);
+var model = new falcor.Model({
+  cache: {
+    todos: [
+      {
+        name: 'get milk from corner store',
+        done: false
+      },
+      {
+        name: 'withdraw money from ATM',
+        done: true
+      }
+    ]
+  }
 });
+
+model.
+  getValue("todos[0].name").
+  then(name => console.log(name);
 ~~~
 
 All Paths are fundamentally a series of keys that evaluate to a location within a JSON object. Models can accept Paths specified in one of two ways:
 
 1. Path Array of Keys
-
-
-
 2. Path Syntax String
 
 ### Path Array
 
-A path can be represented as an array with 0..n JavaScript values. Each value is converted to a string immediately prior to being looked up on the JavaScript object. String conversion follows the rules of JSON.stringify algorithm. 
+A Path can be represented as an array with 0..n Keys. The following value types are considered valid keys:
+1. string
+2. boolean
+3. number
+4. null
+
+Each non-null value that is not a string  is converted to a string immediately prior to being looked up on the JavaScript object. String conversion follows the rules of JavaScript's toString algorithm.
+
+Here are some examples of valid paths:
+
+* ["todos",0,"name"]
+* ["todos",0, true]
+* []
+* ["todos", "length"]
+* ["person", "name", null]
 
 ### Path Syntax Strings
 
-Models support a subset of JavaScript expressions via the Path Syntax String. That means that the follow Path Strings are valid:
+Models support JavaScript-like Path Syntax expressions via the Path Syntax String. That means that the following Path Strings are valid:
 
 * `todos[0].name`
 * `todos[0]["name"]`
