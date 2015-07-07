@@ -19,30 +19,20 @@ var formats = testConfig.formats;
 var tests = testConfig.get;
 var suite = testConfig.suite;
 
+var TESTS = {
+    'scrollGallery': tests.scrollGallery,
+    'complex': tests.complex
+};
 suite.tests = testSuiteGenerator({
-
-    iterations: 1,
-
+    iterations: 10,
     models: {
-        'model': models.model
+        'model': models.modelWithSource
     },
-
-    formats: [
-        'JSON'
-    ],
-
-    tests: {
-        'sync-simple': tests.syncSimple,
-        'sync-reference': tests.syncReference,
-        'simple': tests.simple,
-        'complex': tests.complex,
-        'reference': tests.reference
-    }
-
+    formats: ['PathMap']
 });
 
 var env = 'node ' + process.version;
 var resultsReporter = compose(testReporter.resultsReporter, CSVFormatter.toTable);
 var benchmarkReporter = compose(testReporter.benchmarkReporter, curry(CSVFormatter.toRow, env));
 
-testRunner(suite, 2, env, benchmarkReporter, resultsReporter);
+testRunner(suite, env, benchmarkReporter, resultsReporter);

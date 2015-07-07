@@ -1,4 +1,5 @@
 var noOp = function() {};
+var debug = false;
 
 module.exports = {
 
@@ -14,77 +15,39 @@ module.exports = {
         };
     },
 
-    startup: function(model, format) {
-        var startupRequest = [ ["startup"], ["appconfig"], ["languages"], ["geolocation"], ["user"], ["uiexperience"], ["lolomo", "summary"], ["lolomo", {"to": 60}, "summary"], ["lolomo", 0, "billboardData"], ["lolomo", 0, 0, "postcard"], ["profilesList", {"to": 4}, "avatar", "images", "byWidth", [32, 64, 80, 100, 112, 160, 200, 320]], ["profilesList", {"to": 4}, "summary"], ["profilesList", "summary"], ["profilesList", "availableAvatarsList", {"to": 18}, "images", "byWidth", [32, 64, 80, 100, 112, 160, 200, 320]], ["profilesList", "availableAvatarsList", {"to": 18}, "summary"], ["profilesList", "availableAvatarsList", "summary"], ["profiles", "hasSeenPromoGate"], ["lolomo", "maxExperience"], ["lolomo", 0, 0, "evidence"], ["lolomo", 0, 0, "item", ["info", "summary", "outline", "rating", "heroImages"]] ];
-
-        switch (format) {
-            case 'JSON':
-                return function() {
-                    model._getPathSetsAsJSON(model, startupRequest, [{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{}]);
-                };
-            case 'JSONG':
-                return function() {
-                    model._getPathSetsAsJSONG(model, startupRequest, [{}]);
-                };
-            case 'PathMap':
-                return function() {
-                    model._getPathSetsAsPathMap(model, startupRequest, [{}]);
-                };
-            case 'Value':
-                return function() {
-                    model._getPathSetsAsValues(model, startupRequest, []);
-                };
-        }
-    },
-
-    scrollGallery: function(model, format) {
-        var scollingRequest = [
-            ["lists", "abcd", {"from": 0, "to": 10}, "summary"],
-            ["lists", "abcd", {"from": 11, "to": 20}, "summary"],
-            ["lists", "abcd", {"from": 21, "to": 30}, "summary"],
-            ["lists", "abcd", {"from": 31, "to": 40}, "summary"]
-        ];
-        // for (var i = 0; i < 40;)
-        switch (format) {
-            case 'JSON':
-                return function() {
-                    model._getPathSetsAsJSON(model, scollingRequest, [{},{},{},{}]);
-                };
-            case 'JSONG':
-                return function() {
-                    model._getPathSetsAsJSONG(model, scollingRequest, [{}]);
-                };
-            case 'PathMap':
-                return function() {
-                    model._getPathSetsAsPathMap(model, scollingRequest, [{}]);
-                };
-            case 'Value':
-                return function() {
-                    model._getPathSetsAsValues(model, scollingRequest, []);
-                };
-        }
-    },
-
     simple: function(model, format) {
         var simpleRequest = [
             ['videos', 1234, 'summary']
         ];
         switch (format) {
             case 'JSON':
-                return function() {
-                    model._getPathSetsAsJSON(model, simpleRequest, [{}]);
+                return function(done) {
+                    var obs = model.
+                        get.apply(model, simpleRequest.concat(function(a) {
+                            return a;
+                        }));
+                    run(obs, format, done);
                 };
             case 'JSONG':
-                return function() {
-                    model._getPathSetsAsJSONG(model, simpleRequest, [{}]);
+                return function(done) {
+                    run(
+                        model.get.apply(model, simpleRequest).toJSONG(),
+                        format,
+                        done);
                 };
             case 'PathMap':
-                return function() {
-                    model._getPathSetsAsPathMap(model, simpleRequest, [{}]);
+                return function(done) {
+                    run(
+                        model.get.apply(model, simpleRequest),
+                        format,
+                        done);
                 };
             case 'Value':
-                return function() {
-                    model._getPathSetsAsValues(model, simpleRequest, []);
+                return function(done) {
+                    run(
+                        model.get.apply(model, simpleRequest).toPathValues(),
+                        format,
+                        done);
                 };
         }
     },
@@ -95,20 +58,33 @@ module.exports = {
         ];
         switch (format) {
             case 'JSON':
-                return function() {
-                    model._getPathSetsAsJSON(model, referenceRequest, [{}]);
+                return function(done) {
+                    var obs = model.
+                        get.apply(model, referenceRequest.concat(function(a) {
+                            return a;
+                        }));
+                    run(obs, format, done);
                 };
             case 'JSONG':
-                return function() {
-                    model._getPathSetsAsJSONG(model, referenceRequest, [{}]);
+                return function(done) {
+                    run(
+                        model.get.apply(model, referenceRequest).toJSONG(),
+                        format,
+                        done);
                 };
             case 'PathMap':
-                return function() {
-                    model._getPathSetsAsPathMap(model, referenceRequest, [{}]);
+                return function(done) {
+                    run(
+                        model.get.apply(model, referenceRequest),
+                        format,
+                        done);
                 };
             case 'Value':
-                return function() {
-                    model._getPathSetsAsValues(model, referenceRequest, []);
+                return function(done) {
+                    run(
+                        model.get.apply(model, referenceRequest).toPathValues(),
+                        format,
+                        done);
                 };
         }
     },
@@ -119,21 +95,85 @@ module.exports = {
         ];
         switch (format) {
             case 'JSON':
-                return function() {
-                    model._getPathSetsAsJSON(model, complexRequest, [{}]);
+                return function(done) {
+                    var obs = model.
+                        get.apply(model, complexRequest.concat(function(a) {
+                            return a;
+                        }));
+                    run(obs, format, done);
                 };
             case 'JSONG':
-                return function() {
-                    model._getPathSetsAsJSONG(model, complexRequest, [{}]);
+                return function(done) {
+                    run(
+                        model.get.apply(model, complexRequest).toJSONG(),
+                        format,
+                        done);
                 };
             case 'PathMap':
-                return function() {
-                    model._getPathSetsAsPathMap(model, complexRequest, [{}]);
+                return function(done) {
+                    run(
+                        model.get.apply(model, complexRequest),
+                        format,
+                        done);
                 };
             case 'Value':
-                return function() {
-                    model._getPathSetsAsValues(model, complexRequest, []);
+                return function(done) {
+                    run(
+                        model.get.apply(model, complexRequest).toPathValues(),
+                        format,
+                        done);
                 };
         }
-    }
+    },
+
+    scrollGallery: function(model, format) {
+        var scrollingRequest = [
+            ["lists", "abcd", {"from": 0, "to": 10}, "summary"],
+            ["lists", "abcd", {"from": 11, "to": 20}, "summary"],
+            ["lists", "abcd", {"from": 21, "to": 30}, "summary"],
+            ["lists", "abcd", {"from": 31, "to": 40}, "summary"]
+        ];
+        // for (var i = 0; i < 40;)
+        switch (format) {
+            case 'JSON':
+                return function(done) {
+                    var obs = model.
+                        get.apply(model, scrollingRequest.concat(function(a, b, c, d) {
+                            return [a, b, c, d];
+                        }));
+                    run(obs, format, done);
+                };
+            case 'JSONG':
+                return function(done) {
+                    run(
+                        model.get.apply(model, scrollingRequest).toJSONG(),
+                        format,
+                        done);
+                };
+            case 'PathMap':
+                return function(done) {
+                    run(
+                        model.get.apply(model, scrollingRequest),
+                        format,
+                        done);
+                };
+            case 'Value':
+                return function(done) {
+                    run(
+                        model.get.apply(model, scrollingRequest).toPathValues(),
+                        format,
+                        done);
+                };
+        }
+    },
+
 };
+
+function run(obs, format, done) {
+    obs.
+        subscribe(function(next) {
+            debug && console.log(format, JSON.stringify(next));
+        }, noOp, function() {
+            done && done.resolve();
+        });
+}
