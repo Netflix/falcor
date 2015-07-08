@@ -28,7 +28,8 @@ suite.tests = testSuiteGenerator({
 });
 
 var env = 'node ' + process.version;
+var logger = console.log.bind(console);
 var resultsReporter = compose(testReporter.resultsReporter, CSVFormatter.toTable);
 var benchmarkReporter = compose(testReporter.benchmarkReporter, curry(CSVFormatter.toRow, env));
 
-testRunner(suite, env, benchmarkReporter, resultsReporter);
+testRunner(suite, env, benchmarkReporter, resultsReporter, logger);

@@ -31,12 +31,12 @@ function createSuites(testCfg, iterations) {
     return suites;
 }
 
-function runner(testCfg, env, onBenchmarkComplete, onComplete) {
+function runner(testCfg, env, onBenchmarkComplete, onComplete, log) {
 
     var suites = createSuites(testCfg, 1);
 
     if (!KARMA) {
-        run(suites, env, onBenchmarkComplete, onComplete);
+        run(suites, env, onBenchmarkComplete, onComplete, log);
     } else {
         // KARMA will run the global "suites"
     }
@@ -53,22 +53,26 @@ function runGC() {
 
     if (jscontext) {
         jscontext.gc();
-        console.log('Ran GC');
+        return true;
     }
+
+    return false;
 }
 
-function run(suites, env, onBenchmarkComplete, onComplete) {
+function run(suites, env, onBenchmarkComplete, onComplete, log) {
 
     var results = {};
 
-    console.log('Running Perf Tests');
+    log('Running Perf Tests');
 
     var _run = function() {
 
         suites.shift().
             on('cycle', function (event) {
 
-                runGC();
+                if(runGC()) {
+                    log('Ran GC between benchmarks');
+                }
 
                 var benchmark = event.target;
                 var suite = benchmark.suite = this.name;
@@ -83,12 +87,13 @@ function run(suites, env, onBenchmarkComplete, onComplete) {
                 }
             }).
             on('error', function(e) {
-                console.log('Error');
-                console.log(e.target.error);
-                console.log(e.target.error.stack);
+                var error = e.target.error;
+
+                log(error);
+                log(error.stack);
             }).
             on('complete', function() {
-                console.log('Perf Tests Complete');
+                log('Perf Tests Complete');
                 if (suites.length === 0) {
                     if (onComplete) {
                         onComplete(results);
