@@ -241,9 +241,9 @@ showPage(0);
 
 If you are certain that an Object or Array will remain a constant size, you can indicate to a Model that they should always be retrieved in their entirety by using an Atom. For more information, see [JSON Graph Atoms](#JSON-Graph-Atoms).
 
-## Understanding Paths
+## Paths
 
-A Path is a sequence of keys, which is evaluated from the root of a JSON object. A path refers to a location within a JSON object. When executing JSON operations, Paths are passed to the Model to specify which values in the Model's associated JSON object should be transformed/retrieved.
+A Path is a sequence of Keys, which is evaluated from the root of a JSON object. A path refers to a location within a JSON object. When executing JSON operations, Paths are passed to the Model to specify which values to transform/retrieve in the Model's associated JSON object.
 
 ~~~js
 var model = new falcor.Model({
@@ -252,34 +252,32 @@ var model = new falcor.Model({
       {
         name: 'get milk from corner store',
         done: false
-      },
-      {
-        name: 'withdraw money from ATM',
-        done: true
       }
     ]
   }
 });
 
+// prints 'get milk from corner store'
 model.
   getValue("todos[0].name").
   then(name => console.log(name);
 ~~~
 
-All Paths are fundamentally a series of keys that evaluate to a location within a JSON object. Models can accept Paths specified in one of two ways:
+Models can accept Paths specified in one of two ways:
 
 1. Path Array of Keys
 2. Path Syntax String
 
 ### Path Array
 
-A Path can be represented as an array with 0..n Keys. The following value types are considered valid keys:
+A Path can be represented as an array with 0..n Keys. The following types are considered valid Keys:
+
 1. string
 2. boolean
 3. number
 4. null
 
-Each non-null value that is not a string  is converted to a string immediately prior to being looked up on the JavaScript object. String conversion follows the rules of JavaScript's toString algorithm.
+Each non-null value that is not a string is converted to a string immediately prior to being looked up on the JavaScript object. String conversion follows the rules of JavaScript's toString algorithm.
 
 Here are some examples of valid paths:
 
@@ -289,20 +287,85 @@ Here are some examples of valid paths:
 * ["todos", "length"]
 * ["person", "name", null]
 
+Here are some examples of _invalid_ paths:
+
+* [["todos"],0,"name"]
+* ["todos",{hello:there}, true]
+
 ### Path Syntax Strings
 
-Models support JavaScript-like Path Syntax expressions via the Path Syntax String. That means that the following Path Strings are valid:
+Models support JavaScript-like Path expressions via Path Syntax Strings. Path Syntax Strings are immediately parsed into Path Arrays, which has a run-time cost. The following Path Strings are valid:
 
 * `todos[0].name`
 * `todos[0]["name"]`
 * `todos["0"]["name"]`
 
-As the model root is the assumed prefix to the path, it is also possible to use indexers for the first key in the path (unlike in JavaScript):
+_Unlike JavaScript's Path syntax_ it is also possible to use indexers for the first key in the path.
 
 * `["todos"][0]["name"]`
 * `["todos"][0].name`
 
+### Path Arrays
 
+Models can alternately be passed Paths as Arrays of Keys. A Path Array is usually more efficient than the Path Syntax, because under the hood a model immediately parses Path Syntax Strings into Path Arrays.  Furthermore a Path Array is often preferable when you have to build Paths programmatically, because string concatenation can be avoided.
+
+~~~js
+function loadTodoByIndex(index) {
+ return model.get(["todos", index, 
+
+## PathSets
+
+A PathSet is a human-readable short-hand for a set of paths. Instead of specifying several paths, in some cases you can collapse them into a single path expression.
+
+Instead of writing this...
+
+~~~js
+var response = 
+  model.get(
+    "todos[0].name",
+    "todos[0].done",
+    "todos[1].name",
+    "todos[1].done",
+    "todos[2].name",
+    "todos[2].done");
+~~~
+
+...you can write this....
+
+~~~js
+model.get("todos[0..2]['name','done']");
+~~~
+
+PathSets are a super set of Paths because in addition to Keys, PathSets can contain KeySets. A KeySet can be any of the following values:
+
+* Key
+* Range
+* Array of Keys or Ranges
+
+Models can accept Paths in one of two formats:
+
+1. PathSet Syntax String
+2. PathSet Array
+ 
+### PathSet Syntax String
+
+PathSet Syntax Strings expand on the Path Syntax Grammer, adding ranges, and the ability to specify multiple keys in indexers. Like Path Syntax Strings, PathSet Syntax Strings are immediately parsed into Path Arrays, which has a run-time cost. Any Models which can accept multiple Paths can also accept PathSets.
+
+The following Path Strings are valid:
+
+## When to use Path Syntax vs. Path Arrays?
+
+Path Syntax 
+Any Model method which accepts a path, can also be passed a Path Syntax String. However Models only ever emit Path Arrays, because they are easier for consumers to analyze.
+
+## PathSets
+
+PathSets are a human-readable format for expressing a set of Paths. PathSets can be both shorter to write than a collection of Paths, and are more efficient to evaluating, and transfer over the network. PathSets can be expressed 
+
+
+#### When should I use Path Arrays or vice-versa?
+
+It is always more efficient to use Path Arrays. 
 ## Working with JSON Graph Data using a Model
 
 In addition to being able to work with JSON documents, Models can also operate on JSON Graph documents. JSON Graph is a convention for modeling graph information in JSON. JSON Graph documents extend JSON with **References**. References can be used anywhere within a JSON object to refer to a value elsewhere within the same JSON object. This removes the need to duplicate objects when serializing a graph into a hierarchical JSON object.
