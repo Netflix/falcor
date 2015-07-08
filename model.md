@@ -386,6 +386,7 @@ The following PathSet Strings are valid:
 * "todos[0..2].name" is equivalent to "todos[0].name", "todos[1].name", and "todos[2].name"
 * "todos[0...2].name" is equivalent to "todos[0].name", and "todos[1].name"
 * "todos[0..1]['name','done']" is equivalent to "todos[0].name", "todos[0].done", "todos[1].name", and "todos[1].done"
+* 'todos[0..1]["name","done"]' is equivalent to "todos[0].name", "todos[0].done", "todos[1].name", and "todos[1].done"
 * "todos[0..1, "length"] is equivalent to "todos[0]", "todos[1]", and "todos.length"
 
 ### PathSet Array
@@ -394,10 +395,11 @@ PathSet Syntax Strings expand on the Path Syntax Grammer, adding ranges, and the
 
 The following PathSet Strings are valid:
 
-* "todos[0..2].name" is equivalent to "todos[0].name", "todos[1].name", and "todos[2].name"
-* "todos[0...2].name" is equivalent to "todos[0].name", and "todos[1].name"
-* "todos[0..1]['name','done']" is equivalent to "todos[0].name", "todos[0].done", "todos[1].name", and "todos[1].done"
-* "todos[0..1, "length"] is equivalent to "todos[0]", "todos[1]", and "todos.length"
+* ["todos", { from: 0, to: 2 }, "name"] is equivalent to ["todos", 0, "name"], ["todos", 1, "name"], and ["todos", 2, "name"]
+* ["todos", { from: 0, length: 2 }, "name"] is equivalent to ["todos", 0, "name"], and ["todos", 1, "name"]
+* ["todos", { length: 2 }, "name"] is equivalent to ["todos", 0, "name"], and ["todos", 1, "name"]
+* ["todos", { from: 0, to: 1 }, ['name','done']] is equivalent to ["todos", 0, "name"], ["todos", 0, "done"], ["todos", 1, "name"], and ["todos", 1, "done"]
+* ["todos", [{from: 0, to: 1}, "length"]] is equivalent to ["todos", 0], ["todos", 1], and ["todos", "length"]
 
 ## Working with JSON Graph Data using a Model
 
@@ -754,8 +756,6 @@ In addition to References, JSON graph introduces two more new value types: Atoms
 
 Sentinels are JSON objects that are treated by the Falcor Model as value types. References, Atoms, and Errors are all JSON objects with a "$type" value of "ref", "atom", and "error" respectively. 
 
-(Example of a reference, atom, and error.)
-
 ~~~js
 var log = console.log.bind(console)
 var $ref = falcor.Model.ref;
@@ -811,12 +811,9 @@ model.getValue('todosById[44]').then(log);
 
 // This outputs the following to the console:
 // [1, 2, 3, 4]
-//@TODO: revisit.
 ~~~
 
 You can create a new Model which does not have this unboxing behavior by calling "boxValues." 
-
-(Example of calling get value on an Atom with boxValues on)
 
 ~~~js
 var $ref = falcor.Model.ref;
@@ -830,7 +827,6 @@ var model = new falcor.Model({cache: {
     }
 }});
 
-//@TODO: revisit.
 model.boxValues().getValue('todosById[44]').
     then(function(x) { console.log(JSON.stringify(x, null, 4)); });
 
@@ -847,27 +843,24 @@ model.boxValues().getValue('todosById[44]').
 // } 
 ~~~
 
-For more information see [Boxing and Unboxing](#Boxing-and-Unboxing).
-
 As sentinels are value types, their contents cannot be changed. Like numbers and strings, they must be replaced entirely.
 
-(Example of Setting an Atom in the cache)
-
 ~~~js
-var $ref = falcor.Model.ref;
-
 var model = new falcor.Model({cache: {
     todosById: {
         "44": {
-            $type: "atom",
-            value: [1, 2, 3, 4]
+            name: "go to ATM",
+            tags: { $type: "atom", value: ["money", "store"] }
         }
     }
 }});
 
-model.setValue('todosById[44]');
-//@TODO: how do you set an atom in the cache?
-// This outputs the following to the console:
+// This outputs the following to the console: ["money", "store", "debit card"]
+model.
+    setValue('todosById[44].tags', { $type: "atom", value: ["money", "store", "debit card"] }).
+    then(tags => {
+       console.log(tags);
+    });
 ~~~
 
 Each Sentinel affects the way in which the Model interprets its value differently. References were explained in the previous section. In the next two sections, Atoms and Errors will be explained.
@@ -879,8 +872,6 @@ Each Sentinel affects the way in which the Model interprets its value differentl
 JSON Graph allows metadata to be attached to values to control how they are handled by the Model. For example, metadata can be attached to values to control how long values stay in the Model cache and indicate whether one value is a more recent version of another value. For more information see [Sentinel Metadata](#Sentinel-Metadata).
 
 One issue is that JavaScript value types do not preserve any metadata attached to them when they are serialized as JSON:
-
-(Example of creating a JavaScript number, attaching an "$expires" property to it, and then Json stringifying it)
 
 ~~~js
 var number = 4;
@@ -915,45 +906,9 @@ console.log(JSON.stringify(number, null, 4))
 
 The value of an Atom is always treated like a value type, meaning it is retrieved and set in its entirety. Mutating an Adam is ineffectual. Instead you must replace it entirely using the Model's set operation.
 
-(Example showing that it is ineffectual to modify the value of an atom directly. We clone Atoms when they are retrieved from the model, so this example should show that mutating an Atom directly has no effect by then retrieving the same object, and displaying it's data which will be unchanged)
-
-~~~js
-var log = console.log.bind(console)
-var $ref = falcor.Model.ref;
-var $atom = falcor.Model.atom;
-
-var model = new falcor.Model({cache: {
-    todos: [
-        $ref('todosById[44]')
-    ],
-    todosById: {
-        "44": {
-            name: 'deliver pizza',
-            done: false,
-            customer: $atom({
-                name: 'Jim Hobart',
-                address: '123 pacifica ave., CA, US'
-            })
-        }
-    }
-}});
-
-model.getValue('todosById[44].customer').
-    then(function(x) { 
-        log(x); 
-        x.name = "not Jim Hobart"
-        model.getValue('todosById[44].customer').then(log)
-    })
-
-//@TODO: example is inaccurate.
-~~~
-
-
 In addition to making it possible to attach metadata to JSON values, Atoms can be used to get around the restriction against retrieving JSON Objects and Arrays from a Falcor Model. 
 
-Let's say that we have an Array which we are certain will remain small, like a list of video subtitles for example. 
-
-(Example of a JSON graph object with a Netflix title which contains an array of subtitles)
+Let's say that we have an Array which we are certain will remain small, like a list of video subtitles for example. By boxing the subtitles Array in an Atom, we cause the Falcor model to treat it as a value and return it in its entirety. 
 
 ~~~js
 var log = console.log.bind(console)
@@ -968,13 +923,7 @@ var model = new falcor.Model({cache: {
         }
     }
 }});
-~~~
 
-By boxing the Array in an Atom, we cause the Falcor model to treat it as a value and return it in its entirety. 
-
-(Example of retrieving the entire array using a model)
-
-~~~js
 model.getValue('titlesById[44].subtitles').then(log)
 
 // This outputs the following to the console:
@@ -985,9 +934,9 @@ Internally the Model boxes all retrieved values that have been successfully retr
 
 #### JSON Graph Errors
 
-When a Model's DataSource encounters an error while attempting to retrieve a value from a JSON Graph object, it is represented as an error object. 
+When a Model's DataSource encounters an error while attempting to retrieve a value from a JSON object, an Error object is created and placed in the JSON instead of the value that was unable to be retrieved. 
 
-(Example of an error when attempting to retrieve the rating of a Netflix title from a model)
+By default a Model delivers Errors differently than other values. If synchronous methods are used to retrieve the data from the Model, the error is thrown.  If the data is asynchronously being requested from the model as a observable or a promise, the error will be delivered in a special callback.
 
 ~~~js
 var model = new falcor.Model({cache: {
@@ -999,57 +948,16 @@ var model = new falcor.Model({cache: {
     }
 }});
 
-try {
-    console.log(model.getValueSync('titlesById[44]'))
-} catch(e) {
-    console.error(e.value)
-}
-
-// This outputs the following to the error console:
-// failure to retrieve title.
-~~~
-
-By default a Model delivers Errors differently than other values. If synchronous methods are used to retrieve the data from the model, the error is thrown.  If the data is asynchronously being requested from the model as a observable or a promise, the error will be delivered in a special call back.
-
-(Example of receiving an error in an observable)
-
-~~~js
-var log = console.log.bind(console);
-
-var model = new falcor.Model({cache: {
-    titlesById: {
-        "44": {
-            $type: "error",
-            value: "failure to retrieve title."
-        }
-    }
-}});
-
-model.getValue('titlesById[44]').subscribe(log, function(e) { console.error(e[0].value); })
-
-// This outputs the following to the error console:
-// failure to retrieve title.
-//@TODO: bug?  why does 'subscribe's error callback return an array while 'then's does not?
-~~~
-
-(Example of receiving an error in a promise)
-
-~~~js
-var log = console.log.bind(console);
-
-var model = new falcor.Model({cache: {
-    titlesById: {
-        "44": {
-            $type: "error",
-            value: "failure to retrieve title."
-        }
-    }
-}});
-
-model.getValue('titlesById[44]').then(log, function(e) { console.error(e.value); })
-
-// This outputs the following to the error console:
-// failure to retrieve title.
+// This outputs the following to the error console: {path:["titlesById", 44],value:"failure to retrieve title."}
+model.
+    getValue('titlesById[44].name').
+    then(
+        data => {
+            console.log("success");
+        },
+        pathValue => {
+            console.error(JSON.stringify(pathValue));
+        });
 ~~~
 
 To learn more about the different ways to retrieve information from a model, see [Retrieving Data from a Model](#Retrieving-Data-from-a-Model).
@@ -1059,8 +967,6 @@ To learn more about the different ways to retrieve information from a model, see
 There are many reasons why you might want errors reported the same way as other values. For example you might retrieve several paths from a model in a single request, and want to be resilient against the possibility that one of them fails. Furthermore you might want to display errors in a template alongside successfully-retrieved values. 
 
 The "treatErrorsAsValues" function creates a new Model which reports errors the same way as values. 
-
-(Example of retrieving a single error from a JSON graph using get value)
 
 ~~~js
 var model = new falcor.Model({cache: {
@@ -1072,15 +978,32 @@ var model = new falcor.Model({cache: {
     }
 }});
 
-console.log(model.treatErrorsAsValues().getValueSync('titlesById[44]'))
+// This outputs the following to the console:
+// {
+//    titlesById: {
+//        "44": {
+//            $type: "error",
+//            value: "failure."
+//        }
+//    }
+//
+model.
+    treatErrorsAsValues().
+    get('titlesById[44].name').
+    then(
+        response => {
+            console.log(JSON.stringify(response.json, 4, null);
+        },
+        pathValue => {
+            // not called!
+            console.error(JSON.stringify(pathValue));
+        });
 
 // This outputs the following to the regular console:
 // failure.
 ~~~
 
 Note that using "treatErrorsAsValues" will cause the model to deliver errors as values. However it will not provide you with a way to distinguish errors from values. If you would like to be able to receive errors alongside values, but retain the ability to distinguish between errors and values, you can chain "treatErrorsAsValues" and "boxValues" together. When I model is operating in "boxValues" mode, it always returns the sentinels that box each value and indicate their type. 
-
-(Identical example as above, except this time we also call box values in addition to treat errors as values)
 
 ~~~js
 var model = new falcor.Model({cache: {
