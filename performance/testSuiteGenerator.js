@@ -1,28 +1,28 @@
 var testConfig = require('./testConfig')();
+var _ = require('lodash');
+
 var models = testConfig.models;
 var formats = testConfig.formats;
 var tests = testConfig.get;
-var _ = require('lodash');
-var FORMATS = ['JSON', 'JSONG', 'Value', 'PathMap'];
-var ITERATIONS = 1;
-var TESTS = {
-    'scrollGallery': tests.scrollGallery,
-    'simple': tests.simple,
-    'reference': tests.reference,
-    'complex': tests.complex
-};
-var MODELS = {
-    'modelWithoutSource' : models.model,
-    'modelWithSource' : models.modelWithSource
+
+var DEFAULTS = {
+    iterations: 2,
+    tests: {
+        'scrollGallery': tests.scrollGallery,
+        'simple': tests.simple,
+        'reference': tests.reference,
+        'complex': tests.complex
+    },
+    formats: formats,
+    models: {
+        'modelWithoutSource' : models.model,
+        'modelWithSource' : models.modelWithSource
+    }
 };
 
 module.exports = function (config) {
-    config = _.extend({
-        iterations: ITERATIONS,
-        models: MODELS,
-        tests: TESTS,
-        formats: FORMATS
-    }, config);
+
+    config = _.assign({}, DEFAULTS, config);
 
     var generatedTests = {};
 
