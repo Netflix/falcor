@@ -1,6 +1,15 @@
 var noOp = function() {};
 var debug = false;
 
+function run(obs, format, done) {
+    obs.
+        subscribe(function(next) {
+            // debug && console.log(format, JSON.stringify(next));
+        }, noOp, function() {
+            done && done.resolve();
+        });
+}
+
 module.exports = {
 
     syncSimple: function(model, format) {
@@ -168,12 +177,3 @@ module.exports = {
     },
 
 };
-
-function run(obs, format, done) {
-    obs.
-        subscribe(function(next) {
-            debug && console.log(format, JSON.stringify(next));
-        }, noOp, function() {
-            done && done.resolve();
-        });
-}
