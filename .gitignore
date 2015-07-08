@@ -6,6 +6,7 @@ out/
 tmp/
 doc/
 performance/bin/
+performance/device/
 !tasks/bin
 coverage
 .idea
