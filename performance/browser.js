@@ -20,11 +20,10 @@ var tests = testConfig.get;
 var suite = testConfig.suite;
 
 suite.tests = testSuiteGenerator({
-    iterations: 10,
     models: {
         'model': models.modelWithSource
     },
-    formats: ['PathMap']
+    formats: ['PathMap', 'JSON']
 });
 
 var env = navigator.userAgent;
