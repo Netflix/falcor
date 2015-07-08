@@ -1,27 +1,31 @@
 var fs = require('fs');
 var mkdirp = require('mkdirp');
 var path = require('path');
-var transformCSVResults = require('./transformCSVResults');
 var dirPath = path.resolve(__dirname, '../out');
+
 var DEFAULT_NAME = 'node-benchmark.csv';
 var COMMAND_OPTION = '-n';
 
-module.exports = function(results) {
-    debugger
-    var filePath = path.resolve(dirPath, getFileName());
-    results = transformCSVResults(results);
-    mkdirp(path.dirname(filePath), function (err) {
-        if (err) {
-            console.error('\nError writing file: ' + filePath);
-        } else {
-            fs.writeFileSync(filePath, results);
-            console.info('\nCreated output file: ' + filePath);
-        }
-    });
+module.exports = {
+    resultsReporter: function (results) {
+        var filePath = path.resolve(dirPath, getFileName());
+        mkdirp(path.dirname(filePath), function (err) {
+            if (err) {
+                console.error('\nError writing file: ' + filePath);
+            } else {
+                fs.writeFileSync(filePath, results);
+                console.info('\nCreated output file: ' + filePath);
+            }
+        });
+    },
+
+
+    benchmarkReporter: function (benchmark) {
+        console.info(benchmark);
+    }
 };
 
 function getFileName() {
-    debugger
     if (typeof process !== 'undefined') {
         var name = DEFAULT_NAME;
         var foundName = false;
