@@ -42,25 +42,34 @@ function runner(testCfg, env, onBenchmarkComplete, onComplete) {
     }
 }
 
+function runGC() {
+    var jscontext;
+
+    if (typeof global !== 'undefined' && global && global.gc) {
+        jscontext = global;
+    } else if (typeof window !== 'undefined' && window && window.gc) {
+        jscontext = window;
+    }
+
+    if (jscontext) {
+        jscontext.gc();
+        console.log('Ran GC');
+    }
+}
+
 function run(suites, env, onBenchmarkComplete, onComplete) {
 
     var results = {};
 
-    console.log('about to run');
-    debugger
+    console.log('Running Perf Tests');
+
     var _run = function() {
 
         suites.shift().
             on('cycle', function (event) {
-                console.log('ran.cycle');
-                if (typeof global !== 'undefined' && global && global.gc) {
-                    console.log('ran.cycle.gc');
-                    global.gc();
-                }
-                else if (typeof window !== 'undefined' && window && window.gc) {
-                    console.log('ran.cycle.gc');
-                    window.gc();
-                }
+
+                runGC();
+
                 var benchmark = event.target;
                 var suite = benchmark.suite = this.name;
 
@@ -74,12 +83,12 @@ function run(suites, env, onBenchmarkComplete, onComplete) {
                 }
             }).
             on('error', function(e) {
-                console.log('ran.error');
+                console.log('Error');
                 console.log(e.target.error);
                 console.log(e.target.error.stack);
             }).
             on('complete', function() {
-                console.log('ran.completed');
+                console.log('Perf Tests Complete');
                 if (suites.length === 0) {
                     if (onComplete) {
                         onComplete(results);

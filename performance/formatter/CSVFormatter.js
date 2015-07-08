@@ -1,3 +1,5 @@
+var csvTransform = require('./CSVTransform');
+
 var benchmarkToRow = function(env, benchmark) {
 
     if (!env) {
@@ -29,7 +31,7 @@ var resultsToTable = function(results) {
         }
     }
 
-    return table.join('\n');
+    return csvTransform(table.join('\n'));
 };
 
 module.exports = {

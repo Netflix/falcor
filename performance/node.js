@@ -19,16 +19,11 @@ var formats = testConfig.formats;
 var tests = testConfig.get;
 var suite = testConfig.suite;
 
-var TESTS = {
-    'scrollGallery': tests.scrollGallery,
-    'complex': tests.complex
-};
 suite.tests = testSuiteGenerator({
-    iterations: 10,
     models: {
         'model': models.modelWithSource
     },
-    formats: ['PathMap']
+    formats: ['PathMap', 'JSON']
 });
 
 var env = 'node ' + process.version;
