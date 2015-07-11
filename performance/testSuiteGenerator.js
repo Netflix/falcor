@@ -6,7 +6,7 @@ var formats = testConfig.formats;
 var tests = testConfig.get;
 
 var DEFAULTS = {
-    iterations: 2,
+    iterations:10,
     tests: {
         'scrollGallery': tests.scrollGallery,
         'simple': tests.simple,
