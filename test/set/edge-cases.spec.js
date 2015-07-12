@@ -9,7 +9,7 @@ describe("Special Cases", function() {
     it('should set the cache in.', function() {
         var model = new Model({cache: {}});
         var edgeCaseCache = {
-            jsong: {
+            jsonGraph: {
                 user: {
                     name: "Jim",
                     location: {$type: "error", value: "Something broke!"},
@@ -44,27 +44,27 @@ describe("Special Cases", function() {
         // this mimicks the server setting cycle from the router.
         var set = [
             {
-                jsong: {"genreList": {
+                jsonGraph: {"genreList": {
                     "0": { "$type": $path, "value": ["lists", "abcd"] },
                     "1": { "$type": $path, "value": ["lists", "my-list"] }
                 }},
                 paths: [['genreList', {to:1}, 0, 'summary']]
             },
             {
-                jsong: {"lists": {
+                jsonGraph: {"lists": {
                     "abcd": { "0": { "$type": $path, "value": ["videos", 1234] } },
                     "my-list": { "$type": $path, "value": ["lists", "1x5x"] }
                 }},
                 paths: [["genreList", 1, 0, "summary"]]
             },
             {
-                jsong: {"lists": {"1x5x": {
+                jsonGraph: {"lists": {"1x5x": {
                     "0": { "$type": $path, "value": ["videos", 553] }
                 }}},
                 paths: [["genreList", 1, 0, "summary"]]
             },
             {
-                jsong: {"videos": {"553": {"summary": {
+                jsonGraph: {"videos": {"553": {"summary": {
                     "$size": 10,
                     "$type": $atom,
                     "value": {
@@ -97,7 +97,7 @@ describe("Special Cases", function() {
 
     it('should return the ranged items when ranges in array.', function() {
         var JSONG = {
-            jsong: {
+            jsonGraph: {
                 foo: {
                     0: {
                         $type: $atom,

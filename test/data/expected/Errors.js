@@ -43,7 +43,7 @@ module.exports = function() {
             AsJSONG: {
                 values: [{
                     paths: [["videos", "errorBranch"]],
-                    jsong: {
+                    jsonGraph: {
                         "videos": {
                             "errorBranch": {
                                 "$size": "51",
@@ -95,7 +95,7 @@ module.exports = function() {
             AsJSONG: {
                 values: [{
                     paths: [["genreList", "2", null]],
-                    jsong: {
+                    jsonGraph: {
                         "genreList": {
                             "2": {
                                 "$size": 52,

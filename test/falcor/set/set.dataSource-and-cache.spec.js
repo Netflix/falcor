@@ -149,7 +149,7 @@ describe('DataSource and Cache', function() {
                             // Don't do it this way, it will cause memory leaks.
                             model._cache.genreList[0][1] = undefined;
                             return {
-                                jsong: jsongEnv.jsong,
+                                jsonGraph: jsongEnv.jsonGraph,
                                 paths: [jsongEnv.paths[0]]
                             };
                         }
@@ -248,7 +248,7 @@ describe('DataSource and Cache', function() {
                 onSet: function(source, tmp, jsongEnv) {
                     sourceCalled = true;
                     testRunner.compare({
-                        jsong: {
+                        jsonGraph: {
                             videos: {
                                 1234: {
                                     summary: 5

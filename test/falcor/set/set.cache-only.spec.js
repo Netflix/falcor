@@ -66,7 +66,7 @@ describe('Cache Only', function() {
             var model = new Model({cache: Cache()});
             var value = {hello: 'world'};
             var expected = {
-                jsong: {
+                jsonGraph: {
                     videos: {
                         1234: {
                             summary: {

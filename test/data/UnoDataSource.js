@@ -21,7 +21,7 @@ UnoDataSource.prototype = {
             if (results) {
                 if (results[0]) {
                     // returns all the paths even though they are missing
-                    observer.onNext({values: results[0].jsong, paths: paths});
+                    observer.onNext({values: results[0].jsonGraph, paths: paths});
                 } else {
                     observer.onNext(undefined);
                 }
