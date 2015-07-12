@@ -80,7 +80,7 @@ module.exports = {
 
         return obs;
     },
-    jsongBindException: 'It is not legal to use the JSON Graph format from a bound Model. JSON Graph format can only be used from a root model.'
+    jsonGraphBindException: 'It is not legal to use the JSON Graph format from a bound Model. JSON Graph format can only be used from a root model.'
 };
 function clean(item, options) {
     traverseAndConvert(item);

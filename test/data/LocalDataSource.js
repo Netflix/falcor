@@ -46,10 +46,10 @@ LocalSource.prototype = {
                 // always output all the paths
                 var output = {
                     paths: paths,
-                    jsong: {}
+                    jsonGraph: {}
                 };
                 if (values[0]) {
-                    output.jsong = values[0].jsong;
+                    output.jsonGraph = values[0].jsonGraph;
                 }
 
                 onResults(output);
@@ -75,7 +75,7 @@ LocalSource.prototype = {
             function exec() {
                 var seed = [{}];
                 var tempModel = new falcor.Model({
-                    cache: jsongEnv.jsong,
+                    cache: jsongEnv.jsonGraph,
                     errorSelector: errorSelector});
                 jsongEnv = onSet(self, tempModel, jsongEnv);
 
