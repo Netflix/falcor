@@ -35,7 +35,6 @@ describe("Bind-Short", function() {
 
             var throwError = false;
             try {
-                debugger
                 dataModel.bindSync(["genreList", 0, 0]);
             } catch (e) {
                 throwError = true;
