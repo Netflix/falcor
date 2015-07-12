@@ -34,7 +34,7 @@ describe('GetValueSync', function() {
         var value = model.getValueSync(['genreList', null, null, 0, 0, 'summary']);
         testRunner.compare(Values().direct.AsJSON.values[0].json, value);
     });
-    
+
     it('should follow references when null is last key.', function() {
         var model = new Model({cache: Cache()});
         model._root.unsafeMode = true;
@@ -50,7 +50,7 @@ describe('GetValueSync', function() {
     it('should throw an error when it encounters one.', function() {
         var model = new Model({cache: Cache()});
         model._root.unsafeMode = true;
-        
+
         var error = false;
         try {
             model.getValueSync(['videos', 'errorBranch']);
@@ -129,7 +129,7 @@ describe('GetValueSync', function() {
             testRunner.compare({$type: 'atom'}, value);
         });
     });
-    
+
     describe('TreatErrorsAsValues', function() {
         it('should throw an error when it encounters one.', function() {
             var model = new Model({cache: Cache()}).treatErrorsAsValues();
