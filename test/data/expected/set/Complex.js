@@ -1,7 +1,7 @@
 module.exports = function() {
     return {
         toOnly: {
-            setPathSets: {
+            setPathValues: {
                 count: 2,
                 query: [{
                     "path": ["v", {to:1}, "s"],
@@ -105,7 +105,7 @@ module.exports = function() {
             }
         },
         fromOnly: {
-            setPathSets: {
+            setPathValues: {
                 query: [{
                     "path": ["v", {from:0}, "s"],
                     "value": "Arnold"
@@ -161,7 +161,7 @@ module.exports = function() {
             }
         },
         fromAndTo: {
-            setPathSets: {
+            setPathValues: {
                 count: 3,
                 query: [{
                     "path": ["v", {from:-1, to:1}, "s"],
@@ -245,7 +245,7 @@ module.exports = function() {
             }
         },
         fromAndLength: {
-            setPathSets: {
+            setPathValues: {
                 query: [{
                     "path": ["v", {from:-1, length:3}, "s"],
                     "value": "Arnold"
@@ -328,7 +328,7 @@ module.exports = function() {
             }
         },
         toOnlyLeaf: {
-            setPathSets: {
+            setPathValues: {
                 count: 2,
                 query: [{
                     "path": ["v", {to:1}],
@@ -416,7 +416,7 @@ module.exports = function() {
             }
         },
         fromOnlyLeaf: {
-            setPathSets: {
+            setPathValues: {
                 query: [{
                     "path": ["v", {from:0}],
                     "value": "Arnold"
@@ -468,7 +468,7 @@ module.exports = function() {
             }
         },
         fromAndToLeaf: {
-            setPathSets: {
+            setPathValues: {
                 count: 3,
                 query: [{
                     "path": ["v", {from:-1, to:1}],
@@ -540,7 +540,7 @@ module.exports = function() {
             }
         },
         fromAndLengthLeaf: {
-            setPathSets: {
+            setPathValues: {
                 query: [{
                     "path": ["v", {from:-1, length:3}],
                     "value": "Arnold"

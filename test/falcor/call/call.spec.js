@@ -23,7 +23,6 @@ function getModel(newModel, cache) {
 describe("Call", function() {
     it("executes a local function with the call args", function(done) {
 
-        debugger;
         var model = getDataModel(new LocalDataSource(Cache()), ReducedCache());
 
         model.withoutDataSource().setValueSync(["lists", "my-list", "add"], function(videoID) {
@@ -40,7 +39,7 @@ describe("Call", function() {
             subscribe(function(videos) {
                 testRunner.compare(videos[0], videos[1]);
                 done();
-            });
+            }, done);
     });
 
     it("executes a local function with call args on a bound Model", function(done) {
@@ -69,7 +68,7 @@ describe("Call", function() {
             subscribe(function(videos) {
                 testRunner.compare(videos[0], videos[1]);
                 done();
-            });
+            }, done);
     });
 
     it("executes a local function with call args and maps the result paths through a selector", function(done) {
@@ -92,7 +91,7 @@ describe("Call", function() {
             subscribe(function(videos) {
                 testRunner.compare(videos[0], videos[1]);
                 done();
-            });
+            }, done);
     });
 
     it("executes a local function with call args on a bound Model and maps the result paths through a selector", function(done) {
@@ -123,7 +122,7 @@ describe("Call", function() {
             .subscribe(function(videos) {
                 testRunner.compare(videos[0], videos[1]);
                 done();
-            });
+            }, done);
     });
 
     it("executes a local function with call args on a bound model and emits invalidations relative to the optimized bound path", function(done) {
@@ -158,7 +157,7 @@ describe("Call", function() {
                 } finally {
                     done(err);
                 }
-            });
+            }, done);
 
         function getExpectedJSONG() {
             // The output json

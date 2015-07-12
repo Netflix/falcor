@@ -1,6 +1,5 @@
 var Rx = require("rx");
 var Observable = Rx.Observable;
-var jsong = require("../../index.js");
 var _ = require("lodash");
 var noOp = function() {};
 

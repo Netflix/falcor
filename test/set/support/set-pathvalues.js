@@ -14,7 +14,7 @@ function set_pathvalues(pathvalues, suffix, options) {
         var values = [];
         seeds = function(pv) { values.push(pv); }
     }
-    var func = model["_setPathSetsAs" + suffix];
+    var func = model["_setPathValuesAs" + suffix];
     var results = func(model, pathvalues, seeds);
     if(values) { results.values = values.sort(sort_path_values); }
     else if(suffix == "JSONG") {
