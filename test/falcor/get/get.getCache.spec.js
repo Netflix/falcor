@@ -1,4 +1,4 @@
-var falcor = require("falcor")
+var falcor = require("./../../../lib/")
 var Model = falcor.Model;
 var Cache = require('../../set/support/whole-cache');
 var Rx = require('rx');

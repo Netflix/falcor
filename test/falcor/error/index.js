@@ -1,5 +1,5 @@
 var ErrorDataSource = require("../../data/ErrorDataSource");
-var falcor = require("falcor");
+var falcor = require("./../../../lib/");
 var Model = falcor.Model;
 var chai = require("chai");
 var expect = chai.expect;

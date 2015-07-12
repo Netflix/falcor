@@ -1,4 +1,4 @@
-var falcor = require("falcor");
+var falcor = require("./../../../lib/");
 var Model = falcor.Model;
 var Expected = require('../../data/expected');
 var ReducedCache = require('../../data/ReducedCache');

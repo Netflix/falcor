@@ -1,4 +1,4 @@
-var falcor = require("falcor");
+var falcor = require('./../../lib/');
 var Model = falcor.Model;
 var Cache = require('../data/Cache');
 var Expected = require('../data/expected');
@@ -13,7 +13,8 @@ var Bound = Expected.Bound;
 var Materialized = Expected.Materialized;
 var Boxed = Expected.Boxed;
 var Errors = Expected.Errors;
-var $atom = require("falcor/types/atom");
+var $atom = require("./../../lib/types/atom");
+var $error = require("./../../lib/types/error");
 var noOp = function() {};
 
 describe('Specific Cases', function() {

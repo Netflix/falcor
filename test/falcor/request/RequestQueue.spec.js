@@ -1,7 +1,7 @@
-var ASAPScheduler = require('falcor/schedulers/ASAPScheduler');
-var TimeoutScheduler = require('falcor/schedulers/TimeoutScheduler');
-var ImmediateScheduler = require('falcor/schedulers/ImmediateScheduler');
-var RequestQueue = require('falcor/request/RequestQueue');
+var ASAPScheduler = require('./../../../lib/schedulers/ASAPScheduler');
+var TimeoutScheduler = require('./../../../lib/schedulers/TimeoutScheduler');
+var ImmediateScheduler = require('./../../../lib/schedulers/ImmediateScheduler');
+var RequestQueue = require('./../../../lib/request/RequestQueue');
 var LocalDataSource = require("../../data/LocalDataSource");
 var Cache = require("../../data/Cache");
 var Expected = require("../../data/expected");
@@ -11,7 +11,7 @@ var expect = chai.expect;
 var References = Expected.References;
 var Values = Expected.Values;
 var requestTestRunner = require("../../requestTestRunner");
-var ModelRoot = require("falcor/ModelRoot");
+var ModelRoot = require("./../../../lib/ModelRoot");
 
 describe("RequestQueue", function() {
     var modelRoot = new ModelRoot();
