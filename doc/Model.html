@@ -49,7 +49,7 @@
 
 
 <div class="description">
-    <p>A Model object is used to execute commands against a <a href="global.html#JSONGraph">JSONGraph</a> object. <a href="Model.html">Model</a>s can work with a local JSONGraph cache, or it can work with a remote <a href="global.html#JSONGraph">JSONGraph</a> object through a <a href="DataSource.html">DataSource</a>.</p>
+    <p>A Model object is used to execute commands against a <a href="global.html#JSONGraph">JSONGraph</a> object. <a href="Model.html">Model</a>s can work with a local JSONGraph cache, or it can work with a remote <a href="global.html#JSONGraph">JSONGraph</a> object through a DataSource.</p>
 </div>
 
 
@@ -147,7 +147,7 @@
             <td class="type">
             
                 
-<span class="param-type"><a href="DataSource.html">DataSource</a></span>
+<span class="param-type">DataSource</span>
 
 
             
@@ -279,7 +279,7 @@
             <td class="type">
             
                 
-<span class="param-type"><a href="Model.html#~errorSelector">Model~errorSelector</a></span>
+<span class="param-type">Model~errorSelector</span>
 
 
             
@@ -347,7 +347,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="falcor_Model.js.html">falcor/Model.js</a>, <a href="falcor_Model.js.html#line34">line 34</a>
+        <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line63">line 63</a>
     </li></ul></dd>
     
 
@@ -440,7 +440,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="falcor_Model.js.html">falcor/Model.js</a>, <a href="falcor_Model.js.html#line175">line 175</a>
+        <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line220">line 220</a>
     </li></ul></dd>
     
 
@@ -458,18 +458,13 @@
 
         
             
-<h4 class="name" id="bindSync"><span class="type-signature"></span>bindSync<span class="type-signature"></span></h4>
+<h4 class="name" id="getValueSync"><span class="type-signature"></span>getValueSync<span class="type-signature"></span></h4>
 
 
 
 
 <div class="description">
-    <p>Synchronously returns a clone of the <a href="Model.html">Model</a> bound to a location within the <a href="global.html#JSONGraph">JSONGraph</a>. The bound location is never a Reference: any References encountered while resolving the bound <a href="global.html#Path">Path</a> are always replaced with the References target value. For subsequent operations on the <a href="Model.html">Model</a>, all paths will be evaluated relative to the bound path. This method can only be invoked when the <a href="Model.html">Model</a> does not have a <a href="DataSource.html">DataSource</a> or from within a selector function. Bind allows you to:</p>
-<ul>
-<li>Expose only a fragment of the <a href="global.html#JSONGraph">JSONGraph</a> to components, rather than the entire graph</li>
-<li>Hide the location of a <a href="global.html#JSONGraph">JSONGraph</a> fragment from components</li>
-<li>Optimize for executing multiple operations and path looksup at/below the same location in the <a href="global.html#JSONGraph">JSONGraph</a></li>
-</ul>
+    <p>Synchronously retrieves a single path from the local <a href="Model.html">Model</a> only and will not retrieve missing paths from the DataSource. This method can only be invoked when the <a href="Model.html">Model</a> does not have a DataSource or from within a selector function. See Model.prototype.get. The getValueSync method differs from the asynchronous get methods (ex. get, getValues) in that it can be used to retrieve objects in addition to JSONGraph values.</p>
 </div>
 
 
@@ -507,7 +502,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="falcor_Model.js.html">falcor/Model.js</a>, <a href="falcor_Model.js.html#line302">line 302</a>
+        <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line268">line 268</a>
     </li></ul></dd>
     
 
@@ -541,7 +536,7 @@
 
 
 <div class="description">
-    <p>Returns a clone of the <a href="Model.html">Model</a> that eanbles batching. Within the configured time period, paths for operations of the same type are collected and executed on the <a href="DataSource.html">DataSource</a> in a batch. Batching can make more efficient use of the <a href="DataSource.html">DataSource</a> depending on its implementation, for example, reducing the number of HTTP requests to the server</p>
+    <p>Returns a clone of the <a href="Model.html">Model</a> that eanbles batching. Within the configured time period, paths for operations of the same type are collected and executed on the DataSource in a batch. Batching can make more efficient use of the DataSource depending on its implementation, for example, reducing the number of HTTP requests to the server</p>
 </div>
 
 
@@ -596,7 +591,7 @@
 
             
 
-            <td class="description last"><p>Either a Scheduler that determines when to send a batch to the <a href="DataSource.html">DataSource</a>, or the number in milliseconds to collect a batch before sending to the <a href="DataSource.html">DataSource</a>. If this parameter is omitted, then batch collection ends at the end of the next tick.</p></td>
+            <td class="description last"><p>Either a Scheduler that determines when to send a batch to the DataSource, or the number in milliseconds to collect a batch before sending to the DataSource. If this parameter is omitted, then batch collection ends at the end of the next tick.</p></td>
         </tr>
 
     
@@ -637,7 +632,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="falcor_Model.js.html">falcor/Model.js</a>, <a href="falcor_Model.js.html#line345">line 345</a>
+        <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line362">line 362</a>
     </li></ul></dd>
     
 
@@ -737,7 +732,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="falcor_Model.js.html">falcor/Model.js</a>, <a href="falcor_Model.js.html#line381">line 381</a>
+        <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line407">line 407</a>
     </li></ul></dd>
     
 
@@ -786,7 +781,7 @@
 
     
 
-    <h4 class="name" id="get"><span class="type-signature"></span>get<span class="signature">(&hellip;path, selector<span class="signature-attributes">nullable</span>)</span><span class="type-signature"> &rarr; {<a href="ModelResponse.html">ModelResponse</a>.&lt;<a href="global.html#JSONEnvelope">JSONEnvelope</a>>|<a href="Observable.html">Observable</a>}</span></h4>
+    <h4 class="name" id="get"><span class="type-signature"></span>get<span class="signature">(&hellip;path, selector<span class="signature-attributes">nullable</span>)</span><span class="type-signature"> &rarr; {ModelResponse.&lt;<a href="global.html#JSONEnvelope">JSONEnvelope</a>>|<a href="Observable.html">Observable</a>}</span></h4>
 
     
 
@@ -794,8 +789,8 @@
 
 <div class="description">
     <p>The get method retrieves several <a href="global.html#Path">Path</a>s or <a href="global.html#PathSet">PathSet</a>s from a <a href="Model.html">Model</a>. The get method is versatile and may be called in several different ways, allowing you to make different trade-offs between performance and expressiveness. The simplest invocation returns an ModelResponse stream that contains a JSON object with all of the requested values. An optional selector function can also be passed in order to translate the retrieved data before it appears in the Observable stream. If a selector function is provided, the output will be an Observable stream with the result of the selector function invocation instead of a ModelResponse stream.
-     If you intend to transform the JSON data into another form, specifying a selector function may be more efficient. The selector function is run once all of the requested path values are available. In the body of the selector function, you can read data from the Model's cache using Model.prototype.getValueSync and transform it directly into its final representation (ex. an HTML string). This technique can reduce allocations by preventing the get method from copying the data in <a href="Model.html">Model</a>'s cache into an intermediary JSON representation.
-     Instead of directly accessing the cache within the selector function, you can optionally pass arguments to the selector function and they will be automatically bound to the corresponding <a href="global.html#Path">Path</a> or <a href="global.html#PathSet">PathSet</a> passed to the get method. If a <a href="global.html#Path">Path</a> is bound to a selector function argument, the function argument will contain the value found at that path. However if a <a href="global.html#PathSet">PathSet</a> is bound to a selector function argument, the function argument will be a JSON structure containing all of the path values. Using argument binding can provide a good balance between allocations and expressiveness. For more detail on how <a href="global.html#Path">Path</a>s and <a href="global.html#PathSet">PathSet</a>s are bound to selector function arguments, see the examples below.</p>
+ If you intend to transform the JSON data into another form, specifying a selector function may be more efficient. The selector function is run once all of the requested path values are available. In the body of the selector function, you can read data from the Model's cache using Model.prototype.getValueSync and transform it directly into its final representation (ex. an HTML string). This technique can reduce allocations by preventing the get method from copying the data in <a href="Model.html">Model</a>'s cache into an intermediary JSON representation.
+ Instead of directly accessing the cache within the selector function, you can optionally pass arguments to the selector function and they will be automatically bound to the corresponding <a href="global.html#Path">Path</a> or <a href="global.html#PathSet">PathSet</a> passed to the get method. If a <a href="global.html#Path">Path</a> is bound to a selector function argument, the function argument will contain the value found at that path. However if a <a href="global.html#PathSet">PathSet</a> is bound to a selector function argument, the function argument will be a JSON structure containing all of the path values. Using argument binding can provide a good balance between allocations and expressiveness. For more detail on how <a href="global.html#Path">Path</a>s and <a href="global.html#PathSet">PathSet</a>s are bound to selector function arguments, see the examples below.</p>
 </div>
 
 
@@ -933,7 +928,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="falcor_Model.js.html">falcor/Model.js</a>, <a href="falcor_Model.js.html#line120">line 120</a>
+        <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line126">line 126</a>
     </li></ul></dd>
     
 
@@ -973,7 +968,7 @@
     </dt>
     <dd>
         
-<span class="param-type"><a href="ModelResponse.html">ModelResponse</a>.&lt;<a href="global.html#JSONEnvelope">JSONEnvelope</a>></span>
+<span class="param-type">ModelResponse.&lt;<a href="global.html#JSONEnvelope">JSONEnvelope</a>></span>
 |
 
 <span class="param-type"><a href="Observable.html">Observable</a></span>
@@ -1105,7 +1100,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="falcor_Model.js.html">falcor/Model.js</a>, <a href="falcor_Model.js.html#line202">line 202</a>
+        <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line307">line 307</a>
     </li></ul></dd>
     
 
@@ -1155,7 +1150,7 @@
     <h5>Example</h5>
     
     <pre class="prettyprint"><code>// Storing the boxshot of the first 10 titles in the first 10 genreLists to local storage.
-     localStorage.setItem('cache', JSON.stringify(model.getCache("genreLists[0...10][0...10].boxshot")));</code></pre>
+ localStorage.setItem('cache', JSON.stringify(model.getCache("genreLists[0...10][0...10].boxshot")));</code></pre>
 
 
 
@@ -1264,7 +1259,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="falcor_Model.js.html">falcor/Model.js</a>, <a href="falcor_Model.js.html#line156">line 156</a>
+        <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line250">line 250</a>
     </li></ul></dd>
     
 
@@ -1317,13 +1312,13 @@
     
     <pre class="prettyprint"><code>var model = new falcor.Model({source: new falcor.HttpDataSource("/model.json") });
 
-     model.
-         getValue('user.name').
-         subscribe(function(name) {
-             console.log(name);
-         });
+ model.
+     getValue('user.name').
+     subscribe(function(name) {
+         console.log(name);
+     });
 
-     // The code above prints "Jim" to the console.</code></pre>
+ // The code above prints "Jim" to the console.</code></pre>
 
 
 
@@ -1332,162 +1327,7 @@
 
     
 
-    <h4 class="name" id="getValueSync"><span class="type-signature"></span>getValueSync<span class="signature">(path)</span><span class="type-signature"> &rarr; {*}</span></h4>
-
-    
-
-
-
-<div class="description">
-    <p>Synchronously retrieves a single path from the local <a href="Model.html">Model</a> only and will not retrieve missing paths from the <a href="DataSource.html">DataSource</a>. This method can only be invoked when the <a href="Model.html">Model</a> does not have a <a href="DataSource.html">DataSource</a> or from within a selector function. See Model.prototype.get. The getValueSync method differs from the asynchronous get methods (ex. get, getValues) in that it can be used to retrieve objects in addition to JSONGraph values.</p>
-</div>
-
-
-
-
-
-
-
-
-
-    <h5>Parameters:</h5>
-    
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>path</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type"><a href="global.html#Path">Path</a></span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>The path to retrieve</p></td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="falcor_Model.js.html">falcor/Model.js</a>, <a href="falcor_Model.js.html#line239">line 239</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<h5>Returns:</h5>
-
-        
-<div class="param-desc">
-    <ul>
-<li>The value for the specified path</li>
-</ul>
-</div>
-
-
-
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type">*</span>
-
-
-    </dd>
-</dl>
-
-    
-
-
-
-        
-            
-
-    
-
-    <h4 class="name" id="set"><span class="type-signature"></span>set<span class="signature">(&hellip;value)</span><span class="type-signature"> &rarr; {<a href="ModelResponse.html">ModelResponse</a>.&lt;JSON>|<a href="Observable.html">Observable</a>}</span></h4>
+    <h4 class="name" id="set"><span class="type-signature"></span>set<span class="signature">(&hellip;value)</span><span class="type-signature"> &rarr; {ModelResponse.&lt;JSON>|<a href="Observable.html">Observable</a>}</span></h4>
 
     
 
@@ -1605,7 +1445,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="falcor_Model.js.html">falcor/Model.js</a>, <a href="falcor_Model.js.html#line127">line 127</a>
+        <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line149">line 149</a>
     </li></ul></dd>
     
 
@@ -1645,7 +1485,7 @@
     </dt>
     <dd>
         
-<span class="param-type"><a href="ModelResponse.html">ModelResponse</a>.&lt;JSON></span>
+<span class="param-type">ModelResponse.&lt;JSON></span>
 |
 
 <span class="param-type"><a href="Observable.html">Observable</a></span>
@@ -1763,7 +1603,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="falcor_Model.js.html">falcor/Model.js</a>, <a href="falcor_Model.js.html#line181">line 181</a>
+        <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line278">line 278</a>
     </li></ul></dd>
     
 
@@ -1894,7 +1734,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="falcor_Model.js.html">falcor/Model.js</a>, <a href="falcor_Model.js.html#line308">line 308</a>
+        <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line227">line 227</a>
     </li></ul></dd>
     
 
@@ -1950,7 +1790,7 @@
 
 
 <div class="description">
-    <p>Returns a clone of the <a href="Model.html">Model</a> that treats errors as values. Errors will be reported in the same callback used to report data. Errors will appear as objects in responses, rather than being sent to the <a href="Observable.html#~onErrorCallback">Observable~onErrorCallback</a> callback of the <a href="ModelResponse.html">ModelResponse</a>.</p>
+    <p>Returns a clone of the <a href="Model.html">Model</a> that treats errors as values. Errors will be reported in the same callback used to report data. Errors will appear as objects in responses, rather than being sent to the <a href="Observable.html#~onErrorCallback">Observable~onErrorCallback</a> callback of the ModelResponse.</p>
 </div>
 
 
@@ -1994,7 +1834,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="falcor_Model.js.html">falcor/Model.js</a>, <a href="falcor_Model.js.html#line368">line 368</a>
+        <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line387">line 387</a>
     </li></ul></dd>
     
 
@@ -2050,7 +1890,7 @@
 
 
 <div class="description">
-    <p>Returns a clone of the <a href="Model.html">Model</a> that disables batching. This is the default mode. Each operation will be executed on the <a href="DataSource.html">DataSource</a> separately</p>
+    <p>Returns a clone of the <a href="Model.html">Model</a> that disables batching. This is the default mode. Each operation will be executed on the DataSource separately</p>
 </div>
 
 
@@ -2094,7 +1934,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="falcor_Model.js.html">falcor/Model.js</a>, <a href="falcor_Model.js.html#line353">line 353</a>
+        <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line371">line 371</a>
     </li></ul></dd>
     
 
@@ -2198,7 +2038,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="falcor_Model.js.html">falcor/Model.js</a>, <a href="falcor_Model.js.html#line388">line 388</a>
+        <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line415">line 415</a>
     </li></ul></dd>
     
 
@@ -2254,7 +2094,7 @@
 
 
 <div class="description">
-    <p>Returns a clone of the <a href="Model.html">Model</a> that only uses the local <a href="global.html#JSONGraph">JSONGraph</a> and never uses a <a href="DataSource.html">DataSource</a> to retrieve missing paths</p>
+    <p>Returns a clone of the <a href="Model.html">Model</a> that only uses the local <a href="global.html#JSONGraph">JSONGraph</a> and never uses a DataSource to retrieve missing paths</p>
 </div>
 
 
@@ -2298,7 +2138,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="falcor_Model.js.html">falcor/Model.js</a>, <a href="falcor_Model.js.html#line395">line 395</a>
+        <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line423">line 423</a>
     </li></ul></dd>
     
 
@@ -2346,163 +2186,6 @@
     
 
     
-        <h3 class="subsection-title">Type Definitions</h3>
-
-        
-                
-
-    
-
-    <h4 class="name" id="~errorSelector"><span class="type-signature"></span>errorSelector<span class="signature">(requestedPath)</span><span class="type-signature"> &rarr; {Error}</span></h4>
-
-    
-
-
-
-<div class="description">
-    <p>The <a href="Model.html">Model</a>'s error selector is applied to any errors that occur during Model operations.  The return value of the error selector is substituted for the input error, giving clients the opportunity to translate error objects before they are returned from the <a href="Model.html">Model</a>.</p>
-</div>
-
-
-
-
-
-
-
-
-
-    <h5>Parameters:</h5>
-    
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>requestedPath</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">Object</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>the requested path at which the error was found.</p></td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="falcor_Model.js.html">falcor/Model.js</a>, <a href="falcor_Model.js.html#line62">line 62</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<h5>Returns:</h5>
-
-        
-<div class="param-desc">
-    <p>the translated error object.</p>
-</div>
-
-
-
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type">Error</span>
-
-
-    </dd>
-</dl>
-
-    
-
-
-
-            
-    
 
     
 </article>
@@ -2515,7 +2198,7 @@
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="HttpDataSource.html">HttpDataSource</a></li><li><a href="Model.html">Model</a></li><li><a href="ModelResponse.html">ModelResponse</a></li><li><a href="Observable.html">Observable</a></li><li><a href="Subscription.html">Subscription</a></li></ul><h3>Interfaces</h3><ul><li><a href="DataSource.html">DataSource</a></li></ul><h3>Global</h3><ul><li><a href="global.html#allUnique">allUnique</a></li><li><a href="global.html#buildQueries">buildQueries</a></li><li><a href="global.html#collapseRangeIndexes">collapseRangeIndexes</a></li><li><a href="global.html#createKey">createKey</a></li><li><a href="global.html#emptyArray">emptyArray</a></li><li><a href="global.html#getSourceObserver">getSourceObserver</a></li><li><a href="global.html#InvalidModelError">InvalidModelError</a></li><li><a href="global.html#isNumber">isNumber</a></li><li><a href="global.html#performGetOnModelSource">performGetOnModelSource</a></li><li><a href="global.html#set_json_values_as_json_values">set_json_values_as_json_values</a></li><li><a href="global.html#sortListOfLists">sortListOfLists</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="HttpDataSource.html">HttpDataSource</a></li><li><a href="Model.html">Model</a></li><li><a href="Observable.html">Observable</a></li><li><a href="Subscription.html">Subscription</a></li></ul><h3>Global</h3><ul><li><a href="global.html#collapseIndex">collapseIndex</a></li><li><a href="global.html#InvalidModelError">InvalidModelError</a></li><li><a href="global.html#isNumber">isNumber</a></li><li><a href="global.html#set_cache">set_cache</a></li><li><a href="global.html#set_json_values_as_json_values">set_json_values_as_json_values</a></li></ul>
 </nav>
 
 <br class="clear">

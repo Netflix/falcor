@@ -26,13 +26,13 @@
     
     <section>
         <article>
-            <pre class="prettyprint source linenums"><code>var inc_version = require("../support/inc-version");
-var getBoundValue = require('../get/getBoundValue');
+            <pre class="prettyprint source linenums"><code>var inc_version = require("./../support/inc-version");
+var getBoundValue = require('./../get/getBoundValue');
 
 /**
  * TODO: more options state tracking comments.
  */
-module.exports = function(options, model, error_selector, comparator) {
+module.exports = function get_initial_state(options, model, error_selector, comparator) {
     
     var bound = options.bound     || (options.bound                 = model._path || []);
     var root  = options.root      || (options.root                  = model._cache);
@@ -47,7 +47,7 @@ module.exports = function(options, model, error_selector, comparator) {
     options.boxed  = model._boxed || false;
     options.materialized = model._materialized;
     options.errorsAsValues = model._treatErrorsAsValues || false;
-    options.no_data_source = model._dataSource == null;
+    options.no_data_source = model._source == null;
     options.version = model._version = inc_version();
     
     options.offset || (options.offset = 0);
@@ -71,7 +71,7 @@ module.exports = function(options, model, error_selector, comparator) {
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="HttpDataSource.html">HttpDataSource</a></li><li><a href="Model.html">Model</a></li><li><a href="ModelResponse.html">ModelResponse</a></li><li><a href="Observable.html">Observable</a></li><li><a href="Subscription.html">Subscription</a></li></ul><h3>Interfaces</h3><ul><li><a href="DataSource.html">DataSource</a></li></ul><h3>Global</h3><ul><li><a href="global.html#allUnique">allUnique</a></li><li><a href="global.html#buildQueries">buildQueries</a></li><li><a href="global.html#collapseRangeIndexes">collapseRangeIndexes</a></li><li><a href="global.html#createKey">createKey</a></li><li><a href="global.html#emptyArray">emptyArray</a></li><li><a href="global.html#getSourceObserver">getSourceObserver</a></li><li><a href="global.html#InvalidModelError">InvalidModelError</a></li><li><a href="global.html#isNumber">isNumber</a></li><li><a href="global.html#performGetOnModelSource">performGetOnModelSource</a></li><li><a href="global.html#set_json_values_as_json_values">set_json_values_as_json_values</a></li><li><a href="global.html#sortListOfLists">sortListOfLists</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="HttpDataSource.html">HttpDataSource</a></li><li><a href="Model.html">Model</a></li><li><a href="Observable.html">Observable</a></li><li><a href="Subscription.html">Subscription</a></li></ul><h3>Global</h3><ul><li><a href="global.html#collapseIndex">collapseIndex</a></li><li><a href="global.html#InvalidModelError">InvalidModelError</a></li><li><a href="global.html#isNumber">isNumber</a></li><li><a href="global.html#set_cache">set_cache</a></li><li><a href="global.html#set_json_values_as_json_values">set_json_values_as_json_values</a></li></ul>
 </nav>
 
 <br class="clear">
