@@ -24,7 +24,7 @@ suite.tests = testSuiteGenerator({
     models: {
         'model': models.modelWithSource
     },
-    formats: ['PathMap']
+    formats: ['PathMap', 'JSON']
 });
 
 var env = navigator.userAgent;

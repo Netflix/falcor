@@ -19,20 +19,17 @@ var formats = testConfig.formats;
 var tests = testConfig.get;
 var suite = testConfig.suite;
 
-var TESTS = {
-    'scrollGallery': tests.scrollGallery,
-    'complex': tests.complex
-};
 suite.tests = testSuiteGenerator({
     iterations: 10,
     models: {
         'model': models.modelWithSource
     },
-    formats: ['PathMap']
+    formats: ['PathMap', 'JSON']
 });
 
 var env = 'node ' + process.version;
+var logger = console.log.bind(console);
 var resultsReporter = compose(testReporter.resultsReporter, CSVFormatter.toTable);
 var benchmarkReporter = compose(testReporter.benchmarkReporter, curry(CSVFormatter.toRow, env));
 
-testRunner(suite, env, benchmarkReporter, resultsReporter);
+testRunner(suite, env, benchmarkReporter, resultsReporter, logger);

@@ -31,36 +31,49 @@ function createSuites(testCfg, iterations) {
     return suites;
 }
 
-function runner(testCfg, env, onBenchmarkComplete, onComplete) {
+function runner(testCfg, env, onBenchmarkComplete, onComplete, log) {
 
     var suites = createSuites(testCfg, 1);
 
     if (!KARMA) {
-        run(suites, env, onBenchmarkComplete, onComplete);
+        run(suites, env, onBenchmarkComplete, onComplete, log);
     } else {
         // KARMA will run the global "suites"
     }
 }
 
-function run(suites, env, onBenchmarkComplete, onComplete) {
+function runGC() {
+    var jscontext;
+
+    if (typeof global !== 'undefined' && global && global.gc) {
+        jscontext = global;
+    } else if (typeof window !== 'undefined' && window && window.gc) {
+        jscontext = window;
+    }
+
+    if (jscontext) {
+        jscontext.gc();
+        return true;
+    }
+
+    return false;
+}
+
+function run(suites, env, onBenchmarkComplete, onComplete, log) {
 
     var results = {};
 
-    console.log('about to run');
-    debugger
+    log('Running Perf Tests');
+
     var _run = function() {
 
         suites.shift().
             on('cycle', function (event) {
-                console.log('ran.cycle');
-                if (typeof global !== 'undefined' && global && global.gc) {
-                    console.log('ran.cycle.gc');
-                    global.gc();
+
+                if(runGC()) {
+                    log('Ran GC between benchmarks');
                 }
-                else if (typeof window !== 'undefined' && window && window.gc) {
-                    console.log('ran.cycle.gc');
-                    window.gc();
-                }
+
                 var benchmark = event.target;
                 var suite = benchmark.suite = this.name;
 
@@ -74,12 +87,13 @@ function run(suites, env, onBenchmarkComplete, onComplete) {
                 }
             }).
             on('error', function(e) {
-                console.log('ran.error');
-                console.log(e.target.error);
-                console.log(e.target.error.stack);
+                var error = e.target.error;
+
+                log(error);
+                log(error.stack);
             }).
             on('complete', function() {
-                console.log('ran.completed');
+                log('Perf Tests Complete');
                 if (suites.length === 0) {
                     if (onComplete) {
                         onComplete(results);

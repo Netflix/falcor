@@ -1,7 +1,7 @@
 var countAndOutputFormatIdx = 2;
 var cyclesIdx = 3;
 
-module.exports = function transformCSVResults(results) {
+module.exports = function csvTransform(results) {
     var transformed = results.
         split('\n').
         map(function(x) {
