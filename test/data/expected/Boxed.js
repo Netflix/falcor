@@ -1,11 +1,11 @@
-var $path = require('./../../../lib/types/path.js');
-var $atom = require('./../../../lib/types/atom.js');
-var $error = require('./../../../lib/types/error.js');
+var $path = require('./../../../lib/types/ref');
+var $atom = require('./../../../lib/types/atom');
+var $error = require('./../../../lib/types/error');
 module.exports = function() {
     return {
         atomValue: {
             getPathSets: { query: [["videos", "0", "summary"]] },
-            setPathSets: {
+            setPathValues: {
                 query: [{
                     path: ["videos", "0", "summary"],
                     value: {

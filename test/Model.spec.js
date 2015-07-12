@@ -1,5 +1,5 @@
 var Rx = require("rx");
-var falcor = require("falcor");
+var falcor = require("./../lib/");
 var Model = falcor.Model;
 
 function ResponseObservable(response) {
@@ -55,9 +55,9 @@ Model.prototype.call = function() {
 var testRunner = require('./testRunner');
 var chai = require("chai");
 var expect = chai.expect;
-var $ref = require('falcor/types/path');
-var $error = require('falcor/types/error');
-var $atom = require('falcor/types/atom');
+var $ref = require('./../lib/types/ref');
+var $error = require('./../lib/types/error');
+var $atom = require('./../lib/types/atom');
 
 describe("Model", function() {
 

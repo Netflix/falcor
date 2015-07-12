@@ -1,6 +1,6 @@
-var $path = require('./../../../lib/types/path.js');
-var $atom = require('./../../../lib/types/atom.js');
-var $error = require('./../../../lib/types/error.js');
+var $path = require('./../../../lib/types/ref');
+var $atom = require('./../../../lib/types/atom');
+var $error = require('./../../../lib/types/error');
 module.exports = function() {
     return {
         direct: {
@@ -9,7 +9,7 @@ module.exports = function() {
                     ["videos", "1234", "summary"]
                 ]
             },
-            setPathSets: {
+            setPathValues: {
                 query: [{
                     path: ["videos", "1234", "summary"],
                     "value": {
@@ -115,7 +115,7 @@ module.exports = function() {
                     ["videos", "553", "summary"]
                 ]
             },
-            setPathSets: {
+            setPathValues: {
                 query: [{
                     path: ["videos", "553", "summary"],
                     "value": {
@@ -220,7 +220,7 @@ module.exports = function() {
                 ["genreList", "0"]
             ],
 
-            setPathSets: {
+            setPathValues: {
                 query: [
                     {
                         path: ["genreList", "0"],
@@ -311,7 +311,7 @@ module.exports = function() {
                     ["videos", "1234", "summary"]
                 ]
             },
-            setPathSets: {
+            setPathValues: {
                 query: [{
                     path: ["videos", "1234", "summary"],
                     "value": {
@@ -431,7 +431,7 @@ module.exports = function() {
                 }]
             },
 
-            setPathSets: {
+            setPathValues: {
                 query: [
                     {
                         path: ["videos", "expiredLeafByTimestamp", "summary"],
@@ -521,7 +521,7 @@ module.exports = function() {
                 }]
             },
 
-            setPathSets: {
+            setPathValues: {
                 query: [
                     {
                         path: ["videos", "expiredLeafBy0", "summary"],

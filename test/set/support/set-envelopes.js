@@ -1,7 +1,7 @@
 module.exports = set_envelopes;
 
 var _ = require("lodash");
-var falcor = require("falcor");
+var falcor = require("./../../../lib/");
 var Model = falcor.Model;
 var partial_cache = require("./partial-cache");
 var get_seeds = require("./get-seeds");

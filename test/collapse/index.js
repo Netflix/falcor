@@ -1,5 +1,5 @@
 var expect = require("chai").expect;
-var collapse = require("falcor/support/collapse");
+var collapse = require("./../../lib/support/collapse");
 
 describe("collapse", function() {
     it("collapses a pathmap that has overlapping branch and leaf nodes", function() {

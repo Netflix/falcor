@@ -1,4 +1,4 @@
-var falcor = require("falcor");
+var falcor = require("./../../../lib/");
 var Model = falcor.Model;
 var Cache = require('../../data/Cache');
 var M = require('../../data/ReducedCache').MinimalCache;
@@ -9,7 +9,7 @@ var testRunner = require('./../../testRunner');
 var noOp = function() {};
 var LocalDataSource = require('../../data/LocalDataSource');
 var ErrorDataSource = require('../../data/ErrorDataSource');
-var isPathValue = require("falcor/support/is-path-value");
+var isPathValue = require("./../../../lib/support/is-path-value");
 
 describe('DataSource and Bind', function() {
     it('should get a value from from dataSource when bound.', function(done) {

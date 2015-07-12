@@ -1,6 +1,6 @@
 {
   "name": "falcor",
-  "version": "0.0.23",
+  "version": "0.0.24",
   "main": "./lib/index.js",
   "homepage": "https://github.com/Netflix/falcor",
   "author": {
@@ -21,14 +21,13 @@
     "test": "gulp test-coverage",
     "dist": "gulp build",
     "doc": "gulp doc",
-    "deploy-ghpages": "./build/deploy-ghpages.sh",
-    "perf": "gulp perf-run"
+    "perf": "gulp perf-run",
+    "deploy-ghpages": "./build/deploy-ghpages.sh"
   },
   "files": [
     "build",
     "dist",
     "lib",
-    "index.js",
     "test"
   ],
   "devDependencies": {
@@ -76,10 +75,10 @@
     "xmlhttprequest": "~1.7.0"
   },
   "dependencies": {
-    "rx": "2.5.3",
-    "promise": "7.0.0",
     "asap": "~2.0.3",
     "falcor-path-syntax": "git+ssh://git@github.com/Netflix/falcor-path-syntax.git",
+    "promise": "7.0.0",
+    "rx": "2.5.3",
     "sinon": "^1.15.4"
   }
 }

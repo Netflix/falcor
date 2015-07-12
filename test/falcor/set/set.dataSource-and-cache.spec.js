@@ -1,4 +1,4 @@
-var falcor = require("falcor");
+var falcor = require("./../../../lib/");
 var Model = falcor.Model;
 var Expected = require('../../data/expected');
 var Values = Expected.Values;
@@ -12,7 +12,7 @@ var testRunner = require('./../../testRunner');
 var noOp = function() {};
 var LocalDataSource = require('../../data/LocalDataSource');
 var ErrorDataSource = require('../../data/ErrorDataSource');
-var $error = require('falcor/types/error');
+var $error = require('./../../../lib/types/error');
 var expect = require('chai').expect;
 
 describe('DataSource and Cache', function() {
