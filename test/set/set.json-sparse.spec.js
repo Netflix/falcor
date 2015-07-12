@@ -1,6 +1,6 @@
 var Rx = require("rx");
 var _ = require("lodash");
-var falcor = require("falcor");
+var falcor = require("./../../lib/");
 var Model = falcor.Model;
 var expect = require('chai').expect;
 
@@ -13,8 +13,8 @@ var get_pathsets = require("./support/get-pathsets");
 var set_and_verify_json_sparse = require("./support/set-and-verify-json-sparse");
 
 var slice = Array.prototype.slice;
-var $path = require("falcor/types/ref");
-var $atom = require("falcor/types/atom");
+var $path = require("./../../lib/types/ref");
+var $atom = require("./../../lib/types/atom");
 
 
 var modes = [{

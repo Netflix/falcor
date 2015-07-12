@@ -1,4 +1,4 @@
-var jsong = require("falcor")
+var jsong = require("./../../../lib/")
 var R = require('falcor-router');
 var Routes = require('../../data/routes');
 var Rx = require("rx");

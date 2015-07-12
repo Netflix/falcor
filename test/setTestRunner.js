@@ -1,4 +1,4 @@
-var falcor = require("falcor");
+var falcor = require("./../lib/");
 var collapse = require("../lib/support/collapse");
 var Model = falcor.Model;
 var chai = require("chai");

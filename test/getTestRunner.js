@@ -1,4 +1,4 @@
-var falcor = require("falcor");
+var falcor = require("./../lib/");
 var _ = require("lodash");
 var Rx = require("rx");
 var testRunner = require("./testRunner");
