@@ -11,7 +11,7 @@ var ErrorDataSource = require('../../data/ErrorDataSource');
 var isPathValue = require("./../../../lib/support/is-path-value");
 var expect = require("chai").expect;
 
-describe('DataSource Only', function() {
+describe('Cache as DataSource', function() {
     describe('Selector Functions', function() {
         it('should get a value from falcor.', function(done) {
             var model = new Model({ source: new Model({ source: new LocalDataSource(Cache()) }).asDataSource() });
