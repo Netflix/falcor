@@ -90,7 +90,7 @@ describe('Expired', function() {
     var setPath = {path: ['genreList', 0, 1, 'summary'], value: {should: 'not set'}};
     var setJSON = {json: {genreList: {0: {1: {summary: 'no set'}}}}};
     var setJSONG = {
-        jsong: {
+        jsonGraph: {
             genreList: {
                 0: {
                     $type: "ref",
@@ -235,7 +235,7 @@ function setExpireyAndGet(query, output, get) {
             expect(lhs[__context]).to.equal(rhs);
         }, noOp, noOp).
         delay(100).
-        flatMap(function() {
+        flatMap(function(data) {
             if (get) {
                 return testRunner.get(model, _.cloneDeep(query), output);
             }
