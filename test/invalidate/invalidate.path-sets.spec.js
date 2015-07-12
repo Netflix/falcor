@@ -163,7 +163,7 @@ function execute(output, suffix) {
                     seeds3 = [];
                     seeds  = function(pv) { seeds3.push(pv); }
                 } else if(suffix == "JSONG") {
-                    seeds2 = [{jsong: {}, paths: [[null, null, null, null]]}];
+                    seeds2 = [{jsonGraph: {}, paths: [[null, null, null, null]]}];
                 }
                 var results = model["_invalidatePathSetsAs" + suffix](model, [[null, null, null, null]], seeds);
                 expect(seeds3 || seeds).to.deep.equal(seeds2);

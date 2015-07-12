@@ -211,14 +211,14 @@ describe('Core', function() {
             getTestRunner(Bound().missingValue, {model: model});
         });
 
-        it('should throw an error when bound and calling jsong.', function() {
+        it('should throw an error when bound and calling jsonGraph.', function() {
             var model = new Model({cache: Cache()}).bindSync(['genreList', 10]);
             var threw = false;
             try {
                 model._getPathSetsAsJSONG(model, [['summary']]);
             } catch(ex) {
                 threw = true;
-                testRunner.compare(testRunner.jsongBindException, ex);
+                testRunner.compare(testRunner.jsonGraphBindException, ex);
             }
             testRunner.compare(true, threw);
         });

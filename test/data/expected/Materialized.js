@@ -66,7 +66,7 @@ module.exports = function() {
             AsJSONG: {
                 values: [{
                     paths: [["videos", "missingBranch"]],
-                    jsong: { videos: { missingBranch: { "$type": $atom } } }
+                    jsonGraph: { videos: { missingBranch: { "$type": $atom } } }
                 }]
             }
         },
@@ -104,7 +104,7 @@ module.exports = function() {
             AsJSONG: {
                 values: [{
                     paths: [["videos", "1234", "missingLeaf"]],
-                    jsong: { videos: { 1234: { missingLeaf: { "$type": $atom } } } }
+                    jsonGraph: { videos: { 1234: { missingLeaf: { "$type": $atom } } } }
                 }]
             }
         },
@@ -140,7 +140,7 @@ module.exports = function() {
             AsJSONG: {
                 values: [{
                     paths: [["misc", "uatom"]],
-                    jsong: { misc: { uatom: { "$type": $atom } } }
+                    jsonGraph: { misc: { uatom: { "$type": $atom } } }
                 }]
             }
         }

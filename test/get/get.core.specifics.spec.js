@@ -70,7 +70,7 @@ describe('Specific Cases', function() {
                     "title": "Additional Title 0",
                     "url": "/movies/0"
                 }
-            }, seed[0].jsong.videos[0].summary);
+            }, seed[0].jsonGraph.videos[0].summary);
 
             testRunner.compare({
                 $type: $atom,
@@ -79,7 +79,7 @@ describe('Specific Cases', function() {
                     "title": "Additional Title 1",
                     "url": "/movies/1"
                 }
-            }, seed[0].jsong.videos[1].summary);
+            }, seed[0].jsonGraph.videos[1].summary);
         });
         it('should continue to populate the seed selector.', function () {
             var model = new Model({cache: Cache()}).withoutDataSource();
@@ -255,7 +255,7 @@ describe('Specific Cases', function() {
 
     it('should return the ranged items when ranges in array.', function() {
         var JSONG = {
-            jsong: {
+            jsonGraph: {
                 foo: {
                     0: {
                         $type: $atom,
@@ -271,7 +271,7 @@ describe('Specific Cases', function() {
                 ['foo', [{from: 0, to: 1}]]
             ]
         };
-        var model = new Model({cache: JSONG.jsong});
+        var model = new Model({cache: JSONG.jsonGraph});
         var out = [{}];
 
         model._getPathSetsAsJSON(model, JSONG.paths, out);

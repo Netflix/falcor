@@ -43,7 +43,7 @@ module.exports = function() {
 
             AsJSONG: {
                 values: [{
-                    jsong: {
+                    jsonGraph: {
                         "genreList": {
                             "9": ["lists", "to-expired-list"]
                         },
@@ -110,7 +110,7 @@ module.exports = function() {
 
             AsJSONG: {
                 values: [{
-                    jsong: {
+                    jsonGraph: {
                         "videos": {
                             "expiredLeafByTimestamp": {
                                 "summary": "should be expired"
@@ -167,7 +167,7 @@ module.exports = function() {
 
             AsJSONG: {
                 values: [{
-                    jsong: {
+                    jsonGraph: {
                         "videos": {
                             "expiredLeafBy0": {
                                 "summary": "should be expired"
@@ -224,7 +224,7 @@ module.exports = function() {
 
             AsJSONG: {
                 values: [{
-                    jsong: {
+                    jsonGraph: {
                         "videos": {
                             "expiredBranchByTimestamp": {
                                 "summary": "should be expired"
@@ -281,7 +281,7 @@ module.exports = function() {
 
             AsJSONG: {
                 values: [{
-                    jsong: {
+                    jsonGraph: {
                         "videos": {
                             "expiredBranchBy0": {
                                 "summary": "should be expired"

@@ -21,7 +21,7 @@ module.exports = function(expected, queue, onNext) {
     return toObservable(expected.getPathSets.query[0], queue, onNext).
         doAction(function(x) {
             var expects = testRunner.clean(expected.AsJSONG.values[0]);
-            x = testRunner.clean(x.jsong && {jsong: x.jsong, paths: x.paths.slice()} || x);
+            x = testRunner.clean(x.jsonGraph && {jsonGraph: x.jsonGraph, paths: x.paths.slice()} || x);
             // contains(expects, x, "");
         });
 };

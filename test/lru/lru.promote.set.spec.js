@@ -1,5 +1,5 @@
-var jsong = require("./../../lib/");
-var Model = jsong.Model;
+var falcor = require("./../../lib/");
+var Model = falcor.Model;
 var Rx = require("rx");
 var LocalDataSource = require("../data/LocalDataSource");
 var Cache = require("../data/Cache");
@@ -89,65 +89,65 @@ describe('Set', function() {
     describe('setJSONG', function() {
         describe('PathMap', function () {
             it('should promote 1 item as head, no tail, no next/prev.', function (done) {
-                singleItem('jsong', 'toJSON').
+                singleItem('jsonGraph', 'toJSON').
                     subscribe(noOp, done, done);
             });
 
             it('should promote 2 items.  1st item should be tail, 2nd should be head.', function (done) {
-                doubleItem('jsong', 'toJSON').
+                doubleItem('jsonGraph', 'toJSON').
                     subscribe(noOp, done, done);
             });
 
             it('should promote 3 items.  1st item should be tail, 3rd should be head.', function (done) {
-                tripleItem('jsong', 'toJSON').
+                tripleItem('jsonGraph', 'toJSON').
                     subscribe(noOp, done, done);
             });
         });
         describe('Values', function () {
             it('should promote 1 item as head, no tail, no next/prev.', function (done) {
-                singleItem('jsong', 'toPathValues').
+                singleItem('jsonGraph', 'toPathValues').
                     subscribe(noOp, done, done);
             });
 
             it('should promote 2 items.  1st item should be tail, 2nd should be head.', function (done) {
-                doubleItem('jsong', 'toPathValues').
+                doubleItem('jsonGraph', 'toPathValues').
                     subscribe(noOp, done, done);
             });
 
             it('should promote 3 items.  1st item should be tail, 3rd should be head.', function (done) {
-                tripleItem('jsong', 'toPathValues').
+                tripleItem('jsonGraph', 'toPathValues').
                     subscribe(noOp, done, done);
             });
         });
         describe('JSONG', function () {
             it('should promote 1 item as head, no tail, no next/prev.', function (done) {
-                singleItem('jsong', 'toJSONG').
+                singleItem('jsonGraph', 'toJSONG').
                     subscribe(noOp, done, done);
             });
 
             it('should promote 2 items.  1st item should be tail, 2nd should be head.', function (done) {
-                doubleItem('jsong', 'toJSONG').
+                doubleItem('jsonGraph', 'toJSONG').
                     subscribe(noOp, done, done);
             });
 
             it('should promote 3 items.  1st item should be tail, 3rd should be head.', function (done) {
-                tripleItem('jsong', 'toJSONG').
+                tripleItem('jsonGraph', 'toJSONG').
                     subscribe(noOp, done, done);
             });
         });
         describe('Selector', function () {
             it('should promote 1 item as head, no tail, no next/prev.', function (done) {
-                singleItem('jsong', 'selector').
+                singleItem('jsonGraph', 'selector').
                     subscribe(noOp, done, done);
             });
 
             it('should promote 2 items.  1st item should be tail, 2nd should be head.', function (done) {
-                doubleItem('jsong', 'selector').
+                doubleItem('jsonGraph', 'selector').
                     subscribe(noOp, done, done);
             });
 
             it('should promote 3 items.  1st item should be tail, 3rd should be head.', function (done) {
-                tripleItem('jsong', 'selector').
+                tripleItem('jsonGraph', 'selector').
                     subscribe(noOp, done, done);
             });
         });
@@ -224,24 +224,24 @@ var querys = {
     1: {
         path: {path: ['1'], value: 'i am 1'},
         json: {json: { 1: 'i am 1'} },
-        jsong: {
-            jsong: { 1: 'i am 1'},
+        jsonGraph: {
+            jsonGraph: { 1: 'i am 1'},
             paths: [['1']]
         }
     },
     2: {
         path: {path: ['2'], value: 'i am 2'},
         json: {json: { 2: 'i am 2'} },
-        jsong: {
-            jsong: { 2: 'i am 2'},
+        jsonGraph: {
+            jsonGraph: { 2: 'i am 2'},
             paths: [['2']]
         }
     },
     3: {
         path: {path: ['3'], value: 'i am 3'},
         json: {json: { 3: 'i am 3'} },
-        jsong: {
-            jsong: { 3: 'i am 3'},
+        jsonGraph: {
+            jsonGraph: { 3: 'i am 3'},
             paths: [['3']]
         }
     }

@@ -14,7 +14,7 @@ module.exports = function() {
                         var cacheGenreList = Cache().genreList[idx];
                         if (cacheGenreList) {
                             var jsong = {
-                                jsong: { genreList: genreList },
+                                jsonGraph: { genreList: genreList },
                                 paths: [
                                     ['genreList', idx]
                                 ]

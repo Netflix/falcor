@@ -15,7 +15,7 @@ module.exports = function() {
                             var cacheVideo = Cache().videos[id];
                             if (cacheVideo) {
                                 var jsong = {
-                                    jsong: { videos: video },
+                                    jsonGraph: { videos: video },
                                     paths: [
                                         ['videos', id, 'summary']
                                     ]

@@ -65,6 +65,10 @@ describe("Model", function() {
         new Model();
     });
 
+    it("should construct a new Model when calling the falcor module function", function() {
+        expect(falcor() instanceof falcor.Model).to.equal(true);
+    });
+
     it('should have access to static helper methods.', function() {
         var ref = ['a', 'b', 'c'];
         var err = {ohhh: 'no!'};
