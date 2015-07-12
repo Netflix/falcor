@@ -158,7 +158,7 @@ describe('DataSource and Partial Cache', function() {
         });
     });
     describe('Re-entrancy', function() {
-        it('calling set/get/call operations that execute synchronously in a selector function should not reset allowSync, thereby disabling subsequent getValueSyncs within the selector functions.', function(done) {
+        it('calling set/get/call operations that execute synchronously in a selector function should not decrement syncRefCount, thereby disabling subsequent getValueSyncs within the selector functions.', function(done) {
             var model = new falcor.Model({
                 source: {
                     get: function() {
@@ -181,14 +181,15 @@ describe('DataSource and Partial Cache', function() {
             model._root.unsafeMode = false;
 
             model.get(["user","age"], function(age) {
-                model.withoutDataSource().get({path:["user","name"], value: 23}).subscribe();
+                // model.withoutDataSource().get({path:["user","name"], value: 23}).subscribe();
+                model.withoutDataSource().get(["user","name"]).subscribe();
                 
-                // should work, but doesn't because allowSync was set to false by get
+                // should work, but doesn't because syncRefCount was set to 0 by get
                 try {
                     model.getValueSync(["user", "age"]);
                     done();
                 } catch(e) {
-                    done(new Error("Unable to run getValueSync because allowSync was set back to false by when get method executed synchronously within a selector function."));
+                    done(new Error("Unable to run getValueSync because syncRefCount was set back to 0 when get method executed synchronously within a selector function."));
                 }
             }).subscribe();
         });
