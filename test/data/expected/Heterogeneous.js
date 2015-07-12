@@ -49,7 +49,7 @@ module.exports = function() {
                         paths: [
                             ["videos", "errorBranch"]
                         ],
-                        jsong: {
+                        jsonGraph: {
                             "videos": {
                                 "errorBranch": {
                                     "$size": 51,

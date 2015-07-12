@@ -26,7 +26,7 @@ module.exports = function() {
             setJSONGs: {
                 count: 2,
                 query: [{
-                    jsong: {
+                    jsonGraph: {
                         v: {
                             0: {
                                 s: "Arnold"
@@ -72,7 +72,7 @@ module.exports = function() {
 
             AsJSONG: {
                 values: [{
-                    jsong: {
+                    jsonGraph: {
                         "v": {
                             "0": {
                                 "s": "Arnold"
@@ -135,7 +135,7 @@ module.exports = function() {
 
             AsJSONG: {
                 values: [{
-                    jsong: {
+                    jsonGraph: {
                         "v": {
                             "0": {
                                 "s": "Arnold"
@@ -205,7 +205,7 @@ module.exports = function() {
 
             AsJSONG: {
                 values: [{
-                    jsong: {
+                    jsonGraph: {
                         "v": {
                             "-1": {
                                 "s": "Arnold"
@@ -288,7 +288,7 @@ module.exports = function() {
 
             AsJSONG: {
                 values: [{
-                    jsong: {
+                    jsonGraph: {
                         "v": {
                             "-1": {
                                 "s": "Arnold"
@@ -349,7 +349,7 @@ module.exports = function() {
             setJSONGs: {
                 count: 2,
                 query: [{
-                    jsong: {
+                    jsonGraph: {
                         v: {
                             0: "Arnold",
                             1: "Arnold"
@@ -391,7 +391,7 @@ module.exports = function() {
 
             AsJSONG: {
                 values: [{
-                    jsong: {
+                    jsonGraph: {
                         "v": {
                             "0": "Arnold",
                             "1": "Arnold"
@@ -446,7 +446,7 @@ module.exports = function() {
 
             AsJSONG: {
                 values: [{
-                    jsong: {
+                    jsonGraph: {
                         "v": {
                             "0": "Arnold"
                         }
@@ -512,7 +512,7 @@ module.exports = function() {
 
             AsJSONG: {
                 values: [{
-                    jsong: {
+                    jsonGraph: {
                         "v": {
                             "-1": "Arnold",
                             "0": "Arnold",
@@ -583,7 +583,7 @@ module.exports = function() {
 
             AsJSONG: {
                 values: [{
-                    jsong: {
+                    jsonGraph: {
                         "v": {
                             "-1": "Arnold",
                             "0": "Arnold",

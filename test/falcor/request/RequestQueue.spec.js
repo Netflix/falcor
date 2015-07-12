@@ -111,6 +111,7 @@ describe("RequestQueue", function() {
     });
 
     it("should merge multiple JSONGraph Envelopes from batched pending source requests.", function(done) {
+
         var dataSource = new LocalDataSource(Cache(), {wait:100});
         var dataModel = { _root: modelRoot, _source: dataSource };
         var queue = new RequestQueue(dataModel, nextTick);
@@ -120,18 +121,48 @@ describe("RequestQueue", function() {
         }
         
         var ref0 = ["genreList", "0", "0", "summary"];
-        var ref1 = ["genreList", "0", "0", "title"]
-        var ref2 = ["genreList", "0", "1", "summary"]
+        var ref1 = ["genreList", "0", ["0", "1"], ["summary", "title"]];
 
         var r1 = queue.get([ref0]).do(onNext);
         var r2 = Rx.Observable.timer(50).flatMap(function() {
             dataModel._source = new LocalDataSource(Cache());
-            return queue.get([ref0, ref1, ref2]).do(onNext);
+            return queue.get([ref0, ref1]).do(onNext);
         });
         r1.zip(r2, function(){}).subscribe(function() {}, done, function() {
             expect(checks).to.equal(2);
             done();
         });
+    });
+
+    it("should remove paths from a batch if disposed before the scheduler is flushed", function(done) {
+
+        var queue = new RequestQueue(dataModel, nextSlice);
+        var checks = 0;
+
+        function onNext(x) {
+            checks++;
+        }
+
+        var subscription = Rx.Observable.zip(
+            requestTestRunner(References().simpleReference0, queue, onNext),
+            requestTestRunner(References().simpleReference1, queue, onNext),
+            requestTestRunner(References().simpleReference2, queue, onNext),
+            requestTestRunner(References().simpleReference3, queue, onNext),
+            function(a, b, c, d) {}).
+            subscribe(function() {}, done, function() {
+                expect(checks).to.equal(4);
+                done();
+            });
+
+        var batch = queue.requests[0];
+
+        expect(batch.length).to.equal(4);
+
+        subscription.dispose();
+
+        expect(batch.length).to.equal(0);
+        expect(checks).to.equal(0);
+        done();
     });
 });
 

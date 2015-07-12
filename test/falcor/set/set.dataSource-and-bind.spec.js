@@ -51,7 +51,7 @@ describe('DataSource and Bind', function() {
                         // Don't do it this way, it will cause memory leaks.
                         model._cache.lists.abcd[1] = undefined;
                         return {
-                            jsong: jsongEnv.jsong,
+                            jsonGraph: jsongEnv.jsonGraph,
                             paths: [jsongEnv.paths[0]]
                         };
                     }

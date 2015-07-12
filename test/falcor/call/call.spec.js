@@ -162,7 +162,7 @@ describe("Call", function() {
         function getExpectedJSONG() {
             // The output json
             return {
-                jsong: {
+                jsonGraph: {
                     lolomo: { $size: "52", $type: "ref", value: ["lolomos", 123] },
                     lolomos: {
                         123: {
