@@ -1,5 +1,5 @@
-var jsong = require("../../index");
-var Model = jsong.Model;
+var falcor = require("./../../lib/");
+var Model = falcor.Model;
 var Rx = require("rx");
 var LocalDataSource = require("../data/LocalDataSource");
 var Cache = require("../data/Cache");
@@ -14,10 +14,10 @@ var noOp = function() {};
 var getDataModel = testRunner.getModel;
 var _ = require('lodash');
 
-var __head = require("../../lib/internal/head");
-var __tail = require("../../lib/internal/tail");
-var __next = require("../../lib/internal/next");
-var __prev = require("../../lib/internal/prev");
+var __head = require("./../../lib/internal/head");
+var __tail = require("./../../lib/internal/tail");
+var __next = require("./../../lib/internal/next");
+var __prev = require("./../../lib/internal/prev");
 
 describe('Expired', function() {
     describe('Input Paths', function() {
@@ -90,9 +90,7 @@ function spliceExpired(query, output) {
 
     expect(model._root[__head].value).to.equal('sad panda');
 
-    return Rx.Observable.
-        return('').
-        delay(100).
+    return Rx.Observable.timer(100).
         flatMap(function() {
             return testRunner.get(model, _.cloneDeep(query), output);
         }).

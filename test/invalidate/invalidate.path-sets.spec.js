@@ -1,7 +1,7 @@
 var Rx = require("rx");
 var _ = require("lodash");
-var jsong = require("../../index");
-var Model = jsong.Model;
+var falcor = require("./../../lib/");
+var Model = falcor.Model;
 var expect = require('chai').expect;
 
 var whole_cache = require("../set/support/whole-cache");
@@ -9,14 +9,14 @@ var partial_cache = require("../set/support/partial-cache");
 var invalidate_and_verify_path_sets = require("./support/invalidate-and-verify-path-sets");
 
 var slice = Array.prototype.slice;
-var $path = require("../../lib/types/path");
-var $atom = require("../../lib/types/atom");
+var $path = require("./../../lib/types/ref");
+var $atom = require("./../../lib/types/atom");
 
 // Tests each output format.
-execute("JSON values", "Values");
+// execute("JSON values", "Values");
 execute("dense JSON", "JSON");
-execute("sparse JSON", "PathMap");
-execute("JSON-Graph", "JSONG");
+// execute("sparse JSON", "PathMap");
+// execute("JSON-Graph", "JSONG");
 
 function execute(output, suffix) {
 
@@ -47,7 +47,7 @@ function execute(output, suffix) {
                         it("directly", function() {
                             invalidate_and_verify_path_sets(this.test, suffix, [["movies", ["pulp-fiction", "kill-bill-1", "reservior-dogs"], "director"]]);
                         });
-                        it("through through successful, short-circuit, and broken references", function() {
+                        it("through successful, short-circuit, and broken references", function() {
                             invalidate_and_verify_path_sets(this.test, suffix, [["grid", 0, [0, 1, 2], "director"]]);
                         });
                     });
@@ -93,7 +93,7 @@ function execute(output, suffix) {
                         it("directly", function() {
                             invalidate_and_verify_path_sets(this.test, suffix, [["movies", ["pulp-fiction", "kill-bill-1", "reservior-dogs"], "genres"]]);
                         });
-                        it("through through successful, short-circuit, and broken references", function() {
+                        it("through successful, short-circuit, and broken references", function() {
                             invalidate_and_verify_path_sets(this.test, suffix, [["grid", 0, [0, 1, 2], "genres"]]);
                         });
                     });
@@ -156,16 +156,16 @@ function execute(output, suffix) {
             it("nothing, hopefully", function() {
                 var model  = new Model({ cache: whole_cache() });
                 var seeds  = [{}];
-                var seeds2 = [{json: {}}];
+                var seeds2 = [{json: { $type: "atom" }}];
                 var seeds3;
                 if(suffix == "Values") {
                     seeds2 = [];
                     seeds3 = [];
                     seeds  = function(pv) { seeds3.push(pv); }
                 } else if(suffix == "JSONG") {
-                    seeds2 = [{jsong: {}, paths: [[null, null, null, null]]}];
+                    seeds2 = [{jsonGraph: {}, paths: [[null, null, null, null]]}];
                 }
-                var results = model["_invPathSetsAs" + suffix](model, [[null, null, null, null]], seeds);
+                var results = model["_invalidatePathSetsAs" + suffix](model, [[null, null, null, null]], seeds);
                 expect(seeds3 || seeds).to.deep.equal(seeds2);
                 expect(model._cache).to.be.ok;
             });

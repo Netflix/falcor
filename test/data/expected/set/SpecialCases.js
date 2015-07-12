@@ -6,7 +6,7 @@ module.exports = function() {
                 to: ["short-circuit", "value"],
                 "short-circuit": "value"
             },
-            setPathSets: {
+            setPathValues: {
                 query: [{
                     "path": ["to", "summary"],
                     "value": "most bestest"

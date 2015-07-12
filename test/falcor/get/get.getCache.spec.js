@@ -1,12 +1,11 @@
-var jsong = require('../../../index');
-var Model = jsong.Model;
+var falcor = require("./../../../lib/")
+var Model = falcor.Model;
 var Cache = require('../../set/support/whole-cache');
 var Rx = require('rx');
 var getTestRunner = require('./../../getTestRunner');
 var testRunner = require('./../../testRunner');
 var noOp = function() {};
 var Observable = Rx.Observable;
-var falcor = {Model: Model, Observable:Observable};
 var _ = require('lodash');
 var expect = require('chai').expect;
 var $ref = falcor.Model.ref;

@@ -1,5 +1,5 @@
-var jsong = require("../../../index");
-var Model = jsong.Model;
+var falcor = require("./../../../lib/");
+var Model = falcor.Model;
 var Rx = require("rx");
 var Cache = require("../../data/Cache");
 var LocalDataSource = require("../../data/LocalDataSource");
@@ -15,7 +15,6 @@ describe('Bind', function() {
         var model = new Model({source: new LocalDataSource(Cache())});
         var count = 0;
         var expected = Bound().directValue.AsPathMap.values[0];
-        debugger
         model = model.
             bind(["genreList", 0, 0], ['summary']).
             flatMap(function(model) {

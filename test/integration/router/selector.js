@@ -1,4 +1,4 @@
-var jsong = require("../../../index");
+var falcor = require("./../../../lib/")
 var R = require('falcor-router');
 var Routes = require('../../data/routes');
 var Rx = require("rx");
@@ -14,7 +14,7 @@ var RouterTestRunner = require('../../routerTestRunner');
 describe("Selector", function() {
     it('should match a simple route in the virtual path.', function(done) {
         var r = new R(Routes().Videos.Integers.Summary);
-        var model = new jsong.Model({router: r});
+        var model = new falcor.Model({router: r});
         var count = 0;
         var expected = Values().direct.AsJSON.values;
         model.
@@ -37,7 +37,7 @@ describe("Selector", function() {
             concat(
                 Routes().GenreList.Ranges);
         var r = new R(routes);
-        var model = new jsong.Model({router: r});
+        var model = new falcor.Model({router: r});
         var count = 0;
         var expected = References().simpleReference0.AsJSON.values;
         model.
@@ -60,7 +60,7 @@ describe("Selector", function() {
             concat(
                 Routes().GenreList.Ranges);
         var r = new R(routes);
-        var model = new jsong.Model({router: r});
+        var model = new falcor.Model({router: r});
         var count = 0;
         var expected = References().simpleReference0.AsJSON.values;
         model.
@@ -84,7 +84,7 @@ describe("Selector", function() {
             concat(
                 Routes().GenreList.Ranges);
         var r = new R(routes);
-        var model = new jsong.Model({router: r});
+        var model = new falcor.Model({router: r});
         var count = 0;
         var r0 = {0: References().simpleReference0.AsJSON.values[0].json};
         var r1 = {1: References().simpleReference1.AsJSON.values[0].json};

@@ -1,8 +1,8 @@
 module.exports = invalidate_and_verify_path_sets;
 
 var _ = require("lodash");
-var jsong = require("../../../index");
-var Model = jsong.Model;
+var falcor = require("./../../../lib/");
+var Model = falcor.Model;
 var whole_cache = require("../../set/support/whole-cache");
 var verify = require("./verify");
 
@@ -19,7 +19,7 @@ function invalidate_path_sets(pathsets, suffix, options) {
         var values = [];
         seeds = function(pv) { values.push(pv); }
     }
-    var func = model["_invPathSetsAs" + suffix];
+    var func = model["_invalidatePathSetsAs" + suffix];
     var results = func(model, pathsets, seeds);
     if(values) { results.values = values; }
     return [model, results];

@@ -1,6 +1,6 @@
-var $path = require('./../../../lib/types/path.js');
-var $atom = require('./../../../lib/types/atom.js');
-var $error = require('./../../../lib/types/error.js');
+var $path = require('./../../../lib/types/ref');
+var $atom = require('./../../../lib/types/atom');
+var $error = require('./../../../lib/types/error');
 module.exports = function() {
     return {
         errorBranchSummary: {
@@ -43,7 +43,7 @@ module.exports = function() {
             AsJSONG: {
                 values: [{
                     paths: [["videos", "errorBranch"]],
-                    jsong: {
+                    jsonGraph: {
                         "videos": {
                             "errorBranch": {
                                 "$size": "51",
@@ -95,7 +95,7 @@ module.exports = function() {
             AsJSONG: {
                 values: [{
                     paths: [["genreList", "2", null]],
-                    jsong: {
+                    jsonGraph: {
                         "genreList": {
                             "2": {
                                 "$size": 52,

@@ -1,6 +1,6 @@
 var ErrorDataSource = require("../../data/ErrorDataSource");
-var jsong = require("../../../index");
-var Model = jsong.Model;
+var falcor = require("./../../../lib/");
+var Model = falcor.Model;
 var chai = require("chai");
 var expect = chai.expect;
 var testRunner = require("../../testRunner");
@@ -98,6 +98,7 @@ describe("Error", function() {
             });
     });
 });
+
 function isAssertionError(e) {
     return e.hasOwnProperty('expected') && e.hasOwnProperty('actual');
 }

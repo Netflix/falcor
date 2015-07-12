@@ -1,7 +1,7 @@
 module.exports = function() {
     return {
         referenceExpired: {
-            setPathSets: {
+            setPathValues: {
                 query: [{
                     "path": ["genreList", "9", "0", "summary"],
                     "value": "should be expired"
@@ -43,7 +43,7 @@ module.exports = function() {
 
             AsJSONG: {
                 values: [{
-                    jsong: {
+                    jsonGraph: {
                         "genreList": {
                             "9": ["lists", "to-expired-list"]
                         },
@@ -77,7 +77,7 @@ module.exports = function() {
         },
 
         expiredLeafNodeTimestamp: {
-            setPathSets: {
+            setPathValues: {
                 query: [{
                     "path": ["videos", "expiredLeafByTimestamp", "summary"],
                     "value": "should be expired"
@@ -110,7 +110,7 @@ module.exports = function() {
 
             AsJSONG: {
                 values: [{
-                    jsong: {
+                    jsonGraph: {
                         "videos": {
                             "expiredLeafByTimestamp": {
                                 "summary": "should be expired"
@@ -134,7 +134,7 @@ module.exports = function() {
             }
         },
         expiredLeafNode0: {
-            setPathSets: {
+            setPathValues: {
                 query: [{
                     "path": ["videos", "expiredLeafBy0", "summary"],
                     "value": "should be expired"
@@ -167,7 +167,7 @@ module.exports = function() {
 
             AsJSONG: {
                 values: [{
-                    jsong: {
+                    jsonGraph: {
                         "videos": {
                             "expiredLeafBy0": {
                                 "summary": "should be expired"
@@ -191,7 +191,7 @@ module.exports = function() {
             }
         },
         expiredBranchByTimestamp: {
-            setPathSets: {
+            setPathValues: {
                 query: [{
                     "path": ["videos", "expiredBranchByTimestamp", "summary"],
                     "value": "should be expired"
@@ -224,7 +224,7 @@ module.exports = function() {
 
             AsJSONG: {
                 values: [{
-                    jsong: {
+                    jsonGraph: {
                         "videos": {
                             "expiredBranchByTimestamp": {
                                 "summary": "should be expired"
@@ -248,7 +248,7 @@ module.exports = function() {
             }
         },
         expiredBranchBy0: {
-            setPathSets: {
+            setPathValues: {
                 query: [{
                     "path": ["videos", "expiredBranchBy0", "summary"],
                     "value": "should be expired"
@@ -281,7 +281,7 @@ module.exports = function() {
 
             AsJSONG: {
                 values: [{
-                    jsong: {
+                    jsonGraph: {
                         "videos": {
                             "expiredBranchBy0": {
                                 "summary": "should be expired"
@@ -305,7 +305,7 @@ module.exports = function() {
             }
         },
         futureExpiredReference: {
-            setPathSets: {
+            setPathValues: {
                 query: [{
                     "path": ["genreList", "12", "0", "summary"],
                     "value": "should be expired"

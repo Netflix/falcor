@@ -1,5 +1,5 @@
-var jsong = require('../../../index');
-var Model = jsong.Model;
+var falcor = require("./../../../lib/");
+var Model = falcor.Model;
 var Cache = require('../../data/Cache');
 var M = require('../../data/ReducedCache').MinimalCache;
 var Expected = require('../../data/expected');
@@ -9,9 +9,7 @@ var testRunner = require('./../../testRunner');
 var noOp = function() {};
 var LocalDataSource = require('../../data/LocalDataSource');
 var ErrorDataSource = require('../../data/ErrorDataSource');
-var isPathValue = function(x) {
-    return x && x.hasOwnProperty('path') && x.hasOwnProperty('value');
-};
+var isPathValue = require("./../../../lib/support/is-path-value");
 
 describe('DataSource and Bind', function() {
     it('should get a value from from dataSource when bound.', function(done) {
@@ -50,11 +48,10 @@ describe('DataSource and Bind', function() {
                     count++;
 
                     if (count === 1) {
-
                         // Don't do it this way, it will cause memory leaks.
                         model._cache.lists.abcd[1] = undefined;
                         return {
-                            jsong: jsongEnv.jsong,
+                            jsonGraph: jsongEnv.jsonGraph,
                             paths: [jsongEnv.paths[0]]
                         };
                     }

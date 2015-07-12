@@ -1,5 +1,5 @@
-var jsong = require('../../index');
-var Model = jsong.Model;
+var falcor = require("./../../lib/");
+var Model = falcor.Model;
 var Cache = require('../data/Cache');
 var Expected = require('../data/expected');
 var Rx = require('rx');
@@ -155,10 +155,6 @@ describe('Core', function() {
         it('should report an undefined atom for a materialized undefined atom', function() {
             getTestRunner(Materialized().atomOfUndefined, { materialized: true });
         });
-        it('should not report a materialized path when there is a router.', function() {
-            var model = new Model({cache: Cache(), router: {}}).materialize();
-            getTestRunner(Materialized().routerOrSourceMissing, { model: model });
-        });
         it('should not report a materialized path when there is a source.', function() {
             var model = new Model({cache: Cache(), source: {}}).materialize();
             getTestRunner(Materialized().routerOrSourceMissing, { model: model });
@@ -211,14 +207,14 @@ describe('Core', function() {
             getTestRunner(Bound().missingValue, {model: model});
         });
 
-        it('should throw an error when bound and calling jsong.', function() {
+        it('should throw an error when bound and calling jsonGraph.', function() {
             var model = new Model({cache: Cache()}).bindSync(['genreList', 10]);
             var threw = false;
             try {
                 model._getPathSetsAsJSONG(model, [['summary']]);
             } catch(ex) {
                 threw = true;
-                testRunner.compare(testRunner.jsongBindException, ex);
+                testRunner.compare(testRunner.jsonGraphBindException, ex);
             }
             testRunner.compare(true, threw);
         });

@@ -1,5 +1,5 @@
-var jsong = require("../../index");
-var Model = jsong.Model;
+var falcor = require("./../../lib/");
+var Model = falcor.Model;
 var expect = require('chai').expect;
 var Cache = require("../data/Cache");
 var ReducedCache = require("../data/ReducedCache");
@@ -14,10 +14,10 @@ var Bound = Expected.Bound;
 var noOp = function() {};
 var _ = require('lodash');
 
-var __ref = require("../../lib/internal/ref");
-var __context = require("../../lib/internal/context");
-var __ref_index = require("../../lib/internal/ref-index");
-var __refs_length = require("../../lib/internal/refs-length");
+var __ref = require("./../../lib/internal/ref");
+var __context = require("./../../lib/internal/context");
+var __ref_index = require("./../../lib/internal/ref-index");
+var __refs_length = require("./../../lib/internal/refs-length");
 
 describe('Adding', function() {
     var getPath = ['genreList', 0, 0, 'summary'];

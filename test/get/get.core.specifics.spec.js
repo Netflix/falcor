@@ -1,5 +1,5 @@
-var jsong = require('../../index');
-var Model = jsong.Model;
+var falcor = require('./../../lib/');
+var Model = falcor.Model;
 var Cache = require('../data/Cache');
 var Expected = require('../data/expected');
 var Rx = require('rx');
@@ -13,8 +13,8 @@ var Bound = Expected.Bound;
 var Materialized = Expected.Materialized;
 var Boxed = Expected.Boxed;
 var Errors = Expected.Errors;
-var $atom = require("../../lib/types/atom");
-var $error = require("../../lib/types/error");
+var $atom = require("./../../lib/types/atom");
+var $error = require("./../../lib/types/error");
 var noOp = function() {};
 
 describe('Specific Cases', function() {
@@ -70,7 +70,7 @@ describe('Specific Cases', function() {
                     "title": "Additional Title 0",
                     "url": "/movies/0"
                 }
-            }, seed[0].jsong.videos[0].summary);
+            }, seed[0].jsonGraph.videos[0].summary);
 
             testRunner.compare({
                 $type: $atom,
@@ -79,7 +79,7 @@ describe('Specific Cases', function() {
                     "title": "Additional Title 1",
                     "url": "/movies/1"
                 }
-            }, seed[0].jsong.videos[1].summary);
+            }, seed[0].jsonGraph.videos[1].summary);
         });
         it('should continue to populate the seed selector.', function () {
             var model = new Model({cache: Cache()}).withoutDataSource();
@@ -255,7 +255,7 @@ describe('Specific Cases', function() {
 
     it('should return the ranged items when ranges in array.', function() {
         var JSONG = {
-            jsong: {
+            jsonGraph: {
                 foo: {
                     0: {
                         $type: $atom,
@@ -271,7 +271,7 @@ describe('Specific Cases', function() {
                 ['foo', [{from: 0, to: 1}]]
             ]
         };
-        var model = new Model({cache: JSONG.jsong});
+        var model = new Model({cache: JSONG.jsonGraph});
         var out = [{}];
 
         model._getPathSetsAsJSON(model, JSONG.paths, out);
@@ -390,36 +390,5 @@ describe('Specific Cases', function() {
                 }).
                 subscribe(noOp, done, done);
         });
-    });
-
-    it('should report the error in boxed mode.', function (done) {
-        var model = new Model({cache: Cache()});
-        var errored = false;
-        model.
-            withoutDataSource().
-            boxValues().
-            get('videos.errorBranch').
-            doAction(function() {
-                throw new Error('Should never on next');
-            }, function(e) {
-                testRunner.compare([{
-                    path: ['videos', 'errorBranch'],
-                    value: {
-                        $type: $error,
-                        $size: 51,
-                        value: 'I am yelling timber.'
-                    }
-                }], e);
-                errored = true;
-            }, function() {
-                throw new Error('Should never on completed');
-            }).
-            subscribe(noOp, function(e) {
-                if (errored) {
-                    done();
-                } else {
-                    done(e);
-                }
-            });
     });
 });

@@ -1,7 +1,7 @@
 var Rx = require("rx");
 var _ = require("lodash");
-var jsong = require("../../index");
-var Model = jsong.Model;
+var falcor = require("./../../lib/");
+var Model = falcor.Model;
 var expect = require('chai').expect;
 
 var whole_cache = require("./support/whole-cache");
@@ -11,8 +11,8 @@ var set_envelopes = require("./support/set-envelopes");
 var set_and_verify_json_graph = require("./support/set-and-verify-json-graph");
 
 var slice = Array.prototype.slice;
-var $path = require("../../lib/types/path");
-var $atom = require("../../lib/types/atom");
+var $path = require("./../../lib/types/ref");
+var $atom = require("./../../lib/types/atom");
 
 var modes = [{
         
@@ -56,7 +56,7 @@ function execute(output, suffix, opts) {
                     it("directly", function() {
                         set_and_verify_json_graph(this.test, suffix, [{
                             paths: [["movies", "pulp-fiction", "title"]],
-                            jsong: {
+                            jsonGraph: {
                                 "movies": {
                                     "pulp-fiction": {
                                         "title": "Pulp Fiction"
@@ -68,7 +68,7 @@ function execute(output, suffix, opts) {
                     it("directly on a bound model", function() {
                         set_and_verify_json_graph(this.test, suffix, [{
                             paths: [["movies", "pulp-fiction", "title"]],
-                            jsong: {
+                            jsonGraph: {
                                 "movies": {
                                     "pulp-fiction": {
                                         "title": "Pulp Fiction"
@@ -78,7 +78,7 @@ function execute(output, suffix, opts) {
                         }], {
                             model: new Model(_.extend({
                                 cache: partial_cache()
-                            }, opts)).clone(["_path", ["movies"]])
+                            }, opts)).clone({ _path: ["movies"] })
                         });
                     });
                     it("through a reference", function() {
@@ -130,7 +130,7 @@ function execute(output, suffix, opts) {
                     it("through a broken reference", function() {
                         set_and_verify_json_graph(this.test, suffix, [{
                             paths: [["grid", 0, 2, "title"]],
-                            jsong: {
+                            jsonGraph: {
                                 "grid": { $type: $path, value: ["grids", "grid-1234"] },
                                 "grids": {
                                     "grid-1234": {
@@ -153,7 +153,7 @@ function execute(output, suffix, opts) {
                     it("through a reference with a null last key", function() {
                         set_and_verify_json_graph(this.test, suffix, [{
                             paths: [["grid", 0, 2, null]],
-                            jsong: {
+                            jsonGraph: {
                                 "grid": { $type: $path, value: ["grids", "grid-1234"] },
                                 "grids": {
                                     "grid-1234": {
@@ -177,7 +177,7 @@ function execute(output, suffix, opts) {
                         it("directly", function() {
                             set_and_verify_json_graph(this.test, suffix, [{
                                 paths: [["movies", ["pulp-fiction", "kill-bill-1", "reservior-dogs"], "director"]],
-                                jsong: {
+                                jsonGraph: {
                                     "movies": {
                                         "pulp-fiction": {
                                             "director": "Quentin Tarantino"
@@ -195,7 +195,7 @@ function execute(output, suffix, opts) {
                         it("through successful, short-circuit, and broken references", function() {
                             set_and_verify_json_graph(this.test, suffix, [{
                                 paths: [["grid", 0, [0, 1, 2], "director"]],
-                                jsong: {
+                                jsonGraph: {
                                     "grid": { $type: $path, value: ["grids", "grid-1234"] },
                                     "grids": {
                                         "grid-1234": {
@@ -226,7 +226,7 @@ function execute(output, suffix, opts) {
                         it("through successful, short-circuit, and broken references on a bound model", function() {
                             set_and_verify_json_graph(this.test, suffix, [{
                                 paths: [["grid", 0, [0, 1, 2], "director"]],
-                                jsong: {
+                                jsonGraph: {
                                     "grid": { $type: $path, value: ["grids", "grid-1234"] },
                                     "grids": {
                                         "grid-1234": {
@@ -255,7 +255,7 @@ function execute(output, suffix, opts) {
                             }], {
                                 model: new Model(_.extend({
                                     cache: partial_cache()
-                                }, opts)).clone(["_path", ["grid", 0]])
+                                }, opts)).clone({ _path: ["grid", 0] })
                             });
                         });
                     });
@@ -263,7 +263,7 @@ function execute(output, suffix, opts) {
                         it("to:2", function() {
                             set_and_verify_json_graph(this.test, suffix, [{
                                 paths: [["grid", 0, {to:2}, "director"]],
-                                jsong: {
+                                jsonGraph: {
                                     "grid": { $type: $path, value: ["grids", "grid-1234"] },
                                     "grids": {
                                         "grid-1234": {
@@ -294,7 +294,7 @@ function execute(output, suffix, opts) {
                         it("from:1, to:2", function() {
                             set_and_verify_json_graph(this.test, suffix, [{
                                 paths: [["grid", 0, {from:1, to:2}, "director"]],
-                                jsong: {
+                                jsonGraph: {
                                     "grid": { $type: $path, value: ["grids", "grid-1234"] },
                                     "grids": {
                                         "grid-1234": {
@@ -321,7 +321,7 @@ function execute(output, suffix, opts) {
                         it("length:3", function() {
                             set_and_verify_json_graph(this.test, suffix, [{
                                 paths: [["grid", 0, {length:3}, "director"]],
-                                jsong: {
+                                jsonGraph: {
                                     "grid": { $type: $path, value: ["grids", "grid-1234"] },
                                     "grids": {
                                         "grid-1234": {
@@ -352,7 +352,7 @@ function execute(output, suffix, opts) {
                         it("from:1, length:2", function() {
                             set_and_verify_json_graph(this.test, suffix, [{
                                 paths: [["grid", 0, {from:1, length:2}, "director"]],
-                                jsong: {
+                                jsonGraph: {
                                     "grid": { $type: $path, value: ["grids", "grid-1234"] },
                                     "grids": {
                                         "grid-1234": {
@@ -379,7 +379,7 @@ function execute(output, suffix, opts) {
                         it("[length:3]", function() {
                             set_and_verify_json_graph(this.test, suffix, [{
                                 paths: [["grid", 0, [{length:3}], "director"]],
-                                jsong: {
+                                jsonGraph: {
                                     "grid": { $type: $path, value: ["grids", "grid-1234"] },
                                     "grids": {
                                         "grid-1234": {
@@ -418,7 +418,7 @@ function execute(output, suffix, opts) {
                     it("directly", function() {
                         set_and_verify_json_graph(this.test, suffix, [{
                             paths: [["movies", "pulp-fiction", "summary"]],
-                            jsong: {
+                            jsonGraph: {
                                 "movies": {
                                     "pulp-fiction": {
                                         "summary": {
@@ -436,7 +436,7 @@ function execute(output, suffix, opts) {
                     it("through a reference", function() {
                         set_and_verify_json_graph(this.test, suffix, [{
                             paths: [["grid", 0, 0, "summary"]],
-                            jsong: {
+                            jsonGraph: {
                                 "grid": { $type: $path, value: ["grids", "grid-1234"] },
                                 "grids": {
                                     "grid-1234": {
@@ -465,7 +465,7 @@ function execute(output, suffix, opts) {
                     it("through a reference that lands on an atom", function() {
                         set_and_verify_json_graph(this.test, suffix, [{
                             paths: [["grid", 0, 1, "summary"]],
-                            jsong: {
+                            jsonGraph: {
                                 "grid": { $type: $path, value: ["grids", "grid-1234"] },
                                 "grids": {
                                     "grid-1234": {
@@ -494,7 +494,7 @@ function execute(output, suffix, opts) {
                     it("through a broken reference", function() {
                         set_and_verify_json_graph(this.test, suffix, [{
                             paths: [["grid", 0, 2, "summary"]],
-                            jsong: {
+                            jsonGraph: {
                                 "grid": { $type: $path, value: ["grids", "grid-1234"] },
                                 "grids": {
                                     "grid-1234": {
@@ -523,7 +523,7 @@ function execute(output, suffix, opts) {
                     it("through a reference with a null last key", function() {
                         set_and_verify_json_graph(this.test, suffix, [{
                             paths: [["grid", 0, 2, null]],
-                            jsong: {
+                            jsonGraph: {
                                 "grid": { $type: $path, value: ["grids", "grid-1234"] },
                                 "grids": {
                                     "grid-1234": {
@@ -550,7 +550,7 @@ function execute(output, suffix, opts) {
                         it("directly", function() {
                             set_and_verify_json_graph(this.test, suffix, [{
                                 paths: [["movies", ["pulp-fiction", "kill-bill-1", "reservior-dogs"], "genres"]],
-                                jsong: {
+                                jsonGraph: {
                                     "movies": {
                                         "pulp-fiction": {
                                             "genres": {
@@ -577,7 +577,7 @@ function execute(output, suffix, opts) {
                         it("through successful, short-circuit, and broken references", function() {
                             set_and_verify_json_graph(this.test, suffix, [{
                                 paths: [["grid", 0, [0, 1, 2], "genres"]],
-                                jsong: {
+                                jsonGraph: {
                                     "grid": { $type: $path, value: ["grids", "grid-1234"] },
                                     "grids": {
                                         "grid-1234": {
@@ -619,7 +619,7 @@ function execute(output, suffix, opts) {
                         it("to:2", function() {
                             set_and_verify_json_graph(this.test, suffix, [{
                                 paths: [["grid", 0, {to:2}, "genres"]],
-                                jsong: {
+                                jsonGraph: {
                                     "grid": { $type: $path, value: ["grids", "grid-1234"] },
                                     "grids": {
                                         "grid-1234": {
@@ -659,7 +659,7 @@ function execute(output, suffix, opts) {
                         it("from:1, to:2", function() {
                             set_and_verify_json_graph(this.test, suffix, [{
                                 paths: [["grid", 0, {from:1, to:2}, "genres"]],
-                                jsong: {
+                                jsonGraph: {
                                     "grid": { $type: $path, value: ["grids", "grid-1234"] },
                                     "grids": {
                                         "grid-1234": {
@@ -692,7 +692,7 @@ function execute(output, suffix, opts) {
                         it("length:3", function() {
                             set_and_verify_json_graph(this.test, suffix, [{
                                 paths: [["grid", 0, {length:3}, "genres"]],
-                                jsong: {
+                                jsonGraph: {
                                     "grid": { $type: $path, value: ["grids", "grid-1234"] },
                                     "grids": {
                                         "grid-1234": {
@@ -732,7 +732,7 @@ function execute(output, suffix, opts) {
                         it("from:1, length:2", function() {
                             set_and_verify_json_graph(this.test, suffix, [{
                                 paths: [["grid", 0, {from:1, length:2}, "genres"]],
-                                jsong: {
+                                jsonGraph: {
                                     "grid": { $type: $path, value: ["grids", "grid-1234"] },
                                     "grids": {
                                         "grid-1234": {
@@ -765,7 +765,7 @@ function execute(output, suffix, opts) {
                         it("[length:3]", function() {
                             set_and_verify_json_graph(this.test, suffix, [{
                                 paths: [["grid", 0, [{length:3}], "genres"]],
-                                jsong: {
+                                jsonGraph: {
                                     "grid": { $type: $path, value: ["grids", "grid-1234"] },
                                     "grids": {
                                         "grid-1234": {
@@ -813,7 +813,7 @@ function execute(output, suffix, opts) {
                     it("directly", function() {
                         set_and_verify_json_graph(this.test, suffix, [{
                             paths: [["rows", "row-0", "3"]],
-                            jsong: {
+                            jsonGraph: {
                                 "rows": {
                                     "row-0": {
                                         "3": { $type: $path, value: ["movies", "django-unchained"] }
@@ -825,7 +825,7 @@ function execute(output, suffix, opts) {
                     it("through a reference", function() {
                         set_and_verify_json_graph(this.test, suffix, [{
                             paths: [["grid", 0, 3]],
-                            jsong: {
+                            jsonGraph: {
                                 "grid": { $type: $path, value: ["grids", "grid-1234"] },
                                 "grids": {
                                     "grid-1234": {
@@ -855,7 +855,7 @@ function execute(output, suffix, opts) {
                             ["movies", ["pulp-fiction", "kill-bill-1", "reservior-dogs"], "genres"],
                             ["rows", "row-0", "3"]
                         ],
-                        jsong: whole_cache()
+                        jsonGraph: whole_cache()
                     }], opts);
                 });
                 it("through references", function() {
@@ -867,7 +867,7 @@ function execute(output, suffix, opts) {
                             ["grid", 0, [0, 1, 2], "genres"],
                             ["grid", 0, 3]
                         ],
-                        jsong: whole_cache()
+                        jsonGraph: whole_cache()
                     }], opts);
                 });
             });
@@ -881,7 +881,7 @@ function execute(output, suffix, opts) {
 
                 set_and_verify_json_graph(this.test, suffix, [{
                     paths: [["grid", 2]],
-                    jsong: {
+                    jsonGraph: {
                         "grid": { $type: $path, value: ["grids", "grid-1234"] },
                         "grids": {
                             "grid-1234": {
@@ -915,7 +915,7 @@ function execute(output, suffix, opts) {
 
                 set_and_verify_json_graph(this.test, suffix, [{
                     paths: [["grid", 2]],
-                    jsong: {
+                    jsonGraph: {
                         "grid": { $type: $path, value: ["grids", "grid-1234"] },
                         "grids": {
                             "grid-1234": {
@@ -934,7 +934,7 @@ function execute(output, suffix, opts) {
                     if(suffix === "JSONG") {
                         var results = model["_setJSONGsAs" + suffix](model, [{
                             paths: [["grid", 2, 0, "title"]],
-                            jsong: {
+                            jsonGraph: {
                                 "rows": {
                                     "row-0": {
                                         "0": { $type: $path, value: ["movies", "pulp-fiction"] }
@@ -949,7 +949,7 @@ function execute(output, suffix, opts) {
                         }], [{}], opts);
                         expect(results).to.deep.equals({
                             values: [{
-                                jsong: {
+                                jsonGraph: {
                                     grid: { "$type": $path, value: ["grids", "grid-1234"], "$size": 52 },
                                     grids: {
                                         "grid-1234": {
@@ -960,6 +960,7 @@ function execute(output, suffix, opts) {
                                 paths: []
                             }],
                             errors: [],
+                            hasValue: true,
                             requestedPaths: [],
                             optimizedPaths: [],
                             requestedMissingPaths: [["grid", 2, 0, "title"]],
@@ -968,7 +969,7 @@ function execute(output, suffix, opts) {
                     } else {
                         set_and_verify_json_graph(this.test, suffix, [{
                             paths: [["grid", 2, 0, "title"]],
-                            jsong: {
+                            jsonGraph: {
                                 "rows": {
                                     "row-0": {
                                         "0": { $type: $path, value: ["movies", "pulp-fiction"] }
@@ -1016,7 +1017,7 @@ function execute(output, suffix, opts) {
 
                 set_envelopes([{
                     paths: [["grid", "grid-1234", {length: count}]],
-                    jsong: get_cache(0, count)
+                    jsonGraph: get_cache(0, count)
                 }], suffix);
 
                 results = get_pathsets(model, [["grid", "grid-1234", {length: count * 2}]], suffix);
@@ -1045,7 +1046,7 @@ function execute(output, suffix, opts) {
                 it("directly", function() {
                     set_and_verify_json_graph(this.test, suffix, [{
                         paths: [["movies", "pulp-fiction", "movie-id"]],
-                        jsong: {
+                        jsonGraph: {
                             "movies": {
                                 "pulp-fiction": {
                                     "movie-id": "pulp-fiction-2"
@@ -1057,7 +1058,7 @@ function execute(output, suffix, opts) {
                 it("through a reference", function() {
                     set_and_verify_json_graph(this.test, suffix, [{
                         paths: [["grid", 0, 0, "movie-id"]],
-                        jsong: {
+                        jsonGraph: {
                             "grid": { $type: $path, value: ["grids", "grid-1234"] },
                             "grids": {
                                 "grid-1234": {
@@ -1086,7 +1087,7 @@ function execute(output, suffix, opts) {
                 it("directly", function() {
                     set_and_verify_json_graph(this.test, suffix, [{
                         paths: [["rows", "row-0", 0]],
-                        jsong: {
+                        jsonGraph: {
                             "rows": {
                                 "row-0": {
                                     "0": { $type: $path, value: ["movies", "pulp-fiction-2"] }
@@ -1098,7 +1099,7 @@ function execute(output, suffix, opts) {
                 it("through a reference", function() {
                     set_and_verify_json_graph(this.test, suffix, [{
                         paths: [["grid", 0, 0]],
-                        jsong: {
+                        jsonGraph: {
                             "grid": { $type: $path, value: ["grids", "grid-1234"] },
                             "grids": {
                                 "grid-1234": {
@@ -1120,7 +1121,7 @@ function execute(output, suffix, opts) {
                 it("directly", function() {
                     set_and_verify_json_graph(this.test, suffix, [{
                         paths: [["movies", "pulp-fiction"]],
-                        jsong: {
+                        jsonGraph: {
                             "movies": {
                                 "pulp-fiction": "oops"
                             }
@@ -1135,7 +1136,7 @@ function execute(output, suffix, opts) {
                 it("directly", function() {
                     set_and_verify_json_graph(this.test, suffix, [{
                         paths: [["movies", "pulp-fiction"]],
-                        jsong: {
+                        jsonGraph: {
                             "movies": {
                                 "pulp-fiction": {
                                     "$type": "error",
@@ -1158,7 +1159,7 @@ function execute(output, suffix, opts) {
 
                     var expected = [{
                         paths: [],
-                        jsong: {
+                        jsonGraph: {
                             grid: { "$type": $path, value: ["grids", "grid-1234"], "$size": 52 },
                             grids: {
                                 "grid-1234": {
@@ -1178,7 +1179,7 @@ function execute(output, suffix, opts) {
 
                     var actual = set_envelopes([{
                         paths: [["grid", 1, 0, "movie-id"]],
-                        jsong: {
+                        jsonGraph: {
                             "grid": { $type: $path, value: ["grids", "grid-1234"] },
                             "grids": {
                                 "grid-1234": {
@@ -1218,7 +1219,7 @@ function execute(output, suffix, opts) {
                                     ["title", "director", "genres", "summary"]
                             ]
                         ],
-                        jsong: whole_cache()
+                        jsonGraph: whole_cache()
                     }], {model: model});
                 });
 
@@ -1236,9 +1237,65 @@ function execute(output, suffix, opts) {
                     // Set in a more complete cache through references.
                     set_and_verify_json_graph(this.test, suffix, [{
                         paths: [["grid", {to:1}, {to:3}, ["title", "director", "genres", "summary"]]],
-                        jsong: whole_cache()
+                        jsonGraph: whole_cache()
                     }], {model: model});
                 });
+            });
+
+            it("sets the same JSON Graph Envelope multiple times without clobbering the cache", function() {
+                var model = new Model(_.extend({cache: partial_cache()}, opts));
+                var paths1 = [["grid", 0, {to: 1}, ["title", "summary"]]];
+                var paths2 = [["grid", 1, {to: 1}, ["title", "summary"]]];
+                var jsonGraph = {
+                    "grid": { $type: $path, value: ["grids", "grid-1234"] },
+                    "grids": {
+                        "grid-1234": {
+                            "0": { $type: $path, value: ["rows", "row-0"] },
+                            "1": { $type: $path, value: ["grids", "grid-1234", "0"] }
+                        }
+                    },
+                    "rows": {
+                        "row-0": {
+                            "0": { $type: $path, value: ["movies", "pulp-fiction"] },
+                            "1": { $type: $path, value: ["movies", "kill-bill-1"] }
+                        }
+                    },
+                    "movies": {
+                        "pulp-fiction": {
+                            "title": "Pulp Fiction",
+                            "summary": {
+                                $type: $atom,
+                                value: {
+                                    title: "Pulp Fiction",
+                                    url: "/movies/id/pulp-fiction"
+                                }
+                            }
+                        },
+                        "kill-bill-1": {
+                            "title": "Kill Bill: Vol. 1",
+                            "summary": {
+                                $type: $atom,
+                                value: {
+                                    title: "Kill Bill: Vol. 1",
+                                    url: "/movies/id/kill-bill-1"
+                                }
+                            }
+                        }
+                    }
+                };
+
+                var envelope = { paths: paths1, jsonGraph: jsonGraph };
+
+                // Get the paths initially to build hard references.
+                model._getPathSetsAsJSON(model, paths1.concat(paths2), []);
+
+                // Set the envelope in the first time.
+                set_and_verify_json_graph(this.test, suffix, [envelope], {model: model});
+
+                envelope.paths = paths2;
+
+                // Set the envelope in again.
+                set_and_verify_json_graph(this.test, suffix, [envelope], {model: model});
             });
         });
     });

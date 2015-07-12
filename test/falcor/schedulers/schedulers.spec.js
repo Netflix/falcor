@@ -1,7 +1,7 @@
 var chai = require("chai");
 var expect = chai.expect;
-var ImmediateScheduler = require('./../../../lib/falcor/scheduler/ImmediateScheduler');
-var TimeoutScheduler = require('./../../../lib/falcor/scheduler/TimeoutScheduler');
+var ImmediateScheduler = require('./../../../lib/schedulers/ImmediateScheduler');
+var TimeoutScheduler = require('./../../../lib/schedulers/TimeoutScheduler');
 
 describe("Schedulers", function() {
     var nextTick = new TimeoutScheduler(0);

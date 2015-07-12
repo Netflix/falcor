@@ -16,7 +16,7 @@ module.exports = function() {
                                 var cachedList = Cache().lists[listId];
                                 if (cachedList && (cachedList[idx] || Array.isArray(cachedList))) {
                                     var jsong = {
-                                        jsong: { lists: list },
+                                        jsonGraph: { lists: list },
                                         paths: [
                                             ['lists', listId, idx]
                                         ]

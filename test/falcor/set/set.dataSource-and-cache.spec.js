@@ -1,5 +1,5 @@
-var jsong = require('../../../index');
-var Model = jsong.Model;
+var falcor = require("./../../../lib/");
+var Model = falcor.Model;
 var Expected = require('../../data/expected');
 var Values = Expected.Values;
 var Complex = Expected.Complex;
@@ -149,7 +149,7 @@ describe('DataSource and Cache', function() {
                             // Don't do it this way, it will cause memory leaks.
                             model._cache.genreList[0][1] = undefined;
                             return {
-                                jsong: jsongEnv.jsong,
+                                jsonGraph: jsongEnv.jsonGraph,
                                 paths: [jsongEnv.paths[0]]
                             };
                         }
@@ -248,7 +248,7 @@ describe('DataSource and Cache', function() {
                 onSet: function(source, tmp, jsongEnv) {
                     sourceCalled = true;
                     testRunner.compare({
-                        jsong: {
+                        jsonGraph: {
                             videos: {
                                 1234: {
                                     summary: 5
@@ -275,16 +275,16 @@ describe('DataSource and Cache', function() {
     });
     it('should do an error set and project it.', function(done) {
         var model = new Model({
-            source: new ErrorDataSource(503, "Timeout")
+            source: new ErrorDataSource(503, "Timeout"),
+            errorSelector: function mapError(path, value) {
+                value.$foo = 'bar';
+                return value;
+            }
         });
         var called = false;
         model.
             boxValues().
             set({path: ['genreList', 0, 0, 'summary'], value: 5}).
-            withErrorSelector(function(path, value) {
-                value.$foo = 'bar';
-                return value;
-            }).
             doAction(function(x) {
                 expect(false, 'onNext should not be called.').to.be.ok;
             }, function(e) {

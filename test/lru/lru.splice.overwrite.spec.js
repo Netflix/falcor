@@ -1,5 +1,5 @@
-var jsong = require("../../index");
-var Model = jsong.Model;
+var falcor = require("./../../lib/");
+var Model = falcor.Model;
 var Rx = require("rx");
 var LocalDataSource = require("../data/LocalDataSource");
 var Cache = require("../data/Cache");
@@ -14,10 +14,10 @@ var noOp = function() {};
 var getDataModel = testRunner.getModel;
 var _ = require('lodash');
 
-var __head = require("../../lib/internal/head");
-var __tail = require("../../lib/internal/tail");
-var __next = require("../../lib/internal/next");
-var __prev = require("../../lib/internal/prev");
+var __head = require("./../../lib/internal/head");
+var __tail = require("./../../lib/internal/tail");
+var __next = require("./../../lib/internal/next");
+var __prev = require("./../../lib/internal/prev");
 
 describe('Overwrite', function() {
     describe('Input Paths', function() {
@@ -49,25 +49,25 @@ describe('Overwrite', function() {
     describe('Input PathMaps', function() {
         describe('AsJSONG', function() {
             it('should splice an overwritten item.', function(done) {
-                spliceOverwrite({values: 'overwrite'}, 'toJSONG').
+                spliceOverwrite({json: 'overwrite'}, 'toJSONG').
                     subscribe(noOp, done, done);
             });
         });
         describe('AsPathValues', function() {
             it('should splice an overwritten item.', function(done) {
-                spliceOverwrite({values: 'overwrite'}, 'toPathValues').
+                spliceOverwrite({json: 'overwrite'}, 'toPathValues').
                     subscribe(noOp, done, done);
             });
         });
         describe('AsJSON', function() {
             it('should splice an overwritten item.', function(done) {
-                spliceOverwrite({values: 'overwrite'}, 'toJSON').
+                spliceOverwrite({json: 'overwrite'}, 'toJSON').
                     subscribe(noOp, done, done);
             });
         });
         describe('Selector', function() {
             it('should splice an overwritten item.', function(done) {
-                spliceOverwrite({values: 'overwrite'}, 'selector').
+                spliceOverwrite({json: 'overwrite'}, 'selector').
                     subscribe(noOp, done, done);
             });
         });
@@ -76,7 +76,7 @@ describe('Overwrite', function() {
 function spliceOverwrite(query, output) {
     var model = new Model({cache: {}});
     return model.
-        set({ values: 'you are terminated' }).
+        set({ json: 'you are terminated' }).
         flatMap(function() {
             return testRunner.set(model, _.cloneDeep(query), output);
         }).

@@ -1,7 +1,7 @@
 {
   "name": "falcor",
-  "version": "0.0.23",
-  "main": "./index.js",
+  "version": "0.0.25",
+  "main": "./lib/index.js",
   "homepage": "https://github.com/Netflix/falcor",
   "author": {
     "name": "Netflix",
@@ -21,14 +21,13 @@
     "test": "gulp test-coverage",
     "dist": "gulp build",
     "doc": "gulp doc",
-    "deploy-ghpages": "./build/deploy-ghpages.sh",
-    "perf": "gulp perf-run"
+    "perf": "gulp perf-run",
+    "deploy-ghpages": "./build/deploy-ghpages.sh"
   },
   "files": [
     "build",
     "dist",
     "lib",
-    "index.js",
     "test"
   ],
   "devDependencies": {
@@ -77,10 +76,9 @@
   },
   "dependencies": {
     "asap": "~2.0.3",
-    "falcor-observable": "git+ssh://git@github.com/Netflix/falcor-observable.git",
     "falcor-path-syntax": "git+ssh://git@github.com/Netflix/falcor-path-syntax.git",
     "promise": "7.0.0",
-    "rx": "git+ssh://git@github.com:Reactive-Extensions/RxJS.git",
+    "rx": "2.5.3",
     "sinon": "^1.15.4"
   }
 }

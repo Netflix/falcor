@@ -1,8 +1,8 @@
 var Rx = require("rx");
 var Observable = Rx.Observable;
-var jsong = require("../../index.js");
+var falcor = require("./../../lib/");
 var UnoDataSource = module.exports = function(cache) {
-    this.model = new jsong.Model({cache: cache});
+    this.model = new falcor.Model({cache: cache});
 };
 
 UnoDataSource.prototype = {
@@ -21,7 +21,7 @@ UnoDataSource.prototype = {
             if (results) {
                 if (results[0]) {
                     // returns all the paths even though they are missing
-                    observer.onNext({values: results[0].jsong, paths: paths});
+                    observer.onNext({values: results[0].jsonGraph, paths: paths});
                 } else {
                     observer.onNext(undefined);
                 }

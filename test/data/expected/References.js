@@ -1,6 +1,6 @@
-var $path = require('./../../../lib/types/path.js');
-var $atom = require('./../../../lib/types/atom.js');
-var $error = require('./../../../lib/types/error.js');
+var $path = require('./../../../lib/types/ref');
+var $atom = require('./../../../lib/types/atom');
+var $error = require('./../../../lib/types/error');
 module.exports = function() {
     return {
         simpleReference0: {
@@ -51,7 +51,7 @@ module.exports = function() {
 
             AsJSONG: {
                 values: [{
-                    jsong: {
+                    jsonGraph: {
                         genreList: {
                             0: {
                                 "$size": 52,
@@ -109,7 +109,7 @@ module.exports = function() {
                 ]
             },
 
-            setPathSets: {
+            setPathValues: {
                 query: [
                     {
                         path: ["genreList", "0", "1", "summary"],
@@ -122,7 +122,7 @@ module.exports = function() {
             },
             setJSONGs: {
                 query: [{
-                    jsong: {
+                    jsonGraph: {
                         genreList: {
                             0: ["lists", "abcd"]
                         },
@@ -185,7 +185,7 @@ module.exports = function() {
 
             AsJSONG: {
                 values: [{
-                    jsong: {
+                    jsonGraph: {
                         genreList: {
                             0: {
                                 "$size": "52",
@@ -243,7 +243,7 @@ module.exports = function() {
                 ]
             },
 
-            setPathSets: {
+            setPathValues: {
                 query: [
                     {
                         path: ["genreList", "0", "2", "summary"],
@@ -256,7 +256,7 @@ module.exports = function() {
             },
             setJSONGs: {
                 query: [{
-                    jsong: {
+                    jsonGraph: {
                         genreList: {
                             0: {
                                 "$size": "52",
@@ -327,7 +327,7 @@ module.exports = function() {
 
             AsJSONG: {
                 values: [{
-                    jsong: {
+                    jsonGraph: {
                         genreList: {
                             0: {
                                 "$size": "52",
@@ -385,7 +385,7 @@ module.exports = function() {
                 ]
             },
 
-            setPathSets: {
+            setPathValues: {
                 query: [
                     {
                         path: ["genreList", "0", "3", "summary"],
@@ -398,7 +398,7 @@ module.exports = function() {
             },
             setJSONGs: {
                 query: [{
-                    jsong: {
+                    jsonGraph: {
                         genreList: {
                             0: {
                                 "$size": "52",
@@ -469,7 +469,7 @@ module.exports = function() {
 
             AsJSONG: {
                 values: [{
-                    jsong: {
+                    jsonGraph: {
                         genreList: {
                             0: {
                                 "$size": "52",
@@ -566,7 +566,7 @@ module.exports = function() {
 
             AsJSONG: {
                 values: [{
-                    jsong: {
+                    jsonGraph: {
                         genreList: {
                             10: {
                                 "$size": "53",
@@ -652,7 +652,7 @@ module.exports = function() {
 
             AsJSONG: {
                 values: [{
-                    jsong: {
+                    jsonGraph: {
                         genreList: {
                             1: {
                                 "$size": "52",
@@ -758,7 +758,7 @@ module.exports = function() {
 
             AsJSONG: {
                 values: [{
-                    jsong: {
+                    jsonGraph: {
                         genreList: {
                             1: {
                                 "$size": "52",
@@ -823,7 +823,7 @@ module.exports = function() {
                 ]
             },
 
-//            setPathSets: {
+//            setPathValues: {
 //                query: [
 //                    {
 //                        path: ["genreList", "1", "0"],
@@ -865,7 +865,7 @@ module.exports = function() {
 
             AsJSONG: {
                 values: [{
-                    jsong: {
+                    jsonGraph: {
                         genreList: {
                             1: {
                                 "$size": "52",
@@ -942,7 +942,7 @@ module.exports = function() {
             AsJSONG: {
                 values: [{
                     paths: [["genreList", "5", null]],
-                    jsong: {
+                    jsonGraph: {
                         "genreList": {
                             "5": {
                                 "$size": "52",
@@ -1010,7 +1010,7 @@ module.exports = function() {
 
             AsJSONG: {
                 values: [{
-                    jsong: {
+                    jsonGraph: {
                         "genreList": {
                             "2": {
                                 "$size": "52",
@@ -1073,7 +1073,7 @@ module.exports = function() {
 
             AsJSONG: {
                 values: [{
-                    jsong: {
+                    jsonGraph: {
                         genreList: {
                             'inner-reference': {
                                 "$size": "52",
@@ -1136,7 +1136,7 @@ module.exports = function() {
 
             AsJSONG: {
                 values: [{
-                    jsong: {
+                    jsonGraph: {
                         "genreList": {
                             "2": {
                                 "$size": "52",
@@ -1204,7 +1204,7 @@ module.exports = function() {
 
             AsJSONG: {
                 values: [{
-                    jsong: {
+                    jsonGraph: {
                         genreList: {
                             4: {
                                 $size: 52,
@@ -1260,7 +1260,7 @@ module.exports = function() {
 
             AsJSONG: {
                 values: [{
-                    jsong: {
+                    jsonGraph: {
                         genreList: {
                             6: {
                                 $size: 52,
@@ -1323,7 +1323,7 @@ module.exports = function() {
 
             AsJSONG: {
                 values: [{
-                    jsong: {
+                    jsonGraph: {
                         genreList: {
                             11: {
                                 $size: 53,
@@ -1378,7 +1378,7 @@ module.exports = function() {
 
             AsJSONG: {
                 values: [{
-                    jsong: {
+                    jsonGraph: {
                         genreList: {
                             9: {
                                 $size: 52,
@@ -1512,7 +1512,7 @@ module.exports = function() {
 
             AsJSONG: {
                 values: [{
-                    jsong: {
+                    jsonGraph: {
                         genreList: {
                             13: {
                                 $type: $path,

@@ -1,5 +1,5 @@
-var jsong = require("../../index");
-var Model = jsong.Model;
+var falcor = require("./../../lib/");
+var Model = falcor.Model;
 var Rx = require("rx");
 var LocalDataSource = require("../data/LocalDataSource");
 var Cache = require("../data/Cache");
@@ -14,10 +14,10 @@ var noOp = function() {};
 var getDataModel = testRunner.getModel;
 var _ = require('lodash');
 
-var __head = require("../../lib/internal/head");
-var __tail = require("../../lib/internal/tail");
-var __next = require("../../lib/internal/next");
-var __prev = require("../../lib/internal/prev");
+var __head = require("./../../lib/internal/head");
+var __tail = require("./../../lib/internal/tail");
+var __next = require("./../../lib/internal/next");
+var __prev = require("./../../lib/internal/prev");
 
 describe('Get', function () {
     describe('getPaths', function () {

@@ -1,6 +1,6 @@
 var Rx = require("rx");
 var Observable = Rx.Observable;
-var jsong = require("../../index.js");
+var falcor = require("./../../lib/");
 var _ = require("lodash");
 var noOp = function(a, b, c) { return c; };
 
@@ -13,15 +13,15 @@ var LocalSource = module.exports = function(cache, options) {
         wait: false
     }, options);
     this._missCount = 0;
-    this.model = new jsong.Model({cache: cache});
+    this.model = new falcor.Model({cache: cache});
 };
 
 LocalSource.prototype = {
     setModel: function(modelOrCache) {
-        if (modelOrCache instanceof jsong.Model) {
+        if (modelOrCache instanceof falcor.Model) {
             this.model = modelOrCache;
         } else {
-            this.model = new jsong.Model({cache: modelOrCache});
+            this.model = new falcor.Model({cache: modelOrCache});
         }
     },
     get: function(paths) {
@@ -46,10 +46,10 @@ LocalSource.prototype = {
                 // always output all the paths
                 var output = {
                     paths: paths,
-                    jsong: {}
+                    jsonGraph: {}
                 };
                 if (values[0]) {
-                    output.jsong = values[0].jsong;
+                    output.jsonGraph = values[0].jsonGraph;
                 }
 
                 onResults(output);
@@ -74,8 +74,8 @@ LocalSource.prototype = {
         return Rx.Observable.create(function(observer) {
             function exec() {
                 var seed = [{}];
-                var tempModel = new jsong.Model({
-                    cache: jsongEnv.jsong,
+                var tempModel = new falcor.Model({
+                    cache: jsongEnv.jsonGraph,
                     errorSelector: errorSelector});
                 jsongEnv = onSet(self, tempModel, jsongEnv);
 
@@ -83,7 +83,7 @@ LocalSource.prototype = {
                     tempModel,
                     jsongEnv.paths,
                     function onNext(pathValue) {
-                        self.model._setPathSetsAsJSONG(self.model, [pathValue], seed);
+                        self.model._setPathValuesAsJSONG(self.model, [pathValue], seed);
                     });
 
                 // always output all the paths

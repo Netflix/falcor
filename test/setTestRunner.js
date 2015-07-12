@@ -1,4 +1,4 @@
-var falcor = require("./../index");
+var falcor = require("./../lib/");
 var collapse = require("../lib/support/collapse");
 var Model = falcor.Model;
 var chai = require("chai");
@@ -65,7 +65,7 @@ function fillInReferences(model, pathTo, prefix) {
 
                 // fills in reference if dne
                 // Also considers
-                !modelC && model._setPathSetsAsValues(model, [{path: prefix.concat(followed), value: value}]);
+                !modelC && model._setPathValuesAsValues(model, [{path: prefix.concat(followed), value: value}]);
                 fillInReferences(model, pathTo.slice(i + 1), c);
                 return;
             }
@@ -75,7 +75,7 @@ function fillInReferences(model, pathTo, prefix) {
     // Finally put in the final object into the cache so that we can set it while following references.
     // since a reference that points to an empty spot in the cache will be considered a "miss"
     // If something is there then it will put nothing there.
-    (followReference(cache, prefix.concat(followed)) === undefined) && model._setPathSetsAsValues(model, [{path: prefix.concat(followed), value: {$type: "atom", value: null}}]);
+    (followReference(cache, prefix.concat(followed)) === undefined) && model._setPathValuesAsValues(model, [{path: prefix.concat(followed), value: {$type: "atom", value: null}}]);
 }
 
 function setTestRunner(data, options) {
@@ -95,7 +95,7 @@ function setTestRunner(data, options) {
         var countOrFunction;
         prefixesAndSuffixes[0].
             filter(function (prefix) {
-                return ~prefix.indexOf("setPathSets");
+                return ~prefix.indexOf("setPathValues");
             }).
             map(function (prefix) {
                 prefixesAndSuffixes[1].map(function (suffix) {
@@ -107,7 +107,7 @@ function setTestRunner(data, options) {
                     // Note: JSONG should have all the required references
                     if (prefix !== 'setJSONGs') {
                         query.forEach(function(q) {
-                            var paths = q.path || q.paths || collapse.buildQueries(removeLeafs(_.cloneDeep(q)));
+                            var paths = q.path || q.paths || pathmapToPathsets(removeLeafs(_.cloneDeep(q))).sets;
                             options.fillReferences && fillInReferences(model, paths);
                             if (options.hardLink) {
                                 model._getPathSetsAsValues(model, [paths]);
@@ -175,6 +175,101 @@ function getCountArrayOrFunction(data, suffix, expected, testRunner) {
     }
     var count = data.count === undefined ? 1 : 0;
     return Array(count).join(",").split(",").map(function() { return {}; });
+}
+
+/**
+ * Builds the set of collapsed
+ * queries by traversing the tree
+ * once
+ */
+
+/* jshint forin: false */
+function pathmapToPathsets(pathmap, pathmapKey) {
+
+    var key;
+    var subs = Object.create(null);
+    var subKeys = "";
+    var pathsets = [];
+    var pathsetsLength = 0;
+
+    var subPath, subPathKeys, subPathKeysCount,
+        subPathSets, subPathSetsCount, subPathSetsIndex;
+
+    for(key in pathmap) {
+        if(key === __count) {
+            if(pathmapKey !== void 0) {
+                subs[__prefix + pathmapKey] = {
+                    key: pathmapKey,
+                    keys: empty_array,
+                    sets: empty_array
+                };
+            }
+            delete pathmap[key];
+        } else if(key[0] === __prefix) {
+            continue;
+        } else {
+            subPath = pathmapToPathsets(pathmap[key], key);
+            subPathKeys = subPath.key;
+            subPathSets = subs[subPathKeys] || (subs[subPathKeys] = {
+                key: subPathKeys,
+                keys: [],
+                sets: subPath.sets
+            });
+            subPathSets.key = key + ", " + subPathSets.key;
+            subPathSets.keys.push(isNumber(key) ? parseInt(key, 10) : key);
+        }
+    }
+
+    var pathset, pathsetCount, pathsetIndex,
+        pathsetClone, firstSubPathsKey;
+
+    for(key in subs) {
+
+        subPath = subs[key];
+        subPathKeys = subPath.keys;
+        subPathKeysCount = subPathKeys.length;
+
+        if(subPathKeysCount > 0) {
+
+            subKeys += (subKeys ? ", " : "") + "[" + subPath.key + "]";
+            subPathSets = subPath.sets;
+            subPathSetsIndex = -1;
+            subPathSetsCount = subPathSets.length;
+            firstSubPathsKey = subPathKeys[0];
+
+            while(++subPathSetsIndex < subPathSetsCount) {
+
+                pathset = subPathSets[subPathSetsIndex];
+                pathsetIndex = -1;
+                pathsetCount = pathset.length;
+                pathsetClone = new Array(pathsetCount);
+
+                if(subPathKeysCount > 1) {
+                    pathsetClone[0] = subPathKeys;
+                } else {
+                    pathsetClone[0] = firstSubPathsKey;
+                }
+
+                while(++pathsetIndex < pathsetCount) {
+                    pathsetClone[pathsetIndex + 1] = pathset[pathsetIndex];
+                }
+
+                pathsets[pathsetsLength++] = pathsetClone;
+            }
+        } else {
+            subKeys += subKeys ? ", []" : "[]";
+            pathsets[pathsetsLength++] = empty_array;
+        }
+    }
+
+    if(pathsetsLength === 0) {
+        pathsets[0] = empty_array;
+    }
+
+    return {
+        key: subKeys || "[]",
+        sets: pathsets
+    };
 }
 
 module.exports = setTestRunner;

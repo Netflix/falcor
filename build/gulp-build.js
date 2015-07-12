@@ -14,11 +14,11 @@ gulp.task('build', ['build.node']);
 gulp.task('dist', ['dist.node', 'dist.browser']);
 
 gulp.task('build.node', ['clean.dev'], function() {
-    return build(['./index.js'], {}, 'falcor.js');
+    return build(['./lib/index.js'], {}, 'falcor.js');
 });
 
 gulp.task('dist.node', ['clean.dist'], function() {
-    return build(['./index.js'], {}, 'falcor.js', 'dist');
+    return build(['./lib/index.js'], {}, 'falcor.js', 'dist');
 });
 
 gulp.task('dist.browser', ['clean.dist'], function() {

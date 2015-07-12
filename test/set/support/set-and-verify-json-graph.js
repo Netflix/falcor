@@ -7,8 +7,8 @@ Array.prototype.flatMap = function(selector) {
 };
 
 var _ = require("lodash");
-var jsong = require("../../../index");
-var Model = jsong.Model;
+var falcor = require("./../../../lib/");
+var Model = falcor.Model;
 var partial_cache = require("./partial-cache");
 var verify = require("./verify");
 var set_envelopes = require("./set-envelopes");

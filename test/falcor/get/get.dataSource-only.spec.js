@@ -1,5 +1,5 @@
-var jsong = require('../../../index');
-var Model = jsong.Model;
+var falcor = require("./../../../lib/");
+var Model = falcor.Model;
 var Cache = require('../../data/Cache');
 var Expected = require('../../data/expected');
 var Rx = require('rx');
@@ -8,9 +8,8 @@ var testRunner = require('./../../testRunner');
 var noOp = function() {};
 var LocalDataSource = require('../../data/LocalDataSource');
 var ErrorDataSource = require('../../data/ErrorDataSource');
-var isPathValue = function(x) {
-    return x && x.hasOwnProperty('path') && x.hasOwnProperty('value');
-};
+var isPathValue = require("./../../../lib/support/is-path-value");
+var expect = require("chai").expect;
 
 describe('DataSource Only', function() {
     describe('Selector Functions', function() {
@@ -146,6 +145,60 @@ describe('DataSource Only', function() {
                 done('On Completed was called. ' +
                      'OnError should have been called.');
             });
+    });
+    it("should get all missing paths in a single request", function(done) {
+        var model = new Model({ source: {
+            get: function(paths) {
+                try {
+                    var path = paths[0];
+                    var range = path[1];
+                    expect(range).to.be.ok;
+                    expect(range.from).to.equals(0);
+                    expect(range.to).to.equals(2);
+                    return Rx.Observable.return({
+                        paths: paths,
+                        jsonGraph: {
+                            lolomo: {
+                                summary: {
+                                    $type: "atom",
+                                    value: "hello"
+                                },
+                                0: {
+                                    summary: {
+                                        $type: "atom",
+                                        value: "hello-0"
+                                    }
+                                },
+                                1: {
+                                    summary: {
+                                        $type: "atom",
+                                        value: "hello-1"
+                                    }
+                                },
+                                2: {
+                                    summary: {
+                                        $type: "atom",
+                                        value: "hello-2"
+                                    }
+                                }
+                            }
+                        }
+                    });
+                } catch(e) {
+                    return Rx.Observable.throw(e);
+                }
+            }
+        }});
+        
+        model.get("lolomo.summary", "lolomo[0..2].summary").subscribe(function(data) {
+            var json = data.json;
+            var lolomo = json.lolomo;
+            expect(lolomo.summary).to.be.ok;
+            expect(lolomo[0].summary).to.be.ok;
+            expect(lolomo[1].summary).to.be.ok;
+            expect(lolomo[2].summary).to.be.ok;
+            done();
+        }, done);
     });
 });
 

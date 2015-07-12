@@ -1,6 +1,6 @@
-var $path = require('./../../../lib/types/path.js');
-var $atom = require('./../../../lib/types/atom.js');
-var $error = require('./../../../lib/types/error.js');
+var $path = require('./../../../lib/types/ref');
+var $atom = require('./../../../lib/types/atom');
+var $error = require('./../../../lib/types/error');
 module.exports = function() {
     return {
         direct: {
@@ -9,7 +9,7 @@ module.exports = function() {
                     ["videos", "1234", "summary"]
                 ]
             },
-            setPathSets: {
+            setPathValues: {
                 query: [{
                     path: ["videos", "1234", "summary"],
                     "value": {
@@ -35,7 +35,7 @@ module.exports = function() {
             setJSONGs: {
                 query: [{
                     paths: [["videos", "1234", "summary"]],
-                    jsong: {
+                    jsonGraph: {
                         videos: {
                             1234: {
                                 summary: {
@@ -77,7 +77,7 @@ module.exports = function() {
             },
             AsJSONG: {
                 values: [{
-                    jsong: {
+                    jsonGraph: {
                         videos: {
                             1234: {
                                 summary: {
@@ -115,7 +115,7 @@ module.exports = function() {
                     ["videos", "553", "summary"]
                 ]
             },
-            setPathSets: {
+            setPathValues: {
                 query: [{
                     path: ["videos", "553", "summary"],
                     "value": {
@@ -141,7 +141,7 @@ module.exports = function() {
             setJSONGs: {
                 query: [{
                     paths: [["videos", "553", "summary"]],
-                    jsong: {
+                    jsonGraph: {
                         videos: {
                             553: {
                                 summary: {
@@ -183,7 +183,7 @@ module.exports = function() {
             },
             AsJSONG: {
                 values: [{
-                    jsong: {
+                    jsonGraph: {
                         videos: {
                             553: {
                                 summary: {
@@ -220,7 +220,7 @@ module.exports = function() {
                 ["genreList", "0"]
             ],
 
-            setPathSets: {
+            setPathValues: {
                 query: [
                     {
                         path: ["genreList", "0"],
@@ -241,7 +241,7 @@ module.exports = function() {
             setJSONGs: {
                 query: [{
                     paths: [["genreList", "0"]],
-                    jsong: {
+                    jsonGraph: {
                         genreList: {
                             0: ["lists", "abcd"]
                         }
@@ -292,7 +292,7 @@ module.exports = function() {
 
             AsJSONG: {
                 values: [{
-                    jsong: {
+                    jsonGraph: {
                         genreList: {
                             0: {
                                 "$size": 52,
@@ -311,7 +311,7 @@ module.exports = function() {
                     ["videos", "1234", "summary"]
                 ]
             },
-            setPathSets: {
+            setPathValues: {
                 query: [{
                     path: ["videos", "1234", "summary"],
                     "value": {
@@ -340,7 +340,7 @@ module.exports = function() {
             setJSONGs: {
                 query: [{
                     paths: [["videos", "1234", "summary"]],
-                    jsong: {
+                    jsonGraph: {
                         videos: {
                             1234: {
                                 summary: {
@@ -382,7 +382,7 @@ module.exports = function() {
             },
             AsJSONG: {
                 values: [{
-                    jsong: {
+                    jsonGraph: {
                         videos: {
                             1234: {
                                 summary: {
@@ -431,7 +431,7 @@ module.exports = function() {
                 }]
             },
 
-            setPathSets: {
+            setPathValues: {
                 query: [
                     {
                         path: ["videos", "expiredLeafByTimestamp", "summary"],
@@ -468,7 +468,7 @@ module.exports = function() {
             setJSONG: {
                 query: [{
                     paths: [["videos", $atom, "summary"]],
-                    jsong: {
+                    jsonGraph: {
                         videos: {
                             expiredLeafByTimestamp: {
                                 summary: {
@@ -521,7 +521,7 @@ module.exports = function() {
                 }]
             },
 
-            setPathSets: {
+            setPathValues: {
                 query: [
                     {
                         path: ["videos", "expiredLeafBy0", "summary"],
@@ -558,7 +558,7 @@ module.exports = function() {
             setJSONG: {
                 query: [{
                     paths: [["videos", "expiredLeafBy0", "summary"]],
-                    jsong: {
+                    jsonGraph: {
                         videos: {
                             expiredLeafBy0: {
                                 summary: {
@@ -693,7 +693,7 @@ module.exports = function() {
             AsJSONG: {
                 values: [{
                     paths: [["videos", "errorBranch"]],
-                    jsong: {
+                    jsonGraph: {
                         "videos": {
                             "errorBranch": {
                                 "$size": 51,
@@ -743,7 +743,7 @@ module.exports = function() {
             AsJSONG: {
                 values: [{
                     paths: [["genreList", "2", null]],
-                    jsong: {
+                    jsonGraph: {
                         "genreList": {
                             "2": {
                                 "$size": 52,

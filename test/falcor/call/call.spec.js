@@ -1,5 +1,5 @@
-var jsong = require("../../../index");
-var Model = jsong.Model;
+var falcor = require("./../../../lib/");
+var Model = falcor.Model;
 var $ref = Model.ref;
 var Cache = require("../../data/Cache");
 var ReducedCache = require("../../data/ReducedCache").ReducedCache;
@@ -40,7 +40,7 @@ describe("Call", function() {
             subscribe(function(videos) {
                 testRunner.compare(videos[0], videos[1]);
                 done();
-            });
+            }, done);
     });
 
     it("executes a local function with call args on a bound Model", function(done) {
@@ -69,7 +69,7 @@ describe("Call", function() {
             subscribe(function(videos) {
                 testRunner.compare(videos[0], videos[1]);
                 done();
-            });
+            }, done);
     });
 
     it("executes a local function with call args and maps the result paths through a selector", function(done) {
@@ -92,7 +92,7 @@ describe("Call", function() {
             subscribe(function(videos) {
                 testRunner.compare(videos[0], videos[1]);
                 done();
-            });
+            }, done);
     });
 
     it("executes a local function with call args on a bound Model and maps the result paths through a selector", function(done) {
@@ -123,7 +123,7 @@ describe("Call", function() {
             .subscribe(function(videos) {
                 testRunner.compare(videos[0], videos[1]);
                 done();
-            });
+            }, done);
     });
 
     it("executes a local function with call args on a bound model and emits invalidations relative to the optimized bound path", function(done) {
@@ -158,12 +158,12 @@ describe("Call", function() {
                 } finally {
                     done(err);
                 }
-            });
+            }, done);
 
         function getExpectedJSONG() {
             // The output json
             return {
-                jsong: {
+                jsonGraph: {
                     lolomo: { $size: "52", $type: "ref", value: ["lolomos", 123] },
                     lolomos: {
                         123: {

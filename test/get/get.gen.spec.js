@@ -1,5 +1,5 @@
-var jsong = require("../../index");
-var Model = jsong.Model;
+var falcor = require("./../../lib/");
+var Model = falcor.Model;
 var expect = require('chai').expect;
 
 describe('getGenerationSync', function() {

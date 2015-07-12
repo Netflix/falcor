@@ -1,7 +1,7 @@
 module.exports = function() {
     return {
         toOnly: {
-            setPathSets: {
+            setPathValues: {
                 count: 2,
                 query: [{
                     "path": ["v", {to:1}, "s"],
@@ -26,7 +26,7 @@ module.exports = function() {
             setJSONGs: {
                 count: 2,
                 query: [{
-                    jsong: {
+                    jsonGraph: {
                         v: {
                             0: {
                                 s: "Arnold"
@@ -72,7 +72,7 @@ module.exports = function() {
 
             AsJSONG: {
                 values: [{
-                    jsong: {
+                    jsonGraph: {
                         "v": {
                             "0": {
                                 "s": "Arnold"
@@ -105,7 +105,7 @@ module.exports = function() {
             }
         },
         fromOnly: {
-            setPathSets: {
+            setPathValues: {
                 query: [{
                     "path": ["v", {from:0}, "s"],
                     "value": "Arnold"
@@ -135,7 +135,7 @@ module.exports = function() {
 
             AsJSONG: {
                 values: [{
-                    jsong: {
+                    jsonGraph: {
                         "v": {
                             "0": {
                                 "s": "Arnold"
@@ -161,7 +161,7 @@ module.exports = function() {
             }
         },
         fromAndTo: {
-            setPathSets: {
+            setPathValues: {
                 count: 3,
                 query: [{
                     "path": ["v", {from:-1, to:1}, "s"],
@@ -205,7 +205,7 @@ module.exports = function() {
 
             AsJSONG: {
                 values: [{
-                    jsong: {
+                    jsonGraph: {
                         "v": {
                             "-1": {
                                 "s": "Arnold"
@@ -245,7 +245,7 @@ module.exports = function() {
             }
         },
         fromAndLength: {
-            setPathSets: {
+            setPathValues: {
                 query: [{
                     "path": ["v", {from:-1, length:3}, "s"],
                     "value": "Arnold"
@@ -288,7 +288,7 @@ module.exports = function() {
 
             AsJSONG: {
                 values: [{
-                    jsong: {
+                    jsonGraph: {
                         "v": {
                             "-1": {
                                 "s": "Arnold"
@@ -328,7 +328,7 @@ module.exports = function() {
             }
         },
         toOnlyLeaf: {
-            setPathSets: {
+            setPathValues: {
                 count: 2,
                 query: [{
                     "path": ["v", {to:1}],
@@ -349,7 +349,7 @@ module.exports = function() {
             setJSONGs: {
                 count: 2,
                 query: [{
-                    jsong: {
+                    jsonGraph: {
                         v: {
                             0: "Arnold",
                             1: "Arnold"
@@ -391,7 +391,7 @@ module.exports = function() {
 
             AsJSONG: {
                 values: [{
-                    jsong: {
+                    jsonGraph: {
                         "v": {
                             "0": "Arnold",
                             "1": "Arnold"
@@ -416,7 +416,7 @@ module.exports = function() {
             }
         },
         fromOnlyLeaf: {
-            setPathSets: {
+            setPathValues: {
                 query: [{
                     "path": ["v", {from:0}],
                     "value": "Arnold"
@@ -446,7 +446,7 @@ module.exports = function() {
 
             AsJSONG: {
                 values: [{
-                    jsong: {
+                    jsonGraph: {
                         "v": {
                             "0": "Arnold"
                         }
@@ -468,7 +468,7 @@ module.exports = function() {
             }
         },
         fromAndToLeaf: {
-            setPathSets: {
+            setPathValues: {
                 count: 3,
                 query: [{
                     "path": ["v", {from:-1, to:1}],
@@ -512,7 +512,7 @@ module.exports = function() {
 
             AsJSONG: {
                 values: [{
-                    jsong: {
+                    jsonGraph: {
                         "v": {
                             "-1": "Arnold",
                             "0": "Arnold",
@@ -540,7 +540,7 @@ module.exports = function() {
             }
         },
         fromAndLengthLeaf: {
-            setPathSets: {
+            setPathValues: {
                 query: [{
                     "path": ["v", {from:-1, length:3}],
                     "value": "Arnold"
@@ -583,7 +583,7 @@ module.exports = function() {
 
             AsJSONG: {
                 values: [{
-                    jsong: {
+                    jsonGraph: {
                         "v": {
                             "-1": "Arnold",
                             "0": "Arnold",

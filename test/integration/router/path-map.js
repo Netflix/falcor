@@ -1,4 +1,4 @@
-var jsong = require("../../../index");
+var falcor = require("./../../../lib/");
 var R = require('falcor-router');
 var Routes = require('../../data/routes');
 var Rx = require("rx");
@@ -14,7 +14,7 @@ var RouterTestRunner = require('../../routerTestRunner');
 describe("PathMap", function() {
     it('should match a simple route in the virtual path.', function(done) {
         var r = new R(Routes().Videos.Integers.Summary);
-        var model = new jsong.Model({router: r});
+        var model = new falcor.Model({router: r});
 
         var expected = Values().direct.AsPathMap.values;
         var obs = model.
@@ -33,7 +33,7 @@ describe("PathMap", function() {
             concat(
             Routes().GenreList.Ranges);
         var r = new R(routes);
-        var model = new jsong.Model({router: r});
+        var model = new falcor.Model({router: r});
 
         var obs = model.
             get(['genreList', 0, 0, 'summary']);
@@ -52,7 +52,7 @@ describe("PathMap", function() {
             concat(
             Routes().GenreList.Ranges);
         var r = new R(routes);
-        var model = new jsong.Model({router: r});
+        var model = new falcor.Model({router: r});
 
         var obs = model.
             get(['genreList', 0, 0, 'summary'], ['videos', 123123, 'summary']);

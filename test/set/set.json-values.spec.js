@@ -1,7 +1,7 @@
 var Rx = require("rx");
 var _ = require("lodash");
-var jsong = require("../../index");
-var Model = jsong.Model;
+var falcor = require("./../../lib/");
+var Model = falcor.Model;
 var expect = require('chai').expect;
 
 var whole_cache = require("./support/whole-cache");
@@ -13,8 +13,8 @@ var get_pathsets = require("./support/get-pathsets");
 var set_and_verify_json_values = require("./support/set-and-verify-json-values");
 
 var slice = Array.prototype.slice;
-var $path = require("../../lib/types/path");
-var $atom = require("../../lib/types/atom");
+var $path = require("./../../lib/types/ref");
+var $atom = require("./../../lib/types/atom");
 
 var modes = [{
         
@@ -94,7 +94,7 @@ function execute(output, suffix, opts) {
                                 value: "Quentin Tarantino"
                             }], opts);
                         });
-                        it("through through successful, short-circuit, and broken references", function() {
+                        it("through successful, short-circuit, and broken references", function() {
                             set_and_verify_json_values(this.test, suffix, [{
                                 path: ["grid", 0, [0, 1, 2], "director"],
                                 value: "Quentin Tarantino"
@@ -209,7 +209,7 @@ function execute(output, suffix, opts) {
                                 }
                             }], opts);
                         });
-                        it("through through successful, short-circuit, and broken references", function() {
+                        it("through successful, short-circuit, and broken references", function() {
                             set_and_verify_json_values(this.test, suffix, [{
                                 path: ["grid", 0, [0, 1, 2], "genres"],
                                 value: {

@@ -1,5 +1,5 @@
-var jsong = require('../../../index');
-var Model = jsong.Model;
+var falcor = require("./../../../lib/");
+var Model = falcor.Model;
 var Cache = require('../../data/Cache');
 var M = require('../../data/ReducedCache').MinimalCache;
 var Expected = require('../../data/expected');
@@ -10,9 +10,6 @@ var testRunner = require('./../../testRunner');
 var noOp = function() {};
 var LocalDataSource = require('../../data/LocalDataSource');
 var ErrorDataSource = require('../../data/ErrorDataSource');
-var isPathValue = function(x) {
-    return x && x.hasOwnProperty('path') && x.hasOwnProperty('value');
-};
 
 describe('Progressive', function() {
     describe('Selector', function() {
