@@ -155,10 +155,6 @@ describe('Core', function() {
         it('should report an undefined atom for a materialized undefined atom', function() {
             getTestRunner(Materialized().atomOfUndefined, { materialized: true });
         });
-        it('should not report a materialized path when there is a router.', function() {
-            var model = new Model({cache: Cache(), router: {}}).materialize();
-            getTestRunner(Materialized().routerOrSourceMissing, { model: model });
-        });
         it('should not report a materialized path when there is a source.', function() {
             var model = new Model({cache: Cache(), source: {}}).materialize();
             getTestRunner(Materialized().routerOrSourceMissing, { model: model });
