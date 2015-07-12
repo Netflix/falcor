@@ -2,6 +2,7 @@ var testConfig = window.testConfig();
 
 var testRunner = require('./testRunner');
 var testSuiteGenerator = require('./testSuiteGenerator');
+var csvFormatter = require('./testResultsCSVFormatter');
 
 var models = testConfig.models;
 var formats = testConfig.formats;

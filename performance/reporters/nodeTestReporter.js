@@ -46,6 +46,11 @@ function getFileName() {
 =======
 
 module.exports = function(totalResults) {
+<<<<<<< HEAD
     fs.writeFileSync('out.csv', totalResults.join('\n'));
 };
 >>>>>>> 5e1882f... More refactoring/cleanup
+=======
+    fs.writeFileSync('out.csv', totalResults);
+};
+>>>>>>> 243f2bc... Added Karma hooks

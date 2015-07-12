@@ -9,6 +9,10 @@ module.exports = {
     }
 =======
 module.exports = function(totalResults) {
+<<<<<<< HEAD
     console.log(totalResults.join('\n'));
 >>>>>>> 5e1882f... More refactoring/cleanup
+=======
+    console.log(totalResults);
+>>>>>>> 243f2bc... Added Karma hooks
 };
