@@ -1,7 +1,7 @@
 module.exports = invalidate_and_verify_json_sparse;
 
 var _ = require("lodash");
-var falcor = require("falcor");
+var falcor = require("./../../../lib/");
 var Model = falcor.Model;
 var whole_cache = require("../../set/support/whole-cache");
 var verify = require("./verify");

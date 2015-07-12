@@ -1,7 +1,7 @@
 var expiredTimestamp = Date.now() - 100;
-var $path = require('falcor/types/ref');
-var $atom = require('falcor/types/atom');
-var $error = require('falcor/types/error');
+var $path = require('./../../lib/types/ref');
+var $atom = require('./../../lib/types/atom');
+var $error = require('./../../lib/types/error');
 
 var Cache = function() {
     return {

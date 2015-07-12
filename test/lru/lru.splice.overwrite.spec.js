@@ -1,4 +1,4 @@
-var jsong = require("falcor");
+var jsong = require("./../../lib/");
 var Model = jsong.Model;
 var Rx = require("rx");
 var LocalDataSource = require("../data/LocalDataSource");
@@ -14,10 +14,10 @@ var noOp = function() {};
 var getDataModel = testRunner.getModel;
 var _ = require('lodash');
 
-var __head = require("falcor/internal/head");
-var __tail = require("falcor/internal/tail");
-var __next = require("falcor/internal/next");
-var __prev = require("falcor/internal/prev");
+var __head = require("./../../lib/internal/head");
+var __tail = require("./../../lib/internal/tail");
+var __next = require("./../../lib/internal/next");
+var __prev = require("./../../lib/internal/prev");
 
 describe('Overwrite', function() {
     describe('Input Paths', function() {

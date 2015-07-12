@@ -1,4 +1,4 @@
-var falcor = require("falcor");
+var falcor = require("./../../../lib/");
 var Model = falcor.Model;
 var Cache = require('../../data/Cache');
 var Expected = require('../../data/expected');
@@ -8,7 +8,7 @@ var testRunner = require('./../../testRunner');
 var noOp = function() {};
 var LocalDataSource = require('../../data/LocalDataSource');
 var ErrorDataSource = require('../../data/ErrorDataSource');
-var isPathValue = require("falcor/support/is-path-value");
+var isPathValue = require("./../../../lib/support/is-path-value");
 var expect = require("chai").expect;
 
 describe('DataSource Only', function() {

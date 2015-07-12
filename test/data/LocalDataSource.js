@@ -1,6 +1,6 @@
 var Rx = require("rx");
 var Observable = Rx.Observable;
-var falcor = require("falcor");
+var falcor = require("./../../lib/");
 var _ = require("lodash");
 var noOp = function(a, b, c) { return c; };
 

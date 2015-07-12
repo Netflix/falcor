@@ -1,4 +1,4 @@
-var falcor = require("falcor");
+var falcor = require("./../../../lib/");
 var Model = falcor.Model;
 var Rx = require("rx");
 var LocalDataSource = require("../../data/LocalDataSource");
@@ -12,10 +12,10 @@ var Values = Expected.Values;
 var chai = require("chai");
 var expect = chai.expect;
 var noOp = function() {};
-var InvalidModelError = require('falcor/errors/InvalidModelError');
-var $atom = require("falcor/types/atom");
-var $error = require("falcor/types/error");
-var $ref = require("falcor/types/ref");
+var InvalidModelError = require('./../../../lib/errors/InvalidModelError');
+var $atom = require("./../../../lib/types/atom");
+var $error = require("./../../../lib/types/error");
+var $ref = require("./../../../lib/types/ref");
 var sinon = require('sinon');
 
 describe("Bind-Short", function() {
