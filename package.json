@@ -1,4 +1,4 @@
-
+{
   "name": "falcor",
   "version": "0.0.25",
   "main": "./lib/index.js",
