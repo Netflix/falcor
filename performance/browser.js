@@ -20,17 +20,26 @@ var tests = testConfig.get;
 var suite = testConfig.suite;
 
 suite.tests = testSuiteGenerator({
-    iterations: 10,
     models: {
         'model': models.modelWithSource
     },
     formats: ['PathMap', 'JSON']
 });
 
+var gc = function() {
+    if (typeof window !== 'undefined' && window && window.gc) {
+        return function() {
+            window.gc();
+        }
+    } else {
+        return null;
+    }
+};
+
 var env = navigator.userAgent;
 var logger = console.log.bind(console);
 var resultsReporter = compose(testReporter.resultsReporter, CSVFormatter.toTable);
 var benchmarkReporter = compose(testReporter.benchmarkReporter, curry(CSVFormatter.toRow, env));
 
-testRunner(suite, env, benchmarkReporter, resultsReporter, logger);
+testRunner(suite, env, benchmarkReporter, resultsReporter, logger, gc());
 
