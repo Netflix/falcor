@@ -44,11 +44,11 @@ describe("Call", function() {
     });
 
     it("executes a local function with call args on a bound Model", function(done) {
-        
+
         var model = getDataModel(new LocalDataSource(Cache()), ReducedCache());
 
         model
-            .bind(["lists", "my-list"], ["0"])
+            .deref(["lists", "my-list"], ["0"])
             .flatMap(function(model) {
                 return model.withoutDataSource().set({
                     path: ["add"],
@@ -99,9 +99,9 @@ describe("Call", function() {
 
         var model = getDataModel(new LocalDataSource(Cache()), ReducedCache());
 
-        model
-            .bind(["lists", "my-list"], ["0"])
-            .flatMap(function(model) {
+        model.
+            deref(["lists", "my-list"], ["0"]).
+            flatMap(function(model) {
                 return model.withoutDataSource().set({
                     path: ["add"],
                     value: function(videoID) {
@@ -111,25 +111,25 @@ describe("Call", function() {
                         });
                     }
                 }, function() { return model; });
-            })
-            .flatMap(function(model) {
+            }).
+            flatMap(function(model) {
                 return model.
                     call(["add"], [1234], [["summary"]], function(paths) {
                         return this.getValueSync(paths[0]);
                     }).
                     concat(model.getValue([0, "summary"])).
                     toArray();
-            })
-            .subscribe(function(videos) {
+            }).
+            subscribe(function(videos) {
                 testRunner.compare(videos[0], videos[1]);
                 done();
             }, done);
     });
 
     it("executes a local function with call args on a bound model and emits invalidations relative to the optimized bound path", function(done) {
-        
+
         // callPath, args, suffix, paths
-        
+
         // The route info
         var model = new Model({ cache: {
             lolomo: { $type: "ref", value: ["lolomos", 123] },

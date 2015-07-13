@@ -68,7 +68,7 @@ describe('Progressive', function() {
                 newValue: '1'
             };
             model.
-                bindSync(['genreList', 0]).
+                derefSync(['genreList', 0]).
                 set(
                     {path: [{to:1}, 'summary'], value: e1},
                     function(list) {
@@ -140,13 +140,13 @@ describe('Progressive', function() {
             model._root.unsafeMode = true;
             model2._root.unsafeMode = true;
             var progressive = model.
-                bindSync(['genreList', 0]).
+                derefSync(['genreList', 0]).
                 set({path: [{to:1}, 'summary'], value: e1}).
                 progressively().
                 toPathValues();
 
             var standard = model2.
-                bindSync(['genreList', 0]).
+                derefSync(['genreList', 0]).
                 set({path: [{to:1}, 'summary'], value: e1}).
                 toPathValues();
 

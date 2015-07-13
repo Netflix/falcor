@@ -10,13 +10,13 @@ var noOp = function() {};
 var chai = require("chai");
 var expect = chai.expect;
 
-describe('Bind', function() {
-    it('should bind to a branch node.', function(done) {
+describe('Deref', function() {
+    it('should deref to a branch node.', function(done) {
         var model = new Model({source: new LocalDataSource(Cache())});
         var count = 0;
         var expected = Bound().directValue.AsPathMap.values[0];
         model = model.
-            bind(["genreList", 0, 0], ['summary']).
+            deref(["genreList", 0, 0], ['summary']).
             flatMap(function(model) {
                 return model.get(['summary']);
             }).
@@ -28,8 +28,8 @@ describe('Bind', function() {
             }).
             subscribe(noOp, done, done);
     });
-    it('should bind to a branch node and build proper missing paths', function() {
-        var model = new Model({ cache: getCache() }).bindSync(["lolomos","c595efe8-4de0-4226-8d4a-ebe89d236e2f_ROOT"]);
+    it('should deref to a branch node and build proper missing paths', function() {
+        var model = new Model({ cache: getCache() }).derefSync(["lolomos","c595efe8-4de0-4226-8d4a-ebe89d236e2f_ROOT"]);
         var results = model._getPathSetsAsPathMap(model, [
             [[{"from":0,"to":4}, {"from":5,"to":9}, {"from":30,"to":34}], 0,"item",["summary","outline","info","heroImages","rating","share","queue","details"]],
             [[{"from":0,"to":4}, {"from":5,"to":9}, {"from":30,"to":34}], 0,"evidence"]
@@ -44,23 +44,23 @@ describe('Bind', function() {
         expect(out.optimizedPath).to.deep.equal(["lolomos","c595efe8-4de0-4226-8d4a-ebe89d236e2f_ROOT", 1, 0]);
     });
 
-    it('should allow for multiple bind operations.', function(done) {
+    it('should allow for multiple deref operations.', function(done) {
         var model = new Model({ cache: getCache() });
         var expectedAtLolomo = ["lolomos", "c595efe8-4de0-4226-8d4a-ebe89d236e2f_ROOT"];
         var expectedAtLolomo0 = ["lists", "c595efe8-4de0-4226-8d4a-ebe89d236e2f_fcce4c47-7b36-456b-89ac-bde430a24ca8"];
         var expectedAtLolomo00Item = ["videos", "80041601"];
         var called = [false, false, false];
         model.
-            bind('lolomo', [0, 0, 'item', 'info']).
+            deref('lolomo', [0, 0, 'item', 'info']).
             flatMap(function(boundModel) {
                 testRunner.compare(expectedAtLolomo, boundModel._path);
                 called[0] = true;
-                return boundModel.bind([0], [0, 'item', 'info']);
+                return boundModel.deref([0], [0, 'item', 'info']);
             }).
             flatMap(function(boundModel) {
                 testRunner.compare(expectedAtLolomo0, boundModel._path);
                 called[1] = true;
-                return boundModel.bind([0, 'item'], ['info']);
+                return boundModel.deref([0, 'item'], ['info']);
             }).
             doAction(function(boundModel) {
                 called[2] = true;

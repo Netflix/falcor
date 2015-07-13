@@ -11,11 +11,11 @@ var LocalDataSource = require('../../data/LocalDataSource');
 var ErrorDataSource = require('../../data/ErrorDataSource');
 var isPathValue = require("./../../../lib/support/is-path-value");
 
-describe('DataSource and Bind', function() {
+describe('DataSource and Deref', function() {
     it('should get a value from from dataSource when bound.', function(done) {
         var model = new Model({cache: M(), source: new LocalDataSource(Cache())});
         model._root.unsafeMode = true;
-        model = model.bindSync(['genreList', 0]);
+        model = model.derefSync(['genreList', 0]);
         var expected = {
             "title": "The Next Terminator",
             "url": "/movies/766"
@@ -61,7 +61,7 @@ describe('DataSource and Bind', function() {
             })
         });
         model._root.unsafeMode = true;
-        model = model.bindSync(['genreList', 0]);
+        model = model.derefSync(['genreList', 0]);
         model.
             set(
                 {path: [0, 'summary'], value: 1337},
