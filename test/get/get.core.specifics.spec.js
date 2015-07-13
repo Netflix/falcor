@@ -2,6 +2,7 @@ var falcor = require('./../../lib/');
 var Model = falcor.Model;
 var Cache = require('../data/Cache');
 var Expected = require('../data/expected');
+var LocalDataSource = require('../data/LocalDataSource');
 var Rx = require('rx');
 var getTestRunner = require('./../getTestRunner');
 var testRunner = require('./../testRunner');
@@ -13,9 +14,10 @@ var Bound = Expected.Bound;
 var Materialized = Expected.Materialized;
 var Boxed = Expected.Boxed;
 var Errors = Expected.Errors;
-var $atom = require("./../../lib/types/atom");
-var $error = require("./../../lib/types/error");
+var $atom = require('./../../lib/types/atom');
+var $error = require('./../../lib/types/error');
 var noOp = function() {};
+var sinon = require('sinon');
 
 describe('Specific Cases', function() {
     describe('Selector Missing PathSet Index', function() {
@@ -48,13 +50,13 @@ describe('Specific Cases', function() {
             model._getPathSetsAsPathMap(model, [['videos', 1, 'summary']], seed);
 
             testRunner.compare({
-                "title": "Additional Title 0",
-                "url": "/movies/0"
+                'title': 'Additional Title 0',
+                'url': '/movies/0'
             }, seed[0].json.videos[0].summary);
 
             testRunner.compare({
-                "title": "Additional Title 1",
-                "url": "/movies/1"
+                'title': 'Additional Title 1',
+                'url': '/movies/1'
             }, seed[0].json.videos[1].summary);
         });
         it('should continue to populate the seed toJSONG()', function () {
@@ -67,8 +69,8 @@ describe('Specific Cases', function() {
                 $type: $atom,
                 $size: 51,
                 value: {
-                    "title": "Additional Title 0",
-                    "url": "/movies/0"
+                    'title': 'Additional Title 0',
+                    'url': '/movies/0'
                 }
             }, seed[0].jsonGraph.videos[0].summary);
 
@@ -76,8 +78,8 @@ describe('Specific Cases', function() {
                 $type: $atom,
                 $size: 51,
                 value: {
-                    "title": "Additional Title 1",
-                    "url": "/movies/1"
+                    'title': 'Additional Title 1',
+                    'url': '/movies/1'
                 }
             }, seed[0].jsonGraph.videos[1].summary);
         });
@@ -88,13 +90,13 @@ describe('Specific Cases', function() {
             model._getPathSetsAsJSON(model, [['videos', [1], 'summary']], seed);
 
             testRunner.compare({
-                "title": "Additional Title 0",
-                "url": "/movies/0"
+                'title': 'Additional Title 0',
+                'url': '/movies/0'
             }, seed[0].json[0]);
 
             testRunner.compare({
-                "title": "Additional Title 1",
-                "url": "/movies/1"
+                'title': 'Additional Title 1',
+                'url': '/movies/1'
             }, seed[0].json[1]);
         });
         it('should continue to populate multiple seeds in the selector.', function () {
@@ -110,23 +112,23 @@ describe('Specific Cases', function() {
             ], seed);
 
             testRunner.compare({
-                "title": "Additional Title 0",
-                "url": "/movies/0"
+                'title': 'Additional Title 0',
+                'url': '/movies/0'
             }, seed[0].json[0]);
 
             testRunner.compare({
-                "title": "Additional Title 1",
-                "url": "/movies/1"
+                'title': 'Additional Title 1',
+                'url': '/movies/1'
             }, seed[0].json[1]);
 
             testRunner.compare({
-                "title": "Additional Title 2",
-                "url": "/movies/2"
+                'title': 'Additional Title 2',
+                'url': '/movies/2'
             }, seed[1].json[2]);
 
             testRunner.compare({
-                "title": "Additional Title 3",
-                "url": "/movies/3"
+                'title': 'Additional Title 3',
+                'url': '/movies/3'
             }, seed[1].json[3]);
         });
         it('should fill double permute complex paths.', function () {
@@ -137,8 +139,8 @@ describe('Specific Cases', function() {
             ], seed);
 
             testRunner.compare({
-                "title": "House of Cards",
-                "url": "/movies/1234"
+                'title': 'House of Cards',
+                'url': '/movies/1234'
             }, seed[0].json[0][0]);
         });
         it('should fill double permute complex paths with partially filled seed.', function () {
@@ -147,8 +149,8 @@ describe('Specific Cases', function() {
                 json: {
                     0: {
                         0: {
-                            "title": "House of Cards",
-                            "url": "/movies/1234"
+                            'title': 'House of Cards',
+                            'url': '/movies/1234'
                         }
                     }
                 }
@@ -158,12 +160,12 @@ describe('Specific Cases', function() {
             ], seed);
 
             testRunner.compare({
-                "title": "House of Cards",
-                "url": "/movies/1234"
+                'title': 'House of Cards',
+                'url': '/movies/1234'
             }, seed[0].json[0][0]);
             testRunner.compare({
-                "title": "Terminator 3",
-                "url": "/movies/766"
+                'title': 'Terminator 3',
+                'url': '/movies/766'
             }, seed[0].json[0][1]);
         });
     });
@@ -176,8 +178,8 @@ describe('Specific Cases', function() {
             model._getPathSetsAsJSON(model, [['genreList', 0, 0, 'summary']], seed);
 
             testRunner.compare({
-                "title": "House of Cards",
-                "url": "/movies/1234"
+                'title': 'House of Cards',
+                'url': '/movies/1234'
             }, seed[0].json);
         });
     });
@@ -390,5 +392,64 @@ describe('Specific Cases', function() {
                 }).
                 subscribe(noOp, done, done);
         });
+    });
+
+    it('should use path syntax to retrieve values out, with double ranges.', function(done) {
+        var spy = sinon.spy();
+        var model = new Model({
+            source: new LocalDataSource(
+                Cache(), {
+                    onGet: spy
+                })
+        });
+
+        model.
+            get('genreList[0][0..1, 3..4].summary').
+            doAction(function(x) {
+                var call = spy.getCall(0);
+                var arg = call.args[1].map(function(path) {
+                    return path.map(function(x) {
+                        if (Array.isArray(x)) {
+                            return x.concat();
+                        }
+                        return x;
+                    });
+                });
+                testRunner.compare([['genreList', 0, [0, 1, 3, 4], 'summary']], arg);
+
+                testRunner.compare({
+                    json: {
+                        genreList: {
+                            0: {
+                                0: {
+                                    summary: {
+                                        title: 'House of Cards',
+                                        url: '/movies/1234'
+                                    }
+                                },
+                                1: {
+                                    summary: {
+                                        'title': 'Terminator 3',
+                                        'url': '/movies/766'
+                                    }
+                                },
+                                3: {
+                                    summary: {
+                                        'title': 'Commando',
+                                        'url': '/movies/6420'
+                                    }
+                                },
+                                4: {
+                                    summary: {
+                                        'title': 'Additional Title 0',
+                                        'url': '/movies/0'
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }, x);
+            }).
+            subscribe(noOp, done, done);
     });
 });
