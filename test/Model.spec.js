@@ -88,7 +88,6 @@ describe("Model", function() {
 
     require("./collapse");
     require('./lru');
-    require('./integration');
     require('./hardlink');
     require('./falcor');
 
