@@ -1,4 +1,5 @@
 module.exports = function(config) {
+
   config.set({
     // base path, that will be used to resolve files and exclude
     basePath: './',
@@ -13,6 +14,13 @@ module.exports = function(config) {
         'karma-safari-launcher',
         require('./reporters/karmaBenchmarkCSVReporter'),
     ],
+
+    customLaunchers: {
+      ChromeForceGC: {
+        base: 'Chrome',
+        flags: ['--js-flags="--expose_gc"']
+      }
+    },
 
     // use dots reporter, as travis terminal does not support escaping sequences
     // possible values: 'dots', 'progress'
@@ -58,7 +66,7 @@ module.exports = function(config) {
     // - IE (only Windows)
     // CLI --browsers Chrome,Firefox,Safari
     browsers: [
-      'Chrome'
+      'ChromeForceGC'
     ],
 
     // Serve html files using html2js

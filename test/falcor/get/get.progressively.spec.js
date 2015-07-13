@@ -60,7 +60,7 @@ describe('Progressive', function() {
             var expected = Expected.Complex().toOnly.AsJSON.values[0].json;
             var count = 0;
             model.
-                bindSync(['genreList', 0]).
+                derefSync(['genreList', 0]).
                 get([{to: 1}, 'summary'], function(complexPath) {
                     if (count === 0) {
                         testRunner.compare({0: expected[0]}, complexPath);
@@ -121,13 +121,13 @@ describe('Progressive', function() {
             model._root.unsafeMode = true;
             model2._root.unsafeMode = true;
             var progressive = model.
-                bindSync(['genreList', 0]).
+                derefSync(['genreList', 0]).
                 get([{to: 1}, 'summary']).
                 progressively().
                 toPathValues();
 
             var standard = model2.
-                bindSync(['genreList', 0]).
+                derefSync(['genreList', 0]).
                 get([{to: 1}, 'summary']).
                 toPathValues();
 
