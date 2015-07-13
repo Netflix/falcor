@@ -13,7 +13,7 @@ gulp.task('perf-run', ['perf-all'], run());
 function run() {
     return gulpShell.task([
         'karma start ./performance/karma.conf.js',
-        'node ./performance/node.js'
+        'node --expose-gc ./performance/node.js'
     ], {
         ignoreErrors:true
     });

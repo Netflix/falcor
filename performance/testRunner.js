@@ -3,12 +3,27 @@ var CSVFormatter = require('./formatter/CSVFormatter');
 
 var KARMA = global.__karma__;
 
-function createSuite(testCfg, iteration) {
+function createSuite(testCfg, log, gc) {
 
     var tests = testCfg.tests;
     var testName;
+    var suite;
+    var suiteName = testCfg.name;
 
-    var suite = ((KARMA) ? global.suite : Benchmark.Suite)(testCfg.name + ':' + iteration, function() {});
+    var gcRunner = function() {
+        if (gc) {
+            gc();
+            log("Ran GC between cycles");
+        }
+    };
+
+    if (KARMA) {
+        suite = global.suite(suiteName, function() {});
+    } else {
+        suite = Benchmark.Suite(suiteName);
+    }
+
+    suite.on('cycle', gcRunner);
 
     for (testName in tests) {
         if (KARMA) {
@@ -21,42 +36,15 @@ function createSuite(testCfg, iteration) {
     return suite;
 }
 
-function createSuites(testCfg, iterations) {
-    var suites = [];
+function runner(testCfg, env, onBenchmarkComplete, onComplete, log, gc) {
 
-    for (var i = 0; i < iterations; i++) {
-        suites.push(createSuite(testCfg, i));
-    }
-
-    return suites;
-}
-
-function runner(testCfg, env, onBenchmarkComplete, onComplete, log) {
-
-    var suites = createSuites(testCfg, 1);
+    var suites = [createSuite(testCfg, log, gc)];
 
     if (!KARMA) {
         run(suites, env, onBenchmarkComplete, onComplete, log);
     } else {
         // KARMA will run the global "suites"
     }
-}
-
-function runGC() {
-    var jscontext;
-
-    if (typeof global !== 'undefined' && global && global.gc) {
-        jscontext = global;
-    } else if (typeof window !== 'undefined' && window && window.gc) {
-        jscontext = window;
-    }
-
-    if (jscontext) {
-        jscontext.gc();
-        return true;
-    }
-
-    return false;
 }
 
 function run(suites, env, onBenchmarkComplete, onComplete, log) {
@@ -69,10 +57,6 @@ function run(suites, env, onBenchmarkComplete, onComplete, log) {
 
         suites.shift().
             on('cycle', function (event) {
-
-                if(runGC()) {
-                    log('Ran GC between benchmarks');
-                }
 
                 var benchmark = event.target;
                 var suite = benchmark.suite = this.name;
