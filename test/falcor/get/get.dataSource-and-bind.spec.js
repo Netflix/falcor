@@ -10,11 +10,11 @@ var noOp = function() {};
 var LocalDataSource = require('../../data/LocalDataSource');
 var ErrorDataSource = require('../../data/ErrorDataSource');
 
-describe('DataSource and Bind', function() {
+describe('DataSource and Deref', function() {
     it('should get a value from from dataSource when bound.', function(done) {
         var model = new Model({cache: M(), source: new LocalDataSource(Cache())});
         model._root.unsafeMode = true;
-        model = model.bindSync(['genreList', 0]);
+        model = model.derefSync(['genreList', 0]);
         var expected = {
             "title": "Terminator 3",
             "url": "/movies/766"

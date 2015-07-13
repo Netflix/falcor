@@ -16,7 +16,7 @@ var InvalidModelError = require('./../../../lib/errors/InvalidModelError');
 var $atom = require('./../../../lib/types/atom');
 var $error = require('./../../../lib/types/error');
 
-describe("Bind-On", function() {
+describe("Deref-On", function() {
     describe('Sync', function() {
         it("bound to a path that lands on an error.", function() {
 
@@ -33,7 +33,7 @@ describe("Bind-On", function() {
 
             var throwError = false;
             try {
-                dataModel.bindSync(["genreList", 0]);
+                dataModel.derefSync(["genreList", 0]);
             } catch (e) {
                 throwError = true;
                 testRunner.compare({ message: 'The humans are dead.' }, e);
@@ -51,7 +51,7 @@ describe("Bind-On", function() {
                 }
             }});
 
-            var nextModel = dataModel.bindSync(["genreList", 0]);
+            var nextModel = dataModel.derefSync(["genreList", 0]);
             var count = 0;
             nextModel.
                 get([0, 'summary']).
@@ -83,7 +83,7 @@ describe("Bind-On", function() {
 
             var throwError = false;
             dataModel.
-                bind(["genreList", 0], ['summary']).
+                deref(["genreList", 0], ['summary']).
                 doAction(
                     function() { throw 'onNext should not happen.'; },
                     function(e) {
@@ -111,7 +111,7 @@ describe("Bind-On", function() {
 
             var count = 0;
             dataModel.
-                bind(["genreList", 0], ['summary']).
+                deref(["genreList", 0], ['summary']).
                 flatMap(function(boundModel) {
                     return boundModel.get(['summarieses']).toPathValues();
                 }).

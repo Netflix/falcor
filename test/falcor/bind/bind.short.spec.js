@@ -18,7 +18,7 @@ var $error = require("./../../../lib/types/error");
 var $ref = require("./../../../lib/types/ref");
 var sinon = require('sinon');
 
-describe("Bind-Short", function() {
+describe("Deref-Short", function() {
     describe('Sync', function() {
         it("bound to a path that short-circuits in a branch key position on error.", function() {
 
@@ -35,7 +35,7 @@ describe("Bind-Short", function() {
 
             var throwError = false;
             try {
-                dataModel.bindSync(["genreList", 0, 0]);
+                dataModel.derefSync(["genreList", 0, 0]);
             } catch (e) {
                 throwError = true;
                 expect(e.name).to.equals(InvalidModelError.prototype.name);
@@ -55,7 +55,7 @@ describe("Bind-Short", function() {
 
             var throwError = false;
             try {
-                dataModel.bindSync(["genreList", 0, 0]);
+                dataModel.derefSync(["genreList", 0, 0]);
             } catch (e) {
                 throwError = true;
                 expect(e.name).to.equals(InvalidModelError.prototype.name);
@@ -78,7 +78,7 @@ describe("Bind-Short", function() {
 
             var throwError = false;
             dataModel.
-                bind(["genreList", 0, 0], ['summary']).
+                deref(["genreList", 0, 0], ['summary']).
                 doAction(
                     function() { throw 'onNext should not happen.'; },
                     function(e) {
@@ -108,7 +108,7 @@ describe("Bind-Short", function() {
 
             var throwError = false;
             dataModel.
-                bind(["genreList", 0, 0], ['summary']).
+                deref(["genreList", 0, 0], ['summary']).
                 doAction(
                     function() { throw 'onNext should not happen.'; },
                     function(e) {
@@ -124,7 +124,7 @@ describe("Bind-Short", function() {
                 }, done);
         });
 
-        it('should ensure that bind correctly makes a request to the dataStore.', function(done) {
+        it('should ensure that deref correctly makes a request to the dataStore.', function(done) {
             var onGet = sinon.spy();
             var onNext = sinon.spy();
 
@@ -147,7 +147,7 @@ describe("Bind-Short", function() {
 
             var throwError = false;
             dataModel.
-                bind(['genreList', 0, 0], ['summary']).
+                deref(['genreList', 0, 0], ['summary']).
                 subscribe(onNext, done, function() {
                     var error = false;
                     try {

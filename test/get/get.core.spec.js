@@ -182,39 +182,39 @@ describe('Core', function() {
         });
     });
 
-    describe('Bind', function() {
+    describe('Deref', function() {
         it('should get a value directly.', function () {
-            var model = new Model({cache: Cache()}).bindSync(['videos', 1234]);
+            var model = new Model({cache: Cache()}).derefSync(['videos', 1234]);
             getTestRunner(Bound().directValue, {model: model});
         });
 
-        it('should bind to a value.', function () {
-            var model = new Model({cache: Cache()}).bindSync(['genreList', 10]);
+        it('should deref to a value.', function () {
+            var model = new Model({cache: Cache()}).derefSync(['genreList', 10]);
             getTestRunner(Bound().toLeafNode, {model: model});
         });
 
-        it('should bind to a value and get multiple paths.', function () {
-            var model = new Model({cache: Cache()}).bindSync(['videos', 3355]);
+        it('should deref to a value and get multiple paths.', function () {
+            var model = new Model({cache: Cache()}).derefSync(['videos', 3355]);
             getTestRunner(Bound().multipleQueries, {model: model});
         });
 
-        it('should bind and request a missing path through a reference so the optimized path gets reset.', function () {
-            var model = new Model({cache: Cache()}).bindSync(['genreList']);
+        it('should deref and request a missing path through a reference so the optimized path gets reset.', function () {
+            var model = new Model({cache: Cache()}).derefSync(['genreList']);
             getTestRunner(Bound().missingValueWithReference, {model: model});
         });
-        it('should bind and request a missing path.', function () {
-            var model = new Model({cache: Cache()}).bindSync(['videos', 'missingSummary']);
+        it('should deref and request a missing path.', function () {
+            var model = new Model({cache: Cache()}).derefSync(['videos', 'missingSummary']);
             getTestRunner(Bound().missingValue, {model: model});
         });
 
         it('should throw an error when bound and calling jsonGraph.', function() {
-            var model = new Model({cache: Cache()}).bindSync(['genreList', 10]);
+            var model = new Model({cache: Cache()}).derefSync(['genreList', 10]);
             var threw = false;
             try {
                 model._getPathSetsAsJSONG(model, [['summary']]);
             } catch(ex) {
                 threw = true;
-                testRunner.compare(testRunner.jsonGraphBindException, ex);
+                testRunner.compare(testRunner.jsonGraphDerefException, ex);
             }
             testRunner.compare(true, threw);
         });
