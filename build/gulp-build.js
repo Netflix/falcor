@@ -2,6 +2,7 @@ var gulp = require('gulp');
 var browserify = require('browserify');
 var license = require('gulp-license');
 var uglify = require('gulp-uglify');
+var vinyl = require('vinyl-source-stream');
 var bundle_collapser = require('bundle-collapser/plugin');
 var _ = require('lodash');
 var path = require('path');
