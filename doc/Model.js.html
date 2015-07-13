@@ -245,17 +245,17 @@ Model.prototype.invalidate = function invalidate() {
  * @param {...PathSet} relativePathsToPreload - Paths to preload before Model is created. These paths are relative to the bound path.
  * @return {Observable.&lt;Model>} - An Observable stream with a single value, the bound {@link Model}, or an empty stream if nothing is found at the path
 */
-Model.prototype.bind = require("./bind");
+Model.prototype.deref = require("./deref");
 
 /**
  * Synchronously returns a clone of the {@link Model} bound to a location within the {@link JSONGraph}. Unlike bind or bindSync, softBind never optimizes its path.  Soft bind is ideal if you want to retrieve the bound path every time, rather than retrieve the optimized path once and then always retrieve paths from that object in the JSON Graph. For example, if you always wanted to retrieve the name from the first item in a list you could softBind to the path "list[0]".
  * @param {Path} path - The path prefix to retrieve every time an operation is executed on a Model.
  * @return {Model}
  */
-Model.prototype.softBind = function softBind(path) {
+Model.prototype.softDeref = function softDeref(path) {
     path = pathSyntax.fromPath(path);
     if(Array.isArray(path) === false) {
-        throw new Error("Model#softBind must be called with an Array path.");
+        throw new Error("Model#softDeref must be called with an Array path.");
     }
     return this.clone({ _path: path });
 };
@@ -297,7 +297,7 @@ Model.prototype.getValueSync = require("./get/sync");
 
 Model.prototype.setValueSync = require("./set/sync");
 
-Model.prototype.bindSync = require("./bind/sync");
+Model.prototype.derefSync = require("./deref/sync");
 
 /**
  * Set the local cache to a {@link JSONGraph} fragment. This method can be a useful way of mocking a remote document, or restoring the local cache from a previously stored state
