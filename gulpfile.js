@@ -37,5 +37,3 @@ gulp.task('doc-d', gulpShell.task([
 gulp.task('default', function(callback) {
     return runSequence('lint', 'build', callback);
 });
-
-gulp.task('build', ['build.node']);
