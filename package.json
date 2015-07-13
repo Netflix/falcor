@@ -69,7 +69,6 @@
     "mkdirp": "^0.5.1",
     "mocha": "~1.21.4",
     "run-sequence": "^1.0.2",
-    "streamify": "^0.2.4",
     "through2": "~0.6.1",
     "uglifyify": "~2.1.1",
     "underscore": "~1.6.0",
