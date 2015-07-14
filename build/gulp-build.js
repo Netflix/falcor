@@ -1,38 +1,67 @@
 var gulp = require('gulp');
 var browserify = require('browserify');
 var license = require('gulp-license');
+var uglify = require('gulp-uglify');
 var vinyl = require('vinyl-source-stream');
 var bundle_collapser = require('bundle-collapser/plugin');
+var _ = require('lodash');
+var path = require('path');
 
 var licenseInfo = {
     organization: 'Netflix, Inc',
-    year: '2014'
+    year: '2015'
 };
 
-gulp.task('build', ['build.node']);
+gulp.task('build', ['build.browser']);
+gulp.task('dist', ['dist.browser']);
+gulp.task('all', ['build.browser', 'dist.browser']);
 
-gulp.task('dist', ['dist.node', 'dist.browser']);
-
-gulp.task('build.node', ['clean.dev'], function() {
-    return build(['./lib/index.js'], {}, 'falcor.js');
+gulp.task('dist.browser', ['clean.dist'], function(cb) {
+    build({
+        file: ['./browser.js'],
+        browserifyOptions: { standalone: 'falcor' },
+        debug: false
+    }, cb);
 });
 
-gulp.task('dist.node', ['clean.dist'], function() {
-    return build(['./lib/index.js'], {}, 'falcor.js', 'dist');
+gulp.task('build.browser', ['clean.dist'], function(cb) {
+    return build({
+        file: ['./browser.js'],
+        browserifyOptions: { standalone: 'falcor' }
+    }, cb);
 });
 
-gulp.task('dist.browser', ['clean.dist'], function() {
-    return build(['./browser.js'], { standalone: 'falcor' }, './falcor.browser.js', 'dist');
-});
 
-function build(file, browserifyOptions, outName, dest) {
-    outName = outName || 'falcor.js';
-    return browserify(file, browserifyOptions || {}).
+function build(options, cb) {
+    options = _.assign({
+        file: '',
+        browserifyOptions: {},
+        outName: 'falcor.browser',
+        dest: 'dist',
+        debug: true
+    }, options);
+
+    var name = options.outName + (!options.debug && '.min' || '') + '.js';
+    browserify(options.file, options.browserifyOptions).
         plugin(bundle_collapser).
         bundle().
-        pipe(vinyl(outName)).
+        pipe(vinyl(name)).
         pipe(license('Apache', licenseInfo)).
-        pipe(gulp.dest(dest || 'bin'));
+        pipe(gulp.dest(options.dest)).
+        on('finish', function() {
+            if (options.debug) {
+                return cb();
+            }
+
+            var destAndName = path.join(options.dest, name);
+            gulp.
+                src(destAndName).
+                pipe(uglify()).
+                pipe(gulp.dest(options.dest)).
+                on('finish', function() {
+                    return cb();
+                });
+        });
 }
 
 module.exports = build;

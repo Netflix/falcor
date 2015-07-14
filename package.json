@@ -54,6 +54,7 @@
     "gulp-plumber": "~0.6.5",
     "gulp-rename": "~1.2.0",
     "gulp-shell": "~0.4.1",
+    "gulp-uglify": "^1.2.0",
     "istanbul": "~0.3.2",
     "jsdoc": "~3.3.0-beta3",
     "karma": "^0.12.37",
