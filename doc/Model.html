@@ -113,7 +113,7 @@
 
             
 
-            <td class="description last"><p>A set of options to customize behavior</p>
+            <td class="description last"><p>a set of options to customize behavior</p>
                 <h6>Properties</h6>
                 
 
@@ -167,7 +167,7 @@
 
             
 
-            <td class="description last"><p>A data source to retrieve and manage the <a href="global.html#JSONGraph">JSONGraph</a></p></td>
+            <td class="description last"><p>a data source to retrieve and manage the <a href="global.html#JSONGraph">JSONGraph</a></p></td>
         </tr>
 
     
@@ -200,7 +200,7 @@
 
             
 
-            <td class="description last"><p>Initial state of the <a href="global.html#JSONGraph">JSONGraph</a></p></td>
+            <td class="description last"><p>initial state of the <a href="global.html#JSONGraph">JSONGraph</a></p></td>
         </tr>
 
     
@@ -233,7 +233,7 @@
 
             
 
-            <td class="description last"><p>The maximum size of the cache</p></td>
+            <td class="description last"><p>the maximum size of the cache</p></td>
         </tr>
 
     
@@ -266,7 +266,7 @@
 
             
 
-            <td class="description last"><p>The ratio of the maximum size to collect when the maxSize is exceeded</p></td>
+            <td class="description last"><p>the ratio of the maximum size to collect when the maxSize is exceeded</p></td>
         </tr>
 
     
@@ -299,7 +299,7 @@
 
             
 
-            <td class="description last"><p>A function used to translate errors before they are returned</p></td>
+            <td class="description last"><p>a function used to translate errors before they are returned</p></td>
         </tr>
 
     
@@ -387,139 +387,6 @@
     
 
     
-        <h3 class="subsection-title">Members</h3>
-
-        
-            
-<h4 class="name" id="deref"><span class="type-signature"></span>deref<span class="type-signature"></span></h4>
-
-
-
-
-<div class="description">
-    <p>Returns a clone of the <a href="Model.html">Model</a> bound to a location within the <a href="global.html#JSONGraph">JSONGraph</a>. The bound location is never a Reference: any References encountered while resolving the bound <a href="global.html#Path">Path</a> are always replaced with the References target value. For subsequent operations on the <a href="Model.html">Model</a>, all paths will be evaluated relative to the bound path. Bind allows you to:</p>
-<ul>
-<li>Expose only a fragment of the <a href="global.html#JSONGraph">JSONGraph</a> to components, rather than the entire graph</li>
-<li>Hide the location of a <a href="global.html#JSONGraph">JSONGraph</a> fragment from components</li>
-<li>Optimize for executing multiple operations and path looksup at/below the same location in the <a href="global.html#JSONGraph">JSONGraph</a></li>
-</ul>
-</div>
-
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line220">line 220</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-        
-            
-<h4 class="name" id="getValueSync"><span class="type-signature"></span>getValueSync<span class="type-signature"></span></h4>
-
-
-
-
-<div class="description">
-    <p>Synchronously retrieves a single path from the local <a href="Model.html">Model</a> only and will not retrieve missing paths from the DataSource. This method can only be invoked when the <a href="Model.html">Model</a> does not have a DataSource or from within a selector function. See Model.prototype.get. The getValueSync method differs from the asynchronous get methods (ex. get, getValues) in that it can be used to retrieve objects in addition to JSONGraph values.</p>
-</div>
-
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line255">line 255</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-        
-    
 
     
         <h3 class="subsection-title">Methods</h3>
@@ -536,7 +403,7 @@
 
 
 <div class="description">
-    <p>Returns a clone of the <a href="Model.html">Model</a> that eanbles batching. Within the configured time period, paths for operations of the same type are collected and executed on the DataSource in a batch. Batching can make more efficient use of the DataSource depending on its implementation, for example, reducing the number of HTTP requests to the server</p>
+    <p>Returns a clone of the <a href="Model.html">Model</a> that eanbles batching. Within the configured time period, paths for operations of the same type are collected and executed on the DataSource in a batch. Batching can make more efficient use of the DataSource depending on its implementation, for example, reducing the number of HTTP requests to the server.</p>
 </div>
 
 
@@ -632,7 +499,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line349">line 349</a>
+        <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line351">line 351</a>
     </li></ul></dd>
     
 
@@ -688,7 +555,7 @@
 
 
 <div class="description">
-    <p>Returns a clone of the <a href="Model.html">Model</a> that boxes values returning the wrapper (<a href="global.html#Atom">Atom</a>, Reference, or Error), rather than the value inside it. This allows any metadata attached to the wrapper to be inspected</p>
+    <p>Returns a clone of the <a href="Model.html">Model</a> that boxes values returning the wrapper (<a href="global.html#Atom">Atom</a>, Reference, or Error), rather than the value inside it. This allows any metadata attached to the wrapper to be inspected.</p>
 </div>
 
 
@@ -732,7 +599,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line394">line 394</a>
+        <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line396">line 396</a>
     </li></ul></dd>
     
 
@@ -767,6 +634,209 @@
     <dd>
         
 <span class="param-type"><a href="Model.html">Model</a></span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="deref"><span class="type-signature"></span>deref<span class="signature">(boundPath, &hellip;relativePathsToPreload)</span><span class="type-signature"> &rarr; {<a href="Observable.html">Observable</a>.&lt;<a href="Model.html">Model</a>>}</span></h4>
+
+    
+
+
+
+<div class="description">
+    <p>Returns a clone of the <a href="Model.html">Model</a> bound to a location within the <a href="global.html#JSONGraph">JSONGraph</a>. The bound location is never a Reference: any References encountered while resolving the bound <a href="global.html#Path">Path</a> are always replaced with the References target value. For subsequent operations on the <a href="Model.html">Model</a>, all paths will be evaluated relative to the bound path. Deref allows you to:</p>
+<ul>
+<li>Expose only a fragment of the <a href="global.html#JSONGraph">JSONGraph</a> to components, rather than the entire graph</li>
+<li>Hide the location of a <a href="global.html#JSONGraph">JSONGraph</a> fragment from components</li>
+<li>Optimize for executing multiple operations and path looksup at/below the same location in the <a href="global.html#JSONGraph">JSONGraph</a></li>
+</ul>
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>boundPath</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="global.html#Path">Path</a></span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>the path to bind to</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>relativePathsToPreload</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="global.html#PathSet">PathSet</a></span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                    &lt;repeatable><br>
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>paths (relative to the bound path) to preload before Model is created</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line221">line 221</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    <ul>
+<li>an Observable stream with a single value, the bound <a href="Model.html">Model</a>, or an empty stream if nothing is found at the path</li>
+</ul>
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type"><a href="Observable.html">Observable</a>.&lt;<a href="Model.html">Model</a>></span>
 
 
     </dd>
@@ -854,7 +924,7 @@
 
             
 
-            <td class="description last"><p>The path(s) to retrieve</p></td>
+            <td class="description last"><p>the path(s) to retrieve</p></td>
         </tr>
 
     
@@ -887,7 +957,7 @@
 
             
 
-            <td class="description last"><p>The callback to execute once all of the paths have been retrieved</p></td>
+            <td class="description last"><p>the callback to execute once all of the paths have been retrieved</p></td>
         </tr>
 
     
@@ -956,7 +1026,7 @@
         
 <div class="param-desc">
     <ul>
-<li>The requested data as JSON, or the result of the optional selector function.</li>
+<li>the requested data as JSON, or the result of the optional selector function</li>
 </ul>
 </div>
 
@@ -993,7 +1063,7 @@
 
 
 <div class="description">
-    <p>Get the local <a href="global.html#JSONGraph">JSONGraph</a> cache. This method can be a useful to store the state of the cache</p>
+    <p>Get the local <a href="global.html#JSONGraph">JSONGraph</a> cache. This method can be a useful to store the state of the cache.</p>
 </div>
 
 
@@ -1059,7 +1129,7 @@
 
             
 
-            <td class="description last"><p>The path(s) to retrieve. If no paths are specified, the entire <a href="global.html#JSONGraph">JSONGraph</a> is returned</p></td>
+            <td class="description last"><p>The path(s) to retrieve. If no paths are specified, the entire <a href="global.html#JSONGraph">JSONGraph</a> is returned.</p></td>
         </tr>
 
     
@@ -1100,7 +1170,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line294">line 294</a>
+        <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line296">line 296</a>
     </li></ul></dd>
     
 
@@ -1127,7 +1197,7 @@
 
         
 <div class="param-desc">
-    <p>jsonGraph - A <a href="global.html#JSONGraph">JSONGraph</a> fragment</p>
+    <p>jsonGraph - a <a href="global.html#JSONGraph">JSONGraph</a> fragment</p>
 </div>
 
 
@@ -1166,7 +1236,7 @@
 
 
 <div class="description">
-    <p>Get data for a single <a href="global.html#Path">Path</a></p>
+    <p>Get data for a single <a href="global.html#Path">Path</a>.</p>
 </div>
 
 
@@ -1218,7 +1288,7 @@
 
             
 
-            <td class="description last"><p>The path to retrieve</p></td>
+            <td class="description last"><p>the path to retrieve</p></td>
         </tr>
 
     
@@ -1259,7 +1329,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line237">line 237</a>
+        <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line238">line 238</a>
     </li></ul></dd>
     
 
@@ -1287,7 +1357,7 @@
         
 <div class="param-desc">
     <ul>
-<li>The value for the path</li>
+<li>the value for the path</li>
 </ul>
 </div>
 
@@ -1319,6 +1389,161 @@
      });
 
  // The code above prints "Jim" to the console.</code></pre>
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="getValueSync"><span class="type-signature"></span>getValueSync<span class="signature">(path)</span><span class="type-signature"> &rarr; {*}</span></h4>
+
+    
+
+
+
+<div class="description">
+    <p>Synchronously retrieves a single path from the local <a href="Model.html">Model</a> only and will not retrieve missing paths from the DataSource. This method can only be invoked when the <a href="Model.html">Model</a> does not have a DataSource or from within a selector function. See Model.prototype.get. The getValueSync method differs from the asynchronous get methods (ex. get, getValues) in that it can be used to retrieve objects in addition to JSONGraph values.</p>
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>path</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="global.html#Path">Path</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>the path to retrieve</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line257">line 257</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    <ul>
+<li>the value for the specified path</li>
+</ul>
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">*</span>
+
+
+    </dd>
+</dl>
+
+    
 
 
 
@@ -1404,7 +1629,7 @@
 
             
 
-            <td class="description last"><p>A value or collection of values to set into the Model.</p></td>
+            <td class="description last"><p>a value or collection of values to set into the Model.</p></td>
         </tr>
 
     
@@ -1473,7 +1698,7 @@
         
 <div class="param-desc">
     <ul>
-<li>An <a href="Observable.html">Observable</a> stream containing the values in the JSONGraph model after the set was attempted.</li>
+<li>an <a href="Observable.html">Observable</a> stream containing the values in the JSONGraph model after the set was attempted</li>
 </ul>
 </div>
 
@@ -1510,7 +1735,7 @@
 
 
 <div class="description">
-    <p>Set the local cache to a <a href="global.html#JSONGraph">JSONGraph</a> fragment. This method can be a useful way of mocking a remote document, or restoring the local cache from a previously stored state</p>
+    <p>Set the local cache to a <a href="global.html#JSONGraph">JSONGraph</a> fragment. This method can be a useful way of mocking a remote document, or restoring the local cache from a previously stored state.</p>
 </div>
 
 
@@ -1562,7 +1787,7 @@
 
             
 
-            <td class="description last"><p>The <a href="global.html#JSONGraph">JSONGraph</a> fragment to use as the local cache</p></td>
+            <td class="description last"><p>the <a href="global.html#JSONGraph">JSONGraph</a> fragment to use as the local cache</p></td>
         </tr>
 
     
@@ -1603,7 +1828,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line265">line 265</a>
+        <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line267">line 267</a>
     </li></ul></dd>
     
 
@@ -1685,7 +1910,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line374">line 374</a>
+        <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line376">line 376</a>
     </li></ul></dd>
     
 
@@ -1741,7 +1966,7 @@
 
 
 <div class="description">
-    <p>Returns a clone of the <a href="Model.html">Model</a> that disables batching. This is the default mode. Each operation will be executed on the DataSource separately</p>
+    <p>Returns a clone of the <a href="Model.html">Model</a> that disables batching. This is the default mode. Each operation will be executed on the DataSource separately.</p>
 </div>
 
 
@@ -1785,7 +2010,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line358">line 358</a>
+        <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line360">line 360</a>
     </li></ul></dd>
     
 
@@ -1812,7 +2037,7 @@
 
         
 <div class="param-desc">
-    <p>a <a href="Model.html">Model</a> that batches requests of the same type and sends them to the data source together.</p>
+    <p>A <a href="Model.html">Model</a> that batches requests of the same type and sends them to the data source together</p>
 </div>
 
 
@@ -1889,7 +2114,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line402">line 402</a>
+        <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line404">line 404</a>
     </li></ul></dd>
     
 
@@ -1945,7 +2170,7 @@
 
 
 <div class="description">
-    <p>Returns a clone of the <a href="Model.html">Model</a> that only uses the local <a href="global.html#JSONGraph">JSONGraph</a> and never uses a DataSource to retrieve missing paths</p>
+    <p>Returns a clone of the <a href="Model.html">Model</a> that only uses the local <a href="global.html#JSONGraph">JSONGraph</a> and never uses a DataSource to retrieve missing paths.</p>
 </div>
 
 
@@ -1989,7 +2214,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line410">line 410</a>
+        <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line412">line 412</a>
     </li></ul></dd>
     
 

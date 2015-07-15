@@ -27,11 +27,11 @@
     <section>
         <article>
             <pre class="prettyprint source linenums"><code>/**
- * An atom allows you to treat a JSON value as atomic regardless of its type, ensuring that a JSON object or array is always returned in its entirety. The JSON value must be treated as immutable. Atoms can also be used to associate metadata with a JSON value. This metadata can be used to influence the way values are handled
+ * An atom allows you to treat a JSON value as atomic regardless of its type, ensuring that a JSON object or array is always returned in its entirety. The JSON value must be treated as immutable. Atoms can also be used to associate metadata with a JSON value. This metadata can be used to influence the way values are handled.
  * @typedef {Object} Atom
- * @property {!String} $type - The $type must be "atom"
- * @property {!*} value - The immutable JSON value
- * @property {number} [$expires] - The time to expire in milliseconds
+ * @property {!String} $type - the $type must be "atom"
+ * @property {!*} value - the immutable JSON value
+ * @property {number} [$expires] - the time to expire in milliseconds
  *  - positive number: expires in milliseconds since epoch
  *  - negative number: expires relative to when the Atom is merged into the JSONGraph
  *  - number 1: never expires even if 
@@ -52,7 +52,8 @@
     $expires: 1
  }
  */
- </code></pre>
+ 
+</code></pre>
         </article>
     </section>
 
