@@ -6,10 +6,11 @@ First make sure you are using NPM v 2.7.5+. Some versions of NPM contain bugs wh
 
 First build:
 ```
-git clone https://github.com/Netflix/falcor
+git clone "git+ssh://git@github.com/Netflix/falcor.git"
 cd falcor
 npm install
-npm run dist
+npm install gulp -g
+gulp dist
 ```
 Now set up a simple webpage and import the newly-generated falcor library:
 ```html
