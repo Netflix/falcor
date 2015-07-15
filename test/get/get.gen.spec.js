@@ -14,10 +14,10 @@ describe('getVersionSync', function() {
         var version = model.getVersion();
         expect(version > 0).to.be.ok;
     });
-    it('should get an undefined if no path exists.', function() {
+    it('should get zero if no path exists.', function() {
         var model = new Model({cache: {hello: 'world'}});
         model._root.unsafeMode = true;
         var version = model.getVersion('world');
-        expect(version === undefined).to.be.ok;
+        expect(version === 0).to.be.ok;
     });
 });
