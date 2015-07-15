@@ -6,4 +6,5 @@ describe('Set', function() {
     require('./set.progressively.spec');
     require('./set.pathSyntax.spec');
     require('./set.change-handler.spec');
+    require('./set.setCache.spec');
 });
