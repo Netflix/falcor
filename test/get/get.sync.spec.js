@@ -60,6 +60,12 @@ describe('GetValueSync', function() {
         }
         expect(error, 'getValueSync did not throw an error.').to.be.ok;
     });
+    it('should get the cache when getBoundValue is called on a root model', function() {
+        var model = new Model({cache: Cache(), unsafeMode: true});
+        var cache = model._cache;
+        var boundValue = model._getBoundValue(model, model._path).value;
+        expect(boundValue, 'root boundValue did not match the cache').to.deep.equal(cache);
+    });
 
     describe('Missing & Expired', function() {
         it('should get undefined when encountering missing keys.', function() {

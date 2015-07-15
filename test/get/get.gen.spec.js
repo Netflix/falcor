@@ -6,13 +6,18 @@ describe('getVersionSync', function() {
     it('should get a version', function() {
         var model = new Model({cache: {hello: 'world'}});
         model._root.unsafeMode = true;
-        var gen = model.getVersion('hello');
-        expect(gen > 0).to.be.ok;
+        var version = model.getVersion('hello');
+        expect(version > 0).to.be.ok;
+    });
+    it('should get a version on the root model', function() {
+        var model = new Model({cache: {hello: 'world'}, unsafeMode: true});
+        var version = model.getVersion();
+        expect(version > 0).to.be.ok;
     });
     it('should get an undefined if no path exists.', function() {
         var model = new Model({cache: {hello: 'world'}});
         model._root.unsafeMode = true;
-        var gen = model.getVersion('world');
-        expect(gen === undefined).to.be.ok;
+        var version = model.getVersion('world');
+        expect(version === undefined).to.be.ok;
     });
 });
