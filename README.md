@@ -10,7 +10,7 @@ git clone "git+ssh://git@github.com/Netflix/falcor.git"
 cd falcor
 npm install
 npm install gulp -g
-gulp dist
+gulp all
 ```
 Now set up a simple webpage and import the newly-generated falcor library:
 ```html
