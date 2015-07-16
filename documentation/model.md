@@ -1268,6 +1268,8 @@ batchModel.getValue("todos[2].name").then(log);
 // httpDataSource.get([["todos", { from: 0, to: 2 }, "name"]]);
 ~~~
 
+![Batch diagram](./batch-diagram.png)
+
 <a name="Path-Optimization"></a>
 
 ## Path Optimization and the DataSource
