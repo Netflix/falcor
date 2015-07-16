@@ -1268,8 +1268,20 @@ batchModel.getValue("todos[2].name").then(log);
 // httpDataSource.get([["todos", { from: 0, to: 2 }, "name"]]);
 ~~~
 
-![Batch diagram](./batch-diagram.png)
+![Batched Model diagram](./batch-model.png)
 
+### Scheduling the Batch
+
+When batched, by default the Model will try to schedule a request to the DataSource as soon as possible. You can control when the batched request is made to the DataSource by implementing the scheduler interface:
+
+~~~js
+interface Scheduler {
+    schedule(() => void): Disposable
+}
+interface Disposable {
+    dispose(): void
+}
+~~~
 <a name="Path-Optimization"></a>
 
 ## Path Optimization and the DataSource
