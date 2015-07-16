@@ -1,8 +1,18 @@
-# Falcor Router
+---
+layout: page
+title: router
+menu: router
+lang: en
+---
+
+* Will be replaced with the ToC, excluding the "Contents" header
+{:toc}
+
+# The Falcor Router
 
 A Falcor Router is an implementation of the DataSource interface. Falcor Model objects use DataSources to retrieve JSON Graph data. However Models typically run on the client and Routers typically run on the Application server. As a result communication between a Model and the Router is typically remoted across the network using an HttpDataSource.
 
-![Router Diagram](https://netflix.github.com/falcor/routerdiagram.png)
+![Falcor End to End](../falcor-end-to-end.png)
 
 A Router works by matching requested paths against a "virtual" JSON Graph object. The JSON Graph object is referred to as "virtual", because the object rarely exists anywhere - in memory or on disk. Instead when paths are requested from the Router, the Router typically creates the necessary subsets of the JSON Graph on-demand by retrieving the necessary data from persistent data stores. Once the newly-created subset of the JSON Graph has been delivered to the caller, the Router frees the memory. This allows the Application Server running the Router to remain stateless, and keep the application’s data in one or more persistent data stores.
 
@@ -14,25 +24,22 @@ Rather than serve static resources from disk, many RESTful Application servers u
 
 For example here is a Router defined for Node's ExpressJS MVC framework which uses a route to match a request for a TODO resource by ID:
 
-(Example of what I said above, with a mocked up query by ID  to a back end data source)
+~~~js
 
-```JavaScript
-
-var express = require('express');
-var serviceLayer = require('serviceLayer');
-var app = express();
-
-app.get('/todo/:todoid', function(req, res) {
-  serviceLayer.getUser(req.params.username, function(error, data) {
-    if (error) {
-        res.status(500).send("Couldn't retrieve this user!");
+//defined for Node's ExpressJS MVC framework?
+var router = new Router([{
+    route: "todosById[{integers:ids}].name",
+    get: function(pathSet) {
+        return pathSet.ids.map(function(id) {
+            return {
+                path: ['todosById', id, 'name'],
+                value: "get milk from corner store."
+            }
+        })
     }
-    else {
-        res.send(JSON.stringify(data);
-    }
-  });
-});
-```
+}]);
+}]);
+~~~
 
 Routers allow application servers to remain stateless. Instead of storing state on the application server, requests for information are matched against URL patterns and requests for data are routed to persistent data stores.
 
@@ -42,27 +49,24 @@ Routers allow application servers to remain stateless. Instead of storing state 
 
 Traditional Application servers expose information at multiple URLs. Falcor App servers expose all of the data the client needs as a single JSON URL.
 
-(Diagram)
+![All data exposed at a single URL](./network-diagram.png)
 
 Exposing all of the client's data as a single HTTP resource gives the client the ability to request all of the data that it requires for any applications scenario using a single HTTP request. This allows the client to get around any restrictions on the number of concurrent HTTP requests which can be sent. It also reduces the relative overhead introduced by HTTP calls by allowing many values to be retrieved in a single request.
 
 Instead of downloading the entire JSON resource, clients pass paths to the values they want to retrieve from the JSON resource in the query string.
 
-(Example URL which contains query string parameters retrieving multiple names of TODOs)
-```JavaScript
-model.get('todosById[0..3].name').then(function (data) {
-    console.log(JSON.stringify(data, null, 4));
-});
-```
+~~~
+http://.../model.json?paths=[["todos",{from:0,to:3},"name"]]
+~~~
 
 The server responds with a subset of the JSON resource which contains the requested values. 
 
 (Example JSONG response which contains the paths specified above)
 
-```JavaScript
+~~~js
 {
     "json": {
-        "todosById": {
+        "todos": {
             "0": {
                 "name": "get milk from corner store."
             },
@@ -78,7 +82,7 @@ The server responds with a subset of the JSON resource which contains the reques
         }
     }
 } 
-```
+~~~
 
 Another key difference between traditional RESTful application servers and Falcor application servers is the way in which relationships are discovered. Traditional RESTful application servers specify hyperlinks to related resources. 
 
@@ -91,15 +95,17 @@ This means that in order for a traditional client to download both a resource an
 Instead of using hyperlinks to refer to other resources, Falcor applications represent relationships as references to other locations within the same JSON resource. 
 
 (Example query which retrieves the first 10 references from the to do list)
-```JavaScript
+
+~~~js
 “todos[0..10]”
-```
+~~~
 This is possible because Falcor application servers expose all their data within a single JSON resource. The important difference between references and hyperlinks is that references can be followed on the server whereas hyperlinks must be followed on the client. That means that instead of making sequential round trips, related values can be downloaded within the same request.
 
 (Example query which retrieves the name, and done property of the first 10 items in the to do list)
-```JavaScript
+
+~~~js
 “todos[0..10][‘name’, ‘done’]”
-```
+~~~
 
 For more information on references see Path Evaluation.
 
@@ -114,14 +120,16 @@ There are three primary differences between a traditional Application Router and
 Instead of matching patterns in URLs, the Falcor Router matches patterns in the paths requested in the query string of the single JSON resource.
 
 ( example HTTP request containing a couple of paths which are highlighted somehow)
-```JavaScript
+
+~~~js
 model.get('todosById[0].name', 'todosById[1].done').then(function (data) {
     console.log(JSON.stringify(data, null, 4));
 });
-```
+~~~
 
 (An example router with two routes which match the two paths passed in the URL above, no code within the get handler is required, just add a comment saying "handle route ")
-```JavaScript
+
+~~~js
 var router = new Router([{
     route: "todosById[0].name",
     get: function(pathSet) {
@@ -140,16 +148,17 @@ var router = new Router([{
         }
     }
 }]);
-```
+~~~
 
 ### 2. A Single Falcor Route can match multiple Paths
 
 Traditional App server Routers only need to match the URL path, because HTTP requests are designed to retrieve a single resource. In contrast a single HTTP request to a Falcor application server may contain multiple paths in the query string. As a result a single Falcor route can match multiple paths at once. Matching multiple paths in a single route can be more efficient in the event they can be retrieved with a single backend request.
 
 (Falcor URL which requests the name of the first 3 TODOs)
-```JavaScript
+
+~~~js
 “todos[0..3].name”
-```
+~~~
  (Example of a route which matches all three using the ranges pattern and an alias, and returns the data)
 
 The route above retrieves the data for multiple paths using a single request to a webservice, and returns the results as a Promise of several path/value pairs.

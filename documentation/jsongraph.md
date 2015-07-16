@@ -5,9 +5,14 @@ menu: model
 lang: en
 ---
 
-# The Falcor Model
- 
+* Will be replaced with the ToC, excluding the "Contents" header
+{:toc}
+
+# Model Overview
+
 Falcor provides a Model object, which is intended to be the "M" in your MVC. An application that uses Falcor doesn't work with JSON data directly, but rather works with JSON data _indirectly_ through the Model object. The Model object provides a set of familiar JavaScript APIs for working with JSON data, including get, set, and call. The main difference between working with JSON data directly and working with it indirectly through a Model object, is that the Falcor Model has a _push API_.
+
+Here is an example of working with JSON data directly:
 
 ~~~js
 var log = console.log.bind(console)
@@ -25,14 +30,14 @@ var model = {
     ]
 };
 
-console.log(model.todos[0].name);
-
 // This outputs the following to the console:
 // get milk from corner store 
+console.log(model.todos[0].name);
+~~~
 
+Here is an example of working with the same JSON object indirectly using a Falcor Model:
 
-// Working with JSON indirectly through a Falcor Model.
-
+~~~js
 var log = console.log.bind(console)
 
 var model = new falcor.Model({cache: {
@@ -48,10 +53,9 @@ var model = new falcor.Model({cache: {
     ]
 }});
 
-model.getValue('todos[0].name').then(log);
-
 // This outputs the following to the console:
 // get milk from corner store 
+model.getValue('todos[0].name').then(log);
 ~~~
 
 Note that in the example above, the name of the TODO is _pushed_ to a call back.
@@ -173,10 +177,9 @@ var model = new falcor.Model({
         ]
     }});
 
-model.getValue('todos[0].name').then(log);
-
 // This outputs the following to the console:
 // get milk from corner store
+model.getValue('todos[0].name').then(log);
 ~~~
  
 It is common practice to begin working against mock data in a Model cache, and then replace it with a DataSource that retrieves data from the server later on.
@@ -792,25 +795,25 @@ Each Sentinel objects also contains a "value" key with its actual value. One way
 
 Despite being JSON objects, all Sentinels are considered JSON Graph value types and therefore can be retrieved from a Model. However when a Sentinel is retrieved from a Model, the Model *unboxes* the value within the Sentinel and returns the value instead of the entire Sentinel object.
 
-(Example of calling get value on an Atom)
-
 ~~~js
 var log = console.log.bind(console)
-var $ref = falcor.Model.ref;
 
 var model = new falcor.Model({cache: {
     todosById: {
         "44": {
-            $type: "atom",
-            value: [1, 2, 3, 4]
+            name: "Get money from ATM.",
+            tags: {
+                $type: "atom",
+                value: ["home", "budget"]
+            }
         }
     }
 }});
 
-model.getValue('todosById[44]').then(log);
-
 // This outputs the following to the console:
-// [1, 2, 3, 4]
+// ["home", "budget"]
+model.getValue('todosById[44].tags').then(log);
+
 ~~~
 
 You can create a new Model which does not have this unboxing behavior by calling "boxValues." 
@@ -885,8 +888,6 @@ console.log(JSON.stringify(number, null, 4))
 
 Atoms "box" value types inside of a JSON object, allowing metadata to be attached to them. 
 
-(Example of creating an atom with a value of 4 and an "$expired property and then serializing)
-
 ~~~js
 var number = {
     $type: "atom",
@@ -904,9 +905,9 @@ console.log(JSON.stringify(number, null, 4))
 // } 
 ~~~
 
-The value of an Atom is always treated like a value type, meaning it is retrieved and set in its entirety. Mutating an Adam is ineffectual. Instead you must replace it entirely using the Model's set operation.
+The value of an Atom is always treated like a value type, meaning it is retrieved and set in its entirety. Mutating an Atom has no effect. Instead you must replace it entirely using the Model's set operation.
 
-In addition to making it possible to attach metadata to JSON values, Atoms can be used to get around the restriction against retrieving JSON Objects and Arrays from a Falcor Model. 
+In addition to making it possible to attach metadata to JSON values, Atoms can be used to get around the restriction against retrieving JSON Objects and Arrays from a Falcor Model.
 
 Let's say that we have an Array which we are certain will remain small, like a list of video subtitles for example. By boxing the subtitles Array in an Atom, we cause the Falcor model to treat it as a value and return it in its entirety. 
 
@@ -936,7 +937,7 @@ Internally the Model boxes all retrieved values that have been successfully retr
 
 When a Model's DataSource encounters an error while attempting to retrieve a value from a JSON object, an Error object is created and placed in the JSON instead of the value that was unable to be retrieved. 
 
-By default a Model delivers Errors differently than other values. If synchronous methods are used to retrieve the data from the Model, the error is thrown.  If the data is asynchronously being requested from the model as a observable or a promise, the error will be delivered in a special callback.
+By default a Model delivers Errors differently than other values. If synchronous methods are used to retrieve the data from the Model the error is thrown.  If the data is asynchronously being requested from the model as an Observable or a Promise, the error will be delivered in a special callback.
 
 ~~~js
 var model = new falcor.Model({cache: {
@@ -960,11 +961,11 @@ model.
         });
 ~~~
 
-To learn more about the different ways to retrieve information from a model, see [Retrieving Data from a Model](#Retrieving-Data-from-a-Model).
+To learn more about the different ways to retrieve information from a Model, see [Retrieving Data from a Model](#Retrieving-Data-from-a-Model).
 
 ##### "What if I don't want a Model to treat errors differently from other values?"
 
-There are many reasons why you might want errors reported the same way as other values. For example you might retrieve several paths from a model in a single request, and want to be resilient against the possibility that one of them fails. Furthermore you might want to display errors in a template alongside successfully-retrieved values. 
+There are many reasons why you might want errors reported the same way as other values. For example you might retrieve several paths from a model in a single request, and resilient if one of them fails. Furthermore you might want to display errors in a template alongside successfully-retrieved values. 
 
 The "treatErrorsAsValues" function creates a new Model which reports errors the same way as values. 
 
@@ -1034,6 +1035,13 @@ Metadata can be attached to Sentinels to control the way the Model handles them 
 (Example of using setValue to add an atom that expires in two seconds  ($expires: -2000) and then attempting to retrieve it after four seconds only to prove that it is gone)
 
 ~~~js
+
+var model = new falcor.Model({
+    cache: {
+        todos:
+    }
+});
+model.setValue(
 //@TODO: look up syntax for how do this.
 ~~~
 
@@ -1150,30 +1158,171 @@ One of the limitations of working with JSON data through a Falcor model is that 
 
 ## Boxing and Unboxing
  
- 
- 
 <a name="Sentinel-Metadata"></a>
 
 ## Sentinel Metadata
 
 Metadata can be attached to value types to control the way the Model handles them once they have been retrieved from the data source. Metadata can be to any JSON object as a key that starts with the prefix "$". Note that any keys set on JSON value types (string, number, boolean, and null) will not persist when serialized to JSON. 
 
-(Example of attaching a metadata key to a JavaScript number, and then JSON stringifying it only to discover that the key is missing.)
+~~~json
+var number = 4;
+// adding expiration metadata to a number, indicating it should expire from the Model cache in 2 seconds
+number.$expires = -2000;
 
-Therefore in order to add metadata to JSON value types, the value types must be boxed in an atom. For more information on Atoms see [JSON Graph Atoms](#JSON-Graph-Atoms).
+// prints "4"
+console.log(JSON.stringify(number));
+~~~
 
+Therefore in order to add metadata to JSON value types, the value types must be boxed in an Atom. For more information on Atoms see [JSON Graph Atoms](#JSON-Graph-Atoms).
 
+~~~json
+var number = {
+    $type: "atom",
+    value: 4,
+    $expires: -2000
+}
 
+// prints {$type:"atom",value:4,$expires:-2000}
+console.log(JSON.stringify(number));
+~~~
 
-For more information on sentinels, see [JSON Graph Sentinels](#JSON-Graph-Sentinels).
+The Model supports a variety of different metadata fields, which can be attached to any [JSON Graph Sentinel](#JSON-Graph-Sentinels):
 
+* $type
+* $expires
+* $timestamp
+* $size
+
+### $type metadata
+
+Every JSON Graph sentinel has to contain a $type key with one of the following three values:
+
+1. "atom"
+2. "ref"
+3. "error"
+
+For more information see [JSON Graph Sentinels](#JSON-Graph-Sentinels).
+
+### $expires metadata
+
+The $expires metadata dictates how long a value should remain in the Model cache. The value of the "$expires" key must a negative or positive integer. This value is overloaded to allow for two special values, as well as both positive and negative integers. Here are the meanings of these values:
+
+#### Expire Immediately ($expires = 0)
+
+An $expires value of 0 will cause the value to immediately be expired from the cache after being delivered.
+
+#### Never Expire ($expires = 1)
+
+An $expires value of 1 will prevent the Model from removing the value from the cache during its normal garbage collection process. Click here more information, see [Model Garbage Collection](#Model-Garbage-Collection).
+
+#### Expire at an Absolute Time ($expires > 0)
+
+A positive integer indicates that the value should expire from the cache if the value < Date.now().
+
+~~~js
+var model = new falcor.Model({
+    cache: {
+        todos: [
+            {
+                $type: "atom",
+                $expires: (new Date(2000,0,1)).getTime(),
+                value: "Fix Y2K bug"
+            }
+        ]
+    }
+});
+
+// prints undefined
+model.getValue("todos[0]").then(task => console.log(task));
+~~~
+
+#### Expire at a Relative Time ($expires < 0)
+
+If the $expires key value is a negative integer, the expiration time is relative to the time at which the value is written into the cache.
+
+~~~js
+var model = new falcor.Model({
+    cache: {
+        todos: [
+            {
+                $type: "atom",
+                $expires: -30 * 60 * 1000, // 30 minutes
+                value: "Deliver Pizza"
+            }
+        ]
+    }
+});
+
+setTimeout(function() {
+    // prints undefined
+    model.getValue("todos[0]").then(task => console.log(task));
+}, (30 * 60 * 1000) + 1000); // 31 minutes
+~~~
+
+### $timestamp metadata
+
+Race conditions can often arise in eventually consistent systems. When multiple requests to the DataSource are in flight, there is no guarantee which request will be processed by the server first. Two sequential requests from the Model's DataSource to the network may hit two different servers. If the application server that processes the first request is overloaded, the second request may make it to the backend data store before the first. If the second request mutates data and the backend data store is eventually consistent, changes may not be replicated by the time the first request makes it to the backend data store. If this occurs, the first request issued by the DataSource will return after the second, but will **not** reflect the mutation made by the second request. The result will be that the newer data in the Model cache will be overwritten by the stale data in the response from the first request.
+
+![How the Model Works]({{ site.baseurl }}/model/withouttimestamp.png)
+
+The $timestamp metadata eliminates race conditions like this by allowing both the client and server to attach the time at which the value was last modified. If an older version of a value arrives from the network after a newer version, the Model Cache will ignore the older version of the value.
+
+![How the Model Works]({{ site.baseurl }}/model/withtimestamp.png)
+
+The $timestamp value is the number of milliseconds between midnight of January 1, 1970 and the date on which the value is last modified. In this example we make an attempt to overwrite the rating key with an older value. The Model will ignore our attempt to mutate the value and return the newer value instead. 
+
+~~~js
+var model = new falcor.Model({ 
+    cache: {
+         rating: {
+             $type: "atom",
+             $timestamp: 500,
+             value: 3
+         }
+    }
+ });
+ // Attempt to set rating to older value will fail, 
+ // and the newer value "3" will be printed to the console.
+ model.setValue(
+     "rating", 
+     {
+         $type: "atom",
+         $timestamp: 200,
+         value: 5
+     }).
+     then(value => console.log(value));
+~~~ 
+
+### $size metadata
+
+The Model can be given a maximum cache size at creation time. When the maximum cache size is surpassed, the least-recently-used values in the cache are purged until there is enough space in the cache to add additional values. However, not all values will occupy the same amount of space in memory. For example, Atoms may contain larger values like JavaScript Objects and Arrays, and the Model will make no effort to approximate the size of these values. In order to more accurately represent the size of the value, it is possible to set a custom size using the $size metadata.
+
+~~~js
+var model = new falcor.Model({
+    cache: {
+        titlesById: {
+            629: {
+                name: "House of Cards",
+                subtitles: {
+                    $type: "atom",
+                    value: ["en","fr","ge"],
+                    $size: 10
+                }
+            }
+        }
+    },
+    maxSize: 500
+});
+~~~
+
+For more information on the Model Cache, see Model Cache.
 
 ## Transactions
 
 A Model automatically collects least-recently-used items in the local cache when the size of the cache breaches the Model's maximum cache size. However the Model also attempts to ensure that data that is currently being delivered 
 A transaction is a period of time during which no cache collections occur. 
 
-When you request data from a Falcor model, any request the data that is not in the local cash is retrieved from the data source, added to the cash, and then pushed to a callback.  By default, a transaction begins when the data is written to the cache and ends when the callback function has finished executing.
+When you request data from a Falcor model, any request the data that is not in the local cache is retrieved from the data source, added to the cache, and then pushed to a callback.  By default, a transaction begins when the data is written to the cache and ends when the callback function has finished executing.
 
 The Falcor model uses push APIs to deliver data, giving it the flexibility to retrieve data from the data source if it is not synchronously available in the Model's cache. Under normal circumstances the model does not allow synchronous access to the cache. The reason why don't you just cannot be synchronously retrieved from the model cache is that there is no way for a developer to ascertain whether a model a value is undefined or simply not present in the cache.
 
@@ -1202,3 +1351,28 @@ Typically a path that has been optimized can be retrieved more efficiently by th
 
 
 When attempting to retrieve paths from the cache, Models optimize paths whenever they encounter references. This means that even if a Model is not able to find the requested data in its local cache, it may be able to request a more optimized path from the data source.
+
+<a name="Creating-a-Model"></a>
+
+## Creating a Model
+
+A Model may be created by invoking the model constructor. Model constructor can be passed an options object that supports the following keys:
+
+* maxSize
+* unsafeMode
+* comparator
+* errorSelector
+* onChange
+* cache
+* source
+
+~~~js
+var modelOptions = { /* options keys here */ };
+var model = new falcor.Model(modelOptions);
+~~~
+
+For more information on these Model Options, see the [Model API docs](http://netflix.github.io/falcor/doc/Model.html)
+
+<a name="Retrieving-Data-from-a-Model"></a>
+
+## Retrieving Data From a Model
