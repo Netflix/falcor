@@ -10,7 +10,6 @@ var noOp = function() {};
 var Rx = require('rx');
 
 var __key = require("../lib/internal/key");
-var __generation = require("../lib/internal/generation");
 
 module.exports = {
     validateData: validateData,
@@ -84,7 +83,7 @@ module.exports = {
 };
 function clean(item, options) {
     traverseAndConvert(item);
-    strip(item, __key, __generation, "pathSetIndex");
+    strip(item, __key, "pathSetIndex");
 
     options.strip.forEach(function(s) {
         strip(item, s);
@@ -111,8 +110,8 @@ function validateOperation(name, expected, actual, messageSuffix) {
     // Removes all 5 !== "5" errors when it comes to pathValues.
     traverseAndConvert(actual);
     traverseAndConvert(expected);
-    strip(expected, __generation, __key);
-    strip(actual, __generation, __key, "pathSetIndex");
+    strip(expected, __key);
+    strip(actual, __key, "pathSetIndex");
 
     if (expected.values) {
         expect(actual.values, name + ".values " + messageSuffix).

@@ -1,4 +1,8 @@
-# Falcor [![Build Status](https://magnum.travis-ci.com/Netflix/falcor.svg?token=2ZVUVaYjVQbQ8yiHk8zs&branch=master)](https://magnum.travis-ci.com/Netflix/falcor) [![Coverage Status](https://coveralls.io/repos/Netflix/falcor/badge.svg?branch=master&t=ntL3St)](https://coveralls.io/r/Netflix/falcor?branch=master) [![bitHound Score](https://www.bithound.io/projects/badges/4770b520-d88b-11e4-a6f0-f5ebff4ed569/score.svg)](https://www.bithound.io/github/Netflix/falcor)
+<p align="center">
+  <img src="https://cloud.githubusercontent.com/assets/1016365/8711049/66438ebc-2b03-11e5-8a8a-75934f7ca7ec.png">
+</p>
+
+# Falcor [![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/Netflix/Falcor?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge) [![Build Status](https://magnum.travis-ci.com/Netflix/falcor.svg?token=2ZVUVaYjVQbQ8yiHk8zs&branch=master)](https://magnum.travis-ci.com/Netflix/falcor) [![Coverage Status](https://coveralls.io/repos/Netflix/falcor/badge.svg?branch=master&t=ntL3St)](https://coveralls.io/r/Netflix/falcor?branch=master) [![bitHound Score](https://www.bithound.io/projects/badges/4770b520-d88b-11e4-a6f0-f5ebff4ed569/score.svg)](https://www.bithound.io/github/Netflix/falcor)
 
 ## Getting Started
 
@@ -6,10 +10,11 @@ First make sure you are using NPM v 2.7.5+. Some versions of NPM contain bugs wh
 
 First build:
 ```
-git clone https://github.com/Netflix/falcor
+git clone "git+ssh://git@github.com/Netflix/falcor.git"
 cd falcor
 npm install
-npm run dist
+npm install gulp -g
+gulp all
 ```
 Now set up a simple webpage and import the newly-generated falcor library:
 ```html
@@ -37,9 +42,9 @@ Falcor lets you model your data as a graph in JSON with the JSON Graph specifica
 
 Falcor is not a replacement for your MVC framework, your database, or your application server. Instead you add Falcor to your existing stack to optimize client/server communication. Falcor is ideal for mobile apps, because it combines the caching benefits of REST with the low latency of RPC.
 
-You retrieve data from a Falcor model using the familiar JavaScript path syntax.   
+You retrieve data from a Falcor model using the familiar JavaScript path syntax.
 
-```JavaScript 
+```JavaScript
 var person = {
     name: "Steve McGuire",
     occupation: "Developer",
@@ -88,9 +93,9 @@ When a client requests paths from the model, the model attempts to retrieve the 
 http://{yourdomain}/person.json?paths=[["name"], ["location", "city"], ["location", "address"]]
 ```
 
-Note that rather than retrieve data from multiple endpoints, all of the data in the virtual model is exposed as single JSON resource. This means that the client can retrieve as much or as little of the graph as is required in a single HTTP request. 
+Note that rather than retrieve data from multiple endpoints, all of the data in the virtual model is exposed as single JSON resource. This means that the client can retrieve as much or as little of the graph as is required in a single HTTP request.
 
-The virtual JSON model on the server responds with a fragment of the virtual JSON model containing only the requested values. 
+The virtual JSON model on the server responds with a fragment of the virtual JSON model containing only the requested values.
 
 ```
 HTTP/1.1 200 OK
@@ -110,7 +115,7 @@ Content-Control: no-cache
 }
 ```
 
-Upon receiving the requested data, the client merges the JSON fragment with a template and displays it. 
+Upon receiving the requested data, the client merges the JSON fragment with a template and displays it.
 
 
 ```hbs
@@ -179,10 +184,10 @@ var person = new falcor.Model({
   source: new Router([
     {
       route: "['name', 'occupation']",
-      get: (pathSet) => 
+      get: (pathSet) =>
         personDB.
           exec(`SELECT ${pathSet[1].join(",")}
-                  FROM user 
+                  FROM user
            WHERE id = ${request.cookies.userid}`).
            then(row => {
              jsong: {
@@ -192,11 +197,11 @@ var person = new falcor.Model({
     },
     {
       route: 'location["country", "city", "address"]',
-      get: (pathSet) => 
+      get: (pathSet) =>
         locationServer.
           getLocation(request.cookies.userid).
           then(location => ({
-              jsong: { location: getProps(location, pathSet[2]) } 
+              jsong: { location: getProps(location, pathSet[2]) }
           })
     }
   ])
@@ -213,7 +218,7 @@ app.get("/person.json", function (req, res) {
 var server = app.listen(80);
 ```
 
-The virtual model exposes the entire JSON model at a single URL and accepts one or more paths in the query string. This allows the client to request as much of the graph as it needs within in a single HTTP request. 
+The virtual model exposes the entire JSON model at a single URL and accepts one or more paths in the query string. This allows the client to request as much of the graph as it needs within in a single HTTP request.
 
 For more information on the router, see
 
