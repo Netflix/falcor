@@ -1,4 +1,4 @@
-var falcor = require('./../../index');
+var falcor = require('./../../lib/index');
 var legacyFalcor = require('./legacy');
 
 var Cache = require('./../../test/data/Cache');
@@ -27,7 +27,7 @@ module.exports = function() {
         modelWithSource._root.expired = [];
         return modelGet.apply(modelWithSource, arguments);
     };
-   
+
     return {
         model: model,
         empty: emptyModel,
