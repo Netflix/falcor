@@ -255,18 +255,28 @@ If you are certain that an Object or Array will remain a constant size, you can 
 A Model may be created by invoking the Model constructor. Model constructor can be passed an options object that supports the following keys:
 
 * cache
-* source
 * maxSize
-* unsafeMode
+* collectRatio
+* source
+* onChange
 * comparator
 * errorSelector
-* onChange
+* unsafeMode
 
 ~~~js
 var modelOptions = { /* options keys here */ };
 var model = new falcor.Model(modelOptions);
 ~~~
 
+## The cache, maxSize, and collectRatio values
+
+These options control the Model cache. For more information on the Model cache and these options, see [The Model Cache](#The-Model-Cache).
+
+## The source value
+
+The source value in the Model constructor options object can be initialized to a DataSource. Models use DataSources to retrieve JSON information. For more information, see [DataSources](./datasources.md).
+
+## The onChange and comparator values
 For more information on these Model Options, see the [Model API docs](http://netflix.github.io/falcor/doc/Model.html)
 
 <a name="Initializing-a-Model-with-a-Cache"></a>
@@ -1267,6 +1277,9 @@ batchModel.getValue("todos[2].name").then(log);
 // The previous three model requests result in the following single request to the DataSource:
 // httpDataSource.get([["todos", { from: 0, to: 2 }, "name"]]);
 ~~~
+
+![Batched Model diagram](./batch-model.png)
+
 
 <a name="Path-Optimization"></a>
 
