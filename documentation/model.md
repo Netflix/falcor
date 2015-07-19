@@ -10,140 +10,19 @@ lang: en
 
 # Model Overview
 
-Falcor provides a Model object, which is intended to be the "M" in your MVC. An application that uses Falcor doesn't work with JSON data directly, but rather works with JSON data _indirectly_ through the Model object. The Model object provides a set of familiar JavaScript APIs for working with JSON data, including get, set, and call. 
+Your application can use Data Sources to retrieve JSON Graph data from the network. However it is rarely ideal for your application's views to interact directly with data sources for the following reasons:
 
-Here is an example of working with JSON data directly:
+1. Application views typically navigate information hierarchically in plain, old JSON format. 
+2. Views need to be responsive to user input, but retrieving data from a Data Source may introduce considerable latency if the Data Source accesses the network.
+3. In response to user navigation (ex. scrolling through a list), views may need to repeatedly access small quantities of fine-grained data in rapid succession. Data Sources typically access the network where fine-grained requests are often inefficient, because of the overhead required to issue a request.
+4. Navigating information hierarchically rather than retrieving information using id's can lead to inefficent back-end requests.
 
-~~~js
-var log = console.log.bind(console)
+For these reasons Views retrieve their data from the Model objects, which act as intermediaries between the view and the Data Source. Models abstract over Data Sources and provide several important services:
 
-var model = {
-    todos: [
-        {
-            name: 'get milk from corner store',
-            done: false
-        },
-        {
-            name: 'withdraw money from ATM',
-            done: true
-        }
-    ]
-};
-
-// This outputs the following to the console:
-// get milk from corner store 
-console.log(model.todos[0].name);
-~~~
-
-The main difference between working with JSON data directly and working with it indirectly through a Model object, is that the Falcor Model has a _push API_. Here is an example of working with a JSON object indirectly using a Falcor Model:
-
-~~~js
-var log = console.log.bind(console)
-
-var model = new falcor.Model({cache: {
-    todos: [
-        {
-            name: 'get milk from corner store',
-            done: false
-        },
-        {
-            name: 'withdraw money from ATM',
-            done: true
-        }
-    ]
-}});
-
-// This outputs the following to the console:
-// get milk from corner store 
-model.getValue('todos[0].name').then(log);
-~~~
-
-Note that in the example above, the name of the TODO is _pushed_ to a call back.
- 
-The main advantage of using a push API is that you can code against JSON data the same way regardless of whether the data is local or remote. This makes it very easy to begin coding your application against mocked data at first, and then work against server data later on without changing client code.
-
-In this example we retrieve the name of the first TODO from a JSON Object: 
-
-~~~js
-var log = console.log.bind(console)
-
-var model = new falcor.Model({cache: {
-    todos: [
-        {
-            name: 'get milk from corner store',
-            done: false
-        },
-        {
-            name: 'withdraw money from ATM',
-            done: true
-        }
-    ]
-}});
-
-model.getValue('todos[0].name').then(log);
-~~~
-
-In this code sample the data has been moved to the cloud, but the client code that retrieves the data remains the same:
-
-~~~js
-var model = new falcor.Model({source: new falcor.HttpDataSource('/model.json')});
-
-model.getValue('todos[0].name').then(log);
-~~~
-
-Another advantage of using a Falcor Model is that it caches the JSON data it retrieves from the server _in-memory_. As a result, you don't need to maintain a cache of the data that you retrieve from a Falcor Model. Whenever you need data, just retrieve it from the Model. If the Model finds the data in its cache, it will push the data to you immediately. Otherwise the Model will retrieve your data from the server, insert it into the cache, and push it to you asynchronously.
- 
-~~~js
-var model = new falcor.Model({source: new falcor.HttpDataSource('/model.json')});
-
-model.getValue('todos[0].name').then(function() {
-    // This request is served out of the local cache:
-    model.getValue('todos[0].name').then(log);
-});
-~~~
-
-In addition to JSON data the Falcor model also supports [JSON Graph](./jsongraph.md). JSON Graph is a convention for modeling graph information in JSON. JSON Graph can help you ensure that the same object never appears more than once in either server responses or the Model cache. This means you never need to worry about propagating changes to multiple copies of the same object.
- 
-~~~js
-var log = console.log.bind(console)
-
-var model = new falcor.Model({cache: {
-    todos: [
-        {
-            $type: "ref",
-            value: ['todosById', 44]
-        },
-        {
-            $type: "ref",
-            value: ['todosById', 54]
-        }        
-    ],
-    todosById: {
-        "44": {
-            name: 'get milk from corner store',
-            done: false,
-            prerequisites: [{
-                $type: "ref",
-                value: ['todosById', 54]
-            }]
-        },
-        "54": {
-            name: 'withdraw money from ATM',
-            done: false
-        }
-    }
-}});
-
-model.setValue('todos[1].done', true).then(function(x) {
-    model.getValue('todos[0].prerequisites[0].done').then(log);
-})
-
-// This outputs the following to the console:
-// true
-~~~
- 
-In addition to using JSON Graph to make sure that objects don't appear more than once in the Model's cache, the model uses the references in JSON Graph to optimize server requests. For more information, see [Path Optimization](#Path-Optimization).
-
+* Models convert JSON Graph information retrieved from the Data Source into JSON.
+* Models reduce latency by caching data previously-retrieved from the Data Source in an in-memory cache.
+* Models achieve more efficient network access patterns by batching multiple concurrent requests for information from the view into batched requests to the Data Source.
+* Models optimize your view's outgoing requests to the Data Source using previously-cached JSON Graph references.
 ## How the Model Works
 
 Every Falcor Model is associated a JSON object. Models use a DataSource to retrieve data from the JSON object. Falcor ships with HttpDataSource, an implementation of the DataSource interface which proxies requests to another DataSource running on an HTTP server (usually a falcor Router).
@@ -248,6 +127,90 @@ showPage(0);
 
 If you are certain that an Object or Array will remain a constant size, you can indicate to a Model that they should always be retrieved in their entirety by using an Atom. For more information, see [JSON Graph Atoms](#JSON-Graph-Atoms).
 
+# Working With Data Using a Model
+
+The Falcor Model is intended to be the "M" in your MVC. Rather than interact with JSON data directly, your application's views interact with data _indirectly_ through the Model object. The Model object provides a set of familiar JavaScript APIs for working with JSON data, including get, set, and call. 
+
+Here is an example of working with JSON data directly:
+
+~~~js
+var log = console.log.bind(console)
+
+var model = {
+    todos: [
+        {
+            name: 'get milk from corner store',
+            done: false
+        },
+        {
+            name: 'withdraw money from ATM',
+            done: true
+        }
+    ]
+};
+
+// This outputs the following to the console:
+// get milk from corner store 
+console.log(model.todos[0].name);
+~~~
+
+The main difference between working with JSON data directly and working with it indirectly through a Model object, is that the Falcor Model has a _push API_. Here is an example of working with a JSON object indirectly using a Falcor Model:
+
+~~~js
+var log = console.log.bind(console)
+
+var model = new falcor.Model({cache: {
+    todos: [
+        {
+            name: 'get milk from corner store',
+            done: false
+        },
+        {
+            name: 'withdraw money from ATM',
+            done: true
+        }
+    ]
+}});
+
+// This outputs the following to the console:
+// get milk from corner store 
+model.getValue('todos[0].name').then(log);
+~~~
+
+Note that in the example above, the name of the TODO is _pushed_ to a call back.
+ 
+The main advantage of using a push API is that you can code against JSON data the same way regardless of whether the data is local or remote. This makes it very easy to begin coding your application against mocked data at first, and then work against server data later on without changing client code.
+
+In this example we retrieve the name of the first TODO from a JSON Object: 
+
+~~~js
+var log = console.log.bind(console)
+
+var model = new falcor.Model({cache: {
+    todos: [
+        {
+            name: 'get milk from corner store',
+            done: false
+        },
+        {
+            name: 'withdraw money from ATM',
+            done: true
+        }
+    ]
+}});
+
+model.getValue('todos[0].name').then(log);
+~~~
+
+In this code sample the data has been moved to the cloud, but the client code that retrieves the data remains the same:
+
+~~~js
+var model = new falcor.Model({source: new falcor.HttpDataSource('/model.json')});
+
+model.getValue('todos[0].name').then(log);
+~~~
+
+
 <a name="Creating-a-Model"></a>
 
 # Creating a Model
@@ -299,20 +262,6 @@ var model = new falcor.Model({
 
 # Working with Data using a Model
 
-Your application can use Data Sources to retrieve JSON Graph data from the network. However it is rarely ideal for your application's views to interact directly with data sources for the following reasons:
-
-1. Application views typically navigate information hierarchically in plain, old JSON format. 
-2. Views need to be responsive to user input, but retrieving data from a Data Source may introduce considerable latency if the Data Source accesses the network.
-3. In response to user navigation (ex. scrolling through a list), views may need to repeatedly access small quantities of fine-grained data in rapid succession. Data Sources typically access the network where fine-grained requests are often inefficient, because of the overhead required to issue a request.
-4. Navigating information hierarchically rather than retrieving information using id's can lead to inefficent back-end requests.
-
-The Model resolves these two alleviates
-For these reasons, instead of working directly with the Data Source, views interact with a Model Object. The Model acts as a intermediary between the view and the Data Source, providing several important services:
-
-* Converting the JSON Graph information retrieved from the Data Source into JSON format which can be navigated hierarchically by the view.
-* Caching data previously retrieved from the Data Source in an in-memory cache to reduce latency.
-* Batching multiple concurrent requests into a single request to the Data Source.
-* Optimizing the view's outgoing requests to the Data Source using JSON Graph references information previously.
 
 
 The Model provides the following useful functions:
