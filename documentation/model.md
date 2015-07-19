@@ -23,9 +23,10 @@ For these reasons Views retrieve their data from the Model objects, which act as
 * Models reduce latency by caching data previously-retrieved from the Data Source in an in-memory cache.
 * Models achieve more efficient network access patterns by batching multiple concurrent requests for information from the view into batched requests to the Data Source.
 * Models optimize your view's outgoing requests to the Data Source using previously-cached JSON Graph references.
+
 ## How the Model Works
 
-Every Falcor Model is associated a JSON object. Models use a DataSource to retrieve data from the JSON object. Falcor ships with HttpDataSource, an implementation of the DataSource interface which proxies requests to another DataSource running on an HTTP server (usually a falcor Router).
+Models use a DataSource to retrieve data from the JSON object. Falcor ships with HttpDataSource, an implementation of the DataSource interface which proxies requests to another DataSource running on an HTTP server (usually a falcor Router).
  
 ![How the Model Works]({{ site.baseurl }}/falcor-end-to-end.png)
 
@@ -57,7 +58,7 @@ var model = new falcor.Model({
     }});
 ~~~
 
-You can transform and retreive values by passing the Model the (Paths)[./paths.md] to those values within its associated JSON object.
+You can transform and retrieve values by passing the Model the (Paths)[./paths.md] to those values within its associated JSON object.
 
 ~~~js
 // This outputs the following to the console:
@@ -126,6 +127,52 @@ showPage(0);
 ~~~
 
 If you are certain that an Object or Array will remain a constant size, you can indicate to a Model that they should always be retrieved in their entirety by using an Atom. For more information, see [JSON Graph Atoms](#JSON-Graph-Atoms).
+
+<a name="Creating-a-Model"></a>
+
+# Creating a Model
+
+A Model may be created by invoking the Model constructor. Model constructor can be passed an options object that supports the following keys:
+
+* cache
+* maxSize
+* collectRatio
+* source
+* onChange
+* comparator
+* errorSelector
+
+~~~js
+var modelOptions = { /* options keys here */ };
+var model = new falcor.Model(modelOptions);
+~~~
+
+## The cache, maxSize, and collectRatio values
+
+These optional values can be used to configure the Model Cache. For more information, see [The Model Cache](#The-Model-Cache).
+
+## The source value
+
+The optional source value in the Model constructor options object can be initialized to a DataSource. Models use DataSources to retrieve JSON information. For more information, see [DataSources](./datasources.md).
+
+## The onChange and comparator values
+
+These optional values relate to change detection. For more information on Change Detection, see [Model Change Detection](#Model-Change-Detection).
+
+## The errorSelector value
+
+The optional errorSelector function can be used to transform errors that are returned from the [DataSource](./datasources.md) before they are stored in the [Model Cache](#The-Model-Cache).
+
+In this example, we use an errorSelector function to add a relative expiration time of two minutes to every error received from the DataSource.
+
+~~~js
+var model = new falcor.Model({
+    source: new falcor.HttpDataSource('/model.json'),   
+    errorSelector: function(error){
+        error.$expires = -1000 * 60 * 2;
+    }
+});
+~~~
 
 # Working With Data Using a Model
 
@@ -210,64 +257,6 @@ var model = new falcor.Model({source: new falcor.HttpDataSource('/model.json')})
 model.getValue('todos[0].name').then(log);
 ~~~
 
-
-<a name="Creating-a-Model"></a>
-
-# Creating a Model
-
-A Model may be created by invoking the Model constructor. Model constructor can be passed an options object that supports the following keys:
-
-* cache
-* maxSize
-* collectRatio
-* source
-* onChange
-* comparator
-* errorSelector
-
-~~~js
-var modelOptions = { /* options keys here */ };
-var model = new falcor.Model(modelOptions);
-~~~
-
-## The cache, maxSize, and collectRatio values
-
-These optional values can be used to configure the Model Cache. For more information, see [The Model Cache](#The-Model-Cache).
-
-## The source value
-
-The optional source value in the Model constructor options object can be initialized to a DataSource. Models use DataSources to retrieve JSON information. For more information, see [DataSources](./datasources.md).
-
-## The onChange and comparator values
-
-These optional values relate to change detection. For more information on Change Detection, see [Model Change Detection](#Model-Change-Detection).
-
-## The errorSelector value
-
-The optional errorSelector function can be used to transform errors that are returned from the [DataSource](./datasources.md) before they are stored in the [Model Cache](#The-Model-Cache).
-
-In this example, we use an errorSelector function to add a relative expiration time of two minutes to every error received from the DataSource.
-
-~~~js
-var model = new falcor.Model({
-    source: new falcor.HttpDataSource('/model.json'),   
-    errorSelector: function(error){
-        error.$expires = -1000 * 60 * 2;
-    }
-});
-~~~
-
-
-<a name="Retrieving-Data-from-a-Model"></a>
-
-# Working with Data using a Model
-
-
-
-The Model provides the following useful functions:
-
-*Allows the views to work with the Data Sources JSON Graph data as JSON
-The main function of the Model is to allow views to work with JSON data.
 The Model supports three types of data operations:
 
 1. get
@@ -282,6 +271,59 @@ The Model's get Method can be used to retrieve data from the DataSource. The get
 class Model {
     get(...PathSet, optionalValueSelector): ModelResponse
 }
+~~~
+
+The get method is flexible and can be used in three different ways:
+
+### 1. Retrieving JSON Graph Information as JSON
+
+While Models retrieve information from Data Sources in JSON Graph format, they emit information in JSON format. You can retrieve JSON data from a Model by passing the get method any number of PathSets. In the following example, we will retrieve the names of the first two tasks in a TODOs list from a Model.
+
+~~~js
+var dataSource = new falcor.HttpDataSource("/model.json");
+var model = new falcor.Model({
+    source: dataSource
+});
+
+model.get(["todos", {from: 0, to:1},"name"], ["todos", "length"]).then(function(response){
+    console.log(JSON.stringify(response));
+});
+~~~
+
+The Model forwards the requested paths to the Data Source's get method. The Data Source executes the abstract JSON Graph get operation on its associated JSON Graph object. The result is a JSON Graph object containing all of the values found at the requested paths, as well as all of the references encountered during path evaluation. 
+
+~~~js
+{
+    todos: {
+        "0": { $type: "ref", value: ["todosById", 44] },
+        "1": { $type: "ref", value: ["todosById", 54] },
+        "length": 10
+    },
+    todosById: {
+        "44": {
+            name: 'get milk from corner store'
+        },
+        "54": {
+            name: 'withdraw money from ATM'
+        }
+    }
+};
+~~~
+
+The Model merges the response from the Data Source into its internal JSON Graph cache, and creates a JSON format copy of the response by replacing all JSON Graph Reference objects with real object references. The resulting JSON object is returned to the caller:
+
+~~~js
+{
+    todos: {
+        "0": {
+            name: 'get milk from corner store'
+        },
+        "1": {
+            name: 'withdraw money from ATM'
+        },
+        "length": 10
+    }
+};
 ~~~
 # Working with JSON Graph Data using a Model
 
