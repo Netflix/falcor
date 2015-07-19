@@ -273,7 +273,7 @@ describe('DataSource and Cache', function() {
             }).
             subscribe(noOp, done, done);
     });
-    it('should do an error set and project it.', function(done) {
+    it('should throw an error set and project it.', function(done) {
         var model = new Model({
             source: new ErrorDataSource(503, "Timeout"),
             errorSelector: function mapError(path, value) {
