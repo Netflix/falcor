@@ -261,7 +261,6 @@ A Model may be created by invoking the Model constructor. Model constructor can 
 * onChange
 * comparator
 * errorSelector
-* unsafeMode
 
 ~~~js
 var modelOptions = { /* options keys here */ };
@@ -270,24 +269,71 @@ var model = new falcor.Model(modelOptions);
 
 ## The cache, maxSize, and collectRatio values
 
-These options control the Model cache. For more information on the Model cache and these options, see [The Model Cache](#The-Model-Cache).
+These optional values can be used to configure the Model Cache. For more information, see [The Model Cache](#The-Model-Cache).
 
 ## The source value
 
-The source value in the Model constructor options object can be initialized to a DataSource. Models use DataSources to retrieve JSON information. For more information, see [DataSources](./datasources.md).
+The optional source value in the Model constructor options object can be initialized to a DataSource. Models use DataSources to retrieve JSON information. For more information, see [DataSources](./datasources.md).
 
 ## The onChange and comparator values
-For more information on these Model Options, see the [Model API docs](http://netflix.github.io/falcor/doc/Model.html)
 
-<a name="Initializing-a-Model-with-a-Cache"></a>
+These optional values relate to change detection. For more information on Change Detection, see [Model Change Detection](#Model-Change-Detection).
 
-## Initializing a Model with a Cache
+## The errorSelector value
+
+The optional errorSelector function can be used to transform errors that are returned from the [DataSource](./datasources.md) before they are stored in the [Model Cache](#The-Model-Cache).
+
+In this example, we use an errorSelector function to add a relative expiration time of two minutes to every error received from the DataSource.
+
+~~~js
+var model = new falcor.Model({
+    source: new falcor.HttpDataSource('/model.json'),   
+    errorSelector: function(error){
+        error.$expires = -1000 * 60 * 2;
+    }
+});
+~~~
 
 
 <a name="Retrieving-Data-from-a-Model"></a>
 
-## Retrieving Data From a Model
+# Working with Data using a Model
 
+Your application can use Data Sources to retrieve JSON Graph data from the network. However it is rarely ideal for your application's views to interact directly with data sources for the following reasons:
+
+1. Application views typically navigate information hierarchically in plain, old JSON format. 
+2. Views need to be responsive to user input, but retrieving data from a Data Source may introduce considerable latency if the Data Source accesses the network.
+3. In response to user navigation (ex. scrolling through a list), views may need to repeatedly access small quantities of fine-grained data in rapid succession. Data Sources typically access the network where fine-grained requests are often inefficient, because of the overhead required to issue a request.
+4. Navigating information hierarchically rather than retrieving information using id's can lead to inefficent back-end requests.
+
+The Model resolves these two alleviates
+For these reasons, instead of working directly with the Data Source, views interact with a Model Object. The Model acts as a intermediary between the view and the Data Source, providing several important services:
+
+* Converting the JSON Graph information retrieved from the Data Source into JSON format which can be navigated hierarchically by the view.
+* Caching data previously retrieved from the Data Source in an in-memory cache to reduce latency.
+* Batching multiple concurrent requests into a single request to the Data Source.
+* Optimizing the view's outgoing requests to the Data Source using JSON Graph references information previously.
+
+
+The Model provides the following useful functions:
+
+*Allows the views to work with the Data Sources JSON Graph data as JSON
+The main function of the Model is to allow views to work with JSON data.
+The Model supports three types of data operations:
+
+1. get
+2. set
+3. call
+
+## The get Method
+
+The Model's get Method can be used to retrieve data from the DataSource. The get Method has the following signature:
+
+~~~js
+class Model {
+    get(...PathSet, optionalValueSelector): ModelResponse
+}
+~~~
 # Working with JSON Graph Data using a Model
 
 In addition to being able to work with JSON documents, Models can also operate on JSON Graph documents. JSON Graph is a convention for modeling graph information in JSON. JSON Graph documents extend JSON with **References**. References can be used anywhere within a JSON object to refer to a value elsewhere within the same JSON object. This removes the need to duplicate objects when serializing a graph into a hierarchical JSON object.
@@ -816,6 +862,8 @@ model.getValue('titlesById[44].subtitles').then(log)
 ~~~
 
 Internally the Model boxes all retrieved values that have been successfully retrieved from the data source before storing these values in its local cache.
+
+<a name="JSON-Graph-Errors"></a>
 
 #### JSON Graph Errors
 
