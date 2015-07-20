@@ -45,7 +45,7 @@ LocalSource.prototype = {
 
                 // always output all the paths
                 var output = {
-                    paths: paths,
+                    // paths: paths,
                     jsonGraph: {}
                 };
                 if (values[0]) {
