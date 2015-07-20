@@ -19,16 +19,13 @@ describe("RequestQueue", function() {
     var nextSlice = new TimeoutScheduler(16);
     var immediate = new ImmediateScheduler();
     var dataSource = new LocalDataSource(Cache());
-    var dataModel = {
-        _root: modelRoot,
-        _source: dataSource
-    };
 
     it("should be constructable.", function() {
         expect(new RequestQueue({}, immediate));
     });
 
     it("should immediately fire off a request.", function(done) {
+        var dataModel = { _root: modelRoot, _source: dataSource, _cache: {} };
         var queue = new RequestQueue(dataModel, immediate);
         var trigger = true;
         requestTestRunner(References().simpleReference0, queue).
@@ -39,6 +36,8 @@ describe("RequestQueue", function() {
     });
 
     it("should immediately fire off multiple requests.", function() {
+
+        var dataModel = { _root: modelRoot, _source: dataSource, _cache: {} };
         var queue = new RequestQueue(dataModel, immediate);
         var checks = 0;
         function onNext(envelope) {
@@ -53,6 +52,8 @@ describe("RequestQueue", function() {
     });
 
     it("should batch multiple requests into a single request asap.", function(done) {
+
+        var dataModel = { _root: modelRoot, _source: dataSource, _cache: {} };
         var queue = new RequestQueue(dataModel, nextTick);
         var checks = 0;
         function onNext(x) {
@@ -73,6 +74,8 @@ describe("RequestQueue", function() {
     });
 
     it("should batch multiple requests into a single request in a 16ms time slice.", function(done) {
+
+        var dataModel = { _root: modelRoot, _source: dataSource, _cache: {} };
         var queue = new RequestQueue(dataModel, nextSlice);
         var checks = 0;
         function onNext(x) {
@@ -94,7 +97,7 @@ describe("RequestQueue", function() {
 
     it("should have multiple requests batched across pending source requests.", function(done) {
         var dataSource = new LocalDataSource(Cache(), {wait:100});
-        var dataModel = { _root: modelRoot, _source: dataSource };
+        var dataModel = { _root: modelRoot, _source: dataSource, _cache: {} };
         var queue = new RequestQueue(dataModel, nextTick);
         var checks = 0;
         function onNext(x) {
@@ -113,7 +116,7 @@ describe("RequestQueue", function() {
     it("should merge multiple JSONGraph Envelopes from batched pending source requests.", function(done) {
 
         var dataSource = new LocalDataSource(Cache(), {wait:100});
-        var dataModel = { _root: modelRoot, _source: dataSource };
+        var dataModel = { _root: modelRoot, _source: dataSource, _cache: {} };
         var queue = new RequestQueue(dataModel, nextTick);
         var checks = 0;
         function onNext(x) {
@@ -136,6 +139,7 @@ describe("RequestQueue", function() {
 
     it("should remove paths from a batch if disposed before the scheduler is flushed", function(done) {
 
+        var dataModel = { _root: modelRoot, _source: dataSource, _cache: {} };
         var queue = new RequestQueue(dataModel, nextSlice);
         var checks = 0;
 
