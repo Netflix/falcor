@@ -12,7 +12,7 @@ lang: en
 
 Your application can use Data Sources to retrieve JSON Graph data from the network. However it is rarely ideal for your application's views to interact directly with data sources for the following reasons:
 
-1. Application views typically navigate information hierarchically in plain, old JSON format. 
+1. Application views typically navigate information hierarchically in JSON format, and Data Sources return data in JSON Graph format. 
 2. Views need to be responsive to user input, but retrieving data from a Data Source may introduce considerable latency if the Data Source accesses the network.
 3. In response to user navigation (ex. scrolling through a list), views may need to repeatedly access small quantities of fine-grained data in rapid succession. Data Sources typically access the network where fine-grained requests are often inefficient, because of the overhead required to issue a request.
 4. Navigating information hierarchically rather than retrieving information using id's can lead to inefficent back-end requests.
@@ -257,13 +257,8 @@ var model = new falcor.Model({source: new falcor.HttpDataSource('/model.json')})
 model.getValue('todos[0].name').then(log);
 ~~~
 
-The Model supports three types of data operations:
 
-1. get
-2. set
-3. call
-
-## The get Method
+## Retrieving Data from the Model
 
 The Model's get Method can be used to retrieve data from the DataSource. The get Method has the following signature:
 
@@ -273,11 +268,14 @@ class Model {
 }
 ~~~
 
-The get method is flexible and can be used in three different ways:
+The get method is flexible and is generally used for either of the following purposes:
+
+1. Retrieving JSON Graph information as JSON
+2. Transforming JSON Graph information directly into view objects
 
 ### 1. Retrieving JSON Graph Information as JSON
 
-While Models retrieve information from Data Sources in JSON Graph format, they emit information in JSON format. You can retrieve JSON data from a Model by passing the get method any number of PathSets. In the following example, we will retrieve the names of the first two tasks in a TODOs list from a Model.
+While Models retrieve information from DataSources in JSON Graph format, they emit information in JSON format. You can retrieve JSON data from a Model by passing the get method any number of PathSets. In the following example, we will retrieve the names of the first two tasks in a TODOs list from a Model.
 
 ~~~js
 var dataSource = new falcor.HttpDataSource("/model.json");
@@ -290,9 +288,10 @@ model.get(["todos", {from: 0, to:1},"name"], ["todos", "length"]).then(function(
 });
 ~~~
 
-The Model forwards the requested paths to the Data Source's get method. The Data Source executes the abstract JSON Graph get operation on its associated JSON Graph object. The result is a JSON Graph object containing all of the values found at the requested paths, as well as all of the references encountered during path evaluation. 
+The Model forwards the requested paths to the Data Source's get method. The Data Source executes the abstract JSON Graph get operation on its associated JSON Graph object. The result is a subset of the Data Source's JSON Graph object containing all of the values found at the requested paths, as well as any [JSON Graph References](#JSON-Graph-References) encountered along the requested paths.
 
 ~~~js
+// DataSource Response
 {
     todos: {
         "0": { $type: "ref", value: ["todosById", 44] },
@@ -310,21 +309,61 @@ The Model forwards the requested paths to the Data Source's get method. The Data
 };
 ~~~
 
-The Model merges the response from the Data Source into its internal JSON Graph cache, and creates a JSON format copy of the response by replacing all JSON Graph Reference objects with real object references. The resulting JSON object is returned to the caller:
+The Model merges the response from the DataSource into its internal JSON Graph cache, and creates a JSON format copy of the response by replacing all JSON Graph Reference objects with real object references. The resulting JSON object is returned to the caller in an envelope, and printed to the console:
 
 ~~~js
-{
-    todos: {
-        "0": {
-            name: 'get milk from corner store'
-        },
-        "1": {
-            name: 'withdraw money from ATM'
-        },
-        "length": 10
-    }
-};
+model.get(["todos", {from: 0, to:1},"name"], ["todos", "length"]).then(function(response){
+    console.log(JSON.stringify(response));
+});
+// The following JSON envelope is eventually printed to the console:
+// {
+//     json: {
+//         todos: {
+//             "0": {
+//                 name: 'get milk from corner store'
+//             },
+//             "1": {
+//                 name: 'withdraw money from ATM'
+//             },
+//             "length": 10
+//         }
+//     }
+// }
 ~~~
+
+### 2. Transforming JSON Graph Information Directly Into View Objects
+
+The Model's internal cache representation is a JSON Graph. That means that in order to return requested values in JSON format, the Model must allocate new objects. In memory-constrained environments in which the caller immediately converts JSON data returned by the Model into view objects, it may be desireable to avoid intermediary allocations by reading data directly from the Model cache.
+
+The Model's get method can optionally accept a selector function. This selector function is guaranteed to run once the requested values have been loaded into the Model's cache. The Model runs the selector function within a Transaction. During a Transaction, it is legal to use the following methods to directly access data in the Model cache:
+
+* getValueSync
+* derefSync
+
+Model methods ending in the suffix "Sync" will throw if executed outside of a transaction. 
+
+By reading data from the model cache and transforming it directly into view objects, we avoid intermediary allocations. However, the developer must ensure that they request those paths in the selector function which have been passed as arguments to the get method.  
+
+In the example below, Views are created from data read directly from the Model cache.
+
+~~~js
+model.
+    get(
+    'todos[0..1]["name", "done"]',
+    function selectorFunction() {
+        var html = "<ul>";
+        var todo;
+        for (var i = 0; i <= 1; i++) {
+            todo = this.derefSync(["todos", i]);
+            if (todo)
+                html += "<li>" + todo.getValueSync("name") + " <img src='" + (todo.getValueSync("done") ? "check.png" : "blank.png") + "'></li>";
+        }
+        html += "</ul><a onclick='showPage(" + to + ")'>Next</a>";
+        return html;
+    }).
+~~~
+
+
 # Working with JSON Graph Data using a Model
 
 In addition to being able to work with JSON documents, Models can also operate on JSON Graph documents. JSON Graph is a convention for modeling graph information in JSON. JSON Graph documents extend JSON with **References**. References can be used anywhere within a JSON object to refer to a value elsewhere within the same JSON object. This removes the need to duplicate objects when serializing a graph into a hierarchical JSON object.
