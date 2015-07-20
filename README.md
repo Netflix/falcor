@@ -62,7 +62,7 @@ This is the way you would retrieve data from the same JSON in a remote Falcor Mo
 
 ```JavaScript
 var person = new falcor.Model({
-  source: new falcor.HttpSource("/person.json")
+  source: new falcor.HttpDataSource("/person.json")
 });
 
 person.getValue("location.address").
@@ -81,7 +81,7 @@ In this example the client requests several values from the virtual model on the
 
 ```JavaScript
 var person = new falcor.Model({
-  source: new falcor.HttpSource("/person.json")
+  source: new falcor.HttpDataSource("/person.json")
 });
 
 person.get("name", "location.city", "location.address").
