@@ -32,3 +32,4 @@ Roughly prioritized TODO list
 - Style TOC
 - Splash page banner, main marketing blurbs, install info, etc. Goal: make it all editable via markdown pieces
 - find better syntax highlighting theme
+- more docs, of course!
