@@ -1,3 +1,3 @@
-## Other Spiffy Feature
+### Bind to the Cloud
 
 info
