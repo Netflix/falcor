@@ -1,0 +1,10 @@
+{% for navitem in include.theTOC %}
+{% if navitem.folder %}
+{% capture iterfolders %}{% if include.folders %}{{include.folders}},{% endif %}{{navitem.folder}}{% endcapture %}
+{% if navitem.contents %}
+{% include /functions/f_navtree_open.html theTOC=navitem.contents folders=iterfolders %}
+{% endif %}
+{% elsif navitem.url %}
+{% if page.url == navitem.url %}{{include.folders}}{% endif %}
+{% endif %}
+{% endfor %}

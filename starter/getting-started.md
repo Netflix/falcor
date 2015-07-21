@@ -1,7 +1,7 @@
 ---
 layout: page
-title: getting started
-menu: starter
+title: Getting Started
+id: getting_started
 lang: en
 ---
 
@@ -13,11 +13,11 @@ In this barebones tutorial we will use the falcor Router to create a Virtual JSO
 
 In this example we will use the falcor Router to build a Virtual JSON resource on an app server. The and host it at /model.json. The JSON resource will contain the following contents:
 
-~~~js
+{% highlight javascript %}
 {
   "greeting": "Hello World"
 }
-~~~
+{% endhighlight %}
 
 Normally Routers retrieve the data for their Virtual JSON resource from backend datastores or other web services on-demand. However in this simple tutorial the Router will simply return static data for a single key.
 
@@ -44,7 +44,7 @@ npm install falcor-express --save
 
 Now we create an index.js file with the following contents:
 
-~~~js
+{% highlight javascript %}
 // index.js
 var falcorExpress = require('falcor-express');
 var Router = require('falcor-router');
@@ -70,7 +70,7 @@ app.use('/model.json', falcorExpress.dataSourceRoute(function (req, res) {
 app.use(express.static(__dirname + '/'));
 
 var server = app.listen(3000);
-~~~
+{% endhighlight %}
 
 Now we run the server, which will listen on port 3000 for requests for /model.json.
 

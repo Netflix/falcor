@@ -1,7 +1,7 @@
 ---
 layout: page
 title: model
-menu: home
+id: paths
 lang: en
 ---
 

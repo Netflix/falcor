@@ -2,3 +2,5 @@ baseurl: "/falcor"
 exclude: 
   - "less"
   - "node_modules"
+  - "gulpfile.js"
+  - "package.json"

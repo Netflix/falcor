@@ -1,3 +1,8 @@
+---
+title: Walkthrough
+layout: page
+---
+
 In a Falcor application you access and modify your application's JSON data using a Falcor Model object. The Falcor Model allows you to work with JSON data using familiar JavaScript operations like get, set, and call. The main difference is that the Falcor Model's Falcor APIs are asynchronous. By providing an asynchronous API, the Falcor model allows developers to manipulate all JSON data the same way regardless of whether the data is in local memory, or in the cloud.
 
 Let's start by working with the JSON data we expect the server to provide. In this example we will use a JSON object that represents an individual Netflix member's (abbreviated) personalized recommendations.
