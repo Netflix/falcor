@@ -23,28 +23,28 @@ Normally Routers retrieve the data for their Virtual JSON resource from backend 
 
 First we create a folder for our application server.
 
-~~~sh
+{% highlight bash %}
 mkdir falcor-app-server
 cd falcor-app-server
 npm init
-~~~
+{% endhighlight %}
 
 Now we install the falcor Router.
 
-~~~sh
+{% highlight bash %}
 npm install falcor-router --save
-~~~
+{% endhighlight %}
 
 Then install express and falcor-express.  Support for restify is also available, as is support for hapi via a [third-party implementation](https://github.com/dzannotti/falcor-hapi).
 
-~~~sh
+{% highlight bash %}
 npm install express --save
 npm install falcor-express --save
-~~~
+{% endhighlight %}
 
 Now we create an index.js file with the following contents:
 
-{% highlight javascript %}
+{% highlight JavaScript %}
 // index.js
 var falcorExpress = require('falcor-express');
 var Router = require('falcor-router');
@@ -70,6 +70,7 @@ app.use('/model.json', falcorExpress.dataSourceRoute(function (req, res) {
 app.use(express.static(__dirname + '/'));
 
 var server = app.listen(3000);
+
 {% endhighlight %}
 
 Now we run the server, which will listen on port 3000 for requests for /model.json.

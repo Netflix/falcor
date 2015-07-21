@@ -6,25 +6,27 @@ lang: en
 
 <div class="row">
   <div class="col-xs-12 text-center">
+    <div class="row row-gap-huge"></div>
     Falcor emblem and banner info will go here
+    <div class="row row-gap-huge"></div>
   </div>
 </div>
 
 <div class="row row-gap-medium">
   <!-- This bit has to be html to achieve the 3 column layout -->
   <div class="col-md-4">
-    {% include homepage-key-feature-1.md %}
+    {% capture the_include %}{% include homepage-key-feature-1.md %}{% endcapture %}
+    {{ the_include | markdownify }}
   </div>
   <div class="col-md-4">
-    {% include homepage-key-feature-2.md %}
+    {% capture the_include %}{% include homepage-key-feature-2.md %}{% endcapture %}
+    {{ the_include | markdownify }}
   </div>
   <div class="col-md-4">
-    {% include homepage-key-feature-3.md %}
+    {% capture the_include %}{% include homepage-key-feature-3.md %}{% endcapture %}
+    {{ the_include | markdownify }}
   </div>
 </div>
 
-<div class="row row-gap-medium">
-  <div class="col-xs-12">
-    {% include homepage.md %}    
-  </div>
-</div>
+{% capture the_include %}{% include homepage.md %}{% endcapture %}
+{{ the_include | markdownify }}

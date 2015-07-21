@@ -31,3 +31,4 @@ Roughly prioritized TODO list
 - Consider approaches to slim down TOC
 - Style TOC
 - Splash page banner, main marketing blurbs, install info, etc. Goal: make it all editable via markdown pieces
+- find better syntax highlighting theme
