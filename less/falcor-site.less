@@ -3,9 +3,35 @@
 @import "includes/bootstrap-customized.less";
 
 // Bootstrap overrides
+
+.navbar-brand > .navbar-logo {
+  display: inline-block;
+  height: 25px;
+  line-height: @navbar-height;
+}
+
 body {
-  background-color: #EBEBEB;
+  padding-top: 70px;
+  // probably unnecessary, but included in bootstrap's examples
+  // TODO: confirm whether this is needed for some browser quirk
+  // or just for their demo
+  // min-height: 2000px;
+}
+
+// Utility classes for easy vertical spacing improvements
+.row {
+  &.row-gap-small {
+    margin-top: 15px;
+  }
+  &.row-gap-medium {
+    margin-top: 30px;
+  }
+  &.row-gap-large {
+    margin-top: 45px;
+  }
+  &.row-gap-huge {
+    margin-top: 60px;
+  }
 }
 
 // Falcor site custom styles
-

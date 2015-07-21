@@ -1,7 +1,7 @@
 ---
 layout: page
-title: router
-menu: router
+title: Router
+id: router
 lang: en
 ---
 
