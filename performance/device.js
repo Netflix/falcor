@@ -11,17 +11,18 @@ var tests = testConfig.get;
 var suite = testConfig.suite;
 
 try {
-   device = require('nf-falcor-device-perf');
+    // Needs explicit 'npm install nf-falcor-device-perf'. Not part of package.json
+    device = require('nf-falcor-device-perf');
 
-   suite.tests = testSuiteGenerator({
-        iterations: 1,
+    suite.tests = testSuiteGenerator({
         models: {
             'model': models.modelWithSource
         },
         formats: ['PathMap', 'JSON']
     });
 
-   device.runTests(suite, testRunner, testSuiteGenerator, CSVFormatter);
+    device.runTests(suite, testRunner, testSuiteGenerator, CSVFormatter);
+
 } catch (e) {
-   // Ignore
+    console.log('Not running device tests. Need to npm install "nf-falcor-device-perf"');
 }
