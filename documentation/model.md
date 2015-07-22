@@ -260,20 +260,45 @@ model.getValue('todos[0].name').then(log);
 
 ## Retrieving Data from the Model
 
+When retrieving data from the Model, developers are typically attempting to do one of the following:
+
+1. Retrieve a single value
+2. Retrieving JSON Graph data as JSON
+3. Transforming JSON Graph data directly into view objects
+
+### 1. Retrieve a Single Value
+
+The Model's getValue Method can be used to retrieve a single value from the DataSource. The getValue Method has the following signature:
+
+~~~js
+class Model {
+    getValue(Path): ModelResponse
+}
+~~~
+
+Here is an example of retrieving a single value from a Model using getValue:
+
+~~~js
+var dataSource = new falcor.HttpDataSource("/model.json");
+var model = new falcor.Model({
+    source: dataSource
+});
+
+// prints "go to the ATM"
+model.get(["todos", 0,"name"]).then(function(name){
+    console.log(name);
+});
+~~~
+
+### 2. Retrieving JSON Graph Data as JSON
+
 The Model's get Method can be used to retrieve data from the DataSource. The get Method has the following signature:
 
 ~~~js
 class Model {
-    get(...PathSet, optionalValueSelector): ModelResponse
+    get(...PathSet): ModelResponse
 }
 ~~~
-
-The get method is flexible and is generally used for either of the following purposes:
-
-1. Retrieving JSON Graph information as JSON
-2. Transforming JSON Graph information directly into view objects
-
-### 1. Retrieving JSON Graph Information as JSON
 
 While Models retrieve information from DataSources in JSON Graph format, they emit information in JSON format. You can retrieve JSON data from a Model by passing the get method any number of PathSets. In the following example, we will retrieve the names of the first two tasks in a TODOs list from a Model.
 
@@ -331,9 +356,15 @@ model.get(["todos", {from: 0, to:1},"name"], ["todos", "length"]).then(function(
 // }
 ~~~
 
-### 2. Transforming JSON Graph Information Directly Into View Objects
+### 3. Transforming JSON Graph Information Directly Into View Objects
 
-The Model's internal cache representation is a JSON Graph. That means that in order to return requested values in JSON format, the Model must allocate new objects. In memory-constrained environments in which the caller immediately converts JSON data returned by the Model into view objects, it may be desireable to avoid intermediary allocations by reading data directly from the Model cache.
+The Model's internal cache representation is a JSON Graph. That means that in order to return requested values in JSON format, the Model must allocate new objects. In memory-constrained environments in which the caller immediately converts JSON data returned by the Model into view objects, it may be desireable to avoid intermediary allocations by reading data directly from the Model cache. That's why the Model's get Method also supports the following overload:
+
+~~~js
+class Model {
+    get(...PathSet, valueSelector): ModelResponse
+}
+~~~
 
 The Model's get method can optionally accept a selector function. This selector function is guaranteed to run once the requested values have been loaded into the Model's cache. The Model runs the selector function within a Transaction. During a Transaction, it is legal to use the following methods to directly access data in the Model cache:
 
@@ -342,7 +373,7 @@ The Model's get method can optionally accept a selector function. This selector 
 
 Model methods ending in the suffix "Sync" will throw if executed outside of a transaction. 
 
-By reading data from the model cache and transforming it directly into view objects, we avoid intermediary allocations. However, the developer must ensure that they request those paths in the selector function which have been passed as arguments to the get method.  
+By reading data from the model cache and transforming it directly into view objects, we avoid intermediary allocations. **Within a transaction, the developer must ensure that they only request those paths in the selector function which have been passed as arguments to the get method.** These are the only paths which are guaranteed to be available in the cache. 
 
 In the example below, Views are created from data read directly from the Model cache.
 
@@ -362,6 +393,10 @@ model.
         return html;
     }).
 ~~~
+
+## Setting Values Using the Model
+
+In addition to retrieving values from a DataSource using a Model, you can also use a Model to set values into a DataSource. Set operations immediately write to the Model's local cache, and then write to the DataSource. That means that changes are reflected on the client immediately. However, if the attempt to modify the data in the DataSource fails, the Model's cache will eventually be updated the post-set value of the DataSource. This is sometimes referred to as eventual consistency.
 
 
 # Working with JSON Graph Data using a Model
