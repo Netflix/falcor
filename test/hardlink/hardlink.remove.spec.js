@@ -221,14 +221,14 @@ function setExpireyAndGet(query, output, get) {
             }
         }
     }});
-    var genreList = model._cache.genreList;
+    var genreList = model._root.cache.genreList;
     var lhs = genreList[0];
-    var rhs = model._cache.lists.abcd;
+    var rhs = model._root.cache.lists.abcd;
     return model.
         get(['genreList', 0, 0, 'summary']).
         do(function() {
-            // var lhs = model._cache.genreList[0];
-            // var rhs = model._cache.lists.abcd;
+            // var lhs = model._root.cache.genreList[0];
+            // var rhs = model._root.cache.lists.abcd;
             expect(lhs[__ref_index]).to.equal(0);
             expect(rhs[__refs_length]).to.equal(1);
             expect(rhs[__ref + lhs[__ref_index]]).to.equal(lhs);
@@ -242,8 +242,8 @@ function setExpireyAndGet(query, output, get) {
             return testRunner.set(model, _.cloneDeep(query), output);
         }).
         do(noOp, noOp, function() {
-            // var lhs = model._cache.genreList[0];
-            // var rhs = model._cache.lists.abcd;
+            // var lhs = model._root.cache.genreList[0];
+            // var rhs = model._root.cache.lists.abcd;
             expect(lhs[__ref_index]).to.not.be.ok;
             expect(rhs[__refs_length]).to.not.be.ok;
             expect(lhs[__context]).to.not.equal(rhs);
@@ -252,8 +252,8 @@ function setExpireyAndGet(query, output, get) {
 
 function getTest(query, output) {
     var model = new Model({cache: Cache()});
-    var lhs = model._cache.genreList[0];
-    var rhs = model._cache.lists.abcd;
+    var lhs = model._root.cache.genreList[0];
+    var rhs = model._root.cache.lists.abcd;
 
     expect(lhs[__ref_index]).to.not.be.ok;
     expect(rhs[__refs_length]).to.not.be.ok;
@@ -270,8 +270,8 @@ function getTest(query, output) {
 
 function setTest(query, output) {
     var model = new Model({cache: Cache()});
-    var lhs = model._cache.genreList[0];
-    var rhs = model._cache.lists.abcd;
+    var lhs = model._root.cache.genreList[0];
+    var rhs = model._root.cache.lists.abcd;
 
     return testRunner.set(model, _.cloneDeep(query), output).
         do(noOp, noOp, function() {

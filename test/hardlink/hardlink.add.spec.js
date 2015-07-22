@@ -100,13 +100,13 @@ describe('Adding', function() {
 
 function getTest(query, output) {
     var model = new Model({cache: Cache()});
-    var lhs = model._cache.genreList[0];
-    var rhs = model._cache.lists.abcd;
-    
+    var lhs = model._root.cache.genreList[0];
+    var rhs = model._root.cache.lists.abcd;
+
     expect(lhs[__ref_index]).to.not.be.ok;
     expect(rhs[__refs_length]).to.not.be.ok;
     expect(lhs[__context]).to.not.be.ok;
-    
+
     return testRunner.get(model, _.cloneDeep(query), output).
         do(noOp, noOp, function() {
             expect(lhs[__ref_index]).to.equal(0);
@@ -118,8 +118,8 @@ function getTest(query, output) {
 
 function setTest(query, output) {
     var model = new Model({cache: Cache()});
-    var lhs = model._cache.genreList[0];
-    var rhs = model._cache.lists.abcd;
+    var lhs = model._root.cache.genreList[0];
+    var rhs = model._root.cache.lists.abcd;
 
     expect(lhs[__ref_index]).to.not.be.ok;
     expect(rhs[__refs_length]).to.not.be.ok;

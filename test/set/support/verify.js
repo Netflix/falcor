@@ -10,16 +10,16 @@ var testRunner = require("../../testRunner");
 
 function verify(suffix) {
     return function(model, input) {
-        
+
         collect(
             model._root,
             model._root.expired,
             model._version,
-            model._cache.$size || 0,
+            model._root.cache.$size || 0,
             model._maxSize,
             model._collectRatio
         );
-        
+
         var message = this.fullTitle();
         var checks  = [
             check("Values", "values"),
@@ -29,13 +29,13 @@ function verify(suffix) {
             check("Requested Missing Paths", "requestedMissingPaths"),
             check("Optimized Missing Paths", "optimizedMissingPaths")
         ];
-        
+
         return function() {
             return checks.shift().call(this, get_pathsets(model, slice.call(arguments), suffix));
         };
-        
+
         function check(name, prop) {
-            
+
             // if(model._boxed || model._materialized || model._treatErrorsAsValues) {
             //     name += " [" +
             //         (model._boxed && " boxed" || "") +
@@ -43,22 +43,22 @@ function verify(suffix) {
             //         (model._treatErrorsAsValues && " treatErrorsAsValues" || "") +
             //     " ]";
             // }
-            
+
             name += " [" +
                 (" boxed: " + !!model._boxed) +
                 (", materialized: " + !!model._materialized) +
                 (", treatErrorsAsValues: " + !!model._treatErrorsAsValues) +
             " ]";
-            
+
             var fn;
-            
+
             return function(output) {
-                
+
                 // console.log("Set " + name + ":", inspect(input[prop], {depth: null}));
                 // console.log("Get " + name + ":", inspect(output[prop], {depth: null}));
-                
+
                 testRunner.compare(output[prop], input[prop], message + " - " + name);
-                
+
                 if(fn = checks.shift()) {
                     return fn.call(this, output);
                 } else {

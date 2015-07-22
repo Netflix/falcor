@@ -167,7 +167,7 @@ function execute(output, suffix) {
                 }
                 var results = model["_invalidatePathSetsAs" + suffix](model, [[null, null, null, null]], seeds);
                 expect(seeds3 || seeds).to.deep.equal(seeds2);
-                expect(model._cache).to.be.ok;
+                expect(model._root.cache).to.be.ok;
             });
         });
         // end invalidating path sets
