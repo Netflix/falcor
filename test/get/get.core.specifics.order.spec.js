@@ -30,7 +30,7 @@ describe('Caching Issues', function() {
         expect(false, 'should never get here').to.be.ok;
     });
 
-    it.only('should ensure that cache remains consistent amoung its clones.', function() {
+    it('should ensure that cache remains consistent amoung its clones.', function() {
         var source = new Model({
             cache: {
                 lolomo: {
