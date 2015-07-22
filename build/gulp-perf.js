@@ -21,7 +21,7 @@ function run() {
 
 function assemble() {
     return browserify('./performance/device.js', {
-            standalone: 'browser'
+            ignoreMissing: true
         }).
         bundle().
         pipe(vinyl('device-body.js')).
@@ -29,9 +29,7 @@ function assemble() {
 }
 
 function browser() {
-    return browserify('./performance/browser.js', {
-            standalone: 'browser'
-        }).
+    return browserify('./performance/browser.js').
         bundle().
         pipe(vinyl('browser.js')).
         pipe(gulp.dest('performance/bin'));
@@ -39,7 +37,7 @@ function browser() {
 
 function device() {
     return gulp.
-        src(['performance/device-polyfill.js', 'performance/bin/device-body.js']).
+        src(['./node_modules/nf-falcor-device-perf/devicePolyfill.js', 'performance/bin/device-body.js']).
         pipe(concat({path: 'device.js'})).
         pipe(gulp.dest('performance/bin'));
 }
