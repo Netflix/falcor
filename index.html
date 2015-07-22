@@ -1,32 +1,57 @@
 ---
-layout: page
+layout: base
 title: Falcor
 lang: en
 ---
 
-<div class="row">
-  <div class="col-xs-12 text-center">
-    <div class="row row-gap-huge"></div>
-    Falcor emblem and banner info will go here
-    <div class="row row-gap-huge"></div>
+<div class="hero-banner">
+  <div class="container">
+    <div class="row row-gap-small">
+      <div class="col-xs-12 text-center">
+        <div class="row">
+          <div class="col-xs-12">
+            <div class="hero-banner-logos">
+              <img class="hero-banner-logo" src="{{ site.baseurl }}/images/hero-banner-intro-animation-start.svg" alt="">
+              <img class="hero-banner-logo" src="{{ site.baseurl }}/images/hero-banner-intro-animation-end.svg" alt="">
+            </div>            
+          </div>
+        </div>
+        <div class="row row-gap-medium text-center text-inverse hero-banner-description">
+          <div class="col-xs-12">
+            <div>Falcor retrieves any model data you request from the cloud on-demand.</div>
+          </div>
+        </div>
+        <div class="row row-gap-huge"></div>
+      </div>
+    </div>
   </div>
 </div>
 
-<div class="row row-gap-medium">
-  <!-- This bit has to be html to achieve the 3 column layout -->
-  <div class="col-md-4">
-    {% capture the_include %}{% include homepage-key-feature-1.md %}{% endcapture %}
-    {{ the_include | markdownify }}
+<div class="container main-page-content">
+  <div class="row row-gap-medium">
+    <!-- This bit has to be html to achieve the 3 column layout -->
+    <div class="col-md-4">
+      {% capture the_include %}{% include homepage-key-feature-1.md %}{% endcapture %}
+      {{ the_include | markdownify }}
+    </div>
+    <div class="col-md-4">
+      {% capture the_include %}{% include homepage-key-feature-2.md %}{% endcapture %}
+      {{ the_include | markdownify }}
+    </div>
+    <div class="col-md-4">
+      {% capture the_include %}{% include homepage-key-feature-3.md %}{% endcapture %}
+      {{ the_include | markdownify }}
+    </div>
   </div>
-  <div class="col-md-4">
-    {% capture the_include %}{% include homepage-key-feature-2.md %}{% endcapture %}
-    {{ the_include | markdownify }}
-  </div>
-  <div class="col-md-4">
-    {% capture the_include %}{% include homepage-key-feature-3.md %}{% endcapture %}
-    {{ the_include | markdownify }}
-  </div>
+
+  {% capture the_include %}{% include homepage.md %}{% endcapture %}
+  {{ the_include | markdownify }}  
 </div>
 
-{% capture the_include %}{% include homepage.md %}{% endcapture %}
-{{ the_include | markdownify }}
+<!-- Hack just for easy demoing purposes -->
+<script>
+  if (window.location.href.indexOf('animated') !== -1) {
+    document.querySelector('.hero-banner').className += ' animated';
+    document.querySelector('.main-page-content').className += ' animated';
+  }
+</script>

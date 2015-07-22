@@ -4,6 +4,10 @@
 
 // Bootstrap overrides
 
+
+// Falcor site custom styles
+@site-content-padding-top: 20px;
+
 .navbar-brand > .navbar-logo {
   display: inline-block;
   height: 25px;
@@ -11,14 +15,115 @@
 }
 
 body {
-  padding-top: 70px;
+  padding-top: @navbar-height + @site-content-padding-top;
   // probably unnecessary, but included in bootstrap's examples
   // TODO: confirm whether this is needed for some browser quirk
   // or just for their demo
   // min-height: 2000px;
 }
 
-// Utility classes for easy vertical spacing improvements
+@-webkit-keyframes fade {
+	0% {
+		opacity: 0;
+	}
+	100% {
+		opacity: 1;
+	}
+}
+
+.hero-banner {
+  background-color: black;
+  // Brings the top flush with the navbar
+  margin-top: -1 * @site-content-padding-top;
+  // height: 350px;
+  padding-top: 20px;
+
+  .hero-banner-logos {
+    @logo-width: 188px;
+    @logo-height: 177px;
+    @screen-xs-logo-reduction-factor: 1.5;
+
+    position: relative;
+    margin: 0 auto;
+    width: @logo-width;
+    height: @logo-height;
+
+
+    @media (max-width: @screen-xs-max) {
+      width: @logo-width / @screen-xs-logo-reduction-factor;
+      height: @logo-height / @screen-xs-logo-reduction-factor;
+    }      
+
+    & > .hero-banner-logo {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: @logo-width;
+      
+      @media (max-width: @screen-xs-max) {
+        width: @logo-width / @screen-xs-logo-reduction-factor;
+      }      
+    }
+  }
+
+  // TODO: clean up!
+  &.animated .hero-banner-logos > .hero-banner-logo {
+    animation-name: fade;
+    animation-duration: 1s;
+    animation-iteration-count: 1;
+    animation-delay: 0.25s;
+    animation-timing-function: ease-out;
+  }
+  &.animated .hero-banner-logos > .hero-banner-logo:nth-child(1) {
+    opacity: 1;
+    display: none;
+    animation-direction: reverse;
+    animation-fill-mode: forwards;
+  }
+
+  &.animated .hero-banner-logos > .hero-banner-logo:nth-child(2) {
+    opacity: 0;
+    animation-direction: normal;
+    animation-fill-mode: forwards;
+  }
+  
+  .hero-banner-description {
+    font-size: 22px; // TODO: standardize
+    
+    @media (max-width: @screen-xs-max) {
+      font-size: 16px;
+    }      
+  }
+  &.animated .hero-banner-description {
+    opacity: 0;
+    animation-name: fade;
+    animation-duration: 0.5s;
+    animation-iteration-count: 1;
+    animation-delay: 1s;
+    animation-timing-function: ease-out;
+    animation-fill-mode: forwards;
+  }
+  
+}
+
+.main-page-content.animated {
+  opacity: 0;
+  animation-name: fade;
+  animation-duration: 0.5s;
+  animation-iteration-count: 1;
+  animation-delay: 1.5s;
+  animation-timing-function: ease-out;
+  animation-fill-mode: forwards;
+}
+
+
+
+// ===========
+// = Utility =
+// ===========
+
+
+// Easy vertical spacing improvements
 .row {
   &.row-gap-small {
     margin-top: 15px;
@@ -34,4 +139,7 @@ body {
   }
 }
 
-// Falcor site custom styles
+// Light text for a dark (inverse) background
+.text-inverse {
+  color: white;
+}
