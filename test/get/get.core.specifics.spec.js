@@ -20,12 +20,6 @@ var noOp = function() {};
 var sinon = require('sinon');
 
 describe('Specific Cases', function() {
-    it.only('should share cache between clones.', function() {
-        var model = new Model();
-        var clone = model.clone({});
-        debugger
-        clone._cache.test = {};
-    });
     describe('Selector Missing PathSet Index', function() {
         it('should report the missing path indices.', function () {
             var model = new Model({cache: Cache()}).withoutDataSource();

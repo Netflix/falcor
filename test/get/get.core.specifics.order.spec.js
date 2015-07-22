@@ -4,8 +4,8 @@ var expect = require('chai').expect;
 var sinon = require('sinon');
 var noOp = function() {};
 
-describe.only('Order of operations.', function() {
-    it('should be able to clone then setCache', function(done) {
+describe('Order of operations.', function() {
+    it('should be able to use a model as a source.', function() {
         var source = new Model({
             cache: {
                 lolomo: {
@@ -15,16 +15,18 @@ describe.only('Order of operations.', function() {
         }).asDataSource();
 
         var model = new Model({source: source});
-        var onNext = sinon.spy();
-        model.
-            clone().
-            setCache(undefined).
-            deref('lolomo', 'summary').
-            doAction(onNext).
-            doAction(noOp, noOp, function() {
-                expect(onNext.calledOnce).to.be.ok;
-                expect(onNext.getCall(0).args[0].getPath()).to.deep.equals(['lolomo']);
-            }).
-            subscribe(noOp, done, done);
+
+        try {
+            model.
+                batch().
+                setCache(undefined).
+                subscribe();
+        } catch (e) {
+            var setCache = e.message.indexOf('setCache') >= 0;
+            var modelObject = e.message.indexOf('#<Model>') >= 0;
+            expect(setCache && modelObject).to.be.ok;
+            return ;
+        }
+        expect(false, 'should never get here').to.be.ok;
     });
 });
