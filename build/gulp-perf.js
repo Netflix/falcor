@@ -14,9 +14,7 @@ function run() {
     return gulpShell.task([
         'karma start ./performance/karma.conf.js',
         'node --expose-gc ./performance/node.js'
-    ], {
-        ignoreErrors:true
-    });
+    ]);
 }
 
 function assemble() {
