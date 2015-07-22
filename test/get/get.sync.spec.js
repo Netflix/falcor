@@ -62,7 +62,7 @@ describe('GetValueSync', function() {
     });
     it('should get the cache when getBoundValue is called on a root model', function() {
         var model = new Model({cache: Cache(), unsafeMode: true});
-        var cache = model._cache;
+        var cache = model._root.cache;
         var boundValue = model._getBoundValue(model, model._path).value;
         expect(boundValue, 'root boundValue did not match the cache').to.deep.equal(cache);
     });

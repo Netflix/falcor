@@ -173,7 +173,7 @@ describe('DataSource and Cache', function() {
                         if (count === 1) {
 
                             // Don't do it this way, it will cause memory leaks.
-                            model._cache.genreList[0][1] = undefined;
+                            model._root.cache.genreList[0][1] = undefined;
                             return {
                                 jsonGraph: jsongEnv.jsonGraph,
                                 paths: [jsongEnv.paths[0]]

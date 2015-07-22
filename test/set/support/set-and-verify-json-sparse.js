@@ -14,7 +14,7 @@ function set_and_verify_json_sparse(test, suffix, pathvalues, options) {
             boxValues().
             materialize().
             treatErrorsAsValues();
-        pv_options.model._cache = {};
+        pv_options.model._root.cache = {};
     } else {
         pv_options = {
             boxed: true,

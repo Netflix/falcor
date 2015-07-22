@@ -37,14 +37,14 @@ function fillInReferences(model, pathTo, prefix) {
     var followed = [];
     var c = cache;
     var value;
-    var modelC = model._cache;
+    var modelC = model._root.cache;
     prefix = prefix || [];
 
     // Rage the references.
     modelC = followReference(modelC, prefix);
     c = followReference(c, prefix);
     while (Array.isArray(c)) {
-        modelC = followReference(model._cache, c);
+        modelC = followReference(model._root.cache, c);
         c = followReference(cache, c);
     }
 
@@ -129,7 +129,7 @@ function setTestRunner(data, options) {
 
                     // validates against the expected vs actual
                     testRunner.validateOperation(op, expected, actual);
-                    
+
                     // reperform the get request with the getPaths* if available.
                     query = data['getPaths'];
                     if (query) {
@@ -151,7 +151,7 @@ function getCountArrayOrFunction(data, suffix, expected, testRunner) {
         var actualCount = 0;
         var vals = expected.values;
         expected.values = undefined;
-        
+
         return function(pV) {
             if (vals && vals.length) {
                 var tested = false;

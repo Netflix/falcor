@@ -33,7 +33,7 @@ describe("Special Cases", function() {
         }, pathMap[0]);
 
         var jsons = [{}];
-        model._cache = {};
+        model._root.cache = {};
         model._setJSONGsAsJSON(model, [edgeCaseCache], jsons);
         testRunner.compare({ json: { name: 'Jim' } }, jsons[0]);
     });
@@ -80,7 +80,7 @@ describe("Special Cases", function() {
         set.forEach(function(s, i) {
             model._setJSONGsAsPathMap(model, [s], seed);
             if (i === 2) {
-                expect(model._cache.lists).to.be.ok;
+                expect(model._root.cache.lists).to.be.ok;
             }
         });
 
