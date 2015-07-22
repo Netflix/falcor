@@ -16,6 +16,32 @@ var $error = require('./../../../lib/types/error');
 var expect = require('chai').expect;
 
 describe('DataSource and Cache', function() {
+    xit('should accept jsongraph without paths from the datasource', function(done) {
+        var mockDataSource = {
+            set: function(jsonGraphEnvelope) {
+                return {
+                    jsonGraph: {
+                        titlesById: {
+                            0: {
+                                rating: 5
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        model = new falcor.Model({
+            source: mockDataSource
+        });
+        model.setValue('titlesById[0].rating', 5).then(function(value) {
+            return model.withoutDataSource().getValue('titlesById[0].rating').then(function(postSetValue) {
+                testRunner.compare(postSetValue, value, 'value after Model.set without paths not equal to same value retrieved from Model.')
+                done();
+            });
+        }, function(error) {
+            testRunner.compare(true, false, 'Model.set operation was not able to accept jsonGraph without paths from the dataSource.');
+        });
+    });
     describe('Selector Functions', function() {
         it('should set a value from falcor.', function(done) {
             var model = new Model({cache: M(), source: new LocalDataSource(Cache())});
@@ -273,7 +299,7 @@ describe('DataSource and Cache', function() {
             }).
             subscribe(noOp, done, done);
     });
-    it('should do an error set and project it.', function(done) {
+    it('should throw an error set and project it.', function(done) {
         var model = new Model({
             source: new ErrorDataSource(503, "Timeout"),
             errorSelector: function mapError(path, value) {
