@@ -285,7 +285,7 @@ var model = new falcor.Model({
 });
 
 // prints "go to the ATM"
-model.get(["todos", 0,"name"]).then(function(name){
+model.getValue(["todos", 0,"name"]).then(function(name){
     console.log(name);
 });
 ~~~
@@ -398,6 +398,102 @@ model.
 
 In addition to retrieving values from a DataSource using a Model, you can also use a Model to set values into a DataSource. Set operations immediately write to the Model's local cache, and then write to the DataSource. That means that changes are reflected on the client immediately. However, if the attempt to modify the data in the DataSource fails, the Model's cache will eventually be updated the post-set value of the DataSource. This is sometimes referred to as eventual consistency.
 
+With setting information using the Model, developers are usually trying to do one of the following operations:
+
+1. Set a single value
+2. Set multiple values using a JSON or JSON Graph object
+
+### 1. Set a Single Value
+
+The Model's setValue Method can be used to set a single value in the DataSource. The setValue Method has the following signature:
+
+~~~js
+class Model {
+    setValue(Path): ModelResponse
+}
+~~~
+
+Here is an example of setting a single value using a Model using setValue:
+
+~~~js
+var dataSource = new falcor.HttpDataSource("/model.json");
+var model = new falcor.Model({
+    source: dataSource
+});
+
+// prints "true"
+model.setValue(["todos", 0,"done"], true).then(function(done){
+    console.log(done);
+});
+~~~
+
+### 2. Set Multiple Values Using Several PathValue Objects 
+
+In order to change multiple values using a single DataSource request, you can pass multiple PathValue objects to the Model's set method.
+
+~~~js
+class Model {
+    set(...PathValue): ModelResponse
+}
+~~~
+
+In the following example, we will set the done value of the first two tasks in a TODOs list to "true".
+
+~~~js
+var dataSource = new falcor.HttpDataSource("/model.json");
+var model = new falcor.Model({
+    source: dataSource
+});
+
+model.
+    set(falcor.pathValue(["todos", 0, "done"], true), falcor.pathValue(["todos", 1, "done"], true)).
+    then(function(response){
+        console.log(JSON.stringify(response));
+    });
+~~~
+
+The Model combines the PathValues into a single JSON Graph Envelope, and then forwards it to the DataSource's set method. The DataSource executes the abstract JSON Graph set operation on its associated JSON Graph object. The result is a JSON Graph object containing the post set values of all of the paths that the Model attempted to set, as well as any [JSON Graph References](#JSON-Graph-References) encountered along the requested paths.
+
+~~~js
+// DataSource Response
+{
+    todos: {
+        "0": { $type: "ref", value: ["todosById", 44] },
+        "1": { $type: "ref", value: ["todosById", 54] }
+    },
+    todosById: {
+        "44": {
+            done: true
+        },
+        "54": {
+            done: true
+        }
+    }
+};
+~~~
+
+The Model merges the response from the DataSource into its internal JSON Graph cache, and creates a JSON format copy of the response by replacing all JSON Graph Reference objects with real object references. The resulting JSON object is returned to the caller in an envelope, and printed to the console:
+
+~~~js
+model.
+    set(falcor.pathValue(["todos", 0, "done"], true), falcor.pathValue(["todos", 1, "done"], true)).
+    then(function(response){
+        console.log(JSON.stringify(response));
+    });
+// The following JSON envelope is eventually printed to the console:
+// {
+//     json: {
+//         todos: {
+//             "0": {
+//                 done: true
+//             },
+//             "1": {
+//                 done: true
+//             }
+//         }
+//     }
+// }
+~~~
 
 # Working with JSON Graph Data using a Model
 
