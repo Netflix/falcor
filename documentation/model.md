@@ -401,7 +401,7 @@ In addition to retrieving values from a DataSource using a Model, you can also u
 With setting information using the Model, developers are usually trying to do one of the following operations:
 
 1. Set a single value
-2. Set multiple values using a JSON or JSON Graph object
+2. Set values using multiple PathValue objects
 
 ### 1. Set a Single Value
 
@@ -427,9 +427,9 @@ model.setValue(["todos", 0,"done"], true).then(function(done){
 });
 ~~~
 
-### 2. Set Multiple Values Using Several PathValue Objects 
+### 2. Set Values Using Multiple PathValue Objects 
 
-In order to change multiple values using a single DataSource request, you can pass multiple PathValue objects to the Model's set method.
+In order to change multiple values using a single DataSource request, you can pass multiple PathValue objects to the Model's set method. 
 
 ~~~js
 class Model {
@@ -437,9 +437,18 @@ class Model {
 }
 ~~~
 
+A PathValue object is a combination of a path and a value. You can create a PathValue object using the pathValue factory function:
+
+~~~js
+var pathValue = falcor.pathValue("todos[0].done",true);
+// prints {path:["todos",0,"done"],value:true}
+console.log(JSON.stringify(pathValue));
+~~~
+
 In the following example, we will set the done value of the first two tasks in a TODOs list to "true".
 
 ~~~js
+
 var dataSource = new falcor.HttpDataSource("/model.json");
 var model = new falcor.Model({
     source: dataSource
@@ -493,6 +502,57 @@ model.
 //         }
 //     }
 // }
+~~~
+
+### 3. Set Values Using JSONEnvelope 
+
+Occasionally it can be less verbose to set multiple values with a JSON object rather than a series of PathValue objects. That is why set supports the following overload:
+
+~~~js
+class Model {
+    set(JSONEnvelope): ModelResponse
+}
+~~~
+
+A JSONEnvelope is just an object that contains a "json" key with a JSON value. It is necessary to wrap JSON values within a JSONEnvelope so that the Model's set method can differentiate between PathValue objects and JSON. 
+
+~~~js
+var taskCompletionValuesJSONEnvelope = {
+    json: {
+        todos: {
+            0: {
+                done:true
+            },
+            1: {
+                done:true
+            }
+        }
+    }
+};
+
+var dataSource = new falcor.HttpDataSource("/model.json");
+var model = new falcor.Model({
+    source: dataSource
+});
+
+// The following code prints a JSONEnvelope to the console: 
+// {
+//     json: {
+//         todos: {
+//             "0": {
+//                 done: true
+//             },
+//             "1": {
+//                 done: true
+//             }
+//         }
+//     }
+// }
+model.
+    set(taskCompletionValuesJSONEnvelope).
+    then(function(response){
+        console.log(JSON.stringify(response));
+    });
 ~~~
 
 # Working with JSON Graph Data using a Model
