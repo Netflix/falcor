@@ -1,20 +1,7 @@
-<!DOCTYPE html>
-<html>
+---
+layout: base
+---
 
-  <head>
-    {% include head.html %}
-  </head>
-
-  <body>
-    {% include navigation.html %}
-    
-    <main class="container">
-      {{ content }}
-    </main>
-    
-    <!-- JS Includes -->
-    <!-- JQuery (cdn and local fallback) -->
-    <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
-    <script src="{{ site.baseurl }}/javascripts/bootstrap.min.js"></script>
-  </body>
-</html>
+<main class="container">
+  {{ content }}
+</main>

@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    {% include head.html %}
+  </head>
+
+  <body>
+    {% include navigation.html %}
+    
+    {{ content }}
+    
+    <!-- JS Includes -->
+    <!-- JQuery (cdn and local fallback) for the bootstrap plugins -->
+    <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
+    <script src="{{ site.baseurl }}/javascripts/bootstrap.min.js"></script>
+  </body>
+</html>
