@@ -15,10 +15,18 @@
  */
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.falcor = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 var falcor = require(29);
-falcor.HttpDataSource = require(140);
+var jsong = require(156);
+
+falcor.atom = jsong.atom;
+falcor.ref = jsong.ref;
+falcor.error = jsong.error;
+falcor.pathValue = jsong.pathValue;
+
+falcor.HttpDataSource = require(141);
+
 module.exports = falcor;
 
-},{"140":140,"29":29}],2:[function(require,module,exports){
+},{"141":141,"156":156,"29":29}],2:[function(require,module,exports){
 var $ref = require(127);
 var $atom = require(125);
 var $error = require(126);
@@ -41,7 +49,7 @@ var array_clone = require(79);
 var array_slice = require(83);
 
 var collect_lru = require(47);
-var pathSyntax = require(148);
+var pathSyntax = require(160);
 
 var get_size = require(93);
 var is_object = require(104);
@@ -52,24 +60,14 @@ var is_json_graph_envelope = require(103);
 
 var set_cache = require(64);
 var set_json_graph_as_json_dense = require(65);
+var jsong = require(156);
 
 module.exports = Model;
 
-Model.ref = function ref(path) {
-    return { $type: $ref, value: pathSyntax.fromPath(path) };
-};
-
-Model.atom = function atom(value) {
-    return { $type: $atom, value: value };
-};
-
-Model.error = function error(error) {
-    return { $type: $error, value: error };
-};
-
-Model.pathValue = function pathValue(path, value) {
-    return { path: pathSyntax.fromPath(path), value: value };
-};
+Model.ref = jsong.ref;
+Model.atom = jsong.atom;
+Model.error = jsong.error;
+Model.pathValue = jsong.pathValue;
 
 /**
  * A Model object is used to execute commands against a {@link JSONGraph} object. {@link Model}s can work with a local JSONGraph cache, or it can work with a remote {@link JSONGraph} object through a {@link DataSource}.
@@ -476,7 +474,7 @@ Model.prototype._setCache = require(64);
 Model.prototype._invalidatePathSetsAsJSON = require(46);
 Model.prototype._invalidatePathMapsAsJSON = require(45);
 
-},{"10":10,"101":101,"102":102,"103":103,"104":104,"105":105,"11":11,"12":12,"125":125,"126":126,"127":127,"13":13,"14":14,"148":148,"15":15,"16":16,"20":20,"3":3,"4":4,"45":45,"46":46,"47":47,"5":5,"53":53,"55":55,"56":56,"58":58,"6":6,"60":60,"61":61,"62":62,"63":63,"64":64,"65":65,"66":66,"67":67,"68":68,"69":69,"70":70,"71":71,"72":72,"73":73,"74":74,"75":75,"76":76,"77":77,"79":79,"83":83,"9":9,"93":93,"97":97}],3:[function(require,module,exports){
+},{"10":10,"101":101,"102":102,"103":103,"104":104,"105":105,"11":11,"12":12,"125":125,"126":126,"127":127,"13":13,"14":14,"15":15,"156":156,"16":16,"160":160,"20":20,"3":3,"4":4,"45":45,"46":46,"47":47,"5":5,"53":53,"55":55,"56":56,"58":58,"6":6,"60":60,"61":61,"62":62,"63":63,"64":64,"65":65,"66":66,"67":67,"68":68,"69":69,"70":70,"71":71,"72":72,"73":73,"74":74,"75":75,"76":76,"77":77,"79":79,"83":83,"9":9,"93":93,"97":97}],3:[function(require,module,exports){
 function ModelDataSourceAdapter(model) {
     this._model = model.materialize().boxValues().treatErrorsAsValues();
 }
@@ -532,8 +530,8 @@ ModelRoot.prototype.comparator = function comparator(a, b) {
 
 module.exports = ModelRoot;
 },{"101":101,"62":62}],5:[function(require,module,exports){
-var Rx = require(167);
-var pathSyntax = require(148);
+var Rx = require(176);
+var pathSyntax = require(160);
 
 module.exports = function deref(boundPath) {
 
@@ -589,9 +587,9 @@ module.exports = function deref(boundPath) {
     });
 };
 
-},{"148":148,"167":167}],6:[function(require,module,exports){
+},{"160":160,"176":176}],6:[function(require,module,exports){
 var $error = require(126);
-var pathSyntax = require(148);
+var pathSyntax = require(160);
 var getBoundValue = require(13);
 var get_type = require(94);
 
@@ -627,7 +625,7 @@ module.exports = function derefSync(path) {
     return this.clone({ _path: path });
 };
 
-},{"126":126,"13":13,"148":148,"94":94}],7:[function(require,module,exports){
+},{"126":126,"13":13,"160":160,"94":94}],7:[function(require,module,exports){
 /**
  * An InvalidModelError can only happen when a user binds, whether sync
  * or async to shorted value.  See the unit tests for examples.
@@ -1570,7 +1568,7 @@ module.exports = function onValue(model, node, seedOrFunction, outerResults, per
 
 
 },{"125":125,"126":126,"127":127,"21":21,"26":26}],20:[function(require,module,exports){
-var pathSyntax = require(148);
+var pathSyntax = require(160);
 
 module.exports = function getValueSync(path) {
     path = pathSyntax.fromPath(path);
@@ -1583,7 +1581,7 @@ module.exports = function getValueSync(path) {
     return this.syncCheck("getValueSync") && this._getValueSync(this, path).value;
 };
 
-},{"148":148}],21:[function(require,module,exports){
+},{"160":160}],21:[function(require,module,exports){
 // Copies the node
 var prefix = require(38);
 
@@ -1806,7 +1804,7 @@ module.exports = {
 };
 
 },{}],29:[function(require,module,exports){
-var Rx = require(167) && require(165) && require(166);
+var Rx = require(176) && require(174) && require(175);
 
 function falcor(opts) {
     return new falcor.Model(opts);
@@ -1815,14 +1813,14 @@ function falcor(opts) {
 if(typeof Promise !== "undefined" && Promise) {
     falcor.Promise = Promise;
 } else {
-    falcor.Promise = require(155);
+    falcor.Promise = require(167);
 }
 
 module.exports = falcor;
 
 falcor.Model = require(2);
 
-},{"155":155,"165":165,"166":166,"167":167,"2":2}],30:[function(require,module,exports){
+},{"167":167,"174":174,"175":175,"176":176,"2":2}],30:[function(require,module,exports){
 module.exports = require(38) + "context";
 },{"38":38}],31:[function(require,module,exports){
 module.exports = require(38) + "count";
@@ -2206,7 +2204,7 @@ module.exports = function lru_splice(root, node) {
 };
 
 },{"32":32,"35":35,"39":39,"43":43}],50:[function(require,module,exports){
-var Rx = require(167);
+var Rx = require(176);
 var Observer = Rx.Observer;
 var Observable = Rx.Observable;
 var immediateScheduler = Rx.Scheduler.immediate;
@@ -2249,8 +2247,8 @@ BatchedRequest.prototype.getSourceObservable = function getSourceObservable() {
 
 module.exports = BatchedRequest;
 
-},{"167":167,"52":52}],51:[function(require,module,exports){
-var Rx = require(167);
+},{"176":176,"52":52}],51:[function(require,module,exports){
+var Rx = require(176);
 var Observer = Rx.Observer;
 
 var BatchedRequest = require(50);
@@ -2330,8 +2328,8 @@ function getPath(pv) {
 
 module.exports = GetRequest;
 
-},{"167":167,"50":50,"65":65,"73":73,"82":82,"90":90}],52:[function(require,module,exports){
-var Rx = require(167);
+},{"176":176,"50":50,"65":65,"73":73,"82":82,"90":90}],52:[function(require,module,exports){
+var Rx = require(176);
 var Observer = Rx.Observer;
 var Observable = Rx.Observable;
 var Disposable = Rx.Disposable;
@@ -2522,8 +2520,8 @@ Request.prototype._subscribe = function _subscribe(observer) {
 
 module.exports = Request;
 
-},{"104":104,"106":106,"113":113,"167":167,"31":31,"90":90}],53:[function(require,module,exports){
-var Rx = require(167);
+},{"104":104,"106":106,"113":113,"176":176,"31":31,"90":90}],53:[function(require,module,exports){
+var Rx = require(176);
 var Observable = Rx.Observable;
 var SerialDisposable = Rx.SerialDisposable;
 
@@ -2715,8 +2713,8 @@ RequestQueue.prototype.mergeJSONGraphs = function mergeJSONGraphs(aggregate, res
 
 module.exports = RequestQueue;
 
-},{"104":104,"167":167,"38":38,"51":51,"54":54,"79":79,"94":94}],54:[function(require,module,exports){
-var Rx = require(167);
+},{"104":104,"176":176,"38":38,"51":51,"54":54,"79":79,"94":94}],54:[function(require,module,exports){
+var Rx = require(176);
 var Observer = Rx.Observer;
 
 var Request = require(52);
@@ -2806,8 +2804,8 @@ function getPath(pv) {
 
 module.exports = SetRequest;
 
-},{"167":167,"52":52,"65":65,"73":73,"82":82}],55:[function(require,module,exports){
-var Rx = require(167);
+},{"176":176,"52":52,"65":65,"73":73,"82":82}],55:[function(require,module,exports){
+var Rx = require(176);
 var Observable = Rx.Observable;
 var Disposable = Rx.Disposable;
 var SerialDisposable = Rx.SerialDisposable;
@@ -2815,7 +2813,7 @@ var CompositeDisposable = Rx.CompositeDisposable;
 
 var ModelResponse = require(59);
 
-var pathSyntax = require(148);
+var pathSyntax = require(160);
 
 var $ref = require(127);
 
@@ -3050,8 +3048,8 @@ function subscribeToResponse(observer) {
 
 module.exports = CallResponse;
 
-},{"127":127,"148":148,"167":167,"59":59}],56:[function(require,module,exports){
-var Rx = require(167);
+},{"127":127,"160":160,"176":176,"59":59}],56:[function(require,module,exports){
+var Rx = require(176);
 var Observable = Rx.Observable;
 var Disposable = Rx.Disposable;
 
@@ -3224,8 +3222,8 @@ function pluckJSON(jsonEnvelope) {
 
 module.exports = GetResponse;
 
-},{"101":101,"167":167,"57":57,"65":65,"73":73,"80":80,"82":82}],57:[function(require,module,exports){
-var Rx = require(167);
+},{"101":101,"176":176,"57":57,"65":65,"73":73,"80":80,"82":82}],57:[function(require,module,exports){
+var Rx = require(176);
 var Disposable = Rx.Disposable;
 var Observable = Rx.Observable;
 var SerialDisposable = Rx.SerialDisposable;
@@ -3233,7 +3231,7 @@ var CompositeDisposable = Rx.CompositeDisposable;
 
 var ModelResponse = require(59);
 
-var pathSyntax = require(148);
+var pathSyntax = require(160);
 
 var get_size = require(93);
 var collect_lru = require(47);
@@ -3387,8 +3385,8 @@ IdempotentResponse.prototype.ensureCollect = function ensureCollect(model) {
 
 module.exports = IdempotentResponse;
 
-},{"101":101,"102":102,"103":103,"104":104,"105":105,"148":148,"167":167,"44":44,"47":47,"59":59,"79":79,"82":82,"93":93}],58:[function(require,module,exports){
-var Rx = require(167);
+},{"101":101,"102":102,"103":103,"104":104,"105":105,"160":160,"176":176,"44":44,"47":47,"59":59,"79":79,"82":82,"93":93}],58:[function(require,module,exports){
+var Rx = require(176);
 var Observable = Rx.Observable;
 var Disposable = Rx.Disposable;
 
@@ -3435,10 +3433,10 @@ function subscribeToInvalidateResponse(observer) {
 
 module.exports = InvalidateResponse;
 
-},{"167":167,"57":57}],59:[function(require,module,exports){
+},{"176":176,"57":57}],59:[function(require,module,exports){
 var falcor = require(29);
 
-var Rx = require(167);
+var Rx = require(176);
 var Observable = Rx.Observable;
 
 var array_map = require(82);
@@ -3572,8 +3570,8 @@ function subscribeToResponse(observer) {
 
 module.exports = ModelResponse;
 
-},{"101":101,"102":102,"103":103,"104":104,"105":105,"109":109,"167":167,"29":29,"79":79,"80":80,"81":81,"82":82,"83":83}],60:[function(require,module,exports){
-var Rx = require(167);
+},{"101":101,"102":102,"103":103,"104":104,"105":105,"109":109,"176":176,"29":29,"79":79,"80":80,"81":81,"82":82,"83":83}],60:[function(require,module,exports){
+var Rx = require(176);
 var Observable = Rx.Observable;
 var Disposable = Rx.Disposable;
 
@@ -3768,9 +3766,9 @@ function pluckPaths(jsonGraphEnvelope) {
 
 module.exports = SetResponse;
 
-},{"101":101,"167":167,"57":57,"65":65,"73":73,"81":81,"82":82}],61:[function(require,module,exports){
+},{"101":101,"176":176,"57":57,"65":65,"73":73,"81":81,"82":82}],61:[function(require,module,exports){
 var asap = require(135);
-var Rx = require(167);
+var Rx = require(176);
 var Disposable = Rx.Disposable;
 
 function ASAPScheduler() {
@@ -3791,8 +3789,8 @@ ASAPScheduler.prototype.scheduleWithState = function scheduleWithState(state, ac
 };
 
 module.exports = ASAPScheduler;
-},{"135":135,"167":167}],62:[function(require,module,exports){
-var Rx = require(167);
+},{"135":135,"176":176}],62:[function(require,module,exports){
+var Rx = require(176);
 var Disposable = Rx.Disposable;
 
 function ImmediateScheduler() {
@@ -3811,8 +3809,8 @@ ImmediateScheduler.prototype.scheduleWithState = function scheduleWithState(stat
 
 module.exports = ImmediateScheduler;
 
-},{"167":167}],63:[function(require,module,exports){
-var Rx = require(167);
+},{"176":176}],63:[function(require,module,exports){
+var Rx = require(176);
 var Disposable = Rx.Disposable;
 
 function TimeoutScheduler(delay) {
@@ -3844,7 +3842,7 @@ TimeoutScheduler.prototype.scheduleWithState = function scheduleWithState(state,
 
 module.exports = TimeoutScheduler;
 
-},{"167":167}],64:[function(require,module,exports){
+},{"176":176}],64:[function(require,module,exports){
 module.exports = set_cache;
 
 var $error = require(126);
@@ -6096,7 +6094,7 @@ function onValueType(pathset, depth, roots, parents, nodes, requested, optimized
 
 },{"104":104,"111":111,"114":114,"116":116,"117":117,"119":119,"120":120,"122":122,"123":123,"124":124,"125":125,"126":126,"133":133,"44":44,"79":79,"84":84,"91":91,"95":95,"96":96,"99":99}],77:[function(require,module,exports){
 var $error = require(126);
-var pathSyntax = require(148);
+var pathSyntax = require(160);
 var get_type = require(94);
 var is_object = require(104);
 var is_path_value = require(105);
@@ -6157,7 +6155,7 @@ module.exports = function setValueSync(path, value, errorSelector, comparator) {
         }
     }
 };
-},{"104":104,"105":105,"126":126,"148":148,"73":73,"94":94}],78:[function(require,module,exports){
+},{"104":104,"105":105,"126":126,"160":160,"73":73,"94":94}],78:[function(require,module,exports){
 module.exports = function array_append(array, value) {
     var i = -1;
     var n = array.length;
@@ -8127,10 +8125,115 @@ rawAsap.makeRequestCallFromTimer = makeRequestCallFromTimer;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 },{}],137:[function(require,module,exports){
+(function (process){
+"use strict";
+
+var domain; // The domain module is executed on demand
+var hasSetImmediate = typeof setImmediate === "function";
+
+// Use the fastest means possible to execute a task in its own turn, with
+// priority over other events including network IO events in Node.js.
+//
+// An exception thrown by a task will permanently interrupt the processing of
+// subsequent tasks. The higher level `asap` function ensures that if an
+// exception is thrown by a task, that the task queue will continue flushing as
+// soon as possible, but if you use `rawAsap` directly, you are responsible to
+// either ensure that no exceptions are thrown from your task, or to manually
+// call `rawAsap.requestFlush` if an exception is thrown.
+module.exports = rawAsap;
+function rawAsap(task) {
+    if (!queue.length) {
+        requestFlush();
+        flushing = true;
+    }
+    // Avoids a function call
+    queue[queue.length] = task;
+}
+
+var queue = [];
+// Once a flush has been requested, no further calls to `requestFlush` are
+// necessary until the next `flush` completes.
+var flushing = false;
+// The position of the next task to execute in the task queue. This is
+// preserved between calls to `flush` so that it can be resumed if
+// a task throws an exception.
+var index = 0;
+// If a task schedules additional tasks recursively, the task queue can grow
+// unbounded. To prevent memory excaustion, the task queue will periodically
+// truncate already-completed tasks.
+var capacity = 1024;
+
+// The flush function processes all tasks that have been scheduled with
+// `rawAsap` unless and until one of those tasks throws an exception.
+// If a task throws an exception, `flush` ensures that its state will remain
+// consistent and will resume where it left off when called again.
+// However, `flush` does not make any arrangements to be called again if an
+// exception is thrown.
+function flush() {
+    while (index < queue.length) {
+        var currentIndex = index;
+        // Advance the index before calling the task. This ensures that we will
+        // begin flushing on the next task the task throws an error.
+        index = index + 1;
+        queue[currentIndex].call();
+        // Prevent leaking memory for long chains of recursive calls to `asap`.
+        // If we call `asap` within tasks scheduled by `asap`, the queue will
+        // grow, but to avoid an O(n) walk for every task we execute, we don't
+        // shift tasks off the queue after they have been executed.
+        // Instead, we periodically shift 1024 tasks off the queue.
+        if (index > capacity) {
+            // Manually shift all values starting at the index back to the
+            // beginning of the queue.
+            for (var scan = 0, newLength = queue.length - index; scan < newLength; scan++) {
+                queue[scan] = queue[scan + index];
+            }
+            queue.length -= index;
+            index = 0;
+        }
+    }
+    queue.length = 0;
+    index = 0;
+    flushing = false;
+}
+
+rawAsap.requestFlush = requestFlush;
+function requestFlush() {
+    // Ensure flushing is not bound to any domain.
+    // It is not sufficient to exit the domain, because domains exist on a stack.
+    // To execute code outside of any domain, the following dance is necessary.
+    var parentDomain = process.domain;
+    if (parentDomain) {
+        if (!domain) {
+            // Lazy execute the domain module.
+            // Only employed if the user elects to use domains.
+            domain = require(138);
+        }
+        domain.active = process.domain = null;
+    }
+
+    // `setImmediate` is slower that `process.nextTick`, but `process.nextTick`
+    // cannot handle recursion.
+    // `requestFlush` will only be called recursively from `asap.js`, to resume
+    // flushing after an error is thrown into a domain.
+    // Conveniently, `setImmediate` was introduced in the same version
+    // `process.nextTick` started throwing recursion errors.
+    if (flushing && hasSetImmediate) {
+        setImmediate(flush);
+    } else {
+        process.nextTick(flush);
+    }
+
+    if (parentDomain) {
+        domain.active = process.domain = parentDomain;
+    }
+}
+
+}).call(this,require(140))
+},{"138":138,"140":140}],138:[function(require,module,exports){
 /*global define:false require:false */
 module.exports = (function(){
 	// Import Events
-	var events = require(138)
+	var events = require(139)
 
 	// Export Domain
 	var domain = {}
@@ -8194,7 +8297,7 @@ module.exports = (function(){
 	};
 	return domain
 }).call(this)
-},{"138":138}],138:[function(require,module,exports){
+},{"139":139}],139:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -8497,7 +8600,7 @@ function isUndefined(arg) {
   return arg === void 0;
 }
 
-},{}],139:[function(require,module,exports){
+},{}],140:[function(require,module,exports){
 // shim for using process in browser
 
 var process = module.exports = {};
@@ -8589,10 +8692,10 @@ process.chdir = function (dir) {
 };
 process.umask = function() { return 0; };
 
-},{}],140:[function(require,module,exports){
+},{}],141:[function(require,module,exports){
 'use strict';
-var request = require(144);
-var buildQueryObject = require(141);
+var request = require(145);
+var buildQueryObject = require(142);
 var isArray = Array.isArray;
 
 function simpleExtend(obj, obj2) {
@@ -8690,7 +8793,7 @@ XMLHttpSource['default'] = XMLHttpSource;
 // commonjs
 module.exports = XMLHttpSource;
 
-},{"141":141,"144":144}],141:[function(require,module,exports){
+},{"142":142,"145":145}],142:[function(require,module,exports){
 'use strict';
 module.exports = function buildQueryObject(url, method, queryData) {
   var qData = [];
@@ -8719,7 +8822,7 @@ module.exports = function buildQueryObject(url, method, queryData) {
   return data;
 };
 
-},{}],142:[function(require,module,exports){
+},{}],143:[function(require,module,exports){
 (function (global){
 'use strict';
 // Get CORS support even for older IE
@@ -8735,7 +8838,7 @@ module.exports = function getCORSRequest() {
 };
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],143:[function(require,module,exports){
+},{}],144:[function(require,module,exports){
 (function (global){
 'use strict';
 module.exports = function getXMLHttpRequest() {
@@ -8763,10 +8866,10 @@ module.exports = function getXMLHttpRequest() {
 };
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],144:[function(require,module,exports){
+},{}],145:[function(require,module,exports){
 'use strict';
-var getXMLHttpRequest = require(143);
-var getCORSRequest = require(142);
+var getXMLHttpRequest = require(144);
+var getCORSRequest = require(143);
 var hasOwnProp = Object.prototype.hasOwnProperty;
 
 function Observable() {}
@@ -8868,7 +8971,7 @@ function request(method, options, context) {
         if (xhr.readyState === 4) {
           if (!isDone) {
             isDone = true;
-            onXhrLoad(observer, xhr, status, e);
+            onXhrLoad(observer, xhr, e);
           }
         }
       };
@@ -8910,7 +9013,7 @@ function _handleXhrError(observer, textStatus, errorThrown) {
   observer.onError(errorThrown);
 }
 
-function onXhrLoad(observer, xhr, status, e) {
+function onXhrLoad(observer, xhr, e) {
   var responseData,
     responseObject,
     responseType;
@@ -8966,14 +9069,14 @@ function onXhrError(observer, xhr, status, e) {
 
 module.exports = request;
 
-},{"142":142,"143":143}],145:[function(require,module,exports){
+},{"143":143,"144":144}],146:[function(require,module,exports){
 module.exports = {
     integers: 'integers',
     ranges: 'ranges',
     keys: 'keys'
 };
 
-},{}],146:[function(require,module,exports){
+},{}],147:[function(require,module,exports){
 var TokenTypes = {
     token: 'token',
     dotSeparator: '.',
@@ -8991,7 +9094,7 @@ var TokenTypes = {
 
 module.exports = TokenTypes;
 
-},{}],147:[function(require,module,exports){
+},{}],148:[function(require,module,exports){
 module.exports = {
     indexer: {
         nested: 'Indexers cannot be nested.',
@@ -9025,10 +9128,10 @@ module.exports = {
 };
 
 
-},{}],148:[function(require,module,exports){
-var Tokenizer = require(154);
-var head = require(149);
-var RoutedTokens = require(145);
+},{}],149:[function(require,module,exports){
+var Tokenizer = require(155);
+var head = require(150);
+var RoutedTokens = require(146);
 
 var parser = function parser(string, extendedRules) {
     return head(new Tokenizer(string, extendedRules));
@@ -9085,10 +9188,10 @@ parser.fromPath = function(path, ext) {
 // Potential routed tokens.
 parser.RoutedTokens = RoutedTokens;
 
-},{"145":145,"149":149,"154":154}],149:[function(require,module,exports){
-var TokenTypes = require(146);
-var E = require(147);
-var indexer = require(150);
+},{"146":146,"150":150,"155":155}],150:[function(require,module,exports){
+var TokenTypes = require(147);
+var E = require(148);
+var indexer = require(151);
 
 /**
  * The top level of the parse tree.  This returns the generated path
@@ -9146,13 +9249,13 @@ module.exports = function head(tokenizer) {
 };
 
 
-},{"146":146,"147":147,"150":150}],150:[function(require,module,exports){
-var TokenTypes = require(146);
-var E = require(147);
+},{"147":147,"148":148,"151":151}],151:[function(require,module,exports){
+var TokenTypes = require(147);
+var E = require(148);
 var idxE = E.indexer;
-var range = require(152);
-var quote = require(151);
-var routed = require(153);
+var range = require(153);
+var quote = require(152);
+var routed = require(154);
 
 /**
  * The indexer is all the logic that happens in between
@@ -9262,9 +9365,9 @@ module.exports = function indexer(tokenizer, openingToken, state, out) {
 };
 
 
-},{"146":146,"147":147,"151":151,"152":152,"153":153}],151:[function(require,module,exports){
-var TokenTypes = require(146);
-var E = require(147);
+},{"147":147,"148":148,"152":152,"153":153,"154":154}],152:[function(require,module,exports){
+var TokenTypes = require(147);
+var E = require(148);
 var quoteE = E.quote;
 
 /**
@@ -9346,10 +9449,10 @@ module.exports = function quote(tokenizer, openingToken, state, out) {
 };
 
 
-},{"146":146,"147":147}],152:[function(require,module,exports){
-var Tokenizer = require(154);
-var TokenTypes = require(146);
-var E = require(147);
+},{"147":147,"148":148}],153:[function(require,module,exports){
+var Tokenizer = require(155);
+var TokenTypes = require(147);
+var E = require(148);
 
 /**
  * The indexer is all the logic that happens in between
@@ -9425,10 +9528,10 @@ module.exports = function range(tokenizer, openingToken, state, out) {
 };
 
 
-},{"146":146,"147":147,"154":154}],153:[function(require,module,exports){
-var TokenTypes = require(146);
-var RoutedTokens = require(145);
-var E = require(147);
+},{"147":147,"148":148,"155":155}],154:[function(require,module,exports){
+var TokenTypes = require(147);
+var RoutedTokens = require(146);
+var E = require(148);
 var routedE = E.routed;
 
 /**
@@ -9491,8 +9594,8 @@ module.exports = function routed(tokenizer, openingToken, state, out) {
 };
 
 
-},{"145":145,"146":146,"147":147}],154:[function(require,module,exports){
-var TokenTypes = require(146);
+},{"146":146,"147":147,"148":148}],155:[function(require,module,exports){
+var TokenTypes = require(147);
 var DOT_SEPARATOR = '.';
 var COMMA_SEPARATOR = ',';
 var OPENING_BRACKET = '[';
@@ -9643,15 +9746,69 @@ function getNext(string, idx, ext) {
 
 
 
-},{"146":146}],155:[function(require,module,exports){
+},{"147":147}],156:[function(require,module,exports){
+var pathSyntax = require(149);
+
+function sentinel(type, value, props) {
+    var copy = Object.create(null);
+    if (props != null) {
+        for(var key in props) {
+            copy[key] = props[key];
+        }
+        
+        copy["$type"] = type;
+        copy.value = value;
+        return copy;
+    }
+    else {
+        return { $type: type, value: value };
+    }    
+}
+
+module.exports = {
+    ref: function ref(path, props) {
+        return sentinel("ref", pathSyntax.fromPath(path), props);
+    },
+    atom: function atom(value, props) {
+        return sentinel("atom", value, props);        
+    },
+    error: function error(errorValue, props) {
+        return sentinel("error", errorValue, props);        
+    },
+    pathValue: function pathValue(path, value) {
+        return { path: pathSyntax.fromPath(path), value: value };
+    }
+};
+
+},{"149":149}],157:[function(require,module,exports){
+arguments[4][146][0].apply(exports,arguments)
+},{"146":146}],158:[function(require,module,exports){
+arguments[4][147][0].apply(exports,arguments)
+},{"147":147}],159:[function(require,module,exports){
+arguments[4][148][0].apply(exports,arguments)
+},{"148":148}],160:[function(require,module,exports){
+arguments[4][149][0].apply(exports,arguments)
+},{"149":149,"157":157,"161":161,"166":166}],161:[function(require,module,exports){
+arguments[4][150][0].apply(exports,arguments)
+},{"150":150,"158":158,"159":159,"162":162}],162:[function(require,module,exports){
+arguments[4][151][0].apply(exports,arguments)
+},{"151":151,"158":158,"159":159,"163":163,"164":164,"165":165}],163:[function(require,module,exports){
+arguments[4][152][0].apply(exports,arguments)
+},{"152":152,"158":158,"159":159}],164:[function(require,module,exports){
+arguments[4][153][0].apply(exports,arguments)
+},{"153":153,"158":158,"159":159,"166":166}],165:[function(require,module,exports){
+arguments[4][154][0].apply(exports,arguments)
+},{"154":154,"157":157,"158":158,"159":159}],166:[function(require,module,exports){
+arguments[4][155][0].apply(exports,arguments)
+},{"155":155,"158":158}],167:[function(require,module,exports){
 'use strict';
 
-module.exports = require(160)
+module.exports = require(172)
 
-},{"160":160}],156:[function(require,module,exports){
+},{"172":172}],168:[function(require,module,exports){
 'use strict';
 
-var asap = require(164)
+var asap = require(137)
 
 function noop() {};
 
@@ -9820,10 +9977,10 @@ function doResolve(fn, promise) {
     promise._67(LAST_ERROR)
   }
 }
-},{"164":164}],157:[function(require,module,exports){
+},{"137":137}],169:[function(require,module,exports){
 'use strict';
 
-var Promise = require(156)
+var Promise = require(168)
 
 module.exports = Promise
 Promise.prototype.done = function (onFulfilled, onRejected) {
@@ -9834,13 +9991,13 @@ Promise.prototype.done = function (onFulfilled, onRejected) {
     }, 0)
   })
 }
-},{"156":156}],158:[function(require,module,exports){
+},{"168":168}],170:[function(require,module,exports){
 'use strict';
 
 //This file contains the ES6 extensions to the core Promises/A+ API
 
-var Promise = require(156)
-var asap = require(164)
+var Promise = require(168)
+var asap = require(137)
 
 module.exports = Promise
 
@@ -9940,10 +10097,10 @@ Promise.prototype['catch'] = function (onRejected) {
   return this.then(null, onRejected);
 }
 
-},{"156":156,"164":164}],159:[function(require,module,exports){
+},{"137":137,"168":168}],171:[function(require,module,exports){
 'use strict';
 
-var Promise = require(156)
+var Promise = require(168)
 
 module.exports = Promise
 Promise.prototype['finally'] = function (f) {
@@ -9958,22 +10115,22 @@ Promise.prototype['finally'] = function (f) {
   })
 }
 
-},{"156":156}],160:[function(require,module,exports){
+},{"168":168}],172:[function(require,module,exports){
 'use strict';
 
-module.exports = require(156)
-require(157)
-require(159)
-require(158)
-require(161)
+module.exports = require(168)
+require(169)
+require(171)
+require(170)
+require(173)
 
-},{"156":156,"157":157,"158":158,"159":159,"161":161}],161:[function(require,module,exports){
+},{"168":168,"169":169,"170":170,"171":171,"173":173}],173:[function(require,module,exports){
 'use strict';
 
 //This file contains then/promise specific extensions that are only useful for node.js interop
 
-var Promise = require(156)
-var asap = require(162)
+var Promise = require(168)
+var asap = require(135)
 
 module.exports = Promise
 
@@ -10032,340 +10189,7 @@ Promise.prototype.nodeify = function (callback, ctx) {
   })
 }
 
-},{"156":156,"162":162}],162:[function(require,module,exports){
-arguments[4][135][0].apply(exports,arguments)
-},{"135":135,"163":163}],163:[function(require,module,exports){
-(function (global){
-"use strict";
-
-// Use the fastest means possible to execute a task in its own turn, with
-// priority over other events including IO, animation, reflow, and redraw
-// events in browsers.
-//
-// An exception thrown by a task will permanently interrupt the processing of
-// subsequent tasks. The higher level `asap` function ensures that if an
-// exception is thrown by a task, that the task queue will continue flushing as
-// soon as possible, but if you use `rawAsap` directly, you are responsible to
-// either ensure that no exceptions are thrown from your task, or to manually
-// call `rawAsap.requestFlush` if an exception is thrown.
-module.exports = rawAsap;
-function rawAsap(task) {
-    if (!queue.length) {
-        requestFlush();
-        flushing = true;
-    }
-    // Equivalent to push, but avoids a function call.
-    queue[queue.length] = task;
-}
-
-var queue = [];
-// Once a flush has been requested, no further calls to `requestFlush` are
-// necessary until the next `flush` completes.
-var flushing = false;
-// `requestFlush` is an implementation-specific method that attempts to kick
-// off a `flush` event as quickly as possible. `flush` will attempt to exhaust
-// the event queue before yielding to the browser's own event loop.
-var requestFlush;
-// The position of the next task to execute in the task queue. This is
-// preserved between calls to `flush` so that it can be resumed if
-// a task throws an exception.
-var index = 0;
-// If a task schedules additional tasks recursively, the task queue can grow
-// unbounded. To prevent memory exhaustion, the task queue will periodically
-// truncate already-completed tasks.
-var capacity = 1024;
-
-// The flush function processes all tasks that have been scheduled with
-// `rawAsap` unless and until one of those tasks throws an exception.
-// If a task throws an exception, `flush` ensures that its state will remain
-// consistent and will resume where it left off when called again.
-// However, `flush` does not make any arrangements to be called again if an
-// exception is thrown.
-function flush() {
-    while (index < queue.length) {
-        var currentIndex = index;
-        // Advance the index before calling the task. This ensures that we will
-        // begin flushing on the next task the task throws an error.
-        index = index + 1;
-        queue[currentIndex].call();
-        // Prevent leaking memory for long chains of recursive calls to `asap`.
-        // If we call `asap` within tasks scheduled by `asap`, the queue will
-        // grow, but to avoid an O(n) walk for every task we execute, we don't
-        // shift tasks off the queue after they have been executed.
-        // Instead, we periodically shift 1024 tasks off the queue.
-        if (index > capacity) {
-            // Manually shift all values starting at the index back to the
-            // beginning of the queue.
-            for (var scan = 0; scan < index; scan++) {
-                queue[scan] = queue[scan + index];
-            }
-            queue.length -= index;
-            index = 0;
-        }
-    }
-    queue.length = 0;
-    index = 0;
-    flushing = false;
-}
-
-// `requestFlush` is implemented using a strategy based on data collected from
-// every available SauceLabs Selenium web driver worker at time of writing.
-// https://docs.google.com/spreadsheets/d/1mG-5UYGup5qxGdEMWkhP6BWCz053NUb2E1QoUTU16uA/edit#gid=783724593
-
-// Safari 6 and 6.1 for desktop, iPad, and iPhone are the only browsers that
-// have WebKitMutationObserver but not un-prefixed MutationObserver.
-// Must use `global` instead of `window` to work in both frames and web
-// workers. `global` is a provision of Browserify, Mr, Mrs, or Mop.
-var BrowserMutationObserver = global.MutationObserver || global.WebKitMutationObserver;
-
-// MutationObservers are desirable because they have high priority and work
-// reliably everywhere they are implemented.
-// They are implemented in all modern browsers.
-//
-// - Android 4-4.3
-// - Chrome 26-34
-// - Firefox 14-29
-// - Internet Explorer 11
-// - iPad Safari 6-7.1
-// - iPhone Safari 7-7.1
-// - Safari 6-7
-if (typeof BrowserMutationObserver === "function") {
-    requestFlush = makeRequestCallFromMutationObserver(flush);
-
-// MessageChannels are desirable because they give direct access to the HTML
-// task queue, are implemented in Internet Explorer 10, Safari 5.0-1, and Opera
-// 11-12, and in web workers in many engines.
-// Although message channels yield to any queued rendering and IO tasks, they
-// would be better than imposing the 4ms delay of timers.
-// However, they do not work reliably in Internet Explorer or Safari.
-
-// Internet Explorer 10 is the only browser that has setImmediate but does
-// not have MutationObservers.
-// Although setImmediate yields to the browser's renderer, it would be
-// preferrable to falling back to setTimeout since it does not have
-// the minimum 4ms penalty.
-// Unfortunately there appears to be a bug in Internet Explorer 10 Mobile (and
-// Desktop to a lesser extent) that renders both setImmediate and
-// MessageChannel useless for the purposes of ASAP.
-// https://github.com/kriskowal/q/issues/396
-
-// Timers are implemented universally.
-// We fall back to timers in workers in most engines, and in foreground
-// contexts in the following browsers.
-// However, note that even this simple case requires nuances to operate in a
-// broad spectrum of browsers.
-//
-// - Firefox 3-13
-// - Internet Explorer 6-9
-// - iPad Safari 4.3
-// - Lynx 2.8.7
-} else {
-    requestFlush = makeRequestCallFromTimer(flush);
-}
-
-// `requestFlush` requests that the high priority event queue be flushed as
-// soon as possible.
-// This is useful to prevent an error thrown in a task from stalling the event
-// queue if the exception handled by Node.js’s
-// `process.on("uncaughtException")` or by a domain.
-rawAsap.requestFlush = requestFlush;
-
-// To request a high priority event, we induce a mutation observer by toggling
-// the text of a text node between "1" and "-1".
-function makeRequestCallFromMutationObserver(callback) {
-    var toggle = 1;
-    var observer = new BrowserMutationObserver(callback);
-    var node = document.createTextNode("");
-    observer.observe(node, {characterData: true});
-    return function requestCall() {
-        toggle = -toggle;
-        node.data = toggle;
-    };
-}
-
-// The message channel technique was discovered by Malte Ubl and was the
-// original foundation for this library.
-// http://www.nonblocking.io/2011/06/windownexttick.html
-
-// Safari 6.0.5 (at least) intermittently fails to create message ports on a
-// page's first load. Thankfully, this version of Safari supports
-// MutationObservers, so we don't need to fall back in that case.
-
-// function makeRequestCallFromMessageChannel(callback) {
-//     var channel = new MessageChannel();
-//     channel.port1.onmessage = callback;
-//     return function requestCall() {
-//         channel.port2.postMessage(0);
-//     };
-// }
-
-// For reasons explained above, we are also unable to use `setImmediate`
-// under any circumstances.
-// Even if we were, there is another bug in Internet Explorer 10.
-// It is not sufficient to assign `setImmediate` to `requestFlush` because
-// `setImmediate` must be called *by name* and therefore must be wrapped in a
-// closure.
-// Never forget.
-
-// function makeRequestCallFromSetImmediate(callback) {
-//     return function requestCall() {
-//         setImmediate(callback);
-//     };
-// }
-
-// Safari 6.0 has a problem where timers will get lost while the user is
-// scrolling. This problem does not impact ASAP because Safari 6.0 supports
-// mutation observers, so that implementation is used instead.
-// However, if we ever elect to use timers in Safari, the prevalent work-around
-// is to add a scroll event listener that calls for a flush.
-
-// `setTimeout` does not call the passed callback if the delay is less than
-// approximately 7 in web workers in Firefox 8 through 18, and sometimes not
-// even then.
-
-function makeRequestCallFromTimer(callback) {
-    return function requestCall() {
-        // We dispatch a timeout with a specified delay of 0 for engines that
-        // can reliably accommodate that request. This will usually be snapped
-        // to a 4 milisecond delay, but once we're flushing, there's no delay
-        // between events.
-        var timeoutHandle = setTimeout(handleTimer, 0);
-        // However, since this timer gets frequently dropped in Firefox
-        // workers, we enlist an interval handle that will try to fire
-        // an event 20 times per second until it succeeds.
-        var intervalHandle = setInterval(handleTimer, 50);
-
-        function handleTimer() {
-            // Whichever timer succeeds will cancel both timers and
-            // execute the callback.
-            clearTimeout(timeoutHandle);
-            clearInterval(intervalHandle);
-            callback();
-        }
-    };
-}
-
-// This is for `asap.js` only.
-// Its name will be periodically randomized to break any code that depends on
-// its existence.
-rawAsap.makeRequestCallFromTimer = makeRequestCallFromTimer;
-
-// ASAP was originally a nextTick shim included in Q. This was factored out
-// into this ASAP package. It was later adapted to RSVP which made further
-// amendments. These decisions, particularly to marginalize MessageChannel and
-// to capture the MutationObserver implementation in a closure, were integrated
-// back into ASAP proper.
-// https://github.com/tildeio/rsvp.js/blob/cddf7232546a9cf858524b75cde6f9edf72620a7/lib/rsvp/asap.js
-
-
-}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],164:[function(require,module,exports){
-(function (process){
-"use strict";
-
-var domain; // The domain module is executed on demand
-var hasSetImmediate = typeof setImmediate === "function";
-
-// Use the fastest means possible to execute a task in its own turn, with
-// priority over other events including network IO events in Node.js.
-//
-// An exception thrown by a task will permanently interrupt the processing of
-// subsequent tasks. The higher level `asap` function ensures that if an
-// exception is thrown by a task, that the task queue will continue flushing as
-// soon as possible, but if you use `rawAsap` directly, you are responsible to
-// either ensure that no exceptions are thrown from your task, or to manually
-// call `rawAsap.requestFlush` if an exception is thrown.
-module.exports = rawAsap;
-function rawAsap(task) {
-    if (!queue.length) {
-        requestFlush();
-        flushing = true;
-    }
-    // Avoids a function call
-    queue[queue.length] = task;
-}
-
-var queue = [];
-// Once a flush has been requested, no further calls to `requestFlush` are
-// necessary until the next `flush` completes.
-var flushing = false;
-// The position of the next task to execute in the task queue. This is
-// preserved between calls to `flush` so that it can be resumed if
-// a task throws an exception.
-var index = 0;
-// If a task schedules additional tasks recursively, the task queue can grown
-// unbounded. To prevent memory excaustion, the task queue will periodically
-// truncate already-completed tasks.
-var capacity = 1024;
-
-// The flush function processes all tasks that have been scheduled with
-// `rawAsap` unless and until one of those tasks throws an exception.
-// If a task throws an exception, `flush` ensures that its state will remain
-// consistent and will resume where it left off when called again.
-// However, `flush` does not make any arrangements to be called again if an
-// exception is thrown.
-function flush() {
-    while (index < queue.length) {
-        var currentIndex = index;
-        // Advance the index before calling the task. This ensures that we will
-        // begin flushing on the next task the task throws an error.
-        index = index + 1;
-        queue[currentIndex].call();
-        // Prevent leaking memory for long chains of recursive calls to `asap`.
-        // If we call `asap` within tasks scheduled by `asap`, the queue will
-        // grow, but to avoid an O(n) walk for every task we execute, we don't
-        // shift tasks off the queue after they have been executed.
-        // Instead, we periodically shift 1024 tasks off the queue.
-        if (index > capacity) {
-            // Manually shift all values starting at the index back to the
-            // beginning of the queue.
-            for (var scan = 0; scan < index; scan++) {
-                queue[scan] = queue[scan + index];
-            }
-            queue.length -= index;
-            index = 0;
-        }
-    }
-    queue.length = 0;
-    index = 0;
-    flushing = false;
-}
-
-rawAsap.requestFlush = requestFlush;
-function requestFlush() {
-    // Ensure flushing is not bound to any domain.
-    // It is not sufficient to exit the domain, because domains exist on a stack.
-    // To execute code outside of any domain, the following dance is necessary.
-    var parentDomain = process.domain;
-    if (parentDomain) {
-        if (!domain) {
-            // Lazy execute the domain module.
-            // Only employed if the user elects to use domains.
-            domain = require(137);
-        }
-        domain.active = process.domain = null;
-    }
-
-    // `setImmediate` is slower that `process.nextTick`, but `process.nextTick`
-    // cannot handle recursion.
-    // `requestFlush` will only be called recursively from `asap.js`, to resume
-    // flushing after an error is thrown into a domain.
-    // Conveniently, `setImmediate` was introduced in the same version
-    // `process.nextTick` started throwing recursion errors.
-    if (flushing && hasSetImmediate) {
-        setImmediate(flush);
-    } else {
-        process.nextTick(flush);
-    }
-
-    if (parentDomain) {
-        domain.active = process.domain = parentDomain;
-    }
-}
-
-
-}).call(this,require(139))
-},{"137":137,"139":139}],165:[function(require,module,exports){
+},{"135":135,"168":168}],174:[function(require,module,exports){
 (function (global){
 // Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
@@ -10395,7 +10219,7 @@ function requestFlush() {
             return factory(root, exports, Rx);
         });
     } else if (typeof module === 'object' && module && module.exports === freeExports) {
-        module.exports = factory(root, module.exports, require(167));
+        module.exports = factory(root, module.exports, require(176));
     } else {
         root.Rx = factory(root, {}, root.Rx);
     }
@@ -11207,7 +11031,7 @@ function requestFlush() {
 }));
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"167":167}],166:[function(require,module,exports){
+},{"176":176}],175:[function(require,module,exports){
 (function (global){
 // Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
@@ -11237,7 +11061,7 @@ function requestFlush() {
             return factory(root, exports, Rx);
         });
     } else if (typeof module === 'object' && module && module.exports === freeExports) {
-        module.exports = factory(root, module.exports, require(167));
+        module.exports = factory(root, module.exports, require(176));
     } else {
         root.Rx = factory(root, {}, root.Rx);
     }
@@ -11730,7 +11554,7 @@ function requestFlush() {
 }));
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"167":167}],167:[function(require,module,exports){
+},{"176":176}],176:[function(require,module,exports){
 (function (process,global){
 // Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
@@ -17320,6 +17144,6 @@ function requestFlush() {
 
 }.call(this));
 
-}).call(this,require(139),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"139":139}]},{},[1])(1)
+}).call(this,require(140),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
+},{"140":140}]},{},[1])(1)
 });
