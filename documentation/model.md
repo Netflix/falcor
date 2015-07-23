@@ -703,36 +703,88 @@ After modifying the JSON Graph object, the function returns a JSONGraphEnvelope 
 }
 ~~~
 
-Note that the response from the function does not include all of the data in the list, nor does it include the newly-created task object in the "todosById" map. As a rule, **functions should return the minimum amount of data required to ensure the Model's cache is consistent, as well as enable Models to retrieve data from any objects created by the function.**
+Let's see if we can try to understand why the function returns the response above. 
 
-When a Model receives a JSONGraphEnvelope from a DataSource, it removes the cached values at each of the paths at the "invalidated" paths array. The function's response ensures Model cache consistency by invalidating the length of the todos list, which was changed by the function. 
-
-Furthermore, the JSONGraphEnvelope response contains the reference to the newly-created task object in the "todosById" map. Instead of returning the data in the task in the response, returning the reference allows the caller to decide what values from the newly-created task should be retrieved. The caller controls
-
-Ideally, a function should include the minimum amount of data in the response in order to ensure that the Model's cache is not stale, and the Model has the ability to retrieve data from any newly-created items. 
-
-To ensure that the Model can retrieve keys from the newly-created 
-all of the data it neeeds that includes the reference to the newly-created task object in its index within the list. It also includes the ["todos", "length"] path in the list of invalidated paths which should be removed from the Model's cache.
-
-Unlike get and set operations, there is no way to predict what values will be returned from a function call. To allow the Model to efficiently merge the values in the JSONGraphEnvelope into its local cache, the function adds a "paths" key to the JSONGraphEnvelope. The "paths" key is an array of PathSets which point to all of the values within the JSON Graph object in the "jsonGraph" key. 
-
-Once the function has returned a response, the DataSource looks for any references inside of the JSONGraphEnvelope and attempts to retrieve the returnValuePathSets from the reference path. In the response from the function, we can see that the following reference was returned:
+Notice that the function's JSONGraphEnvelope response contains a "paths" array which contains paths to all of the values in the "jsonGraph" key. 
 
 ~~~js
-{ $type: "ref", value: ["todosById", 429] }
+// partial JSONGraphEnvelope Response
+{
+    paths: [
+        ["todos", 2]
+    ],
+    jsonGraph: {
+        todos: {
+            2: { $type: "ref", value: ["todosById", 93] }
+        }
+    },
+    // rest of response snipped...
+}
 ~~~
 
-The DataSource appends each of the returnValuePathSets to the reference path and runs a get operation on the resulting PathSets:
+Why is this necessary? Unlike get and set operations, there is no way for the Model to predict what values will be returned from a function call. By providing the Model with an array of paths to the values within the JSONGraph object, the function allows the Model to merge the response into its local cache without resorting to reflection. 
+
+Notice as well that the function does not include the entire contents of the "todos" list in its response, nor does it include the newly-created task object in the "todosById" map. As a rule, **functions should return the minimum amount of data required to ensure the Model's cache is consistent, as well as enable Models to retrieve data from any objects created by the function.**
+
+Functions might change any number of values in the DataSource's JSONGraph object. In order to ensure that the Model's cache is consistent, each function is required to either provide the newest version of each value it changes in the response, or alternately include a path to the value which has changed in the list of invalidated paths in its JSONGraph Response. 
 
 ~~~js
-// Inside DataSource...
-this.
-    get([
-        ["todosById", 429, "name"],
-        ["todosById", 429, "done"]
-    ]).
-    
+{
+    // beginning of response snipped...
+    invalidated: [
+        ["todos", "length"]
+    ]
+}
 ~~~
+
+When a Model receives a JSONGraphEnvelope from the DataSource, it removes the cached values at each of the paths at the "invalidated" paths array. The "todos.add" function's response ensures Model cache consistency by invalidating the length of the todos list, which the function changed. 
+
+To allow the Model to retrieve data from the newly-created task object, the JSONGraphEnvelope response contains the reference to the newly-created task object in the "todosById" map. 
+
+~~~js
+{
+    // beginning of response snipped...
+    jsonGraph: {
+        todos: {
+            2: { $type: "ref", value: ["todosById", 93] }
+        }
+    },
+    // end of response snipped...
+}
+~~~
+
+Instead of returning the task data in the response, including a reference to the task allows the caller to decide what values from the newly-created task should be retrieved by specifying the returnValuePathSets argument. Recall that the following paths were passed as the returnValuePathSets argument:
+
+~~~js
+[
+    ["name"],
+    ["done"]
+]
+~~~
+
+Once the function has returned a response, the DataSource looks for any references inside of the JSONGraphEnvelope and attempts to retrieve the returnValuePathSets from the reference path. In the response from the function, we can see that a JSONGraph Reference was included at the path ["todos", 2]:
+
+~~~js
+{
+    // beginning of response snipped...
+    jsonGraph: {
+        todos: {
+            2: { $type: "ref", value: ["todosById", 93] }
+        }
+    }
+    // end of response snipped...
+~~~
+
+The DataSource appends each of the paths in the returnValuePathSets to the paths at which references are found in the response, yielding the following PathSets:
+
+~~~js
+[
+    ["todos", 2, "name"],
+    ["todos", 2, "done"]
+]
+~~~
+
+The DataSource then attempts to retrieve these PathSets, and adds the values to the JSONGraphEnvelope returned by the function.
 
 # Working with JSON Graph Data using a Model
 
