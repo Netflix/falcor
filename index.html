@@ -35,7 +35,7 @@ lang: en
       <div class="row">
         <div class="col-xs-12 col-lg-10 col-lg-offset-1">
           {% capture the_include %}{% include homepage.md %}{% endcapture %}
-          {{ the_include | markdownify }}          
+          {{ the_include | markdownify }}
         </div>
       </div>
     </div>
@@ -47,9 +47,12 @@ lang: en
     if (window.location.href.indexOf('animated') !== -1) {
       document.body.className += ' animation-enabled';
     }
+    if (window.location.href.indexOf('altimated') !== -1) {
+      document.body.className += ' animation-enabled-alt';
+    }
   });
   </script>
-  
-  
+
+
   {% include javascript-includes.html %}
-</body>  
+</body>
