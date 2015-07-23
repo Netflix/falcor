@@ -17,7 +17,6 @@
 .navbar-nav .dropdown > .dropdown-menu {
   opacity: 0;
   transition: opacity 2s;
-  
 }
 .navbar-nav .dropdown.open > .dropdown-menu {
   opacity: 1;
@@ -80,14 +79,10 @@ body {
   text-rendering: optimizeLegibility;
 }
 
-@-webkit-keyframes fade {
-	0% {
-		opacity: 0;
-	}
-	100% {
-		opacity: 1;
-	}
+.main-homepage-content {
+  background-color: @body-bg;
 }
+
 
 .hero-banner {
   background-color: #111;
@@ -137,6 +132,15 @@ body {
 
 // Animated intro
 
+@-webkit-keyframes fade {
+	0% {
+		opacity: 0;
+	}
+	100% {
+		opacity: 1;
+	}
+}
+
 .animated-fade-in() {
   opacity: 0;
   animation-name: fade;
@@ -161,7 +165,7 @@ body {
     animation-delay: 1.1s;
   }
   
-  .main-page-content {
+  .main-homepage-content {
     .animated-fade-in();
     animation-duration: 0.7s;
     animation-delay: 1.85s;

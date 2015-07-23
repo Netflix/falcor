@@ -27,25 +27,29 @@ lang: en
   </div>
 </div>
 
-<div class="container main-page-content">
-  <div class="row row-gap-medium">
-    <!-- This bit has to be html to achieve the 3 column layout -->
-    <div class="col-md-4">
-      {% capture the_include %}{% include homepage-key-feature-1.md %}{% endcapture %}
-      {{ the_include | markdownify }}
-    </div>
-    <div class="col-md-4">
-      {% capture the_include %}{% include homepage-key-feature-2.md %}{% endcapture %}
-      {{ the_include | markdownify }}
-    </div>
-    <div class="col-md-4">
-      {% capture the_include %}{% include homepage-key-feature-3.md %}{% endcapture %}
-      {{ the_include | markdownify }}
-    </div>
-  </div>
+<div style="background-color: #111;">
+  <div class="main-homepage-content">
+    <div class="container">
+      <div class="row row-gap-medium">
+        <!-- This bit has to be html to achieve the 3 column layout -->
+        <div class="col-md-4">
+          {% capture the_include %}{% include homepage-key-feature-1.md %}{% endcapture %}
+          {{ the_include | markdownify }}
+        </div>
+        <div class="col-md-4">
+          {% capture the_include %}{% include homepage-key-feature-2.md %}{% endcapture %}
+          {{ the_include | markdownify }}
+        </div>
+        <div class="col-md-4">
+          {% capture the_include %}{% include homepage-key-feature-3.md %}{% endcapture %}
+          {{ the_include | markdownify }}
+        </div>
+      </div>
 
-  {% capture the_include %}{% include homepage.md %}{% endcapture %}
-  {{ the_include | markdownify }}
+      {% capture the_include %}{% include homepage.md %}{% endcapture %}
+      {{ the_include | markdownify }}
+    </div>  
+  </div>
 </div>
 
 <!-- Hack just for easy demoing purposes -->
