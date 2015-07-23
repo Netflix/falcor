@@ -594,8 +594,7 @@ After the returnValuePathSets have been evaluated against any JSON Graph Referen
 
 ### Call In Action
 
-
-In the example below, we add a new task to a TODOs list by invoking the push function on the TODOs list:
+In the example below, we add a new task to a TODOs list by invoking the add function on the TODOs list:
 
 ~~~js
 var dataSource = new falcor.HttpDataSource("/model.json");
@@ -605,7 +604,7 @@ var model = new falcor.Model({
 
 model.
     call(
-        "todos.push",
+        "todos.add",
         ["pick up some eggs"],
         ["name", "done"],
         "length").
@@ -625,7 +624,7 @@ The Model forwards the call operation to the DataSource which implements the abs
 dataSource.
     call(
         // callPath parsed into Path array by Model
-        ["todos","push"],
+        ["todos","add"],
         // function arguments
         ["pick up some eggs"],
         // returnValuePathSets parsed into PathSet arrays by Model
@@ -639,7 +638,62 @@ dataSource.
         ])      
 ~~~
 
+Let's say that the JSON Graph object that the DataSource manages looks like this:
 
+~~~js
+{
+    todos: [
+        ["todosById", 44],
+        ["todosById", 54]
+    ],
+    todosById: {
+        "44": {
+            name: 'get milk from corner store',
+            done: false
+        },
+        "54": {
+            name: 'withdraw money from ATM',
+            done: false
+        }
+    }
+}});
+~~~
+
+After the DataSource
+The DataSource executes the function it finds at ["todos","add"] which adds a new task to the TODOs list and returns a JSONGraphEnvelope containing a single reference to the newly created task object at the index in the list at which it was inserted. 
+
+~~~js
+{
+    paths: [
+        ["todos", 2]
+    ],
+    jsonGraph: {
+        todos: {
+            2: { $type: "ref", value: ["todosById", 93] }
+        }
+    }
+}
+~~~
+
+Unlike get and set operations, there is no way to predict what values will be returned from a function call. To allow the Model to efficiently merge the values in the JSONGraphEnvelope into its local cache, the function adds a "paths" key to the JSONGraphEnvelope. The "paths" key is an array of PathSets which point to all of the values within the JSON Graph object in the "jsonGraph" key. 
+
+Once the function has returned a response, the DataSource looks for any references inside of the JSONGraphEnvelope and attempts to retrieve the returnValuePathSets from the reference path. In the response from the function, we can see that the following reference was returned:
+
+~~~js
+{ $type: "ref", value: ["todosById", 429] }
+~~~
+
+The DataSource appends each of the returnValuePathSets to the reference path and runs a get operation on the resulting PathSets:
+
+~~~js
+// Inside DataSource...
+this.
+    get([
+        ["todosById", 429, "name"],
+        ["todosById", 429, "done"]
+    ]).
+    
+~~~
 
 # Working with JSON Graph Data using a Model
 
