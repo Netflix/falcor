@@ -10,10 +10,6 @@ var compose = function(f, g) {
     };
 };
 
-var curry = function(fn, arg) {
-    return fn.bind(null, arg);
-};
-
 var models = testConfig.models;
 var formats = testConfig.formats;
 var tests = testConfig.get;
@@ -39,7 +35,7 @@ var gc = function() {
 var env = navigator.userAgent;
 var logger = console.log.bind(console);
 var resultsReporter = compose(testReporter.resultsReporter, CSVFormatter.toTable);
-var benchmarkReporter = compose(testReporter.benchmarkReporter, curry(CSVFormatter.toRow, env));
+var benchmarkReporter = compose(testReporter.benchmarkReporter, CSVFormatter.toRow.bind(null, env));
 
 testRunner(suite, env, benchmarkReporter, resultsReporter, logger, gc());
 
