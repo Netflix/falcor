@@ -659,8 +659,33 @@ Let's say that the JSON Graph object that the DataSource manages looks like this
 }});
 ~~~
 
-After the DataSource
-The DataSource executes the function it finds at ["todos","add"] which adds a new task to the TODOs list and returns a JSONGraphEnvelope containing a single reference to the newly created task object at the index in the list at which it was inserted. 
+After the DataSource executes the add function on the todos list, the JSON Graph object will look like this:
+
+~~~js
+{
+    todos: [
+        ["todosById", 44],
+        ["todosById", 54],
+        ["todosById", 93]
+    ],
+    todosById: {
+        "44": {
+            name: 'get milk from corner store',
+            done: false
+        },
+        "54": {
+            name: 'withdraw money from ATM',
+            done: false
+        },
+        "93": {
+            name: "pick up some eggs",
+            done: false
+        }
+    }
+}});
+~~~
+
+After modifying the JSON Graph object, the function returns a JSONGraphEnvelope response to the DataSource. 
 
 ~~~js
 {
@@ -671,9 +696,23 @@ The DataSource executes the function it finds at ["todos","add"] which adds a ne
         todos: {
             2: { $type: "ref", value: ["todosById", 93] }
         }
-    }
+    },
+    invalidated: [
+        ["todos", "length"]
+    ]
 }
 ~~~
+
+Note that the response from the function does not include all of the data in the list, nor does it include the newly-created task object in the "todosById" map. As a rule, **functions should return the minimum amount of data required to ensure the Model's cache is consistent, as well as enable Models to retrieve data from any objects created by the function.**
+
+When a Model receives a JSONGraphEnvelope from a DataSource, it removes the cached values at each of the paths at the "invalidated" paths array. The function's response ensures Model cache consistency by invalidating the length of the todos list, which was changed by the function. 
+
+Furthermore, the JSONGraphEnvelope response contains the reference to the newly-created task object in the "todosById" map. Instead of returning the data in the task in the response, returning the reference allows the caller to decide what values from the newly-created task should be retrieved. The caller controls
+
+Ideally, a function should include the minimum amount of data in the response in order to ensure that the Model's cache is not stale, and the Model has the ability to retrieve data from any newly-created items. 
+
+To ensure that the Model can retrieve keys from the newly-created 
+all of the data it neeeds that includes the reference to the newly-created task object in its index within the list. It also includes the ["todos", "length"] path in the list of invalidated paths which should be removed from the Model's cache.
 
 Unlike get and set operations, there is no way to predict what values will be returned from a function call. To allow the Model to efficiently merge the values in the JSONGraphEnvelope into its local cache, the function adds a "paths" key to the JSONGraphEnvelope. The "paths" key is an array of PathSets which point to all of the values within the JSON Graph object in the "jsonGraph" key. 
 
