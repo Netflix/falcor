@@ -29,7 +29,11 @@ In place of such content, here's a placeholder image:
 
 There are some syntax highlighting examples on the getting started page.
 
-I'm also experimenting with light animation to make a user's first visit really pop. This animation would trigger *only* for a user's first visit to the site, then it'd cookie them and display instantly going forward. [Here's a quick sketch of one intro idea]({{ site.baseurl }}/?animated) (or [Go back to no animations]({{ site.baseurl }}/))
+I'm also experimenting with light animation to make a user's first visit really pop. This animation would trigger *only* for a user's first visit to the site, then it'd cookie them and display instantly going forward.
+
+- [Here's a quick sketch of one intro idea]({{ site.baseurl }}/?animated)
+- [Here's an alternate version]({{ site.baseurl }}/?altimated)
+- or [Go back to no animations]({{ site.baseurl }}/)
 
 I plan to make the menus pretty similar to the ones on the main netflix web ui, as I think that would fit well with the site (as well as add brand-wide visual similarity).
 

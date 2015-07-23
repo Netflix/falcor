@@ -162,7 +162,7 @@ body {
     // TODO: major reconciliation
     animation-name: homepagebackground;
     animation-duration: 0.7s;
-    animation-delay: 2.4s;
+    animation-delay: 2.2s;
     animation-iteration-count: 1;
     animation-timing-function: ease-out;
     animation-direction: normal;
@@ -184,7 +184,42 @@ body {
   .main-homepage-content {
     .animated-fade-in();
     animation-duration: 0.7s;
-    animation-delay: 2.4s;
+    animation-delay: 2.2s;
+  }
+}
+
+.animation-enabled-alt {
+  &.homepage {
+    background-color: #111;
+    // TODO: major reconciliation
+    animation-name: homepagebackground;
+    animation-duration: 0.7s;
+    animation-delay: 1.5s;
+    animation-iteration-count: 1;
+    animation-timing-function: ease-out;
+    animation-direction: normal;
+    animation-fill-mode: forwards;
+  }
+
+  .hero-banner-logo {
+    .animated-fade-in();
+    animation-delay: 0.25s;
+    animation-duration: 1s;
+  }
+
+  .hero-banner-description {
+    .animated-fade-in();
+    animation-duration: 0.7s;
+    animation-delay: 1.5s;
+  }
+  
+  .main-homepage-content, .navbar > .container {
+    .animated-fade-in();
+    animation-duration: 0.7s;
+    animation-delay: 1.5s;
+  }
+  .navbar {
+    background-color: #111;
   }
 }
 
