@@ -558,16 +558,44 @@ model.
 
 ## Calling Functions
 
-Retrieving and setting values in a JSON Graph are both examples of idempotent operations. This means that you can repeat the same set or get operation multiple times without introducing any additional side effects. Given that retrieving values from a JSON Graph multiple times will not introduce any additional side effects, we can serve subsequent requests for the same value out of the Model cache. Likewise, we can optimistically update the Model's local cache when a value is set because we can make an educated guess about the effect that this method will have on the DataSource's JSON Graph object. Obviously idempotent operations have nice properties. However applications often require several data transformations to be applied transactionally.  In these instances, set and get are not adequate. You need to call a function. 
+Retrieving and setting values in a JSON Graph are both examples of idempotent operations. This means that you can repeat the same set or get operation multiple times without introducing any additional side effects. Given that retrieving values from a JSON Graph multiple times will not introduce any additional side effects, we can serve subsequent requests for the same value out of the Model cache. Likewise, we can optimistically update the Model's local cache when a value is set because we can make an educated guess about the effect that this method will have on the DataSource's JSON Graph object. Obviously idempotent operations have nice properties. However applications often require a series of mutations to be applied transactionally.  In these instances, set and get are not adequate. You need to call a function. 
 
-To allow for transactional operations, JSON Graph objects can contain functions just like JavaScript objects. Functions are considered JSON Graph objects, which means they cannot be retrieved from a DataSource nor set into a DataSource. Instead, functions can only be invoked using the call method. 
+To allow for transactional operations, JSON Graph objects can contain functions just like JavaScript objects. Functions are considered JSON Graph objects, which means they cannot be retrieved from a DataSource nor set into a DataSource. Rather **functions can only be invoked using the call method.** 
 
 ~~~js
 class Model {
-    call(callPath, arguments, returnValuePaths: [, ...PathSets);
-var dataSource = new falcor.HttpDataSource("/model.json");
-var model = new falcor.Model({
-In the example below, we add a new task to a TODOS list:
+    call(callPath:Path, arguments:any[], returnValuePathSets?: PathSet[], ...thisPathSets:PathSet[]): ModelResponse
+}
+~~~
+
+Unlike JavaScript functions, JSON Graph functions cannot return transient data. Instead JSON Graph functions may only return a subset of their "this" object, typically after mutating it. The result of a JSON Graph function is always a JSONGraphEnvelope containing a subset of the function's "this" object.
+
+The call method's arguments are explained below:
+
+### The callPath Argument
+
+This argument is the path to the function within the DataSource's JSON Graph object. Note that one invocation of call can only run a single function.
+
+### The arguments Argument
+
+This is an array of arguments to be passed to the function being called.
+
+### The Optional returnValuePathSets Argument
+
+Typically, returnValuePaths are used when the function creates a new object and returns a reference to that object. The returnValuePathSets can be passed to call in order to allow fields to be retrieved from the newly-generated object without the need for a subsequent get operation to be executed on the DataSource.
+
+In the event that any of the values returned from the function are [JSON Graph References](#JSON-Graph-References), the DataSource will append each of the returnValuePathSets to each Reference path and evaluate the resulting paths. The results of the values retrieved by evaluating the returnValuePathSets on the References returned by the function are added to the JSON Graph response by the DataSource.
+
+### The Optional thisPathSets Arguments
+
+A function is not obligated to return all of the changes that it makes to its "this" object. On the contrary, functions typically return as little data as possible by default. Instead of returning all of the changes they make to the JSON Graph object, functions allow callers to define exactly which values they would like to refresh after successful function execution by providing the returnValuePathSets and the thisPathSets arguments. The goal is to allow applications to retrieve the minimum subset of data they need for each scenario. 
+
+After the returnValuePathSets have been evaluated against any JSON Graph References returned by the function and added to the JSONGraphEnvelope Response, each PathSet in the thisPathSets array is evaluated on the function's "this" object. The resulting values are added to the JSON Graph Response returned by the DataSource's call method.
+
+### Call In Action
+
+
+In the example below, we add a new task to a TODOs list by invoking the push function on the TODOs list:
 
 ~~~js
 var dataSource = new falcor.HttpDataSource("/model.json");
@@ -577,7 +605,7 @@ var model = new falcor.Model({
 
 model.
     call(
-        "todos.add",
+        "todos.push",
         ["pick up some eggs"],
         ["name", "done"],
         "length").
