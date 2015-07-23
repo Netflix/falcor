@@ -402,6 +402,7 @@ With setting information using the Model, developers are usually trying to do on
 
 1. Set a single value
 2. Set values using multiple PathValue objects
+3. Set values using a JSONEnvelope
 
 ### 1. Set a Single Value
 
@@ -504,7 +505,7 @@ model.
 // }
 ~~~
 
-### 3. Set Values Using JSONEnvelope 
+### 3. Set Values Using a JSONEnvelope 
 
 Occasionally it can be less verbose to set multiple values with a JSON object rather than a series of PathValue objects. That is why set supports the following overload:
 
@@ -553,6 +554,40 @@ model.
     then(function(response){
         console.log(JSON.stringify(response));
     });
+~~~
+
+## Calling Functions
+
+Retrieving and setting values in a JSON Graph are both examples of idempotent operations. This means that you can repeat the same set or get operation multiple times without introducing any additional side effects. Given that retrieving values from a JSON Graph multiple times will not introduce any additional side effects, we can serve subsequent requests for the same value out of the Model cache. Likewise, we can optimistically update the Model's local cache when a value is set because we can make an educated guess about the effect that this method will have on the DataSource's JSON Graph object. Obviously idempotent operations have nice properties. However applications often require several data transformations to be applied transactionally.  In these instances, set and get are not adequate. You need to call a function. 
+
+To allow for transactional operations, JSON Graph objects can contain functions just like JavaScript objects. Functions are considered JSON Graph objects, which means they cannot be retrieved from a DataSource nor set into a DataSource. Instead, functions can only be invoked using the call method. 
+
+~~~js
+class Model {
+    call(callPath, arguments, returnValuePaths: [, ...PathSets);
+var dataSource = new falcor.HttpDataSource("/model.json");
+var model = new falcor.Model({
+In the example below, we add a new task to a TODOS list:
+
+~~~js
+var dataSource = new falcor.HttpDataSource("/model.json");
+var model = new falcor.Model({
+    source: dataSource
+});
+
+model.
+    call(
+        "todos.add",
+        ["pick up some eggs"],
+        ["name", "done"],
+        "length").
+    then(
+        function(jsonEnvelope) {
+            console.log(JSON.stringify(jsonEnvelope));
+        },
+        function(error) {
+            console.error(error);
+        });
 ~~~
 
 # Working with JSON Graph Data using a Model
