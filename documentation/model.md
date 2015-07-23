@@ -558,9 +558,9 @@ model.
 
 ## Calling Functions
 
-Retrieving and setting values in a JSON Graph are both examples of idempotent operations. This means that you can repeat the same set or get operation multiple times without introducing any additional side effects. Given that retrieving values from a JSON Graph multiple times will not introduce any additional side effects, we can serve subsequent requests for the same value out of the Model cache. Likewise, we can optimistically update the Model's local cache when a value is set because we can make an educated guess about the effect that this method will have on the DataSource's JSON Graph object. Obviously idempotent operations have nice properties. However applications often require a series of mutations to be applied transactionally.  In these instances, set and get are not adequate. You need to call a function. 
+Retrieving and setting values in a JSON Graph are both examples of idempotent operations. This means that you can repeat the same set or get operation multiple times without introducing any additional side effects. This is the reason the Model can safely serve subsequent requests for the same value from its cache instead of returning to the DataSource. Furthermore, the Model can optimistically update its local cache when a value is set because it can make an educated guess about the effect that the set operation will have on the DataSource's JSON Graph object. Obviously applications built idempotent operations have nice properties. However, sometimes applications require a series of mutations to be applied transactionally.  In these instances, set and get alone are not adequate. You need to call a **function.** 
 
-To allow for transactional operations, JSON Graph objects can contain functions just like JavaScript objects. Functions are considered JSON Graph objects, which means they cannot be retrieved from a DataSource nor set into a DataSource. Rather **functions can only be invoked using the call method.** 
+To allow for transactional operations, JSON Graph objects can contain functions just like JavaScript objects. Functions are considered JSON Graph objects which means they cannot be retrieved from, nor set into, a DataSource. Rather **functions can only be invoked using the call method.** 
 
 ~~~js
 class Model {
@@ -617,6 +617,29 @@ model.
             console.error(error);
         });
 ~~~
+
+The Model forwards the call operation to the DataSource which implements the abstract JSON Graph call operation on its associated JSON Graph object:
+
+~~~js
+// Inside Model
+dataSource.
+    call(
+        // callPath parsed into Path array by Model
+        ["todos","push"],
+        // function arguments
+        ["pick up some eggs"],
+        // returnValuePathSets parsed into PathSet arrays by Model
+        [
+            ["name"],
+            ["done"]
+        ],
+        // thisPathSets parsed into PathSet arrays by Model
+        [
+            ["length"]
+        ])      
+~~~
+
+
 
 # Working with JSON Graph Data using a Model
 
