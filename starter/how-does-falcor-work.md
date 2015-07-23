@@ -1,7 +1,7 @@
 ---
 layout: page
 title: how does falcor work?
-menu: starter
+id: how_does_falcor_work
 lang: en
 ---
 

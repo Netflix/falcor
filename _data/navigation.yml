@@ -3,16 +3,16 @@
   # First level menu items have title and children if they're a menu with sub-items
   title: Tutorial
   children:
-    - 
-      # each child has an id, which should be set in the page's front matter,
-      # and uniquely identifies that page of the site. Presumably the child
-      # pages will be in the same directory, but that's not required.
-      id: getting_started
+    # each child is an id, which should be set in the page's front matter,
+    # and uniquely identifies that page of the site. Presumably the child
+    # pages will be in the same directory, but that's not required.
+    - getting_started
+    - how_does_falcor_work
+      
 - 
   title: Documents
   children:
-    - 
-      id: router
+    - router
 - 
   # If a first level menu item isn't a dropdown menu, you can give it an
   # id to link it straight to a page or a title and a path to link to a relative url

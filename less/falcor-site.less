@@ -2,10 +2,65 @@
 @import "includes/variables.less";
 @import "includes/bootstrap-customized.less";
 
-// Bootstrap overrides
+// ========================================
+// = Bootstrap Overrides and Enhancements =
+// ========================================
+.navbar-nav .dropdown-menu > li > a:hover {
+  text-decoration: underline;
+}
+
+// Larger navbar font-size
+.navbar-nav > li > a, .navbar-nav .dropdown-menu > li > a {
+  font-size: 16px;
+}
+
+.navbar-nav .dropdown > .dropdown-menu {
+  opacity: 0;
+  transition: opacity 2s;
+  
+}
+.navbar-nav .dropdown.open > .dropdown-menu {
+  opacity: 1;
+}
+
+// Top border and arrow on navbar dropdown menus
+@navbar-dropdown-menu-top-color: #CCC;
+
+.navbar-nav > li > .dropdown-menu {
+  border-top: 2px solid @navbar-dropdown-menu-top-color;
+  margin-top: 1px;
+  
+  @arrow-size: 9px;
+  
+  &:after {
+  	bottom: 100%;
+  	left: @navbar-padding-horizontal + 20px;
+  	border: solid transparent;
+  	content: " ";
+  	height: 0;
+  	width: 0;
+  	position: absolute;
+  	pointer-events: none;
+  }
+
+  &:after {
+  	border-color: rgba(204, 204, 204, 0);
+  	border-bottom-color: #CCC;
+  	border-width: @arrow-size;
+  	margin-left: -1 * @arrow-size;
+  }
+}
 
 
-// Falcor site custom styles
+
+// May be needed later, but safe to ignore for now TODO: use or remove
+// @custom-navbar-font-size: 14px;
+// @custom-navbar-line-height-computed: floor((@custom-navbar-font-size * @line-height-base));
+// @navbar-padding-vertical: ((@navbar-height - @custom-navbar-line-height-computed) / 2);;
+
+// ======================
+// = Falcor Site Styles =
+// ======================
 @site-content-padding-top: 20px;
 
 .navbar-brand > .navbar-logo {
@@ -15,15 +70,14 @@
 }
 
 body {
-  padding-top: @navbar-height + @site-content-padding-top;
-  // probably unnecessary, but included in bootstrap's examples
-  // TODO: confirm whether this is needed for some browser quirk
-  // or just for their demo
-  // min-height: 2000px;
-  
-  // Smooth text when possible
+  padding-top: @navbar-height + @site-content-padding-top;  
+  // Font improvement tweaks.
+  // MDN recommends against using the first two, as they aren't on track to be included
+  // in the spec, but just about everyone (including Netflix, Apple, Google, etc.)
+  // uses them and they greatly improve readability when supported.
   -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: auto;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
 }
 
 @-webkit-keyframes fade {
