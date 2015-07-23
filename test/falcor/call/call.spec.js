@@ -23,7 +23,6 @@ function getModel(newModel, cache) {
 describe("Call", function() {
     it("executes a local function with the call args", function(done) {
 
-        debugger;
         var model = getDataModel(new LocalDataSource(Cache()), ReducedCache());
 
         model.withoutDataSource().setValueSync(["lists", "my-list", "add"], function(videoID) {
@@ -35,8 +34,6 @@ describe("Call", function() {
 
         model.
             call(["lists", "my-list", "add"], [1234], [["summary"]]).
-            concat(model.get(["lists", "my-list", 0, "summary"])).
-            toArray().
             subscribe(function(videos) {
                 testRunner.compare(videos[0], videos[1]);
                 done();
