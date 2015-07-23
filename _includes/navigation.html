@@ -25,7 +25,7 @@
                 </a>
                 <ul class="dropdown-menu">
                   {% for child in navigation_item.children %}
-                    {% assign child_page = site.pages | where:"id",child.id | first %}
+                    {% assign child_page = site.pages | where:"id",child | first %}
                     <li>
                       <a href="{{ site.baseurl }}{{ child_page.url }}">{{ child_page.title }}</a>
                     </li>
