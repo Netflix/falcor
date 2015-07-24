@@ -80,6 +80,7 @@
     "asap": "~2.0.3",
     "falcor-json-graph": "git+ssh://git@github.com/Netflix/falcor-json-graph.git",
     "falcor-path-syntax": "git+ssh://git@github.com/Netflix/falcor-path-syntax.git",
+    "falcor-path-utils": "git+ssh://git@github.com/Netflix/falcor-path-utils.git",
     "promise": "7.0.0",
     "rx": "2.5.3",
     "sinon": "^1.15.4"
