@@ -151,42 +151,38 @@ describe('Cache as DataSource', function() {
     });
     it("should get all missing paths in a single request", function(done) {
         var serviceCalls = 0;
+        var cacheModel = new Model({
+            cache: {
+                lolomo: {
+                    summary: {
+                        $type: "atom",
+                        value: "hello"
+                    },
+                    0: {
+                        summary: {
+                            $type: "atom",
+                            value: "hello-0"
+                        }
+                    },
+                    1: {
+                        summary: {
+                            $type: "atom",
+                            value: "hello-1"
+                        }
+                    },
+                    2: {
+                        summary: {
+                            $type: "atom",
+                            value: "hello-2"
+                        }
+                    }
+                }
+            }
+        });
         var model = new Model({ source: {
             get: function(paths) {
                 serviceCalls++;
-                try {
-                    return Rx.Observable.return({
-                        paths: paths,
-                        jsonGraph: {
-                            lolomo: {
-                                summary: {
-                                    $type: "atom",
-                                    value: "hello"
-                                },
-                                0: {
-                                    summary: {
-                                        $type: "atom",
-                                        value: "hello-0"
-                                    }
-                                },
-                                1: {
-                                    summary: {
-                                        $type: "atom",
-                                        value: "hello-1"
-                                    }
-                                },
-                                2: {
-                                    summary: {
-                                        $type: "atom",
-                                        value: "hello-2"
-                                    }
-                                }
-                            }
-                        }
-                    });
-                } catch(e) {
-                    return Rx.Observable.throw(e);
-                }
+                return cacheModel.get.apply(cacheModel, paths).toJSONG();
             }
         }});
 
