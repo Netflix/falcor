@@ -10,6 +10,7 @@ var LocalDataSource = require('../../data/LocalDataSource');
 var ErrorDataSource = require('../../data/ErrorDataSource');
 var isPathValue = require("./../../../lib/support/is-path-value");
 var expect = require("chai").expect;
+var sinon = require('sinon');
 
 describe('DataSource Only', function() {
     describe('Selector Functions', function() {
@@ -147,14 +148,11 @@ describe('DataSource Only', function() {
             });
     });
     it("should get all missing paths in a single request", function(done) {
+        var serviceCalls = 0;
         var model = new Model({ source: {
             get: function(paths) {
+                serviceCalls++;
                 try {
-                    var path = paths[0];
-                    var range = path[1];
-                    expect(range).to.be.ok;
-                    expect(range.from).to.equals(0);
-                    expect(range.to).to.equals(2);
                     return Rx.Observable.return({
                         paths: paths,
                         jsonGraph: {
@@ -189,16 +187,23 @@ describe('DataSource Only', function() {
                 }
             }
         }});
-        
-        model.get("lolomo.summary", "lolomo[0..2].summary").subscribe(function(data) {
-            var json = data.json;
-            var lolomo = json.lolomo;
-            expect(lolomo.summary).to.be.ok;
-            expect(lolomo[0].summary).to.be.ok;
-            expect(lolomo[1].summary).to.be.ok;
-            expect(lolomo[2].summary).to.be.ok;
-            done();
-        }, done);
+
+
+        var onNext = sinon.spy();
+        model.
+            get("lolomo.summary", "lolomo[0..2].summary").
+            doAction(onNext).
+            doAction(noOp, noOp, function() {
+                var data = onNext.getCall(0).args[0];
+                var json = data.json;
+                var lolomo = json.lolomo;
+                expect(lolomo.summary).to.be.ok;
+                expect(lolomo[0].summary).to.be.ok;
+                expect(lolomo[1].summary).to.be.ok;
+                expect(lolomo[2].summary).to.be.ok;
+                expect(serviceCalls).to.equal(1);
+            }).
+            subscribe(noOp, done, done);
     });
 });
 
