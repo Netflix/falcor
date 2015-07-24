@@ -31,7 +31,8 @@ gulp.task('compile-less', function () {
 		.pipe(autoprefixer({
 			browsers: [
 				'> 1%',
-				'last 2 versions'
+				'last 2 versions',
+				'ie >= 9'
 			]
 		}))
     .pipe(sourcemaps.write('.'))
