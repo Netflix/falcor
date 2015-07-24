@@ -1536,7 +1536,7 @@ module.exports = function() {
         arrayOfComplexPathsLeaf: {
             getPathSets: {
                 query: [
-                    ["genreList", [{to: 0}, {from: 1}]]
+                    ["genreList", [{to: 0}, {from: 1, to: 1}]]
                 ]
             },
 
@@ -1604,7 +1604,7 @@ module.exports = function() {
         arrayOfComplexPaths: {
             getPathSets: {
                 query: [
-                    ["genreList", [{to: 0}, {from: 1}], "0", "summary"]
+                    ["genreList", [{to: 0}, {from: 1, to: 1}], "0", "summary"]
                 ]
             },
 
