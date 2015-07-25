@@ -22,31 +22,40 @@
   opacity: 1;
 }
 
-// Top border and arrow on navbar dropdown menus
+// Top border and arrow on desktop navbar dropdown menus
 @navbar-dropdown-menu-top-color: #CCC;
 
-.navbar-nav > li > .dropdown-menu {
-  border-top: 2px solid @navbar-dropdown-menu-top-color;
-  margin-top: 1px;
+@media (min-width: @screen-sm-min) {
+  .navbar-nav > li > .dropdown-menu {
+    border-top: 2px solid @navbar-dropdown-menu-top-color;
+    margin-top: 1px;
   
-  @arrow-size: 9px;
+    @arrow-size: 9px;
   
-  &:after {
-  	bottom: 100%;
-  	left: @navbar-padding-horizontal + 30px;
-  	border: solid transparent;
-  	content: " ";
-  	height: 0;
-  	width: 0;
-  	position: absolute;
-  	pointer-events: none;
-  }
+    &:after {
+    	bottom: 100%;
+    	left: @navbar-padding-horizontal + 30px;
+    	border: solid transparent;
+    	content: " ";
+    	height: 0;
+    	width: 0;
+    	position: absolute;
+    	pointer-events: none;
+    }
 
-  &:after {
-  	border-color: rgba(204, 204, 204, 0);
-  	border-bottom-color: #CCC;
-  	border-width: @arrow-size;
-  	margin-left: -1 * @arrow-size;
+    &:after {
+    	border-color: rgba(204, 204, 204, 0);
+    	border-bottom-color: #CCC;
+    	border-width: @arrow-size;
+    	margin-left: -1 * @arrow-size;
+    }
+  }  
+}
+
+// More visible top of menu line on mobile menus
+@media (max-width: @screen-xs-max) {
+  .navbar .navbar-collapse {
+    border-color: @navbar-dropdown-menu-top-color * 0.8;
   }
 }
 
@@ -65,9 +74,9 @@
 @nested-item-border-color: #BBB;
 
 .navbar-brand > .navbar-logo {
-  display: inline-block;
   height: 25px;
-  line-height: @navbar-height;
+  // correct for rounding so it perfectly aligns with the other text's baseline
+  margin-top: -1px; 
 }
 
 body {
