@@ -30,6 +30,9 @@ TODO list
 - Proper docs integration
 - Consider approaches to slim down TOC
 - Style TOC
-- add open graph metadata to base template
 - find/make better syntax highlighting theme
+- force code snippets to scroll instead of text wrapping
+- add open graph metadata to base template
+- verify social sharing metadata is set up and results in clean share visuals
+- implement cookie for intro animation and don't show again after first play
 - more docs, of course!

@@ -15,7 +15,9 @@
 </div>
 
 
-### Things to check out in the current site draft:
+### Things to check out in the current site draft (newest first):
+
+Menus for both mobile and desktop are fully styled.
 
 There are some syntax highlighting examples on the getting started pages.
 
