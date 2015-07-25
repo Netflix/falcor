@@ -80,7 +80,8 @@
 }
 
 body {
-  padding-top: @navbar-height + @site-content-padding-top;  
+  padding-top: @navbar-height + @site-content-padding-top;
+
   // Font improvement tweaks.
   // MDN recommends against using the first two, as they aren't on track to be included
   // in the spec, but just about everyone (including Netflix, Apple, Google, etc.)
@@ -238,7 +239,7 @@ img.img-plain {
 // ===========
 
 
-// Easy vertical spacing improvements
+// Easy vertical spacing improvements -- TODO: make into loop
 .row {
   &.row-gap-small {
     margin-top: 15px;
@@ -253,6 +254,23 @@ img.img-plain {
     margin-top: 60px;
   }
 }
+@media (max-width: @screen-xs-max) {
+  .row {
+    &.row-gap-small {
+      margin-top: 10px;
+    }
+    &.row-gap-medium {
+      margin-top: 20px;
+    }
+    &.row-gap-large {
+      margin-top: 30px;
+    }
+    &.row-gap-huge {
+      margin-top: 40px;
+    }
+  }
+}
+
 
 // Light text for a dark (inverse) background
 .text-inverse {
