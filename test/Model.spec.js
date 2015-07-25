@@ -86,7 +86,6 @@ describe("Model", function() {
         testRunner.compare({$type: $atom, value: 1337}, out);
     });
 
-    require("./collapse");
     require('./lru');
     require('./hardlink');
     require('./falcor');

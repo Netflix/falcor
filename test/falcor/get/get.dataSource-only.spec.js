@@ -17,21 +17,18 @@ describe('DataSource Only', function() {
         it('should get a value from falcor.', function(done) {
             var model = new Model({source: new LocalDataSource(Cache())});
             var expected = Expected.Values().direct.AsJSON.values[0].json;
-            var selector = false;
-            var next = false;
+            var selector = sinon.spy(function(x) {
+                return {value: x};
+            });
+            var onNext = sinon.spy();
             model.
-                get(['videos', 1234, 'summary'], function(x) {
-                    testRunner.compare(expected, x);
-                    selector = true;
-
-                    return {value: x};
-                }).
-                doAction(function(x) {
-                    next = true;
-                    testRunner.compare({value: expected}, x);
-                }, noOp, function() {
-                    testRunner.compare(true, selector, 'Expect to be onNext at least 1 time.');
-                    testRunner.compare(true, next, 'Expect to be onNext at least 1 time.');
+                get(['videos', 1234, 'summary'], selector).
+                doAction(onNext).
+                doAction(noOp, noOp, function() {
+                    expect(selector.calledOnce).to.be.ok;
+                    expect(onNext.calledOnce).to.be.ok;
+                    expect(selector.getCall(0).args[0]).to.deep.equals(expected);
+                    expect(onNext.getCall(0).args[0]).to.deep.equals({value: expected});
                 }).
                 subscribe(noOp, done, done);
         });
