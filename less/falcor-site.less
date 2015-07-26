@@ -73,12 +73,6 @@
 // The border on nested images, code snippets, etc.
 @nested-item-border-color: #C7C7C7;
 
-.navbar-brand > .navbar-logo {
-  height: 25px;
-  // correct for rounding so it perfectly aligns with the other text's baseline
-  margin-top: -1px; 
-}
-
 body {
   padding-top: @navbar-height + @site-content-padding-top;
 
@@ -99,6 +93,17 @@ img {
 
 img.img-plain {
   border: none;
+}
+
+// Performance optimization for navbar since it's position sticky
+.navbar-fixed-top {
+  will-change: transform;
+}
+
+.navbar-brand > .navbar-logo {
+  height: 25px;
+  // correct for rounding so it perfectly aligns with the other text's baseline
+  margin-top: -1px; 
 }
 
 .hero-banner {
