@@ -115,7 +115,7 @@ img.img-plain {
 }
 
 .hero-banner {
-  @logo-width: 188px;
+  @logo-height: 172px;
   @screen-xs-banner-logo-ratio: 0.66;
   @screen-xs-banner-text-ratio: 0.8;
 
@@ -127,10 +127,10 @@ img.img-plain {
 
 
   .hero-banner-logo {
-    width: @logo-width;
+    height: @logo-height;
 
     @media (max-width: @screen-xs-max) {
-      width: @logo-width * @screen-xs-banner-logo-ratio;
+      width: @logo-height * @screen-xs-banner-logo-ratio;
     }
   }
 

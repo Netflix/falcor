@@ -17,6 +17,8 @@
 
 ### Things to check out in the current site draft (newest first):
 
+Tables of contents are now in and I've done a first pass at styling them. I plan to do a second pass and polish them up once the other remaining big task it out of the way (docs integration).
+
 Menus for both mobile and desktop are fully styled.
 
 There are some syntax highlighting examples on the getting started pages.
