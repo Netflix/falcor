@@ -8,21 +8,34 @@ lang: en
 
   <div class="hero-banner">
     <div class="container">
-      <div class="row row-gap-small">
+      <div class="row">
         <div class="col-xs-12 col-lg-10 col-lg-offset-1 text-center">
-          <div class="row">
-            <div class="col-xs-12 text-center">
-              <img class="hero-banner-logo img-plain" src="{{ site.baseurl }}/images/hero-banner-logo.svg" alt="">
-            </div>
-          </div>
-          <div class="row row-gap-medium text-center text-inverse hero-banner-description">
+          
+          <div class="row row-gap-small">
             <div class="col-xs-12">
-              <div>Retrieve model data on-demand from the cloud.</div>
+              <div class="row">
+                <div class="col-xs-12 text-center">
+                  <img class="hero-banner-logo img-plain" src="{{ site.baseurl }}/images/hero-banner-logo.svg" alt="">
+                </div>
+              </div>
+              <div class="row row-gap-medium text-center text-inverse hero-banner-description">
+                <div class="col-xs-12">
+                  <div>Retrieve model data on-demand from the cloud.</div>
+                </div>
+              </div>
             </div>
           </div>
-          <div class="row row-gap-huge"></div>
+          
+          <div class="row row-gap-medium"></div>
         </div>
       </div>
+    </div>
+    
+    <!-- Replay intro animation action -->
+    <div class="text-right">
+      <a href class="repeat-intro-animation">
+        <img class="img-plain repeat-intro-animation-icon" src="{{ site.baseurl }}/images/repeat.svg" alt="Repeat intro animation">
+      </a>
     </div>
   </div>
 
@@ -39,18 +52,35 @@ lang: en
     </div>
   </div>
 
+  {% include javascript-includes.html %}
   <!-- Hack just for easy demoing purposes -->
   <script>
-  window.addEventListener('DOMContentLoaded', function () {
-    if (window.location.href.indexOf('animated') !== -1) {
-      document.body.className += ' animation-enabled';
-    }
-    if (window.location.href.indexOf('altimated') !== -1) {
-      document.body.className += ' animation-enabled-alt';
-    }
-  });
+    var INTRO_ANIMATION_FLAG_NAME = 'falcor_homepage_intro_animation_played';
+    
+    window.addEventListener('DOMContentLoaded', function () {
+      if (window.location.href.indexOf('animated') !== -1) {
+        document.body.className += ' animation-enabled';
+      }
+      if (window.location.href.indexOf('altimated') !== -1) {
+        document.body.className += ' animation-enabled-alt';
+      }
+    });
+    $(document).ready(function () {
+      if (document.cookie.indexOf(INTRO_ANIMATION_FLAG_NAME) === -1) {
+        document.body.className += ' animation-enabled';
+        document.cookie = INTRO_ANIMATION_FLAG_NAME +
+        '=true; expires=Fri, 1 Jan 2030 00:00:00 UTC; path=/';
+      } else {
+        // TODO: figure out if the flash before the animation is due to chrome caching
+        // a snapshot of the page, or an actual bug that this will be required to fix
+        document.body.className = document.body.className.replace('loading', '');
+      }
+      $('.repeat-intro-animation').click(function (event) {
+        event.preventDefault();
+        document.cookie = INTRO_ANIMATION_FLAG_NAME +
+        '=; expires=Thu, 01 Jan 1970 00:00:01 UTC; path=/';
+        window.location.reload();
+      });      
+    });
   </script>
-
-
-  {% include javascript-includes.html %}
 </body>
