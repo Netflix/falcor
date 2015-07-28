@@ -28,11 +28,11 @@ TODO list
 -----------------------------
 
 P1
-- Proper docs integration
+- implement cookie for intro animation and don't show again after first play
 - find/make better syntax highlighting theme
 - add open graph metadata to base template
 - verify social sharing metadata is set up and results in clean share visuals
-- implement cookie for intro animation and don't show again after first play
+- Proper docs integration
 
 P2
 - Style TOC - second pass
