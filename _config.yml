@@ -8,4 +8,9 @@ highlighter: pygments
 markdown: kramdown
 kramdown:
   toc_levels: 1..2
+# Default sitewide metadata
+meta_defaults: 
+  description: "Retrieve model data on-demand from the cloud."
+  title: "Falcor: Bind to the Cloud"
+  
     
