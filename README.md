@@ -53,6 +53,7 @@ P1
 - basic syntax highlighting
 - add small footer that just acts like bottom padding
 - fix intro animation in firefox
+- have a style for js, a style for console, and a style for output for code blocks
 
 P2
 - figure out how to leave replay button in on mobile without cluttering the hero banner
