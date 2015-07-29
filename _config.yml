@@ -1,3 +1,4 @@
 baseurl: "/falcor"
 exclude: 
-  - "/less"
+  - "less"
+  - "node_modules"
