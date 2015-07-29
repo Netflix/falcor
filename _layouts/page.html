@@ -5,7 +5,7 @@ layout: base
 <body>
   {% include navigation.html %}
 
-  <main class="container">
+  <main class="container standard-page">
     <div class="row">
       <div class="col-xs-12 col-lg-10 col-lg-offset-1">
         {{ content }}        
@@ -18,12 +18,8 @@ layout: base
   {% include javascript-includes.html %}
   <script>
     $(document).ready(function () {
-      // Force all images to be responsive so they don't exceed their bounds
-      $('img').addClass('img-responsive');
-      
       $('#markdown-toc').wrap('<div class="table-of-contents"></div>');
       $('.toc-page').removeClass('not-ready');
-    });
-    
+    });    
   </script>
 </body>

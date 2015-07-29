@@ -2,6 +2,23 @@
 @import "includes/variables.less";
 @import "includes/bootstrap-customized.less";
 
+// ====================
+// = Custom Variables =
+// ====================
+
+// Nested images, code snippets, etc.
+@nested-item-border-color: #C7C7C7;
+@nested-item-margin: 10px 0;
+
+// Top border and arrow on desktop navbar dropdown menus
+@navbar-dropdown-menu-top-color: #CCC;
+@navbar-dropdown-arrow-size: 9px;
+
+// The space between the navbar and where content on pages starts
+@site-content-padding-top: 20px;
+
+
+
 // ========================================
 // = Bootstrap Overrides and Enhancements =
 // ========================================
@@ -25,21 +42,17 @@
 // Force scrollbars rather than wrapping in embedded code snippets
 pre {
   word-wrap: normal;
+  margin: @nested-item-margin;
 
   & > code {
     white-space: pre;
   }
 }
 
-// Top border and arrow on desktop navbar dropdown menus
-@navbar-dropdown-menu-top-color: #CCC;
-
 @media (min-width: @screen-sm-min) {
   .navbar-nav > li > .dropdown-menu {
     border-top: 2px solid @navbar-dropdown-menu-top-color;
     margin-top: 1px;
-
-    @arrow-size: 9px;
 
     &:after {
     	bottom: 100%;
@@ -55,13 +68,13 @@ pre {
     &:after {
     	border-color: rgba(204, 204, 204, 0);
     	border-bottom-color: #CCC;
-    	border-width: @arrow-size;
-    	margin-left: -1 * @arrow-size;
+    	border-width: @navbar-dropdown-arrow-size;
+    	margin-left: -1 * @navbar-dropdown-arrow-size;
     }
   }
 }
 
-// More visible top of menu line on mobile menus
+// Top of menu line on mobile menus
 @media (max-width: @screen-xs-max) {
   .navbar .navbar-collapse {
     border-color: @navbar-dropdown-menu-top-color * 0.8;
@@ -76,9 +89,6 @@ pre {
 // ======================
 // = Falcor Site Styles =
 // ======================
-@site-content-padding-top: 20px;
-// The border on nested images, code snippets, etc.
-@nested-item-border-color: #C7C7C7;
 
 body {
   position: relative;
@@ -93,10 +103,16 @@ body {
   text-rendering: optimizeLegibility;
 }
 
-// Place a subtle border around images by default, since they're generally
-// set on the light gray site background
-img {
+// Place a subtle border around images by on standard pages since they're generally set on the
+// light gray site background.
+// Also make all images responsive by default, so they can't overflow the bounds of the page.
+// Lastly, give them some margins so they aren't too close to neighboring text.
+// Standard pages are any pages that inherit from the page or *-page templates, which is generally
+// all but the homepage and potentially other special one off pages
+.standard-page img {
   border: 1px solid @nested-item-border-color;
+  margin: @nested-item-margin;
+  .img-responsive();
 }
 
 img.img-plain {
