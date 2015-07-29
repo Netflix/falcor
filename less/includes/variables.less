@@ -48,7 +48,7 @@
 @font-family-monospace:   Menlo, Monaco, Consolas, "Courier New", monospace;
 @font-family-base:        @font-family-sans-serif;
 
-@font-size-base:          16px;
+@font-size-base:          14px;
 @font-size-large:         ceil((@font-size-base * 1.25)); // ~18px
 @font-size-small:         ceil((@font-size-base * 0.85)); // ~12px
 
@@ -232,9 +232,9 @@
 //## Dropdown menu container and contents.
 
 //** Background for the dropdown menu.
-@dropdown-bg:                    #fff;
+@dropdown-bg:                    rgba(40, 40, 40, 0.8);
 //** Dropdown menu `border-color`.
-@dropdown-border:                rgba(0,0,0,.15);
+@dropdown-border:                rgba(0, 0, 0, 0.15);
 //** Dropdown menu `border-color` **for IE8**.
 @dropdown-fallback-border:       #ccc;
 //** Divider color for between dropdown items.
@@ -391,15 +391,16 @@
 //=== Inverted navbar
 // Reset inverted navbar basics
 @navbar-inverse-color:                      lighten(@gray-light, 15%);
-@navbar-inverse-bg:                         #272727;
+@navbar-inverse-bg:                         #363636;
 @navbar-inverse-border:                     darken(@navbar-inverse-bg, 10%);
 
 // Inverted navbar links
-@navbar-inverse-link-color:                 lighten(@gray-light, 30%);
+// @navbar-inverse-link-color:                 lighten(@gray-light, 50%);
+@navbar-inverse-link-color:                 darken(white, 10%);
 @navbar-inverse-link-hover-color:           #fff;
 @navbar-inverse-link-hover-bg:              transparent;
 @navbar-inverse-link-active-color:          @navbar-inverse-link-hover-color;
-@navbar-inverse-link-active-bg:             darken(@navbar-inverse-bg, 10%);
+@navbar-inverse-link-active-bg:             @navbar-inverse-bg;
 @navbar-inverse-link-disabled-color:        #444;
 @navbar-inverse-link-disabled-bg:           transparent;
 

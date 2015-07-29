@@ -20,6 +20,10 @@ body {
   // TODO: confirm whether this is needed for some browser quirk
   // or just for their demo
   // min-height: 2000px;
+  
+  // Smooth text when possible
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: auto;
 }
 
 @-webkit-keyframes fade {
@@ -32,19 +36,19 @@ body {
 }
 
 .hero-banner {
-  background-color: black;
+  background-color: #111;
   // Brings the top flush with the navbar
   margin-top: -1 * @site-content-padding-top;
   // height: 350px;
   padding-top: 20px;
 
   .hero-banner-logos {
+    .center-block();
     @logo-width: 188px;
     @logo-height: 177px;
     @screen-xs-logo-reduction-factor: 1.5;
 
     position: relative;
-    margin: 0 auto;
     width: @logo-width;
     height: @logo-height;
 
@@ -52,7 +56,7 @@ body {
     @media (max-width: @screen-xs-max) {
       width: @logo-width / @screen-xs-logo-reduction-factor;
       height: @logo-height / @screen-xs-logo-reduction-factor;
-    }      
+    }
 
     & > .hero-banner-logo {
       position: absolute;
@@ -66,55 +70,51 @@ body {
     }
   }
 
-  // TODO: clean up!
-  &.animated .hero-banner-logos > .hero-banner-logo {
-    animation-name: fade;
-    animation-duration: 1s;
-    animation-iteration-count: 1;
-    animation-delay: 0.25s;
-    animation-timing-function: ease-out;
-  }
-  &.animated .hero-banner-logos > .hero-banner-logo:nth-child(1) {
-    opacity: 1;
-    display: none;
-    animation-direction: reverse;
-    animation-fill-mode: forwards;
-  }
-
-  &.animated .hero-banner-logos > .hero-banner-logo:nth-child(2) {
-    opacity: 0;
-    animation-direction: normal;
-    animation-fill-mode: forwards;
-  }
   
   .hero-banner-description {
-    font-size: 22px; // TODO: standardize
+    font-size: 20px; // TODO: standardize
     
     @media (max-width: @screen-xs-max) {
       font-size: 16px;
     }      
-  }
-  &.animated .hero-banner-description {
-    opacity: 0;
-    animation-name: fade;
-    animation-duration: 0.5s;
-    animation-iteration-count: 1;
-    animation-delay: 1s;
-    animation-timing-function: ease-out;
-    animation-fill-mode: forwards;
-  }
-  
+  }  
 }
 
-.main-page-content.animated {
+
+// Animated intro
+
+.animated-fade-in() {
   opacity: 0;
   animation-name: fade;
-  animation-duration: 0.5s;
+  animation-duration: 1s;
+  animation-delay: 0;
   animation-iteration-count: 1;
-  animation-delay: 1.5s;
   animation-timing-function: ease-out;
+  animation-direction: normal;
   animation-fill-mode: forwards;
 }
+
+.animation-enabled {
+  .hero-banner-logo {
+    .animated-fade-in();
+    animation-delay: 0.25s;
+    animation-duration: 1s;
+  }
+
+  .hero-banner-description {
+    .animated-fade-in();
+    animation-duration: 0.7s;
+    animation-delay: 1.1s;
+  }
+  
+  .main-page-content {
+    .animated-fade-in();
+    animation-duration: 0.7s;
+    animation-delay: 1.85s;
+  }
+}
+
+
 
 
 
@@ -141,5 +141,5 @@ body {
 
 // Light text for a dark (inverse) background
 .text-inverse {
-  color: white;
+  color: darken(white, 20%);
 }

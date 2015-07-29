@@ -7,20 +7,33 @@ var gulp = require('gulp');
 // Gulp plugin includes
 var less = require('gulp-less');
 var sourcemaps = require('gulp-sourcemaps');
+var autoprefixer = require('gulp-autoprefixer');
 
 // LESS plugin includes
 var CleanCssPlugin = require('less-plugin-clean-css'),
     cleanCss = new CleanCssPlugin();
 
 gulp.task('compile-less', function () {
+	var lessProcessor = less({
+		paths: [
+			'./node_modules/bootstrap/less'
+		],
+		plugins: [cleanCss]
+	});
+	lessProcessor.on('error', function (error) {
+		console.error(error);
+		lessProcessor.end();
+	});
+	
   return gulp.src(['./less/falcor-site.less', './less/*.less'])
     .pipe(sourcemaps.init())
-		.pipe(less({
-      paths: [
-				'./node_modules/bootstrap/less'
-			],
-			plugins: [cleanCss]
-    }))
+		.pipe(lessProcessor)
+		.pipe(autoprefixer({
+			browsers: [
+				'> 1%',
+				'last 2 versions'
+			]
+		}))
     .pipe(sourcemaps.write('.'))
     .pipe(gulp.dest('./stylesheets'))
 		.pipe(browserSync.stream());
@@ -53,7 +66,7 @@ var buildJekyllSite = function (complete) {
 gulp.task('jekyll', buildJekyllSite);
 
 // Builds the less into css, then builds the jekyll site
-gulp.task('build-all', ['less', 'js'], buildJekyllSite);
+gulp.task('build-all', ['compile-less', 'js'], buildJekyllSite);
 
 // Theoretically browserSync.reload should be the third argument, but it
 // doesn't seem to reload reliably if placed here, despite working reliably

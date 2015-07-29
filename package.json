@@ -27,6 +27,7 @@
     "bootstrap": "^3.3.5",
     "browser-sync": "^2.8.0",
     "gulp": "^3.9.0",
+    "gulp-autoprefixer": "^2.3.1",
     "gulp-concat": "^2.6.0",
     "gulp-less": "^3.0.3",
     "gulp-sourcemaps": "^1.5.2",
