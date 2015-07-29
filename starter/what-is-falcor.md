@@ -1,5 +1,5 @@
 ---
-layout: page
+layout: plain-page
 title: What is Falcor
 id: what_is_falcor
 lang: en

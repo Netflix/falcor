@@ -1,5 +1,5 @@
 ---
-layout: page
+layout: plain-page
 title: How Does Falcor Work?
 id: how_does_falcor_work
 lang: en

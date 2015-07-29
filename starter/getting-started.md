@@ -1,5 +1,5 @@
 ---
-layout: page
+layout: plain-page
 title: Getting Started
 id: getting_started
 lang: en

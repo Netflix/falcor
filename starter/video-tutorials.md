@@ -1,5 +1,5 @@
 ---
-layout: page
+layout: plain-page
 title: Video Tutorials
 id: video_tutorials
 lang: en
