@@ -4,30 +4,31 @@ title: Falcor
 lang: en
 ---
 
+<body class="homepage">
+  {% include navigation.html %}
 
-<div class="hero-banner">
-  <div class="container">
-    <div class="row row-gap-small">
-      <div class="col-xs-12 text-center">
-        <div class="row">
-          <div class="col-xs-12">
-            <div class="hero-banner-logos">
-              <img class="hero-banner-logo" src="{{ site.baseurl }}/images/hero-banner-logo.svg" alt="">
+  <div class="hero-banner">
+    <div class="container">
+      <div class="row row-gap-small">
+        <div class="col-xs-12 text-center">
+          <div class="row">
+            <div class="col-xs-12">
+              <div class="hero-banner-logos">
+                <img class="hero-banner-logo" src="{{ site.baseurl }}/images/hero-banner-logo.svg" alt="">
+              </div>
             </div>
           </div>
-        </div>
-        <div class="row row-gap-medium text-center text-inverse hero-banner-description">
-          <div class="col-xs-12">
-            <div>Falcor retrieves any model data you request from the cloud on-demand.</div>
+          <div class="row row-gap-medium text-center text-inverse hero-banner-description">
+            <div class="col-xs-12">
+              <div>Falcor retrieves any model data you request from the cloud on-demand.</div>
+            </div>
           </div>
+          <div class="row row-gap-huge"></div>
         </div>
-        <div class="row row-gap-huge"></div>
       </div>
     </div>
   </div>
-</div>
 
-<div style="background-color: #111;">
   <div class="main-homepage-content">
     <div class="container">
       <div class="row row-gap-medium">
@@ -48,15 +49,18 @@ lang: en
 
       {% capture the_include %}{% include homepage.md %}{% endcapture %}
       {{ the_include | markdownify }}
-    </div>  
+    </div>
   </div>
-</div>
 
-<!-- Hack just for easy demoing purposes -->
-<script>
-window.addEventListener('DOMContentLoaded', function () {
-  if (window.location.href.indexOf('animated') !== -1) {
-    document.body.className += ' animation-enabled';
-  }
-});
-</script>  
+  <!-- Hack just for easy demoing purposes -->
+  <script>
+  window.addEventListener('DOMContentLoaded', function () {
+    if (window.location.href.indexOf('animated') !== -1) {
+      document.body.className += ' animation-enabled';
+    }
+  });
+  </script>
+  
+  
+  {% include javascript-includes.html %}
+</body>  
