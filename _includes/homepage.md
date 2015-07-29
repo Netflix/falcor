@@ -1,13 +1,3 @@
-## Bind to the Cloud
-
-I think a brief description should go here, possibly accompanied by a simple diagram that is fairly wide, showing the data flow and where falcor sits in the stack.  
-  
-The most recent talk could also be embedded here, as that's a great introduction.  
-  
-In place of such content, here's a placeholder image:  
-  
-<img src="https://burntretina.files.wordpress.com/2014/02/house-of-cards-cast1.jpg" class="img img-responsive">      
-
 <!-- This bit has to be html to achieve the 3 column layout -->
 <div class="row row-gap-medium">
   <div class="col-sm-4">
