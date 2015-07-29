@@ -52,14 +52,6 @@ lang: en
   <script>
     var INTRO_ANIMATION_FLAG_NAME = 'falcor_homepage_intro_animation_played';
     
-    window.addEventListener('DOMContentLoaded', function () {
-      if (window.location.href.indexOf('animated') !== -1) {
-        document.body.className += ' animation-enabled';
-      }
-      if (window.location.href.indexOf('altimated') !== -1) {
-        document.body.className += ' animation-enabled-alt';
-      }
-    });
     $(document).ready(function () {
       if (document.cookie.indexOf(INTRO_ANIMATION_FLAG_NAME) === -1) {
         document.body.className += ' animation-enabled';
@@ -70,8 +62,11 @@ lang: en
         // a snapshot of the page, or an actual bug that this will be required to fix
         document.body.className = document.body.className.replace('loading', '');
       }
-      $('.repeat-intro-animation').click(function (event) {
+      
+      // TODO: remove second selector, as that is temporary for demoing
+      $('.repeat-intro-animation, .repeat-intro-anim-hack-link').click(function (event) {
         event.preventDefault();
+        window.scrollTo(0,0);
         document.cookie = INTRO_ANIMATION_FLAG_NAME +
         '=; expires=Thu, 01 Jan 1970 00:00:01 UTC; path=/';
         window.location.reload();

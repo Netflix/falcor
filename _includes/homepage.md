@@ -17,17 +17,13 @@
 
 ### Things to check out in the current site draft (newest first):
 
+The intro animation on mobile doesn't have a replay button, as I haven't yet found a place for it that doesn't interfere with the aesthetics of the main hero banner. For now, you can <a class="repeat-intro-anim-hack-link">Click here to re-run the intro animation on mobile</a>
+
 Tables of contents are now in and I've done a first pass at styling them. I plan to do a second pass and polish them up once the other remaining big task it out of the way (docs integration).
 
 Menus for both mobile and desktop are fully styled.
 
-There are some syntax highlighting examples on the getting started pages.
-
-I'm also experimenting with light animation to make a user's first visit really pop. This animation would trigger *only* for a user's first visit to the site, then it'd cookie them and display instantly going forward.
-
-- [Here's a quick sketch of one intro idea]({{ site.baseurl }}/?animated)
-- [Here's an alternate version]({{ site.baseurl }}/?altimated)
-- or [Go back to no animations]({{ site.baseurl }}/)
+There are some syntax highlighting examples on the getting started pages. Updates to that coming soon.
 
 {% include something.html %}
 
