@@ -1,6 +1,6 @@
 ---
 layout: page
-title: what is falcor
+title: What is Falcor
 id: what_is_falcor
 lang: en
 ---
