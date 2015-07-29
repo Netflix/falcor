@@ -18,6 +18,26 @@ Configuring the Navigation
 
 Please see the documented code in `_data/navigation.yml` to configure the main top nav.
 
+Code blocks
+------------------
+
+Rather than using triple-backticks, please use the highlight Liquid Tag like so
+
+```
+{% highlight languageName %}
+// some code in that language
+{% endhighlight %}
+```
+
+This will automatically format and apply syntax highlighting to the code snippet.
+
+Page Level Variables
+--------------------
+
+Every page can use jekyll's [frontmatter](http://jekyllrb.com/docs/frontmatter/ "Front Matter") system to define a number of fields:
+- **title**: Sets the page title tag. Defaults to the value in _config.yml if absent.
+- **description**: Sets the meta description tag. Defaults to the value in _config.yml if absent.
+
 
 In-Page Table of Contents
 -------------------------
@@ -28,14 +48,14 @@ TODO list
 -----------------------------
 
 P1
-- implement cookie for intro animation and don't show again after first play
 - find/make better syntax highlighting theme
 - add open graph metadata to base template
 - verify social sharing metadata is set up and results in clean share visuals
 - Proper docs integration
+- basic syntax highlighting
+- add small footer that just acts like bottom padding
 
 P2
 - Style TOC - second pass
-- fix responsive image FOUC by making appropriate page template have rule `parent-class img` with `.img-responsive()` inside
 - Fix minor safari horizontal scrollbar issue in `pre`s
 - more docs, of course!
