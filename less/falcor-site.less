@@ -204,6 +204,7 @@ img.img-plain {
   animation-fill-mode: forwards;
 }
 
+// The current winner
 .supports-cssanimations .animation-enabled {
   &.homepage {
     background-color: #111;
@@ -229,13 +230,14 @@ img.img-plain {
     animation-delay: 1.1s;
   }
 
-  .main-homepage-content {
+  .main-homepage-content, .repeat-intro-animation {
     .animated-fade-in();
     animation-duration: 0.7s;
     animation-delay: 2.2s;
   }
 }
 
+// May be a better animation to use for mobile
 .supports-cssanimations .animation-enabled-alt {
   &.homepage {
     background-color: #111;
