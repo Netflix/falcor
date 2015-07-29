@@ -22,6 +22,15 @@
   opacity: 1;
 }
 
+// Force scrollbars rather than wrapping in embedded code snippets
+pre {
+  word-wrap: normal;
+
+  & > code {
+    white-space: pre;
+  }
+}
+
 // Top border and arrow on desktop navbar dropdown menus
 @navbar-dropdown-menu-top-color: #CCC;
 
