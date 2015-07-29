@@ -10,7 +10,7 @@ lang: en
   <div class="hero-banner">
     <div class="container">
       <div class="row row-gap-small">
-        <div class="col-xs-12 text-center">
+        <div class="col-xs-12 col-lg-10 col-lg-offset-1 text-center">
           <div class="row">
             <div class="col-xs-12">
               <div class="hero-banner-logos">
@@ -31,24 +31,13 @@ lang: en
 
   <div class="main-homepage-content">
     <div class="container">
-      <div class="row row-gap-medium">
-        <!-- This bit has to be html to achieve the 3 column layout -->
-        <div class="col-md-4">
-          {% capture the_include %}{% include homepage-key-feature-1.md %}{% endcapture %}
-          {{ the_include | markdownify }}
-        </div>
-        <div class="col-md-4">
-          {% capture the_include %}{% include homepage-key-feature-2.md %}{% endcapture %}
-          {{ the_include | markdownify }}
-        </div>
-        <div class="col-md-4">
-          {% capture the_include %}{% include homepage-key-feature-3.md %}{% endcapture %}
-          {{ the_include | markdownify }}
+      <div class="row row-gap-small"></div>
+      <div class="row">
+        <div class="col-xs-12 col-lg-10 col-lg-offset-1">
+          {% capture the_include %}{% include homepage.md %}{% endcapture %}
+          {{ the_include | markdownify }}          
         </div>
       </div>
-
-      {% capture the_include %}{% include homepage.md %}{% endcapture %}
-      {{ the_include | markdownify }}
     </div>
   </div>
 

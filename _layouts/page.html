@@ -6,7 +6,11 @@ layout: base
   {% include navigation.html %}
 
   <main class="container">
-    {{ content }}
+    <div class="row">
+      <div class="col-xs-12 col-lg-10 col-lg-offset-1">
+        {{ content }}        
+      </div>
+    </div>
   </main>
   
   {% include javascript-includes.html %}
