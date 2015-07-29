@@ -59,3 +59,6 @@ P2
 - Style TOC - second pass
 - Fix minor safari horizontal scrollbar issue in `pre`s
 - more docs, of course!
+
+Ideas
+- Link to next + previous page in menu section at the bottom of each page
