@@ -6,8 +6,10 @@
     # each child is an id, which should be set in the page's front matter,
     # and uniquely identifies that page of the site. Presumably the child
     # pages will be in the same directory, but that's not required.
-    - getting_started
+    - what_is_falcor
     - how_does_falcor_work
+    - getting_started
+    - video_tutorials
       
 - 
   title: Documents
