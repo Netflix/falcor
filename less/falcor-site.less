@@ -375,13 +375,15 @@ img.img-plain {
 
 
 // Small hack so the anchors will align with the top of the content area
-// rather than the top of the page
-// See http://stackoverflow.com/questions/9288482/how-do-i-set-the-offset-for-scrollspy-in-bootstrap/12606867#12606867
-h1, h2, h3 {
-  padding-top: @navbar-height + @line-height-computed;
-  margin-top: -1 * @navbar-height;
+// rather than the top of the page. Please read that page for limitations
+// of the method before modifying header styles.
+// See http://nicolasgallagher.com/jump-links-and-viewport-positioning/
+.toc-page h1:before, .toc-page h2:before, .toc-page h3:before {
+   content: "";
+   display: block;
+   height: @navbar-height + @site-content-padding-top;
+   margin: -1 * (@navbar-height + @site-content-padding-top) 0 0;
 }
-
 
 
 // ===========
