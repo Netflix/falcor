@@ -1,5 +1,5 @@
 ---
-layout: page
+layout: toc-page
 title: JSON Graph
 id: json_graph
 lang: en

@@ -1,5 +1,5 @@
 ---
-layout: page
+layout: toc-page
 title: Data Sources
 id: data_sources
 lang: en
