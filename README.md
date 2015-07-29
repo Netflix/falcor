@@ -38,7 +38,7 @@ Page Level Variables
 --------------------
 
 Every page can use jekyll's [frontmatter](http://jekyllrb.com/docs/frontmatter/ "Front Matter") system to define a number of fields:
-- **title**: Sets the page title tag. Defaults to the value in _config.yml if absent.
+- **title**: Sets the page title tag. Defaults to the value in _config.yml if absent. Also has a sitewide prefix that can be customized, also in _config.yml.
 - **description**: Sets the meta description tag. Defaults to the value in _config.yml if absent.
 
 
