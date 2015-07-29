@@ -52,6 +52,7 @@ P1
 - Proper docs integration
 - basic syntax highlighting
 - add small footer that just acts like bottom padding
+- fix intro animation in firefox
 
 P2
 - figure out how to leave replay button in on mobile without cluttering the hero banner
