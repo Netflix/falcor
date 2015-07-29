@@ -1,5 +1,5 @@
 ---
-layout: page
+layout: toc-page
 title: Paths
 id: paths
 lang: en

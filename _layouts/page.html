@@ -17,9 +17,13 @@ layout: base
   
   {% include javascript-includes.html %}
   <script>
-    // Force all images to be responsive so they don't exceed their bounds
     $(document).ready(function () {
+      // Force all images to be responsive so they don't exceed their bounds
       $('img').addClass('img-responsive');
-    })
+      
+      $('#markdown-toc').wrap('<div class="table-of-contents"></div>');
+      $('.toc-page').removeClass('not-ready');
+    });
+    
   </script>
 </body>

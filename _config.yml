@@ -5,3 +5,7 @@ exclude:
   - "gulpfile.js"
   - "package.json"
 highlighter: pygments
+markdown: kramdown
+kramdown:
+  toc_levels: 1..2
+    

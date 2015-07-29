@@ -1,5 +1,5 @@
 ---
-layout: page
+layout: toc-page
 title: Router
 id: router
 lang: en
