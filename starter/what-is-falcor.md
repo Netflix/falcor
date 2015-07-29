@@ -1,7 +1,7 @@
 ---
 layout: page
 title: what is falcor
-menu: starter
+id: what_is_falcor
 lang: en
 ---
 

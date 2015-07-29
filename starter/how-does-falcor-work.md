@@ -1,6 +1,6 @@
 ---
 layout: page
-title: how does falcor work?
+title: How Does Falcor Work?
 id: how_does_falcor_work
 lang: en
 ---
