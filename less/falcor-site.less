@@ -146,7 +146,7 @@ img.img-plain {
     height: @logo-height;
 
     @media (max-width: @screen-xs-max) {
-      width: @logo-height * @screen-xs-banner-logo-ratio;
+      height: @logo-height * @screen-xs-banner-logo-ratio;
     }
   }
 
@@ -235,44 +235,15 @@ img.img-plain {
     animation-duration: 0.7s;
     animation-delay: 2.2s;
   }
-}
-
-// May be a better animation to use for mobile
-.supports-cssanimations .animation-enabled-alt {
-  &.homepage {
-    background-color: #111;
-    // TODO: major reconciliation
-    animation-name: homepagebackground;
-    animation-duration: 0.7s;
-    animation-delay: 1.5s;
-    animation-iteration-count: 1;
-    animation-timing-function: ease-out;
-    animation-direction: normal;
-    animation-fill-mode: forwards;
-  }
-
-  .hero-banner-logo {
-    .animated-fade-in();
-    animation-delay: 0.25s;
-    animation-duration: 1s;
-  }
-
-  .hero-banner-description {
-    .animated-fade-in();
-    animation-duration: 0.7s;
-    animation-delay: 1.5s;
-  }
-
-  .main-homepage-content, .navbar > .container {
-    .animated-fade-in();
-    animation-duration: 0.7s;
-    animation-delay: 1.5s;
-  }
-  .navbar {
-    background-color: #111;
+  
+  // Simplify animation on mobile
+  @media (max-width: @screen-xs-max) {
+    &.homepage, .main-homepage-content, .repeat-intro-animation, .hero-banner-description {
+      animation-duration: 0.7s;
+      animation-delay: 1.4s;
+    }
   }
 }
-
 
 
 // Table of Contents
