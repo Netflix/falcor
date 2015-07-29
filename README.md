@@ -54,6 +54,7 @@ P1
 - add small footer that just acts like bottom padding
 
 P2
+- figure out how to leave replay button in on mobile without cluttering the hero banner
 - Style TOC - second pass
 - Fix minor safari horizontal scrollbar issue in `pre`s
 - more docs, of course!

@@ -145,12 +145,11 @@ img.img-plain {
   @screen-xs-banner-logo-ratio: 0.66;
   @screen-xs-banner-text-ratio: 0.8;
 
-  background-color: #111;
   // Brings the top flush with the navbar
   margin-top: -1 * @site-content-padding-top;
-  // height: 350px;
-  padding-top: 20px;
-
+  background-color: #111;
+  padding: 35px 0;
+  position: relative;
 
   .hero-banner-logo {
     height: @logo-height;
@@ -162,23 +161,41 @@ img.img-plain {
 
   .hero-banner-description {
     @hero-banner-description-font-size: 20px;
-    font-size: 20px; // TODO: standardize
+    font-size: @hero-banner-description-font-size;
+    margin-top: 20px;
 
     @media (max-width: @screen-xs-max) {
       font-size: @hero-banner-description-font-size * @screen-xs-banner-text-ratio;
     }
   }
   
-  .repeat-intro-animation-icon {
-    width: 20px;
-    height: 20px;
-    opacity: 0.4;
-    margin-bottom: 5px;
-    margin-right: 5px;
+  .repeat-intro-animation {
+    position: absolute;
+    right: 10px;
+    bottom: 10px;
     
-    &:hover {
-      opacity: 0.85;
+    @media (max-width: @screen-xs-max) {
+      // left: 50%;
+      // margin-left: -7px;
+      left: 0;
     }
+    
+    .repeat-intro-animation-icon {
+      @icon-size: 20px;
+      opacity: 0.3;
+      width: @icon-size;
+      height: @icon-size;
+      
+      @media (max-width: @screen-xs-max) {
+        width: @icon-size * @screen-xs-banner-text-ratio;
+        height: @icon-size * @screen-xs-banner-text-ratio;
+        opacity: 0.2;
+      }
+    
+      &:hover {
+        opacity: 0.85;
+      }
+    }    
   }
 }
 
