@@ -1,6 +1,6 @@
 ---
 layout: page
-title: video tutorials
+title: Video Tutorials
 id: video_tutorials
 lang: en
 ---

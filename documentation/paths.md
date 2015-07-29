@@ -1,6 +1,6 @@
 ---
 layout: page
-title: model
+title: Paths
 id: paths
 lang: en
 ---

@@ -1,7 +1,7 @@
 ---
 layout: page
-title: Models
-id: jsongraph
+title: JSON Graph
+id: json_graph
 lang: en
 ---
 

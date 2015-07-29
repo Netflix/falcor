@@ -1,6 +1,6 @@
 ---
 layout: page
-title: DataSources
+title: Data Sources
 id: data_sources
 lang: en
 ---
