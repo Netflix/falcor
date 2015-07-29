@@ -28,10 +28,8 @@ TODO list
 -----------------------------
 
 - Proper docs integration
-- restyle nav menu dropdowns
 - Consider approaches to slim down TOC
 - Style TOC
-- consider another typeface
 - add open graph metadata to base template
-- find better syntax highlighting theme
+- find/make better syntax highlighting theme
 - more docs, of course!

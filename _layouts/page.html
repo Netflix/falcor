@@ -2,7 +2,12 @@
 layout: base
 ---
 
-<main class="container">
-  {{ content }}
-</main>
+<body>
+  {% include navigation.html %}
+
+  <main class="container">
+    {{ content }}
+  </main>
   
+  {% include javascript-includes.html %}
+</body>

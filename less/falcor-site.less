@@ -79,11 +79,6 @@ body {
   text-rendering: optimizeLegibility;
 }
 
-.main-homepage-content {
-  background-color: @body-bg;
-}
-
-
 .hero-banner {
   background-color: #111;
   // Brings the top flush with the navbar
@@ -130,15 +125,24 @@ body {
 }
 
 
-// Animated intro
+// Animated homepage intro
 
 @-webkit-keyframes fade {
-	0% {
-		opacity: 0;
-	}
-	100% {
-		opacity: 1;
-	}
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+@-webkit-keyframes homepagebackground {
+  0% {
+    background-color: #111;
+  }
+  100% {
+    background-color: @body-bg;
+  }
 }
 
 .animated-fade-in() {
@@ -153,6 +157,18 @@ body {
 }
 
 .animation-enabled {
+  &.homepage {
+    background-color: #111;
+    // TODO: major reconciliation
+    animation-name: homepagebackground;
+    animation-duration: 0.7s;
+    animation-delay: 1.85s;
+    animation-iteration-count: 1;
+    animation-timing-function: ease-out;
+    animation-direction: normal;
+    animation-fill-mode: forwards;
+  }
+
   .hero-banner-logo {
     .animated-fade-in();
     animation-delay: 0.25s;
