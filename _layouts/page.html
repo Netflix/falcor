@@ -16,4 +16,10 @@ layout: base
   </main>
   
   {% include javascript-includes.html %}
+  <script>
+    // Force all images to be responsive so they don't exceed their bounds
+    $(document).ready(function () {
+      $('img').addClass('img-responsive');
+    })
+  </script>
 </body>
