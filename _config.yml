@@ -11,6 +11,8 @@ kramdown:
 # Default sitewide metadata
 meta_defaults: 
   description: "Retrieve model data on-demand from the cloud."
-  title: "Falcor: Bind to the Cloud"
+  title: "Bind to the Cloud"
+  # All titles (including the default) will have this prepended to them
+  title_prefix: "Falcor: "
   
     
