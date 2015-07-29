@@ -119,7 +119,7 @@ img.img-plain {
   border: none;
 }
 
-// Performance optimization for navbar since it's position sticky
+// Performance optimization for navbar since it's position fixed
 .navbar-fixed-top {
   will-change: transform;
 }
@@ -128,6 +128,16 @@ img.img-plain {
   height: 25px;
   // correct for rounding so it perfectly aligns with the other text's baseline
   margin-top: -1px;
+  margin-right: 20px;
+}
+
+// Make the mobile menu button equally distant from the edge compared to the logo
+.navbar-toggle {
+  padding-right: 0px;
+}
+
+.navbar-github-link > li > a {
+  padding-right: 0;
 }
 
 .hero-banner {
