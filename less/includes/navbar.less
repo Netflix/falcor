@@ -1,0 +1,20 @@
+// Performance optimization for navbar since it's position fixed
+.navbar-fixed-top {
+  will-change: transform;
+}
+
+.navbar-brand > .navbar-logo {
+  height: 25px;
+  // correct for rounding so it perfectly aligns with the other text's baseline
+  margin-top: -1px;
+  margin-right: 20px;
+}
+
+// Make the mobile menu button equally distant from the edge compared to the logo
+.navbar-toggle {
+  padding-right: 0px;
+}
+
+.navbar-github-link > li > a {
+  padding-right: 0;
+}

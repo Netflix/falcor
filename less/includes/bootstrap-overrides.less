@@ -1,0 +1,64 @@
+@import "variables.less";
+
+// ========================================
+// = Bootstrap Overrides and Enhancements =
+// ========================================
+.navbar-nav .dropdown-menu > li > a:hover {
+  text-decoration: underline;
+}
+
+// Larger navbar font-size
+.navbar-nav > li > a, .navbar-nav .dropdown-menu > li > a {
+  font-size: 16px;
+}
+
+.navbar-nav .dropdown > .dropdown-menu {
+  opacity: 0;
+  transition: opacity 2s;
+}
+
+.navbar-nav .dropdown.open > .dropdown-menu {
+  opacity: 1;
+}
+
+// Force scrollbars rather than wrapping in embedded code snippets
+pre {
+  word-wrap: normal;
+  margin: @nested-item-margin;
+
+  & > code {
+    white-space: pre;
+  }
+}
+
+@media (min-width: @screen-sm-min) {
+  .navbar-nav > li > .dropdown-menu {
+    border-top: 2px solid @navbar-dropdown-menu-top-color;
+    margin-top: 1px;
+
+    &:after {
+    	bottom: 100%;
+    	left: @navbar-padding-horizontal + 30px;
+    	border: solid transparent;
+    	content: " ";
+    	height: 0;
+    	width: 0;
+    	position: absolute;
+    	pointer-events: none;
+    }
+
+    &:after {
+    	border-color: rgba(204, 204, 204, 0);
+    	border-bottom-color: #CCC;
+    	border-width: @navbar-dropdown-arrow-size;
+    	margin-left: -1 * @navbar-dropdown-arrow-size;
+    }
+  }
+}
+
+// Top of menu line on mobile menus
+@media (max-width: @screen-xs-max) {
+  .navbar .navbar-collapse {
+    border-color: @navbar-dropdown-menu-top-color * 0.8;
+  }
+}
