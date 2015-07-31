@@ -17,7 +17,7 @@ Falcor is not a replacement for your MVC framework, your database, or your appli
 
 You retrieve data from a Falcor model using the familiar JavaScript path syntax.   
 
-{% highlight javascript %}
+~~~js
 var person = {
     name: "Steve McGuire",
     occupation: "Developer",
@@ -29,11 +29,11 @@ var person = {
 }
 
 print(person.location.address);
-{% endhighlight %}
+~~~
 
 This is the way you would retrieve data from the same JSON in a remote Falcor Model.  Note that the only difference is that the API is asynchronous.
 
-{% highlight javascript %}
+~~~js
 var person = new falcor.Model({
   source: new falcor.HttpSource("/person.json")
 });
@@ -42,4 +42,4 @@ person.getValue("location.address").
   then(address => print(address));
 
 // outputs "344 Seaside"
-{% endhighlight %}
+~~~

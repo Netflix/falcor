@@ -23,4 +23,4 @@
   # If a first level menu item isn't a dropdown menu, you can give it an
   # id to link it straight to a page or a title and a path to link to a relative url
   title: API Reference
-  path: /doc
+  path: "/doc/Model.html"

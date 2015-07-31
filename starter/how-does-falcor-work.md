@@ -13,14 +13,14 @@ Application Servers use falcor's Router to represent all their backend data as a
 
 In this example the client requests several values from the virtual model on the server and then displays them on-screen.
 
-{% highlight javascript %}
+~~~js
 var model = new falcor.Model({
   source: new falcor.HttpDataSource("/model.json")
 });
 
 model.get("user.name", "user.location.city", "user.location.address").
   then(json => display(json));
-{% endhighlight %}
+~~~
 
 When a client requests paths from the Model, the Model attempts to retrieve the data from its in-memory cache. If the data is not found in the local cache, the following GET request is sent to the virtual model:
 
@@ -60,7 +60,7 @@ Upon receiving the requested data, the client merges the resulting JSON object w
 </script>
 ~~~
 
-{% highlight javascript %}
+~~~js
 var source   = $("#entry-template").html();
 var template = Handlebars.compile(source);
 
@@ -80,7 +80,7 @@ function display(json) {
 
   document.body.innerHTML = template(json);
 }
-{% endhighlight %}
+~~~
 
 Each JSON fragment returned from the server is added to the Model's local cache. Subsequent queries for the same paths do not result in a network request.
 
