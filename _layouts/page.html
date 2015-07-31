@@ -31,7 +31,10 @@ layout: base
       // To prevent flash-of-awkwardly-styled-content, the toc is hidden until
       // the processing above is done.
       $('.toc-page').removeClass('not-ready');
-      $('body').scrollspy({target: '.table-of-contents'});
+      $('body').scrollspy({
+        target: '.table-of-contents', 
+        offset: 75
+      });
       
       
       // ========================

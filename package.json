@@ -30,7 +30,9 @@
     "gulp-autoprefixer": "^2.3.1",
     "gulp-concat": "^2.6.0",
     "gulp-less": "^3.0.3",
+    "gulp-rename": "^1.2.2",
     "gulp-sourcemaps": "^1.5.2",
+    "gulp-uglify": "^1.2.0",
     "gulp-watch": "^4.3.3",
     "less": "^2.5.1",
     "less-plugin-clean-css": "^1.5.0"

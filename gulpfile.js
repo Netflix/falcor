@@ -8,6 +8,8 @@ var gulp = require('gulp');
 var less = require('gulp-less');
 var sourcemaps = require('gulp-sourcemaps');
 var autoprefixer = require('gulp-autoprefixer');
+var uglify = require('gulp-uglify');
+var rename = require('gulp-rename');
 
 // LESS plugin includes
 var CleanCssPlugin = require('less-plugin-clean-css'),
@@ -50,7 +52,9 @@ gulp.task('less', ['compile-less'], function () {
 });
 
 gulp.task('js', function () {
-	return gulp.src('./node_modules/bootstrap/dist/js/bootstrap.min.js')
+	return gulp.src('./javascripts/bootstrap-modified.js')
+    .pipe(uglify())
+    .pipe(rename('bootstrap-modified.min.js'))
 		.pipe(gulp.dest('./javascripts'));
 });
 
