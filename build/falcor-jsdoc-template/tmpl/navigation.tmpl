@@ -11,17 +11,19 @@
     // based on the original template I'm guessing it's possible
     var currentDoc = _.first(docs);
     
+    // escapes weird characters that jsdoc puts in ids but jquery chokes on
+    var escapeDocId = function (docId) {
+      return docId.replace(/(:|\.|\[|\]|,|~)/g, '\\$1');
+    };
     // Returns a link just like linkto, but with an id to its target header on
     // the page added so bootstrap scrollspy can pick it up use it to work.
     // Also sanitizes the input because jsdoc uses all sorts of weird characters
-    // in their ids
-    var sanitizeDocId = function (docId) {
-      return docId.replace(/(:|\.|\[|\]|,|~)/g, '\\$1');
-    };
-    var linkToWithTarget = function (doc) {
-      var linkTag = self.linkto(doc.longname, doc.name);
+    // in their ids. Optionally, link text can be passed in to use instead of
+    // the doc's name inside the link.
+    var linkToWithTarget = function (doc, linkText) {
+      var linkTag = self.linkto(doc.longname, linkText || doc.name);
       return linkTag.slice(0, linkTag.indexOf('>')) + ' data-target="#' +
-        sanitizeDocId(doc.id) + '"' + linkTag.slice(linkTag.indexOf('>'));
+        escapeDocId(doc.id) + '"' + linkTag.slice(linkTag.indexOf('>'));
     };
 ?>
 
@@ -38,7 +40,7 @@
 <nav class="table-of-contents api-doc-toc">
   <ul class="nav">
     <li>
-      <span class="toc-api-section-title">Classes</span>
+      <?js= self.linkto(_.first(classDocs).longname, 'Classes') ?>
       <ul class="toc-api-classes">
         <?js _.each(classDocs, function (classDoc) { ?>
           <li class="toc-api-class <?js= currentDoc.longname === classDoc.longname ? 'current-page' : '' ?>">
@@ -57,7 +59,7 @@
         <?js }) ?>
       </ul>
     </li>
-    <li class="toc-api-type-list <?js= currentDoc.longname === 'global' ? 'current-page' : '' ?>">
+    <li class="toc-api-type-list <?js= currentDoc.kind === 'globalobj' ? 'current-page' : '' ?>">
       <span class="toc-api-section-title">
         <?js= self.linkto('global', 'Types') ?>
       </span>
