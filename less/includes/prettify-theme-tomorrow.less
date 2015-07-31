@@ -1,6 +1,14 @@
-.prettyprint {
-  // Customization on top of theme: lighten the line numbers
+.prettyprint.language-js,
+.prettyprint.language-html,
+.prettyprint.language-css,
+.prettyprint.language-scss,
+.prettyprint.language-sass,
+.prettyprint.language-less,
+.prettyprint.language-cs,
+.prettyprint:not([class*="language-"]) {
+  // Customization on top of theme: lighten the line numbers and set the background
   color: @gray-light;
+  background-color: white;
   
   /* Tomorrow Theme */
   /* Original theme - https://github.com/chriskempson/tomorrow-theme */

@@ -46,19 +46,14 @@ TODO list
 -----------------------------
 
 P1
-- find/make better syntax highlighting theme
 - add open graph metadata to base template
 - verify social sharing metadata is set up and results in clean share visuals
-- Proper docs integration
-- basic syntax highlighting
-- add small footer that just acts like bottom padding
+- add small footer that just acts like bottom padding? I can't find any other sites that do this, so I'm not sure if we want to.
 - fix intro animation in firefox
-- have a style for js, a style for console, and a style for output for code blocks
 
 P2
 - figure out how to leave replay button in on mobile without cluttering the hero banner
 - Style TOC - second pass
-- Fix minor safari horizontal scrollbar issue in `pre`s
 - more docs, of course!
 
 Ideas

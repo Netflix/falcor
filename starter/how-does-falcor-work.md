@@ -24,7 +24,7 @@ model.get("user.name", "user.location.city", "user.location.address").
 
 When a client requests paths from the Model, the Model attempts to retrieve the data from its in-memory cache. If the data is not found in the local cache, the following GET request is sent to the virtual model:
 
-~~~
+~~~js
 /model.json?method=get&paths=[["user","name"],["user","location","city"],["user","location","address"]]
 ~~~
 
@@ -32,7 +32,7 @@ Note that rather than retrieve data from multiple endpoints, all of the data as 
 
 The Application Server responds with the requested subset of the virtual JSON resource containing only the requested values. 
 
-~~~
+~~~output
 HTTP/1.1 200 OK
 Content-Length: length
 Content-Type: application/json; charset=utf-8
