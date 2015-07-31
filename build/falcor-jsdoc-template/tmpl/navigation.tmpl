@@ -2,11 +2,11 @@
   (function (self) {
     var classDocs = self.find({kind: 'class'})
     var keys = _.keys(classDocs[1])
-    var getMethods = function (classDoc) {
-      var result = self.find({kind: 'function', memberof: classDoc.longname})
+    var getSubDocs = function (classDoc, docType) {
+      var result = self.find({kind: docType, memberof: classDoc.longname})
       return result || [];
     }
-    var typeDocs = self.find({kind: 'typedef'})
+    var typeDocs = self.find({kind: 'typedef', memberof: {isUndefined: true}})
     // So far I haven't encountered any pages with more than one doc in the doclist, but
     // based on the original template I'm guessing it's possible
     var currentDoc = _.first(docs);
@@ -45,12 +45,18 @@
         <?js _.each(classDocs, function (classDoc) { ?>
           <li class="toc-api-class <?js= currentDoc.longname === classDoc.longname ? 'current-page' : '' ?>">
             <?js= linkToWithTarget(classDoc) ?>
-            <?js var methodDocs = getMethods(classDoc); ?>
-            <?js if (methodDocs.length) { ?>
+            <?js 
+              var methodDocs = getSubDocs(classDoc, 'function');
+              var typeDocs = getSubDocs(classDoc, 'typedef');
+              var eventDocs = getSubDocs(classDoc, 'event');
+              // for now just combine them
+              var subDocs = methodDocs.concat(eventDocs, typeDocs);
+            ?>
+            <?js if (subDocs.length) { ?>
               <ul class="toc-api-methods">
-              <?js _.each(methodDocs, function (methodDoc) { ?>
+              <?js _.each(subDocs, function (subDoc) { ?>
                 <li class="toc-api-method">
-                  <?js= linkToWithTarget(methodDoc) ?>
+                  <?js= linkToWithTarget(subDoc) ?>
                 </li>
               <?js }) ?> 
               </ul>
