@@ -10,6 +10,19 @@
     // So far I haven't encountered any pages with more than one doc in the doclist, but
     // based on the original template I'm guessing it's possible
     var currentDoc = _.first(docs);
+    
+    // Returns a link just like linkto, but with an id to its target header on
+    // the page added so bootstrap scrollspy can pick it up use it to work.
+    // Also sanitizes the input because jsdoc uses all sorts of weird characters
+    // in their ids
+    var sanitizeDocId = function (docId) {
+      return docId.replace(/(:|\.|\[|\]|,|~)/g, '\\$1');
+    };
+    var linkToWithTarget = function (doc) {
+      var linkTag = self.linkto(doc.longname, doc.name);
+      return linkTag.slice(0, linkTag.indexOf('>')) + ' data-target="#' +
+        sanitizeDocId(doc.id) + '"' + linkTag.slice(linkTag.indexOf('>'));
+    };
 ?>
 
 <?js if (docs && docs.length > 0) { ?>
@@ -29,13 +42,13 @@
       <ul class="toc-api-classes">
         <?js _.each(classDocs, function (classDoc) { ?>
           <li class="toc-api-class <?js= currentDoc.longname === classDoc.longname ? 'current-page' : '' ?>">
-            <?js= self.linkto(classDoc.longname, classDoc.name) ?>
+            <?js= linkToWithTarget(classDoc) ?>
             <?js var methodDocs = getMethods(classDoc); ?>
             <?js if (methodDocs.length) { ?>
               <ul class="toc-api-methods">
               <?js _.each(methodDocs, function (methodDoc) { ?>
                 <li class="toc-api-method">
-                  <?js= self.linkto(methodDoc.longname, methodDoc.name) ?>
+                  <?js= linkToWithTarget(methodDoc) ?>
                 </li>
               <?js }) ?> 
               </ul>
@@ -44,12 +57,14 @@
         <?js }) ?>
       </ul>
     </li>
-    <li>
-      <?js= self.linkto('global', 'Global Types') ?>
-      <ul class="api-toc-types">
+    <li class="toc-api-type-list <?js= currentDoc.longname === 'global' ? 'current-page' : '' ?>">
+      <span class="toc-api-section-title">
+        <?js= self.linkto('global', 'Types') ?>
+      </span>
+      <ul class="toc-api-types">
         <?js _.each(typeDocs, function (typeDoc) { ?>
-          <li>
-            <?js= self.linkto(typeDoc.longname, typeDoc.name) ?>
+          <li class="toc-api-type">
+            <?js= linkToWithTarget(typeDoc) ?>
           </li>
         <?js }) ?>
       </ul>

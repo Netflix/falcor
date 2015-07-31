@@ -17,7 +17,6 @@ title: "<?js= title ?>"
           isGlobalPage = (doc.kind === 'globalobj');
       }
   ?>
-
   <?js if (doc.kind === 'mainpage' || (doc.kind === 'package')) { ?>
       <?js= self.partial('mainpage.tmpl', doc) ?>
   <?js } else if (doc.kind === 'source') { ?>
@@ -27,14 +26,20 @@ title: "<?js= title ?>"
   <section>
 
   <header>
+      <?js if (isGlobalPage) { ?>
+        <h2>Global</h2>
+      <?js } ?>
+      
       <?js if (!doc.longname || doc.kind !== 'module') { ?>
-          <h2><?js if (doc.ancestors && doc.ancestors.length) { ?>
-              <span class="ancestors"><?js= doc.ancestors.join('') ?></span>
+          <?js if ((doc.ancestors && doc.ancestors.length) || doc.name || doc.variation) { ?>
+            <h2><?js if (doc.ancestors && doc.ancestors.length) { ?>
+                <span class="ancestors"><?js= doc.ancestors.join('') ?></span>
+            <?js } ?>
+            <?js= doc.name ?>
+            <?js if (doc.variation) { ?>
+                <sup class="variation"><?js= doc.variation ?></sup>
+            <?js } ?></h2>
           <?js } ?>
-          <?js= doc.name ?>
-          <?js if (doc.variation) { ?>
-              <sup class="variation"><?js= doc.variation ?></sup>
-          <?js } ?></h2>
           <?js if (doc.classdesc) { ?>
               <div class="class-description"><?js= doc.classdesc ?></div>
           <?js } ?>
