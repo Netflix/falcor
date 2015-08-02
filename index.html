@@ -30,7 +30,7 @@ lang: en
     
     <!-- Replay intro animation action -->
     <a href class="repeat-intro-animation">
-      <img class="repeat-intro-animation-icon" src="{{ site.baseurl }}/images/repeat.svg" alt="Repeat intro animation">
+      <span class="icon icon-reload"></span>
     </a>
   </div>
 
@@ -46,7 +46,8 @@ lang: en
   </div>
 
   {% include javascript-includes.html %}
-  <!-- Hack just for easy demoing purposes -->
+  
+  <!-- First visit intro animation -->
   <script>
     var INTRO_ANIMATION_FLAG_NAME = 'falcor_homepage_intro_animation_played';
     
@@ -62,7 +63,7 @@ lang: en
       }
       
       // TODO: remove second selector, as that is temporary for demoing
-      $('.repeat-intro-animation, .repeat-intro-anim-hack-link').click(function (event) {
+      $('.repeat-intro-animation').click(function (event) {
         event.preventDefault();
         window.scrollTo(0,0);
         document.cookie = INTRO_ANIMATION_FLAG_NAME +

@@ -59,7 +59,7 @@ gulp.task('js', function () {
 });
 
 var buildJekyllSite = function (complete) {
-	var jekyll = childProcess.spawn('jekyll', ['build'], {stdio: 'inherit'});
+	var jekyll = childProcess.spawn('jekyll', ['build', '--verbose'], {stdio: 'inherit'});
 
 	browserSync.notify('Rebuilding jekyll site');
 	jekyll.on('close', function () {

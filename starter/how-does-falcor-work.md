@@ -160,4 +160,6 @@ var server = app.listen(80);
 
 The virtual model exposes the entire JSON model at a single URL and accepts one or more paths in the query string. This allows the client to request as much of the graph as it needs within in a single HTTP request. 
 
-For more information on the router, see [Falcor Router]({{ site.baseurl }}/router/router.html)
+For more information on the router, see {% include link.to id="router" text="Falcor Router" %}
+
+
