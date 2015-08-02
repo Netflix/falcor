@@ -214,7 +214,7 @@ describe('Core', function() {
                 model._getPathSetsAsJSONG(model, [['summary']]);
             } catch(ex) {
                 threw = true;
-                testRunner.compare(testRunner.jsonGraphDerefException, ex);
+                testRunner.compare(testRunner.jsonGraphDerefException, ex.message);
             }
             testRunner.compare(true, threw);
         });
