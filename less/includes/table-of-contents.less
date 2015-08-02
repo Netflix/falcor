@@ -1,12 +1,4 @@
 .toc-page {
-  @toc-width-lg: 32%;
-  @toc-width-md: 32%;
-  @toc-width-sm: 37%;
-  @toc-background: lighten(#26B2E7, 40%);
-  @toc-background: lighten(#0062AE, 57%);
-  @toc-active-background: rgba(0, 0, 0, 18%);
-  @toc-active-background-sub-item: rgba(0, 0, 0, 12%);
-  @toc-indentation-per-level: 15px;
 
   .table-of-contents {
     @content-toc-gap: 40px;
@@ -61,7 +53,7 @@
     
     // All level items / defaults
     .nav li > a, .nav li > span > a {
-      color: black;
+      color: @toc-link-color;
       display: block;
       padding-top: 1px;
       padding-bottom: 1px;

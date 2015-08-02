@@ -9,6 +9,8 @@
     {% for child_id in navigation_item.children %}
       {% if child_id == page.id %}
         {% assign current_page = site.pages | where: 'id', navigation_item.children[forloop.index0] | first %}
+        {% assign current_page_number = forloop.index %}
+        {% assign total_pages_in_section = forloop.length %}
         {% unless forloop.first %}
           {% assign previous_page_index = forloop.index0 | minus: 1 %}
           {% assign previous_page = site.pages | where: 'id', navigation_item.children[previous_page_index] | first %}
@@ -24,21 +26,23 @@
 
 {% if previous_page or next_page %}
   <div class="row">
-    <div class="col-xs-6 text-left">
-      {% if previous_page %}
-        <a href="{{ site.baseurl }}{{ previous_page.url }}">
-          <span class="icon icon-arrow-left"></span>
-          {{ previous_page.title }}
-        </a>
-      {% endif %}
-    </div>
-    <div class="col-xs-6 text-right">
-      {% if next_page %}
-        <a href="{{ site.baseurl }}{{ next_page.url }}">
-          {{ next_page.title }}
-          <span class="icon icon-arrow-right"></span>
-        </a>
-      {% endif %}
+    <div class="col-xs-12">
+      <div class="intrasection-navigation">
+        <div class="row">
+          <div class="col-xs-6 text-left">
+            {% if previous_page %}
+              <span class="icon icon-arrow-left"></span>
+              <a href="{{ site.baseurl }}{{ previous_page.url }}">{{ previous_page.title }}</a>
+            {% endif %}
+          </div>
+          <div class="col-xs-6 text-right">
+            {% if next_page %}
+              <a href="{{ site.baseurl }}{{ next_page.url }}">{{ next_page.title }}</a>
+              <span class="icon icon-arrow-right"></span>
+            {% endif %}
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 {% endif %}
