@@ -28,74 +28,79 @@ title: "Class: HttpDataSource"
       <div class="container-overview">
       
           
+<section class="method-section">
+    
+        
 
+        <h4 class="name function-name" id="HttpDataSource"><span class="type-signature"></span>new HttpDataSource<span class="signature">(jsonGraphUrl)</span><span class="type-signature return-signature"></span></h4>
+
+        
     
 
-    <h4 class="name" id="HttpDataSource"><span class="type-signature"></span>new HttpDataSource<span class="signature">(jsonGraphUrl)</span><span class="type-signature"></span></h4>
-
-    
-
-
-
-<div class="description">
-    <p>TODO: Move this into falcor-browser repo
+        
+        <div class="description">
+            <p>TODO: Move this into falcor-browser repo
 A HttpDataSource object is a DataSource can be used to retrieve data from a remote JSONGraph object using the browser's XMLHttpRequest.</p>
-</div>
+        </div>
+        
 
-
-
-
-
-
-
-
-
-    <h5>Parameters:</h5>
     
 
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
     
 
+    
+
+    
+        <h5>Parameters:</h5>
+        
+
+<div class="parameters-section">
+    <table class="params">
+        <thead>
         <tr>
             
-                <td class="name"><code>jsonGraphUrl</code></td>
+            <th class="header-name-and-attributes">
+              Name
+              
+            </th>
             
 
-            <td class="type">
-            
-            </td>
+            <th class="header-type">Type</th>
 
             
 
-            
-
-            <td class="description last"><p>the URL of the JSONGraph model.</p></td>
+            <th class="last header-description">Description</th>
         </tr>
+        </thead>
+
+        <tbody>
+        
+
+            <tr>
+                
+                    <td>
+                        <span class="name">jsonGraphUrl</span>
+                        
+                    </td>
+                
+
+                <td class="type">
+                
+                </td>
+
+                
+
+                <td class="description last"><p>the URL of the JSONGraph model.</p></td>
+            </tr>
+
+        
+        </tbody>
+    </table>
+</div>
 
     
-    </tbody>
-</table>
 
-
-
-
+    
 
 
 
@@ -148,26 +153,26 @@ A HttpDataSource object is a DataSource can be used to retrieve data from a remo
   </dl>
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-    <h5>Example</h5>
     
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+        <h5>Example</h5>
+        
     <pre class="prettyprint"><code>var model = new falcor.Model({source: new falcor.HttpDataSource("http://netflix.com/user.json")});
 var movieNames = model.get('genreLists[0...10][0...10].name').toPathValues();</code></pre>
 
-
-
+    
+</section>
       
       </div>
 
@@ -336,9 +341,7 @@ var movieNames = model.get('genreLists[0...10][0...10].name').toPathValues();</c
                     </ul>
                 </li>
                 <li class="toc-api-type-list ">
-                    <span class="toc-api-section-title">
-                        <a href="global.html">Types</a>
-                    </span>
+                    <a href="global.html">Types</a>
                     <ul class="toc-api-types">
                         
                             <li class="toc-api-type">
