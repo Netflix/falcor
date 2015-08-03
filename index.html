@@ -4,6 +4,7 @@ lang: en
 ---
 
 <body class="homepage">
+  <a class="sr-only" href="#main-content">Skip to main content</a>  
   {% include navigation.html %}
 
   <div class="hero-banner">
@@ -34,7 +35,8 @@ lang: en
     </a>
   </div>
 
-  <div class="main-homepage-content">
+  <!-- the id is used exclusively for easy access by assistive technology -->
+  <main class="main-homepage-content" id="main-content">
     <div class="container">
       <div class="row">
         <div class="col-xs-12 col-lg-10 col-lg-offset-1">
@@ -43,7 +45,7 @@ lang: en
         </div>
       </div>
     </div>
-  </div>
+  </main>
 
   {% include javascript-includes.html %}
   
