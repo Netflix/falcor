@@ -1,11 +1,11 @@
 ---
-layout: page
+layout: toc-page
 title: Model
-menu: home
+id: model
 lang: en
 ---
 
-* Will be replaced with the ToC, excluding the "Contents" header
+* table of contents. this line is required for some reason
 {:toc}
 
 # Model Overview

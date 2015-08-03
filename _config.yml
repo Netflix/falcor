@@ -1,0 +1,18 @@
+baseurl: "/falcor"
+exclude: 
+  - "less"
+  - "node_modules"
+  - "gulpfile.js"
+  - "package.json"
+highlighter: pygments
+markdown: kramdown
+kramdown:
+  toc_levels: 1..2
+# Default sitewide metadata
+meta_defaults: 
+  description: "Retrieve model data on-demand from the cloud."
+  title: "Bind to the Cloud"
+  # All titles (including the default) will have this prepended to them
+  title_prefix: "Falcor: "
+  
+    

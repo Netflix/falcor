@@ -1,0 +1,131 @@
+.hero-banner {
+  @logo-height: 172px;
+  @screen-xs-banner-logo-ratio: 0.7;
+  @screen-xs-banner-text-ratio: 0.8;
+
+  // Brings the top flush with the navbar
+  margin-top: -1 * @site-content-padding-top;
+  background-color: #111;
+  padding: 35px 0;
+  position: relative;
+
+  .hero-banner-logo {
+    height: @logo-height;
+
+    @media (max-width: @screen-xs-max) {
+      height: @logo-height * @screen-xs-banner-logo-ratio;
+    }
+  }
+
+  .hero-banner-description {
+    @hero-banner-description-font-size: 20px;
+    font-size: @hero-banner-description-font-size;
+    margin-top: 20px;
+
+    @media (max-width: @screen-xs-max) {
+      font-size: @hero-banner-description-font-size * @screen-xs-banner-text-ratio;
+    }
+  }
+  
+  .repeat-intro-animation {
+    position: absolute;
+    right: 10px;
+    bottom: 10px;
+    
+    @media (max-width: @screen-xs-max) {
+      right: 5px;
+      bottom: 5px;
+    }
+    
+    .icon-reload {
+      @icon-size: 20px;
+      color: white;
+      opacity: 0.3;
+      width: @icon-size;
+      height: @icon-size;
+      
+      @media (max-width: @screen-xs-max) {
+        width: @icon-size * @screen-xs-banner-text-ratio;
+        height: @icon-size * @screen-xs-banner-text-ratio;
+        opacity: 0.2;
+      }
+    
+      &:hover {
+        opacity: 0.85;
+      }
+    }    
+  }
+}
+
+
+// Animated homepage intro
+
+@-webkit-keyframes fade {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+@-webkit-keyframes homepagebackground {
+  0% {
+    background-color: #111;
+  }
+  100% {
+    background-color: @body-bg;
+  }
+}
+
+.animated-fade-in() {
+  opacity: 0;
+  animation-name: fade;
+  animation-duration: 1s;
+  animation-delay: 0;
+  animation-iteration-count: 1;
+  animation-timing-function: ease-out;
+  animation-direction: normal;
+  animation-fill-mode: forwards;
+}
+
+// The current winner
+.supports-cssanimations .animation-enabled {
+  &.homepage {
+    background-color: #111;
+    // TODO: major reconciliation
+    animation-name: homepagebackground;
+    animation-duration: 0.7s;
+    animation-delay: 2.2s;
+    animation-iteration-count: 1;
+    animation-timing-function: ease-out;
+    animation-direction: normal;
+    animation-fill-mode: forwards;
+  }
+
+  .hero-banner-logo {
+    .animated-fade-in();
+    animation-delay: 0.25s;
+    animation-duration: 1s;
+  }
+
+  .hero-banner-description {
+    .animated-fade-in();
+    animation-duration: 0.7s;
+    animation-delay: 1.1s;
+  }
+
+  .main-homepage-content, .repeat-intro-animation {
+    .animated-fade-in();
+    animation-duration: 0.7s;
+    animation-delay: 2.2s;
+  }
+  
+  // Simplify animation on mobile
+  @media (max-width: @screen-xs-max) {
+    &.homepage, .main-homepage-content, .repeat-intro-animation, .hero-banner-description {
+      animation-duration: 0.7s;
+      animation-delay: 1.4s;
+    }
+  }
+}

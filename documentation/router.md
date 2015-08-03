@@ -1,7 +1,7 @@
 ---
-layout: page
-title: router
-menu: router
+layout: toc-page
+title: Router
+id: router
 lang: en
 ---
 

@@ -1,0 +1,92 @@
+    <!-- MAIN CONTENT -->
+    <!-- <div id="main_content_wrap" class="outer">
+      <section id="main_content" class="inner">
+        <p><strong>Imagine how much easier it would be to build your web application if all the data in the cloud was available in-memory?</strong> <strong><em>Falcor lets you code that way.</em></strong></p>
+
+<h3>
+<a id="one-model-everywhere" class="anchor" href="#one-model-everywhere" aria-hidden="true"><span class="octicon octicon-link"></span></a>One Model Everywhere</h3>
+
+<p>Falcor lets you represent all of your cloud data sources as <em>one Virtual JSON Model on the server.</em> On the client Falcor makes it appear as if the entire JSON model is available locally. Falcor retrieves any model data you request from the cloud  on-demand, transparently handling all the network communication and keeping the server and client in sync.</p>
+
+<p><strong>Falcor is <em>not</em> a replacement for your MVC framework, your database, or your application server.</strong> Instead you add Falcor to your existing stack to optimize client/server communication. Falcor is ideal for mobile apps, because it combines the caching benefits of REST with the low latency of RPC.</p>
+
+<h3>
+<a id="the-data-is-the-api" class="anchor" href="#the-data-is-the-api" aria-hidden="true"><span class="octicon octicon-link"></span></a>The Data is the API</h3>
+
+<p>You retrieve data from a Falcor model using the familiar JavaScript path syntax. The only difference is that the API is asynchronous.</p>
+
+<div class="highlight highlight-JavaScript"><pre><span class="pl-s">var</span> person <span class="pl-k">=</span> <span class="pl-k">new</span> <span class="pl-en">falcor.Model</span>({
+  source<span class="pl-k">:</span> <span class="pl-k">new</span> <span class="pl-en">falcor.HttpSource</span>(<span class="pl-s1"><span class="pl-pds">"</span>/person.json<span class="pl-pds">"</span></span>)
+});
+
+person.getValue(<span class="pl-s1"><span class="pl-pds">"</span>location.address<span class="pl-pds">"</span></span>).
+  then(address <span class="pl-k">=&gt;</span> <span class="pl-s3">print</span>(address));
+
+<span class="pl-c">// outputs "344 Seaside"</span></pre></div>
+
+<p>You can also retrieve multiple paths from a Falcor model, and the model will batch them into a <strong>single network request.</strong></p>
+
+<pre><code>var person = new falcor.Model({
+  source: new falcor.HttpSource("/person.json")
+});
+
+person.get("genreLists[0..1][0..1].boxshot").
+  then(json =&gt; JSON.stringify(json));
+
+// outputs...
+//  {
+//    genreLists: {
+//      “0”: {
+//        “0”: { boxshot: “/237843.png” },
+//        “1”: { boxshot: “/328432.png” }
+//      },
+//      “1”: {
+//        “0”: { boxshot: “/7832443.png” },
+//        “1”: { boxshot: “/432432.png” }
+//      }
+//    }
+// }
+</code></pre>
+
+<p>See the <a href="doc/index.html">API Documentation</a> for more.</p>
+
+<h3>
+<a id="bind-to-the-cloud" class="anchor" href="#bind-to-the-cloud" aria-hidden="true"><span class="octicon octicon-link"></span></a>Bind to the Cloud</h3>
+
+<p>Falcor's asynchronous model allows you to bind your views directly to the cloud using the <em>Asynchronous Model-View-Controller Pattern (AMVC).</em> This pattern can be used in any MVC framework (ex. React, Angular, Ember), but works best with those that allow you to template bind directly to asynchronous values:</p>
+
+<pre><code>// Controller
+
+model.
+  bind("genreLists[0][5]").
+  then(titleModel =&gt; new TitleView(titleModel));
+
+// View (Angular 2.0 Template)
+
+&lt;div&gt;
+  &lt;h1&gt;{{ model.getValue("name")|async }}&lt;/h1&gt;
+  &lt;p&gt;{{ model.getValue("description")|async }}&lt;/p&gt;
+&lt;/div&gt;
+
+// outputs
+// &lt;div&gt;
+//   &lt;h1&gt;House of Cards&lt;/h1&gt;
+//   &lt;p&gt;A Congressman works with his equally conniving wife to exact revenge on the people who betrayed him.&lt;/p&gt;
+// &lt;/div&gt;
+</code></pre>
+
+<h3>
+<a id="try-it" class="anchor" href="#try-it" aria-hidden="true"><span class="octicon octicon-link"></span></a>Try It</h3>
+
+<pre><code>npm install falcor
+</code></pre>
+      </section>
+    </div> -->
+
+    <!-- FOOTER  -->
+    <!-- <div id="footer_wrap" class="outer">
+      <footer class="inner">
+        <p class="copyright">Falcor maintained by <a href="https://github.com/Netflix">Netflix</a></p>
+        <p>Published with <a href="http://pages.github.com">GitHub Pages</a></p>
+      </footer>
+    </div> -->

@@ -1,7 +1,7 @@
 ---
-layout: page
-title: video tutorials
-menu: starter
+layout: plain-page
+title: Video Tutorials
+id: video_tutorials
 lang: en
 ---
 

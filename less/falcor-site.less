@@ -1,0 +1,95 @@
+// override bootstrap defaults with our configuration
+@import "includes/variables.less";
+@import "includes/bootstrap-customized.less";
+@import "includes/table-of-contents.less";
+@import "includes/bootstrap-overrides.less";
+@import "includes/navbar.less";
+@import "includes/homepage.less";
+@import "includes/api-documentation.less";
+@import "includes/prettify-theme-tomorrow.less";
+@import "includes/prettify-theme-tomorrow-night-eighties.less";
+@import "includes/prettify-theme-terminal.less";
+@import "includes/icons.less";
+// Left here in case it becomes useful to try out later
+// @import "includes/prettify-theme-tomorrow-night.less";
+
+
+// General site styles that don't fit into a subcategory yet
+body {
+  position: relative;
+  padding-top: @navbar-height + @site-content-padding-top;
+
+  // Font improvement tweaks.
+  // MDN recommends against using the first two, as they aren't on track to be included
+  // in the spec, but just about everyone (including Netflix, Apple, Google, etc.)
+  // uses them and they greatly improve readability when supported.
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+// Place a subtle border around images by on standard pages since they're generally set on the
+// light gray site background.
+// Also make all images responsive by default, so they can't overflow the bounds of the page.
+// Lastly, give them some margins so they aren't too close to neighboring text.
+// Standard pages are any pages that inherit from the page or *-page templates, which is generally
+// all but the homepage and potentially other special one off pages
+.standard-page img {
+  border: 1px solid @nested-item-border-color;
+  margin: @nested-item-margin;
+  .img-responsive();
+}
+
+.intrasection-navigation {
+  background-color: @module-background-blue;
+  padding: 15px 10px;
+  &, & a {
+    color: @gray-dark;
+  }
+}
+
+img.img-plain {
+  border: none;
+}
+
+// ==================
+// = Utility Styles =
+// ==================
+
+// Easy vertical spacing improvements -- TODO: make into loop
+.row {
+  &.row-gap-small {
+    margin-top: 15px;
+  }
+  &.row-gap-medium {
+    margin-top: 30px;
+  }
+  &.row-gap-large {
+    margin-top: 45px;
+  }
+  &.row-gap-huge {
+    margin-top: 60px;
+  }
+}
+@media (max-width: @screen-xs-max) {
+  .row {
+    &.row-gap-small {
+      margin-top: 10px;
+    }
+    &.row-gap-medium {
+      margin-top: 20px;
+    }
+    &.row-gap-large {
+      margin-top: 30px;
+    }
+    &.row-gap-huge {
+      margin-top: 40px;
+    }
+  }
+}
+
+
+// Light text for a dark (inverse) background
+.text-inverse {
+  color: darken(white, 20%);
+}

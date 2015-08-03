@@ -1,7 +1,7 @@
 ---
-layout: page
-title: what is falcor
-menu: starter
+layout: plain-page
+title: What is Falcor
+id: what_is_falcor
 lang: en
 ---
 
@@ -17,7 +17,7 @@ Falcor is not a replacement for your MVC framework, your database, or your appli
 
 You retrieve data from a Falcor model using the familiar JavaScript path syntax.   
 
-~~~js 
+~~~js
 var person = {
     name: "Steve McGuire",
     occupation: "Developer",

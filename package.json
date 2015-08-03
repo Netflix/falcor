@@ -1,0 +1,40 @@
+{
+  "name": "falcor-website",
+  "version": "0.1.0",
+  "description": "The official website for Netflix's Falcor project",
+  "main": "index.html",
+  "directories": {
+    "doc": "doc"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Netflix/falcor"
+  },
+  "keywords": [
+    "netflix",
+    "falcor"
+  ],
+  "author": "The Falcor Team",
+  "license": "Apache License 2.0",
+  "bugs": {
+    "url": "https://github.com/Netflix/falcor/issues"
+  },
+  "homepage": "https://github.com/Netflix/falcor",
+  "devDependencies": {
+    "bootstrap": "^3.3.5",
+    "browser-sync": "^2.8.0",
+    "gulp": "^3.9.0",
+    "gulp-autoprefixer": "^2.3.1",
+    "gulp-concat": "^2.6.0",
+    "gulp-less": "^3.0.3",
+    "gulp-rename": "^1.2.2",
+    "gulp-sourcemaps": "^1.5.2",
+    "gulp-uglify": "^1.2.0",
+    "gulp-watch": "^4.3.3",
+    "less": "^2.5.1",
+    "less-plugin-clean-css": "^1.5.0"
+  }
+}

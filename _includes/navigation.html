@@ -1,0 +1,64 @@
+<header>
+  <nav class="navbar navbar-inverse navbar-fixed-top">
+    <div class="container">
+      <div class="row">
+        <div class="col-xs-12 col-lg-10 col-lg-offset-1">
+          
+          <!-- Branding and mobile menu button -->
+          <div class="navbar-header">
+            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target=".site-navigation" aria-expanded="false">
+              <span class="sr-only">Toggle navigation</span>
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="{{ site.baseurl }}/">
+              <img class="img-plain navbar-logo" src="{{ site.baseurl }}/images/navigation-logo-inverse.svg">
+            </a>
+          </div>
+      
+          <!-- Main navigation links -->
+          <div class="navbar-collapse collapse site-navigation">
+            <ul class="nav navbar-nav">
+              {% for navigation_item in site.data.navigation %}
+                {% if navigation_item.children %}
+                  <li class="dropdown">
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
+                      {{ navigation_item.title }} <span class="caret"></span>
+                    </a>
+                    <ul class="dropdown-menu">
+                      {% for child_page_id in navigation_item.children %}
+                        {% assign child_page = site.pages | where:"id",child_page_id | first %}
+                        <li>
+                          <a href="{{ site.baseurl }}{{ child_page.url }}">{{ child_page.title }}</a>
+                        </li>
+                      {% endfor %}
+                    </ul>
+                  </li>
+                {% else %}
+                  {% if navigation_item.id %}
+                    {% assign item_page = site.pages | where:"id",navigation_item.id | first %}
+                    <li>
+                      <a href="{{ site.baseurl }}{{ item_page.url }}">{{ item_page.title }}</a>
+                    </li>
+                  {% else %}
+                    <li>
+                      <a href="{{ site.baseurl }}{{ navigation_item.path }}">{{ navigation_item.title }}</a>
+                    </li>              
+                  {% endif %}
+                {% endif %}
+              </li>
+              {% endfor %}
+            </ul>
+        
+            <!-- Link to the project's GitHub repo -->
+            <ul class="nav navbar-nav navbar-right navbar-github-link">
+              <li><a href="https://github.com/Netflix/falcor">GitHub</a></li>
+            </ul>
+          </div>
+          
+        </div>
+      </div>
+    </div>
+  </nav>
+</header>

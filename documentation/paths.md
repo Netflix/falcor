@@ -1,7 +1,7 @@
 ---
-layout: page
-title: model
-menu: home
+layout: toc-page
+title: Paths
+id: paths
 lang: en
 ---
 

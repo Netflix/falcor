@@ -1,7 +1,7 @@
 ---
-layout: page
-title: DataSources
-menu: home
+layout: toc-page
+title: Data Sources
+id: data_sources
 lang: en
 ---
 

@@ -1,3 +1,8 @@
+---
+title: Walkthrough
+layout: page
+---
+
 In a Falcor application you access and modify your application's JSON data using a Falcor Model object. The Falcor Model allows you to work with JSON data using familiar JavaScript operations like get, set, and call. The main difference is that the Falcor Model's Falcor APIs are asynchronous. By providing an asynchronous API, the Falcor model allows developers to manipulate all JSON data the same way regardless of whether the data is in local memory, or in the cloud.
 
 Let's start by working with the JSON data we expect the server to provide. In this example we will use a JSON object that represents an individual Netflix member's (abbreviated) personalized recommendations.
@@ -8,7 +13,7 @@ To keep the code short we will abbreviate the model to two genre lists ("New Rel
 
 We can use the following JavaScript code to retrieve the name of the first title in the first genre list.
 
-```JavaScript
+~~~js
 var model = {
     genreLists: [
         {
@@ -40,16 +45,16 @@ var model = {
 };
 
 console.log(model.genreLists[0].titles[0].name);
-```
+~~~
 
 The code above outputs the following to the console:
-```JavaScript
+~~~js
 Bloodline 
-```
+~~~
 
 Instead of working with the JSON data directly, let's load it into a Falcor model.  To retrieve the name of the first title in the first list from the Falcor Model, we can use the same JavaScript path we used on the JSON object. Note that the only difference is that the model returns a promise, which resolves to the result asynchronously.
 
-```JavaScript
+~~~js
 var cache = {
     genreLists: [
         {
@@ -85,16 +90,16 @@ var model = new falcor.Model({cache: cache});
 model.getValue('genreLists[0].titles[0].name').then(function(x) {
     console.log(JSON.stringify(x, null, 4));
 });
-```
+~~~
 
 The code above outputs the following to the console:
-```JavaScript
+~~~js
 "Bloodline"
-```
+~~~
 
 In addition to normal JavaScript path syntax, models also support ranges in indexers. In the example below we use a range to retrieve the names of the titles in both of the genre lists.
 
-```JavaScript
+~~~js
 var cache = {
     genreLists: [
         {
@@ -130,10 +135,10 @@ var model = new falcor.Model({cache: cache});
 model.get('genreLists[0..1].titles[0].name').then(function(x) {
     console.log(JSON.stringify(x, null, 4));
 });
-```
+~~~
 
 The code above outputs the following to the console:
-```JavaScript
+~~~js
 {
     "json": {
         "genreLists": {
@@ -154,11 +159,11 @@ The code above outputs the following to the console:
         }
     }
 }
-```
+~~~
 
 In addition to using ranges to select multiple values, you can also select multiple values by passing multiple paths to a model. In this example we select the name and rating of the titles in both genre lists.
 
-```JavaScript
+~~~js
 var cache = {
     genreLists: [
         {
@@ -196,10 +201,10 @@ model.get(
     then(function(x) {
         console.log(JSON.stringify(x, null, 4));
     });
-```
+~~~
 
 The code above outputs the following to the console:
-```JavaScript
+~~~js
 {
     "json": {
         "genreLists": {
@@ -222,17 +227,17 @@ The code above outputs the following to the console:
         }
     }
 } 
-```
+~~~
 
 The two paths above can be collapsed into one, because Falcor allows multiple keys to be passed into indexers.
 
-```JavaScript
+~~~js
 model.get(
     'genreLists[0..1].titles[0]["name", "rating"]').
     then(function(x) {
         console.log(JSON.stringify(x, null, 4));
     });
-```
+~~~
 
 The code above will produce the same console output as the last example.
 
@@ -240,7 +245,7 @@ Falcor makes it easy to work with JSON data. Unfortunately using JSON data to mo
 
 For example, when you watch a Netflix title, the title appears at the front of your "Recently Watched" genre list. If we were to watch house of cards, the JSON object would look like this:
 
-```JavaScript
+~~~js
 var cache = {
     genreLists: [
         {
@@ -270,11 +275,11 @@ var cache = {
         //, ... more genres
     ]
 };
-```
+~~~
 
 Notice that the "house of cards" title appears twice in the JSON object. Now let's say that I Netflix user give the title in the recently watchlist a rating of five. This is accomplished using the model's set operation.
 
-```JavaScript
+~~~js
 var model = new falcor.Model({cache: cache});
 
 model.setValue(
@@ -285,10 +290,10 @@ model.setValue(
     then(function(x) {
         console.log(JSON.stringify(x, null, 4));
     });
-```
+~~~
 
 The code above outputs the following to the console:
-```JavaScript
+~~~js
 {
     "json": {
         "genreLists": {
@@ -311,7 +316,7 @@ The code above outputs the following to the console:
         }
     }
 } 
-```
+~~~
 
 Now take a close look at the JSON object in the model. Noticed that the rating is only reflected in the "house of cards" object in the recently watched list. If the user scrolls down and sees the same title in the New releases list, the rating will not reflect their changes.
 
