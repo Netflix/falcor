@@ -68,7 +68,7 @@ function getSignatureAttributes(item) {
     var attributes = [];
 
     if (item.optional) {
-        attributes.push('opt');
+        attributes.push('optional');
     }
 
     if (item.nullable === true) {
@@ -170,7 +170,7 @@ function addSignatureReturns(f) {
     }
 
     f.signature = '<span class="signature">' + (f.signature || '') + '</span>' +
-        '<span class="type-signature">' + returnTypesString + '</span>';
+        '<span class="type-signature return-signature">' + returnTypesString + '</span>';
 }
 
 function addSignatureTypes(f) {

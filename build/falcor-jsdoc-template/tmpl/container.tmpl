@@ -20,7 +20,7 @@ title: "<?js= title ?>"
   <?js if (doc.kind === 'mainpage' || (doc.kind === 'package')) { ?>
       <?js= self.partial('mainpage.tmpl', doc) ?>
   <?js } else if (doc.kind === 'source') { ?>
-      <?js= self.partial('source.tmpl', doc) ?>
+      <?js= self.partial('source.tmpl', {doc: doc, fileName: title}) ?>
   <?js } else { ?>
 
   <section>
