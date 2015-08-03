@@ -1,6 +1,11 @@
 // Overall site variables. Inclues the bootstrap variables and some additions.
 @import './bootstrap-variables.less';
 
+@falcor-blue-dark: #0062AE;
+@falcor-purple-light: #D99EDB;
+@falcor-purple: #B987BB;
+@falcor-purple-dark: #934C98;
+
 // Nested images, code snippets, etc.
 @nested-item-border-color: #C7C7C7;
 @nested-item-margin: 10px 0;
@@ -12,15 +17,28 @@
 // The space between the navbar and where content on pages starts
 @site-content-padding-top: 20px;
 
-@falcor-blue-dark: #0062AE;
+// Widgets/modules such as the table of contents
 @module-background-blue: lighten(@falcor-blue-dark, 57%);
 
 // Table of contents
 @toc-width-lg: 32%;
 @toc-width-md: 32%;
 @toc-width-sm: 37%;
+// The space between the main page content and ToC
+@content-toc-gap: 40px;
 @toc-background: @module-background-blue;
-@toc-active-background: rgba(0, 0, 0, 18%);
+@toc-active-background: rgba(0, 0, 0, 21%);
 @toc-active-background-sub-item: rgba(0, 0, 0, 12%);
+@toc-active-background-sub-item-sub-item: rgba(0, 0, 0, 7%);
 @toc-indentation-per-level: 15px;
 @toc-link-color: @gray-darker;
+
+// API Documentation
+@section-function-background-color: lighten(@falcor-purple, 12%);
+@parameters-table-border-color: lighten(@gray, 40%);
+@parameters-table-border-width: 1px;
+@parameters-table-header-background-color: lighten(black, 80%);
+@parameters-table-header-color: @text-color;
+@token-attribute-background-color: lighten(black, 85%);
+@section-function-token-attribute-background-color: rgba(217, 217, 217, 0.5);
+@token-attribute-color: @gray-darker;
