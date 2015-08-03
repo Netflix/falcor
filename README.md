@@ -50,16 +50,11 @@ TODO list
 -----------------------------
 
 P1
-- fix z-index on method names in api docs
-- fix weird mobile 1safari scrolling issue on api docs
 - add open graph metadata to base template
 - verify social sharing metadata is set up and results in clean share visuals
-- improve type styles on api docs
-- finish documenting this repo
+- add skip to main link for AT users
 - improve intro animation perf
+- finish documenting this repo
 
 P2
 - add small footer that just acts like bottom padding? I can't find any other sites that do this, so I'm not sure if we want to.
-- figure out how to leave replay button in on mobile without cluttering the hero banner 
-
-idea: put the few large tables in the api docs into forcibly size-restricted containers that scroll so they can't overflow.

@@ -1,13 +1,12 @@
 .toc-page {
 
   .table-of-contents {
-    @content-toc-gap: 40px;
-    position: absolute;    
+    position: absolute;
     right: 0;
     top: 0;
     padding-left: @content-toc-gap;
     max-height: 90vh;
-    
+
     & > .nav {
       position: fixed;
       will-change: transform;
@@ -26,7 +25,7 @@
         width: 292px - @content-toc-gap;
       }
     }
-    
+
     @media (max-width: @screen-xs-max) {
       display: none;
     }
@@ -39,7 +38,7 @@
     @media (min-width: @screen-lg-min) {
       width: @toc-width-lg;
     }
-    
+
     // List styling overrides for ToC lists
     //
     // These selectors are messier than I'd like, because there's no
@@ -50,7 +49,7 @@
       padding-left: 0;
       list-style: none;
     }
-    
+
     // All level items / defaults
     .nav li > a, .nav li > span > a {
       color: @toc-link-color;
@@ -61,50 +60,59 @@
         text-decoration: underline;
       }
     }
-    .nav li.active{
-      & > a {
-        &, &:hover {
-          background-color: @toc-active-background-sub-item;
-        }
-      }
-    } 
-    
-    
+
+
     // First level items only
     .nav > li {
       padding-top: 10px;
-      & > a, & > span > a {
+      & > a {
         padding: 5px @toc-indentation-per-level 5px 15px;
         font-size: 16px;
-        
+
         &:hover {
           background: transparent;
         }
       }
-      &.active > a, &.active > span > a {
+      &.active > a {
         &, &:hover {
           background-color: @toc-active-background;
-        } 
+        }
       }
     }
-    
+
     // Second level items only
-    .nav > li > ul > li > a {
-      padding-left: @toc-indentation-per-level * 2;
-    }
-    
-    // Third level items only
-    .nav > li > ul > li > ul > li > a {
-      padding-left: @toc-indentation-per-level * 3;
-    }
-    
-    .nav > li > ul > li.active > a {
-      &, &:hover {
-        background-color: @toc-active-background-sub-item;        
+    .nav > li > ul > li {
+      & > a {
+        padding-left: @toc-indentation-per-level * 2;
+      }
+
+      &.active > a {
+        &, &:hover {
+          background-color: @toc-active-background-sub-item;
+        }
       }
     }
+
+    // Third level items only
+    .nav > li > ul > li > ul > li {
+      & > a {
+        padding-left: @toc-indentation-per-level * 3;
+      }
+
+      &.active > a {
+        &, &:hover {
+          background-color: @toc-active-background-sub-item-sub-item;
+        }
+      }
+    }
+
+    // .nav > li > ul > li.active > a {
+    //   &, &:hover {
+    //     background-color: @toc-active-background-sub-item;
+    //   }
+    // }
   }
-  
+
   // Page sizing, to account for the space the ToC is taking up
   @media (max-width: @screen-sm-max) {
     padding-right: 0;
@@ -118,7 +126,7 @@
   @media (min-width: @screen-lg-min) {
     padding-right: @toc-width-lg;
   }
-  
+
   /* Since we can't touch the html the TOC command generates, it looks mediocre
    until the page is ready and jquery can move it to its proper place. Until then,
    the not-ready class lets us hide it so the page doesn't jump suddenly.
@@ -126,7 +134,8 @@
   &.not-ready #markdown-toc {
     display: none;
   }
-  // Small hack so the anchors will align with the top of the content area
+
+  // Necessary hack so the anchors will align with the top of the content area
   // rather than the top of the page. Please read that page for limitations
   // of the method (this is method #2) before modifying header styles.
   // See http://nicolasgallagher.com/jump-links-and-viewport-positioning/
@@ -148,6 +157,6 @@
   h4 {
     margin-top: -1 * (@navbar-height + @site-content-padding-top) + @line-height-computed / 2;
   }
-  
-  
+
+
 }

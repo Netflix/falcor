@@ -1,280 +1,182 @@
 .api-page {
-  // Hide the method/type lists for all but the current page
-  .toc-api-class > .toc-api-methods {
-    display: none;
-  }
-  .toc-api-class.current-page > .toc-api-methods {
-    display: block;
-  }
-  .toc-api-type-list > .toc-api-types {
-    display: none;
-  }
-  .toc-api-type-list.current-page > .toc-api-types {
-    display: block;
-  }
-  
-  h4 {
-    line-height: 1.6;
-  }
-  
-  // Type signature looks awkward when split over two lines,
-  // so this will keep it together
-  .type-signature {
-    display: inline-block;
-  }
-  
-  .class-description {
-      font-size: 130%;
-      line-height: 140%;
-      margin-bottom: 1em;
-      margin-top: 1em;
-  }
+    // Hide the method/type lists for all but the current page
+    .toc-api-class > .toc-api-methods {
+        display: none;
+    }
+    .toc-api-class.current-page > .toc-api-methods {
+        display: block;
+    }
+    .toc-api-type-list > .toc-api-types {
+        display: none;
+    }
+    .toc-api-type-list.current-page > .toc-api-types {
+        display: block;
+    }
 
-  .class-description:empty {
-      margin: 0;
-  }
+    // Quick fix. TODO: look into why the line height is so off
+    // for the default h4 style
+    h4 {
+        line-height: 1.6;
+    }
+    
+    .method-section {
+        margin-bottom: 40px;
+    }
 
-  article dl {
-      margin-bottom: 40px;
-  }
+    // Remove the return type signature entirely for now, as the information
+    // is already displayed just below and it clutters up the line
+    .return-signature {
+        display: none;
+    }
 
-  .variation {
-      display: none;
-  }
+    .class-description:empty {
+        margin: 0;
+    }
 
-  .signature-attributes {
-      font-size: 60%;
-      color: @gray;
-      font-style: italic;
-  }
+    .variation {
+        display: none;
+    }
 
-  // nav ul {
-  //     font-family: 'Lucida Grande', 'Lucida Sans Unicode', arial, sans-serif;
-  //     font-size: 100%;
-  //     line-height: 17px;
-  //     padding: 0;
-  //     margin: 0;
-  //     list-style-type: none;
-  // }
-  //
-  // nav ul a, nav ul a:visited, nav ul a:active {
-  //     font-family: Consolas, Monaco, 'Andale Mono', monospace;
-  //     line-height: 18px;
-  //     color: #4D4E53;
-  // }
-  //
-  // nav h3 {
-  //     margin-top: 12px;
-  // }
-  //
-  // nav li {
-  //     margin-top: 6px;
-  // }
-  //
-  // footer {
-  //     display: block;
-  //     padding: 6px;
-  //     margin-top: 12px;
-  //     font-style: italic;
-  //     font-size: 90%;
-  // }
-  //
-  // h1, h2, h3, h4 {
-  //     font-weight: 200;
-  //     margin: 0;
-  // }
-  //
-  // h1
-  // {
-  //     font-family: 'Open Sans Light', sans-serif;
-  //     font-size: 48px;
-  //     letter-spacing: -2px;
-  //     margin: 12px 24px 20px;
-  // }
-  //
-  // h2, h3
-  // {
-  //     font-size: 30px;
-  //     font-weight: 700;
-  //     letter-spacing: -1px;
-  //     margin-bottom: 12px;
-  // }
-  //
-  // h4
-  // {
-  //     font-size: 18px;
-  //     letter-spacing: -0.33px;
-  //     margin-bottom: 12px;
-  //     color: #4d4e53;
-  // }
-  //
-  // h5, .container-overview .subsection-title
-  // {
-  //     font-size: 120%;
-  //     font-weight: bold;
-  //     letter-spacing: -0.01em;
-  //     margin: 8px 0 3px 0;
-  // }
-  //
-  // h6
-  // {
-  //     font-size: 100%;
-  //     letter-spacing: -0.01em;
-  //     margin: 6px 0 3px 0;
-  //     font-style: italic;
-  // }
+    // Deprecated. From original JSDocs template css. Can be carefully removed.
+    .details {
+        margin-top: 15px;
+        margin-bottom: 10px;
+        
+        dt {
+            float: left;
+        }
+        ul {
+            margin: 0;
+            list-style-type: none;
 
-  .ancestors { color: #999; }
-  .ancestors a
-  {
-      color: #999 !important;
-      text-decoration: none;
-  }
+            li {
+                margin-left: 30px;
+            }
+        }
+        pre.prettyprint {
+            margin: 0
+        }
+        .object-value {
+            padding-top: 0;
+        }
+    }
 
-  .clear
-  {
-      clear: both;
-  }
+    .code-caption {
+        font-style: italic;
+        font-size: 107%;
+        margin: 0;
+    }
 
-  .important
-  {
-      font-weight: bold;
-      color: #950B02;
-  }
 
-  .yes-def {
-      text-indent: -1000px;
-  }
+    // There is occasionally a table that's way too wide to fit in its
+    // area, and since tables don't collapse very responsively, we'll
+    // just have to fall back to horizontal scrolling so it's still usable
+    .parameters-section {
+        width: 100%;
+        overflow: auto;
+    }
 
-  .type-signature {
-      color: #aaa;
-  }
+    .params, .props
+    {
+        border-spacing: 0;
+        border: 0;
+        border-collapse: collapse;
+        max-width: 100%;
+    }
 
-  .name, .signature {
-      font-family: Consolas, Monaco, 'Andale Mono', monospace;
-  }
+    .params td,
+    .params th,
+    .props td,
+    .props th {
+        border: 1px solid @parameters-table-border-color;
+        margin: 0px;
+        text-align: left;
+        vertical-align: top;
+        padding: 4px 6px;
+        display: table-cell;
+    }
+    .params th, .props th {
+        color: @parameters-table-header-color;
+        background-color: @parameters-table-header-background-color;
+        font-weight: 500;
+    }
+    .header-name-and-attributes {
+        // Just enough to fit the necessary words in without ever wrapping
+        min-width: 137px;
+    }    
 
-  .details { margin-top: 14px; border-left: 2px solid #DDD; }
-  .details dt { width: 120px; float: left; padding-left: 10px;  padding-top: 6px; }
-  .details dd { margin-left: 70px; }
-  .details ul { margin: 0; }
-  .details ul { list-style-type: none; }
-  .details li { margin-left: 30px; padding-top: 6px; }
-  .details pre.prettyprint { margin: 0 }
-  .details .object-value { padding-top: 0; }
+    // Type and token styles
+    .name {
+        background-color: transparent;
+        padding-left: 0;
+        padding-right: 0;
+    }
+    
+    // Function name headers (including the constructor)
+    .name.function-name {
+        background-color: @section-function-background-color;
+        padding: 3px 5px;
+        
+        .signature-attributes {
+            background-color: @section-function-token-attribute-background-color
+        }
+    }
+    .name, .signature {
+        font-family: @font-family-monospace;
+    }
+    .attribute, .signature-attributes {
+        display: inline-block;
+        position: relative;
+        // same as the padding, so the baseline appears consistent
+        top: -2px;
+        padding: 2px 4px;
+        border-radius: 2px;
+        background-color: @token-attribute-background-color;
+        color: @token-attribute-color;
+        font-style: normal;
+    }
+    .signature-attributes {
+        font-size: 0.6em;
+    }
 
-  .description {
-      margin-bottom: 1em;
-      margin-top: 1em;
-  }
+    .tag-deprecated
+    {
+        font-weight: bold;
+        color: #FF3146;
+    }
+    
+    // Standalone code page code pretty printing widget
+    .prettyprint {
+        &.source {
+            width: inherit;
+        }
 
-  .code-caption
-  {
-      font-style: italic;
-      font-size: 107%;
-      margin: 0;
-  }
+        & code span.line {
+            display: inline-block;
+        }
 
-  .prettyprint.source {
-      width: inherit;
-  }
+        &.linenums {
+            user-select: none;
+            padding-left: 60px;
+            ol {
+                padding-left: 0;
+            }
 
-  .prettyprint code
-  {
-      font-size: 100%;
-      line-height: 18px;
-      display: block;
-      padding: 4px 12px;
-      margin: 0;
-      background-color: #fff;
-      color: #4D4E53;
-  }
 
-  .prettyprint code span.line
-  {
-    display: inline-block;
-  }
+            li.selected, li.selected * {
+                background-color: lightyellow;
+            }
 
-  .prettyprint.linenums
-  {
-    padding-left: 70px;
-    user-select: none;
-  }
+            li * {
+                user-select: text;
+            }
+        }
+    }
+    
 
-  .prettyprint.linenums ol
-  {
-    padding-left: 0;
-  }
-
-  .prettyprint.linenums li
-  {
-    border-left: 3px #ddd solid;
-  }
-
-  .prettyprint.linenums li.selected,
-  .prettyprint.linenums li.selected *
-  {
-    background-color: lightyellow;
-  }
-
-  .prettyprint.linenums li *
-  {
-    user-select: text;
-  }
-
-  .params, .props
-  {
-      border-spacing: 0;
-      border: 0;
-      border-collapse: collapse;
-  }
-
-  .params .name, .props .name, .name code {
-      color: #4D4E53;
-      font-family: Consolas, Monaco, 'Andale Mono', monospace;
-      font-size: 100%;
-  }
-
-  .params td, .params th, .props td, .props th
-  {
-      border: 1px solid #ddd;
-      margin: 0px;
-      text-align: left;
-      vertical-align: top;
-      padding: 4px 6px;
-      display: table-cell;
-  }
-
-  .params thead tr, .props thead tr
-  {
-      background-color: #ddd;
-      font-weight: bold;
-  }
-
-  .params .params thead tr, .props .props thead tr
-  {
-      background-color: #fff;
-      font-weight: bold;
-  }
-
-  .params th, .props th { border-right: 1px solid #aaa; }
-  .params thead .last, .props thead .last { border-right: 1px solid #ddd; }
-
-  .params td.description > p:first-child,
-  .props td.description > p:first-child
-  {
-      margin-top: 0;
-      padding-top: 0;
-  }
-
-  .params td.description > p:last-child,
-  .props td.description > p:last-child
-  {
-      margin-bottom: 0;
-      padding-bottom: 0;
-  }
-
-  .disabled {
-      color: #454545;
-  }
+    // From the default JSDoc template. Appears to only be used in conjunction with
+    // deprecated taags
+    .yes-def {
+        text-indent: -1000px;
+    }
 }
