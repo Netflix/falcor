@@ -50,8 +50,7 @@ TODO list
 -----------------------------
 
 P1
-- verify social sharing metadata is set up and results in clean share visuals
-- browser test
+- second round of browser tests
 
 P2
 - gather more data on and improve intro animation perf if possible
