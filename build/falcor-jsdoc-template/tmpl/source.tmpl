@@ -1,8 +1,11 @@
 <?js
-    var data = obj;
+    var data = obj.doc;
 ?>
-    <section>
-        <article>
-            <pre class="prettyprint source linenums"><code><?js= data.code ?></code></pre>
-        </article>
-    </section>
+<h2>
+    <?js= obj.fileName ?>
+</h2>
+<section>
+    <article>
+        <pre class="prettyprint source linenums"><code><?js= data.code ?></code></pre>
+    </article>
+</section>
