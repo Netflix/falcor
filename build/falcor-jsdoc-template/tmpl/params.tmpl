@@ -55,20 +55,21 @@
         <thead>
         <tr>
             <?js if (params.hasName) {?>
-            <th>Name</th>
+            <th class="header-name-and-attributes">
+              Name
+              <?js if (params.hasAttributes) {?>
+                &amp; Attributes
+              <?js } ?>
+            </th>
             <?js } ?>
 
-            <th>Type</th>
-
-            <?js if (params.hasAttributes) {?>
-            <th>Attributes</th>
-            <?js } ?>
+            <th class="header-type">Type</th>
 
             <?js if (params.hasDefault) {?>
-            <th>Default</th>
+            <th class="header-default">Default</th>
             <?js } ?>
 
-            <th class="last">Description</th>
+            <th class="last header-description">Description</th>
         </tr>
         </thead>
 
@@ -81,7 +82,25 @@
 
             <tr>
                 <?js if (params.hasName) {?>
-                    <td class="name"><code><?js= param.name ?></code></td>
+                    <td>
+                        <span class="name"><?js= param.name ?></span>
+                        <?js if (params.hasAttributes) {?>
+                            <?js if (param.optional) { ?>
+                                <br>
+                                <span class="attribute">optional</span>
+                            <?js } ?>
+                        
+                            <?js if (param.nullable) { ?>
+                                <br>
+                                <span class="attribute">nullable</span>
+                            <?js } ?>
+                        
+                            <?js if (param.variable) { ?>
+                                <br>
+                                <span class="attribute">repeatable</span>
+                            <?js } ?>
+                        <?js } ?>
+                    </td>
                 <?js } ?>
 
                 <td class="type">
@@ -89,22 +108,6 @@
                     <?js= self.partial('type.tmpl', param.type.names) ?>
                 <?js } ?>
                 </td>
-
-                <?js if (params.hasAttributes) {?>
-                    <td class="attributes">
-                    <?js if (param.optional) { ?>
-                        &lt;optional><br>
-                    <?js } ?>
-
-                    <?js if (param.nullable) { ?>
-                        &lt;nullable><br>
-                    <?js } ?>
-
-                    <?js if (param.variable) { ?>
-                        &lt;repeatable><br>
-                    <?js } ?>
-                    </td>
-                <?js } ?>
 
                 <?js if (params.hasDefault) {?>
                     <td class="default">
