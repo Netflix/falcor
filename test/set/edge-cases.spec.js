@@ -4,6 +4,8 @@ var expect = require('chai').expect;
 var $path = require("./../../lib/types/ref");
 var $atom = require("./../../lib/types/atom");
 var testRunner = require('../testRunner');
+var sinon = require('sinon');
+var noOp = function() {};
 
 describe("Special Cases", function() {
     it('should set the cache in.', function() {
