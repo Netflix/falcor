@@ -220,7 +220,13 @@ var server = app.listen(80);
 
 The virtual model exposes the entire JSON model at a single URL and accepts one or more paths in the query string. This allows the client to request as much of the graph as it needs within in a single HTTP request.
 
-For more information on the router, see
+## Additional Resources
+
+For detailed high-level documentation explaining the Model, the Router, and JSON Graph check out the [Falcor website](http://netflix.github.io/falcor).
+
+For API documentation, go [here](http://netflix.github.io/falcor/doc/Model.html)
+
+For a working example of a Router, check out the [falcor-router-demo](http://github.com/netflix/router-demo).
 
 ## Learn Falcor: Video Tutorials
 
