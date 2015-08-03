@@ -50,11 +50,13 @@ TODO list
 -----------------------------
 
 P1
+- fix z-index on method names in api docs
+- fix weird mobile 1safari scrolling issue on api docs
 - add open graph metadata to base template
 - verify social sharing metadata is set up and results in clean share visuals
-- fix intro animation in firefox
 - improve type styles on api docs
 - finish documenting this repo
+- improve intro animation perf
 
 P2
 - add small footer that just acts like bottom padding? I can't find any other sites that do this, so I'm not sure if we want to.
