@@ -50,11 +50,9 @@ TODO list
 -----------------------------
 
 P1
-- add open graph metadata to base template
 - verify social sharing metadata is set up and results in clean share visuals
-- add skip to main link for AT users
-- improve intro animation perf
-- finish documenting this repo
+- browser test
 
 P2
+- gather more data on and improve intro animation perf if possible
 - add small footer that just acts like bottom padding? I can't find any other sites that do this, so I'm not sure if we want to.
