@@ -3,5 +3,4 @@ module.exports = function() {
     require('./set.json-sparse.spec');
     require('./set.json-graph.spec');
     require('./edge-cases.spec');
-    require('./set.atom.js');
 };
