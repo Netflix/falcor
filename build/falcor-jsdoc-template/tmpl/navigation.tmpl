@@ -66,9 +66,7 @@
                     </ul>
                 </li>
                 <li class="toc-api-type-list <?js= currentDoc.kind === 'globalobj' ? 'current-page' : '' ?>">
-                    <span class="toc-api-section-title">
-                        <?js= self.linkto('global', 'Types') ?>
-                    </span>
+                    <?js= self.linkto('global', 'Types') ?>
                     <ul class="toc-api-types">
                         <?js _.each(typeDocs, function (typeDoc) { ?>
                             <li class="toc-api-type">
