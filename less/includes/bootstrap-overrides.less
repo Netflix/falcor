@@ -3,6 +3,9 @@
 // ========================================
 // = Bootstrap Overrides and Enhancements =
 // ========================================
+
+// Navbar
+//--------------
 .navbar-nav .dropdown-menu > li > a:hover {
   text-decoration: underline;
 }
@@ -12,14 +15,45 @@
   font-size: 16px;
 }
 
-.navbar-nav .dropdown > .dropdown-menu {
-  opacity: 0;
-  transition: opacity 2s;
+// Performance optimization for navbar since it's position fixed
+.navbar-fixed-top {
+  will-change: transform;
 }
 
-.navbar-nav .dropdown.open > .dropdown-menu {
-  opacity: 1;
+.navbar-brand > .navbar-logo {
+  height: 25px;
+  // correct for rounding so it perfectly aligns with the other text's baseline
+  margin-top: -1px;
+  margin-right: 20px;
 }
+
+// Make the mobile menu button equally distant from the edge compared to the logo
+.navbar-toggle {
+  padding-right: 0px;
+}
+
+.navbar-github-link > li > a {
+  padding-right: 0;
+}
+
+.navbar-inverse .navbar-nav > li {
+  & > a:hover, &.open > a, &.active > a:hover {
+    color: white;
+  }
+}
+
+// Active location highlighting
+.navbar-nav > .active {
+  background-color: #4A4A4A;
+  
+  & .dropdown-menu > .active {
+    & > a, & > a:hover {
+      background-color: #4A4A4A;
+      color: @dropdown-link-color;
+    }
+  }
+}
+
 
 // Force scrollbars rather than wrapping in embedded code snippets
 pre {

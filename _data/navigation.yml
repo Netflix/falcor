@@ -26,7 +26,8 @@
     - model
 
 - 
-  # If a first level menu item isn't a dropdown menu, you can give it an
-  # id to link it straight to a page or a title and a path to link to a relative url
+  # If a first level menu item isn't a dropdown menu, you can give it just an
+  # id to link it straight to a page or an id, title and path to link to a relative url
   title: API Reference
+  id: api
   path: "/doc/Model.html"
