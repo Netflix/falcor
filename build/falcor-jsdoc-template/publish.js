@@ -243,8 +243,7 @@ function generateSourceFiles(sourceFiles, encoding) {
             logger.error('Error while generating source file %s: %s', file, e.message);
         }
 
-        generate('Source: ' + sourceFiles[file].shortened, [source], sourceOutfile,
-            false);
+        generate(sourceFiles[file].shortened, [source], sourceOutfile, false);
     });
 }
 
