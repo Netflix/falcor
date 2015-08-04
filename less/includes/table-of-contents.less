@@ -134,29 +134,4 @@
   &.not-ready #markdown-toc {
     display: none;
   }
-
-  // Necessary hack so the anchors will align with the top of the content area
-  // rather than the top of the page. Please read that page for limitations
-  // of the method (this is method #2) before modifying header styles.
-  // See http://nicolasgallagher.com/jump-links-and-viewport-positioning/
-  // Additionally modified to set manual z index stacking order so code snippets
-  // never fall behind a subsequent header and lose clickable area
-  // pre {
-  //   position: relative;
-  //   z-index: 2;
-  // }
-  h1, h2, h3, h4 {
-    position: relative;
-    border-top: (@navbar-height + @site-content-padding-top) solid transparent;
-    // subtract the height of the border, then re-add bootstrap's standard margin
-    // so the style appears the same as before the hack
-    margin-top: -1 * (@navbar-height + @site-content-padding-top) + @line-height-computed;
-    background-clip: padding-box;
-    z-index: -1;
-  }
-  h4 {
-    margin-top: -1 * (@navbar-height + @site-content-padding-top) + @line-height-computed / 2;
-  }
-
-
 }
