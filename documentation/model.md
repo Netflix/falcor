@@ -638,13 +638,13 @@ dataSource.
         ])      
 ~~~
 
-Let's say that the JSON Graph object that the DataSource manages looks like this:
+Let's say that the JSON Graph object managed by the DataSource looks like this:
 
 ~~~js
 {
     todos: [
-        ["todosById", 44],
-        ["todosById", 54]
+        { $type: "ref", value: ["todosById", 44] },
+        { $type: "ref", value: ["todosById", 54] }
     ],
     todosById: {
         "44": {
@@ -664,9 +664,9 @@ After the DataSource executes the add function on the todos list, the JSON Graph
 ~~~js
 {
     todos: [
-        ["todosById", 44],
-        ["todosById", 54],
-        ["todosById", 93]
+        { $type: "ref", value: ["todosById", 44] },
+        { $type: "ref", value: ["todosById", 54] },
+        { $type: "ref", value: ["todosById", 93] }
     ],
     todosById: {
         "44": {
@@ -737,7 +737,7 @@ Functions might change any number of values in the DataSource's JSONGraph object
 }
 ~~~
 
-When a Model receives a JSONGraphEnvelope from the DataSource, it removes the cached values at each of the paths at the "invalidated" paths array. The "todos.add" function's response ensures Model cache consistency by invalidating the length of the todos list, which the function changed. 
+When a Model receives a JSONGraphEnvelope from the DataSource, it removes the cached values at each of the paths at the "invalidated" paths array. The "todos.add" function response ensures Model cache consistency by invalidating the length of the todos list, which the function changed. 
 
 To allow the Model to retrieve data from the newly-created task object, the JSONGraphEnvelope response contains the reference to the newly-created task object in the "todosById" map. 
 
@@ -784,8 +784,41 @@ The DataSource appends each of the paths in the returnValuePathSets to the paths
 ]
 ~~~
 
-The DataSource then attempts to retrieve these PathSets, and adds the values to the JSONGraphEnvelope returned by the function.
+The DataSource then attempts to retrieve these PathSets, and adds the values to the JSONGraphEnvelope returned by the function. This yields the following response:
 
+~~~js
+{
+    paths: [
+        ["todos", 2]
+    ],
+    jsonGraph: {
+        todos: {
+            2: { $type: "ref", value: ["todosById", 93] }
+        },
+        todosById: {
+            "93": {
+                name: "pick up some eggs",
+                done: false
+            }
+        }
+    },
+    invalidated: [
+        ["todos", "length"]
+    ]
+}
+~~~
+
+Notice that the response above now contains the "name" and "done" fields of the newly added task object. Using the returnValuePathSets argument, we are able to retrieve values from object references returned from the function.
+
+Now that the function has run successfully, and the values have been retrieved from the references in the response, the "thisPathSets" paths are retrieved from the function's "this" object. Recall that we requested the following path from the "this" object:
+
+~~~js
+[
+    ["length"]
+]  
+~~~
+
+The DataSource appends each one of the "thisPathSets" to the function path ["todos", "add"]
 # Working with JSON Graph Data using a Model
 
 In addition to being able to work with JSON documents, Models can also operate on JSON Graph documents. JSON Graph is a convention for modeling graph information in JSON. JSON Graph documents extend JSON with **References**. References can be used anywhere within a JSON object to refer to a value elsewhere within the same JSON object. This removes the need to duplicate objects when serializing a graph into a hierarchical JSON object.
