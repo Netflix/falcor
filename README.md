@@ -49,9 +49,6 @@ Every page can use jekyll's [frontmatter](http://jekyllrb.com/docs/frontmatter/ 
 TODO list
 -----------------------------
 
-P1
-- second round of browser tests
-
 P2
 - gather more data on and improve intro animation perf if possible
 - add small footer that just acts like bottom padding? I can't find any other sites that do this, so I'm not sure if we want to.
