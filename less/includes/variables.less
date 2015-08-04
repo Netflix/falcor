@@ -2,6 +2,7 @@
 @import './bootstrap-variables.less';
 
 @falcor-blue-dark: #0062AE;
+@falcor-blue: #BFE6FF;
 @falcor-purple-light: #D99EDB;
 @falcor-purple: #B987BB;
 @falcor-purple-dark: #934C98;
@@ -18,7 +19,7 @@
 @site-content-padding-top: 20px;
 
 // Widgets/modules such as the table of contents
-@module-background-blue: lighten(@falcor-blue-dark, 57%);
+@module-background-blue: @falcor-blue;
 
 // Table of contents
 @toc-width-lg: 32%;
@@ -27,14 +28,14 @@
 // The space between the main page content and ToC
 @content-toc-gap: 40px;
 @toc-background: @module-background-blue;
-@toc-active-background: rgba(0, 0, 0, 21%);
-@toc-active-background-sub-item: rgba(0, 0, 0, 12%);
-@toc-active-background-sub-item-sub-item: rgba(0, 0, 0, 7%);
+@toc-active-background: rgba(0, 0, 0, 15%);
+@toc-active-background-sub-item: rgba(0, 0, 0, 11%);
+@toc-active-background-sub-item-sub-item: rgba(0, 0, 0, 8%);
 @toc-indentation-per-level: 15px;
 @toc-link-color: @gray-darker;
 
 // API Documentation
-@section-function-background-color: lighten(@falcor-purple, 12%);
+@section-header-background-color: lighten(@falcor-purple, 12%);
 @parameters-table-border-color: lighten(@gray, 40%);
 @parameters-table-border-width: 1px;
 @parameters-table-header-background-color: lighten(black, 80%);

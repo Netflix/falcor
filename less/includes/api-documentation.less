@@ -13,13 +13,13 @@
         display: block;
     }
 
-    // Quick fix. TODO: look into why the line height is so off
-    // for the default h4 style
+    // Quick fix in case the line wraps, since the default doesn't
+    // leave enough space between lines in this instance
     h4 {
         line-height: 1.6;
     }
     
-    .method-section {
+    .method-section, .member-section {
         margin-bottom: 40px;
     }
 
@@ -37,20 +37,20 @@
         display: none;
     }
 
-    // Deprecated. From original JSDocs template css. Can be carefully removed.
-    .details {
-        margin-top: 15px;
+    .details, .member-type, .return-type {
+        margin-top: 20px;
         margin-bottom: 10px;
         
         dt {
             float: left;
+            padding-right: 5px;
         }
         ul {
             margin: 0;
             list-style-type: none;
 
             li {
-                margin-left: 30px;
+                margin-left: 15px;
             }
         }
         pre.prettyprint {
@@ -63,7 +63,6 @@
 
     .code-caption {
         font-style: italic;
-        font-size: 107%;
         margin: 0;
     }
 
@@ -81,7 +80,6 @@
         border-spacing: 0;
         border: 0;
         border-collapse: collapse;
-        max-width: 100%;
     }
 
     .params td,
@@ -113,8 +111,8 @@
     }
     
     // Function name headers (including the constructor)
-    .name.function-name {
-        background-color: @section-function-background-color;
+    .section-header.name {
+        background-color: @section-header-background-color;
         padding: 3px 5px;
         
         .signature-attributes {
