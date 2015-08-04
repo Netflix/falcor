@@ -5,6 +5,7 @@
     right: 0;
     top: 0;
     padding-left: @content-toc-gap;
+    // TODO: Fix
     max-height: 90vh;
 
     & > .nav {
@@ -12,7 +13,6 @@
       will-change: transform;
       padding: 0 0 7px 0;
       background-color: @toc-background;
-      // alternate base background colors to try #26B2E7, #B987BB, #8BBE2D
 
       // Since the TOC is position: fixed, it must be manually sized
       @media (min-width: @screen-sm-min) and (max-width: @screen-sm-max) {
@@ -51,22 +51,30 @@
     }
 
     // All level items / defaults
-    .nav li > a, .nav li > span > a {
-      color: @toc-link-color;
-      display: block;
-      padding-top: 1px;
-      padding-bottom: 1px;
-      &:hover {
-        text-decoration: underline;
+    .nav li {
+      & > a, & > span {
+        display: block;
+        padding-top: 1px;
+        padding-bottom: 1px;
+        padding-right: 15px;
+        
+      }
+      & > a {
+        color: @toc-link-color;
+        &:hover {
+          text-decoration: underline;
+        }
+      }
+      &.active > a, &.active > a:hover {
+        font-weight: 500;
       }
     }
-
 
     // First level items only
     .nav > li {
       padding-top: 10px;
       & > a {
-        padding: 5px @toc-indentation-per-level 5px 15px;
+        padding: 5px 10px 5px @toc-indentation-per-level;
         font-size: 16px;
 
         &:hover {
@@ -94,23 +102,31 @@
     }
 
     // Third level items only
-    .nav > li > ul > li > ul > li {
-      & > a {
-        padding-left: @toc-indentation-per-level * 3;
+    .nav > li > ul > li {
+      & > .toc-api-subgroup {
+        padding-top: 4px;
+        padding-bottom: 4px;
       }
+      & > ul > li {
+        & > a, & > .toc-api-subgroup-title {
+          padding-left: @toc-indentation-per-level * 3;
+        }
+        & > .toc-api-subgroup-title {
+          font-weight: 700;
+          text-style: italic;
+          color: @toc-subgroup-title-color;
+          // Just looks nicer since that region is specifically for clickable
+          // navigation items and headers, not text to be selected
+          cursor: default;
+        }
 
-      &.active > a {
-        &, &:hover {
-          background-color: @toc-active-background-sub-item-sub-item;
+        &.active > a {
+          &, &:hover {
+            background-color: @toc-active-background-sub-item-sub-item;
+          }
         }
       }
-    }
-
-    // .nav > li > ul > li.active > a {
-    //   &, &:hover {
-    //     background-color: @toc-active-background-sub-item;
-    //   }
-    // }
+    } 
   }
 
   // Page sizing, to account for the space the ToC is taking up
