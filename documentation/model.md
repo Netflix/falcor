@@ -818,7 +818,14 @@ Now that the function has run successfully, and the values have been retrieved f
 ]  
 ~~~
 
-The DataSource appends each one of the "thisPathSets" to the function path ["todos", "add"]
+The DataSource appends each one of the "thisPathSets" to the function path, yielding the following paths:
+
+~~~js
+[
+    ["todos", "length"]
+]  
+~~~
+
 # Working with JSON Graph Data using a Model
 
 In addition to being able to work with JSON documents, Models can also operate on JSON Graph documents. JSON Graph is a convention for modeling graph information in JSON. JSON Graph documents extend JSON with **References**. References can be used anywhere within a JSON object to refer to a value elsewhere within the same JSON object. This removes the need to duplicate objects when serializing a graph into a hierarchical JSON object.
