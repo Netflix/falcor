@@ -8,9 +8,9 @@ if (data.description) {
 <?js } ?>
 
 <?js if (data.type && data.type.names) {?>
-<dl>
+<dl class="return-type">
     <dt>
-        Type
+        Return Type: 
     </dt>
     <dd>
         <?js= this.partial('type.tmpl', data.type.names) ?>
