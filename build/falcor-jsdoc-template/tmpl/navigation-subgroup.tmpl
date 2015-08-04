@@ -1,0 +1,18 @@
+<?js
+    var docs = obj.docs;
+    var title = obj.title;
+    var id = obj.groupId;
+    var self = this;
+?>
+<?js if (docs.length) { ?>
+    <ul class="toc-api-subgroup toc-api-subgroup-<?js= id ?>">
+        <li>
+            <span class="toc-api-subgroup-title"><?js= title ?></span>
+        </li>
+        <?js _.each(docs, function (doc) { ?>
+            <li class="toc-api-subgroup-item">
+                <?js= self.linkToWithTarget(doc) ?>
+            </li>
+        <?js }) ?> 
+    </ul>
+<?js } ?>

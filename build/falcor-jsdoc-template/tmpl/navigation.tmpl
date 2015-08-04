@@ -10,21 +10,6 @@
         // So far I haven't encountered any pages with more than one doc in the doclist, but
         // based on the original template I'm guessing it's possible
         var currentDoc = _.first(docs);
-    
-        // escapes weird characters that jsdoc puts in ids but jquery chokes on
-        var escapeDocId = function (docId) {
-          return docId.replace(/(:|\.|\[|\]|,|~)/g, '\\$1');
-        };
-        // Returns a link just like linkto, but with an id to its target header on
-        // the page added so bootstrap scrollspy can pick it up use it to work.
-        // Also sanitizes the input because jsdoc uses all sorts of weird characters
-        // in their ids. Optionally, link text can be passed in to use instead of
-        // the doc's name inside the link.
-        var linkToWithTarget = function (doc, linkText) {
-          var linkTag = self.linkto(doc.longname, linkText || doc.name);
-          return linkTag.slice(0, linkTag.indexOf('>')) + ' data-target="#' +
-            escapeDocId(doc.id) + '"' + linkTag.slice(linkTag.indexOf('>'));
-        };
         ?>
 
         <?js if (docs && docs.length > 0) { ?>
@@ -44,7 +29,7 @@
                     <ul class="toc-api-classes">
                         <?js _.each(classDocs, function (classDoc) { ?>
                             <li class="toc-api-class <?js= currentDoc.longname === classDoc.longname ? 'current-page' : '' ?>">
-                                <?js= linkToWithTarget(classDoc) ?>
+                                <?js= self.linkToWithTarget(classDoc) ?>
                                 <?js 
                                     var methodDocs = getSubDocs(classDoc, 'function');
                                     var typeDocs = getSubDocs(classDoc, 'typedef');
@@ -52,25 +37,19 @@
                                     // for now just combine them
                                     var subDocs = methodDocs.concat(eventDocs, typeDocs);
                                 ?>
-                                <?js if (subDocs.length) { ?>
-                                    <ul class="toc-api-methods">
-                                        <?js _.each(subDocs, function (subDoc) { ?>
-                                            <li class="toc-api-method">
-                                                <?js= linkToWithTarget(subDoc) ?>
-                                            </li>
-                                        <?js }) ?> 
-                                    </ul>
-                                <?js } ?>
+                                <?js= self.partial('navigation-subgroup.tmpl', {docs: methodDocs, title: 'Methods', groupId: 'methods'}) ?>
+                                <?js= self.partial('navigation-subgroup.tmpl', {docs: typeDocs, title: 'Types', groupId: 'types'}) ?>
+                                <?js= self.partial('navigation-subgroup.tmpl', {docs: eventDocs, title: 'Events', groupId: 'events'}) ?>
                             </li>
                         <?js }) ?>
                     </ul>
                 </li>
                 <li class="toc-api-type-list <?js= currentDoc.kind === 'globalobj' ? 'current-page' : '' ?>">
-                    <?js= self.linkto('global', 'Types') ?>
+                    <?js= self.linkto('global', 'Global Types') ?>
                     <ul class="toc-api-types">
                         <?js _.each(typeDocs, function (typeDoc) { ?>
                             <li class="toc-api-type">
-                                <?js= linkToWithTarget(typeDoc) ?>
+                                <?js= self.linkToWithTarget(typeDoc) ?>
                             </li>
                         <?js }) ?>
                     </ul>

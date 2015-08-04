@@ -320,6 +320,23 @@ function linktoExternal(longName, name) {
     return linkto(longName, name.replace(/(^"|"$)/g, ''));
 }
 
+// escapes weird characters that jsdoc puts in ids but jquery chokes on
+function escapeDocId(docId) {
+  return docId.replace(/(:|\.|\[|\]|,|~)/g, '\\$1');
+};
+
+// Returns a link just like linkto, but with an id to its target header on
+// the page added so bootstrap scrollspy can pick it up use it to work.
+// Also sanitizes the input because jsdoc uses all sorts of weird characters
+// in their ids. Optionally, link text can be passed in to use instead of
+// the doc's name inside the link.
+function linkToWithTarget(doc, linkText) {
+  var linkTag = linkto(doc.longname, linkText || doc.name);
+  return linkTag.slice(0, linkTag.indexOf('>')) + ' data-target="#' +
+    escapeDocId(doc.id) + '"' + linkTag.slice(linkTag.indexOf('>'));
+};
+
+
 /**
  * Create the navigation sidebar.
  * @param {object} members The members that will be used to create the sidebar.
@@ -554,6 +571,7 @@ exports.publish = function(taffyData, opts, tutorials) {
     // add template helpers
     view.find = find;
     view.linkto = linkto;
+    view.linkToWithTarget = linkToWithTarget;
     view.resolveAuthorLinks = resolveAuthorLinks;
     view.tutoriallink = tutoriallink;
     view.htmlsafe = htmlsafe;
