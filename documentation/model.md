@@ -592,6 +592,16 @@ A function is not obligated to return all of the changes that it makes to its "t
 
 After the returnValuePathSets have been evaluated against any JSON Graph References returned by the function and added to the JSONGraphEnvelope Response, each PathSet in the thisPathSets array is evaluated on the function's "this" object. The resulting values are added to the JSON Graph Response returned by the DataSource's call method.
 
+### How Call Works
+
+When a JSON Graph function is called using a Model, the following steps are executed in order:
+
+1. The Model immediately forwards the call to its DataSource.
+2. The DataSource executes the abstract JSON Graph call operation on the function, receiving a JSONGraphEnvelope in response. The function's response contains a subset of the DataSource's JSON Graph object after the function's successful completion. It also may optionally include an Array of "invalidated" PathSets which may have been changed by the function. 
+3. If the function added any new objects to the JSON Graph, references to these objects are typically included in its response. The function caller can retrieve values from these newly-created objects by specifying returnValuePathSets alongside the other arguments to the call method (callPath, arguments, etc). If returnValuePathSets have been specified, the DataSource attempts to retrieve each of these PathSets from the objects located at the references included in the function's response. Once the DataSource has retrieved these values, it adds them to the JSON Graph subset in the function's response. 
+4. Finally the DataSource attempts to retrieve each PathSet in the "thisPathSets" argument from the functions "this" object. The resulting subset of the DataSource's JSON Graph is added to the function's response, and returned to the Model.
+5. Upon receiving the response from the DataSource, The Model removes all of the "invalidated" paths from the cache, merges the data in the response into its cache, and returns a JSON version of the response to the caller.
+
 ### Call In Action
 
 In the example below, we add a new task to a TODOs list by invoking the add function on the TODOs list:
