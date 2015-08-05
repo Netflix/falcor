@@ -7234,6 +7234,7 @@ var arrayAppend = require(78);
 var isExpired = require(99);
 var isPrimitive = require(105);
 var isObject = require(103);
+var isArray = Array.isArray;
 
 var promote = require(48);
 
@@ -7292,6 +7293,11 @@ function walkPathMap(onNode, onValueType, pathmap, keysStack, depth, roots, pare
     }
 
     var keys = keysStack[depth] = Object.keys(pathmap);
+
+    // Force in the arrays hidden field length.
+    if (isArray(pathmap)) {
+        keys[keys.length] = "length";
+    }
 
     if (keys.length === 0) {
         return onValueType(pathmap, keysStack, depth, roots, parents, nodes, requested, optimized, key, keyset);
@@ -7358,6 +7364,7 @@ var arrayAppend = require(78);
 var isExpired = require(99);
 var isPrimitive = require(105);
 var isObject = require(103);
+var isArray = Array.isArray;
 
 var promote = require(48);
 
@@ -7420,6 +7427,11 @@ function walkPathMap(onNode, onValueType, pathmap, keysStack, depth, roots, pare
     }
 
     var keys = keysStack[depth] = Object.keys(pathmap);
+
+    // Force in the arrays hidden field length.
+    if (isArray(pathmap)) {
+        keys[keys.length] = "length";
+    }
 
     if (keys.length === 0) {
         return onValueType(pathmap, keysStack, depth, roots, parents, nodes, requested, optimized, key, keyset);
