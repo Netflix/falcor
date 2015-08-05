@@ -6,8 +6,31 @@ var $atom = require("./../../lib/types/atom");
 var testRunner = require('../testRunner');
 var sinon = require('sinon');
 var noOp = function() {};
+var Rx = require('rx');
+var Observable = Rx.Observable;
 
 describe("Special Cases", function() {
+    it('should set in an array and the length should be set in.', function(done) {
+        var model = new Model();
+        var onNext = sinon.spy();
+        model.
+            set({
+                json: {
+                    foo: ['bar']
+                }
+            }).
+            flatMap(function() {
+                return model.get('foo.length');
+            }).
+            doAction(onNext).
+            doAction(noOp, noOp, function() {
+                expect(onNext.calledOnce).to.be.ok;
+                expect(onNext.getCall(0).args[0]).to.deep.equals({
+                    json: {foo: { length: 1 } }
+                });
+            }).
+            subscribe(noOp, done, done);
+    });
     it('should set the cache in.', function() {
         var model = new Model({cache: {}});
         var edgeCaseCache = {
