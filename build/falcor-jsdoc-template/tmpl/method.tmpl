@@ -8,7 +8,7 @@ var self = this;
         <h2>Constructor</h2>
         <?js } ?>
 
-        <h4 class="name function-name" id="<?js= id ?>"><?js= data.attribs + (kind === 'class' ? 'new ' : '') +
+        <h4 class="name section-header function-name" id="<?js= id ?>"><?js= data.attribs + (kind === 'class' ? 'new ' : '') +
         name + (data.signature || '') ?></h4>
 
         <?js if (data.summary) { ?>
@@ -89,7 +89,9 @@ var self = this;
     } } ?>
 
     <?js if (data.returns && returns.length) { ?>
-    <h5>Returns:</h5>
+    <?js if (data.returns.length > 1 || data.returns[0].description) { ?>
+        <h5>Returns:</h5>
+    <?js } ?>
     <?js if (returns.length > 1) { ?><ul><?js
         returns.forEach(function(r) { ?>
             <li><?js= self.partial('returns.tmpl', r) ?></li>
