@@ -818,13 +818,41 @@ Now that the function has run successfully, and the values have been retrieved f
 ]  
 ~~~
 
-The DataSource appends each one of the "thisPathSets" to the function path, yielding the following paths:
+The DataSource appends each one of the "thisPathSets" (there is currently only one) to the function path, yielding the following path:
 
 ~~~js
 [
     ["todos", "length"]
 ]  
 ~~~
+
+The DataSource then retrieves this path, and adds the resulting JSON graph subset to the response, yielding the following JSONGraphEnvelope:
+
+~~~js
+{
+    paths: [
+        ["todos", 2]
+    ],
+    jsonGraph: {
+        todos: {
+            2: { $type: "ref", value: ["todosById", 93] },
+            length: 3
+        },
+        todosById: {
+            "93": {
+                name: "pick up some eggs",
+                done: false
+            }
+        }
+    },
+    invalidated: [
+        ["todos", "length"]
+    ]
+}
+~~~
+
+Notice that the value of the "todos.length" is now in the JSON Graph object.
+
 
 # Working with JSON Graph Data using a Model
 
