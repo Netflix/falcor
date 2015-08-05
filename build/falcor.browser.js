@@ -119,6 +119,9 @@ function Model(o) {
 
 Model.prototype.constructor = Model;
 
+/**
+ * @property {Boolean} Materialized This is a test property
+*/
 Model.prototype._materialized = false;
 Model.prototype._boxed = false;
 Model.prototype._progressive = false;

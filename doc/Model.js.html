@@ -1,6 +1,7 @@
 ---
 layout: api-page
-title: "Source: Model.js"
+title: "Model.js"
+id: api
 ---
 
 <main class="api-documentation-page">
@@ -10,7 +11,7 @@ title: "Source: Model.js"
   
       
 <h2>
-    Source: Model.js
+    Model.js
 </h2>
 <section>
     <article>
@@ -106,6 +107,9 @@ function Model(o) {
 
 Model.prototype.constructor = Model;
 
+/**
+ * @property {Boolean} Materialized This is a test property
+*/
 Model.prototype._materialized = false;
 Model.prototype._boxed = false;
 Model.prototype._progressive = false;
@@ -505,114 +509,162 @@ Model.prototype._invalidatePathMapsAsJSON = require("./invalidate/invalidate-jso
                                 <a href="HttpDataSource.html" data-target="#HttpDataSource">HttpDataSource</a>
                                 
                                 
+
+
+                                
+
+
+                                
+
+
                             </li>
                         
                             <li class="toc-api-class ">
                                 <a href="Model.html" data-target="#Model">Model</a>
                                 
                                 
-                                    <ul class="toc-api-methods">
-                                        
-                                            <li class="toc-api-method">
-                                                <a href="Model.html#batch" data-target="#batch">batch</a>
-                                            </li>
-                                        
-                                            <li class="toc-api-method">
-                                                <a href="Model.html#boxValues" data-target="#boxValues">boxValues</a>
-                                            </li>
-                                        
-                                            <li class="toc-api-method">
-                                                <a href="Model.html#deref" data-target="#deref">deref</a>
-                                            </li>
-                                        
-                                            <li class="toc-api-method">
-                                                <a href="Model.html#get" data-target="#get">get</a>
-                                            </li>
-                                        
-                                            <li class="toc-api-method">
-                                                <a href="Model.html#getCache" data-target="#getCache">getCache</a>
-                                            </li>
-                                        
-                                            <li class="toc-api-method">
-                                                <a href="Model.html#getValue" data-target="#getValue">getValue</a>
-                                            </li>
-                                        
-                                            <li class="toc-api-method">
-                                                <a href="Model.html#getValueSync" data-target="#getValueSync">getValueSync</a>
-                                            </li>
-                                        
-                                            <li class="toc-api-method">
-                                                <a href="Model.html#set" data-target="#set">set</a>
-                                            </li>
-                                        
-                                            <li class="toc-api-method">
-                                                <a href="Model.html#setCache" data-target="#setCache">setCache</a>
-                                            </li>
-                                        
-                                            <li class="toc-api-method">
-                                                <a href="Model.html#treatErrorsAsValues" data-target="#treatErrorsAsValues">treatErrorsAsValues</a>
-                                            </li>
-                                        
-                                            <li class="toc-api-method">
-                                                <a href="Model.html#unbatch" data-target="#unbatch">unbatch</a>
-                                            </li>
-                                        
-                                            <li class="toc-api-method">
-                                                <a href="Model.html#unboxValues" data-target="#unboxValues">unboxValues</a>
-                                            </li>
-                                        
-                                            <li class="toc-api-method">
-                                                <a href="Model.html#withoutDataSource" data-target="#withoutDataSource">withoutDataSource</a>
-                                            </li>
-                                         
-                                    </ul>
+
+    <ul class="toc-api-subgroup toc-api-subgroup-methods">
+        <li>
+            <span class="toc-api-subgroup-title">Methods</span>
+        </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="Model.html#batch" data-target="#batch">batch</a>
+            </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="Model.html#boxValues" data-target="#boxValues">boxValues</a>
+            </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="Model.html#deref" data-target="#deref">deref</a>
+            </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="Model.html#get" data-target="#get">get</a>
+            </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="Model.html#getCache" data-target="#getCache">getCache</a>
+            </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="Model.html#getValue" data-target="#getValue">getValue</a>
+            </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="Model.html#getValueSync" data-target="#getValueSync">getValueSync</a>
+            </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="Model.html#set" data-target="#set">set</a>
+            </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="Model.html#setCache" data-target="#setCache">setCache</a>
+            </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="Model.html#treatErrorsAsValues" data-target="#treatErrorsAsValues">treatErrorsAsValues</a>
+            </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="Model.html#unbatch" data-target="#unbatch">unbatch</a>
+            </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="Model.html#unboxValues" data-target="#unboxValues">unboxValues</a>
+            </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="Model.html#withoutDataSource" data-target="#withoutDataSource">withoutDataSource</a>
+            </li>
+         
+    </ul>
+
+
                                 
+
+
+                                
+
+
                             </li>
                         
                             <li class="toc-api-class ">
                                 <a href="Observable.html" data-target="#Observable">Observable</a>
                                 
                                 
-                                    <ul class="toc-api-methods">
-                                        
-                                            <li class="toc-api-method">
-                                                <a href="Observable.html#forEach" data-target="#forEach">forEach</a>
-                                            </li>
-                                        
-                                            <li class="toc-api-method">
-                                                <a href="Observable.html#~onCompletedCallback" data-target="#\~onCompletedCallback">onCompletedCallback</a>
-                                            </li>
-                                        
-                                            <li class="toc-api-method">
-                                                <a href="Observable.html#~onErrorCallback" data-target="#\~onErrorCallback">onErrorCallback</a>
-                                            </li>
-                                        
-                                            <li class="toc-api-method">
-                                                <a href="Observable.html#~onNextCallback" data-target="#\~onNextCallback">onNextCallback</a>
-                                            </li>
-                                         
-                                    </ul>
+
+    <ul class="toc-api-subgroup toc-api-subgroup-methods">
+        <li>
+            <span class="toc-api-subgroup-title">Methods</span>
+        </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="Observable.html#forEach" data-target="#forEach">forEach</a>
+            </li>
+         
+    </ul>
+
+
                                 
+
+    <ul class="toc-api-subgroup toc-api-subgroup-types">
+        <li>
+            <span class="toc-api-subgroup-title">Types</span>
+        </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="Observable.html#~onCompletedCallback" data-target="#\~onCompletedCallback">onCompletedCallback</a>
+            </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="Observable.html#~onErrorCallback" data-target="#\~onErrorCallback">onErrorCallback</a>
+            </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="Observable.html#~onNextCallback" data-target="#\~onNextCallback">onNextCallback</a>
+            </li>
+         
+    </ul>
+
+
+                                
+
+
                             </li>
                         
                             <li class="toc-api-class ">
                                 <a href="Subscription.html" data-target="#Subscription">Subscription</a>
                                 
                                 
-                                    <ul class="toc-api-methods">
-                                        
-                                            <li class="toc-api-method">
-                                                <a href="Subscription.html#dispose" data-target="#dispose">dispose</a>
-                                            </li>
-                                         
-                                    </ul>
+
+    <ul class="toc-api-subgroup toc-api-subgroup-methods">
+        <li>
+            <span class="toc-api-subgroup-title">Methods</span>
+        </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="Subscription.html#dispose" data-target="#dispose">dispose</a>
+            </li>
+         
+    </ul>
+
+
                                 
+
+
+                                
+
+
                             </li>
                         
                     </ul>
                 </li>
                 <li class="toc-api-type-list ">
-                    <a href="global.html">Types</a>
+                    <a href="global.html">Global Types</a>
                     <ul class="toc-api-types">
                         
                             <li class="toc-api-type">

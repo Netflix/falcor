@@ -1,6 +1,7 @@
 ---
 layout: api-page
 title: "Global"
+id: api
 ---
 
 <main class="api-documentation-page">
@@ -55,32 +56,31 @@ title: "Global"
 
           
                   
-<h4 class="name" id="Atom">Atom</h4>
+<section class="member-section">
+    <h4 class="name section-header members-header" id="Atom">Atom</h4>
 
+    
 
+    
+    <div class="description">
+        <p>An atom allows you to treat a JSON value as atomic regardless of its type, ensuring that a JSON object or array is always returned in its entirety. The JSON value must be treated as immutable. Atoms can also be used to associate metadata with a JSON value. This metadata can be used to influence the way values are handled.</p>
+    </div>
+    
 
-
-<div class="description">
-    <p>An atom allows you to treat a JSON value as atomic regardless of its type, ensuring that a JSON object or array is always returned in its entirety. The JSON value must be treated as immutable. Atoms can also be used to associate metadata with a JSON value. This metadata can be used to influence the way values are handled.</p>
-</div>
-
-
-
-    <h5>Type:</h5>
-    <ul>
-        <li>
-            
+    
+        <dl class="member-type">
+            <dt><span class="h5">Type:</span></dt>
+            <dd>
 <span class="param-type">Object</span>
 
+</dd>
+        </dl>
+    
 
-        </li>
-    </ul>
+    
 
 
-
-
-
-    <h5 class="subsection-title">Properties:</h5>
+    <h5 class="subsection-title">Properties</h5>
 
     
 
@@ -241,9 +241,9 @@ title: "Global"
 
       
       <dt class="tag-source">Source:</dt>
-      <dd class="tag-source"><ul class="dummy"><li>
+      <dd class="tag-source">
           <a href="typedefs_Atom.js.html">typedefs/Atom.js</a>, <a href="typedefs_Atom.js.html#line1">line 1</a>
-      </li></ul></dd>
+      </dd>
       
 
       
@@ -254,11 +254,11 @@ title: "Global"
   </dl>
 
 
-
-
-
-    <h5>Example</h5>
     
+
+    
+        <h5>Example</h5>
+        
     <pre class="prettyprint"><code>// Atom with number value, expiring in 2 seconds
  {
     $type: "atom",
@@ -275,36 +275,36 @@ title: "Global"
     $expires: 1
  }</code></pre>
 
-
+    
+</section>
 
               
                   
-<h4 class="name" id="JSONEnvelope">JSONEnvelope</h4>
+<section class="member-section">
+    <h4 class="name section-header members-header" id="JSONEnvelope">JSONEnvelope</h4>
 
+    
 
+    
+    <div class="description">
+        <p>An envelope that wraps a JSON object.</p>
+    </div>
+    
 
-
-<div class="description">
-    <p>An envelope that wraps a JSON object.</p>
-</div>
-
-
-
-    <h5>Type:</h5>
-    <ul>
-        <li>
-            
+    
+        <dl class="member-type">
+            <dt><span class="h5">Type:</span></dt>
+            <dd>
 <span class="param-type">Object</span>
 
+</dd>
+        </dl>
+    
 
-        </li>
-    </ul>
+    
 
 
-
-
-
-    <h5 class="subsection-title">Properties:</h5>
+    <h5 class="subsection-title">Properties</h5>
 
     
 
@@ -495,9 +495,9 @@ title: "Global"
 
       
       <dt class="tag-source">Source:</dt>
-      <dd class="tag-source"><ul class="dummy"><li>
+      <dd class="tag-source">
           <a href="typedefs_JSONEnvelope.js.html">typedefs/JSONEnvelope.js</a>, <a href="typedefs_JSONEnvelope.js.html#line1">line 1</a>
-      </li></ul></dd>
+      </dd>
       
 
       
@@ -508,40 +508,40 @@ title: "Global"
   </dl>
 
 
-
-
-
-    <h5>Example</h5>
     
+
+    
+        <h5>Example</h5>
+        
     <pre class="prettyprint"><code>TODO: Fill out a simple example showing the data structure</code></pre>
 
-
+    
+</section>
 
               
                   
-<h4 class="name" id="JSONGraph">JSONGraph</h4>
+<section class="member-section">
+    <h4 class="name section-header members-header" id="JSONGraph">JSONGraph</h4>
 
+    
 
+    
+    <div class="description">
+        <p>JavaScript Object Notation Graph (JSONGraph) is a notation for expressing graphs in JSON. JSON is a hierarchical data format, capable of modeling trees.</p>
+    </div>
+    
 
-
-<div class="description">
-    <p>JavaScript Object Notation Graph (JSONGraph) is a notation for expressing graphs in JSON. JSON is a hierarchical data format, capable of modeling trees.</p>
-</div>
-
-
-
-    <h5>Type:</h5>
-    <ul>
-        <li>
-            
+    
+        <dl class="member-type">
+            <dt><span class="h5">Type:</span></dt>
+            <dd>
 <span class="param-type">Object</span>
 
+</dd>
+        </dl>
+    
 
-        </li>
-    </ul>
-
-
-
+    
 
 
 
@@ -574,9 +574,9 @@ title: "Global"
 
       
       <dt class="tag-source">Source:</dt>
-      <dd class="tag-source"><ul class="dummy"><li>
+      <dd class="tag-source">
           <a href="typedefs_JSONGraph.js.html">typedefs/JSONGraph.js</a>, <a href="typedefs_JSONGraph.js.html#line1">line 1</a>
-      </li></ul></dd>
+      </dd>
       
 
       
@@ -587,11 +587,11 @@ title: "Global"
   </dl>
 
 
-
-
-
-    <h5>Example</h5>
     
+
+    
+        <h5>Example</h5>
+        
     <pre class="prettyprint"><code>// JSONGraph model modeling a list of film genres, each of which contains the same title.
  {
     // list of user's genres, modeled as a map with ordinal keys
@@ -634,36 +634,36 @@ title: "Global"
     }
 }</code></pre>
 
-
+    
+</section>
 
               
                   
-<h4 class="name" id="JSONGraphEnvelope">JSONGraphEnvelope</h4>
+<section class="member-section">
+    <h4 class="name section-header members-header" id="JSONGraphEnvelope">JSONGraphEnvelope</h4>
 
+    
 
+    
+    <div class="description">
+        <p>An envelope that wraps a <a href="global.html#JSONGraph">JSONGraph</a> fragment.</p>
+    </div>
+    
 
-
-<div class="description">
-    <p>An envelope that wraps a <a href="global.html#JSONGraph">JSONGraph</a> fragment.</p>
-</div>
-
-
-
-    <h5>Type:</h5>
-    <ul>
-        <li>
-            
+    
+        <dl class="member-type">
+            <dt><span class="h5">Type:</span></dt>
+            <dd>
 <span class="param-type">Object</span>
 
+</dd>
+        </dl>
+    
 
-        </li>
-    </ul>
+    
 
 
-
-
-
-    <h5 class="subsection-title">Properties:</h5>
+    <h5 class="subsection-title">Properties</h5>
 
     
 
@@ -854,9 +854,9 @@ title: "Global"
 
       
       <dt class="tag-source">Source:</dt>
-      <dd class="tag-source"><ul class="dummy"><li>
+      <dd class="tag-source">
           <a href="typedefs_JSONGraphEnvelope.js.html">typedefs/JSONGraphEnvelope.js</a>, <a href="typedefs_JSONGraphEnvelope.js.html#line1">line 1</a>
-      </li></ul></dd>
+      </dd>
       
 
       
@@ -867,32 +867,33 @@ title: "Global"
   </dl>
 
 
-
-
-
-    <h5>Example</h5>
     
+
+    
+        <h5>Example</h5>
+        
     <pre class="prettyprint"><code>TODO: Fill out a simple example showing the data structure</code></pre>
 
-
+    
+</section>
 
               
                   
-<h4 class="name" id="Key">Key</h4>
+<section class="member-section">
+    <h4 class="name section-header members-header" id="Key">Key</h4>
 
+    
 
+    
+    <div class="description">
+        <p>A part of a <a href="global.html#Path">Path</a> that can be any JSON value type. All types are coerced to string, except null. This makes the number 1 and the string &quot;1&quot; equivalent.</p>
+    </div>
+    
 
-
-<div class="description">
-    <p>A part of a <a href="global.html#Path">Path</a> that can be any JSON value type. All types are coerced to string, except null. This makes the number 1 and the string &quot;1&quot; equivalent.</p>
-</div>
-
-
-
-    <h5>Type:</h5>
-    <ul>
-        <li>
-            
+    
+        <dl class="member-type">
+            <dt><span class="h5">Type:</span></dt>
+            <dd>
 <span class="param-type">string</span>
 or
 
@@ -904,12 +905,11 @@ or
 
 <span class="param-type">null</span>
 
+</dd>
+        </dl>
+    
 
-        </li>
-    </ul>
-
-
-
+    
 
 
 
@@ -942,9 +942,9 @@ or
 
       
       <dt class="tag-source">Source:</dt>
-      <dd class="tag-source"><ul class="dummy"><li>
+      <dd class="tag-source">
           <a href="typedefs_Key.js.html">typedefs/Key.js</a>, <a href="typedefs_Key.js.html#line1">line 1</a>
-      </li></ul></dd>
+      </dd>
       
 
       
@@ -955,27 +955,28 @@ or
   </dl>
 
 
+    
 
-
-
+    
+</section>
 
               
                   
-<h4 class="name" id="KeySet">KeySet</h4>
+<section class="member-section">
+    <h4 class="name section-header members-header" id="KeySet">KeySet</h4>
 
+    
 
+    
+    <div class="description">
+        <p>A part of a <a href="global.html#PathSet">PathSet</a> that can be either a <a href="global.html#Key">Key</a>, <a href="global.html#Range">Range</a>, or Array of either.</p>
+    </div>
+    
 
-
-<div class="description">
-    <p>A part of a <a href="global.html#PathSet">PathSet</a> that can be either a <a href="global.html#Key">Key</a>, <a href="global.html#Range">Range</a>, or Array of either.</p>
-</div>
-
-
-
-    <h5>Type:</h5>
-    <ul>
-        <li>
-            
+    
+        <dl class="member-type">
+            <dt><span class="h5">Type:</span></dt>
+            <dd>
 <span class="param-type"><a href="global.html#Key">Key</a></span>
 or
 
@@ -984,12 +985,11 @@ or
 
 <span class="param-type">Array.&lt;(<a href="global.html#Key">Key</a>|<a href="global.html#Range">Range</a>)></span>
 
+</dd>
+        </dl>
+    
 
-        </li>
-    </ul>
-
-
-
+    
 
 
 
@@ -1022,9 +1022,9 @@ or
 
       
       <dt class="tag-source">Source:</dt>
-      <dd class="tag-source"><ul class="dummy"><li>
+      <dd class="tag-source">
           <a href="typedefs_KeySet.js.html">typedefs/KeySet.js</a>, <a href="typedefs_KeySet.js.html#line1">line 1</a>
-      </li></ul></dd>
+      </dd>
       
 
       
@@ -1035,35 +1035,35 @@ or
   </dl>
 
 
+    
 
-
-
+    
+</section>
 
               
                   
-<h4 class="name" id="Path">Path</h4>
+<section class="member-section">
+    <h4 class="name section-header members-header" id="Path">Path</h4>
 
+    
 
+    
+    <div class="description">
+        <p>An ordered list of <a href="global.html#Key">Key</a>s that point to a location in a <a href="global.html#JSONGraph">JSONGraph</a>.</p>
+    </div>
+    
 
-
-<div class="description">
-    <p>An ordered list of <a href="global.html#Key">Key</a>s that point to a location in a <a href="global.html#JSONGraph">JSONGraph</a>.</p>
-</div>
-
-
-
-    <h5>Type:</h5>
-    <ul>
-        <li>
-            
+    
+        <dl class="member-type">
+            <dt><span class="h5">Type:</span></dt>
+            <dd>
 <span class="param-type">Array.&lt;<a href="global.html#Key">Key</a>></span>
 
+</dd>
+        </dl>
+    
 
-        </li>
-    </ul>
-
-
-
+    
 
 
 
@@ -1096,9 +1096,9 @@ or
 
       
       <dt class="tag-source">Source:</dt>
-      <dd class="tag-source"><ul class="dummy"><li>
+      <dd class="tag-source">
           <a href="typedefs_Path.js.html">typedefs/Path.js</a>, <a href="typedefs_Path.js.html#line1">line 1</a>
-      </li></ul></dd>
+      </dd>
       
 
       
@@ -1109,41 +1109,41 @@ or
   </dl>
 
 
-
-
-
-    <h5>Example</h5>
     
+
+    
+        <h5>Example</h5>
+        
     <pre class="prettyprint"><code>// Points to the name of product 1234
  ["productsById", "1234", "name"]</code></pre>
 
-
+    
+</section>
 
               
                   
-<h4 class="name" id="PathSet">PathSet</h4>
+<section class="member-section">
+    <h4 class="name section-header members-header" id="PathSet">PathSet</h4>
 
+    
 
+    
+    <div class="description">
+        <p>An ordered list of <a href="global.html#KeySet">KeySet</a>s that point to location(s) in the <a href="global.html#JSONGraph">JSONGraph</a>. It enables pointing to multiple locations in a more terse format than a set of <a href="global.html#Path">Path</a>s and is generally more efficient to evaluate.</p>
+    </div>
+    
 
-
-<div class="description">
-    <p>An ordered list of <a href="global.html#KeySet">KeySet</a>s that point to location(s) in the <a href="global.html#JSONGraph">JSONGraph</a>. It enables pointing to multiple locations in a more terse format than a set of <a href="global.html#Path">Path</a>s and is generally more efficient to evaluate.</p>
-</div>
-
-
-
-    <h5>Type:</h5>
-    <ul>
-        <li>
-            
+    
+        <dl class="member-type">
+            <dt><span class="h5">Type:</span></dt>
+            <dd>
 <span class="param-type">Array.&lt;<a href="global.html#KeySet">KeySet</a>></span>
 
+</dd>
+        </dl>
+    
 
-        </li>
-    </ul>
-
-
-
+    
 
 
 
@@ -1176,9 +1176,9 @@ or
 
       
       <dt class="tag-source">Source:</dt>
-      <dd class="tag-source"><ul class="dummy"><li>
+      <dd class="tag-source">
           <a href="typedefs_PathSet.js.html">typedefs/PathSet.js</a>, <a href="typedefs_PathSet.js.html#line1">line 1</a>
-      </li></ul></dd>
+      </dd>
       
 
       
@@ -1189,44 +1189,44 @@ or
   </dl>
 
 
-
-
-
-    <h5>Example</h5>
     
+
+    
+        <h5>Example</h5>
+        
     <pre class="prettyprint"><code>// Points to the name and price of products 1234 and 5678
  ["productsById", ["1234", "5678"], ["name", "price"]]</code></pre>
 
-
+    
+</section>
 
               
                   
-<h4 class="name" id="PathValue">PathValue</h4>
+<section class="member-section">
+    <h4 class="name section-header members-header" id="PathValue">PathValue</h4>
 
+    
 
+    
+    <div class="description">
+        <p>A wrapper around a path and its value.</p>
+    </div>
+    
 
-
-<div class="description">
-    <p>A wrapper around a path and its value.</p>
-</div>
-
-
-
-    <h5>Type:</h5>
-    <ul>
-        <li>
-            
+    
+        <dl class="member-type">
+            <dt><span class="h5">Type:</span></dt>
+            <dd>
 <span class="param-type">Object</span>
 
+</dd>
+        </dl>
+    
 
-        </li>
-    </ul>
+    
 
 
-
-
-
-    <h5 class="subsection-title">Properties:</h5>
+    <h5 class="subsection-title">Properties</h5>
 
     
 
@@ -1351,9 +1351,9 @@ or
 
       
       <dt class="tag-source">Source:</dt>
-      <dd class="tag-source"><ul class="dummy"><li>
+      <dd class="tag-source">
           <a href="typedefs_PathValue.js.html">typedefs/PathValue.js</a>, <a href="typedefs_PathValue.js.html#line1">line 1</a>
-      </li></ul></dd>
+      </dd>
       
 
       
@@ -1364,46 +1364,46 @@ or
   </dl>
 
 
-
-
-
-    <h5>Example</h5>
     
+
+    
+        <h5>Example</h5>
+        
     <pre class="prettyprint"><code>{
 	path: ["productsById", "1234", "name"],
 	value: "ABC"
  }</code></pre>
 
-
+    
+</section>
 
               
                   
-<h4 class="name" id="Range">Range</h4>
+<section class="member-section">
+    <h4 class="name section-header members-header" id="Range">Range</h4>
 
+    
 
+    
+    <div class="description">
+        <p>Describe a range of integers. Must contain either a &quot;to&quot; or &quot;length&quot; property.</p>
+    </div>
+    
 
-
-<div class="description">
-    <p>Describe a range of integers. Must contain either a &quot;to&quot; or &quot;length&quot; property.</p>
-</div>
-
-
-
-    <h5>Type:</h5>
-    <ul>
-        <li>
-            
+    
+        <dl class="member-type">
+            <dt><span class="h5">Type:</span></dt>
+            <dd>
 <span class="param-type">Object</span>
 
+</dd>
+        </dl>
+    
 
-        </li>
-    </ul>
+    
 
 
-
-
-
-    <h5 class="subsection-title">Properties:</h5>
+    <h5 class="subsection-title">Properties</h5>
 
     
 
@@ -1579,9 +1579,9 @@ or
 
       
       <dt class="tag-source">Source:</dt>
-      <dd class="tag-source"><ul class="dummy"><li>
+      <dd class="tag-source">
           <a href="typedefs_Range.js.html">typedefs/Range.js</a>, <a href="typedefs_Range.js.html#line1">line 1</a>
-      </li></ul></dd>
+      </dd>
       
 
       
@@ -1592,17 +1592,18 @@ or
   </dl>
 
 
-
-
-
-    <h5>Example</h5>
     
+
+    
+        <h5>Example</h5>
+        
     <pre class="prettyprint"><code>// The following range specifies the numbers 0, 1, and 2
  {from: 0, to: 2}
  // The following range specifies the numbers 1 and 2
  {from: 1, length: 2}</code></pre>
 
-
+    
+</section>
 
               
       
@@ -1638,114 +1639,162 @@ or
                                 <a href="HttpDataSource.html" data-target="#HttpDataSource">HttpDataSource</a>
                                 
                                 
+
+
+                                
+
+
+                                
+
+
                             </li>
                         
                             <li class="toc-api-class ">
                                 <a href="Model.html" data-target="#Model">Model</a>
                                 
                                 
-                                    <ul class="toc-api-methods">
-                                        
-                                            <li class="toc-api-method">
-                                                <a href="Model.html#batch" data-target="#batch">batch</a>
-                                            </li>
-                                        
-                                            <li class="toc-api-method">
-                                                <a href="Model.html#boxValues" data-target="#boxValues">boxValues</a>
-                                            </li>
-                                        
-                                            <li class="toc-api-method">
-                                                <a href="Model.html#deref" data-target="#deref">deref</a>
-                                            </li>
-                                        
-                                            <li class="toc-api-method">
-                                                <a href="Model.html#get" data-target="#get">get</a>
-                                            </li>
-                                        
-                                            <li class="toc-api-method">
-                                                <a href="Model.html#getCache" data-target="#getCache">getCache</a>
-                                            </li>
-                                        
-                                            <li class="toc-api-method">
-                                                <a href="Model.html#getValue" data-target="#getValue">getValue</a>
-                                            </li>
-                                        
-                                            <li class="toc-api-method">
-                                                <a href="Model.html#getValueSync" data-target="#getValueSync">getValueSync</a>
-                                            </li>
-                                        
-                                            <li class="toc-api-method">
-                                                <a href="Model.html#set" data-target="#set">set</a>
-                                            </li>
-                                        
-                                            <li class="toc-api-method">
-                                                <a href="Model.html#setCache" data-target="#setCache">setCache</a>
-                                            </li>
-                                        
-                                            <li class="toc-api-method">
-                                                <a href="Model.html#treatErrorsAsValues" data-target="#treatErrorsAsValues">treatErrorsAsValues</a>
-                                            </li>
-                                        
-                                            <li class="toc-api-method">
-                                                <a href="Model.html#unbatch" data-target="#unbatch">unbatch</a>
-                                            </li>
-                                        
-                                            <li class="toc-api-method">
-                                                <a href="Model.html#unboxValues" data-target="#unboxValues">unboxValues</a>
-                                            </li>
-                                        
-                                            <li class="toc-api-method">
-                                                <a href="Model.html#withoutDataSource" data-target="#withoutDataSource">withoutDataSource</a>
-                                            </li>
-                                         
-                                    </ul>
+
+    <ul class="toc-api-subgroup toc-api-subgroup-methods">
+        <li>
+            <span class="toc-api-subgroup-title">Methods</span>
+        </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="Model.html#batch" data-target="#batch">batch</a>
+            </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="Model.html#boxValues" data-target="#boxValues">boxValues</a>
+            </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="Model.html#deref" data-target="#deref">deref</a>
+            </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="Model.html#get" data-target="#get">get</a>
+            </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="Model.html#getCache" data-target="#getCache">getCache</a>
+            </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="Model.html#getValue" data-target="#getValue">getValue</a>
+            </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="Model.html#getValueSync" data-target="#getValueSync">getValueSync</a>
+            </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="Model.html#set" data-target="#set">set</a>
+            </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="Model.html#setCache" data-target="#setCache">setCache</a>
+            </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="Model.html#treatErrorsAsValues" data-target="#treatErrorsAsValues">treatErrorsAsValues</a>
+            </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="Model.html#unbatch" data-target="#unbatch">unbatch</a>
+            </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="Model.html#unboxValues" data-target="#unboxValues">unboxValues</a>
+            </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="Model.html#withoutDataSource" data-target="#withoutDataSource">withoutDataSource</a>
+            </li>
+         
+    </ul>
+
+
                                 
+
+
+                                
+
+
                             </li>
                         
                             <li class="toc-api-class ">
                                 <a href="Observable.html" data-target="#Observable">Observable</a>
                                 
                                 
-                                    <ul class="toc-api-methods">
-                                        
-                                            <li class="toc-api-method">
-                                                <a href="Observable.html#forEach" data-target="#forEach">forEach</a>
-                                            </li>
-                                        
-                                            <li class="toc-api-method">
-                                                <a href="Observable.html#~onCompletedCallback" data-target="#\~onCompletedCallback">onCompletedCallback</a>
-                                            </li>
-                                        
-                                            <li class="toc-api-method">
-                                                <a href="Observable.html#~onErrorCallback" data-target="#\~onErrorCallback">onErrorCallback</a>
-                                            </li>
-                                        
-                                            <li class="toc-api-method">
-                                                <a href="Observable.html#~onNextCallback" data-target="#\~onNextCallback">onNextCallback</a>
-                                            </li>
-                                         
-                                    </ul>
+
+    <ul class="toc-api-subgroup toc-api-subgroup-methods">
+        <li>
+            <span class="toc-api-subgroup-title">Methods</span>
+        </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="Observable.html#forEach" data-target="#forEach">forEach</a>
+            </li>
+         
+    </ul>
+
+
                                 
+
+    <ul class="toc-api-subgroup toc-api-subgroup-types">
+        <li>
+            <span class="toc-api-subgroup-title">Types</span>
+        </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="Observable.html#~onCompletedCallback" data-target="#\~onCompletedCallback">onCompletedCallback</a>
+            </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="Observable.html#~onErrorCallback" data-target="#\~onErrorCallback">onErrorCallback</a>
+            </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="Observable.html#~onNextCallback" data-target="#\~onNextCallback">onNextCallback</a>
+            </li>
+         
+    </ul>
+
+
+                                
+
+
                             </li>
                         
                             <li class="toc-api-class ">
                                 <a href="Subscription.html" data-target="#Subscription">Subscription</a>
                                 
                                 
-                                    <ul class="toc-api-methods">
-                                        
-                                            <li class="toc-api-method">
-                                                <a href="Subscription.html#dispose" data-target="#dispose">dispose</a>
-                                            </li>
-                                         
-                                    </ul>
+
+    <ul class="toc-api-subgroup toc-api-subgroup-methods">
+        <li>
+            <span class="toc-api-subgroup-title">Methods</span>
+        </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="Subscription.html#dispose" data-target="#dispose">dispose</a>
+            </li>
+         
+    </ul>
+
+
                                 
+
+
+                                
+
+
                             </li>
                         
                     </ul>
                 </li>
                 <li class="toc-api-type-list current-page">
-                    <a href="global.html">Types</a>
+                    <a href="global.html">Global Types</a>
                     <ul class="toc-api-types">
                         
                             <li class="toc-api-type">
