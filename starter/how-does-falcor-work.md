@@ -28,7 +28,7 @@ When a client requests paths from the Model, the Model attempts to retrieve the 
 /model.json?method=get&paths=[["user","name"],["user","location","city"],["user","location","address"]]
 ~~~
 
-Note that rather than retrieve data from multiple endpoints, all of the data as a single JSON resource. This allows the client can retrieve all of the data it needs in a single HTTP request. 
+Note that rather than retrieve data from multiple endpoints, it retrieves all of the data as a single JSON resource. This allows the client to get all the data it needs in a single HTTP request. 
 
 The Application Server responds with the requested subset of the virtual JSON resource containing only the requested values. 
 
