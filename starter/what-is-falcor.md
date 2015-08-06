@@ -17,12 +17,12 @@ You retrieve data from a Falcor model using the familiar JavaScript path syntax.
 
 ~~~js
 var person = {
-    name: "Steve McGuire",
+    name: "Steve McAdams",
     occupation: "Developer",
     location: {
       country: "US",
-      city: "Pacifica",
-      address: "344 Seaside"
+      city: "Los Gatos",
+      address: "121 Albright Way"
     }
 }
 
@@ -39,5 +39,5 @@ var person = new falcor.Model({
 person.getValue("location.address").
   then(address => print(address));
 
-// outputs "344 Seaside"
+// outputs "121 Albright Way"
 ~~~
