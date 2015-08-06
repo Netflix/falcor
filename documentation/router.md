@@ -14,9 +14,9 @@ A Falcor Router is an implementation of the DataSource interface. Falcor Model o
 
 ![Falcor End to End](../falcor-end-to-end.png)
 
-A Router works by matching requested paths against a "virtual" JSON Graph object. The JSON Graph object is referred to as "virtual", because the object rarely exists anywhere - in memory or on disk. Instead when paths are requested from the Router, the Router typically creates the necessary subsets of the JSON Graph on-demand by retrieving the necessary data from persistent data stores. Once the newly-created subset of the JSON Graph has been delivered to the caller, the Router frees the memory. This allows the Application Server running the Router to remain stateless, and keep the application’s data in one or more persistent data stores.
+A Router works by matching requested paths against a "virtual" JSON Graph object. The JSON Graph object is referred to as "virtual", because the object rarely exists anywhere - in memory or on disk. Instead when paths are requested from the Router, the Router typically creates the necessary subsets of the JSON Graph on-demand by retrieving the necessary data from persistent data stores. Once the newly-created subset of the JSON Graph has been delivered to the caller, the Router frees the memory. This allows the Application Server running the Router to remain stateless, and keep the application's data in one or more persistent data stores.
 
-In order to create the requested subset of the JSON Graph object, the Router matches the requested paths against a series of Routes. A Route is an object with a pattern that can match a set of paths, and is responsible for creating the subset of the JSON Graph object which contains the data requested by those paths. Typically Routes build a subset of the JSON Graph object on-demand by retrieving the data from persistent data stores or web services. The Route transforms the data retrieved from the data sources into the the schema of the JSON Graph, and delivers it to the Router. Once the Router receives the JSON Graph subset from the Route, it evaluates the paths against the JSON Graph subset using the (Path Evaluation) algorithm. If the router encounters References in the JSON Graph, it may optimize the requested paths, and recursively evaluate them against the Routes. The Router’s final output is the subset of virtual JSON Graph that combines all the responses produced by the evaluated the requested paths against the Routes.
+In order to create the requested subset of the JSON Graph object, the Router matches the requested paths against a series of Routes. A Route is an object with a pattern that can match a set of paths, and is responsible for creating the subset of the JSON Graph object which contains the data requested by those paths. Typically Routes build a subset of the JSON Graph object on-demand by retrieving the data from persistent data stores or web services. The Route transforms the data retrieved from the data sources into the the schema of the JSON Graph, and delivers it to the Router. Once the Router receives the JSON Graph subset from the Route, it evaluates the paths against the JSON Graph subset using the (Path Evaluation) algorithm. If the router encounters References in the JSON Graph, it may optimize the requested paths, and recursively evaluate them against the Routes. The Router's final output is the subset of virtual JSON Graph that combines all the responses produced by the evaluated the requested paths against the Routes.
 
 ## Application Servers for REST services
 
@@ -96,14 +96,14 @@ Instead of using hyperlinks to refer to other resources, Falcor applications rep
 (Example query which retrieves the first 10 references from the to do list)
 
 ~~~js
-“todos[0..10]”
+"todos[0..10]"
 ~~~
 This is possible because Falcor application servers expose all their data within a single JSON resource. The important difference between references and hyperlinks is that references can be followed on the server whereas hyperlinks must be followed on the client. That means that instead of making sequential round trips, related values can be downloaded within the same request.
 
 (Example query which retrieves the name, and done property of the first 10 items in the to do list)
 
 ~~~js
-“todos[0..10][‘name’, ‘done’]”
+"todos[0..10]['name', 'done']"
 ~~~
 
 For more information on references see Path Evaluation.
@@ -156,7 +156,7 @@ Traditional App server Routers only need to match the URL path, because HTTP req
 (Falcor URL which requests the name of the first 3 TODOs)
 
 ~~~js
-“todos[0..3].name”
+"todos[0..3].name"
 ~~~
  (Example of a route which matches all three using the ranges pattern and an alias, and returns the data)
 
@@ -196,7 +196,7 @@ A Router Class is created by invoking the Router.createClass method. This Class 
  
 When an Array of routes is passed to the createClass method, an internal Route Map is generated. The Route Map is a stateless data structure designed to improve the speed of pattern matching. Ideally the process of creating the Route Map should only be performed once when your Web server starts up. However Router instances often require access to connection information (ex. authorization information, included in the cookies of an HTTP Request). Creating a Router class generates the route map once, and allows the route map to be shared with every new instance of the Router class.
  
-These derived Router class instances can be instantiated at connection time, and passed connection information via their constructor. All route handler functions are applied to the concrete Router instance, which means that Routes can access connection state passed to the Router via the “this” pointer.
+These derived Router class instances can be instantiated at connection time, and passed connection information via their constructor. All route handler functions are applied to the concrete Router instance, which means that Routes can access connection state passed to the Router via the "this" pointer.
  
 (example)
  
@@ -204,33 +204,33 @@ Typically a single Router class is created when the application server starts up
  
 (example)
  
-Note that if you’re using ES6 or a transpiler from ES6 to ES5 like Babel, you can use the new JavaScript class syntax to create a derived Router class:
+Note that if you're using ES6 or a transpiler from ES6 to ES5 like Babel, you can use the new JavaScript class syntax to create a derived Router class:
  
 (example)
  
 ### Route Objects
  
-Each Route object passed to the Router constructor contains a pattern that can be used to match Path Sets, as well as three optional handlers that correspond to each of the DataSource interface’s methods.
+Each Route object passed to the Router constructor contains a pattern that can be used to match Path Sets, as well as three optional handlers that correspond to each of the DataSource interface's methods.
  
-When one of the DataSource methods is invoked on the Router object, the Router attempts to match the paths against the patterns in each route.  If a Route’s pattern is matched, the corresponding route handler method is invoked.  The Route handler is expected to perform the corresponding action and generate the subset of the JSON Graph containing the requested path.
+When one of the DataSource methods is invoked on the Router object, the Router attempts to match the paths against the patterns in each route.  If a Route's pattern is matched, the corresponding route handler method is invoked.  The Route handler is expected to perform the corresponding action and generate the subset of the JSON Graph containing the requested path.
  
 For an example, take the following Router which matches the set of paths that attempts to retrieve a user name or surname:
 
 (Example of a router class created to match first name and last name on a user using a single route)
  
-Let’s say the following request is made for the “name” and “surname” of the user:
+Let's say the following request is made for the "name" and "surname" of the user:
  
-routerInstance.get([[“user”,[“name”,”surname”]]])
+routerInstance.get([["user",["name","surname"]]])
  
-Once the Router determines that a route's pattern matches a subset of the requested Path Set, the Router will invoke the matching route’s get handler with a PathSet containing the set of paths that matched the route pattern:
+Once the Router determines that a route's pattern matches a subset of the requested Path Set, the Router will invoke the matching route's get handler with a PathSet containing the set of paths that matched the route pattern:
  
-matchingRoute.get.call(routerInstance, [“user”,[“name”,”surname”]])
+matchingRoute.get.call(routerInstance, ["user",["name","surname"]])
  
-Note that each Route handler is applied to the Router instance, meaning it can access Router properties using the “this” object.  Note as well that the matching path is passed to the handler using the Path Array syntax. 
+Note that each Route handler is applied to the Router instance, meaning it can access Router properties using the "this" object.  Note as well that the matching path is passed to the handler using the Path Array syntax. 
  
 Each route is responsible for creating a subset of the JSON Graph object that contains the requested values.
  
-(example of retrieving the Route’s get handler retrieving the data from the DB and returning a Promise of JSON Graph).
+(example of retrieving the Route's get handler retrieving the data from the DB and returning a Promise of JSON Graph).
  
 The Router combines all of these subsets of the JSON Graph object returned by each individual route into a single JSON Graph object subset, and returns it to the caller.
  
@@ -242,7 +242,7 @@ Each route handler is responsible for creating a subset of the JSON Graph that c
 ·      A Series of PathValues
  
 
-A JSON Graph envelope is an object with a “jsong” key that contains a subset of a JSON is responsible for creating the subset of the cereal grass that contains the requested paths.
+A JSON Graph envelope is an object with a "jsong" key that contains a subset of a JSON is responsible for creating the subset of the cereal grass that contains the requested paths.
  
 In the following example, a route returns JSON Graph envelope containing both the name and surname of a user:
  
@@ -254,7 +254,7 @@ A PathValue is an object with a path and value key. In lieu of a JSON Graph obje
  
 As in the previous example, this route returns the name and surname of a user. However this time it returns two PathValue objects, one containing the path and value of the name, and the other containing the path and value of the surname.
  
-When a Router receives a series of PathValue’s, it creates the JSON Graph envelope by writing each PathValue’s value into an object at the PathValue’s path.
+When a Router receives a series of PathValue's, it creates the JSON Graph envelope by writing each PathValue's value into an object at the PathValue's path.
  
 (example demonstrating the two PathValues (name,surname) === one JSON Graph object)
  
@@ -279,7 +279,7 @@ Alternately a Router Handler can return the PathValue results progressively usin
  
 An Observable is similar to a Promise, with the principal difference being that an Observable can send multiple values over time. The main advantage of using a Observable over a Promise is the ability to progressively return PathValues to the Router as soon as they are returned from the underlying DataSource.  In contrast, when delivering values in a Promise, all values must be collected together in a JSON Graph envelope or an Array of PathValues and returned to the Router at the same time.
  
-Using an Observable can improve throughput, because Routers may make additional requests to backend services in the event references are discovered in a Route Handler’s JSON Graph output.
+Using an Observable can improve throughput, because Routers may make additional requests to backend services in the event references are discovered in a Route Handler's JSON Graph output.
 
 When a Router discovers a reference before a path has been fully evaluated, it optimizes the Path and matches the newly optimized path against the Routes. When a path is optimized it is matched against the Router's Routes again. This may in turn trigger subsequent backend requests, which means that getting the references within a Route response back to the Router earlier can sometimes improve throughput.
  
@@ -307,7 +307,7 @@ titlesById[{integers}].name
 
 ...will produce the following Path Set to be passed to the route handler:
 
-["titlesById", [234,223,555,111,112,113],”name”]
+["titlesById", [234,223,555,111,112,113],"name"]
 
 This pattern is most often when matching entities by an integer ID. For example, the following route builds a map of all titles by ID.
 
@@ -319,7 +319,7 @@ The {ranges} pattern will match any integers in a KeySet whether specified in a 
 
 For example...
 
-genreList[0,1,5..7,9,”length”]
+genreList[0,1,5..7,9,"length"]
 
 ...matched against...
 
@@ -367,23 +367,23 @@ Each pattern will produce an array of results, even when matched against a singl
 
 You can assign the {keys}, {integers}, or {ranges} tokens an alias, allowing Route handlers to retrieve matched KeySets by their alias rather than their index in the PathSet. Retrieving keys by alias rather than index can make it easier to adjust your JSON Graph schema while minimizing the need for changes to your Route Handlers.
 
-In the following example, we assign the result of the {indices} pattern token an alias: “titleIds.”
+In the following example, we assign the result of the {indices} pattern token an alias: "titleIds."
 
 (example)
 
-In the example above, the PathSet sent to the route handler includes a “titleIds” key. If we were to print the value of each key in the matched PathSet, we would get the following results:
+In the example above, the PathSet sent to the route handler includes a "titleIds" key. If we were to print the value of each key in the matched PathSet, we would get the following results:
 
 {
-0: “titlesById”,
+0: "titlesById",
 1: [23,55,11],
-2: “name”,
+2: "name",
 length: 3,
 titleIds: [23,55,11]
 }
 
 ## How a Router Works
 
-The router implements the Data source interface, which allows a caller to work with serial graph data indirectly using three methods: get, set, and call. Routers are unusual in that rather than work against a pre-existing JSON Graph object stored somewhere, Routers generate JSON Graph data on-demand by retrieving the requested data from one or more data sources. As a Router’s JSON Graph object is sometimes referred to as a "virtual” JSON Graph.
+The router implements the Data source interface, which allows a caller to work with serial graph data indirectly using three methods: get, set, and call. Routers are unusual in that rather than work against a pre-existing JSON Graph object stored somewhere, Routers generate JSON Graph data on-demand by retrieving the requested data from one or more data sources. As a Router's JSON Graph object is sometimes referred to as a "virtual" JSON Graph.
 
 In this section we will examine how the router executes each of the DataSource methods. However rather than explain how each DataSource operation works in the abstract, we will define an sample Router and then explain how the DataSource operations are executed against it.
 
@@ -399,7 +399,7 @@ The Netflix application also allows members to search for titles by name.
 
 Our goal is to define a serial graph resources on the Application server that exposes all of the data that the Netflix client needs. The serial graph schema should be designed in such a way that the Netflix application can retrieve all of the data it needs for any given application scenario in a single network request. In order to avoid creating and storing the entire JSON Graph object on the application server, we will define a Router. 
 
-The Netflix Application Router will retrieve generate the subset of the JSON Graph requested by the client on demand by retrieving the requested data from a series of back-end services. The Netflix Router will effectively map operations against a “virtual” JSON Graph object to the appropriate operations against a series of backend services. In doing so the Router will create the illusion that be JSON Graph object is stored on the application server, while allowing the application server to remain stateless in reality.
+The Netflix Application Router will retrieve generate the subset of the JSON Graph requested by the client on demand by retrieving the requested data from a series of back-end services. The Netflix Router will effectively map operations against a "virtual" JSON Graph object to the appropriate operations against a series of backend services. In doing so the Router will create the illusion that be JSON Graph object is stored on the application server, while allowing the application server to remain stateless in reality.
  
 #### The Backend Services
 
@@ -457,14 +457,14 @@ When the Netflix application starts up, it displays titles in a gallery. The min
  
 Ideally the Netflix application would be able to retrieve this information using the following Path Sets:
  
-”genreList[0..3].name”
-”genreList[0..3].titles[0..4].boxshot”
+"genreList[0..3].name"
+"genreList[0..3].titles[0..4].boxshot"
  
-In order for these paths to retrieved the necessary information, we would need the Router’s JSON object to have the following structure:
+In order for these paths to retrieved the necessary information, we would need the Router's JSON object to have the following structure:
 
 (example Neflix JSON)
  
-Note that this tree can contain duplicates, because multiple genre list could contain the same title. Multiple copies of the same object in a serial graph can create inconsistency in the Netflix client’s cache if changes to one copy of an object are not migrated to all of the other copies. To eliminate all duplicates, we convert this cereal schema into a JSON Graph schema.
+Note that this tree can contain duplicates, because multiple genre list could contain the same title. Multiple copies of the same object in a serial graph can create inconsistency in the Netflix client's cache if changes to one copy of an object are not migrated to all of the other copies. To eliminate all duplicates, we convert this cereal schema into a JSON Graph schema.
 
 We can convert the serial object above to a JSON Graph in two easy steps:
  
