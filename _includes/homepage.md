@@ -13,6 +13,3 @@
     {{ the_include | markdownify }}
   </div>
 </div>
-
-{% capture the_include %}{% include homepage-getting-started.md % }{% endcapture %}
-{{ the_include | markdownify }}
