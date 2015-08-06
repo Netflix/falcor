@@ -1,3 +1,3 @@
 ### Bind to the Cloud
 
-Avoid writing data fetching code by binding your views directly to the Virtual JSON resource on the Application Server.
+Falcor retrieves any model data you request from the cloud on-demand, transparently handling all the network communication and keeping the server and client in sync.
