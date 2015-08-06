@@ -1452,29 +1452,9 @@ console.log(JSON.stringify(model.treatErrorsAsValues().boxValues().getValueSync(
 
 When you receive a Sentinel, you can check the "$type" property of each sentinel to distinguish whether a value is an error ("error") or a successfully-retrieved value ("atom"). For more information see [Boxing and Unboxing](#Boxing-and-Unboxing).
 
-#### Sentinel Metadata
-
-Metadata can be attached to Sentinels to control the way the Model handles them once they have been retrieved from the data source. Metadata is any key that starts with the prefix "$".
-
-(Example of using setValue to add an atom that expires in two seconds  ($expires: -2000) and then attempting to retrieve it after four seconds only to prove that it is gone)
-
-~~~js
-
-var model = new falcor.Model({
-    cache: {
-        todos:
-    }
-});
-model.setValue(
-//@TODO: look up syntax for how do this.
-~~~
-
 <a name="Retrieving-Data-from-a-Model"></a>
 
 ## Retrieving Data from a Model
-
-(Example of using get value sync to retrieve the rating)
-
 
 Errors are cached in the Model just like any other value. As it is possible to retrieve more than one path at a time from a model,
 
