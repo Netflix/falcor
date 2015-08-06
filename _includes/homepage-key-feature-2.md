@@ -1,3 +1,3 @@
 ### The Data is the API
 
-The falcor Model object lets clients work with the data in the server's Virtual JSON resource as if all the data was locally-available.
+Falcor makes it appear as if your entire JSON model is available locally and allows you to access data the same way you would from an in-memory JSON object.
