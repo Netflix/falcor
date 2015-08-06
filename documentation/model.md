@@ -356,44 +356,6 @@ model.get(["todos", {from: 0, to:1},"name"], ["todos", "length"]).then(function(
 // }
 ~~~
 
-### 3. Transforming JSON Graph Information Directly Into View Objects
-
-The Model's internal cache representation is a JSON Graph. That means that in order to return requested values in JSON format, the Model must allocate new objects. In memory-constrained environments in which the caller immediately converts JSON data returned by the Model into view objects, it may be desireable to avoid intermediary allocations by reading data directly from the Model cache. That's why the Model's get Method also supports the following overload:
-
-~~~js
-class Model {
-    get(...PathSet, valueSelector): ModelResponse
-}
-~~~
-
-The Model's get method can optionally accept a selector function. This selector function is guaranteed to run once the requested values have been loaded into the Model's cache. The Model runs the selector function within a Transaction. During a Transaction, it is legal to use the following methods to directly access data in the Model cache:
-
-* getValueSync
-* derefSync
-
-Model methods ending in the suffix "Sync" will throw if executed outside of a transaction. 
-
-By reading data from the model cache and transforming it directly into view objects, we avoid intermediary allocations. **Within a transaction, the developer must ensure that they only request those paths in the selector function which have been passed as arguments to the get method.** These are the only paths which are guaranteed to be available in the cache. 
-
-In the example below, Views are created from data read directly from the Model cache.
-
-~~~js
-model.
-    get(
-    'todos[0..1]["name", "done"]',
-    function selectorFunction() {
-        var html = "<ul>";
-        var todo;
-        for (var i = 0; i <= 1; i++) {
-            todo = this.derefSync(["todos", i]);
-            if (todo)
-                html += "<li>" + todo.getValueSync("name") + " <img src='" + (todo.getValueSync("done") ? "check.png" : "blank.png") + "'></li>";
-        }
-        html += "</ul><a onclick='showPage(" + to + ")'>Next</a>";
-        return html;
-    }).
-~~~
-
 ## Setting Values Using the Model
 
 In addition to retrieving values from a DataSource using a Model, you can also use a Model to set values into a DataSource. Set operations immediately write to the Model's local cache, and then write to the DataSource. That means that changes are reflected on the client immediately. However, if the attempt to modify the data in the DataSource fails, the Model's cache will eventually be updated the post-set value of the DataSource. This is sometimes referred to as eventual consistency.
@@ -1778,20 +1740,6 @@ var model = new falcor.Model({
 ~~~
 
 For more information on the Model Cache, see Model Cache.
-
-## Transactions
-
-A Model automatically collects least-recently-used items in the local cache when the size of the cache breaches the Model's maximum cache size. However the Model also attempts to ensure that data that is currently being delivered 
-A transaction is a period of time during which no cache collections occur. 
-
-When you request data from a Falcor model, any request the data that is not in the local cache is retrieved from the data source, added to the cache, and then pushed to a callback.  By default, a transaction begins when the data is written to the cache and ends when the callback function has finished executing.
-
-The Falcor model uses push APIs to deliver data, giving it the flexibility to retrieve data from the data source if it is not synchronously available in the Model's cache. Under normal circumstances the model does not allow synchronous access to the cache. The reason why don't you just cannot be synchronously retrieved from the model cache is that there is no way for a developer to ascertain whether a model a value is undefined or simply not present in the cache.
-
-
-There are a several Model methods which can _only_ be called within a transaction. These methods end in the suffix "Sync", because they are both _synch_ronous and _sync_hronized, meaning they synchronously retrieve data from the model cache but throw if not run within a transaction. 
-
-Synchronized methods allow you to synchronously read data directly from the Falcor cache. 
 
 ## Error Handling
 
