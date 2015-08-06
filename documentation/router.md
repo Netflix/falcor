@@ -28,16 +28,15 @@ For example here is a Router defined for Node's ExpressJS MVC framework which us
 
 //defined for Node's ExpressJS MVC framework?
 var router = new Router([{
-    route: "todosById[{integers:ids}].name",
+    route: 'todosById[{integers:ids}].name',
     get: function(pathSet) {
         return pathSet.ids.map(function(id) {
             return {
                 path: ['todosById', id, 'name'],
-                value: "get milk from corner store."
+                value: 'get milk from corner store.'
             }
-        })
+        });
     }
-}]);
 }]);
 ~~~
 
