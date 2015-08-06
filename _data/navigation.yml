@@ -11,6 +11,12 @@
     - video_tutorials
       
 - 
+  # If a first level menu item isn't a dropdown menu, you can give it an
+  # id to link it straight to a page or a title and a path to link to a relative url
+  title: Video Tutorials
+  path: "/starter/video-tutorials.html"
+
+- 
   title: Documentation
   children:
     - paths  
@@ -18,12 +24,6 @@
     - data_sources    
     - router    
     - model
-
-- 
-  # If a first level menu item isn't a dropdown menu, you can give it an
-  # id to link it straight to a page or a title and a path to link to a relative url
-  title: Video Tutorials
-  path: "/starter/video-tutorials.html"
 
 - 
   # If a first level menu item isn't a dropdown menu, you can give it an
