@@ -12,7 +12,7 @@ lang: en
 
 # Data Sources
 
-A DataSource is an interface which can be implemented to expose JSON Graph information to a Model. Every DataSource is associated with a single JSON Graph object. Models execute JSON Graph operations (get, set, and call) to retrieve values from the DataSource's JSON Graph object. DataSources may retrieve JSON Graph information from anywhere, including device memory, a remote machine, or even a lazily-run computation. 
+A DataSource is an interface which can be implemented to expose JSON Graph information to a Model. Every DataSource is associated with a single JSON Graph object. Models execute JSON Graph operations (get, set, and call) to retrieve values from the DataSource's JSON Graph object. DataSources may retrieve JSON Graph information from anywhere, including device memory, a remote machine, or even a lazily-run computation.
 
 ![DataSource Diagram](./datasource.png)
 
@@ -28,7 +28,7 @@ Each JSON Graph operation is executed asynchronously, resulting in an Observable
 
 ### The get Method
 
-The get Method on the DataSource interface executes the abstract JSON Graph get operation on the DataSource's associated JSON Graph object.
+The `get` method on the DataSource interface executes the abstract JSON Graph get operation on the DataSource's associated JSON Graph object.
 
 ~~~js
 interface DataSource {
@@ -36,10 +36,10 @@ interface DataSource {
 }
 ~~~
 
-To demonstrate the get() method in action, we'll create a DataSource by adapting a Model with an in-memory cache to the DataSource interface using the toDataSource() method.
+To demonstrate the `get()` method in action, we'll create a DataSource by adapting a Model with an in-memory cache to the DataSource interface using the `asDataSource()` method.
 
 ~~~js
-var dataSource = 
+var dataSource =
     new falcor.Model({
         cache: {
             todos: [
@@ -63,7 +63,7 @@ var dataSource =
     }).asDataSource();
 ~~~
 
-Here is an example which requests the name and status of the first two prerequisites of the first task in a TODO list. 
+Here is an example which requests the name and status of the first two prerequisites of the first task in a TODO list.
 
 ~~~js
 var response = dataSource.get([
@@ -84,7 +84,7 @@ response.subscribe(jsonGraphEnvelope => JSON.stringify(jsonGraphEnvelope, null, 
 //                 done: false,
 //                 prerequisites: [
 //                     { $type: "ref", value: ['todosById', 54] },
-//                     { $type: "ref", value: ['todosById', 97] }                    
+//                     { $type: "ref", value: ['todosById', 97] }
 //                 ]
 //             },
 //             "54": { name: 'withdraw money from ATM', done: false },
@@ -96,7 +96,7 @@ response.subscribe(jsonGraphEnvelope => JSON.stringify(jsonGraphEnvelope, null, 
 
 ### The set Method
 
-The set Method on the DataSource interface executes the abstract JSON Graph set operation on the DataSource's associated JSON Graph object.
+The `set` method on the DataSource interface executes the abstract JSON Graph set operation on the DataSource's associated JSON Graph object.
 
 ~~~js
 interface DataSource {
@@ -104,10 +104,10 @@ interface DataSource {
 }
 ~~~
 
-To demonstrate the set() method in action, we'll create a DataSource by adapting a Model with an in-memory cache to the DataSource interface using the toDataSource() method.
+To demonstrate the `set()` method in action, we'll create a DataSource by adapting a Model with an in-memory cache to the DataSource interface using the `asDataSource()` method.
 
 ~~~js
-var dataSource = 
+var dataSource =
     new falcor.Model({
         cache: {
             todos: [
@@ -165,7 +165,7 @@ response.subscribe(jsonGraphEnvelope => JSON.stringify(jsonGraphEnvelope, null, 
 //             44: {
 //                 prerequisites: [
 //                     { $type: "ref", value: ['todosById', 54] },
-//                     { $type: "ref", value: ['todosById', 97] }                    
+//                     { $type: "ref", value: ['todosById', 97] }
 //                 ]
 //             },
 //             "54": { name: 'withdraw money from ATM', done: false },
@@ -177,9 +177,9 @@ response.subscribe(jsonGraphEnvelope => JSON.stringify(jsonGraphEnvelope, null, 
 
 ### The call Method
 
-The call Method on the DataSource interface executes the abstract JSON Graph call operation on the DataSource's associated JSON Graph object. The call method invokes a single function located inside of the JSON graph object. 
+The `call` method on the DataSource interface executes the abstract JSON Graph call operation on the DataSource's associated JSON Graph object. The `call` method invokes a single function located inside of the JSON graph object.
 
-Functions are useful for non-idempotent operations which cannot be performed using get or set (ex. like adding to a list). Using a Function is appropriate when the application is performing a transactional operation that cannot be represented as a series of set operation.
+Functions are useful for non-idempotent operations which cannot be performed using `get` or `set` (ex. like adding to a list). Using a Function is appropriate when the application is performing a transactional operation that cannot be represented as a series of set operation.
 
 JSON Graph Functions can _not_ return transient data (ex. 2 + 2 = 4). A JSON Graph function can only return a JSONGraphEnvelope containing a subset of the data in its "this" object (the object which contains the function as a member).
 
@@ -194,13 +194,13 @@ interface DataSource {
 ~~~
 
 
-The "callPath" parameter is a Path Array that refers to the location of the function within the JSON Graph object. The "arguments" parameter are the arguments passed to the function. The "pathSuffixes" parameter 
+The `callPath` parameter is a Path Array that refers to the location of the function within the JSON Graph object. The "arguments" parameter are the arguments passed to the function. The "pathSuffixes" parameter
 
 
-To demonstrate the call() method in action, we'll create a DataSource by adapting a Model with an in-memory cache to the DataSource interface using the toDataSource() method.
+To demonstrate the `call()` method in action, we'll create a DataSource by adapting a Model with an in-memory cache to the DataSource interface using the `asDataSource()` method.
 
 ~~~js
-var dataSource = 
+var dataSource =
     new falcor.Model({
         cache: {
             todos: [
@@ -258,7 +258,7 @@ response.subscribe(jsonGraphEnvelope => JSON.stringify(jsonGraphEnvelope, null, 
 //             44: {
 //                 prerequisites: [
 //                     { $type: "ref", value: ['todosById', 54] },
-//                     { $type: "ref", value: ['todosById', 97] }                    
+//                     { $type: "ref", value: ['todosById', 97] }
 //                 ]
 //             },
 //             "54": { name: 'withdraw money from ATM', done: false },
@@ -285,6 +285,6 @@ Falcor ships with the following DataSource implementations:
 Falcor Models typically use the HttpDataSource to connect directly to falcor middleware running on an Http server.
 ## Reference Implementation
 
-Here is a [reference implementation](https://github.com/Netflix/falcor/blob/master/examples/datasource/webWorkerSource.js) of a Data Source which retrieves information from a Model running in a WebWorker. 
+Here is a [reference implementation](https://github.com/Netflix/falcor/blob/master/examples/datasource/webWorkerSource.js) of a Data Source which retrieves information from a Model running in a WebWorker.
 ##Http DataSource
 The falcor library ships with one implementation of the DataSource interface: the HttpDataSource. The HttpDataSource retrieves JSON Graph information
