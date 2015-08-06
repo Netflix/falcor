@@ -7,8 +7,6 @@ lang: en
 
 ## What is Falcor?
 
-Every user wants to believe that all the data in the cloud is stored on their device. Falcor lets web developers code that way.
-
 Falcor is a JavaScript library for data fetching. Falcor lets you represent all of your cloud data sources as *One Virtual JSON Model* on the server. On the client, you code as if the entire JSON model is available locally. Falcor retrieves any data you request from the cloud on-demand, handling network communication transparently.
 
 Falcor lets you model your data as a graph in JSON with the JSON Graph specification. Falcor automatically optimizes and traverses references in your graph for you.
