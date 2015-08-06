@@ -1,3 +1,3 @@
 ### The Data is the API
 
-Falcor makes it appear as if your entire JSON model is available locally and allows you to access data the same way you would from an in-memory JSON object.
+Falcor lets you access your data like it's a JavaScript object. You don't have to learn a new API. You just have to know your data.
