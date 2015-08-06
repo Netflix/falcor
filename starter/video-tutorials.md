@@ -10,6 +10,8 @@ lang: en
 
 ### 1. [Introduction to the Model](https://www.youtube.com/watch?v=xby_MUlBOw0)
 
+<iframe width="560" height="315" src="https://www.youtube.com/embed/xby_MUlBOw0" frameborder="0" allowfullscreen></iframe>
+
 In this video will learn how to work with JSON data indirectly through a Falcor Model. The Falcor Model allows you to work with data using the same familiar JavaScript path syntax. However the Model uses a push API, sending the data to a callback rather than returning it immediately. Using a push API means that you can move your data anywhere in the network later on, without changing the data retrieval code in your client.
 
 ### 2. [Retrieving Multiple Values](http://youtu.be/6c0BEPywkYc)
