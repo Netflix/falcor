@@ -34,7 +34,7 @@ var router = new Router([{
             return {
                 path: ['todosById', id, 'name'],
                 value: 'get milk from corner store.'
-            }
+            };
         });
     }
 }]);
@@ -130,21 +130,21 @@ model.get('todosById[0].name', 'todosById[1].done').then(function (data) {
 
 ~~~js
 var router = new Router([{
-    route: "todosById[0].name",
+    route: 'todosById[0].name',
     get: function(pathSet) {
         return {
             path: ['todosById', 0, 'name'],
-            value: "get milk from corner store."
-        }
+            value: 'get milk from corner store.'
+        };
     }
 },
 {
-    route: "todosById[1].done",
+    route: 'todosById[1].done',
     get: function(pathSet) {
         return {
             path: ['todosById', 1, 'done'],
             value: true
-        }
+        };
     }
 }]);
 ~~~
