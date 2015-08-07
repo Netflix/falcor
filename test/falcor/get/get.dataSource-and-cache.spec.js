@@ -10,49 +10,69 @@ var testRunner = require('./../../testRunner');
 var noOp = function() {};
 var LocalDataSource = require('../../data/LocalDataSource');
 var Observable = Rx.Observable;
+var sinon = require('sinon');
+var expect = require('chai').expect;
 
 describe('DataSource and Partial Cache', function() {
-    describe('Selector Functions', function() {
+    describe('Preload Functions', function() {
         it('should get multiple arguments with multiple selector function args.', function(done) {
             var model = new Model({cache: M(), source: new LocalDataSource(Cache())});
-            var expected = Expected.Complex().toOnly.AsJSON.values[0].json;
-            var selector = false;
-            var next = false;
+            var onNext = sinon.spy();
+            var secondOnNext = sinon.spy();
             model.
-                get(['videos', 1234, 'summary'], ['videos', 766, 'summary'], function(v1234, v766) {
-                    testRunner.compare(expected[0], v1234);
-                    testRunner.compare(expected[1], v766);
-                    selector = true;
-
-                    return {value: v766};
+                preload(['videos', 1234, 'summary'], ['videos', 766, 'summary']).
+                doAction(onNext).
+                doAction(noOp, noOp, function() {
+                    expect(onNext.callCount).to.equal(0);
                 }).
-                doAction(function(x) {
-                    next = true;
-                    testRunner.compare(expected[1], x.value);
-                }, noOp, function() {
-                    testRunner.compare(true, selector, 'Expect to be onNext at least 1 time.');;
-                    testRunner.compare(true, next, 'Expect to be onNext at least 1 time.');
+                defaultIfEmpty({}).
+                flatMap(function() {
+                    return model.get(['videos', 1234, 'summary'], ['videos', 766, 'summary']);
+                }).
+                doAction(secondOnNext).
+                doAction(noOp, noOp, function() {
+                    expect(secondOnNext.calledOnce).to.be.ok;
+                    testRunner.compare({
+                        json: {
+                            videos: {
+                                1234: {
+                                    summary: {
+                                        title: "House of Cards",
+                                        url: "/movies/1234"
+                                    }
+                                },
+                                766: {
+                                    summary: {
+                                        title: "Terminator 3",
+                                        url: "/movies/766"
+                                    }
+                                }
+                            }
+                        }
+                    }, secondOnNext.getCall(0).args[0]);
                 }).
                 subscribe(noOp, done, done);
         });
 
         it('should get a complex argument into a single arg.', function(done) {
+            var expected = Expected.Complex().toOnly.AsPathMap.values[0];
             var model = new Model({cache: M(), source: new LocalDataSource(Cache())});
-            var expected = Expected.Complex().toOnly.AsJSON.values[0].json;
-            var selector = false;
-            var next = false;
+            var onNext = sinon.spy();
+            var secondOnNext = sinon.spy();
             model.
-                get(['genreList', 0, {to: 1}, 'summary'], function(complexPath) {
-                    testRunner.compare(expected, complexPath);
-                    selector = true;
-                    return {value: complexPath};
+                preload(['genreList', 0, {to: 1}, 'summary']).
+                doAction(onNext).
+                doAction(noOp, noOp, function() {
+                    expect(onNext.callCount).to.equal(0);
                 }).
-                doAction(function(x) {
-                    next = true;
-                    testRunner.compare(expected, x.value);
-                }, noOp, function() {
-                    testRunner.compare(true, selector, 'Expect to be onNext at least 1 time.');;
-                    testRunner.compare(true, next, 'Expect to be onNext at least 1 time.');
+                defaultIfEmpty({}).
+                flatMap(function() {
+                    return model.get(['genreList', 0, {to: 1}, 'summary']);
+                }).
+                doAction(secondOnNext).
+                doAction(noOp, noOp, function() {
+                    expect(secondOnNext.calledOnce).to.be.ok;
+                    testRunner.compare(expected, secondOnNext.getCall(0).args[0]);
                 }).
                 subscribe(noOp, done, done);
         });
@@ -157,7 +177,7 @@ describe('DataSource and Partial Cache', function() {
                 subscribe(noOp, done, done);
         });
     });
-    describe('Re-entrancy', function() {
+    xdescribe('Re-entrancy - NOT AN ISSUE UNTIL SYNC COMES BACK', function() {
         it('calling set/get/call operations that execute synchronously in a selector function should not decrement syncRefCount, thereby disabling subsequent getValueSyncs within the selector functions.', function(done) {
             var model = new falcor.Model({
                 source: {
@@ -183,7 +203,7 @@ describe('DataSource and Partial Cache', function() {
             model.get(["user","age"], function(age) {
                 // model.withoutDataSource().get({path:["user","name"], value: 23}).subscribe();
                 model.withoutDataSource().get(["user","name"]).subscribe();
-                
+
                 // should work, but doesn't because syncRefCount was set to 0 by get
                 try {
                     model.getValueSync(["user", "age"]);
