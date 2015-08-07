@@ -13,10 +13,11 @@
 // @import "includes/prettify-theme-tomorrow-night.less";
 
 
-// General site styles that don't fit into a subcategory yet
+// General site styles that don't fit into a subcategory
+//------------------------------------------------------
+
+
 body {
-  position: relative;
-  padding-top: @navbar-height + @site-content-padding-top;
 
   // Font improvement tweaks.
   // MDN recommends against using the first two, as they aren't on track to be included
@@ -31,6 +32,47 @@ body {
     color: @video-page-text-color;
   }
 }
+
+
+// Fixed navbar and sticky footer 
+//-------------------------------
+
+html {
+  position: relative;
+  min-height: 100%;
+}
+body {
+  /* Margin bottom by footer height */
+  margin-bottom: @site-footer-height;
+  
+  & > .container, & > .hero-banner > .container {
+    padding-top: @navbar-height + @site-content-padding-top;
+  }
+}
+.site-footer {
+  background-color: @site-footer-background-color;
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  height: @site-footer-height;
+  
+  & .footer-links {
+    height: 100%;
+    padding: (@site-footer-height - @line-height-computed)/2 0;
+    color: @site-footer-text-color;
+    
+    & > a {
+      color: @site-footer-link-color;
+    }
+  }
+  
+  & .netflix-logo {
+    @logo-height: 0.5 * @site-footer-height;
+    height: @logo-height;
+    margin-top: (@site-footer-height - @logo-height)/2;
+  }
+}
+
 
 // Place a subtle border around images by on standard pages since they're generally set on the
 // light gray site background.
@@ -67,8 +109,12 @@ body {
   h4 {
     margin-top: -1 * (@navbar-height + @site-content-padding-top) + @line-height-computed / 2;
   }
+  h5, .h5 {
+    font-weight: bold;
+    margin-top: @line-height-computed;
+    margin-bottom: @line-height-computed / 2;
+  }  
 }
-
 
 .intrasection-navigation {
   background-color: @module-background-blue;
@@ -80,12 +126,6 @@ body {
 
 img.img-plain {
   border: none;
-}
-
-h5, .h5 {
-  font-weight: bold;
-  margin-top: @line-height-computed;
-  margin-bottom: @line-height-computed / 2;
 }
 
 // ==================
@@ -122,10 +162,4 @@ h5, .h5 {
       margin-top: 40px;
     }
   }
-}
-
-
-// Light text for a dark (inverse) background
-.text-inverse {
-  color: darken(white, 20%);
 }
