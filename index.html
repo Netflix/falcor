@@ -20,7 +20,7 @@ lang: en
               </div>
               <div class="row text-center text-inverse hero-banner-description">
                 <div class="col-xs-12">
-                  <div>A JavaScript library for on-demand data fetching</div>
+                  <div>{% include tagline.txt %}</div>
                 </div>
               </div>
             </div>
@@ -47,6 +47,8 @@ lang: en
     </div>
   </main>
 
+  {% include site-footer.html %}
+  
   {% include javascript-includes.html %}
   
   <!-- First visit intro animation -->
@@ -64,7 +66,6 @@ lang: en
         document.body.className = document.body.className.replace('loading', '');
       }
       
-      // TODO: remove second selector, as that is temporary for demoing
       $('.repeat-intro-animation').click(function (event) {
         event.preventDefault();
         window.scrollTo(0,0);
