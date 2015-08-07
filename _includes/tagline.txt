@@ -1,1 +1,1 @@
-Retrieve model data on-demand from the cloud.
+A JavaScript library for on-demand data fetching
