@@ -13,10 +13,11 @@
 // @import "includes/prettify-theme-tomorrow-night.less";
 
 
-// General site styles that don't fit into a subcategory yet
+// General site styles that don't fit into a subcategory
+//------------------------------------------------------
+
+
 body {
-  position: relative;
-  padding-top: @navbar-height + @site-content-padding-top;
 
   // Font improvement tweaks.
   // MDN recommends against using the first two, as they aren't on track to be included
@@ -25,31 +26,61 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
+  
+  &.video-page {
+    background-color: @video-page-bg;
+    color: @video-page-text-color;
+  }
 }
 
-// Place a subtle border around images by on standard pages since they're generally set on the
-// light gray site background.
-// Also make all images responsive by default, so they can't overflow the bounds of the page.
-// Lastly, give them some margins so they aren't too close to neighboring text.
-// Standard pages are any pages that inherit from the page or *-page templates, which is generally
-// all but the homepage and potentially other special one off pages
-.standard-page img {
-  border: 1px solid @nested-item-border-color;
-  margin: @nested-item-margin;
-  .img-responsive();
+
+// Fixed navbar and sticky footer 
+//-------------------------------
+
+html {
+  position: relative;
+  min-height: 100%;
+}
+body {
+  /* Margin bottom by footer height */
+  margin-bottom: @site-footer-height;
+  
+  & > .container, & > .hero-banner > .container {
+    padding-top: @navbar-height + @site-content-padding-top;
+  }
+}
+.site-footer {
+  background-color: @site-footer-background-color;
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  height: @site-footer-height;
+  
+  & .footer-links {
+    height: 100%;
+    padding: (@site-footer-height - @line-height-computed)/2 0;
+    color: @site-footer-text-color;
+    
+    & > a {
+      color: @site-footer-link-color;
+    }
+  }
+  
+  & .netflix-logo {
+    @logo-height: 0.5 * @site-footer-height;
+    height: @logo-height;
+    margin-top: (@site-footer-height - @logo-height)/2;
+  }
 }
 
 .standard-page {
+  padding-bottom: @site-content-padding-bottom;
   // Necessary hack so the anchors will align with the top of the content area
   // rather than the top of the page. Please read that page for limitations
   // of the method (this is method #2) before modifying header styles.
   // See http://nicolasgallagher.com/jump-links-and-viewport-positioning/
-  // Additionally modified to set manual z index stacking order so code snippets
-  // never fall behind a subsequent header and lose clickable area
-  // pre {
-  //   position: relative;
-  //   z-index: 2;
-  // }
+  // Additionally modified to set manual z index stacking order so headers are behind other
+  // elements and thus don't devour the clicks intended for them.
   h1, h2, h3, h4 {
     position: relative;
     border-top: (@navbar-height + @site-content-padding-top) solid transparent;
@@ -62,8 +93,29 @@ body {
   h4 {
     margin-top: -1 * (@navbar-height + @site-content-padding-top) + @line-height-computed / 2;
   }
+  h5, .h5 {
+    font-weight: bold;
+    margin-top: @line-height-computed;
+    margin-bottom: @line-height-computed / 2;
+  }  
+}
+// Place a subtle border around images by on standard pages since they're generally set on the
+// light gray site background.
+// Also make all images responsive by default, so they can't overflow the bounds of the page.
+// Lastly, give them some margins so they aren't too close to neighboring text.
+// Standard pages are any pages that inherit from the page or *-page templates, which is generally
+// all but the homepage and potentially other special one off pages
+.standard-page img {
+  border: 1px solid @nested-item-border-color;
+  margin: @nested-item-margin;
+  .img-responsive();
 }
 
+.video-page .video-description {
+  margin: 15px 0px 30px 0px;
+}
+
+// Bottom-of-content next/previous page in section links, for quick navigation 
 .intrasection-navigation {
   background-color: @module-background-blue;
   padding: 15px 10px;
@@ -71,15 +123,21 @@ body {
     color: @gray-dark;
   }
 }
+.video-page {
+  .intrasection-navigation {
+    background-color: #222;
+  }
+  &, & a, & .icon {
+    color: @text-inverse-link-color;
+  }
+}
 
 img.img-plain {
   border: none;
 }
 
-h5, .h5 {
-  font-weight: bold;
-  margin-top: @line-height-computed;
-  margin-bottom: @line-height-computed / 2;
+hr {
+  border-color: @gray-dark;
 }
 
 // ==================
@@ -116,10 +174,4 @@ h5, .h5 {
       margin-top: 40px;
     }
   }
-}
-
-
-// Light text for a dark (inverse) background
-.text-inverse {
-  color: darken(white, 20%);
 }
