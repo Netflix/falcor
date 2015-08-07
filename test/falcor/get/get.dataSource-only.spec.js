@@ -12,7 +12,7 @@ var isPathValue = require("./../../../lib/support/is-path-value");
 var expect = require("chai").expect;
 var sinon = require('sinon');
 
-describe.only('DataSource Only', function() {
+describe('DataSource Only', function() {
     describe('Preload Functions', function() {
         it('should get a value from falcor.', function(done) {
             var model = new Model({source: new LocalDataSource(Cache())});
