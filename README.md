@@ -75,13 +75,22 @@ Where you can replace the id with any page's id, or even a variable (`id=site.da
 
 
 Code blocks
-------------------
+-----------
 
 You can use triple tildes (~~~) with the language specified and your code will be automatically syntax highlighted!
 The following general language types are available, and have distinct highlighting:
 - default: specify any language other than the ones below (e.g. `js`, `css`, `html`, etc.).
 - `shell`/`sh`/`bash`: terminal colors (green on black).
 - `output`: a dark variant of the default highlighting theme so you can follow a user input examle with the server's response and have a contrasting but familiar theme. It attemps to autodetect language via the code prettify library, so you don't need to specify one.
+
+Quick Vertical Spacer
+---------------------
+
+Since markdown lets you embed html, you can place the following html to create a one-off vertical gap between some text content:
+```
+<div class="row row-gap-small"></div>
+```
+Where row-gap-small can be any of: `row-gap-small`, `row-gap-medium`, `row-gap-large`, `row-gap-huge`, and create 15px, 30px, 45px, and 60px of space, respectively.
 
 Configuring the Navigation
 --------------------------
