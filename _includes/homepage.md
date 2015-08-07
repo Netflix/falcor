@@ -14,6 +14,4 @@
   </div>
 </div>
 
-<hr>
-
 {% include homepage-getting-started.md %}
