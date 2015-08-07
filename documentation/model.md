@@ -358,9 +358,9 @@ model.get(["todos", {from: 0, to:1},"name"], ["todos", "length"]).then(function(
 
 ## Setting Values Using the Model
 
-In addition to retrieving values from a DataSource using a Model, you can also use a Model to set values into a DataSource. Set operations immediately write to the Model's local cache, and then write to the DataSource. That means that changes are reflected on the client immediately. However, if the attempt to modify the data in the DataSource fails, the Model's cache will eventually be updated the post-set value of the DataSource. This is sometimes referred to as eventual consistency.
+In addition to retrieving values from a DataSource using a Model, you can also use a Model to set values into a DataSource. Set operations immediately write to the Model's local cache, and then write to the DataSource. That means that changes are reflected on the client immediately. However, if the attempt to modify the data in the DataSource fails, the Model's cache will eventually be updated with the post-set value of the DataSource. This is sometimes referred to as eventual consistency.
 
-With setting information using the Model, developers are usually trying to do one of the following operations:
+When setting information using the Model, developers are usually trying to do one of the following operations:
 
 1. Set a single value
 2. Set values using multiple PathValue objects
