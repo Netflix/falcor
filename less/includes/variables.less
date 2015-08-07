@@ -8,6 +8,7 @@
 @falcor-purple-light: #D99EDB;
 @falcor-purple: #B987BB;
 @falcor-purple-dark: #934C98;
+@text-inverse-link-color: darken(white, 15%);
 
 // Nested images, code snippets, etc.
 //-----------------------------------
@@ -19,9 +20,13 @@
 @navbar-dropdown-menu-top-color: #CCC;
 @navbar-dropdown-arrow-size: 9px;
 
-// The space between the navbar and where content on pages starts
+// Spacing before and after the main content for a page
 //---------------------------------------------------------------
+
+// Between where the nav bar ends and the content starts
 @site-content-padding-top: 20px;
+// Between where the content ends and the footer starts
+@site-content-padding-bottom: 60px;
 
 // Widgets/modules such as the table of contents
 //----------------------------------------------
@@ -70,7 +75,7 @@
 // Site footer
 //------------
 @site-footer-height: 60px;
-@site-footer-text-color: @navbar-inverse-link-color;
-@site-footer-link-color: @navbar-inverse-link-color;
+@site-footer-text-color: @text-inverse-link-color;
+@site-footer-link-color: @text-inverse-link-color;
 @site-footer-font-size: 16px;
 @site-footer-background-color: #111;
