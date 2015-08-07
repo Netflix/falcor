@@ -5,7 +5,7 @@ id: model
 lang: en
 ---
 
-* table of contents. this line is required for some reason
+* Table of contents. This line is required to start the list.
 {:toc}
 
 # Model Overview

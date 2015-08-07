@@ -5,7 +5,7 @@ id: paths
 lang: en
 ---
 
-* Will be replaced with the ToC, excluding the "Contents" header
+* Table of contents. This line is required to start the list.
 {:toc}
 
 ## Paths
