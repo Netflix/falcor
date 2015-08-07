@@ -14,6 +14,10 @@
   </div>
 </div>
 
+~~~bash
+npm install falcor --save
+~~~
+
 ---
 
 {% include homepage-getting-started.md %}
