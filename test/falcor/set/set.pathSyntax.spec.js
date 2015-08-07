@@ -30,7 +30,7 @@ describe('Path Syntax', function() {
             }).
             subscribe(noOp, done, done);
     });
-    it('should accept strings for setValue', function(done) {
+    it.only('should accept strings for setValue', function(done) {
         var called = false;
         model.
             setValue('test[0]', 6).

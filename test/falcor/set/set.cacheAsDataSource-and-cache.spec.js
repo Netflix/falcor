@@ -222,32 +222,4 @@ describe('Cache as DataSource and Cache', function() {
                 done(e);
             }, noOp);
     });
-    it('should progessively selector.', function(done) {
-        var model = new Model({
-            cache: M(),
-            source: new Model({
-                source: new LocalDataSource(Cache())
-        }).asDataSource() });
-        var called = 0;
-        model.
-            get(['genreList', 0, {to:1}, 'summary'], function(x) {
-                if (called === 0) {
-                    testRunner.compare({
-                        0: Values().direct.AsJSON.values[0].json
-                    }, x);
-                }
-
-                else {
-                    testRunner.compare(
-                        Complex().toOnly.AsJSON.values[0].json,
-                        x);
-                }
-                called++;
-            }).
-            progressively().
-            doAction(noOp, noOp, function() {
-                expect(called).to.equals(2);
-            }).
-            subscribe(noOp, done, done);
-    });
 });

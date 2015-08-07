@@ -11,7 +11,7 @@ var LocalDataSource = require('../../data/LocalDataSource');
 var ErrorDataSource = require('../../data/ErrorDataSource');
 var isPathValue = require("./../../../lib/support/is-path-value");
 
-describe.only('DataSource and Deref', function() {
+describe('DataSource and Deref', function() {
     it('should perform multiple trips to a dataSource.', function(done) {
         var count = 0;
         var model = new Model({

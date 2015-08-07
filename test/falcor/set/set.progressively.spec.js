@@ -10,6 +10,8 @@ var testRunner = require('./../../testRunner');
 var noOp = function() {};
 var LocalDataSource = require('../../data/LocalDataSource');
 var ErrorDataSource = require('../../data/ErrorDataSource');
+var sinon = require('sinon');
+var expect = require('chai').expect;
 
 describe('Progressive', function() {
     describe('toPathValues', function() {
@@ -63,42 +65,41 @@ describe('Progressive', function() {
             var model = new Model({cache: M(), source: new LocalDataSource(Cache())});
             var model2 = new Model({cache: M(), source: new LocalDataSource(Cache())});
             var expected = Expected.Complex().toOnly.AsJSON.values[0].json;
-            var count = 0;
             var e1 = {
                 newValue: '1'
             };
             model._root.unsafeMode = true;
             model2._root.unsafeMode = true;
             var progressive = model.
-                derefSync(['genreList', 0]).
-                set({path: [{to:1}, 'summary'], value: e1}).
-                progressively().
-                toPathValues();
+                deref(['genreList', 0], [{to: 1}, 'summary']).
+                flatMap(function(m) {
+                    return m.
+                        set({path: [{to:1}, 'summary'], value: e1}).
+                        progressively().
+                        toPathValues();
+                });
 
             var standard = model2.
-                derefSync(['genreList', 0]).
-                set({path: [{to:1}, 'summary'], value: e1}).
-                toPathValues();
+                deref(['genreList', 0], [{to: 1}, 'summary']).
+                flatMap(function(m) {
+                    return m.
+                        set({path: [{to:1}, 'summary'], value: e1}).
+                        toPathValues();
+                });
 
-            var progressiveResult = false;
-            var standardResult = false;
+            var onNextStandard = sinon.spy();
+            var onNextProg = sinon.spy(function(progressiveResult) {
+                return standard.
+                    toArray().
+                    doAction(onNextStandard);
+            });
+
             // cannot zip, can hide results.
             progressive.
                 toArray().
-                flatMap(function(progressiveResults) {
-                    progressiveResult = true;
-                    return standard.
-                        toArray().
-                        doAction(function(standardRes) {
-                            standardResult = true;
-                            standardRes.forEach(function(res, i) {
-                                testRunner.compare(res, progressiveResults[i]);
-                            });
-                        });
-                }).
+                flatMap(onNextProg).
                 doAction(noOp, noOp, function() {
-                    testRunner.compare(true, progressiveResult, 'expected progressive result to fire');
-                    testRunner.compare(true, standardResult, 'expected standart result to fire');
+                    expect(onNextProg.getCall(0).args[0]).to.deep.equals(onNextStandard.getCall(0).args[0]);
                 }).
                 subscribe(noOp, done, done);
         });
