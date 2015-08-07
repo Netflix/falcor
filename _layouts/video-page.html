@@ -17,9 +17,9 @@ page_class: "video-page"
     Please ensure your page has a youtube_id in its page front matter
     {% endif %}
     
-    
-    {{ content }}
-    
+    <div class="video-description">
+      {{ content }}
+    </div>
     {% include intrasection-navigation-links.html %}
   </div>
 </div>
