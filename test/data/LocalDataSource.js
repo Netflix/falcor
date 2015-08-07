@@ -38,7 +38,7 @@ LocalSource.prototype = {
                 var values = [{}];
                 if (self._missCount >= miss) {
                     onGet(self, paths);
-                    self.model._getPathSetsAsJSONG(self.model, paths, values, errorSelector);
+                    self.model._getPathValuesAsJSONG(self.model, paths, values, errorSelector);
                 } else {
                     self._missCount++;
                 }
@@ -79,7 +79,7 @@ LocalSource.prototype = {
                     errorSelector: errorSelector});
                 jsongEnv = onSet(self, tempModel, jsongEnv);
 
-                tempModel._getPathSetsAsValues(
+                tempModel._getPathValuesAsValues(
                     tempModel,
                     jsongEnv.paths,
                     function onNext(pathValue) {

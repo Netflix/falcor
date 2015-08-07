@@ -39,9 +39,9 @@ describe('Overwrite', function() {
                     subscribe(noOp, done, done);
             });
         });
-        describe('Selector', function() {
+        describe('preload', function() {
             it('should splice an overwritten item.', function(done) {
-                spliceOverwrite({path: ['expired'], value: 'overwrite'}, 'selector').
+                spliceOverwrite({path: ['expired'], value: 'overwrite'}, 'preload').
                     subscribe(noOp, done, done);
             });
         });
@@ -65,9 +65,9 @@ describe('Overwrite', function() {
                     subscribe(noOp, done, done);
             });
         });
-        describe('Selector', function() {
+        describe('preload', function() {
             it('should splice an overwritten item.', function(done) {
-                spliceOverwrite({json: 'overwrite'}, 'selector').
+                spliceOverwrite({json: 'overwrite'}, 'preload').
                     subscribe(noOp, done, done);
             });
         });

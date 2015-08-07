@@ -5,7 +5,7 @@ var $error = require('./../../../lib/types/error');
 module.exports = function() {
     return {
         routerOrSourceMissing: {
-            getPathSets: {
+            getPathValues: {
                 query: [["videos", "missingBranch", "summary"]]
             },
             getPathMaps: {
@@ -33,7 +33,7 @@ module.exports = function() {
             }
         },
         missingBranch: {
-            getPathSets: {
+            getPathValues: {
                 query: [["videos", "missingBranch", "summary"]]
             },
             getPathMaps: {
@@ -71,7 +71,7 @@ module.exports = function() {
             }
         },
         missingLeaf: {
-            getPathSets: {
+            getPathValues: {
                 query: [["videos", "1234", "missingLeaf"]]
             },
             getPathMaps: {
@@ -109,7 +109,7 @@ module.exports = function() {
             }
         },
         atomOfUndefined: {
-            getPathSets: {
+            getPathValues: {
                 query: [["misc", "uatom"]]
             },
             getPathMaps: {

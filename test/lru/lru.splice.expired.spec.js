@@ -39,9 +39,9 @@ describe('Expired', function() {
                     subscribe(noOp, done, done);
             });
         });
-        describe('Selector', function() {
+        describe('preload', function() {
             it('should splice expired item.', function(done) {
-                spliceExpired(['expireSoon', 'summary'], 'selector').
+                spliceExpired(['expireSoon', 'summary'], 'preload').
                     subscribe(noOp, done, done);
             });
         });
@@ -65,9 +65,9 @@ describe('Expired', function() {
                     subscribe(noOp, done, done);
             });
         });
-        describe('Selector', function() {
+        describe('preload', function() {
             it('should splice expired item.', function(done) {
-                spliceExpired({ json: { expireSoon: { summary: null } } }, 'selector').
+                spliceExpired({ json: { expireSoon: { summary: null } } }, 'preload').
                     subscribe(noOp, done, done);
             });
         });

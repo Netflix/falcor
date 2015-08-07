@@ -4,7 +4,7 @@ var $error = require('./../../../lib/types/error');
 module.exports = function() {
     return {
         direct: {
-            getPathSets: {
+            getPathValues: {
                 query: [
                     ["videos", "1234", "summary"]
                 ]
@@ -110,7 +110,7 @@ module.exports = function() {
             }
         },
         direct553: {
-            getPathSets: {
+            getPathValues: {
                 query: [
                     ["videos", "553", "summary"]
                 ]
@@ -249,7 +249,7 @@ module.exports = function() {
                 }]
             },
 
-            getPathSets: {
+            getPathValues: {
                 query: [
                     ["genreList", "0"]
                 ]
@@ -306,7 +306,7 @@ module.exports = function() {
             }
         },
         atomDirect: {
-            getPathSets: {
+            getPathValues: {
                 query: [
                     ["videos", "1234", "summary"]
                 ]
@@ -415,7 +415,7 @@ module.exports = function() {
             }
         },
         expiredLeafNodeTimestamp: {
-            getPathSets: {
+            getPathValues: {
                 query: [["videos", "expiredLeafByTimestamp", "summary"]]
             },
 
@@ -505,7 +505,7 @@ module.exports = function() {
             }
         },
         expiredLeafNode0: {
-            getPathSets: {
+            getPathValues: {
                 query: [["videos", "expiredLeafBy0", "summary"]]
             },
 
@@ -594,7 +594,7 @@ module.exports = function() {
             }
         },
         expiredBranchNodeTimestamp: {
-            getPathSets: {
+            getPathValues: {
                 query: [["videos", "expiredBranchByTimestamp", "summary"]]
             },
 
@@ -629,7 +629,7 @@ module.exports = function() {
             }
         },
         expiredBranchNode0: {
-            getPathSets: {
+            getPathValues: {
                 query: [["videos", "expiredBranchBy0", "summary"]]
             },
 
@@ -664,7 +664,7 @@ module.exports = function() {
             }
         },
         errorBranchSummary: {
-            getPathSets: {
+            getPathValues: {
                 query: [["videos", "errorBranch", "summary"]]
             },
             getPathMaps: {
@@ -712,7 +712,7 @@ module.exports = function() {
             }
         },
         genreListErrorNull: {
-            getPathSets: {
+            getPathValues: {
                 query: [
                     ["genreList", 2, null]
                 ]
@@ -769,7 +769,7 @@ module.exports = function() {
             }
         },
         missingBranchSummary: {
-            getPathSets: {
+            getPathValues: {
                 query: [
                     ["videos", "missingBranch", "summary"]
                 ]
@@ -808,7 +808,7 @@ module.exports = function() {
             }
         },
         missingLeafSummary: {
-            getPathSets: {
+            getPathValues: {
                 query: [
                     ["videos", "missingLeaf", "summary"]
                 ]

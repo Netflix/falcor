@@ -62,7 +62,10 @@ module.exports = {
     get: function(model, query, output) {
         var obs;
         if (output === 'selector') {
-            obs = model.get(query, noOp);
+            throw 'noeuhntoe';
+        }
+        if (output === 'preload') {
+            obs = model.preload(query);
         } else {
             obs = model.get(query)[output]();
         }
@@ -71,7 +74,8 @@ module.exports = {
     },
     set: function(model, query, output) {
         var obs;
-        if (output === 'selector') {
+
+        if (output === 'preload') {
             obs = model.set(query, noOp);
         } else {
             obs = model.set(query)[output]();

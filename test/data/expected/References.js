@@ -4,7 +4,7 @@ var $error = require('./../../../lib/types/error');
 module.exports = function() {
     return {
         simpleReference0: {
-            getPathSets: {
+            getPathValues: {
                 query: [
                     ["genreList", "0", "0", "summary"]
                 ]
@@ -103,7 +103,7 @@ module.exports = function() {
             }
         },
         simpleReference1: {
-            getPathSets: {
+            getPathValues: {
                 query: [
                     ["genreList", "0", "1", "summary"]
                 ]
@@ -237,7 +237,7 @@ module.exports = function() {
             }
         },
         simpleReference2: {
-            getPathSets: {
+            getPathValues: {
                 query: [
                     ["genreList", "0", "2", "summary"]
                 ]
@@ -379,7 +379,7 @@ module.exports = function() {
             }
         },
         simpleReference3: {
-            getPathSets: {
+            getPathValues: {
                 query: [
                     ["genreList", "0", "3", "summary"]
                 ]
@@ -521,7 +521,7 @@ module.exports = function() {
             }
         },
         referenceLeafNode: {
-            getPathSets: {
+            getPathValues: {
                 query: [
                     ["genreList", "10", null]
                 ]
@@ -607,7 +607,7 @@ module.exports = function() {
             }
         },
         referenceToValue: {
-            getPathSets: {
+            getPathValues: {
                 query: [
                     ["genreList", "1", "0", "summary"]
                 ]
@@ -711,7 +711,7 @@ module.exports = function() {
             }
         },
         referenceToReferenceComplete: {
-            getPathSets: {
+            getPathValues: {
                 query: [
                     ["genreList", "1", "0", "summary"]
                 ]
@@ -817,7 +817,7 @@ module.exports = function() {
             }
         },
         referenceToReference: {
-            getPathSets: {
+            getPathValues: {
                 query: [
                     ["genreList", "1", "0"]
                 ]
@@ -907,7 +907,7 @@ module.exports = function() {
             }
         },
         toErrorReference: {
-            getPathSets: {
+            getPathValues: {
                 query: [
                     ["genreList", "5", null]
                 ]
@@ -988,7 +988,7 @@ module.exports = function() {
                 }]
             },
 
-            getPathSets: {
+            getPathValues: {
                 query: [
                     ["genreList", "2", "0", "summary"]
                 ]
@@ -1052,7 +1052,7 @@ module.exports = function() {
                 }]
             },
             optimizedPaths: [['movies']],
-            getPathSets: {
+            getPathValues: {
                 query: [
                     ["genreList", "inner-reference", 'summary']
                 ]
@@ -1114,7 +1114,7 @@ module.exports = function() {
                 }]
             },
 
-            getPathSets: {
+            getPathValues: {
                 query: [
                     ["genreList", "2", null]
                 ]
@@ -1188,7 +1188,7 @@ module.exports = function() {
                 ["lists", "missing-list", "0", "summary"]
             ],
 
-            getPathSets: {
+            getPathValues: {
                 query: [
                     ["genreList", "4", "0", "summary"]
                 ]
@@ -1222,7 +1222,7 @@ module.exports = function() {
             }
         },
         toMissingReference: {
-            getPathSets: {
+            getPathValues: {
                 query: [
                     ["genreList", "6", "0", "summary"]
                 ]
@@ -1285,7 +1285,7 @@ module.exports = function() {
             }
         },
         referenceBranchIsMissing: {
-            getPathSets: {
+            getPathValues: {
                 query: [
                     ["genreList", "11", "0", null]
                 ]
@@ -1341,7 +1341,7 @@ module.exports = function() {
             }
         },
         referenceExpired: {
-            getPathSets: {
+            getPathValues: {
                 query: [
                     ["genreList", "9", "0", "summary"]
                 ]
@@ -1403,7 +1403,7 @@ module.exports = function() {
             }
         },
         referenceMissingBranch: {
-            getPathSets: {
+            getPathValues: {
                 query: [
                     ["genreList", "branch-missing", "0", "summary"]
                 ]
@@ -1447,7 +1447,7 @@ module.exports = function() {
             }
         },
         futureExpiredReference: {
-            getPathSets: {
+            getPathValues: {
                 query: [
                     ["genreList", "12", "0", "summary"]
                 ]
@@ -1492,7 +1492,7 @@ module.exports = function() {
             }
         },
         missingFirstKey: {
-            getPathSets: {
+            getPathValues: {
                 query: [
                     ["genreList", 13, "summary"]
                 ]

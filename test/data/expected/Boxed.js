@@ -4,7 +4,7 @@ var $error = require('./../../../lib/types/error');
 module.exports = function() {
     return {
         atomValue: {
-            getPathSets: { query: [["videos", "0", "summary"]] },
+            getPathValues: { query: [["videos", "0", "summary"]] },
             setPathValues: {
                 query: [{
                     path: ["videos", "0", "summary"],
@@ -81,7 +81,7 @@ module.exports = function() {
             }
         },
         referenceValue: {
-            getPathSets: { query: [["genreList", "0"]] },
+            getPathValues: { query: [["genreList", "0"]] },
             AsValues: {
                 values: [{
                     path: ["genreList", "0"],

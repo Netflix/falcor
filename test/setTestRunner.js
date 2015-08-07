@@ -109,7 +109,7 @@ function setTestRunner(data, options) {
                             var paths = q.path || q.paths || pathmapToPathsets(removeLeafs(_.cloneDeep(q))).sets;
                             options.fillReferences && fillInReferences(model, paths);
                             if (options.hardLink) {
-                                model._getPathSetsAsValues(model, [paths]);
+                                model._getPathValuesAsValues(model, [paths]);
                             }
                         });
                     }
@@ -133,7 +133,7 @@ function setTestRunner(data, options) {
                     query = data['getPaths'];
                     if (query) {
                         var suffixMessage = 'Confirming that ' + op + ' has correctly taken place.';
-                        op = "_getPathSets" + suffix;
+                        op = "_getPathValues" + suffix;
                         countOrFunction = getCountArrayOrFunction(data[prefix], suffix, expected, testRunner);
                         actual = model[op](model, _.cloneDeep(query), countOrFunction, model._errorSelector);
 
@@ -192,7 +192,7 @@ function pathmapToPathsets(pathmap, pathmapKey) {
     var pathsetsLength = 0;
 
     var subPath, subPathKeys, subPathKeysCount,
-        subPathSets, subPathSetsCount, subPathSetsIndex;
+        subPathValues, subPathValuesCount, subPathValuesIndex;
 
     for(key in pathmap) {
         if(key === __count) {
@@ -209,13 +209,13 @@ function pathmapToPathsets(pathmap, pathmapKey) {
         } else {
             subPath = pathmapToPathsets(pathmap[key], key);
             subPathKeys = subPath.key;
-            subPathSets = subs[subPathKeys] || (subs[subPathKeys] = {
+            subPathValues = subs[subPathKeys] || (subs[subPathKeys] = {
                 key: subPathKeys,
                 keys: [],
                 sets: subPath.sets
             });
-            subPathSets.key = key + ", " + subPathSets.key;
-            subPathSets.keys.push(isNumber(key) ? parseInt(key, 10) : key);
+            subPathValues.key = key + ", " + subPathValues.key;
+            subPathValues.keys.push(isNumber(key) ? parseInt(key, 10) : key);
         }
     }
 
@@ -231,14 +231,14 @@ function pathmapToPathsets(pathmap, pathmapKey) {
         if(subPathKeysCount > 0) {
 
             subKeys += (subKeys ? ", " : "") + "[" + subPath.key + "]";
-            subPathSets = subPath.sets;
-            subPathSetsIndex = -1;
-            subPathSetsCount = subPathSets.length;
+            subPathValues = subPath.sets;
+            subPathValuesIndex = -1;
+            subPathValuesCount = subPathValues.length;
             firstSubPathsKey = subPathKeys[0];
 
-            while(++subPathSetsIndex < subPathSetsCount) {
+            while(++subPathValuesIndex < subPathValuesCount) {
 
-                pathset = subPathSets[subPathSetsIndex];
+                pathset = subPathValues[subPathValuesIndex];
                 pathsetIndex = -1;
                 pathsetCount = pathset.length;
                 pathsetClone = new Array(pathsetCount);

@@ -9,28 +9,6 @@ var noOp = function() {};
 var Observable = Rx.Observable;
 
 describe('Cache Only', function() {
-    describe('Selector Functions', function() {
-        it('should get a value from falcor.', function(done) {
-            var model = new Model({cache: Cache()});
-            var expected = Expected.Values().direct.AsJSON.values[0].json;
-            var selector = false;
-            var next = false;
-            model.
-                get(['videos', 1234, 'summary'], function(x) {
-                    testRunner.compare(expected, x);
-                    selector = true;
-                    return {value: x};
-                }).
-                doAction(function(x) {
-                    next = true;
-                    testRunner.compare({value: expected}, x);
-                }, noOp, function() {
-                    testRunner.compare(true, selector, 'Expect to be onNext at least 1 time.');
-                    testRunner.compare(true, next, 'Expect to be onNext at least 1 time.');
-                }).
-                subscribe(noOp, done, done);
-        });
-    });
 
     describe('Relative Expiration', function() {
         it('should retrieve a value from the cache that has a relative expiration that has not expired yet', function() {

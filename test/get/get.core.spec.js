@@ -211,7 +211,7 @@ describe('Core', function() {
             var model = new Model({cache: Cache()}).derefSync(['genreList', 10]);
             var threw = false;
             try {
-                model._getPathSetsAsJSONG(model, [['summary']]);
+                model._getPathValuesAsJSONG(model, [['summary']]);
             } catch(ex) {
                 threw = true;
                 testRunner.compare(testRunner.jsonGraphDerefException, ex.message);

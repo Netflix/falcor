@@ -32,7 +32,7 @@ function getTestRunner(data, options) {
                     seedsOrFunction = Array(count).join(",").split(",").map(function() { return {}; });
                 }
                 var op = "_" + prefix + suffix;
-                
+
 
                 // If this prefix operation intentionally excludes then early return.
                 if (data[prefix].exclude && _.contains(data[prefix].exclude, suffix)) {
@@ -47,19 +47,19 @@ function getTestRunner(data, options) {
                 } else {
                     model = new falcor.Model({cache: Cache()});
                 }
-                
+
                 if(options.materialized) {
                     model._materialized = true;
                 }
-                
+
                 if(options.boxed) {
                     model._boxed = true;
                 }
-                
+
                 if(options.errorsAsValues) {
                     model._treatErrorsAsValues = true;
                 }
-                
+
                 // TODO: quick debug
                 switch (suffix) {
                     case 'AsPathMap':
@@ -77,7 +77,7 @@ function getTestRunner(data, options) {
                 if (suffix === 'AsValues') {
                     var vals = expected.values;
                     delete expected.values;
-                    
+
                     seedsOrFunction = function(pV) {
                         if (vals && vals.length) {
                             var tested = false;
@@ -103,12 +103,12 @@ function getTestRunner(data, options) {
                 // For doing any preprocessing.
                 preCallFn(model, op, _.cloneDeep(query), seedsOrFunction);
                 actual = model[op](model, _.cloneDeep(query), seedsOrFunction, model._errorSelector);
-                
+
                 actual = Object.keys(expected).reduce(function(memo, key) {
                     memo[key] = actual[key];
                     return memo;
                 }, {});
-                
+
                 // validates that the results from the operation and the expected values are valid.
                 testRunner.validateData(expected, actual);
 

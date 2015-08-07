@@ -33,8 +33,8 @@ describe('Get', function () {
             testPaths('toJSONG').
                 subscribe(noOp, done, done);
         });
-        it('should promote the get item to the head selector.', function (done) {
-            testPaths('selector').
+        it('should promote the get item to the head preload.', function (done) {
+            testPaths('preload').
                 subscribe(noOp, done, done);
         });
     });
@@ -51,8 +51,8 @@ describe('Get', function () {
             testJSON('toJSONG').
                 subscribe(noOp, done, done);
         });
-        it('should promote the get item to the head selector.', function (done) {
-            testJSON('selector').
+        it('should promote the get item to the head preload.', function (done) {
+            testJSON('preload').
                 subscribe(noOp, done, done);
         });
     });
@@ -71,8 +71,8 @@ describe('Multiple Gets', function () {
             testMultiplePaths('toJSONG').
                 subscribe(noOp, done, done);
         });
-        it('should promote the get item to the head selector.', function (done) {
-            testMultiplePaths('selector').
+        it('should promote the get item to the head preload.', function (done) {
+            testMultiplePaths('preload').
                 subscribe(noOp, done, done);
         });
     });
@@ -89,8 +89,8 @@ describe('Multiple Gets', function () {
             testMultipleJSON('toJSONG').
                 subscribe(noOp, done, done);
         });
-        it('should promote the get item to the head selector.', function (done) {
-            testMultipleJSON('selector').
+        it('should promote the get item to the head preload.', function (done) {
+            testMultipleJSON('preload').
                 subscribe(noOp, done, done);
         });
     });
