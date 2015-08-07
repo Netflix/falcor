@@ -13,5 +13,3 @@
     {{ the_include | markdownify }}
   </div>
 </div>
-
-{% include homepage-getting-started.md %}
