@@ -25,6 +25,11 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
+  
+  &.video-page {
+    background-color: @video-page-bg;
+    color: @video-page-text-color;
+  }
 }
 
 // Place a subtle border around images by on standard pages since they're generally set on the
@@ -63,6 +68,7 @@ body {
     margin-top: -1 * (@navbar-height + @site-content-padding-top) + @line-height-computed / 2;
   }
 }
+
 
 .intrasection-navigation {
   background-color: @module-background-blue;
