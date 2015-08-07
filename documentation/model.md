@@ -87,9 +87,9 @@ model.getValue('todos[0].name').then(log);
 
 There is one very important difference between working with a JSON object directly and working with that same JSON object through a Falcor Model: **you can only retrieve value types from a Model.**  
 
-### "Why can't I request entire Objects or Arrays from a Model?"
+### "Why can't I request Objects or Arrays from a Model?"
 
-_Falcor is optimized for displaying catered to your views._ Both Arrays and Objects can contain an unbounded amount of data. Requesting an Array or Object in it's entirety is equivalent to your view requesting 'SELECT *' without a 'WHERE' clause in the SQL world. An Array that contains 5 items today, can grow to contain 10,000 items later on. This means that requests which are initially served quickly and fit the view's requirements can become slower over time as more data is added to backend data stores.
+_Falcor is optimized for displaying data catered to your views._ Both Arrays and Objects can contain an unbounded amount of data. Requesting an Array or Object in it's entirety is equivalent to your view requesting 'SELECT *' without a 'WHERE' clause in the SQL world. An Array that contains 5 items today, can grow to contain 10,000 items later on. This means that requests which are initially served quickly and fit the view's requirements can become slower over time as more data is added to backend data stores.
 
 Models force developers to be explicit about which value types they would like to retrieve in order to maximize the likelihood that server requests for data will have **stable performance** over time. Rather than allow you to retrieve an entire Object, Models force you to _be explicit_ and retrieve only those values needed in a given scenario. Similarly when displaying an Array of items, Models do not allow you to retrieve the entire Array upfront. Instead you must request the first visible page of an Array, and follow up with additional page requests as the user scrolls. This allows your client code to control performance boundaries, based on the amount of data actually used in the view, as opposed to being susceptible to unexpected increases in the total amount of data available.
 
