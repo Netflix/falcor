@@ -29,7 +29,7 @@ describe('Deref', function() {
             subscribe(noOp, done, done);
     });
     it('should deref to a branch node and build proper missing paths', function() {
-        var model = new Model({ cache: getCache() }).derefSync(["lolomos","c595efe8-4de0-4226-8d4a-ebe89d236e2f_ROOT"]);
+        var model = new Model({ cache: getCache() })._derefSync(["lolomos","c595efe8-4de0-4226-8d4a-ebe89d236e2f_ROOT"]);
         var results = model._getPathValuesAsPathMap(model, [
             [[{"from":0,"to":4}, {"from":5,"to":9}, {"from":30,"to":34}], 0,"item",["summary","outline","info","heroImages","rating","share","queue","details"]],
             [[{"from":0,"to":4}, {"from":5,"to":9}, {"from":30,"to":34}], 0,"evidence"]

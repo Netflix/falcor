@@ -104,7 +104,7 @@ describe("Model", function() {
             require("./set")();
         });
 
-        describe.only("#invalidate", function() {
+        describe("#invalidate", function() {
             require("./invalidate")();
         });
     });

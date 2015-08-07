@@ -15,7 +15,7 @@ var Boxed = Expected.Boxed;
 var Errors = Expected.Errors;
 var expect = require('chai').expect;
 
-describe('GetValueSync', function() {
+xdescribe('GetValueSync', function() {
     it('should get a value.', function() {
         var model = new Model({cache: Cache()});
         model._root.unsafeMode = true;
