@@ -1,0 +1,24 @@
+---
+layout: page
+---
+
+<div class="row">
+  <div class="col-xs-12 video-page">
+    {% if page.youtube_id %}
+    <div class="row">
+      <div class="col-xs-12">
+        <div class="embed-responsive embed-responsive-16by9">
+          <iframe allowfullscreen class="embed-responsive-item" src="http://www.youtube.com/embed/{{ page.youtube_id }}?rel=0"></iframe>        
+        </div>        
+      </div>
+    </div>
+    {% else %}
+    Please ensure your page has a youtube_id in its page front matter
+    {% endif %}
+    
+    
+    {{ content }}
+    
+    {% include intrasection-navigation-links.html %}
+  </div>
+</div>
