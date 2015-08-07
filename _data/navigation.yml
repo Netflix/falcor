@@ -17,7 +17,7 @@
     - router    
     - model
 -
-  title: Video Tutorials
+  title: Videos
   children:
     - video_example
 - 
