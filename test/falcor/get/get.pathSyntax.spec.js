@@ -41,8 +41,4 @@ describe('Path Syntax', function() {
             }).
             subscribe(noOp, done, done);
     });
-    it('should accept strings for getValueSync', function() {
-        var out = model.getValueSync('videos[1234].summary');
-        testRunner.compare(expectedValue, out);
-    });
 });

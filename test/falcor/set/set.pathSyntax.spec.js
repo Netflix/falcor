@@ -30,7 +30,7 @@ describe('Path Syntax', function() {
             }).
             subscribe(noOp, done, done);
     });
-    it.only('should accept strings for setValue', function(done) {
+    it('should accept strings for setValue', function(done) {
         var called = false;
         model.
             setValue('test[0]', 6).
@@ -42,9 +42,5 @@ describe('Path Syntax', function() {
                    'The onNext function was expected to be called at least once.');
             }).
             subscribe(noOp, done, done);
-    });
-    it('should accept strings for setValueSync', function() {
-        var out = model.setValueSync('test[0]', 7);
-        testRunner.compare(7, out);
     });
 });

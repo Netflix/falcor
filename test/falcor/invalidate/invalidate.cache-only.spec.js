@@ -27,7 +27,9 @@ describe("Cache Only", function() {
             }
         });
         var count = 0;
-        var model = getModel(dataSource, Cache());
+        var model = new Model({
+            cache: Cache()
+        });
         model.
             invalidate(["videos", 3355, "summary"]).
             withoutDataSource().

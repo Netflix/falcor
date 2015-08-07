@@ -1,4 +1,4 @@
-describe('Invalidate', function() {
+describe.only('Invalidate', function() {
     require('./invalidate.cache-only.spec');
     require('./invalidate.change-handler.spec');
 });
