@@ -5,7 +5,7 @@
 
   // Brings the top flush with the navbar
   margin-top: -1 * @site-content-padding-top;
-  background-color: #111;
+  background-color: @hero-banner-background-color;
   padding: 35px 0;
   position: relative;
 
@@ -17,13 +17,14 @@
     }
   }
 
-  .hero-banner-description {
-    @hero-banner-description-font-size: 20px;
-    font-size: @hero-banner-description-font-size;
+  .hero-banner-tagline {
+    @hero-banner-tagline-font-size: 20px;
+    font-size: @hero-banner-tagline-font-size;
     margin-top: 20px;
+    color: @hero-banner-tagline-color;
 
     @media (max-width: @screen-xs-max) {
-      font-size: @hero-banner-description-font-size * @screen-xs-banner-text-ratio;
+      font-size: @hero-banner-tagline-font-size * @screen-xs-banner-text-ratio;
     }
   }
   
@@ -109,7 +110,7 @@
     animation-duration: 1s;
   }
 
-  .hero-banner-description {
+  .hero-banner-tagline {
     .animated-fade-in();
     animation-duration: 0.7s;
     animation-delay: 1.1s;
@@ -123,7 +124,7 @@
   
   // Simplify animation on mobile
   @media (max-width: @screen-xs-max) {
-    &.homepage, .main-homepage-content, .repeat-intro-animation, .hero-banner-description {
+    &.homepage, .main-homepage-content, .repeat-intro-animation, .hero-banner-tagline {
       animation-duration: 0.7s;
       animation-delay: 1.4s;
     }
