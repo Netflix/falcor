@@ -12,56 +12,58 @@ var isPathValue = require("./../../../lib/support/is-path-value");
 var expect = require("chai").expect;
 var sinon = require('sinon');
 
-describe('DataSource Only', function() {
-    describe('Selector Functions', function() {
+describe.only('DataSource Only', function() {
+    describe('Preload Functions', function() {
         it('should get a value from falcor.', function(done) {
             var model = new Model({source: new LocalDataSource(Cache())});
-            var expected = Expected.Values().direct.AsJSON.values[0].json;
-            var selector = sinon.spy(function(x) {
-                return {value: x};
-            });
+            var expected = Expected.Values().direct.AsPathMap.values[0];
             var onNext = sinon.spy();
+            var secondOnNext = sinon.spy();
             model.
-                get(['videos', 1234, 'summary'], selector).
+                preload(['videos', 1234, 'summary']).
                 doAction(onNext).
                 doAction(noOp, noOp, function() {
-                    expect(selector.calledOnce).to.be.ok;
-                    expect(onNext.calledOnce).to.be.ok;
-                    expect(selector.getCall(0).args[0]).to.deep.equals(expected);
-                    expect(onNext.getCall(0).args[0]).to.deep.equals({value: expected});
+                    expect(onNext.callCount).to.equal(0);
+                }).
+                defaultIfEmpty({}).
+                flatMap(function() {
+                    return model.get(['videos', 1234, 'summary']);
+                }).
+                doAction(secondOnNext).
+                doAction(noOp, noOp, function() {
+                    expect(secondOnNext.calledOnce).to.be.ok;
+                    testRunner.compare(expected, secondOnNext.getCall(0).args[0]);
                 }).
                 subscribe(noOp, done, done);
         });
 
         it('should perform multiple trips to a dataSource.', function(done) {
-            var count = 0;
-            var model = new Model({
-                source: new LocalDataSource(Cache(), {
-                    onGet: function(source, paths) {
-                        if (count === 0) {
-                            paths.pop();
-                        }
-                        count++;
-                    }
-                })
+            var get = sinon.spy(function(source, paths) {
+                if (paths.length === 0) {
+                    paths.pop();
+                }
             });
-            var expected = Expected.Values().direct.AsJSON.values[0].json;
+            var model = new Model({
+                source: new LocalDataSource(Cache(), {onGet: get})
+            });
+            var expected = Expected.Values().direct.AsPathMap.values[0];
+            var onNext = sinon.spy();
+            var secondOnNext = sinon.spy();
             model.
-                get(
-                    ['videos', 1234, 'summary'],
-                    ['videos', 3355, 'art'],
-                    function(v1234, v3355) {
-                        testRunner.compare(expected, v1234);
-                        testRunner.compare({
-                            "box-shot": "www.cdn.com/3355"
-                        }, v3355);
-
-                        return {value: v1234};
-                    }).
-                doAction(function(x) {
-                    testRunner.compare({value: expected}, x);
-                }, noOp, function() {
-
+                preload(['videos', 1234, 'summary'],
+                    ['videos', 3355, 'art']).
+                doAction(onNext).
+                doAction(noOp, noOp, function() {
+                    expect(onNext.callCount).to.equal(0);
+                }).
+                defaultIfEmpty({}).
+                flatMap(function() {
+                    return model.get(['videos', 1234, 'summary']);
+                }).
+                doAction(secondOnNext).
+                doAction(noOp, noOp, function() {
+                    expect(secondOnNext.calledOnce).to.be.ok;
+                    testRunner.compare(expected, secondOnNext.getCall(0).args[0]);
                 }).
                 subscribe(noOp, done, done);
         });

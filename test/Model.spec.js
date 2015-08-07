@@ -39,6 +39,7 @@ ResponseObservable.prototype.then = function() {
 var modelGet = Model.prototype.get;
 var modelSet = Model.prototype.set;
 var modelCall = Model.prototype.call;
+var modelPreload = Model.prototype.preload;
 
 Model.prototype.get = function() {
     return new ResponseObservable(modelGet.apply(this, arguments));
@@ -46,6 +47,10 @@ Model.prototype.get = function() {
 
 Model.prototype.set = function() {
     return new ResponseObservable(modelSet.apply(this, arguments));
+};
+
+Model.prototype.preload = function() {
+    return new ResponseObservable(modelPreload.apply(this, arguments));
 };
 
 Model.prototype.call = function() {
