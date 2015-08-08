@@ -320,6 +320,22 @@ Model.prototype.getValue = function getValue(path) {
     return this._get(parsedPath, identity);
 };
 
+/**
+ * Set value for a single {@link Path}.
+ * @param {Path} path - the path to set
+ * @param {Object} value - the value to set 
+ * @return {Observable.&lt;*>} - the value for the path
+ * @example
+ var model = new falcor.Model({source: new falcor.HttpDataSource("/model.json") });
+
+ model.
+     setValue('user.name', 'Jim').
+     subscribe(function(name) {
+         console.log(name);
+     });
+
+ // The code above prints "Jim" to the console.
+ */
 Model.prototype.setValue = function setValue(pathArg, valueArg) {
     var value = isPathValue(pathArg) ? pathArg : Model.pathValue(pathArg, valueArg);
     var pathIdx = 0;
@@ -343,6 +359,7 @@ Model.prototype.setValue = function setValue(pathArg, valueArg) {
 /**
  * Synchronously retrieves a single path from the local {@link Model} only and will not retrieve missing paths from the {@link DataSource}. This method can only be invoked when the {@link Model} does not have a {@link DataSource} or from within a selector function. See {@link Model.prototype.get}. The getValueSync method differs from the asynchronous get methods (ex. get, getValues) in that it can be used to retrieve objects in addition to JSONGraph values.
  * @method
+ * @private
  * @arg {Path} path - the path to retrieve
  * @return {*} - the value for the specified path
  */
@@ -619,10 +636,6 @@ Model.prototype._invalidatePathMapsAsJSON = require("./invalidate/invalidate-jso
         </li>
         
             <li class="toc-api-subgroup-item">
-                <a href="Model.html#_getValueSync" data-target="#_getValueSync">_getValueSync</a>
-            </li>
-        
-            <li class="toc-api-subgroup-item">
                 <a href="Model.html#batch" data-target="#batch">batch</a>
             </li>
         
@@ -652,6 +665,10 @@ Model.prototype._invalidatePathMapsAsJSON = require("./invalidate/invalidate-jso
         
             <li class="toc-api-subgroup-item">
                 <a href="Model.html#setCache" data-target="#setCache">setCache</a>
+            </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="Model.html#setValue" data-target="#setValue">setValue</a>
             </li>
         
             <li class="toc-api-subgroup-item">
