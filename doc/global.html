@@ -527,7 +527,7 @@ id: api
 
     
     <div class="description">
-        <p>JavaScript Object Notation Graph (JSONGraph) is a notation for expressing graphs in JSON. JSON is a hierarchical data format, capable of modeling trees.</p>
+        <p>JavaScript Object Notation Graph (JSONGraph) is a notation for expressing graphs in JSON. For more information, see the <a href="http://netflix.github.io/falcor/documentation/model.html#working-with-json-graph-data-using-a-model">Model Guide</a>.</p>
     </div>
     
 
@@ -592,7 +592,8 @@ id: api
     
         <h5>Example</h5>
         
-    <pre class="prettyprint"><code>// JSONGraph model modeling a list of film genres, each of which contains the same title.
+    <pre class="prettyprint"><code>var $ref = falcor.ref;
+ // JSONGraph model modeling a list of film genres, each of which contains the same title.
  {
     // list of user's genres, modeled as a map with ordinal keys
     "genreLists": {
