@@ -19,10 +19,16 @@ id: api
  * An envelope that wraps a JSON object.
  * @typedef {Object} JSONEnvelope
  * @property {JSON} json - a JSON object
- * @property {?Array.&lt;PathSet>} paths - the paths to the values in the JSON object
- * @property {?Array.&lt;Error>} errors - one or more errors that occurred while executing an operation
- * @property {?Array.&lt;PathSet>} invalidated - the paths to invalidate in the {@link Model}
- * @example TODO: Fill out a simple example showing the data structure
+ * @example
+ var model = new falcor.Model();
+ model.set({
+    json: {
+      name: "Steve",
+      surname: "McGuire"
+    }
+ }).then(function(jsonEnvelope) {
+    console.log(jsonEnvelope);
+ });
  */
 </code></pre>
     </article>
