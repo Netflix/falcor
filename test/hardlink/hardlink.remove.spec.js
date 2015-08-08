@@ -27,28 +27,21 @@ describe('Removing', function() {
         it('should perform a hard-link with back references toJSONG.', function(done) {
             getTest(getPath, 'toJSONG').
                 flatMap(function() {
-                    return setTest(setPath, 'toJSONG')
+                    return setTest(setPath, 'toJSONG');
                 }).
                 subscribe(noOp, done, done);
         });
         it('should perform a hard-link with back references toJSON.', function(done) {
             getTest(getPath, 'toJSON').
                 flatMap(function() {
-                    return setTest(setPath, 'toJSON')
+                    return setTest(setPath, 'toJSON');
                 }).
                 subscribe(noOp, done, done);
         });
         it('should perform a hard-link with back references toPathValues.', function(done) {
             getTest(getPath, 'toPathValues').
                 flatMap(function() {
-                    return setTest(setPath, 'toPathValues')
-                }).
-                subscribe(noOp, done, done);
-        });
-        it('should perform a hard-link with back references selector.', function(done) {
-            getTest(getPath, 'selector').
-                flatMap(function() {
-                    return setTest(setPath, 'selector')
+                    return setTest(setPath, 'toPathValues');
                 }).
                 subscribe(noOp, done, done);
         });
@@ -57,28 +50,21 @@ describe('Removing', function() {
         it('should perform a hard-link with back references toJSONG.', function(done) {
             getTest(getPath, 'toJSONG').
                 flatMap(function() {
-                    return setTest(setJSON, 'toJSONG')
+                    return setTest(setJSON, 'toJSONG');
                 }).
                 subscribe(noOp, done, done);
         });
         it('should perform a hard-link with back references toJSON.', function(done) {
             getTest(getPath, 'toJSON').
                 flatMap(function() {
-                    return setTest(setJSON, 'toJSON')
+                    return setTest(setJSON, 'toJSON');
                 }).
                 subscribe(noOp, done, done);
         });
         it('should perform a hard-link with back references toPathValues.', function(done) {
             getTest(getPath, 'toPathValues').
                 flatMap(function() {
-                    return setTest(setJSON, 'toPathValues')
-                }).
-                subscribe(noOp, done, done);
-        });
-        it('should perform a hard-link with back references selector.', function(done) {
-            getTest(getPath, 'selector').
-                flatMap(function() {
-                    return setTest(setJSON, 'selector')
+                    return setTest(setJSON, 'toPathValues');
                 }).
                 subscribe(noOp, done, done);
         });
@@ -122,10 +108,6 @@ describe('Expired', function() {
             setExpireyAndGet(getPath, 'toPathValues', true).
                 subscribe(noOp, done, done);
         });
-        it('should perform a hard-link with back references selector.', function(done) {
-            setExpireyAndGet(getPath, 'selector', true).
-                subscribe(noOp, done, done);
-        });
     });
     describe('getJSON', function() {
         it('should perform a hard-link with back references toJSONG.', function(done) {
@@ -138,10 +120,6 @@ describe('Expired', function() {
         });
         it('should perform a hard-link with back references toPathValues.', function(done) {
             setExpireyAndGet(getJSON, 'toPathValues', true).
-                subscribe(noOp, done, done);
-        });
-        it('should perform a hard-link with back references selector.', function(done) {
-            setExpireyAndGet(getJSON, 'selector', true).
                 subscribe(noOp, done, done);
         });
     });
@@ -158,10 +136,6 @@ describe('Expired', function() {
             setExpireyAndGet(setPath, 'toPathValues').
                 subscribe(noOp, done, done);
         });
-        it('should perform a hard-link with back references selector.', function(done) {
-            setExpireyAndGet(setPath, 'selector').
-                subscribe(noOp, done, done);
-        });
     });
     describe('setJSON', function() {
         it('should perform a hard-link with back references toJSONG.', function(done) {
@@ -176,10 +150,6 @@ describe('Expired', function() {
             setExpireyAndGet(setJSON, 'toPathValues').
                 subscribe(noOp, done, done);
         });
-        it('should perform a hard-link with back references selector.', function(done) {
-            setExpireyAndGet(setJSON, 'selector').
-                subscribe(noOp, done, done);
-        });
     });
     describe('setJSONG', function() {
         it('should perform a hard-link with back references toJSONG.', function(done) {
@@ -192,10 +162,6 @@ describe('Expired', function() {
         });
         it('should perform a hard-link with back references toPathValues.', function(done) {
             setExpireyAndGet(setJSONG, 'toPathValues').
-                subscribe(noOp, done, done);
-        });
-        it('should perform a hard-link with back references selector.', function(done) {
-            setExpireyAndGet(setJSONG, 'selector').
                 subscribe(noOp, done, done);
         });
     });

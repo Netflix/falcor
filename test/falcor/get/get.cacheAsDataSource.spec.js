@@ -13,62 +13,6 @@ var expect = require("chai").expect;
 var sinon = require('sinon');
 
 describe('Cache as DataSource', function() {
-    describe('Selector Functions', function() {
-        it('should get a value from falcor.', function(done) {
-            var model = new Model({ source: new Model({ source: new LocalDataSource(Cache()) }).asDataSource() });
-            var expected = Expected.Values().direct.AsJSON.values[0].json;
-            var selector = false;
-            var next = false;
-            model.
-                get(['videos', 1234, 'summary'], function(x) {
-                    testRunner.compare(expected, x);
-                    selector = true;
-
-                    return {value: x};
-                }).
-                doAction(function(x) {
-                    next = true;
-                    testRunner.compare({value: expected}, x);
-                }, noOp, function() {
-                    testRunner.compare(true, selector, 'Expect to be onNext at least 1 time.');
-                    testRunner.compare(true, next, 'Expect to be onNext at least 1 time.');
-                }).
-                subscribe(noOp, done, done);
-        });
-
-        it('should perform multiple trips to a dataSource.', function(done) {
-            var count = 0;
-            var model = new Model({
-                source: new Model({ source: new LocalDataSource(Cache(), {
-                    onGet: function(source, paths) {
-                        if (count === 0) {
-                            paths.pop();
-                        }
-                        count++;
-                    }
-                })}).asDataSource()
-            });
-            var expected = Expected.Values().direct.AsJSON.values[0].json;
-            model.
-                get(
-                    ['videos', 1234, 'summary'],
-                    ['videos', 3355, 'art'],
-                    function(v1234, v3355) {
-                        testRunner.compare(expected, v1234);
-                        testRunner.compare({
-                            "box-shot": "www.cdn.com/3355"
-                        }, v3355);
-
-                        return {value: v1234};
-                    }).
-                doAction(function(x) {
-                    testRunner.compare({value: expected}, x);
-                }, noOp, function() {
-
-                }).
-                subscribe(noOp, done, done);
-        });
-    });
     describe('toJSON', function() {
         it('should get a value from falcor.', function(done) {
             var model = new Model({ source: new Model({ source: new LocalDataSource(Cache()) }).asDataSource() });

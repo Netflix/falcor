@@ -4,7 +4,7 @@ var $error = require('./../../../lib/types/error');
 module.exports = function() {
     return {
         errorWithBoxedAndTreatErrorAsValues: {
-            getPathSets: {
+            getPathValues: {
                 query: [
                     ["videos", "errorBranch", "summary"]
                 ]

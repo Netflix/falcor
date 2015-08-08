@@ -15,7 +15,7 @@ var $path = require("./../../lib/types/ref");
 var $atom = require("./../../lib/types/atom");
 
 var modes = [{
-        
+
     }, {
         boxed: true
     }, {
@@ -1205,7 +1205,7 @@ function execute(output, suffix, opts) {
                     var model = new Model(_.extend({cache: partial_cache()}, opts));
 
                     // Get an initial path to build hard references.
-                    model._getPathSetsAsJSON(model, [
+                    model._getPathValuesAsJSON(model, [
                         ["grid", {to: 1}, 0, "movie-id"],
                         ["grid", {to: 1}, 1, null]
                     ], []);
@@ -1229,7 +1229,7 @@ function execute(output, suffix, opts) {
                     var model = new Model(_.extend({ cache: partial_cache() }, opts));
 
                     // Get an initial path to build hard references.
-                    model._getPathSetsAsJSON(model, [
+                    model._getPathValuesAsJSON(model, [
                         ["grid", {to: 1}, 0, "movie-id"],
                         ["grid", {to: 1}, 1, null]
                     ], []);
@@ -1287,7 +1287,7 @@ function execute(output, suffix, opts) {
                 var envelope = { paths: paths1, jsonGraph: jsonGraph };
 
                 // Get the paths initially to build hard references.
-                model._getPathSetsAsJSON(model, paths1.concat(paths2), []);
+                model._getPathValuesAsJSON(model, paths1.concat(paths2), []);
 
                 // Set the envelope in the first time.
                 set_and_verify_json_graph(this.test, suffix, [envelope], {model: model});

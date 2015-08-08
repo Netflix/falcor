@@ -27,10 +27,12 @@ describe("Cache Only", function() {
             }
         });
         var count = 0;
-        var model = getModel(dataSource, Cache());
+        var model = new Model({
+            cache: Cache()
+        });
         model.
-            invalidate(["videos", 3355, "summary"]).
-            withoutDataSource().
+            invalidate(["videos", 3355, "summary"]);
+        model.withoutDataSource().
             get(["videos", 3355, "summary"]).
             doAction(function(x) {
                 throw inspect(x, {depth: 10}) + " should not be onNext'd";
@@ -81,8 +83,8 @@ describe("Cache Only", function() {
         var count = 0;
         var model = getModel(dataSource, Cache());
         model.
-            invalidate(["videos", 3355]).
-            withoutDataSource().
+            invalidate(["videos", 3355]);
+        model.withoutDataSource().
             get(summary.slice()).
             doAction(function(x) {
                 throw inspect(x, {depth: 10}) + " should not be onNext'd";
@@ -134,8 +136,8 @@ describe("Cache Only", function() {
         var count = 0;
         var model = getModel(dataSource, Cache());
         model.
-            invalidate(["genreList", 0]).
-            withoutDataSource().
+            invalidate(["genreList", 0]);
+        model.withoutDataSource().
             get(summary.concat()).
             doAction(function(x) {
                 throw inspect(x, {depth: 10}) + " should not be onNext'd";

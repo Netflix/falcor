@@ -4,7 +4,7 @@ var $error = require('./../../../lib/types/error');
 module.exports = function() {
     return {
         toOnlyLists: {
-            getPathSets: {
+            getPathValues: {
                 query: [
                     ["genreList", {to: 1}, 0, "summary"]
                 ]
@@ -159,7 +159,7 @@ module.exports = function() {
             }
         },
         doubleComplex: {
-            getPathSets: {
+            getPathValues: {
                 query: [
                     ["genreList", {to: 1}, {to: 1}, "summary"]
                 ]
@@ -386,7 +386,7 @@ module.exports = function() {
             }
         },
         toOnly: {
-            getPathSets: {
+            getPathValues: {
                 query: [
                     ["genreList", "0", {to: 1}, "summary"]
                 ]
@@ -526,7 +526,7 @@ module.exports = function() {
             }
         },
         toOnlyMyList: {
-            getPathSets: {
+            getPathValues: {
                 query: [
                     ["genreList", "1", {to: 1}, "summary"]
                 ]
@@ -645,7 +645,7 @@ module.exports = function() {
             }
         },
         fromOnly: {
-            getPathSets: {
+            getPathValues: {
                 query: [
                     ["genreList", "0", {from: 0}, "summary"]
                 ]
@@ -732,7 +732,7 @@ module.exports = function() {
             }
         },
         fromAndToWithNegativePaths: {
-            getPathSets: {
+            getPathValues: {
                 query: [
                     ["genreList", "0", {from: -1, to: 1}, "summary"]
                 ]
@@ -889,7 +889,7 @@ module.exports = function() {
             }
         },
         fromAndLength: {
-            getPathSets: {
+            getPathValues: {
                 query: [
                     ["genreList", "0", {from: -1, length: 3}, "summary"]
                 ]
@@ -1046,7 +1046,7 @@ module.exports = function() {
             }
         },
         fromArray: {
-            getPathSets: {
+            getPathValues: {
                 query: [
                     ["genreList", "0", ["0", "1"], "summary"]
                 ]
@@ -1170,7 +1170,7 @@ module.exports = function() {
             }
         },
         toOnlyLeaf: {
-            getPathSets: {
+            getPathValues: {
                 query: [
                     ["genreList", {to: 1}]
                 ]
@@ -1249,7 +1249,7 @@ module.exports = function() {
             }
         },
         fromOnlyLeaf: {
-            getPathSets: {
+            getPathValues: {
                 query: [
                     ["genreList", {from: 0}]
                 ]
@@ -1304,7 +1304,7 @@ module.exports = function() {
             }
         },
         fromAndLengthLeaf: {
-            getPathSets: {
+            getPathValues: {
                 query: [
                     ["genreList", {from: -1, length: 3}]
                 ]
@@ -1385,7 +1385,7 @@ module.exports = function() {
             }
         },
         fromAndToWithNegativePathsLeaf: {
-            getPathSets: {
+            getPathValues: {
                 query: [
                     ["genreList", {from: -1, to: 1}]
                 ]
@@ -1466,7 +1466,7 @@ module.exports = function() {
             }
         },
         fromArrayLeaf: {
-            getPathSets: {
+            getPathValues: {
                 query: [
                     ["genreList", ["0", "1"]]
                 ]
@@ -1534,7 +1534,7 @@ module.exports = function() {
             }
         },
         arrayOfComplexPathsLeaf: {
-            getPathSets: {
+            getPathValues: {
                 query: [
                     ["genreList", [{to: 0}, {from: 1, to: 1}]]
                 ]
@@ -1602,7 +1602,7 @@ module.exports = function() {
             }
         },
         arrayOfComplexPaths: {
-            getPathSets: {
+            getPathValues: {
                 query: [
                     ["genreList", [{to: 0}, {from: 1, to: 1}], "0", "summary"]
                 ]

@@ -33,7 +33,7 @@ describe("Deref-On", function() {
 
             var throwError = false;
             try {
-                dataModel.derefSync(["genreList", 0]);
+                dataModel._derefSync(["genreList", 0]);
             } catch (e) {
                 throwError = true;
                 testRunner.compare({ message: 'The humans are dead.' }, e);
@@ -51,7 +51,7 @@ describe("Deref-On", function() {
                 }
             }});
 
-            var nextModel = dataModel.derefSync(["genreList", 0]);
+            var nextModel = dataModel._derefSync(["genreList", 0]);
             var count = 0;
             nextModel.
                 get([0, 'summary']).

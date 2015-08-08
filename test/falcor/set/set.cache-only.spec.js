@@ -11,57 +11,6 @@ var sinon = require('sinon');
 var toValue = function(x) { return {value: x}; };
 
 describe('Cache Only', function() {
-    describe('Selector Functions', function() {
-        it('should set a value from falcor.', function(done) {
-            var model = new Model({cache: Cache()});
-            var expected = {
-                hello: 'world'
-            };
-            var selector = false;
-            var next = false;
-            model.
-                set({path: ['videos', 1234, 'summary'], value: expected}, function(x) {
-                    testRunner.compare(expected, x);
-                    selector = true;
-                    return {value: x};
-                }).
-                doAction(function(x) {
-                    next = true;
-                    testRunner.compare({value: expected}, x);
-                }, noOp, function() {
-                    testRunner.compare(true, selector, 'Expect to be onNext at least 1 time.');
-                    testRunner.compare(true, next, 'Expect to be onNext at least 1 time.');
-                }).
-                subscribe(noOp, done, done);
-        });
-
-        it('should set a value from falcor with jsonGraph.', function(done) {
-            var model = new Model({cache: Cache()});
-            var jsong = {
-                jsonGraph: {
-                    videos: {
-                        1234: {
-                            summary: 'hello world'
-                        }
-                    }
-                },
-                paths: [['videos', 1234, 'summary']]
-            };
-            var expected = 'hello world';
-            var selector = sinon.spy(toValue);
-            var onNext = sinon.spy();
-            model.
-                set(jsong, selector).
-                doAction(onNext).
-                doAction(noOp, noOp, function() {
-                    expect(selector.calledOnce).to.be.ok;
-                    expect(onNext.calledOnce).to.be.ok;
-                    expect(selector.getCall(0).args[0]).to.deep.equals(expected);
-                    expect(onNext.getCall(0).args[0]).to.deep.equals({value: expected});
-                }).
-                subscribe(noOp, done, done);
-        });
-    });
     describe('toJSON', function() {
         it('should set a value from falcor.', function(done) {
             var model = new Model({cache: Cache()});

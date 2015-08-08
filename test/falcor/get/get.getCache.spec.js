@@ -13,26 +13,14 @@ var $atom = falcor.Model.atom;
 var $error = falcor.Model.error;
 
 describe('getCache', function() {
-    it("should serialize the cache", function(done) {
+    it("should serialize the cache", function() {
         var model = new Model({ cache: Cache() });
-        model.
-            get(["genreList", {from: -1, to: 12}], function() {})
-            // catchException(Rx.Observable.return(model)).
-            ['catch'](Rx.Observable.return(model)).
-            defaultIfEmpty(null).
-            map(function() { return model.getCache(); }).
-            subscribe(function(serializedCache) {
-                try {
-                    testRunner.compare(
-                        Cache(), serializedCache,
-                        "Serialized cache should be value equal to the original.",
-                        {strip: ["$size"]}
-                    );
-                    done();
-                } catch(e) {
-                    done(e);
-                }
-            });
+        var cache = model.getCache();
+        testRunner.compare(
+            Cache(), cache,
+            "Serialized cache should be value equal to the original.",
+            {strip: ["$size"]}
+        );
     });
 
     it("should serialize part of the cache", function(done) {

@@ -12,7 +12,7 @@ describe('Path Syntax', function() {
     var model = new Model({cache: Cache()});
     model._root.unsafeMode = true;
     it('should derefSync to a path syntax.', function() {
-        var tmp = model.derefSync('videos[1234]');
+        var tmp = model._derefSync('videos[1234]');
         testRunner.compare(['videos', 1234], tmp._path);
     });
     it('should deref to a path syntax.', function(done) {

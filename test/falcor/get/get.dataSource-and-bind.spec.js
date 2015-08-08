@@ -9,31 +9,40 @@ var testRunner = require('./../../testRunner');
 var noOp = function() {};
 var LocalDataSource = require('../../data/LocalDataSource');
 var ErrorDataSource = require('../../data/ErrorDataSource');
+var sinon = require('sinon');
+var expect = require('chai').expect;
 
 describe('DataSource and Deref', function() {
     it('should get a value from from dataSource when bound.', function(done) {
         var model = new Model({cache: M(), source: new LocalDataSource(Cache())});
         model._root.unsafeMode = true;
-        model = model.derefSync(['genreList', 0]);
-        var expected = {
-            "title": "Terminator 3",
-            "url": "/movies/766"
-        };
-        var selector = false;
-        var next = false;
+        var onNext = sinon.spy();
+        var secondOnNext = sinon.spy();
         model.
-            get([1, 'summary'], function(x) {
-                testRunner.compare(expected, x);
-                selector = true;
-
-                return {value: x};
+            deref(['genreList', 0], [0, 'summary']).
+            flatMap(function(boundModel) {
+                model = boundModel;
+                return model.preload([1, 'summary']);
             }).
-            doAction(function(x) {
-                next = true;
-                testRunner.compare({value: expected}, x);
-            }, noOp, function() {
-                testRunner.compare(true, selector, 'Expect to be onNext at least 1 time.');;
-                testRunner.compare(true, next, 'Expect to be onNext at least 1 time.');
+            doAction(onNext).
+            doAction(noOp, noOp, function() {
+                expect(onNext.callCount).to.equal(0);
+            }).
+            defaultIfEmpty({}).
+            flatMap(function() {
+                return model.get([1, 'summary']);
+            }).
+            doAction(secondOnNext).
+            doAction(noOp, noOp, function() {
+                expect(secondOnNext.calledOnce).to.be.ok;
+                testRunner.compare({
+                    1: {
+                        summary: {
+                            title: "Terminator 3",
+                            url: "/movies/766"
+                        }
+                    }
+                }, secondOnNext.getCall(0).args[0].json);
             }).
             subscribe(noOp, done, done);
     });

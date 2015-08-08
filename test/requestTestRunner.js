@@ -18,7 +18,7 @@ function toObservable(request, queue, onNext) {
 }
 
 module.exports = function(expected, queue, onNext) {
-    return toObservable(expected.getPathSets.query[0], queue, onNext);
+    return toObservable(expected.getPathValues.query[0], queue, onNext);
 };
 
 function contains(has, toHave, position) {

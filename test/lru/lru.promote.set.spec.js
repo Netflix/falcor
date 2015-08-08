@@ -69,22 +69,6 @@ describe('Set', function() {
                     subscribe(noOp, done, done);
             });
         });
-        describe('Selector', function () {
-            it('should promote 1 item as head, no tail, no next/prev.', function (done) {
-                singleItem('path', 'selector').
-                    subscribe(noOp, done, done);
-            });
-
-            it('should promote 2 items.  1st item should be tail, 2nd should be head.', function (done) {
-                doubleItem('path', 'selector').
-                    subscribe(noOp, done, done);
-            });
-
-            it('should promote 3 items.  1st item should be tail, 3rd should be head.', function (done) {
-                tripleItem('path', 'selector').
-                    subscribe(noOp, done, done);
-            });
-        });
     });
     describe('setJSONG', function() {
         describe('PathMap', function () {
@@ -132,22 +116,6 @@ describe('Set', function() {
 
             it('should promote 3 items.  1st item should be tail, 3rd should be head.', function (done) {
                 tripleItem('jsonGraph', 'toJSONG').
-                    subscribe(noOp, done, done);
-            });
-        });
-        describe('Selector', function () {
-            it('should promote 1 item as head, no tail, no next/prev.', function (done) {
-                singleItem('jsonGraph', 'selector').
-                    subscribe(noOp, done, done);
-            });
-
-            it('should promote 2 items.  1st item should be tail, 2nd should be head.', function (done) {
-                doubleItem('jsonGraph', 'selector').
-                    subscribe(noOp, done, done);
-            });
-
-            it('should promote 3 items.  1st item should be tail, 3rd should be head.', function (done) {
-                tripleItem('jsonGraph', 'selector').
                     subscribe(noOp, done, done);
             });
         });
@@ -201,22 +169,6 @@ describe('Set', function() {
                     subscribe(noOp, done, done);
             });
         });
-        describe('Selector', function () {
-            it('should promote 1 item as head, no tail, no next/prev.', function (done) {
-                singleItem('json', 'selector').
-                    subscribe(noOp, done, done);
-            });
-
-            it('should promote 2 items.  1st item should be tail, 2nd should be head.', function (done) {
-                doubleItem('json', 'selector').
-                    subscribe(noOp, done, done);
-            });
-
-            it('should promote 3 items.  1st item should be tail, 3rd should be head.', function (done) {
-                tripleItem('json', 'selector').
-                    subscribe(noOp, done, done);
-            });
-        });
     });
 });
 
@@ -249,6 +201,7 @@ var querys = {
 
 function singleItem(query, output) {
     var model = new Model({cache: {}});
+    debugger
     return testRunner.set(model, _.cloneDeep(querys[1][query]), output).
         do(function () {
             expect(model._root[__head].value).to.equal('i am 1');

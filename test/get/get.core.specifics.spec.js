@@ -23,7 +23,7 @@ describe('Specific Cases', function() {
     describe('Selector Missing PathSet Index', function() {
         it('should report the missing path indices.', function () {
             var model = new Model({cache: Cache()}).withoutDataSource();
-            var results = model._getPathSetsAsJSON(model, [['missingPath1'], ['missingPath2'], ['missingPath3']], [{}, {}, {}]);
+            var results = model._getPathValuesAsJSON(model, [['missingPath1'], ['missingPath2'], ['missingPath3']], [{}, {}, {}]);
             var missingPaths = results.requestedMissingPaths;
             testRunner.compare(0, missingPaths[0].pathSetIndex);
             testRunner.compare(1, missingPaths[1].pathSetIndex);
@@ -31,7 +31,7 @@ describe('Specific Cases', function() {
         });
         it('should report the missing path indices on complex paths.', function () {
             var model = new Model({cache: Cache()}).withoutDataSource();
-            var results = model._getPathSetsAsJSON(model, [['missingPath1'], ['genreList', 0, {from: 41, to: 50}, 'summary']], [{}, {}]);
+            var results = model._getPathValuesAsJSON(model, [['missingPath1'], ['genreList', 0, {from: 41, to: 50}, 'summary']], [{}, {}]);
             var missingPaths = results.requestedMissingPaths;
             testRunner.compare(0, missingPaths[0].pathSetIndex);
             testRunner.compare(['missingPath1'], missingPaths[0]);
@@ -46,8 +46,8 @@ describe('Specific Cases', function() {
         it('should continue to populate the seed toJSON()', function () {
             var model = new Model({cache: Cache()}).withoutDataSource();
             var seed = [{}];
-            model._getPathSetsAsPathMap(model, [['videos', 0, 'summary']], seed);
-            model._getPathSetsAsPathMap(model, [['videos', 1, 'summary']], seed);
+            model._getPathValuesAsPathMap(model, [['videos', 0, 'summary']], seed);
+            model._getPathValuesAsPathMap(model, [['videos', 1, 'summary']], seed);
 
             testRunner.compare({
                 'title': 'Additional Title 0',
@@ -62,8 +62,8 @@ describe('Specific Cases', function() {
         it('should continue to populate the seed toJSONG()', function () {
             var model = new Model({cache: Cache()}).withoutDataSource();
             var seed = [{}];
-            model._getPathSetsAsJSONG(model, [['videos', 0, 'summary']], seed);
-            model._getPathSetsAsJSONG(model, [['videos', 1, 'summary']], seed);
+            model._getPathValuesAsJSONG(model, [['videos', 0, 'summary']], seed);
+            model._getPathValuesAsJSONG(model, [['videos', 1, 'summary']], seed);
 
             testRunner.compare({
                 $type: $atom,
@@ -86,8 +86,8 @@ describe('Specific Cases', function() {
         it('should continue to populate the seed selector.', function () {
             var model = new Model({cache: Cache()}).withoutDataSource();
             var seed = [{}];
-            model._getPathSetsAsJSON(model, [['videos', [0], 'summary']], seed);
-            model._getPathSetsAsJSON(model, [['videos', [1], 'summary']], seed);
+            model._getPathValuesAsJSON(model, [['videos', [0], 'summary']], seed);
+            model._getPathValuesAsJSON(model, [['videos', [1], 'summary']], seed);
 
             testRunner.compare({
                 'title': 'Additional Title 0',
@@ -102,11 +102,11 @@ describe('Specific Cases', function() {
         it('should continue to populate multiple seeds in the selector.', function () {
             var model = new Model({cache: Cache()}).withoutDataSource();
             var seed = [{}, {}];
-            model._getPathSetsAsJSON(model, [
+            model._getPathValuesAsJSON(model, [
                 ['videos', [0], 'summary'],
                 ['videos', [2], 'summary']
             ], seed);
-            model._getPathSetsAsJSON(model, [
+            model._getPathValuesAsJSON(model, [
                 ['videos', [1], 'summary'],
                 ['videos', [3], 'summary']
             ], seed);
@@ -134,7 +134,7 @@ describe('Specific Cases', function() {
         it('should fill double permute complex paths.', function () {
             var model = new Model({cache: Cache()}).withoutDataSource();
             var seed = [{}];
-            model._getPathSetsAsJSON(model, [
+            model._getPathValuesAsJSON(model, [
                 ['genreList', [0], [0], 'summary']
             ], seed);
 
@@ -155,7 +155,7 @@ describe('Specific Cases', function() {
                     }
                 }
             }];
-            model._getPathSetsAsJSON(model, [
+            model._getPathValuesAsJSON(model, [
                 ['genreList', [0], [1], 'summary']
             ], seed);
 
@@ -174,8 +174,8 @@ describe('Specific Cases', function() {
         it('should follow hardlinks.', function() {
             var model = new Model({cache: Cache()});
             var seed = [{}];
-            model._getPathSetsAsJSON(model, [['genreList', 0, 0, 'summary']]);
-            model._getPathSetsAsJSON(model, [['genreList', 0, 0, 'summary']], seed);
+            model._getPathValuesAsJSON(model, [['genreList', 0, 0, 'summary']]);
+            model._getPathValuesAsJSON(model, [['genreList', 0, 0, 'summary']], seed);
 
             testRunner.compare({
                 'title': 'House of Cards',
@@ -216,7 +216,7 @@ describe('Specific Cases', function() {
 
     it('should emit value when expired and materialized.', function() {
         var model = new Model({cache: Cache()}).materialize();
-        var results = model._getPathSetsAsJSON(model, [['videos', 'expiredLeafByTimestamp', 'summary']], [{}]);
+        var results = model._getPathValuesAsJSON(model, [['videos', 'expiredLeafByTimestamp', 'summary']], [{}]);
         testRunner.compare([{}], results.values);
     });
 
@@ -224,8 +224,8 @@ describe('Specific Cases', function() {
         var model = new Model({cache: Cache()}).materialize();
 
         // Removes the hardlink
-        model._getPathSetsAsJSON(model, [['videos', 'expiredLeafByTimestamp', 'summary']], [{}]);
-        var results = model._getPathSetsAsJSON(model, [['videos', 'expiredLeafByTimestamp', 'summary']], [{}]);
+        model._getPathValuesAsJSON(model, [['videos', 'expiredLeafByTimestamp', 'summary']], [{}]);
+        var results = model._getPathValuesAsJSON(model, [['videos', 'expiredLeafByTimestamp', 'summary']], [{}]);
         testRunner.compare([{}], results.values);
     });
 
@@ -251,7 +251,7 @@ describe('Specific Cases', function() {
             ['videos', {to: 0, from: 1}, 'summary'],
             ['videos', [], 'summary']
         ];
-        var results = model._getPathSetsAsJSONG(model, queries, [{}]);
+        var results = model._getPathValuesAsJSONG(model, queries, [{}]);
         testRunner.compare(0, results.requestedMissingPaths.length);
     });
 
@@ -276,7 +276,7 @@ describe('Specific Cases', function() {
         var model = new Model({cache: JSONG.jsonGraph});
         var out = [{}];
 
-        model._getPathSetsAsJSON(model, JSONG.paths, out);
+        model._getPathValuesAsJSON(model, JSONG.paths, out);
         testRunner.compare({
             0: 0,
             1: 75

@@ -11,6 +11,8 @@ var testRunner = require("./../../testRunner");
 var getDataModel = testRunner.getModel;
 var chai = require("chai");
 var expect = chai.expect;
+var sinon = require('sinon');
+var noOp = function() {};
 
 /**
  * @param newModel
@@ -25,7 +27,7 @@ describe("Call", function() {
 
         var model = getDataModel(new LocalDataSource(Cache()), ReducedCache());
 
-        model.withoutDataSource().setValueSync(["lists", "my-list", "add"], function(videoID) {
+        model.withoutDataSource()._setValueSync(["lists", "my-list", "add"], function(videoID) {
             return Rx.Observable.return({
                 path: [0],
                 value: $ref(["videos", videoID])
@@ -44,18 +46,21 @@ describe("Call", function() {
 
         var model = getDataModel(new LocalDataSource(Cache()), ReducedCache());
 
-        model
-            .deref(["lists", "my-list"], ["0"])
-            .flatMap(function(model) {
-                return model.withoutDataSource().set({
-                    path: ["add"],
-                    value: function(videoID) {
-                        return Rx.Observable.return({
-                            path: [0],
-                            value: $ref(["videos", videoID])
-                        });
-                    }
-                }, function() { return model; });
+        model.
+            deref(["lists", "my-list"], ["0"]).
+            flatMap(function(model) {
+                return model.
+                    withoutDataSource().
+                    set({
+                        path: ["add"],
+                        value: function(videoID) {
+                            return Rx.Observable.return({
+                                path: [0],
+                                value: $ref(["videos", videoID])
+                            });
+                        }
+                    }).
+                    map(function() { return model; });
             }).
             flatMap(function(model) {
                 return model.
@@ -63,17 +68,17 @@ describe("Call", function() {
                     concat(model.get([0, "summary"])).
                     toArray();
             }).
-            subscribe(function(videos) {
+            doAction(function(videos) {
                 testRunner.compare(videos[0], videos[1]);
-                done();
-            }, done);
+            }).
+            subscribe(noOp, done, done);
     });
 
     it("executes a local function with call args and maps the result paths through a selector", function(done) {
 
         var model = getDataModel(new LocalDataSource(Cache()), ReducedCache());
-
-        model.withoutDataSource().setValueSync(["lists", "my-list", "add"], function(videoID) {
+        var onNext = sinon.spy();
+        model.withoutDataSource()._setValueSync(["lists", "my-list", "add"], function(videoID) {
             return Rx.Observable.return({
                 path: [0],
                 value: $ref(["videos", videoID])
@@ -81,46 +86,55 @@ describe("Call", function() {
         });
 
         model.
-            call(["lists", "my-list", "add"], [1234], [["summary"]], function(paths) {
-                return this.getValueSync(paths[0]);
-            }).
+            call(["lists", "my-list", "add"], [1234], [["summary"]]).
             concat(model.getValue(["lists", "my-list", 0, "summary"])).
-            toArray().
-            subscribe(function(videos) {
-                testRunner.compare(videos[0], videos[1]);
-                done();
-            }, done);
+            last().
+            doAction(onNext).
+            doAction(noOp, noOp, function() {
+                expect(onNext.calledOnce).to.be.ok;
+                testRunner.compare({
+                    title: "House of Cards",
+                    url: "/movies/1234"
+                }, onNext.getCall(0).args[0]);
+            }).
+            subscribe(noOp, done, done);
     });
 
     it("executes a local function with call args on a bound Model and maps the result paths through a selector", function(done) {
 
         var model = getDataModel(new LocalDataSource(Cache()), ReducedCache());
-
+        var onNext = sinon.spy();
         model.
             deref(["lists", "my-list"], ["0"]).
             flatMap(function(model) {
-                return model.withoutDataSource().set({
-                    path: ["add"],
-                    value: function(videoID) {
-                        return Rx.Observable.return({
-                            path: [0],
-                            value: $ref(["videos", videoID])
-                        });
-                    }
-                }, function() { return model; });
+                return model.
+                    withoutDataSource().
+                    set({
+                        path: ["add"],
+                        value: function(videoID) {
+                            return Rx.Observable.return({
+                                path: [0],
+                                value: $ref(["videos", videoID])
+                            });
+                        }
+                    }).
+                    map(function() { return model; });
             }).
             flatMap(function(model) {
                 return model.
-                    call(["add"], [1234], [["summary"]], function(paths) {
-                        return this.getValueSync(paths[0]);
-                    }).
-                    concat(model.getValue([0, "summary"])).
-                    toArray();
+                    call(["add"], [1234], [["summary"]]).
+                    concat(model.getValue([0, "summary"]))
             }).
-            subscribe(function(videos) {
-                testRunner.compare(videos[0], videos[1]);
-                done();
-            }, done);
+            last().
+            doAction(onNext).
+            doAction(noOp, noOp, function() {
+                expect(onNext.calledOnce).to.be.ok;
+                testRunner.compare({
+                    title: "House of Cards",
+                    url: "/movies/1234"
+                }, onNext.getCall(0).args[0]);
+            }).
+            subscribe(noOp, done, done);
     });
 
     it("executes a local function with call args on a bound model and emits invalidations relative to the optimized bound path", function(done) {

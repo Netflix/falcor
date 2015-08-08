@@ -35,7 +35,7 @@ describe("Deref-Short", function() {
 
             var throwError = false;
             try {
-                dataModel.derefSync(["genreList", 0, 0]);
+                dataModel._derefSync(["genreList", 0, 0]);
             } catch (e) {
                 throwError = true;
                 expect(e.name).to.equals(InvalidModelError.prototype.name);
@@ -55,7 +55,7 @@ describe("Deref-Short", function() {
 
             var throwError = false;
             try {
-                dataModel.derefSync(["genreList", 0, 0]);
+                dataModel._derefSync(["genreList", 0, 0]);
             } catch (e) {
                 throwError = true;
                 expect(e.name).to.equals(InvalidModelError.prototype.name);

@@ -19,7 +19,7 @@ function invalidate_path_sets(pathsets, suffix, options) {
         var values = [];
         seeds = function(pv) { values.push(pv); }
     }
-    var func = model["_invalidatePathSetsAs" + suffix];
+    var func = model["_invalidatePathValuesAs" + suffix];
     var results = func(model, pathsets, seeds);
     if(values) { results.values = values; }
     return [model, results];

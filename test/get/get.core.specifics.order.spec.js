@@ -40,8 +40,8 @@ describe('Caching Issues', function() {
         });
         var clone = source.clone({});
         source._root.unsafeMode = clone._root.unsafeMode = true;
-        var resSource = source._getPathSetsAsJSON(source, [['lolomo', 'summary']], [{}]);
-        var resClone = clone._getPathSetsAsJSON(clone, [['lolomo', 'summary']], [{}]);
+        var resSource = source._getPathValuesAsJSON(source, [['lolomo', 'summary']], [{}]);
+        var resClone = clone._getPathValuesAsJSON(clone, [['lolomo', 'summary']], [{}]);
         expect(resClone).to.deep.equals(resSource);
 
         source.setCache({
@@ -49,8 +49,8 @@ describe('Caching Issues', function() {
                 name: 'Terminator 2'
             }
         });
-        resSource = source._getPathSetsAsJSON(source, [['lolomo', 'name']], [{}]);
-        resClone = clone._getPathSetsAsJSON(clone, [['lolomo', 'name']], [{}]);
+        resSource = source._getPathValuesAsJSON(source, [['lolomo', 'name']], [{}]);
+        resClone = clone._getPathValuesAsJSON(clone, [['lolomo', 'name']], [{}]);
         expect(resClone).to.deep.equals(resSource);
     });
 });

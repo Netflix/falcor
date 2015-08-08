@@ -1,7 +1,7 @@
 module.exports = function() {
     return {
         multipleQueries: {
-            getPathSets: {
+            getPathValues: {
                 count: 2,
                 query: [['summary'], ['art']]
             },
@@ -50,7 +50,7 @@ module.exports = function() {
             }
         },
         directValue: {
-            getPathSets: {
+            getPathValues: {
                 count: 0,
                 query: [['summary']]
             },
@@ -89,7 +89,7 @@ module.exports = function() {
             }
         },
         missingValueWithReference: {
-            getPathSets: {
+            getPathValues: {
                 query: [[4, 'summary']]
             },
             getPathMaps: {
@@ -113,7 +113,7 @@ module.exports = function() {
             }
         },
         missingValue: {
-            getPathSets: {
+            getPathValues: {
                 query: [['summary']]
             },
             getPathMaps: {
@@ -137,7 +137,7 @@ module.exports = function() {
             }
         },
         toLeafNode: {
-            getPathSets: {
+            getPathValues: {
                 query: [[]]
             },
             getPathMaps: {

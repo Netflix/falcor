@@ -37,8 +37,8 @@ describe('Adding', function() {
             getTest(getPath, 'toPathValues').
                 subscribe(noOp, done, done);
         });
-        it('should perform a hard-link with back references selector.', function(done) {
-            getTest(getPath, 'selector').
+        it('should perform a hard-link with back references preload.', function(done) {
+            getTest(getPath, 'preload').
                 subscribe(noOp, done, done);
         });
     });
@@ -55,8 +55,8 @@ describe('Adding', function() {
             getTest(getJSON, 'toPathValues').
                 subscribe(noOp, done, done);
         });
-        it('should perform a hard-link with back references selector.', function(done) {
-            getTest(getJSON, 'selector').
+        it('should perform a hard-link with back references preload.', function(done) {
+            getTest(getJSON, 'preload').
                 subscribe(noOp, done, done);
         });
     });
@@ -73,10 +73,6 @@ describe('Adding', function() {
             setTest(setPath, 'toPathValues').
                 subscribe(noOp, done, done);
         });
-        it('should perform a hard-link with back references selector.', function(done) {
-            setTest(setPath, 'selector').
-                subscribe(noOp, done, done);
-        });
     });
     describe('setJSON', function() {
         it('should perform a hard-link with back references toJSONG.', function(done) {
@@ -89,10 +85,6 @@ describe('Adding', function() {
         });
         it('should perform a hard-link with back references toPathValues.', function(done) {
             setTest(setJSON, 'toPathValues').
-                subscribe(noOp, done, done);
-        });
-        it('should perform a hard-link with back references selector.', function(done) {
-            setTest(setJSON, 'selector').
                 subscribe(noOp, done, done);
         });
     });

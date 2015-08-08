@@ -4,7 +4,7 @@ var $error = require('./../../../lib/types/error');
 module.exports = function() {
     return {
         errorBranchSummary: {
-            getPathSets: {
+            getPathValues: {
                 query: [
                     ["videos", "errorBranch", "summary"]
                 ]
@@ -56,7 +56,7 @@ module.exports = function() {
             }
         },
         genreListErrorNull: {
-            getPathSets: {
+            getPathValues: {
                 query: [
                     ["genreList", 2, null]
                 ]

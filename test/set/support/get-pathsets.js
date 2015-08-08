@@ -9,7 +9,7 @@ function get_pathsets(model, paths, suffix) {
         var values = [];
         seeds = function(pv) { values.push(pv); }
     }
-    var func = model["_getPathSetsAs" + suffix];
+    var func = model["_getPathValuesAs" + suffix];
     var output = func(model, paths, seeds);
     if(values) { output.values = values.sort(sort_path_values); }
     else if(suffix == "JSONG") {

@@ -184,34 +184,34 @@ describe('Core', function() {
 
     describe('Deref', function() {
         it('should get a value directly.', function () {
-            var model = new Model({cache: Cache()}).derefSync(['videos', 1234]);
+            var model = new Model({cache: Cache()})._derefSync(['videos', 1234]);
             getTestRunner(Bound().directValue, {model: model});
         });
 
         it('should deref to a value.', function () {
-            var model = new Model({cache: Cache()}).derefSync(['genreList', 10]);
+            var model = new Model({cache: Cache()})._derefSync(['genreList', 10]);
             getTestRunner(Bound().toLeafNode, {model: model});
         });
 
         it('should deref to a value and get multiple paths.', function () {
-            var model = new Model({cache: Cache()}).derefSync(['videos', 3355]);
+            var model = new Model({cache: Cache()})._derefSync(['videos', 3355]);
             getTestRunner(Bound().multipleQueries, {model: model});
         });
 
         it('should deref and request a missing path through a reference so the optimized path gets reset.', function () {
-            var model = new Model({cache: Cache()}).derefSync(['genreList']);
+            var model = new Model({cache: Cache()})._derefSync(['genreList']);
             getTestRunner(Bound().missingValueWithReference, {model: model});
         });
         it('should deref and request a missing path.', function () {
-            var model = new Model({cache: Cache()}).derefSync(['videos', 'missingSummary']);
+            var model = new Model({cache: Cache()})._derefSync(['videos', 'missingSummary']);
             getTestRunner(Bound().missingValue, {model: model});
         });
 
         it('should throw an error when bound and calling jsonGraph.', function() {
-            var model = new Model({cache: Cache()}).derefSync(['genreList', 10]);
+            var model = new Model({cache: Cache()})._derefSync(['genreList', 10]);
             var threw = false;
             try {
-                model._getPathSetsAsJSONG(model, [['summary']]);
+                model._getPathValuesAsJSONG(model, [['summary']]);
             } catch(ex) {
                 threw = true;
                 testRunner.compare(testRunner.jsonGraphDerefException, ex.message);

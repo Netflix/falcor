@@ -43,8 +43,4 @@ describe('Path Syntax', function() {
             }).
             subscribe(noOp, done, done);
     });
-    it('should accept strings for setValueSync', function() {
-        var out = model.setValueSync('test[0]', 7);
-        testRunner.compare(7, out);
-    });
 });

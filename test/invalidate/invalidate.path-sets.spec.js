@@ -165,7 +165,7 @@ function execute(output, suffix) {
                 } else if(suffix == "JSONG") {
                     seeds2 = [{jsonGraph: {}, paths: [[null, null, null, null]]}];
                 }
-                var results = model["_invalidatePathSetsAs" + suffix](model, [[null, null, null, null]], seeds);
+                var results = model["_invalidatePathValuesAs" + suffix](model, [[null, null, null, null]], seeds);
                 expect(seeds3 || seeds).to.deep.equal(seeds2);
                 expect(model._root.cache).to.be.ok;
             });
