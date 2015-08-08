@@ -346,7 +346,7 @@ id: api
       
       <dt class="tag-source">Source:</dt>
       <dd class="tag-source">
-          <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line50">line 50</a>
+          <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line66">line 66</a>
       </dd>
       
 
@@ -386,74 +386,89 @@ id: api
       
 
       
-          <h3 class="subsection-title">Members</h3>
+
+      
+          <h3 class="subsection-title">Methods</h3>
 
           
               
-<section class="member-section">
-    <h4 class="name section-header members-header" id="_materialized"><span class="type-signature"></span>_materialized<span class="type-signature"></span></h4>
-
+<section class="method-section">
     
-
-    
-
-    
-
-    
-
-
-    <h5 class="subsection-title">Properties</h5>
-
-    
-
-<table class="props">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
         
 
-        <th>Type</th>
+        <h4 class="name section-header function-name" id="_getValueSync"><span class="type-signature"></span>_getValueSync<span class="signature">(path)</span><span class="type-signature return-signature"> &rarr; {*}</span></h4>
 
         
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
     
 
+        
+        <div class="description">
+            <p>Synchronously retrieves a single path from the local <a href="Model.html">Model</a> only and will not retrieve missing paths from the DataSource. This method can only be invoked when the <a href="Model.html">Model</a> does not have a DataSource or from within a selector function. See Model.prototype.get. The getValueSync method differs from the asynchronous get methods (ex. get, getValues) in that it can be used to retrieve objects in addition to JSONGraph values.</p>
+        </div>
+        
+
+    
+
+    
+
+    
+
+    
+        <h5>Parameters:</h5>
+        
+
+<div class="parameters-section">
+    <table class="params">
+        <thead>
         <tr>
             
-                <td class="name">
-                    Materialized
-                </td>
+            <th class="header-name-and-attributes">
+              Name
+              
+            </th>
             
 
-            <td class="type">
-            
-                
-<span class="param-type">Boolean</span>
-
-
-            
-            </td>
+            <th class="header-type">Type</th>
 
             
 
-            
-
-            <td class="description last"><p>This is a test property</p></td>
+            <th class="last header-description">Description</th>
         </tr>
+        </thead>
+
+        <tbody>
+        
+
+            <tr>
+                
+                    <td>
+                        <span class="name">path</span>
+                        
+                    </td>
+                
+
+                <td class="type">
+                
+                    
+<span class="param-type"><a href="global.html#Path">Path</a></span>
+
+
+                
+                </td>
+
+                
+
+                <td class="description last"><p>the path to retrieve</p></td>
+            </tr>
+
+        
+        </tbody>
+    </table>
+</div>
 
     
-    </tbody>
-</table>
 
-
+    
 
 
 
@@ -487,7 +502,7 @@ id: api
       
       <dt class="tag-source">Source:</dt>
       <dd class="tag-source">
-          <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line96">line 96</a>
+          <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line332">line 332</a>
       </dd>
       
 
@@ -502,14 +517,43 @@ id: api
     
 
     
+
+    
+
+    
+
+    
+
+    
+    
+        <h5>Returns:</h5>
+    
+    
+            
+<div class="param-desc">
+    <ul>
+<li>the value for the specified path</li>
+</ul>
+</div>
+
+
+
+<dl class="return-type">
+    <dt>
+        Return Type: 
+    </dt>
+    <dd>
+        
+<span class="param-type">*</span>
+
+
+    </dd>
+</dl>
+
+        
+
+    
 </section>
-
-          
-      
-
-      
-          <h3 class="subsection-title">Methods</h3>
-
           
               
 <section class="method-section">
@@ -625,7 +669,7 @@ or
       
       <dt class="tag-source">Source:</dt>
       <dd class="tag-source">
-          <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line338">line 338</a>
+          <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line427">line 427</a>
       </dd>
       
 
@@ -728,7 +772,7 @@ or
       
       <dt class="tag-source">Source:</dt>
       <dd class="tag-source">
-          <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line395">line 395</a>
+          <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line484">line 484</a>
       </dd>
       
 
@@ -930,7 +974,7 @@ or
       
       <dt class="tag-source">Source:</dt>
       <dd class="tag-source">
-          <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line207">line 207</a>
+          <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line273">line 273</a>
       </dd>
       
 
@@ -1140,7 +1184,7 @@ or
       
       <dt class="tag-source">Source:</dt>
       <dd class="tag-source">
-          <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line112">line 112</a>
+          <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line125">line 125</a>
       </dd>
       
 
@@ -1321,7 +1365,7 @@ or
       
       <dt class="tag-source">Source:</dt>
       <dd class="tag-source">
-          <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line282">line 282</a>
+          <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line371">line 371</a>
       </dd>
       
 
@@ -1489,7 +1533,7 @@ or
       
       <dt class="tag-source">Source:</dt>
       <dd class="tag-source">
-          <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line224">line 224</a>
+          <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line290">line 290</a>
       </dd>
       
 
@@ -1551,170 +1595,6 @@ or
      });
 
  // The code above prints "Jim" to the console.</code></pre>
-
-    
-</section>
-          
-              
-<section class="method-section">
-    
-        
-
-        <h4 class="name section-header function-name" id="getValueSync"><span class="type-signature"></span>getValueSync<span class="signature">(path)</span><span class="type-signature return-signature"> &rarr; {*}</span></h4>
-
-        
-    
-
-        
-        <div class="description">
-            <p>Synchronously retrieves a single path from the local <a href="Model.html">Model</a> only and will not retrieve missing paths from the DataSource. This method can only be invoked when the <a href="Model.html">Model</a> does not have a DataSource or from within a selector function. See Model.prototype.get. The getValueSync method differs from the asynchronous get methods (ex. get, getValues) in that it can be used to retrieve objects in addition to JSONGraph values.</p>
-        </div>
-        
-
-    
-
-    
-
-    
-
-    
-        <h5>Parameters:</h5>
-        
-
-<div class="parameters-section">
-    <table class="params">
-        <thead>
-        <tr>
-            
-            <th class="header-name-and-attributes">
-              Name
-              
-            </th>
-            
-
-            <th class="header-type">Type</th>
-
-            
-
-            <th class="last header-description">Description</th>
-        </tr>
-        </thead>
-
-        <tbody>
-        
-
-            <tr>
-                
-                    <td>
-                        <span class="name">path</span>
-                        
-                    </td>
-                
-
-                <td class="type">
-                
-                    
-<span class="param-type"><a href="global.html#Path">Path</a></span>
-
-
-                
-                </td>
-
-                
-
-                <td class="description last"><p>the path to retrieve</p></td>
-            </tr>
-
-        
-        </tbody>
-    </table>
-</div>
-
-    
-
-    
-
-
-
-
-  <dl class="details">
-
-      
-
-      
-
-      
-
-      
-
-      
-
-      
-
-      
-
-      
-
-      
-
-      
-
-      
-
-      
-
-      
-      <dt class="tag-source">Source:</dt>
-      <dd class="tag-source">
-          <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line243">line 243</a>
-      </dd>
-      
-
-      
-
-      
-
-      
-  </dl>
-
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    
-        <h5>Returns:</h5>
-    
-    
-            
-<div class="param-desc">
-    <ul>
-<li>the value for the specified path</li>
-</ul>
-</div>
-
-
-
-<dl class="return-type">
-    <dt>
-        Return Type: 
-    </dt>
-    <dd>
-        
-<span class="param-type">*</span>
-
-
-    </dd>
-</dl>
-
-        
 
     
 </section>
@@ -1847,7 +1727,7 @@ or
       
       <dt class="tag-source">Source:</dt>
       <dd class="tag-source">
-          <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line135">line 135</a>
+          <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line141">line 141</a>
       </dd>
       
 
@@ -2014,7 +1894,7 @@ or
       
       <dt class="tag-source">Source:</dt>
       <dd class="tag-source">
-          <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line253">line 253</a>
+          <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line342">line 342</a>
       </dd>
       
 
@@ -2099,7 +1979,7 @@ or
       
       <dt class="tag-source">Source:</dt>
       <dd class="tag-source">
-          <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line369">line 369</a>
+          <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line458">line 458</a>
       </dd>
       
 
@@ -2202,7 +2082,7 @@ or
       
       <dt class="tag-source">Source:</dt>
       <dd class="tag-source">
-          <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line351">line 351</a>
+          <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line440">line 440</a>
       </dd>
       
 
@@ -2311,7 +2191,7 @@ or
       
       <dt class="tag-source">Source:</dt>
       <dd class="tag-source">
-          <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line405">line 405</a>
+          <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line494">line 494</a>
       </dd>
       
 
@@ -2414,7 +2294,7 @@ or
       
       <dt class="tag-source">Source:</dt>
       <dd class="tag-source">
-          <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line415">line 415</a>
+          <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line504">line 504</a>
       </dd>
       
 
@@ -2515,6 +2395,10 @@ or
         </li>
         
             <li class="toc-api-subgroup-item">
+                <a href="Model.html#_getValueSync" data-target="#_getValueSync">_getValueSync</a>
+            </li>
+        
+            <li class="toc-api-subgroup-item">
                 <a href="Model.html#batch" data-target="#batch">batch</a>
             </li>
         
@@ -2536,10 +2420,6 @@ or
         
             <li class="toc-api-subgroup-item">
                 <a href="Model.html#getValue" data-target="#getValue">getValue</a>
-            </li>
-        
-            <li class="toc-api-subgroup-item">
-                <a href="Model.html#getValueSync" data-target="#getValueSync">getValueSync</a>
             </li>
         
             <li class="toc-api-subgroup-item">
