@@ -449,7 +449,7 @@ id: api
       
       <dt class="tag-source">Source:</dt>
       <dd class="tag-source">
-          <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line495">line 495</a>
+          <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line512">line 512</a>
       </dd>
       
 
@@ -490,6 +490,26 @@ id: api
 </dl>
 
         
+
+    
+        <h5>Example</h5>
+        
+    <pre class="prettyprint"><code>var model = 
+    new falcor.Model({
+        cache: {
+            user: {
+                name: "Steve",
+                surname: "McGuire"
+            }
+        }
+    }),
+    proxyModel = new falcor.Model({ source: model.asDataSource() });
+
+// Prints "Steve"
+proxyModel.getValue("user.name").
+    then(function(name) {
+        console.log(name);
+    });</code></pre>
 
     
 </section>
@@ -717,7 +737,7 @@ or
       
       <dt class="tag-source">Source:</dt>
       <dd class="tag-source">
-          <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line515">line 515</a>
+          <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line532">line 532</a>
       </dd>
       
 
@@ -1387,7 +1407,7 @@ or
       
       <dt class="tag-source">Source:</dt>
       <dd class="tag-source">
-          <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line552">line 552</a>
+          <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line569">line 569</a>
       </dd>
       
 
@@ -2826,7 +2846,7 @@ or
       
       <dt class="tag-source">Source:</dt>
       <dd class="tag-source">
-          <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line525">line 525</a>
+          <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line542">line 542</a>
       </dd>
       
 
@@ -2929,7 +2949,7 @@ or
       
       <dt class="tag-source">Source:</dt>
       <dd class="tag-source">
-          <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line535">line 535</a>
+          <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line552">line 552</a>
       </dd>
       
 

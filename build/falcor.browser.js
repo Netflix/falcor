@@ -520,6 +520,23 @@ Model.prototype.treatErrorsAsValues = function treatErrorsAsValues() {
 /**
  * Adapts a Model to the {@link DataSource} interface.
  * @return {DataSource}
+ * @example
+var model = 
+    new falcor.Model({
+        cache: {
+            user: {
+                name: "Steve",
+                surname: "McGuire"
+            }
+        }
+    }),
+    proxyModel = new falcor.Model({ source: model.asDataSource() });
+
+// Prints "Steve"
+proxyModel.getValue("user.name").
+    then(function(name) {
+        console.log(name);
+    });
  */
 Model.prototype.asDataSource = function asDataSource() {
     return new ModelDataSourceAdapter(this);
