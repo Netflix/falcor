@@ -420,7 +420,7 @@ var model = new falcor.Model({
 model.
     set(falcor.pathValue(["todos", 0, "done"], true), falcor.pathValue(["todos", 1, "done"], true)).
     then(function(response){
-        console.log(JSON.stringify(response));
+        console.log(JSON.stringify(response, null, 4));
     });
 ~~~
 
@@ -526,7 +526,7 @@ To allow for transactional operations, JSON Graph objects can contain functions 
 
 ~~~js
 class Model {
-    call(callPath:Path, arguments:any[], returnValuePathSets?: PathSet[], ...thisPathSets:PathSet[]): ModelResponse
+    call(callPath:Path, arguments:any[], returnValuePathSets?: PathSet[], thisPathSets?:PathSet[]): ModelResponse
 }
 ~~~
 
@@ -564,7 +564,9 @@ When a JSON Graph function is called using a Model, the following steps are exec
 4. Finally the DataSource attempts to retrieve each PathSet in the "thisPathSets" argument from the functions "this" object. The resulting subset of the DataSource's JSON Graph is added to the function's response, and returned to the Model.
 5. Upon receiving the response from the DataSource, The Model removes all of the "invalidated" paths from the cache, merges the data in the response into its cache, and returns a JSON version of the response to the caller.
 
-### Call In Action
+### Call By Example
+
+#### Adding to the End of a List with a Call
 
 In the example below, we add a new task to a TODOs list by invoking the add function on the TODOs list:
 
@@ -576,10 +578,9 @@ var model = new falcor.Model({
 
 model.
     call(
-        "todos.add",
+        ["todos", "add"],
         ["pick up some eggs"],
-        ["name", "done"],
-        "length").
+        [["name"], ["done"]]).
     then(
         function(jsonEnvelope) {
             console.log(JSON.stringify(jsonEnvelope));
@@ -603,10 +604,6 @@ dataSource.
         [
             ["name"],
             ["done"]
-        ],
-        // thisPathSets parsed into PathSet arrays by Model
-        [
-            ["length"]
         ])      
 ~~~
 
@@ -662,16 +659,14 @@ After modifying the JSON Graph object, the function returns a JSONGraphEnvelope 
 ~~~js
 {
     paths: [
-        ["todos", 2]
+        ["todos", [2, "length"]]
     ],
     jsonGraph: {
         todos: {
-            2: { $type: "ref", value: ["todosById", 93] }
+            2: { $type: "ref", value: ["todosById", 93] },
+            length: 3
         }
-    },
-    invalidated: [
-        ["todos", "length"]
-    ]
+    }
 }
 ~~~
 
@@ -683,11 +678,12 @@ Notice that the function's JSONGraphEnvelope response contains a "paths" array w
 // partial JSONGraphEnvelope Response
 {
     paths: [
-        ["todos", 2]
+        ["todos", [2,"length"]]
     ],
     jsonGraph: {
         todos: {
-            2: { $type: "ref", value: ["todosById", 93] }
+            2: { $type: "ref", value: ["todosById", 93] },
+            length: 3
         }
     },
     // rest of response snipped...
@@ -698,19 +694,6 @@ Why is this necessary? Unlike get and set operations, there is no way for the Mo
 
 Notice as well that the function does not include the entire contents of the "todos" list in its response, nor does it include the newly-created task object in the "todosById" map. As a rule, **functions should return the minimum amount of data required to ensure the Model's cache is consistent, as well as enable Models to retrieve data from any objects created by the function.**
 
-Functions might change any number of values in the DataSource's JSONGraph object. In order to ensure that the Model's cache is consistent, each function is required to either provide the newest version of each value it changes in the response, or alternately include a path to the value which has changed in the list of invalidated paths in its JSONGraph Response. 
-
-~~~js
-{
-    // beginning of response snipped...
-    invalidated: [
-        ["todos", "length"]
-    ]
-}
-~~~
-
-When a Model receives a JSONGraphEnvelope from the DataSource, it removes the cached values at each of the paths at the "invalidated" paths array. The "todos.add" function response ensures Model cache consistency by invalidating the length of the todos list, which the function changed. 
-
 To allow the Model to retrieve data from the newly-created task object, the JSONGraphEnvelope response contains the reference to the newly-created task object in the "todosById" map. 
 
 ~~~js
@@ -718,7 +701,8 @@ To allow the Model to retrieve data from the newly-created task object, the JSON
     // beginning of response snipped...
     jsonGraph: {
         todos: {
-            2: { $type: "ref", value: ["todosById", 93] }
+            2: { $type: "ref", value: ["todosById", 93] },
+            length: 3
         }
     },
     // end of response snipped...
@@ -734,20 +718,7 @@ Instead of returning the task data in the response, including a reference to the
 ]
 ~~~
 
-Once the function has returned a response, the DataSource looks for any references inside of the JSONGraphEnvelope and attempts to retrieve the returnValuePathSets from the reference path. In the response from the function, we can see that a JSONGraph Reference was included at the path ["todos", 2]:
-
-~~~js
-{
-    // beginning of response snipped...
-    jsonGraph: {
-        todos: {
-            2: { $type: "ref", value: ["todosById", 93] }
-        }
-    }
-    // end of response snipped...
-~~~
-
-The DataSource appends each of the paths in the returnValuePathSets to the paths at which references are found in the response, yielding the following PathSets:
+Once the function has returned a response, the DataSource looks for any references inside of the JSONGraphEnvelope and attempts to retrieve the returnValuePathSets from the reference path. The function's response included a JSON Graph Reference { $type: "ref", value: ["todosById", 93] } at the path ["todos", 2]. Therefore the DataSource appends each of the paths in the returnValuePathSets to the paths at which references are found in the response, yielding the following PathSets:
 
 ~~~js
 [
@@ -761,11 +732,12 @@ The DataSource then attempts to retrieve these PathSets, and adds the values to 
 ~~~js
 {
     paths: [
-        ["todos", 2]
+        ["todos", [2, "length"]]
     ],
     jsonGraph: {
         todos: {
-            2: { $type: "ref", value: ["todosById", 93] }
+            2: { $type: "ref", value: ["todosById", 93] },
+            length: 3
         },
         todosById: {
             "93": {
@@ -773,10 +745,7 @@ The DataSource then attempts to retrieve these PathSets, and adds the values to 
                 done: false
             }
         }
-    },
-    invalidated: [
-        ["todos", "length"]
-    ]
+    }
 }
 ~~~
 
