@@ -658,39 +658,6 @@ id: api
         <tr>
             
                 <td class="name">
-                    errors
-                </td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">Array.&lt;Error></span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-
-                
-                    &lt;nullable><br>
-                
-                </td>
-            
-
-            
-
-            <td class="description last"><p>one or more errors that occurred while executing an operation</p></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name">
                     invalidated
                 </td>
             
@@ -774,7 +741,47 @@ id: api
     
         <h5>Example</h5>
         
-    <pre class="prettyprint"><code>TODO: Fill out a simple example showing the data structure</code></pre>
+    <pre class="prettyprint"><code>var $ref = falcor.ref;
+var model = new falcor.Model();
+model.set({
+  paths: [
+    ["todos", [12,15], ["name","done"]]
+  ],
+  jsonGraph: {
+    todos: [
+      $ref("todosById[12]"),
+      $ref("todosById[15]")
+    ],
+    todosById: {
+      12: {
+        name: "go to the ATM",
+        done: false
+      },
+      15: {
+        name: "buy milk",
+        done: false
+      }
+    }
+  },
+}).then(function(jsonEnvelope) {
+  console.log(JSON.stringify(jsonEnvelope, null, 4));
+});
+
+// prints...
+// {
+//   json: {
+//     todos: {
+//       0: {
+//         name: "go to the ATM",
+//         done: false
+//       },
+//       1: {
+//         name: "buy milk",
+//         done: false
+//       }
+//     }
+//   }
+// }</code></pre>
 
     
 </section>
