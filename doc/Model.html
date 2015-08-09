@@ -515,7 +515,7 @@ id: api
       
       <dt class="tag-source">Source:</dt>
       <dd class="tag-source">
-          <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line532">line 532</a>
+          <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line539">line 539</a>
       </dd>
       
 
@@ -694,7 +694,7 @@ or
       
       <dt class="tag-source">Source:</dt>
       <dd class="tag-source">
-          <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line475">line 475</a>
+          <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line482">line 482</a>
       </dd>
       
 
@@ -803,7 +803,7 @@ or
       
       <dt class="tag-source">Source:</dt>
       <dd class="tag-source">
-          <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line552">line 552</a>
+          <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line559">line 559</a>
       </dd>
       
 
@@ -853,7 +853,7 @@ or
     
         
 
-        <h4 class="name section-header function-name" id="deref"><span class="type-signature"></span>deref<span class="signature">(boundPath, &hellip;relativePathsToPreload)</span><span class="type-signature return-signature"> &rarr; {<a href="Observable.html">Observable</a>.&lt;<a href="Model.html">Model</a>>}</span></h4>
+        <h4 class="name section-header function-name" id="deref"><span class="type-signature"></span>deref<span class="signature">(derefPath, &hellip;relativePathsToPreload)</span><span class="type-signature return-signature"> &rarr; {<a href="Observable.html">Observable</a>.&lt;<a href="Model.html">Model</a>>}</span></h4>
 
         
     
@@ -906,7 +906,7 @@ or
             <tr>
                 
                     <td>
-                        <span class="name">boundPath</span>
+                        <span class="name">derefPath</span>
                         
                             
                         
@@ -928,7 +928,7 @@ or
 
                 
 
-                <td class="description last"><p>the path to bind to</p></td>
+                <td class="description last"><p>the path to the object that the new Model should refer to</p></td>
             </tr>
 
         
@@ -961,7 +961,7 @@ or
 
                 
 
-                <td class="description last"><p>paths (relative to the bound path) to preload before Model is created</p></td>
+                <td class="description last"><p>paths (relative to the dereference path) to preload before Model is created</p></td>
             </tr>
 
         
@@ -1005,7 +1005,7 @@ or
       
       <dt class="tag-source">Source:</dt>
       <dd class="tag-source">
-          <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line300">line 300</a>
+          <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line307">line 307</a>
       </dd>
       
 
@@ -1035,7 +1035,7 @@ or
             
 <div class="param-desc">
     <ul>
-<li>an Observable stream with a single value, the bound <a href="Model.html">Model</a>, or an empty stream if nothing is found at the path</li>
+<li>an Observable stream with a single value, the dereferenced <a href="Model.html">Model</a>, or an empty stream if nothing is found at the path</li>
 </ul>
 </div>
 
@@ -1054,6 +1054,16 @@ or
 </dl>
 
         
+
+    
+        <h5>Example</h5>
+        
+    <pre class="prettyprint"><code>var model = new falcor.Model({ source: new falcor.HttpDataSource("/model.json") });
+model.deref("user", "name").subscribe(function(userModel){
+  userModel.getValue("name").then(function(name){
+	  console.log(name);
+  });
+});</code></pre>
 
     
 </section>
@@ -1358,7 +1368,7 @@ or
       
       <dt class="tag-source">Source:</dt>
       <dd class="tag-source">
-          <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line415">line 415</a>
+          <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line422">line 422</a>
       </dd>
       
 
@@ -1473,7 +1483,7 @@ or
       
       <dt class="tag-source">Source:</dt>
       <dd class="tag-source">
-          <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line589">line 589</a>
+          <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line596">line 596</a>
       </dd>
       
 
@@ -1629,7 +1639,7 @@ or
       
       <dt class="tag-source">Source:</dt>
       <dd class="tag-source">
-          <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line317">line 317</a>
+          <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line324">line 324</a>
       </dd>
       
 
@@ -1817,7 +1827,7 @@ or
       
       <dt class="tag-source">Source:</dt>
       <dd class="tag-source">
-          <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line436">line 436</a>
+          <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line443">line 443</a>
       </dd>
       
 
@@ -2414,7 +2424,7 @@ or
       
       <dt class="tag-source">Source:</dt>
       <dd class="tag-source">
-          <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line386">line 386</a>
+          <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line393">line 393</a>
       </dd>
       
 
@@ -2576,7 +2586,7 @@ or
       
       <dt class="tag-source">Source:</dt>
       <dd class="tag-source">
-          <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line349">line 349</a>
+          <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line356">line 356</a>
       </dd>
       
 
@@ -2700,7 +2710,7 @@ or
       
       <dt class="tag-source">Source:</dt>
       <dd class="tag-source">
-          <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line505">line 505</a>
+          <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line512">line 512</a>
       </dd>
       
 
@@ -2803,7 +2813,7 @@ or
       
       <dt class="tag-source">Source:</dt>
       <dd class="tag-source">
-          <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line488">line 488</a>
+          <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line495">line 495</a>
       </dd>
       
 
@@ -2912,7 +2922,7 @@ or
       
       <dt class="tag-source">Source:</dt>
       <dd class="tag-source">
-          <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line562">line 562</a>
+          <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line569">line 569</a>
       </dd>
       
 
@@ -3015,7 +3025,7 @@ or
       
       <dt class="tag-source">Source:</dt>
       <dd class="tag-source">
-          <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line572">line 572</a>
+          <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line579">line 579</a>
       </dd>
       
 
