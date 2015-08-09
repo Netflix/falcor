@@ -22,13 +22,13 @@ In order to create the requested subset of the JSON Graph object, the Router mat
 
 Rather than serve static resources from disk, many RESTful Application servers use Routers to create resources on-demand by retrieving data from one or more persistent datastores.
 
-For example here is a Router defined for Node's ExpressJS MVC framework which uses a route to match a request for a TODO resource by ID:
+For example here is a Router defined for Node's ExpressJS MVC framework which uses a route to match a request for a task resource by ID:
 
 ~~~js
 var express = require('express');
 var app = express();
 
-app.get('/todos/:id', function(req, res) {
+app.get('/task/:id', function(req, res) {
     taskService.get(req.params.id, function(error, task) {
         if (error) {
             res.send(500);
@@ -54,7 +54,7 @@ Exposing all of the client's data as a single HTTP resource gives the client the
 Instead of downloading the entire JSON resource, clients pass paths to the values they want to retrieve from the JSON resource in the query string.
 
 ~~~
-http://.../model.json?paths=[["todos",{from:0,to:3},"name"]]
+http://.../model.json?paths=[["todos",{from:0,to:2},"name"]]
 ~~~
 
 The server responds with a subset of the JSON resource which contains the requested values. 
@@ -71,9 +71,6 @@ The server responds with a subset of the JSON resource which contains the reques
             },
             "2": {
                 "name": "pick up car from the shop."
-            },
-            "3": {
-                "name": "get milk from corner store."
             }
         }
     }
@@ -82,28 +79,60 @@ The server responds with a subset of the JSON resource which contains the reques
 
 Another key difference between traditional RESTful application servers and Falcor application servers is the way in which relationships are discovered. Traditional RESTful application servers specify hyperlinks to related resources. 
 
-(Example of /todos REST end point which returns 3 hyperlinks)
+The following request attempts to retrieve three task objects:
 
-This means that in order for a traditional client to download both a resource and its related resources, at least two JSON JSON requests must be made.
+~~~
+http://.../todos?pageOffset=0&pageSize=3
+~~~
 
-(A diagram of one sequential request to retrieve /todos followed by five concurrent requests to retrieve /todo/53838 /todo/6837 todo/5289 etc)
-
-Instead of using hyperlinks to refer to other resources, Falcor applications represent relationships as references to other locations within the same JSON resource. 
-
-(Example query which retrieves the first 10 references from the to do list)
+The server returns three hyperlinks to task resources.
 
 ~~~js
-"todos[0..10]"
+[
+    "/task/8964",
+    "/task/5296",
+    "/task/9721"
+]
 ~~~
+
+This means that in order for a traditional client to download both a resource and its related resources, at least two JSON requests must be made.
+
+![Server Roundtrips](../images/server-roundtrips.png)
+
+Instead of using hyperlinks to refer to other resources, Falcor applications represent relationships as references to other locations within the same JSON resource. For example, the following request attempts to retrieve the name of the first three tasks in the todos list:
+
+~~~js
+http://.../model.json?paths=[["todos",{from:0,to:2},"name"]]
+~~~
+
+The Falcor application server sends the following response:
+
+~~~js
+{
+    "json": {
+        "todos": {
+            "0": { $type: "ref", value: ["todosById", 8964] },
+            "1": { $type: "ref", value: ["todosById", 5296] },
+            "2": { $type: "ref", value: ["todosById", 9721] }
+        },
+        "todosById": {
+            "8964": {
+                "name": "get milk from corner store."
+            },
+            "5296": {
+                "name": "go to the ATM."
+            },
+            "9721": {
+                "name": "pick up car from the shop."
+            }
+        }
+    }
+} 
+~~~
+
 This is possible because Falcor application servers expose all their data within a single JSON resource. The important difference between references and hyperlinks is that references can be followed on the server whereas hyperlinks must be followed on the client. That means that instead of making sequential round trips, related values can be downloaded within the same request.
 
-(Example query which retrieves the name, and done property of the first 10 items in the to do list)
-
-~~~js
-"todos[0..10]['name', 'done']"
-~~~
-
-For more information on references see Path Evaluation.
+![One Roundtrip](../images/one-roundtrip.png)
 
 ## Contrasting a REST Router with a Falcor Router 
 
@@ -115,35 +144,26 @@ There are three primary differences between a traditional Application Router and
 
 Instead of matching patterns in URLs, the Falcor Router matches patterns in the paths requested in the query string of the single JSON resource.
 
-( example HTTP request containing a couple of paths which are highlighted somehow)
-
 ~~~js
-model.get('todosById[0].name', 'todosById[1].done').then(function (data) {
-    console.log(JSON.stringify(data, null, 4));
-});
+http://.../model.json?paths=[["todos","name"],["todos","length"]]
 ~~~
 
-(An example router with two routes which match the two paths passed in the URL above, no code within the get handler is required, just add a comment saying "handle route ")
-
 ~~~js
-var router = new Router([{
-    route: 'todosById[0].name',
-    get: function(pathSet) {
-        return {
-            path: ['todosById', 0, 'name'],
-            value: 'get milk from corner store.'
-        };
+var Router = require("falcor-router");
+var router = new Router([
+    {
+        route: 'todos.name',
+        get: function(pathSet) {
+            return todosService.getName();
+        }
+    },
+    {
+        route: 'todos.length',
+        get: function(pathSet) {
+            return todosService.getLength();
+        }
     }
-},
-{
-    route: 'todosById[1].done',
-    get: function(pathSet) {
-        return {
-            path: ['todosById', 1, 'done'],
-            value: true
-        };
-    }
-}]);
+]);
 ~~~
 
 ### 2. A Single Falcor Route can match multiple Paths
