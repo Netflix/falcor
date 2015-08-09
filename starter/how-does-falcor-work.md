@@ -7,9 +7,7 @@ lang: en
 
 ## How does Falcor work?
 
-### Retrieving Data from the Model
-
-Application Servers use falcor's Router to represent all their backend data as a single *Virtual JSON resource* (ex. /model.json). Application Client's use a falcor Model to work with the App Server's Virtual JSON resource as if the entire JSON object was available locally.
+Application Servers use Falcor's Router to represent all their backend data as a single *Virtual JSON resource* (ex. /model.json). Application Client's use a Falcor Model to work with the App Server's Virtual JSON resource as if the entire JSON object was available locally.
 
 In this example the client requests several values from the virtual model on the server and then displays them on-screen.
 
