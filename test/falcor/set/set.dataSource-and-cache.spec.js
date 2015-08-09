@@ -114,7 +114,6 @@ describe('DataSource and Cache', function() {
             var count = 0;
             var onSet = sinon.spy(function(source, tmp, jsongEnv) {
                 count++;
-                debugger
                 if (count === 1) {
 
                     // Don't do it this way, it will cause memory leaks.

@@ -41,8 +41,7 @@ describe('call', function() {
         var onNext = sinon.spy();
         model.
             call("genreList[0].titles.push", args, ['name']).
-            doAction(onNext).
-            doAction(noOp, noOp, function() {
+            doAction(onNext, noOp, function() {
                 expect(onNext.calledOnce).to.be.ok;
                 expect(onNext.getCall(0).args[0]).to.deep.equals({
                     json: {
@@ -51,8 +50,7 @@ describe('call', function() {
                                 titles: {
                                     2: {
                                         name: 'House of Cards'
-                                    },
-                                    push: undefined
+                                    }
                                 },
                             }
                         }
@@ -93,8 +91,7 @@ describe('call', function() {
                                 titles: {
                                     2: {
                                         name: undefined
-                                    },
-                                    push: undefined
+                                    }
                                 },
                             }
                         }
