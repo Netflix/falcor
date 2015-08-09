@@ -59,8 +59,6 @@ http://.../model.json?paths=[["todos",{from:0,to:3},"name"]]
 
 The server responds with a subset of the JSON resource which contains the requested values. 
 
-(Example JSONG response which contains the paths specified above)
-
 ~~~js
 {
     "json": {
@@ -69,10 +67,10 @@ The server responds with a subset of the JSON resource which contains the reques
                 "name": "get milk from corner store."
             },
             "1": {
-                "name": "get milk from corner store."
+                "name": "go to the ATM."
             },
             "2": {
-                "name": "get milk from corner store."
+                "name": "pick up car from the shop."
             },
             "3": {
                 "name": "get milk from corner store."
