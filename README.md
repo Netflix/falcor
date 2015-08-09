@@ -6,7 +6,7 @@
 
 ## Developer Preview
 
-**This release is a developer preview.** We are looking for community help to track down and fix bugs. We are also looking for help integrating with existing MVC frameworks, as well as ports to other platforms like .NET, PHP, and so forth.
+**This release is a developer preview.** We are looking for community help to track down and fix bugs. We are also looking for help integrating with existing MVC frameworks, as well as ports to other platforms.
 
 ## Getting Started
 
