@@ -14,6 +14,7 @@ var LocalDataSource = require('../../data/LocalDataSource');
 var ErrorDataSource = require('../../data/ErrorDataSource');
 var $error = require('./../../../lib/types/error');
 var expect = require('chai').expect;
+var sinon = require('sinon');
 
 describe('DataSource and Cache', function() {
     xit('should accept jsongraph without paths from the datasource', function(done) {
@@ -111,44 +112,49 @@ describe('DataSource and Cache', function() {
         });
         it('should perform multiple trips to a dataSource.', function(done) {
             var count = 0;
+            var onSet = sinon.spy(function(source, tmp, jsongEnv) {
+                count++;
+                debugger
+                if (count === 1) {
+
+                    // Don't do it this way, it will cause memory leaks.
+                    model._root.cache.genreList[1][1] = undefined;
+                    return {
+                        jsonGraph: jsongEnv.jsonGraph,
+                        paths: [jsongEnv.paths[0]]
+                    };
+                }
+                return jsongEnv;
+            });
             var model = new Model({
                 source: new LocalDataSource(Cache(), {
-                    onSet: function(source, tmp, jsongEnv) {
-                        count++;
-                        if (count === 1) {
-
-                            // Don't do it this way, it will cause memory leaks.
-                            model._root.cache.genreList[0][1] = undefined;
-                            return {
-                                jsonGraph: jsongEnv.jsonGraph,
-                                paths: [jsongEnv.paths[0]]
-                            };
-                        }
-                        return jsongEnv;
-                    }
+                    onSet: onSet
                 })
             });
+            var onNext = sinon.spy();
             model.
                 set(
                     {path: ['genreList', 0, 0, 'summary'], value: 1337},
-                    {path: ['genreList', 0, 1, 'summary'], value: 7331}).
-                doAction(function(x) {
-                    testRunner.compare({
+                    {path: ['genreList', 1, 1, 'summary'], value: 7331}).
+                doAction(onNext, noOp, function() {
+                    expect(onSet.calledTwice, 'onSet to be called 2x').to.be.ok;
+                    expect(onNext.calledOnce, 'onNext to be called 1x').to.be.ok;
+                    expect(onNext.getCall(0).args[0]).to.deep.equals({
                         json: {
                             genreList: {
                                 0: {
                                     0: {
                                         summary: 1337
-                                    },
+                                    }
+                                },
+                                1: {
                                     1: {
                                         summary: 7331
                                     }
                                 }
                             }
                         }
-                    }, x);
-                }, noOp, function() {
-                    testRunner.compare(2, count);
+                    });
                 }).
                 subscribe(noOp, done, done);
         });
