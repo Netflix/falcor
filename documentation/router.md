@@ -170,12 +170,40 @@ var router = new Router([
 
 Traditional App server Routers only need to match the URL path, because HTTP requests are designed to retrieve a single resource. In contrast a single HTTP request to a Falcor application server may contain multiple paths in the query string. As a result a single Falcor route can match multiple paths at once. Matching multiple paths in a single route can be more efficient in the event they can be retrieved with a single backend request.
 
-(Falcor URL which requests the name of the first 3 TODOs)
+The following request attempts to retrieve the name of the first three tasks in the todos list:
 
 ~~~js
-"todos[0..3].name"
+http://.../model.json?paths=[["todos",{from:0,to:2},"name"]]
 ~~~
- (Example of a route which matches all three using the ranges pattern and an alias, and returns the data)
+
+The following route will match all three paths and handle them at the same time:
+
+~~~js
+var Router = require("falcor-router");
+var router = new Router([
+    {
+        route: 'todos[{integers:indices}].name',
+        get: function(pathSet) {
+            // pathSet = ["todos",[0,1,2],"name"]
+            // pathSet.indices = [0,1,2]
+            return todosService.
+                getTasks(pathSet.indices).
+                then(function(taskListItems) {
+                    // taskListItems = [
+                    //  { index: 0, value: { name: "get milk from corner store", done: false } },
+                    //  { index: 1, value: { name: "go to ATM", done: false } },
+                    //  { index: 2, value: { name: "pick up car from the shop", done: false } }
+                    // ]
+
+                    return taskListItems.
+                        map(function(taskListItem) {
+                            return { path: ["todos", taskListItem.index, "name"], value: taskListItem.value.name };
+                        });
+                });
+        }
+    }
+]);
+~~~
 
 The route above retrieves the data for multiple paths using a single request to a webservice, and returns the results as a Promise of several path/value pairs.
 
