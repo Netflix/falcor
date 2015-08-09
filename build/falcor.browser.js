@@ -61,6 +61,7 @@ var setJsonGraphAsJsonDense = require(65);
 var jsong = require(155);
 var ID = 0;
 var validateInput = require(122);
+var noOp = function() {};
 
 var GET_VALID_INPUT = {
     path: true,
@@ -85,14 +86,14 @@ Model.pathValue = jsong.pathValue;
  * This callback is invoked when the Model's cache is changed.
  * @callback Model~onChange
  */
- 
+
  /**
  * This function is invoked on every JSONGraph Error retrieved from the DataSource. This function allows Error objects to be transformed before being stored in the Model's cache.
  * @callback Model~errorSelector
  * @param {Object} jsonGraphError - the JSONGraph Error object to transform before it is stored in the Model's cache.
  * @returns {Object} the JSONGraph Error object to store in the Model cache.
  */
- 
+
  /**
  * This function is invoked every time a value in the Model cache is about to be replaced with a new value. If the function returns true, the existing value is replaced with a new value and the version flag on all of the value's ancestors in the tree are incremented.
  * @callback Model~comparator
@@ -100,7 +101,7 @@ Model.pathValue = jsong.pathValue;
  * @param {Object} newValue - the value about to be set into the Model cache.
  * @returns {Boolean} the Boolean value indicating whether the new value and the existing value are equal.
  */
- 
+
 /**
  * A Model object is used to execute commands against a {@link JSONGraph} object. {@link Model}s can work with a local JSONGraph cache, or it can work with a remote {@link JSONGraph} object through a {@link DataSource}.
  * @constructor
@@ -297,23 +298,20 @@ Model.prototype.invalidate = function invalidate() {
     var argsIdx = -1;
     var argsLen = arguments.length;
     var selector = arguments[argsLen - 1];
-    if (isFunction(selector)) {
-        argsLen = argsLen - 1;
-    } else {
-        selector = void 0;
-    }
     args = new Array(argsLen);
     while (++argsIdx < argsLen) {
-        args[argsIdx] = arguments[argsIdx];
+        args[argsIdx] = pathSyntax.fromPath(arguments[argsIdx]);
         if (typeof args[argsIdx] !== "object") {
-            /* eslint-disable no-loop-func */
-            return new ModelResponse(function(o) {
-                o.onError(new Error("Invalid argument"));
-            });
-            /* eslint-enable no-loop-func */
+            throw new Error("Invalid argument");
         }
     }
-    InvalidateResponse.create(this, args, selector).subscribe();
+
+    // creates the obs, subscribes and will throw the errors if encountered.
+    InvalidateResponse.
+        create(this, args, selector).
+        subscribe(noOp, function(e) {
+            throw e;
+        });
 };
 
 /**
@@ -334,7 +332,7 @@ var model = new falcor.Model({
     usersById: {
       32: {
 	name: "Steve",
-        surname: "McGuire"			
+        surname: "McGuire"
       }
     }
   }
@@ -381,7 +379,7 @@ Model.prototype.getValue = function getValue(path) {
 /**
  * Set value for a single {@link Path}.
  * @param {Path} path - the path to set
- * @param {Object} value - the value to set 
+ * @param {Object} value - the value to set
  * @return {Observable.<*>} - the value for the path
  * @example
  var model = new falcor.Model({source: new falcor.HttpDataSource("/model.json") });
@@ -560,7 +558,7 @@ Model.prototype.treatErrorsAsValues = function treatErrorsAsValues() {
  * Adapts a Model to the {@link DataSource} interface.
  * @return {DataSource}
  * @example
-var model = 
+var model =
     new falcor.Model({
         cache: {
             user: {
@@ -642,7 +640,7 @@ var model = new falcor.Model({
     usersById: {
       32: {
 	name: "Steve",
-        surname: "McGuire"			
+        surname: "McGuire"
       }
     }
   }
