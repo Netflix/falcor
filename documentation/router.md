@@ -25,24 +25,23 @@ Rather than serve static resources from disk, many RESTful Application servers u
 For example here is a Router defined for Node's ExpressJS MVC framework which uses a route to match a request for a TODO resource by ID:
 
 ~~~js
+var express = require('express');
+var app = express();
 
-//defined for Node's ExpressJS MVC framework?
-var router = new Router([{
-    route: 'todosById[{integers:ids}].name',
-    get: function(pathSet) {
-        return pathSet.ids.map(function(id) {
-            return {
-                path: ['todosById', id, 'name'],
-                value: 'get milk from corner store.'
-            };
-        });
-    }
-}]);
+app.get('/todos/:id', function(req, res) {
+    taskService.get(req.params.id, function(error, task) {
+        if (error) {
+            res.send(500);
+        } else {
+            res.send(200, JSON.parse(task));
+        }
+    });
+});
 ~~~
 
 Routers allow application servers to remain stateless. Instead of storing state on the application server, requests for information are matched against URL patterns and requests for data are routed to persistent data stores.
 
-(Diagram of server that matches multiple URL sources and retrieves data from back in services)
+![Traditional Application Server](../images/traditional-app-server.png)
 
 ## RESTful App Servers vs. Falcor App Servers
 
