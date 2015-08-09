@@ -1,5 +1,6 @@
 describe('Set', function() {
     require('./set.cache-only.spec');
+    require('./set.dataSource-only.spec');
     require('./set.dataSource-and-bind.spec');
     require('./set.dataSource-and-cache.spec');
     require('./set.cacheAsDataSource-and-cache.spec');
