@@ -29,8 +29,8 @@ describe('Get', function () {
             testPaths('toJSON').
                 subscribe(noOp, done, done);
         });
-        it('should promote the get item to the head toJSONG.', function (done) {
-            testPaths('toJSONG').
+        it('should promote the get item to the head _toJSONG.', function (done) {
+            testPaths('_toJSONG').
                 subscribe(noOp, done, done);
         });
         it('should promote the get item to the head preload.', function (done) {
@@ -47,8 +47,8 @@ describe('Get', function () {
             testJSON('toJSON').
                 subscribe(noOp, done, done);
         });
-        it('should promote the get item to the head toJSONG.', function (done) {
-            testJSON('toJSONG').
+        it('should promote the get item to the head _toJSONG.', function (done) {
+            testJSON('_toJSONG').
                 subscribe(noOp, done, done);
         });
         it('should promote the get item to the head preload.', function (done) {
@@ -67,8 +67,8 @@ describe('Multiple Gets', function () {
             testMultiplePaths('toJSON').
                 subscribe(noOp, done, done);
         });
-        it('should promote the get item to the head toJSONG.', function (done) {
-            testMultiplePaths('toJSONG').
+        it('should promote the get item to the head _toJSONG.', function (done) {
+            testMultiplePaths('_toJSONG').
                 subscribe(noOp, done, done);
         });
         it('should promote the get item to the head preload.', function (done) {
@@ -85,8 +85,8 @@ describe('Multiple Gets', function () {
             testMultipleJSON('toJSON').
                 subscribe(noOp, done, done);
         });
-        it('should promote the get item to the head toJSONG.', function (done) {
-            testMultipleJSON('toJSONG').
+        it('should promote the get item to the head _toJSONG.', function (done) {
+            testMultipleJSON('_toJSONG').
                 subscribe(noOp, done, done);
         });
         it('should promote the get item to the head preload.', function (done) {

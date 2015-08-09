@@ -55,17 +55,17 @@ describe('Set', function() {
         });
         describe('JSONG', function () {
             it('should promote 1 item as head, no tail, no next/prev.', function (done) {
-                singleItem('path', 'toJSONG').
+                singleItem('path', '_toJSONG').
                     subscribe(noOp, done, done);
             });
 
             it('should promote 2 items.  1st item should be tail, 2nd should be head.', function (done) {
-                doubleItem('path', 'toJSONG').
+                doubleItem('path', '_toJSONG').
                     subscribe(noOp, done, done);
             });
 
             it('should promote 3 items.  1st item should be tail, 3rd should be head.', function (done) {
-                tripleItem('path', 'toJSONG').
+                tripleItem('path', '_toJSONG').
                     subscribe(noOp, done, done);
             });
         });
@@ -105,17 +105,17 @@ describe('Set', function() {
         });
         describe('JSONG', function () {
             it('should promote 1 item as head, no tail, no next/prev.', function (done) {
-                singleItem('jsonGraph', 'toJSONG').
+                singleItem('jsonGraph', '_toJSONG').
                     subscribe(noOp, done, done);
             });
 
             it('should promote 2 items.  1st item should be tail, 2nd should be head.', function (done) {
-                doubleItem('jsonGraph', 'toJSONG').
+                doubleItem('jsonGraph', '_toJSONG').
                     subscribe(noOp, done, done);
             });
 
             it('should promote 3 items.  1st item should be tail, 3rd should be head.', function (done) {
-                tripleItem('jsonGraph', 'toJSONG').
+                tripleItem('jsonGraph', '_toJSONG').
                     subscribe(noOp, done, done);
             });
         });
@@ -155,17 +155,17 @@ describe('Set', function() {
         });
         describe('JSONG', function () {
             it('should promote 1 item as head, no tail, no next/prev.', function (done) {
-                singleItem('json', 'toJSONG').
+                singleItem('json', '_toJSONG').
                     subscribe(noOp, done, done);
             });
 
             it('should promote 2 items.  1st item should be tail, 2nd should be head.', function (done) {
-                doubleItem('json', 'toJSONG').
+                doubleItem('json', '_toJSONG').
                     subscribe(noOp, done, done);
             });
 
             it('should promote 3 items.  1st item should be tail, 3rd should be head.', function (done) {
-                tripleItem('json', 'toJSONG').
+                tripleItem('json', '_toJSONG').
                     subscribe(noOp, done, done);
             });
         });

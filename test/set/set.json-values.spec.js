@@ -17,7 +17,7 @@ var $path = require("./../../lib/types/ref");
 var $atom = require("./../../lib/types/atom");
 
 var modes = [{
-        
+
     }, {
         boxed: true
     }, {
@@ -410,7 +410,7 @@ function execute(output, suffix, opts) {
                 var model = new Model(_.extend({
                     maxSize: (count * $size) + 1,
                     collectRatio: 1
-                }, opts)).materialize();
+                }, opts))._materialize();
 
                 set_and_verify_json_values(this.test, suffix, [{
                     path:  ["grid", "grid-1234", {length: count}],

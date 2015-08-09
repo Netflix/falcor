@@ -358,7 +358,7 @@ function execute(output, suffix, opts) {
                 var model = new Model(_.extend({cache: partial_cache()}, opts));
                 var options = {model: model};
                 var start_time = Date.now();
-                
+
                 set_and_verify_json_sparse(this.test, suffix, [{
                     path: ["grid", 2],
                     value: {
@@ -414,7 +414,7 @@ function execute(output, suffix, opts) {
                 var model = new Model(_.extend({
                     maxSize: (count * $size) + 1,
                     collectRatio: 1
-                }, opts)).materialize();
+                }, opts))._materialize();
 
                 set_and_verify_json_sparse(this.test, suffix, [{
                     path:  ["grid", "grid-1234", {length: count}],

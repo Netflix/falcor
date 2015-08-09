@@ -78,7 +78,7 @@ function execute(output, suffix, opts) {
                         }], {
                             model: new Model(_.extend({
                                 cache: partial_cache()
-                            }, opts)).clone({ _path: ["movies"] })
+                            }, opts))._clone({ _path: ["movies"] })
                         });
                     });
                     it("through a reference", function() {
@@ -255,7 +255,7 @@ function execute(output, suffix, opts) {
                             }], {
                                 model: new Model(_.extend({
                                     cache: partial_cache()
-                                }, opts)).clone({ _path: ["grid", 0] })
+                                }, opts))._clone({ _path: ["grid", 0] })
                             });
                         });
                     });
@@ -996,7 +996,7 @@ function execute(output, suffix, opts) {
                 var model = new Model(_.extend({
                     maxSize: (count * $size) + 1,
                     collectRatio: 1
-                }, opts)).materialize();
+                }, opts))._materialize();
 
                 set_and_verify_json_graph(this.test, suffix, [{
                     paths:  [["grid", "grid-1234", {length: count}]],
