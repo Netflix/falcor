@@ -2842,6 +2842,7 @@ var prefix = require(38);
 var getType = require(93);
 var isObject = require(103);
 var arrayClone = require(79);
+var falcorPathUtils = require(167);
 
 /* eslint-disable no-labels block-scoped-var */
 function RequestQueue(model, scheduler) {
@@ -2908,6 +2909,7 @@ RequestQueue.prototype.get = function getRequest(paths) {
 };
 
 RequestQueue.prototype.set = function setRequest(jsonGraphEnvelope) {
+    jsonGraphEnvelope.paths = falcorPathUtils.collapse(jsonGraphEnvelope.paths);
     return SetRequest.create(this.model, jsonGraphEnvelope);
 };
 
@@ -3024,7 +3026,7 @@ RequestQueue.prototype.mergeJSONGraphs = function mergeJSONGraphs(aggregate, res
 
 module.exports = RequestQueue;
 
-},{"103":103,"179":179,"181":181,"38":38,"51":51,"54":54,"79":79,"93":93}],54:[function(require,module,exports){
+},{"103":103,"167":167,"179":179,"181":181,"38":38,"51":51,"54":54,"79":79,"93":93}],54:[function(require,module,exports){
 var Rx = require(181);
 var Observer = Rx.Observer;
 
@@ -3034,6 +3036,7 @@ var arrayMap = require(82);
 
 var setJsonGraphAsJsonDense = require(65);
 var setJsonValuesAsJsonDense = require(73);
+var collapse = require(167).collapse;
 
 var emptyArray = new Array(0);
 
@@ -3115,7 +3118,7 @@ function getPath(pv) {
 
 module.exports = SetRequest;
 
-},{"181":181,"52":52,"65":65,"73":73,"82":82}],55:[function(require,module,exports){
+},{"167":167,"181":181,"52":52,"65":65,"73":73,"82":82}],55:[function(require,module,exports){
 var Rx = require(181);
 var Observable = Rx.Observable;
 var CompositeDisposable = Rx.CompositeDisposable;
