@@ -5,7 +5,7 @@ In this barebones tutorial we will use the falcor Router to create a Virtual JSO
 
 ### Creating a Virtual JSON Resource
 
-In this example we will use the falcor Router to build a Virtual JSON resource on an app server. The and host it at /model.json. The JSON resource will contain the following contents:
+In this example we will use the falcor Router to build a Virtual JSON resource on an app server and host it at /model.json. The JSON resource will contain the following contents:
 
 ~~~js
 {
@@ -77,25 +77,14 @@ node index.js
 
 Now that we've built a simple virtual JSON document with a single read-only key "greeting", we will create a test web page and retrieve this key from the server.
 
-First we build the falcor library from source.
-
-~~~sh
-cd ..
-git clone https://github.com/Netflix/falcor
-cd falcor
-npm install
-npm run dist
-cp dist/falcor.browser.js ../falcor-app-server
-cd ../falcor-app-server
-~~~
-
 Now create an index.html file with the following contents:
 
 ~~~html
 <!-- index.html -->
 <html>
   <head>
-    <script src="/falcor.browser.js"></script>
+    <!-- Do _not_  rely on this URL in production. Use only during development.  -->
+    <script src="https://cdn.rawgit.com/Netflix/falcor/master/dist/falcor.browser.js"></script>
     <script>
       var model = new falcor.Model({source: new falcor.HttpDataSource('/model.json') });
       
