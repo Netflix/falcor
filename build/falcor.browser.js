@@ -468,8 +468,8 @@ Model.prototype.getCache = function getCache() {
         };
     }
     var result;
-    this.get.apply(this.withoutDataSource().boxValues().treatErrorsAsValues().materialize(), paths).
-    toJSONG().
+    this.get.apply(this.withoutDataSource().boxValues().treatErrorsAsValues()._materialize(), paths).
+    _toJSONG().
     subscribe(function(envelope) {
         result = envelope.jsonGraph || envelope.jsong;
     });
@@ -492,7 +492,7 @@ Model.prototype.getVersion = function getVersion(pathArg) {
     return this._getVersion(this, path);
 };
 
-Model.prototype.syncCheck = function syncCheck(name) {
+Model.prototype._syncCheck = function syncCheck(name) {
     if (Boolean(this._source) && this._root.syncRefCount <= 0 && this._root.unsafeMode === false) {
         throw new Error("Model#" + name + " may only be called within the context of a request selector.");
     }
@@ -500,7 +500,7 @@ Model.prototype.syncCheck = function syncCheck(name) {
 };
 
 /* eslint-disable guard-for-in */
-Model.prototype.clone = function cloneModel(opts) {
+Model.prototype._clone = function cloneModel(opts) {
     var clone = new Model(this);
     for (var key in opts) {
         var value = opts[key];
@@ -541,7 +541,7 @@ Model.prototype.batch = function batch(schedulerOrDelayArg) {
  * @return {Model} a {@link Model} that batches requests of the same type and sends them to the data source together
  */
 Model.prototype.unbatch = function unbatch() {
-    var clone = this.clone();
+    var clone = this._clone();
     clone._request = new RequestQueue(clone, new ImmediateScheduler());
     return clone;
 };
@@ -551,7 +551,7 @@ Model.prototype.unbatch = function unbatch() {
  * @return {Model}
  */
 Model.prototype.treatErrorsAsValues = function treatErrorsAsValues() {
-    return this.clone({
+    return this._clone({
         _treatErrorsAsValues: true
     });
 };
@@ -581,14 +581,14 @@ Model.prototype.asDataSource = function asDataSource() {
     return new ModelDataSourceAdapter(this);
 };
 
-Model.prototype.materialize = function materialize() {
-    return this.clone({
+Model.prototype._materialize = function materialize() {
+    return this._clone({
         _materialized: true
     });
 };
 
-Model.prototype.dematerialize = function dematerialize() {
-    return this.clone({
+Model.prototype._dematerialize = function dematerialize() {
+    return this._clone({
         _materialized: "delete"
     });
 };
@@ -598,7 +598,7 @@ Model.prototype.dematerialize = function dematerialize() {
  * @return {Model}
  */
 Model.prototype.boxValues = function boxValues() {
-    return this.clone({
+    return this._clone({
         _boxed: true
     });
 };
@@ -608,7 +608,7 @@ Model.prototype.boxValues = function boxValues() {
  * @return {Model}
  */
 Model.prototype.unboxValues = function unboxValues() {
-    return this.clone({
+    return this._clone({
         _boxed: "delete"
     });
 };
@@ -618,7 +618,7 @@ Model.prototype.unboxValues = function unboxValues() {
  * @return {Model}
  */
 Model.prototype.withoutDataSource = function withoutDataSource() {
-    return this.clone({
+    return this._clone({
         _source: "delete"
     });
 };
@@ -693,20 +693,20 @@ Model.prototype._invalidatePathMapsAsJSON = require(45);
 
 },{"10":10,"100":100,"101":101,"102":102,"103":103,"104":104,"105":105,"11":11,"12":12,"122":122,"13":13,"14":14,"15":15,"155":155,"159":159,"16":16,"17":17,"21":21,"3":3,"4":4,"45":45,"46":46,"47":47,"5":5,"53":53,"55":55,"56":56,"58":58,"59":59,"6":6,"60":60,"61":61,"62":62,"63":63,"64":64,"65":65,"66":66,"67":67,"68":68,"69":69,"70":70,"71":71,"72":72,"73":73,"74":74,"75":75,"76":76,"77":77,"79":79,"83":83,"92":92,"96":96}],3:[function(require,module,exports){
 function ModelDataSourceAdapter(model) {
-    this._model = model.materialize().boxValues().treatErrorsAsValues();
+    this._model = model._materialize().boxValues().treatErrorsAsValues();
 }
 
 ModelDataSourceAdapter.prototype.get = function get(pathSets) {
-    return this._model.get.apply(this._model, pathSets).toJSONG();
+    return this._model.get.apply(this._model, pathSets)._toJSONG();
 };
 
 ModelDataSourceAdapter.prototype.set = function set(jsongResponse) {
-    return this._model.set(jsongResponse).toJSONG();
+    return this._model.set(jsongResponse)._toJSONG();
 };
 
 ModelDataSourceAdapter.prototype.call = function call(path, args, suffixes, paths) {
     var params = [path, args, suffixes].concat(paths);
-    return this._model.call.apply(this._model, params).toJSONG();
+    return this._model.call.apply(this._model, params)._toJSONG();
 };
 
 module.exports = ModelDataSourceAdapter;
@@ -823,7 +823,7 @@ module.exports = function derefSync(boundPathArg) {
         throw new Error("Model#derefSync must be called with an Array path.");
     }
 
-    var boundValue = this.syncCheck("bindSync") && getBoundValue(this, this._path.concat(boundPath));
+    var boundValue = this._syncCheck("bindSync") && getBoundValue(this, this._path.concat(boundPath));
 
     var path = boundValue.path;
     var node = boundValue.value;
@@ -846,7 +846,7 @@ module.exports = function derefSync(boundPathArg) {
         }
     }
 
-    return this.clone({ _path: path });
+    return this._clone({ _path: path });
 };
 
 },{"125":125,"14":14,"159":159,"93":93}],7:[function(require,module,exports){
@@ -1821,7 +1821,7 @@ module.exports = function getValueSync(pathArg) {
     if (this._path.length) {
         path = this._path.concat(path);
     }
-    return this.syncCheck("getValueSync") && this._getValueSync(this, path).value;
+    return this._syncCheck("getValueSync") && this._getValueSync(this, path).value;
 };
 
 },{"159":159}],22:[function(require,module,exports){
@@ -3036,7 +3036,6 @@ var arrayMap = require(82);
 
 var setJsonGraphAsJsonDense = require(65);
 var setJsonValuesAsJsonDense = require(73);
-var collapse = require(167).collapse;
 
 var emptyArray = new Array(0);
 
@@ -3080,7 +3079,7 @@ SetRequest.prototype.getSourceObserver = function getSourceObserver(observer) {
 
             model._path = emptyArray;
 
-            var result = setJsonGraphAsJsonDense(model.materialize(), [{
+            var result = setJsonGraphAsJsonDense(model._materialize(), [{
                 paths: paths,
                 jsonGraph: jsonGraphEnvelope.jsonGraph
             }], emptyArray, errorSelector, comparator);
@@ -3095,7 +3094,7 @@ SetRequest.prototype.getSourceObserver = function getSourceObserver(observer) {
 
             model._path = emptyArray;
 
-            setJsonValuesAsJsonDense(model.materialize(), arrayMap(paths, function(path) {
+            setJsonValuesAsJsonDense(model._materialize(), arrayMap(paths, function(path) {
                 return {
                     path: path,
                     value: error
@@ -3118,7 +3117,7 @@ function getPath(pv) {
 
 module.exports = SetRequest;
 
-},{"167":167,"181":181,"52":52,"65":65,"73":73,"82":82}],55:[function(require,module,exports){
+},{"181":181,"52":52,"65":65,"73":73,"82":82}],55:[function(require,module,exports){
 var Rx = require(181);
 var Observable = Rx.Observable;
 var CompositeDisposable = Rx.CompositeDisposable;
@@ -3162,7 +3161,7 @@ function subscribeToResponse(observer) {
     var suffixes = (args[2] || []).map(pathSyntax.fromPath);
     var extraPaths = (args[3] || []).map(pathSyntax.fromPath);
 
-    var rootModel = model.clone({
+    var rootModel = model._clone({
         _path: []
     });
     var localRoot = rootModel.withoutDataSource();
@@ -3195,7 +3194,7 @@ function subscribeToResponse(observer) {
             }
             var innerObs = model.get.apply(model, paths);
             if (observer.outputFormat === "AsJSONG") {
-                innerObs = innerObs.toJSONG().doAction(function(envelope2) {
+                innerObs = innerObs._toJSONG().doAction(function(envelope2) {
                     envelope2.invalidated = invalidated;
                 });
             }
@@ -3259,7 +3258,7 @@ function subscribeToResponse(observer) {
             if (values.length > 0) {
                 return localRoot.set
                     .apply(localRoot, values)
-                    .toJSONG()
+                    ._toJSONG()
                     .map(function(envelope) {
                         return {
                             results: results,
@@ -3292,7 +3291,7 @@ function subscribeToResponse(observer) {
             var envelopeObs;
 
             if (rootPaths.length > 0) {
-                envelopeObs = rootModel.get.apply(rootModel, rootValues.concat(rootPaths)).toJSONG();
+                envelopeObs = rootModel.get.apply(rootModel, rootValues.concat(rootPaths))._toJSONG();
             } else {
                 envelopeObs = Observable.return(envelope);
             }
@@ -3751,7 +3750,6 @@ var noop = require(108);
 var jsongMixin = { outputFormat: { value: "AsJSONG" } };
 var valuesMixin = { outputFormat: { value: "AsValues" } };
 var pathMapMixin = { outputFormat: { value: "AsPathMap" } };
-var compactJSONMixin = { outputFormat: { value: "AsJSON" } };
 var progressiveMixin = { isProgressive: { value: true } };
 
 /**
@@ -3777,7 +3775,7 @@ ModelResponse.prototype = Object.create(Observable.prototype);
 
 ModelResponse.prototype.constructor = ModelResponse;
 
-ModelResponse.prototype.mixin = function mixin() {
+ModelResponse.prototype._mixin = function mixin() {
     var self = this;
     var mixins = arraySlice(arguments);
     return new self.constructor(function(observer) {
@@ -3816,19 +3814,15 @@ model.
 "{\"path\":[\"user\",\"surname\"],\"value\":\"McGuire\"}"
  */
 ModelResponse.prototype.toPathValues = function toPathValues() {
-    return this.mixin(valuesMixin).asObservable();
-};
-
-ModelResponse.prototype.toCompactJSON = function toCompactJSON() {
-    return this.mixin(compactJSONMixin);
+    return this._mixin(valuesMixin).asObservable();
 };
 
 ModelResponse.prototype.toJSON = function toJSON() {
-    return this.mixin(pathMapMixin);
+    return this._mixin(pathMapMixin);
 };
 
-ModelResponse.prototype.toJSONG = function toJSONG() {
-    return this.mixin(jsongMixin);
+ModelResponse.prototype._toJSONG = function toJSONG() {
+    return this._mixin(jsongMixin);
 };
 
 /**
@@ -3889,7 +3883,7 @@ model.
 // }
 */
 ModelResponse.prototype.progressively = function progressively() {
-    return this.mixin(progressiveMixin);
+    return this._mixin(progressiveMixin);
 };
 
 ModelResponse.prototype.subscribe = function subscribe(a, b, c) {
@@ -6520,7 +6514,7 @@ module.exports = function setValueSync(pathArg, valueArg, errorSelectorArg, comp
         comparator = this._root._comparator;
     }
 
-    if (this.syncCheck("setValueSync")) {
+    if (this._syncCheck("setValueSync")) {
 
         var json = {};
         var boxed = this._boxed;

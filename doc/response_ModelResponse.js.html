@@ -27,7 +27,6 @@ var noop = require("./../support/noop");
 var jsongMixin = { outputFormat: { value: "AsJSONG" } };
 var valuesMixin = { outputFormat: { value: "AsValues" } };
 var pathMapMixin = { outputFormat: { value: "AsPathMap" } };
-var compactJSONMixin = { outputFormat: { value: "AsJSON" } };
 var progressiveMixin = { isProgressive: { value: true } };
 
 /**
@@ -53,7 +52,7 @@ ModelResponse.prototype = Object.create(Observable.prototype);
 
 ModelResponse.prototype.constructor = ModelResponse;
 
-ModelResponse.prototype.mixin = function mixin() {
+ModelResponse.prototype._mixin = function mixin() {
     var self = this;
     var mixins = arraySlice(arguments);
     return new self.constructor(function(observer) {
@@ -92,19 +91,15 @@ model.
 "{\"path\":[\"user\",\"surname\"],\"value\":\"McGuire\"}"
  */
 ModelResponse.prototype.toPathValues = function toPathValues() {
-    return this.mixin(valuesMixin).asObservable();
-};
-
-ModelResponse.prototype.toCompactJSON = function toCompactJSON() {
-    return this.mixin(compactJSONMixin);
+    return this._mixin(valuesMixin).asObservable();
 };
 
 ModelResponse.prototype.toJSON = function toJSON() {
-    return this.mixin(pathMapMixin);
+    return this._mixin(pathMapMixin);
 };
 
-ModelResponse.prototype.toJSONG = function toJSONG() {
-    return this.mixin(jsongMixin);
+ModelResponse.prototype._toJSONG = function toJSONG() {
+    return this._mixin(jsongMixin);
 };
 
 /**
@@ -165,7 +160,7 @@ model.
 // }
 */
 ModelResponse.prototype.progressively = function progressively() {
-    return this.mixin(progressiveMixin);
+    return this._mixin(progressiveMixin);
 };
 
 ModelResponse.prototype.subscribe = function subscribe(a, b, c) {

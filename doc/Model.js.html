@@ -456,8 +456,8 @@ Model.prototype.getCache = function getCache() {
         };
     }
     var result;
-    this.get.apply(this.withoutDataSource().boxValues().treatErrorsAsValues().materialize(), paths).
-    toJSONG().
+    this.get.apply(this.withoutDataSource().boxValues().treatErrorsAsValues()._materialize(), paths).
+    _toJSONG().
     subscribe(function(envelope) {
         result = envelope.jsonGraph || envelope.jsong;
     });
@@ -480,7 +480,7 @@ Model.prototype.getVersion = function getVersion(pathArg) {
     return this._getVersion(this, path);
 };
 
-Model.prototype.syncCheck = function syncCheck(name) {
+Model.prototype._syncCheck = function syncCheck(name) {
     if (Boolean(this._source) &amp;&amp; this._root.syncRefCount &lt;= 0 &amp;&amp; this._root.unsafeMode === false) {
         throw new Error("Model#" + name + " may only be called within the context of a request selector.");
     }
@@ -488,7 +488,7 @@ Model.prototype.syncCheck = function syncCheck(name) {
 };
 
 /* eslint-disable guard-for-in */
-Model.prototype.clone = function cloneModel(opts) {
+Model.prototype._clone = function cloneModel(opts) {
     var clone = new Model(this);
     for (var key in opts) {
         var value = opts[key];
@@ -529,7 +529,7 @@ Model.prototype.batch = function batch(schedulerOrDelayArg) {
  * @return {Model} a {@link Model} that batches requests of the same type and sends them to the data source together
  */
 Model.prototype.unbatch = function unbatch() {
-    var clone = this.clone();
+    var clone = this._clone();
     clone._request = new RequestQueue(clone, new ImmediateScheduler());
     return clone;
 };
@@ -539,7 +539,7 @@ Model.prototype.unbatch = function unbatch() {
  * @return {Model}
  */
 Model.prototype.treatErrorsAsValues = function treatErrorsAsValues() {
-    return this.clone({
+    return this._clone({
         _treatErrorsAsValues: true
     });
 };
@@ -569,14 +569,14 @@ Model.prototype.asDataSource = function asDataSource() {
     return new ModelDataSourceAdapter(this);
 };
 
-Model.prototype.materialize = function materialize() {
-    return this.clone({
+Model.prototype._materialize = function materialize() {
+    return this._clone({
         _materialized: true
     });
 };
 
-Model.prototype.dematerialize = function dematerialize() {
-    return this.clone({
+Model.prototype._dematerialize = function dematerialize() {
+    return this._clone({
         _materialized: "delete"
     });
 };
@@ -586,7 +586,7 @@ Model.prototype.dematerialize = function dematerialize() {
  * @return {Model}
  */
 Model.prototype.boxValues = function boxValues() {
-    return this.clone({
+    return this._clone({
         _boxed: true
     });
 };
@@ -596,7 +596,7 @@ Model.prototype.boxValues = function boxValues() {
  * @return {Model}
  */
 Model.prototype.unboxValues = function unboxValues() {
-    return this.clone({
+    return this._clone({
         _boxed: "delete"
     });
 };
@@ -606,7 +606,7 @@ Model.prototype.unboxValues = function unboxValues() {
  * @return {Model}
  */
 Model.prototype.withoutDataSource = function withoutDataSource() {
-    return this.clone({
+    return this._clone({
         _source: "delete"
     });
 };
