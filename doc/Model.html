@@ -40,7 +40,7 @@ id: api
 
         
         <div class="description">
-            <p>A Model object is used to execute commands against a <a href="global.html#JSONGraph">JSONGraph</a> object. <a href="Model.html">Model</a>s can work with a local JSONGraph cache, or it can work with a remote <a href="global.html#JSONGraph">JSONGraph</a> object through a DataSource.</p>
+            <p>A Model object is used to execute commands against a <a href="global.html#JSONGraph">JSONGraph</a> object. <a href="Model.html">Model</a>s can work with a local JSONGraph cache, or it can work with a remote <a href="global.html#JSONGraph">JSONGraph</a> object through a <a href="DataSource.html">DataSource</a>.</p>
         </div>
         
 
@@ -154,7 +154,7 @@ id: api
                 <td class="type">
                 
                     
-<span class="param-type">DataSource</span>
+<span class="param-type"><a href="DataSource.html">DataSource</a></span>
 
 
                 
@@ -462,14 +462,14 @@ id: api
     
         
 
-        <h4 class="name section-header function-name" id="asDataSource"><span class="type-signature"></span>asDataSource<span class="signature">()</span><span class="type-signature return-signature"> &rarr; {DataSource}</span></h4>
+        <h4 class="name section-header function-name" id="asDataSource"><span class="type-signature"></span>asDataSource<span class="signature">()</span><span class="type-signature return-signature"> &rarr; {<a href="DataSource.html">DataSource</a>}</span></h4>
 
         
     
 
         
         <div class="description">
-            <p>Adapts a Model to the DataSource interface.</p>
+            <p>Adapts a Model to the <a href="DataSource.html">DataSource</a> interface.</p>
         </div>
         
 
@@ -549,7 +549,7 @@ id: api
     </dt>
     <dd>
         
-<span class="param-type">DataSource</span>
+<span class="param-type"><a href="DataSource.html">DataSource</a></span>
 
 
     </dd>
@@ -592,7 +592,7 @@ proxyModel.getValue("user.name").
 
         
         <div class="description">
-            <p>Returns a clone of the <a href="Model.html">Model</a> that enables batching. Within the configured time period, paths for get operations are collected and sent to the DataSource in a batch. Batching can be more efficient if the DataSource access the network, potentially reducing the number of HTTP requests to the server.</p>
+            <p>Returns a clone of the <a href="Model.html">Model</a> that enables batching. Within the configured time period, paths for get operations are collected and sent to the <a href="DataSource.html">DataSource</a> in a batch. Batching can be more efficient if the <a href="DataSource.html">DataSource</a> access the network, potentially reducing the number of HTTP requests to the server.</p>
         </div>
         
 
@@ -650,7 +650,7 @@ or
 
                 
 
-                <td class="description last"><p>Either a Scheduler that determines when to send a batch to the DataSource, or the number in milliseconds to collect a batch before sending to the DataSource. If this parameter is omitted, then batch collection ends at the end of the next tick.</p></td>
+                <td class="description last"><p>Either a Scheduler that determines when to send a batch to the <a href="DataSource.html">DataSource</a>, or the number in milliseconds to collect a batch before sending to the <a href="DataSource.html">DataSource</a>. If this parameter is omitted, then batch collection ends at the end of the next tick.</p></td>
             </tr>
 
         
@@ -2801,7 +2801,7 @@ model.deref(["users", 0], "name").subscribe(function(userModel){
 
         
         <div class="description">
-            <p>Returns a clone of the <a href="Model.html">Model</a> that disables batching. This is the default mode. Each get operation will be executed on the DataSource separately.</p>
+            <p>Returns a clone of the <a href="Model.html">Model</a> that disables batching. This is the default mode. Each get operation will be executed on the <a href="DataSource.html">DataSource</a> separately.</p>
         </div>
         
 
@@ -3013,7 +3013,7 @@ model.deref(["users", 0], "name").subscribe(function(userModel){
 
         
         <div class="description">
-            <p>Returns a clone of the <a href="Model.html">Model</a> that only uses the local <a href="global.html#JSONGraph">JSONGraph</a> and never uses a DataSource to retrieve missing paths.</p>
+            <p>Returns a clone of the <a href="Model.html">Model</a> that only uses the local <a href="global.html#JSONGraph">JSONGraph</a> and never uses a <a href="DataSource.html">DataSource</a> to retrieve missing paths.</p>
         </div>
         
 
@@ -3569,13 +3569,57 @@ model.deref(["users", 0], "name").subscribe(function(userModel){
         <nav class="table-of-contents api-doc-toc">
             <ul class="nav">
                 <li>
-                    <a href="HttpDataSource.html">Classes</a>
+                    <a href="DataSource.html">Classes</a>
                     <ul class="toc-api-classes">
+                        
+                            <li class="toc-api-class ">
+                                <a href="DataSource.html" data-target="#DataSource">DataSource</a>
+                                
+                                
+
+    <ul class="toc-api-subgroup toc-api-subgroup-methods">
+        <li>
+            <span class="toc-api-subgroup-title">Methods</span>
+        </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="DataSource.html#call" data-target="#call">call</a>
+            </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="DataSource.html#set" data-target="#set">set</a>
+            </li>
+         
+    </ul>
+
+
+                                
+
+
+                                
+
+
+                            </li>
                         
                             <li class="toc-api-class ">
                                 <a href="HttpDataSource.html" data-target="#HttpDataSource">HttpDataSource</a>
                                 
                                 
+
+    <ul class="toc-api-subgroup toc-api-subgroup-methods">
+        <li>
+            <span class="toc-api-subgroup-title">Methods</span>
+        </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="HttpDataSource.html#call" data-target="#call">call</a>
+            </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="HttpDataSource.html#set" data-target="#set">set</a>
+            </li>
+         
+    </ul>
 
 
                                 
