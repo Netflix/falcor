@@ -515,7 +515,7 @@ id: api
       
       <dt class="tag-source">Source:</dt>
       <dd class="tag-source">
-          <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line539">line 539</a>
+          <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line551">line 551</a>
       </dd>
       
 
@@ -694,7 +694,7 @@ or
       
       <dt class="tag-source">Source:</dt>
       <dd class="tag-source">
-          <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line482">line 482</a>
+          <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line494">line 494</a>
       </dd>
       
 
@@ -803,7 +803,7 @@ or
       
       <dt class="tag-source">Source:</dt>
       <dd class="tag-source">
-          <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line559">line 559</a>
+          <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line571">line 571</a>
       </dd>
       
 
@@ -1005,7 +1005,7 @@ or
       
       <dt class="tag-source">Source:</dt>
       <dd class="tag-source">
-          <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line307">line 307</a>
+          <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line319">line 319</a>
       </dd>
       
 
@@ -1058,12 +1058,24 @@ or
     
         <h5>Example</h5>
         
-    <pre class="prettyprint"><code>var model = new falcor.Model({ source: new falcor.HttpDataSource("/model.json") });
-model.deref("user", "name").subscribe(function(userModel){
-  userModel.getValue("name").then(function(name){
-	  console.log(name);
-  });
-});</code></pre>
+    <pre class="prettyprint"><code>var model = new falcor.Model({
+  cache: {
+    users: [
+      { $type: "ref", value: ["usersById", 32] }
+    ],
+    usersById: {
+      32: {
+	name: "Steve",
+        surname: "McGuire"			
+      }
+    }
+  }
+});
+model.deref(["users", 0], "name").subscribe(function(userModel){
+  console.log(userModel.getPath());
+});
+
+// prints ["usersById", 32] because userModel refers to target of reference at ["users", 0]</code></pre>
 
     
 </section>
@@ -1368,7 +1380,7 @@ model.deref("user", "name").subscribe(function(userModel){
       
       <dt class="tag-source">Source:</dt>
       <dd class="tag-source">
-          <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line422">line 422</a>
+          <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line434">line 434</a>
       </dd>
       
 
@@ -1483,7 +1495,7 @@ model.deref("user", "name").subscribe(function(userModel){
       
       <dt class="tag-source">Source:</dt>
       <dd class="tag-source">
-          <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line596">line 596</a>
+          <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line627">line 627</a>
       </dd>
       
 
@@ -1524,6 +1536,28 @@ model.deref("user", "name").subscribe(function(userModel){
 </dl>
 
         
+
+    
+        <h5>Example</h5>
+        
+    <pre class="prettyprint"><code>var model = new falcor.Model({
+  cache: {
+    users: [
+      { $type: "ref", value: ["usersById", 32] }
+    ],
+    usersById: {
+      32: {
+	name: "Steve",
+        surname: "McGuire"			
+      }
+    }
+  }
+});
+model.deref(["users", 0], "name").subscribe(function(userModel){
+  console.log(userModel.getPath());
+});
+
+// prints ["usersById", 32] because userModel refers to target of reference at ["users", 0]</code></pre>
 
     
 </section>
@@ -1639,7 +1673,7 @@ model.deref("user", "name").subscribe(function(userModel){
       
       <dt class="tag-source">Source:</dt>
       <dd class="tag-source">
-          <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line324">line 324</a>
+          <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line336">line 336</a>
       </dd>
       
 
@@ -1827,7 +1861,7 @@ model.deref("user", "name").subscribe(function(userModel){
       
       <dt class="tag-source">Source:</dt>
       <dd class="tag-source">
-          <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line443">line 443</a>
+          <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line455">line 455</a>
       </dd>
       
 
@@ -2424,7 +2458,7 @@ model.deref("user", "name").subscribe(function(userModel){
       
       <dt class="tag-source">Source:</dt>
       <dd class="tag-source">
-          <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line393">line 393</a>
+          <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line405">line 405</a>
       </dd>
       
 
@@ -2586,7 +2620,7 @@ model.deref("user", "name").subscribe(function(userModel){
       
       <dt class="tag-source">Source:</dt>
       <dd class="tag-source">
-          <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line356">line 356</a>
+          <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line368">line 368</a>
       </dd>
       
 
@@ -2710,7 +2744,7 @@ model.deref("user", "name").subscribe(function(userModel){
       
       <dt class="tag-source">Source:</dt>
       <dd class="tag-source">
-          <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line512">line 512</a>
+          <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line524">line 524</a>
       </dd>
       
 
@@ -2813,7 +2847,7 @@ model.deref("user", "name").subscribe(function(userModel){
       
       <dt class="tag-source">Source:</dt>
       <dd class="tag-source">
-          <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line495">line 495</a>
+          <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line507">line 507</a>
       </dd>
       
 
@@ -2922,7 +2956,7 @@ model.deref("user", "name").subscribe(function(userModel){
       
       <dt class="tag-source">Source:</dt>
       <dd class="tag-source">
-          <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line569">line 569</a>
+          <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line581">line 581</a>
       </dd>
       
 
@@ -3025,7 +3059,7 @@ model.deref("user", "name").subscribe(function(userModel){
       
       <dt class="tag-source">Source:</dt>
       <dd class="tag-source">
-          <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line579">line 579</a>
+          <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line591">line 591</a>
       </dd>
       
 

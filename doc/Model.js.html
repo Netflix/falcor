@@ -314,12 +314,24 @@ Model.prototype.invalidate = function invalidate() {
  * @param {...PathSet} relativePathsToPreload - paths (relative to the dereference path) to preload before Model is created
  * @return {Observable.&lt;Model>} - an Observable stream with a single value, the dereferenced {@link Model}, or an empty stream if nothing is found at the path
  * @example
-var model = new falcor.Model({ source: new falcor.HttpDataSource("/model.json") });
-model.deref("user", "name").subscribe(function(userModel){
-  userModel.getValue("name").then(function(name){
-	  console.log(name);
-  });
+var model = new falcor.Model({
+  cache: {
+    users: [
+      { $type: "ref", value: ["usersById", 32] }
+    ],
+    usersById: {
+      32: {
+	name: "Steve",
+        surname: "McGuire"			
+      }
+    }
+  }
 });
+model.deref(["users", 0], "name").subscribe(function(userModel){
+  console.log(userModel.getPath());
+});
+
+// prints ["usersById", 32] because userModel refers to target of reference at ["users", 0]
  */
 Model.prototype.deref = require("./deref");
 
@@ -609,6 +621,25 @@ Model.prototype.toJSON = function toJSON() {
 /**
  * Returns the {@link Path} to the object within the JSON Graph that this Model references.
  * @return {Path}
+ * @example
+var model = new falcor.Model({
+  cache: {
+    users: [
+      { $type: "ref", value: ["usersById", 32] }
+    ],
+    usersById: {
+      32: {
+	name: "Steve",
+        surname: "McGuire"			
+      }
+    }
+  }
+});
+model.deref(["users", 0], "name").subscribe(function(userModel){
+  console.log(userModel.getPath());
+});
+
+// prints ["usersById", 32] because userModel refers to target of reference at ["users", 0]
  */
 Model.prototype.getPath = function getPath() {
     return arrayClone(this._path);
