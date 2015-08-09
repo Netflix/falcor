@@ -24,10 +24,10 @@ describe('Removing', function() {
     var setPath = {path: ['genreList', 0], value: 4};
     var setJSON = {json: {genreList: {0: 4}}};
     describe('setPaths', function() {
-        it('should perform a hard-link with back references toJSONG.', function(done) {
-            getTest(getPath, 'toJSONG').
+        it('should perform a hard-link with back references _toJSONG.', function(done) {
+            getTest(getPath, '_toJSONG').
                 flatMap(function() {
-                    return setTest(setPath, 'toJSONG');
+                    return setTest(setPath, '_toJSONG');
                 }).
                 subscribe(noOp, done, done);
         });
@@ -47,10 +47,10 @@ describe('Removing', function() {
         });
     });
     describe('setJSON', function() {
-        it('should perform a hard-link with back references toJSONG.', function(done) {
-            getTest(getPath, 'toJSONG').
+        it('should perform a hard-link with back references _toJSONG.', function(done) {
+            getTest(getPath, '_toJSONG').
                 flatMap(function() {
-                    return setTest(setJSON, 'toJSONG');
+                    return setTest(setJSON, '_toJSONG');
                 }).
                 subscribe(noOp, done, done);
         });
@@ -96,8 +96,8 @@ describe('Expired', function() {
         paths: [['genreList', 0, 1, 'summary']]
     };
     describe('getPath', function() {
-        it('should perform a hard-link with back references toJSONG.', function(done) {
-            setExpireyAndGet(getPath, 'toJSONG', true).
+        it('should perform a hard-link with back references _toJSONG.', function(done) {
+            setExpireyAndGet(getPath, '_toJSONG', true).
                 subscribe(noOp, done, done);
         });
         it('should perform a hard-link with back references toJSON.', function(done) {
@@ -110,8 +110,8 @@ describe('Expired', function() {
         });
     });
     describe('getJSON', function() {
-        it('should perform a hard-link with back references toJSONG.', function(done) {
-            setExpireyAndGet(getJSON, 'toJSONG', true).
+        it('should perform a hard-link with back references _toJSONG.', function(done) {
+            setExpireyAndGet(getJSON, '_toJSONG', true).
                 subscribe(noOp, done, done);
         });
         it('should perform a hard-link with back references toJSON.', function(done) {
@@ -124,8 +124,8 @@ describe('Expired', function() {
         });
     });
     describe('setPath', function() {
-        it('should perform a hard-link with back references toJSONG.', function(done) {
-            setExpireyAndGet(setPath, 'toJSONG').
+        it('should perform a hard-link with back references _toJSONG.', function(done) {
+            setExpireyAndGet(setPath, '_toJSONG').
                 subscribe(noOp, done, done);
         });
         it('should perform a hard-link with back references toJSON.', function(done) {
@@ -138,8 +138,8 @@ describe('Expired', function() {
         });
     });
     describe('setJSON', function() {
-        it('should perform a hard-link with back references toJSONG.', function(done) {
-            setExpireyAndGet(setJSON, 'toJSONG').
+        it('should perform a hard-link with back references _toJSONG.', function(done) {
+            setExpireyAndGet(setJSON, '_toJSONG').
                 subscribe(noOp, done, done);
         });
         it('should perform a hard-link with back references toJSON.', function(done) {
@@ -152,8 +152,8 @@ describe('Expired', function() {
         });
     });
     describe('setJSONG', function() {
-        it('should perform a hard-link with back references toJSONG.', function(done) {
-            setExpireyAndGet(setJSONG, 'toJSONG').
+        it('should perform a hard-link with back references _toJSONG.', function(done) {
+            setExpireyAndGet(setJSONG, '_toJSONG').
                 subscribe(noOp, done, done);
         });
         it('should perform a hard-link with back references toJSON.', function(done) {

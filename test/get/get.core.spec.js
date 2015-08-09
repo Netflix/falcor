@@ -156,7 +156,7 @@ describe('Core', function() {
             getTestRunner(Materialized().atomOfUndefined, { materialized: true });
         });
         it('should not report a materialized path when there is a source.', function() {
-            var model = new Model({cache: Cache(), source: {}}).materialize();
+            var model = new Model({cache: Cache(), source: {}})._materialize();
             getTestRunner(Materialized().routerOrSourceMissing, { model: model });
         });
     });

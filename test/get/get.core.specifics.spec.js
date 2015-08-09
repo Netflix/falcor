@@ -59,7 +59,7 @@ describe('Specific Cases', function() {
                 'url': '/movies/1'
             }, seed[0].json.videos[1].summary);
         });
-        it('should continue to populate the seed toJSONG()', function () {
+        it('should continue to populate the seed _toJSONG()', function () {
             var model = new Model({cache: Cache()}).withoutDataSource();
             var seed = [{}];
             model._getPathValuesAsJSONG(model, [['videos', 0, 'summary']], seed);
@@ -201,7 +201,7 @@ describe('Specific Cases', function() {
     });
 
     it('should be able to ask with non-nulls in the pathMap when missing in materialize.', function() {
-        var model = new Model({cache: Cache()}).materialize();
+        var model = new Model({cache: Cache()})._materialize();
         var queries = [
             [{json: {videos: {1234: 'string'}}}],
             [{json: {videos: {1234: ['arr']}}}],
@@ -215,13 +215,13 @@ describe('Specific Cases', function() {
     });
 
     it('should emit value when expired and materialized.', function() {
-        var model = new Model({cache: Cache()}).materialize();
+        var model = new Model({cache: Cache()})._materialize();
         var results = model._getPathValuesAsJSON(model, [['videos', 'expiredLeafByTimestamp', 'summary']], [{}]);
         testRunner.compare([{}], results.values);
     });
 
     it('should ensure that anything removed wont be unhardlinked 2x.  COVERAGE TEST', function() {
-        var model = new Model({cache: Cache()}).materialize();
+        var model = new Model({cache: Cache()})._materialize();
 
         // Removes the hardlink
         model._getPathValuesAsJSON(model, [['videos', 'expiredLeafByTimestamp', 'summary']], [{}]);
@@ -363,7 +363,7 @@ describe('Specific Cases', function() {
                     atomFalse: Model.atom(false),
                     atomEmpty: Model.atom('')
                 }
-            }}).materialize();
+            }})._materialize();
             var called = 0;
             var expected = [{
                 path: ['misc', 'atomU'],

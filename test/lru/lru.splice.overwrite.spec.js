@@ -23,7 +23,7 @@ describe('Overwrite', function() {
     describe('Input Paths', function() {
         describe('AsJSONG', function() {
             it('should splice an overwritten item.', function(done) {
-                spliceOverwrite({path: ['expired'], value: 'overwrite'}, 'toJSONG').
+                spliceOverwrite({path: ['expired'], value: 'overwrite'}, '_toJSONG').
                     subscribe(noOp, done, done);
             });
         });
@@ -49,7 +49,7 @@ describe('Overwrite', function() {
     describe('Input PathMaps', function() {
         describe('AsJSONG', function() {
             it('should splice an overwritten item.', function(done) {
-                spliceOverwrite({json: 'overwrite'}, 'toJSONG').
+                spliceOverwrite({json: 'overwrite'}, '_toJSONG').
                     subscribe(noOp, done, done);
             });
         });

@@ -30,14 +30,14 @@ describe('Cache as DataSource', function() {
                 subscribe(noOp, done, done);
         });
     });
-    describe('toJSONG', function() {
+    describe('_toJSONG', function() {
         it('should get a value from falcor.', function(done) {
             var model = new Model({ source: new Model({ source: new LocalDataSource(Cache()) }).asDataSource() });
             var expected = Expected.Values().direct.AsJSONG.values[0];
             var next = false;
             model.
                 get(['videos', 1234, 'summary']).
-                toJSONG().
+                _toJSONG().
                 doAction(function(x) {
                     testRunner.compare(expected, x);
                     next = true;
@@ -126,7 +126,7 @@ describe('Cache as DataSource', function() {
         var model = new Model({ source: {
             get: function(paths) {
                 serviceCalls++;
-                return cacheModel.get.apply(cacheModel, paths).toJSONG();
+                return cacheModel.get.apply(cacheModel, paths)._toJSONG();
             }
         }});
 

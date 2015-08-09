@@ -39,7 +39,7 @@ describe('Cache Only', function() {
                 subscribe(noOp, done, done);
         });
     });
-    describe('toJSONG', function() {
+    describe('_toJSONG', function() {
         it('should get a value from falcor.', function(done) {
             var model = new Model({cache: Cache()});
             var value = {hello: 'world'};
@@ -62,7 +62,7 @@ describe('Cache Only', function() {
             var next = false;
             model.
                 set({path: ['videos', 1234, 'summary'], value: value}).
-                toJSONG().
+                _toJSONG().
                 doAction(function(x) {
                     testRunner.compare(expected, x);
                     next = true;

@@ -12,7 +12,7 @@ function set_and_verify_json_sparse(test, suffix, pathvalues, options) {
     if(pv_options.model) {
         pv_options.model = pv_options.model.
             boxValues().
-            materialize().
+            _materialize().
             treatErrorsAsValues();
         pv_options.model._root.cache = {};
     } else {

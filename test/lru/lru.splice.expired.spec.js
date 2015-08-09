@@ -23,7 +23,7 @@ describe('Expired', function() {
     describe('Input Paths', function() {
         describe('AsJSONG', function() {
             it('should splice expired item.', function(done) {
-                spliceExpired(['expireSoon', 'summary'], 'toJSONG').
+                spliceExpired(['expireSoon', 'summary'], '_toJSONG').
                     subscribe(noOp, done, done);
             });
         });
@@ -49,7 +49,7 @@ describe('Expired', function() {
     describe('Input PathMaps', function() {
         describe('AsJSONG', function() {
             it('should splice expired item.', function(done) {
-                spliceExpired({ json: { expireSoon: { summary: null } } }, 'toJSONG').
+                spliceExpired({ json: { expireSoon: { summary: null } } }, '_toJSONG').
                     subscribe(noOp, done, done);
             });
         });

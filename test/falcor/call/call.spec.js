@@ -159,7 +159,7 @@ describe("Call", function() {
 
         model.
             call("lolomo.add", [{ $type: "ref", value: ["listsById", 29] }], ["name"], ["length"]).
-            toJSONG().
+            _toJSONG().
             subscribe(function(envelope) {
                 var err;
                 try {

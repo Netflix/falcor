@@ -87,14 +87,14 @@ describe('Cache Only', function() {
                 subscribe(noOp, done, done);
         });
     });
-    describe('toJSONG', function() {
+    describe('_toJSONG', function() {
         it('should get a value from falcor.', function(done) {
             var model = new Model({cache: Cache()});
             var expected = Expected.Values().direct.AsJSONG.values[0];
             var next = false;
             model.
                 get(['videos', 1234, 'summary']).
-                toJSONG().
+                _toJSONG().
                 doAction(function(x) {
                     testRunner.compare(expected, x);
                     next = true;

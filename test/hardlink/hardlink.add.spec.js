@@ -25,8 +25,8 @@ describe('Adding', function() {
     var setPath = {path: ['genreList', 0, 'length'], value: 4};
     var setJSON = {json: {genreList: {0: {length: 4}}}};
     describe('getPaths', function() {
-        it('should perform a hard-link with back references toJSONG.', function(done) {
-            getTest(getPath, 'toJSONG').
+        it('should perform a hard-link with back references _toJSONG.', function(done) {
+            getTest(getPath, '_toJSONG').
                 subscribe(noOp, done, done);
         });
         it('should perform a hard-link with back references toJSON.', function(done) {
@@ -43,8 +43,8 @@ describe('Adding', function() {
         });
     });
     describe('getJSON', function() {
-        it('should perform a hard-link with back references toJSONG.', function(done) {
-            getTest(getJSON, 'toJSONG').
+        it('should perform a hard-link with back references _toJSONG.', function(done) {
+            getTest(getJSON, '_toJSONG').
                 subscribe(noOp, done, done);
         });
         it('should perform a hard-link with back references toJSON.', function(done) {
@@ -61,8 +61,8 @@ describe('Adding', function() {
         });
     });
     describe('setPaths', function() {
-        it('should perform a hard-link with back references toJSONG.', function(done) {
-            setTest(setPath, 'toJSONG').
+        it('should perform a hard-link with back references _toJSONG.', function(done) {
+            setTest(setPath, '_toJSONG').
                 subscribe(noOp, done, done);
         });
         it('should perform a hard-link with back references toJSON.', function(done) {
@@ -75,8 +75,8 @@ describe('Adding', function() {
         });
     });
     describe('setJSON', function() {
-        it('should perform a hard-link with back references toJSONG.', function(done) {
-            setTest(setJSON, 'toJSONG').
+        it('should perform a hard-link with back references _toJSONG.', function(done) {
+            setTest(setJSON, '_toJSONG').
                 subscribe(noOp, done, done);
         });
         it('should perform a hard-link with back references toJSON.', function(done) {

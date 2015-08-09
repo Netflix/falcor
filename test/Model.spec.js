@@ -24,8 +24,8 @@ ResponseObservable.prototype.toJSON = function() {
     return new ResponseObservable(this.response.toJSON.apply(this.response, arguments));
 };
 
-ResponseObservable.prototype.toJSONG = function() {
-    return this.response.toJSONG.apply(this.response, arguments);
+ResponseObservable.prototype._toJSONG = function() {
+    return this.response._toJSONG.apply(this.response, arguments);
 };
 
 ResponseObservable.prototype.progressively = function() {

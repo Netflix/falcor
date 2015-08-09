@@ -110,14 +110,14 @@ describe('DataSource and Partial Cache', function() {
                 subscribe(noOp, done, done);
         });
     });
-    describe('toJSONG', function() {
-        it('should get multiple arguments into a single toJSONG response.', function(done) {
+    describe('_toJSONG', function() {
+        it('should get multiple arguments into a single _toJSONG response.', function(done) {
             var model = new Model({cache: M(), source: new LocalDataSource(Cache())});
             var expected = Expected.Complex().toOnly.AsJSONG.values[0];
             var next = false;
             model.
                 get(['genreList', 0, 0, 'summary'], ['genreList', 0, 1, 'summary']).
-                toJSONG().
+                _toJSONG().
                 doAction(function(x) {
                     next = true;
                     testRunner.compare(expected, x);
@@ -133,7 +133,7 @@ describe('DataSource and Partial Cache', function() {
             var next = false;
             model.
                 get(['genreList', 0, {to: 1}, 'summary']).
-                toJSONG().
+                _toJSONG().
                 doAction(function(x) {
                     next = true;
                     testRunner.compare(expected, x);
