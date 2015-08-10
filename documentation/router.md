@@ -375,6 +375,7 @@ class TODORouter extends
 When an Array of routes is passed to the createClass method, an internal Route Map is generated. The Route Map is a stateless data structure designed to improve the speed of pattern matching. Ideally the process of creating the Route Map should only be performed once when your Web server starts up. However Router instances often require access to connection information (ex. authorization information, included in the cookies of an HTTP Request). Creating a Router class generates the route map once, and allows the route map to be shared with every new instance of the Router class.
 
 ~~~js
+// todo-router.js
 var Router = require("falcor-router");
 // Create a Router base class
 class TODORouter extends
@@ -398,38 +399,34 @@ class TODORouter extends
         this.userId = userId;
     }
 }
+
+module.exports = TODORouter;
 ~~~
 
 These derived Router class instances can be instantiated at connection time, and passed connection information via their constructor. All route handler functions are applied to the concrete Router instance, which means that Routes can access connection state passed to the Router via the "this" pointer.
  
 Typically a single Router class is created when the application server starts up, and then one instance is created per connection and then thrown away.
-~~~js 
-var express = require('express');
-var bodyParser = require('body-parser');
-var app = express();
-var FalcorServer = require('falcor-express');
-app.use(bodyParser.text({ type: 'text/*' }));
 
-// Simple middleware to handle get/post
-app.use('/model.json', FalcorServer.dataSourceRoute(function(req, res) {
-    return new TODORouter();
+~~~js
+// app.js
+var express = require('express');
+var cookieParser = require('cookie-parser')
+var bodyParser = require('body-parser');
+var falcorMiddleware = require('falcor-express');
+var TODORouter = require('./todo-router');
+
+var app = express();
+app.use(bodyParser.urlencoded({ extended: false }))
+app.use(cookieParser());
+
+// Create a new Router instance for each new request
+app.use('/model.json', falcorMiddleware.dataSourceRoute(function(req, res) {
+    return new TODORouter(req.cookies.userId);
 }));
 
-app.use(express.static('.'));
-
-var server = app.listen(9090, function(err) {
-    if (err) {
-        console.error(err);
-        return;
-    }
-    console.log("navigate to http://localhost:9090");
-});
+var server = app.listen(80);
 ~~~
- 
-Note that if you're using ES6 or a transpiler from ES6 to ES5 like Babel, you can use the new JavaScript class syntax to create a derived Router class:
- 
-(example)
- 
+
 ### Route Objects
  
 Each Route object passed to the Router constructor contains a pattern that can be used to match Path Sets, as well as three optional handlers that correspond to each of the DataSource interface's methods.
@@ -437,8 +434,37 @@ Each Route object passed to the Router constructor contains a pattern that can b
 When one of the DataSource methods is invoked on the Router object, the Router attempts to match the paths against the patterns in each route.  If a Route's pattern is matched, the corresponding route handler method is invoked.  The Route handler is expected to perform the corresponding action and generate the subset of the JSON Graph containing the requested path.
  
 For an example, take the following Router which matches the set of paths that attempts to retrieve a user name or surname:
+~~~js
+var BaseRouter = Router.createClass([
+        {
+            route: 'user.["name", "surname"]',
+            get: function(pathSet) {
+                // pathSet is ["user", ["name"]] or ["user", ["surname"]] or ["user", ["name", "surname"]]
+                if (this.userId == null) {
+                    throw new Error("not authorized");
+                } 
+                return userService.
+                    get(this.userId).
+                    then(function(user) {
+                        // pathSet[1] is ["name"] or ["surname"] or ["name", "surname"]
+                        return pathSet[1].map(function(key) {
+                            return { path: ["user", key], value: user[key] };
+                        });
+                    });
+            }
+        }
+    ]);
 
-(Example of a router class created to match first name and last name on a user using a single route)
+// Creating a constructor for a class that derives from BaseRouter
+var AppRouter = function(userId){
+    // Invoking the base class constructor
+    BaseRouter.call(this);
+    this.userId = userId;
+};
+
+// Creating a derived class using JavaScript's classical inheritance pattern
+AppRouter.prototype = Object.create(BaseRouter);    
+~~~
  
 Let's say the following request is made for the "name" and "surname" of the user:
  
