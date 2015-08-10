@@ -66,7 +66,8 @@ body {
   
   & .footer-links {
     height: 100%;
-    padding: (@site-footer-height - @line-height-computed)/2 0;
+    padding-top: (@site-footer-height - @line-height-computed)/2 0;
+    padding-bottom: (@site-footer-height - @line-height-computed)/2 0;
     color: @site-footer-text-color;
     
     & > a {
@@ -75,7 +76,7 @@ body {
   }
   
   & .netflix-logo {
-    @logo-height: 0.5 * @site-footer-height;
+    @logo-height: 0.4 * @site-footer-height;
     height: @logo-height;
     margin-top: (@site-footer-height - @logo-height)/2;
   }
