@@ -166,7 +166,7 @@ var router = new Router([
 ]);
 ~~~
 
-### 2. A Single Falcor Route can match multiple Paths
+### 2. A Single Falcor Route Can Match Multiple Paths
 
 Traditional App server Routers only need to match the URL path, because HTTP requests are designed to retrieve a single resource. In contrast a single HTTP request to a Falcor application server may contain multiple paths in the query string. As a result a single Falcor route can match multiple paths at once. Matching multiple paths in a single route can be more efficient in the event they can be retrieved with a single backend request.
 
