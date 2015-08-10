@@ -526,7 +526,7 @@ To allow for transactional operations, JSON Graph objects can contain functions 
 
 ~~~js
 class Model {
-    call(callPath:Path, arguments:any[], returnValuePathSets?: PathSet[], thisPathSets?:PathSet[]): ModelResponse
+    call(callPath:Path, arguments:any[], refPaths?: PathSet[], thisPaths?:PathSet[]): ModelResponse
 }
 ~~~
 
@@ -542,17 +542,17 @@ This argument is the path to the function within the DataSource's JSON Graph obj
 
 This is an array of arguments to be passed to the function being called.
 
-### The Optional returnValuePathSets Argument
+### The Optional refPaths Argument
 
-Typically, returnValuePaths are used when the function creates a new object and returns a reference to that object. The returnValuePathSets can be passed to call in order to allow fields to be retrieved from the newly-generated object without the need for a subsequent get operation to be executed on the DataSource.
+Typically, returnValuePaths are used when the function creates a new object and returns a reference to that object. The refPaths can be passed to call in order to allow fields to be retrieved from the newly-generated object without the need for a subsequent get operation to be executed on the DataSource.
 
-In the event that any of the values returned from the function are [JSON Graph References](#JSON-Graph-References), the DataSource will append each of the returnValuePathSets to each Reference path and evaluate the resulting paths. The results of the values retrieved by evaluating the returnValuePathSets on the References returned by the function are added to the JSON Graph response by the DataSource.
+In the event that any of the values returned from the function are [JSON Graph References](#JSON-Graph-References), the DataSource will append each of the refPaths to each Reference path and evaluate the resulting paths. The results of the values retrieved by evaluating the refPaths on the References returned by the function are added to the JSON Graph response by the DataSource.
 
-### The Optional thisPathSets Arguments
+### The Optional thisPaths Arguments
 
-A function is not obligated to return all of the changes that it makes to its "this" object. On the contrary, functions typically return as little data as possible by default. Instead of returning all of the changes they make to the JSON Graph object, functions allow callers to define exactly which values they would like to refresh after successful function execution by providing the returnValuePathSets and the thisPathSets arguments. The goal is to allow applications to retrieve the minimum subset of data they need for each scenario. 
+A function is not obligated to return all of the changes that it makes to its "this" object. On the contrary, functions typically return as little data as possible by default. Instead of returning all of the changes they make to the JSON Graph object, functions allow callers to define exactly which values they would like to refresh after successful function execution by providing the refPaths and the thisPaths arguments. The goal is to allow applications to retrieve the minimum subset of data they need for each scenario. 
 
-After the returnValuePathSets have been evaluated against any JSON Graph References returned by the function and added to the JSONGraphEnvelope Response, each PathSet in the thisPathSets array is evaluated on the function's "this" object. The resulting values are added to the JSON Graph Response returned by the DataSource's call method.
+After the refPaths have been evaluated against any JSON Graph References returned by the function and added to the JSONGraphEnvelope Response, each PathSet in the thisPaths array is evaluated on the function's "this" object. The resulting values are added to the JSON Graph Response returned by the DataSource's call method.
 
 ### How Call Works
 
@@ -560,8 +560,8 @@ When a JSON Graph function is called using a Model, the following steps are exec
 
 1. The Model immediately forwards the call to its DataSource.
 2. The DataSource executes the abstract JSON Graph call operation on the function, receiving a JSONGraphEnvelope in response. The function's response contains a subset of the DataSource's JSON Graph object after the function's successful completion. It also may optionally include an Array of "invalidated" PathSets which may have been changed by the function. 
-3. If the function added any new objects to the JSON Graph, references to these objects are typically included in its response. The function caller can retrieve values from these newly-created objects by specifying returnValuePathSets alongside the other arguments to the call method (callPath, arguments, etc). If returnValuePathSets have been specified, the DataSource attempts to retrieve each of these PathSets from the objects located at the references included in the function's response. Once the DataSource has retrieved these values, it adds them to the JSON Graph subset in the function's response. 
-4. Finally the DataSource attempts to retrieve each PathSet in the "thisPathSets" argument from the functions "this" object. The resulting subset of the DataSource's JSON Graph is added to the function's response, and returned to the Model.
+3. If the function added any new objects to the JSON Graph, references to these objects are typically included in its response. The function caller can retrieve values from these newly-created objects by specifying refPaths alongside the other arguments to the call method (callPath, arguments, etc). If refPaths have been specified, the DataSource attempts to retrieve each of these PathSets from the objects located at the references included in the function's response. Once the DataSource has retrieved these values, it adds them to the JSON Graph subset in the function's response. 
+4. Finally the DataSource attempts to retrieve each PathSet in the "thisPaths" argument from the functions "this" object. The resulting subset of the DataSource's JSON Graph is added to the function's response, and returned to the Model.
 5. Upon receiving the response from the DataSource, The Model removes all of the "invalidated" paths from the cache, merges the data in the response into its cache, and returns a JSON version of the response to the caller.
 
 ### Call By Example
@@ -600,7 +600,7 @@ dataSource.
         ["todos","add"],
         // function arguments
         ["pick up some eggs"],
-        // returnValuePathSets parsed into PathSet arrays by Model
+        // refPaths parsed into PathSet arrays by Model
         [
             ["name"],
             ["done"]
@@ -709,7 +709,7 @@ To allow the Model to retrieve data from the newly-created task object, the JSON
 }
 ~~~
 
-Instead of returning the task data in the response, including a reference to the task allows the caller to decide what values from the newly-created task should be retrieved by specifying the returnValuePathSets argument. Recall that the following paths were passed as the returnValuePathSets argument:
+Instead of returning the task data in the response, including a reference to the task allows the caller to decide what values from the newly-created task should be retrieved by specifying the refPaths argument. Recall that the following paths were passed as the refPaths argument:
 
 ~~~js
 [
@@ -718,7 +718,7 @@ Instead of returning the task data in the response, including a reference to the
 ]
 ~~~
 
-Once the function has returned a response, the DataSource looks for any references inside of the JSONGraphEnvelope and attempts to retrieve the returnValuePathSets from the reference path. The function's response included a JSON Graph Reference { $type: "ref", value: ["todosById", 93] } at the path ["todos", 2]. Therefore the DataSource appends each of the paths in the returnValuePathSets to the paths at which references are found in the response, yielding the following PathSets:
+Once the function has returned a response, the DataSource looks for any references inside of the JSONGraphEnvelope and attempts to retrieve the refPaths from the reference path. The function's response included a JSON Graph Reference { $type: "ref", value: ["todosById", 93] } at the path ["todos", 2]. Therefore the DataSource appends each of the paths in the refPaths to the paths at which references are found in the response, yielding the following PathSets:
 
 ~~~js
 [
@@ -749,9 +749,9 @@ The DataSource then attempts to retrieve these PathSets, and adds the values to 
 }
 ~~~
 
-Notice that the response above now contains the "name" and "done" fields of the newly added task object. Using the returnValuePathSets argument, we are able to retrieve values from object references returned from the function.
+Notice that the response above now contains the "name" and "done" fields of the newly added task object. Using the refPaths argument, we are able to retrieve values from object references returned from the function.
 
-Now that the function has run successfully, and the values have been retrieved from the references in the response, the "thisPathSets" paths are retrieved from the function's "this" object. Recall that we requested the following path from the "this" object:
+Now that the function has run successfully, and the values have been retrieved from the references in the response, the "thisPaths" paths are retrieved from the function's "this" object. Recall that we requested the following path from the "this" object:
 
 ~~~js
 [
@@ -759,7 +759,7 @@ Now that the function has run successfully, and the values have been retrieved f
 ]  
 ~~~
 
-The DataSource appends each one of the "thisPathSets" (there is currently only one) to the function path, yielding the following path:
+The DataSource appends each one of the "thisPaths" (there is currently only one) to the function path, yielding the following path:
 
 ~~~js
 [
