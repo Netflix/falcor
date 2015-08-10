@@ -434,6 +434,7 @@ Each Route object passed to the Router constructor contains a pattern that can b
 When one of the DataSource methods is invoked on the Router object, the Router attempts to match the paths against the patterns in each route.  If a Route's pattern is matched, the corresponding route handler method is invoked.  The Route handler is expected to perform the corresponding action and generate the subset of the JSON Graph containing the requested path.
  
 For an example, take the following Router which matches the set of paths that attempts to retrieve a user name or surname:
+
 ~~~js
 var BaseRouter = Router.createClass([
         {
@@ -467,64 +468,184 @@ AppRouter.prototype = Object.create(BaseRouter);
 ~~~
  
 Let's say the following request is made for the "name" and "surname" of the user:
- 
+
+~~~js 
 routerInstance.get([["user",["name","surname"]]])
+~~~
  
 Once the Router determines that a route's pattern matches a subset of the requested Path Set, the Router will invoke the matching route's get handler with a PathSet containing the set of paths that matched the route pattern:
  
+~~~js
 matchingRoute.get.call(routerInstance, ["user",["name","surname"]])
- 
+~~~
+
 Note that each Route handler is applied to the Router instance, meaning it can access Router properties using the "this" object.  Note as well that the matching path is passed to the handler using the Path Array syntax. 
  
 Each route is responsible for creating a subset of the JSON Graph object that contains the requested values.
  
-(example of retrieving the Route's get handler retrieving the data from the DB and returning a Promise of JSON Graph).
- 
+~~~js
+{
+    route: 'user.["name", "surname"]',
+    get: function(pathSet) {
+        // pathSet is ["user", ["name"]] or ["user", ["surname"]] or ["user", ["name", "surname"]]
+        if (this.userId == null) {
+            throw new Error("not authorized");
+        } 
+        return userService.
+            get(this.userId).
+            then(function(user) {
+                // pathSet[1] is ["name"] or ["surname"] or ["name", "surname"]
+                return pathSet[1].map(function(key) {
+                    return { path: ["user", key], value: user[key] };
+                });
+            });
+    }
+}
+~~~ 
+
 The Router combines all of these subsets of the JSON Graph object returned by each individual route into a single JSON Graph object subset, and returns it to the caller.
  
 #### Route Handler Response Formats
  
 Each route handler is responsible for creating a subset of the JSON Graph that contains the values found at the requested paths. These values can be delivered in one of two formats:
  
-·      JSON Graph Envelope
-·      A Series of PathValues
+* JSON Graph Envelope
+* A Series of PathValues
  
-
-A JSON Graph envelope is an object with a "jsong" key that contains a subset of a JSON is responsible for creating the subset of the cereal grass that contains the requested paths.
+A JSON Graph envelope is an object with a "jsonGraph" key that contains a subset of a JSON is responsible for creating the subset of the JSON Graph Envelope that contains the requested paths.
  
 In the following example, a route returns JSON Graph envelope containing both the name and surname of a user:
  
-(example)
+~~~js
+{
+    route: 'user.["name", "surname"]',
+    get: function(pathSet) {
+        // pathSet is ["user", ["name"]] or ["user", ["surname"]] or ["user", ["name", "surname"]]
+        if (this.userId == null) {
+            throw new Error("not authorized");
+        } 
+        return userService.
+            get(this.userId).
+            then(function(userObject) {
+                var jsonGraph = {};
+                var user = jsonGraph["user"] = {};
+                // pathSet[1] is ["name"] or ["surname"] or ["name", "surname"]
+                pathSet[1].forEach(function(key) {
+                    user[key] = userObject[key];
+                });
+                
+                return { jsonGraph: jsonGraph };
+            });
+    }
+}
+~~~ 
  
 A PathValue is an object with a path and value key. In lieu of a JSON Graph object containing all requested values, a Route can return a PathValue for each requested path:
  
-(example)
- 
+~~~js
+{
+    route: 'user.["name", "surname"]',
+    get: function(pathSet) {
+        // pathSet is ["user", ["name"]] or ["user", ["surname"]] or ["user", ["name", "surname"]]
+        if (this.userId == null) {
+            throw new Error("not authorized");
+        } 
+        return userService.
+            get(this.userId).
+            then(function(user) {
+                // pathSet[1] is ["name"] or ["surname"] or ["name", "surname"]
+                return pathSet[1].map(function(key) {
+                    return { path: ["user", key], value: user[key] };
+                });
+            });
+    }
+}
+~~~ 
+
 As in the previous example, this route returns the name and surname of a user. However this time it returns two PathValue objects, one containing the path and value of the name, and the other containing the path and value of the surname.
  
 When a Router receives a series of PathValue's, it creates the JSON Graph envelope by writing each PathValue's value into an object at the PathValue's path.
  
-(example demonstrating the two PathValues (name,surname) === one JSON Graph object)
- 
+~~~js
+[
+    { path: ["user","name"], value: "Anupa" },
+    { path: ["user","surname"], value: "Husain" }
+]
+// is converted to...
+{
+    jsonGraph: {
+        user: {
+            name: "Anupa",
+            surname: "Husain"
+        }
+    },
+    paths: [
+        ["user", ["name", "surname"]]
+    ]
+}
+~~~ 
+
 If your Route progressively builds up JSON Graph envelopes from a series of values, returning PathValues can be a more convenient alternative.
  
 #### Route Handler Concurrency
  
 In addition to returning either JSON Graph envelopes or path values synchronously, Router handlers can also return their data asynchronously by delivering their output data in either of the following containers:
 
-Promise
-Observable.
+* Promise
+* Observable
  
 In the following example a Route handler retrieves the name and surname of a user from a persistent DataStore, and returns the results in an ES6 Promise:
  
-(example)
- 
-For more information on Promises, see this article: https://www.promisejs.org/
+~~~js
+{
+    route: 'user.["name", "surname"]',
+    get: function(pathSet) {
+        // pathSet is ["user", ["name"]] or ["user", ["surname"]] or ["user", ["name", "surname"]]
+        if (this.userId == null) {
+            throw new Error("not authorized");
+        } 
+        return userService.
+            get(this.userId).
+            then(function(user) {
+                // pathSet[1] is ["name"] or ["surname"] or ["name", "surname"]
+                return pathSet[1].map(function(key) {
+                    return { path: ["user", key], value: user[key] };
+                });
+            });
+    }
+}
+~~~ 
+
+For more information on Promises, see this [article](https://www.promisejs.org/)
  
 Alternately a Router Handler can return the PathValue results progressively using an Observable:
  
-(example)
- 
+~~~js
+var Rx = require("rx");
+var Observable = Rx.Observable;
+
+// snip...
+{
+    route: 'user.["name", "surname"]',
+    get: function(pathSet) {
+        // pathSet is ["user", ["name"]] or ["user", ["surname"]] or ["user", ["name", "surname"]]
+        if (this.userId == null) {
+            throw new Error("not authorized");
+        } 
+        return Observable.
+            fromPromise(userService.get(this.userId)).
+            flatMap(function(user) {
+                // pathSet[1] is ["name"] or ["surname"] or ["name", "surname"]
+                return Observable.
+                    fromArray(pathSet[1]).
+                    map(function(key) {
+                        return { path: ["user", key], value: user[key] };
+                    });
+            });
+    }
+}
+~~~
+
 An Observable is similar to a Promise, with the principal difference being that an Observable can send multiple values over time. The main advantage of using a Observable over a Promise is the ability to progressively return PathValues to the Router as soon as they are returned from the underlying DataSource.  In contrast, when delivering values in a Promise, all values must be collected together in a JSON Graph envelope or an Array of PathValues and returned to the Router at the same time.
  
 Using an Observable can improve throughput, because Routers may make additional requests to backend services in the event references are discovered in a Route Handler's JSON Graph output.
