@@ -191,12 +191,12 @@ var router = new Router([
                 then(function(taskListItems) {
                     // taskListItems = [
                     //  { index: 0, value: { name: "get milk from corner store", done: false } },
-                    //  { index: 1, value: { name: "go to ATM", done: false } },
+                    //  { index: 1, value: { name: "go to the ATM", done: false } },
                     //  { index: 2, value: { name: "pick up car from the shop", done: false } }
                     // ]
-
                     return taskListItems.
                         map(function(taskListItem) {
+                            // create a response for each individual path
                             return { path: ["todos", taskListItem.index, "name"], value: taskListItem.value.name };
                         });
                 });
@@ -207,17 +207,51 @@ var router = new Router([
 
 The route above retrieves the data for multiple paths using a single request to a webservice, and returns the results as a Promise of several path/value pairs.
 
+~~~js
+[
+    { path: ["todos", 0, "name"], value: "get milk from corner store." },
+    { path: ["todos", 1, "name"], value: "go to the ATM." },
+    { path: ["todos", 2, "name"], value: "pick up car from the shop." }
+]
+~~~
+
+The Router accepts all of these path/value pairs, adds them to a single JSON object, and then sends it back to the client as the response.
+
+~~~js
+{
+    "json": {
+        "todos": {
+            "0": {
+                "name": "get milk from corner store."
+            },
+            "1": {
+                "name": "go to the ATM."
+            },
+            "2": {
+                "name": "pick up car from the shop."
+            }
+        }
+    }
+} 
+~~~
+
 ### 3. Retrieving Related Resources on the Server
 
 In addition to allowing multiple values to be retrieved in a single request, Falcor routers can also traverse entity relationships and retrieve related values within the same request.
 
 REST APIs often expose different kinds of resources at different end points. These resources often contain hyperlinks to related resources. For example the following endpoint /todos returns a JSON array of hyperlinks to task resources:
 
-(A JSON array of task hyperlinks)
+~~~js
+[
+    "/task/8964",
+    "/task/5296",
+    "/task/9721"
+]
+~~~
 
 RESTful clients traverse entity relationships by making follow-up requests for the resources at these hyperlinks. 
 
-(Diagram of the sequential calls required to retrieve /todos and then /todo//783)
+![Server Roundtrips](../images/server-roundtrips.png)
 
 Unlike RESTful servers, Falcor Application servers expose all of an application's domain data as a single JSON Graph resource. Within a the JSON Graph resource, entity relationships are expressed as references to other entities in the same resource rather than hyperlinks to different resources. 
 
