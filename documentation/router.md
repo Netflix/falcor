@@ -22,13 +22,13 @@ In order to create the requested subset of the JSON Graph object, the Router mat
 
 Rather than serve static resources from disk, many RESTful Application servers use Routers to create resources on-demand by retrieving data from one or more persistent datastores.
 
-For example here is a Router defined for Node's ExpressJS MVC framework which uses a route to match a request for a TODO resource by ID:
+For example here is a Router defined for Node's ExpressJS MVC framework which uses a route to match a request for a task resource by ID:
 
 ~~~js
 var express = require('express');
 var app = express();
 
-app.get('/todos/:id', function(req, res) {
+app.get('/task/:id', function(req, res) {
     taskService.get(req.params.id, function(error, task) {
         if (error) {
             res.send(500);
@@ -54,14 +54,14 @@ Exposing all of the client's data as a single HTTP resource gives the client the
 Instead of downloading the entire JSON resource, clients pass paths to the values they want to retrieve from the JSON resource in the query string.
 
 ~~~
-http://.../model.json?paths=[["todos",{from:0,to:3},"name"]]
+http://.../model.json?paths=[["todos",{from:0,to:2},"name"]]
 ~~~
 
 The server responds with a subset of the JSON resource which contains the requested values. 
 
 ~~~js
 {
-    "json": {
+    "jsonGraph": {
         "todos": {
             "0": {
                 "name": "get milk from corner store."
@@ -71,9 +71,6 @@ The server responds with a subset of the JSON resource which contains the reques
             },
             "2": {
                 "name": "pick up car from the shop."
-            },
-            "3": {
-                "name": "get milk from corner store."
             }
         }
     }
@@ -82,28 +79,60 @@ The server responds with a subset of the JSON resource which contains the reques
 
 Another key difference between traditional RESTful application servers and Falcor application servers is the way in which relationships are discovered. Traditional RESTful application servers specify hyperlinks to related resources. 
 
-(Example of /todos REST end point which returns 3 hyperlinks)
+The following request attempts to retrieve three task objects:
 
-This means that in order for a traditional client to download both a resource and its related resources, at least two JSON JSON requests must be made.
+~~~
+http://.../todos?pageOffset=0&pageSize=3
+~~~
 
-(A diagram of one sequential request to retrieve /todos followed by five concurrent requests to retrieve /todo/53838 /todo/6837 todo/5289 etc)
-
-Instead of using hyperlinks to refer to other resources, Falcor applications represent relationships as references to other locations within the same JSON resource. 
-
-(Example query which retrieves the first 10 references from the to do list)
+The server returns three hyperlinks to task resources.
 
 ~~~js
-"todos[0..10]"
+[
+    "/task/8964",
+    "/task/5296",
+    "/task/9721"
+]
 ~~~
+
+This means that in order for a traditional client to download both a resource and its related resources, at least two JSON requests must be made.
+
+![Server Roundtrips](../images/server-roundtrips.png)
+
+Instead of using hyperlinks to refer to other resources, Falcor applications represent relationships as references to other locations within the same JSON resource. For example, the following request attempts to retrieve the name of the first three tasks in the todos list:
+
+~~~js
+http://.../model.json?paths=[["todos",{from:0,to:2},"name"]]
+~~~
+
+The Falcor application server sends the following response:
+
+~~~js
+{
+    "json": {
+        "todos": {
+            "0": { $type: "ref", value: ["todosById", 8964] },
+            "1": { $type: "ref", value: ["todosById", 5296] },
+            "2": { $type: "ref", value: ["todosById", 9721] }
+        },
+        "todosById": {
+            "8964": {
+                "name": "get milk from corner store."
+            },
+            "5296": {
+                "name": "go to the ATM."
+            },
+            "9721": {
+                "name": "pick up car from the shop."
+            }
+        }
+    }
+} 
+~~~
+
 This is possible because Falcor application servers expose all their data within a single JSON resource. The important difference between references and hyperlinks is that references can be followed on the server whereas hyperlinks must be followed on the client. That means that instead of making sequential round trips, related values can be downloaded within the same request.
 
-(Example query which retrieves the name, and done property of the first 10 items in the to do list)
-
-~~~js
-"todos[0..10]['name', 'done']"
-~~~
-
-For more information on references see Path Evaluation.
+![One Roundtrip](../images/one-roundtrip.png)
 
 ## Contrasting a REST Router with a Falcor Router 
 
@@ -115,49 +144,96 @@ There are three primary differences between a traditional Application Router and
 
 Instead of matching patterns in URLs, the Falcor Router matches patterns in the paths requested in the query string of the single JSON resource.
 
-( example HTTP request containing a couple of paths which are highlighted somehow)
-
 ~~~js
-model.get('todosById[0].name', 'todosById[1].done').then(function (data) {
-    console.log(JSON.stringify(data, null, 4));
-});
+http://.../model.json?paths=[["todos","name"],["todos","length"]]
 ~~~
 
-(An example router with two routes which match the two paths passed in the URL above, no code within the get handler is required, just add a comment saying "handle route ")
-
 ~~~js
-var router = new Router([{
-    route: 'todosById[0].name',
-    get: function(pathSet) {
-        return {
-            path: ['todosById', 0, 'name'],
-            value: 'get milk from corner store.'
-        };
+var Router = require("falcor-router");
+var router = new Router([
+    {
+        route: 'todos.name',
+        get: function(pathSet) {
+            return todosService.getName();
+        }
+    },
+    {
+        route: 'todos.length',
+        get: function(pathSet) {
+            return todosService.getLength();
+        }
     }
-},
-{
-    route: 'todosById[1].done',
-    get: function(pathSet) {
-        return {
-            path: ['todosById', 1, 'done'],
-            value: true
-        };
-    }
-}]);
+]);
 ~~~
 
-### 2. A Single Falcor Route can match multiple Paths
+### 2. A Single Falcor Route Can Match Multiple Paths
 
 Traditional App server Routers only need to match the URL path, because HTTP requests are designed to retrieve a single resource. In contrast a single HTTP request to a Falcor application server may contain multiple paths in the query string. As a result a single Falcor route can match multiple paths at once. Matching multiple paths in a single route can be more efficient in the event they can be retrieved with a single backend request.
 
-(Falcor URL which requests the name of the first 3 TODOs)
+The following request attempts to retrieve the name of the first three tasks in the todos list:
 
 ~~~js
-"todos[0..3].name"
+http://.../model.json?paths=[["todos",{from:0,to:2},"name"]]
 ~~~
- (Example of a route which matches all three using the ranges pattern and an alias, and returns the data)
+
+The following route will match all three paths and handle them at the same time:
+
+~~~js
+var Router = require("falcor-router");
+var router = new Router([
+    {
+        route: 'todos[{integers:indices}].name',
+        get: function(pathSet) {
+            // pathSet = ["todos",[0,1,2],"name"]
+            // pathSet.indices = [0,1,2]
+            return todosService.
+                getTasks(pathSet.indices).
+                then(function(taskListItems) {
+                    // taskListItems = [
+                    //  { index: 0, value: { name: "get milk from corner store", done: false } },
+                    //  { index: 1, value: { name: "go to the ATM", done: false } },
+                    //  { index: 2, value: { name: "pick up car from the shop", done: false } }
+                    // ]
+                    return taskListItems.
+                        map(function(taskListItem) {
+                            // create a response for each individual path
+                            return { path: ["todos", taskListItem.index, "name"], value: taskListItem.value.name };
+                        });
+                });
+        }
+    }
+]);
+~~~
 
 The route above retrieves the data for multiple paths using a single request to a webservice, and returns the results as a Promise of several path/value pairs.
+
+~~~js
+[
+    { path: ["todos", 0, "name"], value: "get milk from corner store." },
+    { path: ["todos", 1, "name"], value: "go to the ATM." },
+    { path: ["todos", 2, "name"], value: "pick up car from the shop." }
+]
+~~~
+
+The Router accepts all of these path/value pairs, adds them to a single JSON object, and then sends it back to the client as the response.
+
+~~~js
+{
+    "jsonGraph": {
+        "todos": {
+            "0": {
+                "name": "get milk from corner store."
+            },
+            "1": {
+                "name": "go to the ATM."
+            },
+            "2": {
+                "name": "pick up car from the shop."
+            }
+        }
+    }
+} 
+~~~
 
 ### 3. Retrieving Related Resources on the Server
 
@@ -165,11 +241,17 @@ In addition to allowing multiple values to be retrieved in a single request, Fal
 
 REST APIs often expose different kinds of resources at different end points. These resources often contain hyperlinks to related resources. For example the following endpoint /todos returns a JSON array of hyperlinks to task resources:
 
-(A JSON array of task hyperlinks)
+~~~js
+[
+    "/task/8964",
+    "/task/5296",
+    "/task/9721"
+]
+~~~
 
 RESTful clients traverse entity relationships by making follow-up requests for the resources at these hyperlinks. 
 
-(Diagram of the sequential calls required to retrieve /todos and then /todo//783)
+![Server Roundtrips](../images/server-roundtrips.png)
 
 Unlike RESTful servers, Falcor Application servers expose all of an application's domain data as a single JSON Graph resource. Within a the JSON Graph resource, entity relationships are expressed as references to other entities in the same resource rather than hyperlinks to different resources. 
 
@@ -177,34 +259,174 @@ When Falcor clients request paths to values within the JSON Graph resource, Falc
 
 For example the following path retrieves a reference to the first task object in a JSON Graph resource, much the same way as the RESTful /todos resource contains hyperlinks to task resources. 
 
-(Example HTTP request for "todos[0]", and the response which contains just the reference inside of the JSON Graph fragment)
+~~~js
+http://.../model.json?paths=[["todos",0]]
+~~~
+
+The server responds with the following JSONGraphEnvelope:
+
+~~~js
+{
+    "jsonGraph": {
+        "todos": {
+            "0": { $type: "ref", value: ["todosById", 8964] }
+        }
+    }
+} 
+~~~
 
 However if the path is altered to retrieve keys from the entity located at the reference, the Falcor Router traverses the reference on the server and retrieves the values from the entity located at the reference path. The result is a fragment of the JSON Graph object which contains all of the references encountered during path evaluation as well as the requested value.
 
-(Example HTTP request for "todos[0]['name','done']", and the response which contains just the reference inside of the JSON Graph fragment)
+~~~js
+http://.../model.json?paths=[["todos",0,"name"]]
+~~~
+
+The server responds with the following JSONGraphEnvelope:
+
+~~~js
+{
+    "jsonGraph": {
+        "todos": {
+            "0": { $type: "ref", value: ["todosById", 8964] }
+        },
+        "todosById": {
+            "8964": {
+                "name": "get milk from corner store."
+            }
+        }
+    }
+} 
+~~~
 
 ## Creating a Router Class
  
 A Router Class is created by invoking the Router.createClass method. This Class factory method accepts an Array of Route objects. Each Route object contains a path pattern, and an optional series of handlers for the various DataSource methods: get, set, and call.
  
-(example)
- 
-### Why create a Router Class instead of a Router instance?
+~~~js
+var Router = require("falcor-router");
+
+// Create a Router base class
+var BaseRouter = Router.createClass([
+    {
+        route: 'todos[{integers:indices}].name',
+        // Route handlers are run with the Router instance as their this object
+        get: function(pathSet) {
+            if (this.userId == null) {
+                throw new Error("not authorized");
+            }  
+            // Route implementation snipped
+        },
+        set: function(jsonGraph) {
+            if (this.userId == null) {
+                throw new Error("not authorized");
+            }  
+            // Route implementation snipped
+        }        
+    }
+]);
+
+// Creating a constructor for a class that derives from BaseRouter
+var TODORouter = function(userId){
+    // Invoking the base class constructor
+    BaseRouter.call(this);
+    this.userId = userId;
+};
+
+// Creating a derived class using JavaScript's classical inheritance pattern
+TODORouter.prototype = Object.create(BaseRouter);
+~~~
+
+The next version of JavaScript (ES2015) has native support for classes. If you are using a version of node that supports classes, or you are using a transpiler, you can write this code instead of the code seen above:
+
+~~~js
+var Router = require("falcor-router");
+
+// Create a Router base class
+class TODORouter extends
+    // create base class in-line
+    Router.createClass([
+        {
+            route: 'todos[{integers:indices}].name',
+            // Route handlers are run with the Router instance as their this object
+            get: function(pathSet) {
+                if (this.userId == null) {
+                    throw new Error("not authorized");
+                } 
+                // Route implementation snipped
+            },
+            set: function(jsonGraph) {
+                if (this.userId == null) {
+                    throw new Error("not authorized");
+                }
+                // Route implementation snipped
+            }      
+        }
+    ]) {
+    
+    constructor(userId) {
+        super();
+        this.userId = userId;
+    }
+}
+~~~
+
+### Why Create a Router Class Instead of a Router Instance?
  
 When an Array of routes is passed to the createClass method, an internal Route Map is generated. The Route Map is a stateless data structure designed to improve the speed of pattern matching. Ideally the process of creating the Route Map should only be performed once when your Web server starts up. However Router instances often require access to connection information (ex. authorization information, included in the cookies of an HTTP Request). Creating a Router class generates the route map once, and allows the route map to be shared with every new instance of the Router class.
- 
+
+~~~js
+// todo-router.js
+var Router = require("falcor-router");
+// Create a Router base class
+class TODORouter extends
+    // create base class in-line
+    Router.createClass([
+        {
+            route: 'todos[{integers:indices}].name',
+            get: function(pathSet) {
+                // Route handlers are run with the Router instance as their this object.
+                // Therefore the userId member must be set by the constructor.
+                if (this.userId == null) {
+                    throw new Error("not authorized");
+                } 
+                // Route implementation snipped
+            }
+        }
+    ]) {
+    
+    constructor(userId) {
+        super();
+        this.userId = userId;
+    }
+}
+
+module.exports = TODORouter;
+~~~
+
 These derived Router class instances can be instantiated at connection time, and passed connection information via their constructor. All route handler functions are applied to the concrete Router instance, which means that Routes can access connection state passed to the Router via the "this" pointer.
  
-(example)
- 
 Typically a single Router class is created when the application server starts up, and then one instance is created per connection and then thrown away.
- 
-(example)
- 
-Note that if you're using ES6 or a transpiler from ES6 to ES5 like Babel, you can use the new JavaScript class syntax to create a derived Router class:
- 
-(example)
- 
+
+~~~js
+// app.js
+var express = require('express');
+var cookieParser = require('cookie-parser')
+var bodyParser = require('body-parser');
+var falcorMiddleware = require('falcor-express');
+var TODORouter = require('./todo-router');
+
+var app = express();
+app.use(bodyParser.urlencoded({ extended: false }))
+app.use(cookieParser());
+
+// Create a new Router instance for each new request
+app.use('/model.json', falcorMiddleware.dataSourceRoute(function(req, res) {
+    return new TODORouter(req.cookies.userId);
+}));
+
+var server = app.listen(80);
+~~~
+
 ### Route Objects
  
 Each Route object passed to the Router constructor contains a pattern that can be used to match Path Sets, as well as three optional handlers that correspond to each of the DataSource interface's methods.
@@ -213,67 +435,217 @@ When one of the DataSource methods is invoked on the Router object, the Router a
  
 For an example, take the following Router which matches the set of paths that attempts to retrieve a user name or surname:
 
-(Example of a router class created to match first name and last name on a user using a single route)
+~~~js
+var BaseRouter = Router.createClass([
+        {
+            route: 'user.["name", "surname"]',
+            get: function(pathSet) {
+                // pathSet is ["user", ["name"]] or ["user", ["surname"]] or ["user", ["name", "surname"]]
+                if (this.userId == null) {
+                    throw new Error("not authorized");
+                } 
+                return userService.
+                    get(this.userId).
+                    then(function(user) {
+                        // pathSet[1] is ["name"] or ["surname"] or ["name", "surname"]
+                        return pathSet[1].map(function(key) {
+                            return { path: ["user", key], value: user[key] };
+                        });
+                    });
+            }
+        }
+    ]);
+
+// Creating a constructor for a class that derives from BaseRouter
+var AppRouter = function(userId){
+    // Invoking the base class constructor
+    BaseRouter.call(this);
+    this.userId = userId;
+};
+
+// Creating a derived class using JavaScript's classical inheritance pattern
+AppRouter.prototype = Object.create(BaseRouter);    
+~~~
  
 Let's say the following request is made for the "name" and "surname" of the user:
- 
+
+~~~js 
 routerInstance.get([["user",["name","surname"]]])
+~~~
  
 Once the Router determines that a route's pattern matches a subset of the requested Path Set, the Router will invoke the matching route's get handler with a PathSet containing the set of paths that matched the route pattern:
  
+~~~js
 matchingRoute.get.call(routerInstance, ["user",["name","surname"]])
- 
+~~~
+
 Note that each Route handler is applied to the Router instance, meaning it can access Router properties using the "this" object.  Note as well that the matching path is passed to the handler using the Path Array syntax. 
  
 Each route is responsible for creating a subset of the JSON Graph object that contains the requested values.
  
-(example of retrieving the Route's get handler retrieving the data from the DB and returning a Promise of JSON Graph).
- 
+~~~js
+{
+    route: 'user.["name", "surname"]',
+    get: function(pathSet) {
+        // pathSet is ["user", ["name"]] or ["user", ["surname"]] or ["user", ["name", "surname"]]
+        if (this.userId == null) {
+            throw new Error("not authorized");
+        } 
+        return userService.
+            get(this.userId).
+            then(function(user) {
+                // pathSet[1] is ["name"] or ["surname"] or ["name", "surname"]
+                return pathSet[1].map(function(key) {
+                    return { path: ["user", key], value: user[key] };
+                });
+            });
+    }
+}
+~~~ 
+
 The Router combines all of these subsets of the JSON Graph object returned by each individual route into a single JSON Graph object subset, and returns it to the caller.
  
 #### Route Handler Response Formats
  
 Each route handler is responsible for creating a subset of the JSON Graph that contains the values found at the requested paths. These values can be delivered in one of two formats:
  
-·      JSON Graph Envelope
-·      A Series of PathValues
+* JSON Graph Envelope
+* A Series of PathValues
  
-
-A JSON Graph envelope is an object with a "jsong" key that contains a subset of a JSON is responsible for creating the subset of the cereal grass that contains the requested paths.
+A JSON Graph envelope is an object with a "jsonGraph" key that contains a subset of a JSON is responsible for creating the subset of the JSON Graph Envelope that contains the requested paths.
  
 In the following example, a route returns JSON Graph envelope containing both the name and surname of a user:
  
-(example)
+~~~js
+{
+    route: 'user.["name", "surname"]',
+    get: function(pathSet) {
+        // pathSet is ["user", ["name"]] or ["user", ["surname"]] or ["user", ["name", "surname"]]
+        if (this.userId == null) {
+            throw new Error("not authorized");
+        } 
+        return userService.
+            get(this.userId).
+            then(function(userObject) {
+                var jsonGraph = {};
+                var user = jsonGraph["user"] = {};
+                // pathSet[1] is ["name"] or ["surname"] or ["name", "surname"]
+                pathSet[1].forEach(function(key) {
+                    user[key] = userObject[key];
+                });
+                
+                return { jsonGraph: jsonGraph };
+            });
+    }
+}
+~~~ 
  
 A PathValue is an object with a path and value key. In lieu of a JSON Graph object containing all requested values, a Route can return a PathValue for each requested path:
  
-(example)
- 
+~~~js
+{
+    route: 'user.["name", "surname"]',
+    get: function(pathSet) {
+        // pathSet is ["user", ["name"]] or ["user", ["surname"]] or ["user", ["name", "surname"]]
+        if (this.userId == null) {
+            throw new Error("not authorized");
+        } 
+        return userService.
+            get(this.userId).
+            then(function(user) {
+                // pathSet[1] is ["name"] or ["surname"] or ["name", "surname"]
+                return pathSet[1].map(function(key) {
+                    return { path: ["user", key], value: user[key] };
+                });
+            });
+    }
+}
+~~~ 
+
 As in the previous example, this route returns the name and surname of a user. However this time it returns two PathValue objects, one containing the path and value of the name, and the other containing the path and value of the surname.
  
 When a Router receives a series of PathValue's, it creates the JSON Graph envelope by writing each PathValue's value into an object at the PathValue's path.
  
-(example demonstrating the two PathValues (name,surname) === one JSON Graph object)
- 
+~~~js
+[
+    { path: ["user","name"], value: "Anupa" },
+    { path: ["user","surname"], value: "Husain" }
+]
+// is converted to...
+{
+    jsonGraph: {
+        user: {
+            name: "Anupa",
+            surname: "Husain"
+        }
+    },
+    paths: [
+        ["user", ["name", "surname"]]
+    ]
+}
+~~~ 
+
 If your Route progressively builds up JSON Graph envelopes from a series of values, returning PathValues can be a more convenient alternative.
  
 #### Route Handler Concurrency
  
 In addition to returning either JSON Graph envelopes or path values synchronously, Router handlers can also return their data asynchronously by delivering their output data in either of the following containers:
 
-Promise
-Observable.
+* Promise
+* Observable
  
 In the following example a Route handler retrieves the name and surname of a user from a persistent DataStore, and returns the results in an ES6 Promise:
  
-(example)
- 
-For more information on Promises, see this article: https://www.promisejs.org/
+~~~js
+{
+    route: 'user.["name", "surname"]',
+    get: function(pathSet) {
+        // pathSet is ["user", ["name"]] or ["user", ["surname"]] or ["user", ["name", "surname"]]
+        if (this.userId == null) {
+            throw new Error("not authorized");
+        } 
+        return userService.
+            get(this.userId).
+            then(function(user) {
+                // pathSet[1] is ["name"] or ["surname"] or ["name", "surname"]
+                return pathSet[1].map(function(key) {
+                    return { path: ["user", key], value: user[key] };
+                });
+            });
+    }
+}
+~~~ 
+
+For more information on Promises, see this [article](https://www.promisejs.org/)
  
 Alternately a Router Handler can return the PathValue results progressively using an Observable:
  
-(example)
- 
+~~~js
+var Rx = require("rx");
+var Observable = Rx.Observable;
+
+// snip...
+{
+    route: 'user.["name", "surname"]',
+    get: function(pathSet) {
+        // pathSet is ["user", ["name"]] or ["user", ["surname"]] or ["user", ["name", "surname"]]
+        if (this.userId == null) {
+            throw new Error("not authorized");
+        } 
+        return Observable.
+            fromPromise(userService.get(this.userId)).
+            flatMap(function(user) {
+                // pathSet[1] is ["name"] or ["surname"] or ["name", "surname"]
+                return Observable.
+                    fromArray(pathSet[1]).
+                    map(function(key) {
+                        return { path: ["user", key], value: user[key] };
+                    });
+            });
+    }
+}
+~~~
+
 An Observable is similar to a Promise, with the principal difference being that an Observable can send multiple values over time. The main advantage of using a Observable over a Promise is the ability to progressively return PathValues to the Router as soon as they are returned from the underlying DataSource.  In contrast, when delivering values in a Promise, all values must be collected together in a JSON Graph envelope or an Array of PathValues and returned to the Router at the same time.
  
 Using an Observable can improve throughput, because Routers may make additional requests to backend services in the event references are discovered in a Route Handler's JSON Graph output.
