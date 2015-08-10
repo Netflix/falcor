@@ -61,7 +61,7 @@ The server responds with a subset of the JSON resource which contains the reques
 
 ~~~js
 {
-    "json": {
+    "jsonGraph": {
         "todos": {
             "0": {
                 "name": "get milk from corner store."
@@ -219,7 +219,7 @@ The Router accepts all of these path/value pairs, adds them to a single JSON obj
 
 ~~~js
 {
-    "json": {
+    "jsonGraph": {
         "todos": {
             "0": {
                 "name": "get milk from corner store."
@@ -259,29 +259,172 @@ When Falcor clients request paths to values within the JSON Graph resource, Falc
 
 For example the following path retrieves a reference to the first task object in a JSON Graph resource, much the same way as the RESTful /todos resource contains hyperlinks to task resources. 
 
-(Example HTTP request for "todos[0]", and the response which contains just the reference inside of the JSON Graph fragment)
+~~~js
+http://.../model.json?paths=[["todos",0]]
+~~~
+
+The server responds with the following JSONGraphEnvelope:
+
+~~~js
+{
+    "jsonGraph": {
+        "todos": {
+            "0": { $type: "ref", value: ["todosById", 8964] }
+        }
+    }
+} 
+~~~
 
 However if the path is altered to retrieve keys from the entity located at the reference, the Falcor Router traverses the reference on the server and retrieves the values from the entity located at the reference path. The result is a fragment of the JSON Graph object which contains all of the references encountered during path evaluation as well as the requested value.
 
-(Example HTTP request for "todos[0]['name','done']", and the response which contains just the reference inside of the JSON Graph fragment)
+~~~js
+http://.../model.json?paths=[["todos",0,"name"]]
+~~~
+
+The server responds with the following JSONGraphEnvelope:
+
+~~~js
+{
+    "jsonGraph": {
+        "todos": {
+            "0": { $type: "ref", value: ["todosById", 8964] }
+        },
+        "todosById": {
+            "8964": {
+                "name": "get milk from corner store."
+            }
+        }
+    }
+} 
+~~~
 
 ## Creating a Router Class
  
 A Router Class is created by invoking the Router.createClass method. This Class factory method accepts an Array of Route objects. Each Route object contains a path pattern, and an optional series of handlers for the various DataSource methods: get, set, and call.
  
-(example)
- 
-### Why create a Router Class instead of a Router instance?
+~~~js
+var Router = require("falcor-router");
+
+// Create a Router base class
+var BaseRouter = Router.createClass([
+    {
+        route: 'todos[{integers:indices}].name',
+        // Route handlers are run with the Router instance as their this object
+        get: function(pathSet) {
+            if (this.userId == null) {
+                throw new Error("not authorized");
+            }  
+            // Route implementation snipped
+        },
+        set: function(jsonGraph) {
+            if (this.userId == null) {
+                throw new Error("not authorized");
+            }  
+            // Route implementation snipped
+        }        
+    }
+]);
+
+// Creating a constructor for a class that derives from BaseRouter
+var TODORouter = function(userId){
+    // Invoking the base class constructor
+    BaseRouter.call(this);
+    this.userId = userId;
+};
+
+// Creating a derived class using JavaScript's classical inheritance pattern
+TODORouter.prototype = Object.create(BaseRouter);
+~~~
+
+The next version of JavaScript (ES2015) has native support for classes. If you are using a version of node that supports classes, or you are using a transpiler, you can write this code instead of the code seen above:
+
+~~~js
+var Router = require("falcor-router");
+
+// Create a Router base class
+class TODORouter extends
+    // create base class in-line
+    Router.createClass([
+        {
+            route: 'todos[{integers:indices}].name',
+            // Route handlers are run with the Router instance as their this object
+            get: function(pathSet) {
+                if (this.userId == null) {
+                    throw new Error("not authorized");
+                } 
+                // Route implementation snipped
+            },
+            set: function(jsonGraph) {
+                if (this.userId == null) {
+                    throw new Error("not authorized");
+                }
+                // Route implementation snipped
+            }      
+        }
+    ]) {
+    
+    constructor(userId) {
+        super();
+        this.userId = userId;
+    }
+}
+~~~
+
+### Why Create a Router Class Instead of a Router Instance?
  
 When an Array of routes is passed to the createClass method, an internal Route Map is generated. The Route Map is a stateless data structure designed to improve the speed of pattern matching. Ideally the process of creating the Route Map should only be performed once when your Web server starts up. However Router instances often require access to connection information (ex. authorization information, included in the cookies of an HTTP Request). Creating a Router class generates the route map once, and allows the route map to be shared with every new instance of the Router class.
- 
+
+~~~js
+var Router = require("falcor-router");
+// Create a Router base class
+class TODORouter extends
+    // create base class in-line
+    Router.createClass([
+        {
+            route: 'todos[{integers:indices}].name',
+            get: function(pathSet) {
+                // Route handlers are run with the Router instance as their this object.
+                // Therefore the userId member must be set by the constructor.
+                if (this.userId == null) {
+                    throw new Error("not authorized");
+                } 
+                // Route implementation snipped
+            }
+        }
+    ]) {
+    
+    constructor(userId) {
+        super();
+        this.userId = userId;
+    }
+}
+~~~
+
 These derived Router class instances can be instantiated at connection time, and passed connection information via their constructor. All route handler functions are applied to the concrete Router instance, which means that Routes can access connection state passed to the Router via the "this" pointer.
  
-(example)
- 
 Typically a single Router class is created when the application server starts up, and then one instance is created per connection and then thrown away.
- 
-(example)
+~~~js 
+var express = require('express');
+var bodyParser = require('body-parser');
+var app = express();
+var FalcorServer = require('falcor-express');
+app.use(bodyParser.text({ type: 'text/*' }));
+
+// Simple middleware to handle get/post
+app.use('/model.json', FalcorServer.dataSourceRoute(function(req, res) {
+    return new TODORouter();
+}));
+
+app.use(express.static('.'));
+
+var server = app.listen(9090, function(err) {
+    if (err) {
+        console.error(err);
+        return;
+    }
+    console.log("navigate to http://localhost:9090");
+});
+~~~
  
 Note that if you're using ES6 or a transpiler from ES6 to ES5 like Babel, you can use the new JavaScript class syntax to create a derived Router class:
  
