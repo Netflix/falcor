@@ -853,6 +853,228 @@ or
     
         
 
+        <h4 class="name section-header function-name" id="call"><span class="type-signature"></span>call<span class="signature">(functionPath, args, refPaths, thisPaths)</span><span class="type-signature return-signature"></span></h4>
+
+        
+    
+
+        
+        <div class="description">
+            <p>Invokes a function in the JSON Graph.</p>
+        </div>
+        
+
+    
+
+    
+
+    
+
+    
+        <h5>Parameters:</h5>
+        
+
+<div class="parameters-section">
+    <table class="params">
+        <thead>
+        <tr>
+            
+            <th class="header-name-and-attributes">
+              Name
+              
+            </th>
+            
+
+            <th class="header-type">Type</th>
+
+            
+
+            <th class="last header-description">Description</th>
+        </tr>
+        </thead>
+
+        <tbody>
+        
+
+            <tr>
+                
+                    <td>
+                        <span class="name">functionPath</span>
+                        
+                    </td>
+                
+
+                <td class="type">
+                
+                    
+<span class="param-type"><a href="global.html#Path">Path</a></span>
+
+
+                
+                </td>
+
+                
+
+                <td class="description last"><p>the path to the function to invoke</p></td>
+            </tr>
+
+        
+
+            <tr>
+                
+                    <td>
+                        <span class="name">args</span>
+                        
+                    </td>
+                
+
+                <td class="type">
+                
+                    
+<span class="param-type">Array.&lt;Object></span>
+
+
+                
+                </td>
+
+                
+
+                <td class="description last"><p>the arguments to pass to the function</p></td>
+            </tr>
+
+        
+
+            <tr>
+                
+                    <td>
+                        <span class="name">refPaths</span>
+                        
+                    </td>
+                
+
+                <td class="type">
+                
+                    
+<span class="param-type">Array.&lt;<a href="global.html#PathSet">PathSet</a>></span>
+
+
+                
+                </td>
+
+                
+
+                <td class="description last"><p>the paths to retrieve from the JSON Graph References in the message returned from the function</p></td>
+            </tr>
+
+        
+
+            <tr>
+                
+                    <td>
+                        <span class="name">thisPaths</span>
+                        
+                    </td>
+                
+
+                <td class="type">
+                
+                    
+<span class="param-type">Array.&lt;<a href="global.html#PathSet">PathSet</a>></span>
+
+
+                
+                </td>
+
+                
+
+                <td class="description last"><p>the paths to retrieve from function's this object after successful function execution</p></td>
+            </tr>
+
+        
+        </tbody>
+    </table>
+</div>
+
+    
+
+    
+
+
+
+
+  <dl class="details">
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+      <dt class="tag-source">Source:</dt>
+      <dd class="tag-source">
+          <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line239">line 239</a>
+      </dd>
+      
+
+      
+
+      
+
+      
+  </dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    
+        <h5>Returns:</h5>
+    
+    
+            
+<div class="param-desc">
+    <p>{ModelResponse.<JSONEnvelope> - a JSONEnvelope contains the values returned from the function</p>
+</div>
+
+
+
+        
+
+    
+</section>
+          
+              
+<section class="method-section">
+    
+        
+
         <h4 class="name section-header function-name" id="deref"><span class="type-signature"></span>deref<span class="signature">(derefPath, &hellip;relativePathsToPreload)</span><span class="type-signature return-signature"> &rarr; {<a href="Observable.html">Observable</a>.&lt;<a href="Model.html">Model</a>>}</span></h4>
 
         
@@ -3658,6 +3880,10 @@ model.deref(["users", 0], "name").subscribe(function(userModel){
         
             <li class="toc-api-subgroup-item">
                 <a href="Model.html#boxValues" data-target="#boxValues">boxValues</a>
+            </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="Model.html#call" data-target="#call">call</a>
             </li>
         
             <li class="toc-api-subgroup-item">
