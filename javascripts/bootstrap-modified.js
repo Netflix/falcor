@@ -1927,6 +1927,7 @@ if (typeof jQuery === 'undefined') {
     this.$body
       .find(this.selector)
       .map(function () {
+        console.log('woooooo', $(this).text(), this);
         var $el   = $(this)
         var href  = $el.data('target') || $el.attr('href')
         var $href = /^#./.test(href) && $(href)
@@ -1964,6 +1965,8 @@ if (typeof jQuery === 'undefined') {
       this.activeTarget = null
       return this.clear()
     }
+    
+    console.log('targets', targets);
 
     for (i = offsets.length; i--;) {
       activeTarget != targets[i]
@@ -1989,6 +1992,14 @@ if (typeof jQuery === 'undefined') {
     // END
 
     var active = $(selector)
+      // MODIFIED - Fixes issues with duplicate method
+      // names across multiple classes in jsdoc generated
+      // doc headers, because JSDoc doesn't fully quality
+      // identifiers in a reasonable way (it defaults to just
+      // methodname, with an alterative datum that contains #
+      // and potentially other not-safe-for-id-value characters)
+      .filter(':visible')
+      // END
       .parents('li')
       .addClass('active')
 
