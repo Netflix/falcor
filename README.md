@@ -57,7 +57,7 @@ Falcor is a JavaScript library for data fetching. Falcor lets you represent all 
 
 Falcor lets you model your data as a graph in JSON with the JSON Graph format. Falcor automatically optimizes and traverses references in your graph for you.
 
-Falcor is not a replacement for your MVC framework, your database, or your application server. Instead you add Falcor to your existing stack to optimize client/server communication. Falcor is ideal for mobile apps, because it combines the caching benefits of REST with the low latency of RPC.
+Falcor is not a replacement for your MVC framework, your database, or your application server. Instead you add Falcor to your existing stack to optimize client/server communication.
 
 You retrieve data from a Falcor model using the familiar JavaScript path syntax.
 
