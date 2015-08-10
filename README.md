@@ -98,11 +98,3 @@ Configuring the Navigation
 Please see the documented code in `_data/navigation.yml` to configure the main top nav.
 
 The navigation supports two levels (main and dropdown) currently. All ordering is based on the ordering in the `_data/navigation.yml` file itself.
-
-
-
-
-TODO list
------------------------------
-- gather more data on and improve intro animation perf if possible
-- add mobile-friendly ToC variant
