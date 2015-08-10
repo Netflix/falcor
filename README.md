@@ -8,6 +8,23 @@
 
 **This release is a developer preview.** We are looking for community help to track down and fix bugs. We are also looking for help integrating with existing MVC frameworks, as well as ports to other platforms.
 
+## Important Note for Webpack Users
+
+If you're including falcor in your app, via npm and `require('falcor')`, and you're building a browser bundle for your app with Webpack, you'll need to add an alias entry for the 'rx' module in your webpack config, to avoid this RxJS bug: 'https://github.com/Reactive-Extensions/RxJS/issues/832'. You may already have such an entry, if you're using RxJS already. An example is below:
+
+In webpack.config.js:
+
+```
+module.exports = {
+  resolve: {
+    alias: {
+      // Workaround https://github.com/Reactive-Extensions/RxJS/issues/832, until it's fixed
+      'rx$': <path to rx/dist/rx.js file >
+    }
+  }
+};
+```
+
 ## Getting Started
 
 Set up a simple webpage, include the Falcor library, and run some code.
