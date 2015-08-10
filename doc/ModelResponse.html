@@ -491,33 +491,33 @@ The progressively method creates a ModelResponse that immediately returns the re
         <h5>Example</h5>
         
     <pre class="prettyprint"><code>var dataSource = (new falcor.Model({
-	cache: {
-		user: {
-	    name: "Steve",
-			surname: "McGuire",
-			age: 31
-		}
-	}
+  cache: {
+    user: {
+      name: "Steve",
+      surname: "McGuire",
+      age: 31
+    }
+  }
 })).asDataSource();
 
 var model = new falcor.Model({
-	source: dataSource,
-	cache: {
-		user: {
-	    name: "Steve",
-			surname: "McGuire"			
-		}
-	}
+  source: dataSource,
+  cache: {
+    user: {
+      name: "Steve",
+      surname: "McGuire"
+    }
+  }
 });
 
 model.
-    get(["user",["name", "surname", "age"]]).
-    progressively().
-    // this callback will be invoked twice, once with the data in the
-    // Model cache, and again with the additional data retrieved from the DataSource.
-    subscribe(function(json){
-	    console.log(JSON.stringify(json,null,4));
-    });
+  get(["user",["name", "surname", "age"]]).
+  progressively().
+  // this callback will be invoked twice, once with the data in the
+  // Model cache, and again with the additional data retrieved from the DataSource.
+  subscribe(function(json){
+    console.log(JSON.stringify(json,null,4));
+  });
 
 // prints...
 // {
