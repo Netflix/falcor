@@ -652,15 +652,17 @@ Using an Observable can improve throughput, because Routers may make additional 
 
 When a Router discovers a reference before a path has been fully evaluated, it optimizes the Path and matches the newly optimized path against the Routes. When a path is optimized it is matched against the Router's Routes again. This may in turn trigger subsequent backend requests, which means that getting the references within a Route response back to the Router earlier can sometimes improve throughput.
  
-For more information on Observable, see this video: https://www.youtube.com/watch?v=XRYN2xt11Ek
+For an overview on Observable, see this [video](https://www.youtube.com/watch?v=XRYN2xt11Ek).
  
 #### Route Pattern Matching
  
 Route patterns support a superset of the PathSet syntax, which means they can match any PathSet. In addition to allowing matching explicit Ranges and KeySets in indexers, Route patterns may contain any of the following three special tokens:
 
+~~~
 {integers}
 {ranges}
 {keys}
+~~~
 
 ##### The {integers} Pattern
 
@@ -668,19 +670,70 @@ The {integers} pattern will match any integers in a KeySet, including those spec
 
 For example...
 
+~~~
 titlesById[235,223,555,111...113].name
+~~~
 
 ...matched against...
 
+~~~
 titlesById[{integers}].name
+~~~
 
 ...will produce the following Path Set to be passed to the route handler:
 
+~~~
 ["titlesById", [234,223,555,111,112,113],"name"]
+~~~
 
-This pattern is most often when matching entities by an integer ID. For example, the following route builds a map of all titles by ID.
+This pattern is most often when matching entities by an integer ID. For example, the following route builds a map of all tasks by ID.
 
-(Example)
+~~~js
+var jsong = require('falcor-json-graph');
+var Router = require('falcor-router');
+
+var router = new Router([{
+    route: 'tasksById[{integers:ids}]["name","done"]',
+    get: function(pathSet) {
+        // pathSet.ids is [234,122]
+        return todoService.
+            get(pathSet.ids).
+            then(function(taskMap) {
+                // taskMap is
+                // {
+                //     "234": { name: "Go to ATM", done: false },
+                //     "122": null
+                // }
+                var jsonGraph = {},
+                    tasksById = jsonGraph.tasksById = {},
+                    task;
+                
+                pathSet.ids.forEach(function(id) {
+                    var taskRecord = taskMap[id];
+                    // if a Task does not exist, we explicitly insert an empty value
+                    // at the task object, rather than its "name" or "done" field.
+                    if (taskRecord == null) {
+                        tasksById[id] = jsong.atom(taskMap[id]);
+                    }
+                    else {
+                        task = tasksById[id] = {};
+                        pathSet[2].forEach(function(key) {
+                            task[key] = jsong.atom(taskRecord[key]);
+                        });
+                    }
+                });
+                
+                return { jsonGraph: jsonGraph };
+            });
+    }
+}]);
+
+router.get([
+    ["tasksById", [234,122], "name"]
+]).subscribe(function(jsongGraphEnvelope) {
+    console.log(JSON.stringify(jsongGraphEnvelope, null, 4));
+});
+~~~
  
 ##### The {ranges} Pattern
 
@@ -688,19 +741,64 @@ The {ranges} pattern will match any integers in a KeySet whether specified in a 
 
 For example...
 
-genreList[0,1,5..7,9,"length"]
+~~~
+genreList[0,1,5..7,9,"name"]
+~~~
 
 ...matched against...
 
-genreList[{ranges}]
+~~~
+genreList[{ranges}].name
+~~~
 
 ...will produce the following Path Set to be passed to the route handler:
 
-["titlesById", [{from:0,to:1}, {from:5,to:7}, {from:9,to:9}]]
+~~~
+["genreList", [{from:0,to:1}, {from:5,to:7}, {from:9,to:9}], "name"]
+~~~
 
 The {ranges} pattern is most often when matching indices in a list. It is ideal when the underlying service API supports paging. For example the following route retrieves the names of Netflix genre lists:
 
-(Example)
+~~~js
+var jsong = require('falcor-json-graph');
+var Router = require('falcor-router');
+
+var router = new Router([{
+    route: 'genrelist[{ranges:indexRanges}].name',
+    get: function(pathSet) {
+        // pathSet.indexRanges is [{from:0,to:1}, {from:5,to:7}, {from:9,to:9}] 
+        return genreListService.
+            getGenreListsByRanges(pathSet.indexRanges).
+            then(function(listItems) {
+                // listItems is...
+                // [ 
+                //    { index: 0, value: { name: "Horror", titles: [ ... ] },
+                //    { index: 1, value: { name: "Drama", titles: [ ... ] },
+                //    { index: 5, value: { name: "New Releases", titles: [ ... ] },
+                //    { index: 6, value: { name: "Action", titles: [ ... ] },
+                //    { index: 7, value: { name: "Romantic Comedies", titles: [ ... ] },
+                //    { index: 9, value: null }
+                // ]
+                return listItems.map(function(listItem) {
+                    // if no object exists at a list item, insert an undefined value explicitly at the
+                    // list item.
+                    if (listItem.value == null) {
+                        return { path: ["genrelist", listItem.index], value: jsong.atom(listItem.value) };
+                    }
+                    else {
+                        return { path: ["genrelist", listItem.index, "name"], value: listItem.value.name };
+                    }
+                });
+            });
+    }
+}]);
+
+router.get([
+    ["genreList", [0,1,5,6,7,9], "name"]
+]).subscribe(function(jsongGraphEnvelope) {
+    console.log(JSON.stringify(jsongGraphEnvelope, null, 4));
+});
+~~~
  
  ##### The {keys} Pattern
 
@@ -708,15 +806,21 @@ The {keys} pattern will match any valid key (string, number, boolean), or KeySet
 
 For example...
 
+~~~
 genreList[0, 2..4, "length"]
+~~~
 
 ...matched against...
 
+~~~
 genreList[{keys}]
+~~~
 
 ...will produce the following Path Set to be passed to the route handler:
 
+~~~
 ["genreList", [0, 2, 3, 4, "length"]]
+~~~
 
 This pattern is most often when matching entities by a GUID. For example, the following route builds a map of all titles by GUID.
 
