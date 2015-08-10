@@ -1,5 +1,5 @@
 
-## Hello World
+## Getting Started
 
 In this barebones tutorial we will use the falcor Router to create a Virtual JSON resource. Then we will use falcor's express middleware to serve the Virtual JSON resource on a application server at the URL /model.json. We will also host a static web page on the same server which retrieves data from the Virtual JSON resource.
 
