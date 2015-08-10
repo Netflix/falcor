@@ -42,11 +42,19 @@ html {
   min-height: 100%;
 }
 body {
-  /* Margin bottom by footer height */
+  // Ensure there is room for the sticky footer
   margin-bottom: @site-footer-height;
   
+  // Add some standard padding between the navbar and page content
   & > .container, & > .hero-banner > .container {
     padding-top: @navbar-height + @site-content-padding-top;
+  }
+  
+  // Lessen the content padding on mobile
+  @media (max-width: @screen-xs-max) {
+    & > .container {
+      padding-top: @navbar-height;      
+    }
   }
 }
 .site-footer {
@@ -97,15 +105,15 @@ body {
     font-weight: bold;
     margin-top: @line-height-computed;
     margin-bottom: @line-height-computed / 2;
-  }  
+  }
 }
-// Place a subtle border around images by on standard pages since they're generally set on the
-// light gray site background.
+// Place a subtle border around images in standard content sections since they're
+// generally set on a light gray site background.
 // Also make all images responsive by default, so they can't overflow the bounds of the page.
 // Lastly, give them some margins so they aren't too close to neighboring text.
 // Standard pages are any pages that inherit from the page or *-page templates, which is generally
 // all but the homepage and potentially other special one off pages
-.standard-page img {
+.standard-page img, .main-homepage-content img {
   border: 1px solid @nested-item-border-color;
   margin: @nested-item-margin;
   .img-responsive();
