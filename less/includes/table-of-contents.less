@@ -5,8 +5,6 @@
     right: 0;
     top: 0;
     padding-left: @content-toc-gap;
-    // TODO: Fix
-    max-height: 90vh;
 
     & > .nav {
       // Enough to overlap the footer, if it comes to that.
@@ -23,7 +21,8 @@
       // Unfortunately, on very short windows it will overlap the footer if it reaches the very
       // bottom of the page, but that seems better to me than the other way around, since that
       // would make the nav partly inaccessible.
-      max-height: calc(~"100vh" - (@navbar-height + @site-content-padding-top * 2));
+      max-height: calc(~"100vh" - (@navbar-height +
+        @site-content-padding-top * 2 + @site-footer-height));
       overflow: auto;
       overflow-y: auto;
       overflow-x: inherit;
