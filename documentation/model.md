@@ -1735,7 +1735,7 @@ To minimize the risk of purging items from the cache that the application is cur
 
 In the unlikely event that a value which the application is currently using is removed from the cache, the value will be reloaded from the data source when requested again.
 
-## Batching Outgoing Requests
+# Batching Outgoing Requests
 
 By default, each request to the Model will map to a single request to the DataSource. Usually, the DataSource forwards the requests to a remote server on the network. Given the high cost of network requests, it can be efficient to batch multiple requests to the Model into a single request to the DataSource. This can be accomplished using the Model's batch method: 
 
@@ -1758,7 +1758,7 @@ batchModel.getValue("todos[2].name").then(log);
 
 <a name="Path-Optimization"></a>
 
-## Path Optimization and the DataSource
+# Path Optimization and the DataSource
 
 When you request a path from a Model, the Model first attempts to retrieve the data from an in-memory cache. If the model fails to find the data in its cache, the Model requests the data from its DataSource.
 
