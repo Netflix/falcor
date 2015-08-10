@@ -9,6 +9,7 @@
 @import "includes/prettify-theme-tomorrow-night-eighties.less";
 @import "includes/prettify-theme-terminal.less";
 @import "includes/icons.less";
+@import "includes/intrasection-navigation.less";
 // Left here in case it becomes useful to try out later
 // @import "includes/prettify-theme-tomorrow-night.less";
 
@@ -66,8 +67,8 @@ body {
   
   & .footer-links {
     height: 100%;
-    padding-top: (@site-footer-height - @line-height-computed)/2 0;
-    padding-bottom: (@site-footer-height - @line-height-computed)/2 0;
+    padding-top: (@site-footer-height - @line-height-computed)/2;
+    padding-bottom: (@site-footer-height - @line-height-computed)/2;
     color: @site-footer-text-color;
     
     & > a {
@@ -120,25 +121,21 @@ body {
   .img-responsive();
 }
 
-.video-page .video-description {
-  margin: 15px 0px 30px 0px;
-}
-
-// Bottom-of-content next/previous page in section links, for quick navigation 
-.intrasection-navigation {
-  background-color: @module-background-blue;
-  padding: 15px 10px;
-  &, & a {
-    color: @gray-dark;
-  }
-}
 .video-page {
-  .intrasection-navigation {
-    background-color: #222;
+  // Even out the vertical balance around the 16x9 video on a
+  // (usually) portrait oriented phone display
+  @media (max-width: @screen-xs-max) {
+    .video-player {
+      margin-top: 15px;
+    }
   }
-  &, & a, & .icon {
-    color: @text-inverse-link-color;
-  }
+  .video-description {
+    margin: 15px 0px 30px 0px;
+  
+    @media (max-width: @screen-xs-max) {
+      margin-top: 0;
+    }
+  } 
 }
 
 img.img-plain {
