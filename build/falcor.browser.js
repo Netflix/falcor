@@ -3983,7 +3983,7 @@ SetResponse.prototype.invokeSourceRequest = function invokeSourceRequest(model) 
             var optimizedPaths = results.optimizedPaths;
 
             model._path = emptyArray;
-            model._getPathValuesAsJSONG(model, optimizedPaths, [envelope]);
+            model._getPathValuesAsJSONG(model._materialize(), optimizedPaths, [envelope]);
             model._path = boundPath;
             requestObs = model.
                 _request.set(envelope).
@@ -4029,6 +4029,11 @@ function subscribeToSetResponse(observer) {
     }
 
     var model = this.model;
+    var materializedModel = this.materializedModel || model._materialize();
+    if (!this.materializedModel) {
+        this.materializedModel = materializedModel;
+    }
+
     var modelRoot = model._root;
     var method = this.method;
     var outputFormat = this.outputFormat;
@@ -4048,9 +4053,12 @@ function subscribeToSetResponse(observer) {
     var groups = this.groups;
     var groupIndex = -1;
     var groupCount = groups.length;
+    var modelToUse = model;
 
     if (isCompleted) {
         method = "get";
+    } else {
+        modelToUse = materializedModel;
     }
 
     while (++groupIndex < groupCount) {
@@ -4075,7 +4083,7 @@ function subscribeToSetResponse(observer) {
 
             var operationName = "_" + method + inputType + outputFormat;
             var operationFunc = model[operationName];
-            var results = operationFunc(model, methodArgs, groupValues, errorSelector, comparator);
+            var results = operationFunc(modelToUse, methodArgs, groupValues, errorSelector, comparator);
 
             errors.push.apply(errors, results.errors);
             optimizedPaths.push.apply(optimizedPaths, results.optimizedPaths);
