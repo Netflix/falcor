@@ -979,8 +979,33 @@ JSONGraph also adds three additional value types to JSON:
 
 Given that these are the only valid types which can be retrieved from a JSON Graph object, we only need to build the following routes to match the example JSONGraph object above.
 
+~~~
+"genrelist.length"
+"genrelist[0].titles.length"
+"genrelist[0].titles[0]"
+"titlesById[234].name"
+"titlesById[234].year"
+"titlesById[234].description"
+"titlesById[234].boxshot"
+"titlesById[234].rating"
+"titlesById[234].userRating"
+~~~
 
-The Netflix Application Router will retrieve generate the subset of the JSON Graph requested by the client on demand by retrieving the requested data from a series of back-end services. The Netflix Router will effectively map operations against a "virtual" JSON Graph object to the appropriate operations against a series of backend services. In doing so the Router will create the illusion that be JSON Graph object is stored on the application server, while allowing the application server to remain stateless in reality.
+Of course there may be any number of genrelists or any number of titles within a genrelist. Furthermore, the titlesById map may contain any number of titles. In order to match any genrelist index, any index within each genrelist's titles array, or any id in the titlesById map, we will use the {integers} pattern.
+
+~~~
+"genrelist.length"
+"genrelist[{integers}].titles.length"
+"genrelist[{integers}].titles[{integers}]"
+"titlesById[{integers}].name"
+"titlesById[{integers}].year"
+"titlesById[{integers}].description"
+"titlesById[{integers}].boxshot"
+"titlesById[{integers}].rating"
+"titlesById[{integers}].userRating"
+~~~
+
+
 
  
 #### The Service Layer
