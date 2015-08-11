@@ -53,4 +53,78 @@ describe('DataSource.', function() {
             }).
             subscribe(noOp, done, done);
     });
+
+    it('should send off an empty string on a set to the server.', function(done) {
+        var onSet = sinon.spy(function(source, tmpGraph, jsonGraphFromSet) {
+            return jsonGraphFromSet;
+        });
+        var dataSource = new LocalDataSource(Cache(), {
+            onSet: onSet
+        });
+        var model = new Model({
+            source: dataSource
+        });
+        model.
+            setValue('videos[1234].another_prop', '').
+            doAction(noOp, noOp, function() {
+                expect(onSet.calledOnce).to.be.ok;
+
+                var cleaned = onSet.getCall(0).args[2];
+                expect(cleaned).to.deep.equals({
+                    jsonGraph: {
+                        videos: {
+                            1234: {
+                                another_prop: ''
+                            }
+                        }
+                    },
+                    paths: [
+                        ['videos', 1234, 'another_prop']
+                    ]
+                });
+            }).
+            subscribe(noOp, done, done);
+    });
+
+    it('should send off undefined on a set to the server.', function(done) {
+        var onSet = sinon.spy(function(source, tmpGraph, jsonGraphFromSet) {
+            return jsonGraphFromSet;
+        });
+        var dataSource = new LocalDataSource(Cache(), {
+            onSet: onSet
+        });
+        var model = new Model({
+            source: dataSource
+        });
+        model.
+            set({
+                json: {
+                    videos: {
+                        1234: {
+                            another_prop: undefined
+                        }
+                    }
+                }
+            }).
+            doAction(noOp, noOp, function() {
+                expect(onSet.calledOnce).to.be.ok;
+
+                var cleaned = onSet.getCall(0).args[2];
+                expect(cleaned).to.deep.equals({
+                    jsonGraph: {
+                        videos: {
+                            1234: {
+                                another_prop: {
+                                    $type: 'atom'
+                                }
+                            }
+                        }
+                    },
+                    paths: [
+                        ['videos', 1234, 'another_prop']
+                    ]
+                });
+            }).
+            subscribe(noOp, done, done);
+    });
 });
