@@ -806,7 +806,7 @@ router.get([
 });
 ~~~
  
- ##### The {keys} Pattern
+##### The {keys} Pattern
 
 The {keys} pattern will match any valid key (string, number, boolean), or KeySet (an array of ranges or keys) and normalize the matching set of keys into an Array of keys.
 
@@ -927,15 +927,15 @@ We would like to create a JSON Graph object on the server that looks like this:
 
 We will create a Router that retrieves the data for this JSON Graph from three different data sources:
 
-1. The Recommendation Service
+#### 1. The Recommendation Service
 
 This service can be used to retrieve a personalized list of genres for each user. Each genre list contains a personalized list of titles included based on information gathered about the user's past preferences. The data in this service is stored in a separate database, and the personalized recommendations for all users are recomputed twice a day.
 
-2. The Title Service
+#### 2. The Title Service
 
 This service can be used to retrieve information about titles in the catalog. This information is not personalized, changes relatively infrequently, and is therefore stored in a different database.
 
-3. The Rating Service
+#### 3. The Rating Service
 
 This service can be used to retrieve predicted ratings for every user and title combination. In addition, if users choose to override the predicted rating, this service is used to store their preferred rating. The rating information may be updated frequently based on user input, and is therefore stored in a separate database.
 
