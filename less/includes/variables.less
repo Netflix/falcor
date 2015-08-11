@@ -37,12 +37,15 @@
 @toc-width-lg: 31%;
 @toc-width-md: 32%;
 @toc-width-sm: 38%;
-// The space between the main page content and ToC
+// The horizontal space between the main page content and ToC
 @content-toc-gap: 40px;
 @toc-background: @module-background-blue;
+// Background color for the current first level item
 @toc-active-background: rgba(0, 0, 0, 15%);
-@toc-active-background-sub-item: rgba(0, 0, 0, 11%);
-@toc-active-background-sub-item-sub-item: rgba(0, 0, 0, 8%);
+// And second level item
+@toc-active-background-sub-item: darken(@toc-background, 15%);
+// And third level item
+@toc-active-background-sub-item-sub-item: transparent;
 @toc-indentation-per-level: 20px;
 @toc-link-color: @gray-darker;
 @toc-subgroup-title-color: lighten(@gray, 5%);
