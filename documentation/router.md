@@ -1005,9 +1005,9 @@ Of course there may be any number of genrelists or any number of titles within a
 "titlesById[{integers}].userRating"
 ~~~
 
-#### Collapsing Routes
+If we create handlers for each of these routes, we should be able to create the illusion that the JSON object exist by matching incoming paths and retrieving data from the relevant services. 
 
-We could create a separate route and handler for each one of the routes listed above. However this could lead to redundant code and inefficient call patterns. For example the Router below contains two route objects, each of which differ by only a few characters.
+We could create a separate route handler for each one of the routes listed above. However this could lead to redundant code and inefficient call patterns. For example the Router below contains two route objects, each of which differ by only a few characters.
 
 ~~~js
 var router = new Router([
@@ -1063,7 +1063,11 @@ var model = new falcor.Model({ source: new falcor.HttpDataSource("/model.json") 
 model.get("titlesById[523]['name', 'year']").then(function(jsonResponse){ console.log(jsonResponse); });
 ~~~
 
-The good news is that it is possible to to replace multiple routes that differ by only a single key with a single route that contains an indexer that matches a discrete set of keys. In other words we can replace both routes above with a single route, as in the example below:
+How can we match multiple paths for values exposed by the same service without making multiple calls to the same service?
+
+#### Matching PathSets With Routes
+
+The good news is that it is possible to to match multiple paths that differ by only one key using an indexer that contains a discrete set of keys. In other words we can replace both routes above with a single route, as in the example below:
 
 ~~~js
 var router = new Router([
@@ -1109,7 +1113,9 @@ Given the large efficiency gains to be made by creating routes which are capable
 "titlesById[{integers}]['name', 'year', 'description', 'boxshot', 'rating', 'userRating']"
 ~~~
 
-However it doesn't always make sense to create routes that match as many paths as possible.  There are exceptions though. For example if two different paths can be matched by single route, but they require completely different code to retrieve their individual values, handling them a single route often provides no benefit. 
+However it doesn't always make sense to create routes that match as many paths as possible. Note that the title's rating and user rating keys are retrieve from an entirely different service of them the titles
+
+ For example if two different paths can be matched by single route, but they require completely different code to retrieve their individual values, handling them a single route often provides no benefit. 
 
 Collapsing routes can reduce code and can be more efficient in many situations.  When route handlers retrieve data from services, the services typically make network requests. As a result the more paths that can be matched by a single route, the more opportunity there is for the route's handler to make coarse-grained calls to the service for multiple values. This in turn typically leads to fewer network requests.
 
@@ -1117,7 +1123,7 @@ Collapsing routes can reduce code and can be more efficient in many situations. 
  
 #### The Service Layer
 
-This Netflix-lite service layer exposes three different microservaces:
+This Netflix-lite service layer exposes three different microservices:
 
 1. The Recommendations Database
 ##### The Genre List Service
