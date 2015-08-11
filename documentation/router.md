@@ -933,7 +933,7 @@ This service can be used to retrieve a personalized list of genres for each user
 
 #### 2. The Title Service
 
-This service can be used to retrieve information about titles in the catalog. This information is not personalized, changes relatively infrequently, and is therefore stored in a different database.
+This service can be used to retrieve information about titles in the catalog. This information is not personalized, and changes relatively infrequently. As a result it makes sense to store it in a different database than either the personalized recommendations or the Ratings.
 
 #### 3. The Rating Service
 
@@ -991,7 +991,7 @@ Given that these are the only valid types which can be retrieved from a JSON Gra
 "titlesById[234].userRating"
 ~~~
 
-Of course there may be any number of genrelists or any number of titles within a genrelist. Furthermore, the titlesById map may contain any number of titles. In order to match any genrelist index, any index within each genrelist's titles array, or any id in the titlesById map, we will use the {integers} pattern.
+Of course there may be any number of genrelists or any number of titles within a genrelist. Furthermore, the titlesById map may contain any number of titles. In order to match a request for any genrelist index, any index within a genrelist's titles array, or any id in the titlesById map, we will generalize our routes using the {integers} pattern.
 
 ~~~
 "genrelist.length"
@@ -1005,6 +1005,113 @@ Of course there may be any number of genrelists or any number of titles within a
 "titlesById[{integers}].userRating"
 ~~~
 
+#### Collapsing Routes
+
+We could create a separate route and handler for each one of the routes listed above. However this could lead to redundant code and inefficient call patterns. For example the Router below contains two route objects, each of which differ by only a few characters.
+
+~~~js
+var router = new Router([
+    {
+        route: "titlesById[{integers:titleIds}].name",
+        get: function (pathSet) {
+            return titleService.getTitles(pathSet.titleIds).
+                then(function(titles) {
+                    var response = {};
+                    var jsonGraphResponse = response['jsonGraph'] = {};                    
+                    var titlesById = jsonGraphResponse['titlesById'] = {};
+                    pathSet.titleIds.forEach(function(titleId) {
+                        var titleRecord = titles[titleId],
+                            title = {};
+                        if (titleRecord.error) {
+                            titlesById[titleId] = $error(titleRecord.error);
+                        } else {
+                            titlesById[titleId].name = titleRecord.doc.name
+                        }
+                    });
+                    return response;
+                });
+        }
+    },
+    {
+        route: "titlesById[{integers:titleIds}].name",
+        get: function (pathSet) {
+            return titleService.getTitles(pathSet.titleIds).
+                then(function(titles) {
+                    var response = {};
+                    var jsonGraphResponse = response['jsonGraph'] = {};                    
+                    var titlesById = jsonGraphResponse['titlesById'] = {};
+                    pathSet.titleIds.forEach(function(titleId) {
+                        var titleRecord = titles[titleId],
+                            title = {};
+                        if (titleRecord.error) {
+                            titlesById[titleId] = $error(titleRecord.error);
+                        } else {
+                            titlesById[titleId].year = titleRecord.doc.year
+                        }
+                    });
+                    return response;
+                });
+        }
+    }    
+]);
+~~~
+
+Except for returning a title's name vs. its year, _the code in the route handlers above are nearly identical._ Worse than the repetitive code, creating a route for each individual key on the title puts more load on the title database.  For example the following request for the name and year from a given title will end up retrieving the same title from the title database twice:
+
+~~~js
+var model = new falcor.Model({ source: new falcor.HttpDataSource("/model.json") });
+model.get("titlesById[523]['name', 'year']").then(function(jsonResponse){ console.log(jsonResponse); });
+~~~
+
+The good news is that it is possible to to replace multiple routes that differ by only a single key with a single route that contains an indexer that matches a discrete set of keys. In other words we can replace both routes above with a single route, as in the example below:
+
+~~~js
+var router = new Router([
+    {
+        route: "titlesById[{integers:titleIds}]['name','year']",
+        get: function (pathSet) {
+            var titleKeys = pathSet[2];
+            return titleService.getTitles(pathSet.titleIds).
+                then(function(titles) {
+                    var response = {};
+                    var jsonGraphResponse = response['jsonGraph'] = {};                    
+                    var titlesById = jsonGraphResponse['titlesById'] = {};
+
+                    pathSet.titleIds.forEach(function(titleId) {
+                        var responseTitle = titles[titleId],
+                            title = {};
+                        if (responseTitle.error) {
+                            titlesById[titleId] = $error(responseTitle.error);
+                        } else {
+                            // going through each of the matched keys
+                            // ["name"] or ["year"] or ["name", "year"]
+                            titleKeys.forEach(function(key) {
+                                title[key] = responseTitle.doc[key];
+                            });
+                            titlesById[titleId] = title;
+                        }
+                    });
+                    return response;
+                });
+        }
+    }
+]);
+~~~
+
+Note that by matching several paths with a single route, we are able to make a single request to the database and eliminate a large amount of repetitive code. 
+
+Given the large efficiency gains to be made by creating routes which are capable of matching many paths simultaneously,  one might think that we would want to create as few routes as possible.  For example it is possible to match any incoming path request for the JSON Graph schema above with a small set of the following few routes:
+
+~~~
+"genrelist.length"
+"genrelist[{integers}].titles.length"
+"genrelist[{integers}].titles[{integers}]"
+"titlesById[{integers}]['name', 'year', 'description', 'boxshot', 'rating', 'userRating']"
+~~~
+
+However it doesn't always make sense to create routes that match as many paths as possible.  There are exceptions though. For example if two different paths can be matched by single route, but they require completely different code to retrieve their individual values, handling them a single route often provides no benefit. 
+
+Collapsing routes can reduce code and can be more efficient in many situations.  When route handlers retrieve data from services, the services typically make network requests. As a result the more paths that can be matched by a single route, the more opportunity there is for the route's handler to make coarse-grained calls to the service for multiple values. This in turn typically leads to fewer network requests.
 
 
  
