@@ -65,10 +65,13 @@ body {
   width: 100%;
   height: @site-footer-height;
   
+  
+  &, & .site-footer-content {
+    display: flex;
+    align-items: center;    
+  }
+  
   & .footer-links {
-    height: 100%;
-    padding-top: (@site-footer-height - @line-height-computed)/2;
-    padding-bottom: (@site-footer-height - @line-height-computed)/2;
     color: @site-footer-text-color;
     
     & > a {
@@ -79,7 +82,6 @@ body {
   & .netflix-logo {
     @logo-height: 0.4 * @site-footer-height;
     height: @logo-height;
-    margin-top: (@site-footer-height - @logo-height)/2;
   }
 }
 

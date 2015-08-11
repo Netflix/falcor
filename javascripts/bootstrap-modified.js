@@ -1927,7 +1927,6 @@ if (typeof jQuery === 'undefined') {
     this.$body
       .find(this.selector)
       .map(function () {
-        console.log('woooooo', $(this).text(), this);
         var $el   = $(this)
         var href  = $el.data('target') || $el.attr('href')
         var $href = /^#./.test(href) && $(href)
@@ -1965,8 +1964,6 @@ if (typeof jQuery === 'undefined') {
       this.activeTarget = null
       return this.clear()
     }
-    
-    console.log('targets', targets);
 
     for (i = offsets.length; i--;) {
       activeTarget != targets[i]
