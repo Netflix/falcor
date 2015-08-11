@@ -203,6 +203,12 @@ var router = new Router([
         }
     }
 ]);
+
+router.get([
+    ["todos", {from: 0, to: 2 }, "name"]
+]).subscribe(function(jsonGraph) {
+    console.log(JSON.stringify(jsonGraph, null, 4));
+});
 ~~~
 
 The route above retrieves the data for multiple paths using a single request to a webservice, and returns the results as a Promise of several path/value pairs.
@@ -437,24 +443,24 @@ For an example, take the following Router which matches the set of paths that at
 
 ~~~js
 var BaseRouter = Router.createClass([
-        {
-            route: 'user.["name", "surname"]',
-            get: function(pathSet) {
-                // pathSet is ["user", ["name"]] or ["user", ["surname"]] or ["user", ["name", "surname"]]
-                if (this.userId == null) {
-                    throw new Error("not authorized");
-                } 
-                return userService.
-                    get(this.userId).
-                    then(function(user) {
-                        // pathSet[1] is ["name"] or ["surname"] or ["name", "surname"]
-                        return pathSet[1].map(function(key) {
-                            return { path: ["user", key], value: user[key] };
-                        });
+    {
+        route: 'user.["name", "surname"]',
+        get: function(pathSet) {
+            // pathSet is ["user", ["name"]] or ["user", ["surname"]] or ["user", ["name", "surname"]]
+            if (this.userId == null) {
+                throw new Error("not authorized");
+            } 
+            return userService.
+                get(this.userId).
+                then(function(user) {
+                    // pathSet[1] is ["name"] or ["surname"] or ["name", "surname"]
+                    return pathSet[1].map(function(key) {
+                        return { path: ["user", key], value: user[key] };
                     });
-            }
+                });
         }
-    ]);
+    }
+]);
 
 // Creating a constructor for a class that derives from BaseRouter
 var AppRouter = function(userId){
@@ -729,7 +735,7 @@ var router = new Router([{
 }]);
 
 router.get([
-    ["tasksById", [234,122], "name"]
+    ["tasksById", [234, 122], "name"]
 ]).subscribe(function(jsongGraphEnvelope) {
     console.log(JSON.stringify(jsongGraphEnvelope, null, 4));
 });
@@ -824,35 +830,57 @@ genreList[{keys}]
 
 This pattern is most often when matching entities by a GUID. For example, the following route builds a map of all titles by GUID.
 
-(Example)
+~~~js
+var jsong = require('falcor-json-graph');
+var Router = require('falcor-router');
 
-The {keys} can also be used to expose any key on a server object to the client. For example the following route matches any and all requests for properties on a title object.
+var router = new Router([{
+    route: 'tasksById[{keys:ids}][{keys:props}]',
+    get: function(pathSet) {
+        // pathSet.ids is ["a32e8912f34","51f2928f34"]
+        // pathSet.keys is ["name"]
+        return todoService.
+            get(pathSet.ids).
+            then(function(taskMap) {
+                // taskMap is
+                // {
+                //     "a32e8912f34": { name: "Go to ATM", done: false },
+                //     "51f2928f34": null
+                // }
+                var jsonGraph = {},
+                    tasksById = jsonGraph.tasksById = {},
+                    task;
+                
+                pathSet.ids.forEach(function(id) {
+                    var taskRecord = taskMap[id];
+                    // if a Task does not exist, we explicitly insert an empty value
+                    // at the task object, rather than its "name" or "done" field.
+                    if (taskRecord == null) {
+                        tasksById[id] = jsong.atom(taskMap[id]);
+                    }
+                    else {
+                        task = tasksById[id] = {};
+                        pathSet.keys.forEach(function(key) {
+                            task[key] = jsong.atom(taskRecord[key]);
+                        });
+                    }
+                });
+                
+                return { jsonGraph: jsonGraph };
+            });
+    }
+}]);
 
-(Example)
+router.get([
+    ["tasksById", ["a32e8912f34", "51f2928f34"], "name"]
+]).subscribe(function(jsongGraphEnvelope) {
+    console.log(JSON.stringify(jsongGraphEnvelope, null, 4));
+});
+~~~
 
-This technique should be used with caution, because it is easy to inadvertently expose server-only properties on the client. If there is any risk of this occurring, it is safer to list of the keys that can be retrieved from a server object explicitly.
-
-(Example)
+The {keys} can also be used to expose any key on a server object to the client. 
 
 Each pattern will produce an array of results, even when matched against a single value.
-
-##### Token Aliasing
-
-You can assign the {keys}, {integers}, or {ranges} tokens an alias, allowing Route handlers to retrieve matched KeySets by their alias rather than their index in the PathSet. Retrieving keys by alias rather than index can make it easier to adjust your JSON Graph schema while minimizing the need for changes to your Route Handlers.
-
-In the following example, we assign the result of the {indices} pattern token an alias: "titleIds."
-
-(example)
-
-In the example above, the PathSet sent to the route handler includes a "titleIds" key. If we were to print the value of each key in the matched PathSet, we would get the following results:
-
-{
-0: "titlesById",
-1: [23,55,11],
-2: "name",
-length: 3,
-titleIds: [23,55,11]
-}
 
 ## How a Router Works
 
@@ -864,24 +892,94 @@ In this section we will examine how the router executes each of the DataSource m
 
 Netflix is a online streaming video service with millions of subscribers.  When a member logs on to the Netflix service, they are presented with a list of genres, each of which contains a list of titles which they can stream.
 
-(Image)
+![Netflix Homepage](http://netflix.github.io/falcor/images/netflix-screenshot.png)
 
-The Netflix application also allows members to search for titles by name.
- 
-(Image)
+Our goal is to define a JSON graph resource on the Application server that exposes all of the data that the Netflix client needs. The serial graph schema should be designed in such a way that the Netflix application can retrieve all of the data it needs for any given application scenario in a single network request. In order to avoid creating and storing the entire JSON Graph object on the application server, we will define a Router. 
 
-Our goal is to define a serial graph resources on the Application server that exposes all of the data that the Netflix client needs. The serial graph schema should be designed in such a way that the Netflix application can retrieve all of the data it needs for any given application scenario in a single network request. In order to avoid creating and storing the entire JSON Graph object on the application server, we will define a Router. 
+We would like to create a JSON Graph object on the server that looks like this:
+
+~~~js
+{
+  genrelist: [
+    {
+      name: ”Drama",
+      titles: [
+        { $type: "ref", value: ["titlesById", 234] },
+        // more title references snipped
+      ]
+    },
+    // more genre lists snipped
+  ],
+  titlesById: {
+    234: {
+      "name": ”House of Cards",
+      "year": 2014,
+      "description": ”Ambition and politics...",
+      "boxshot": ”/images/9236/1919236.jpg",
+      "rating”: 4.2,
+      "userRating": 5
+    },
+    // many more titles snipped
+  }
+}
+
+~~~
+
+We will create a Router that retrieves the data for this JSON Graph from three different data sources:
+
+1. Recommendations Service
+2. Titles Service
+3. Rating Service
+
+Each of these services will inform a different portion of the JSON object:
+
+![Services Diagram](../images/services-diagram.png)
+
+This would allow the Netflix client to make requests like this:
+
+~~~js
+var model = new falcor.Model({ source: new falcor.HttpDataSource("/model.json") });
+
+//  grab the name of the first four genre lists, as well as the 
+// name and boxshot of the first five titles within each genre list
+model.
+    get("genrelists[0..3].name", "genrelists[0..3].titles[0..4]['name','boxshot']").
+    then(function(jsonResponse) {
+        console.log(JSON.stringify(jsonResponse, null, 4);
+    });
+~~~
+
+#### Choosing the Routes
+
+It would be challenging if we had to build a route for every possible path that the client might request from the virtual JSONGraph object.  Luckily this is not necessary. Why not?
+
+**It is only legal to retrieve value types from a JSON Graph object.**
+
+As a result, it is only necessary to build routes which match paths at which primitive value types can be found. Recall that these are the JSON value types:
+
+* null
+* string
+* number
+* true
+* false
+
+JSONGraph also adds three additional value types to JSON:
+
+* ref
+* atom
+* error
+
+Given that these are the only valid types which can be retrieved from a JSON Graph object, we only need to build the following routes to match the example JSONGraph object above.
+
 
 The Netflix Application Router will retrieve generate the subset of the JSON Graph requested by the client on demand by retrieving the requested data from a series of back-end services. The Netflix Router will effectively map operations against a "virtual" JSON Graph object to the appropriate operations against a series of backend services. In doing so the Router will create the illusion that be JSON Graph object is stored on the application server, while allowing the application server to remain stateless in reality.
+
  
-#### The Backend Services
+#### The Service Layer
 
-We are going to create a service layer facade for all of the backend services will be using to populate our cereal graph.
+This Netflix-lite service layer exposes three different microservaces:
 
-(Simple class declaration "ServiceLayer")
-
-In the next few sections we will be taking a look at the services available to us to populate our virtual JSON graph. We will add a function to our service layer for each one of these backend services.
-
+1. The Recommendations Database
 ##### The Genre List Service
  
 The genre list service returns a list of genres, and their titles:
