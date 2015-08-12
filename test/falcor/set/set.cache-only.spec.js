@@ -49,6 +49,7 @@ describe('Cache Only', function() {
                         1234: {
                             summary: {
                                 $type: 'atom',
+                                $modelCreated: true,
                                 $size: 51,
                                 value: {
                                     hello: 'world'

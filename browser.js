@@ -6,6 +6,6 @@ falcor.ref = jsong.ref;
 falcor.error = jsong.error;
 falcor.pathValue = jsong.pathValue;
 
-falcor.HttpDataSource = require('falcor-browser');
+falcor.HttpDataSource = require('falcor-http-datasource');
 
 module.exports = falcor;
