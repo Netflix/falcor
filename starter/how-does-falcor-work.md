@@ -37,7 +37,7 @@ Content-Type: application/json; charset=utf-8
 Content-Control: no-cache
 
 {
-  "jsong": {
+  "jsonGraph": {
     "user": {
       "name": "Steve McGuire",
       "location": {
@@ -128,7 +128,7 @@ var person = new falcor.Model({
                   FROM user 
            WHERE id = ${request.cookies.userid}`).
            then(row => {
-             jsong: {
+             jsonGraph: {
                 user: {
                   name: getProps(row, pathSet[0]),
                   occupation: getProps(row, pathSet[1])
@@ -141,7 +141,7 @@ var person = new falcor.Model({
         locationServer.
           getLocation(request.cookies.userid).
           then(location => ({
-              jsong: { user: { location: getProps(location, pathSet[2]) } }
+              jsonGraph: { user: { location: getProps(location, pathSet[2]) } }
           })
     }
   ])
