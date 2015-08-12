@@ -1421,7 +1421,26 @@ Now let's tackle the most challenging of all of the genre list routes...
 
 #### The "genrelist[{integers}].titles[{integers}]" Route
 
-This route contains two different patterns. As a result the number of path values the route emits must be pattern1KeySet 
+This route builds the JSON Graph references in the titles array within each genre. In other words this route will create this portion of the JSON Graph object:
+
+~~~js
+{
+  genrelist: [
+    {
+      name: ”Drama",
+      titles: [
+        { $type: "ref", value: ["titlesById", 234] },
+        // more title references snipped
+      ]
+    },
+    // more genre lists snipped
+  ],
+  // rest of the object snipped
+}
+~~~
+
+Each reference in the titles array points to a title in the "titlesById" map. 
+This route contains two different patterns. As a result the number of path values the route emits must be pattern1KeySetLength * pattern2KeySetLength. In other words, if our route matches "genrelist[0..1].titles[0..1]"
 
 
 ~~~js
