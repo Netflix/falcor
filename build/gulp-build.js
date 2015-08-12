@@ -15,6 +15,7 @@ var licenseInfo = {
 gulp.task('build', ['build.browser']);
 gulp.task('dist', ['dist.browser']);
 gulp.task('all', ['build.browser', 'dist.browser']);
+gulp.task('build-with-lint', ['build.browser', 'dist.browser', 'lint']);
 
 gulp.task('dist.browser', ['clean.dist'], function(cb) {
     build({

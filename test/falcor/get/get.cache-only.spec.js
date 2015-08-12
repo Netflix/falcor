@@ -11,27 +11,6 @@ var sinon = require('sinon');
 var expect = require('chai').expect;
 
 describe('Cache Only', function() {
-    it('should get nulls out as JSONG without boxed values.', function(done) {
-        var model = new Model({
-            cache: {
-                foo: null
-            }
-        });
-        var onNext = sinon.spy();
-        model.
-            get('foo').
-            _toJSONG().
-            doAction(onNext, noOp, function() {
-                expect(onNext.calledOnce).to.be.ok;
-                expect(onNext.getCall(0).args[0]).to.deep.equals({
-                    jsonGraph: {
-                        foo: null
-                    },
-                    paths: [['foo']]
-                });
-            }).
-            subscribe(noOp, done, done);
-    });
     describe('Relative Expiration', function() {
         it('should retrieve a value from the cache that has a relative expiration that has not expired yet', function() {
 
@@ -122,6 +101,59 @@ describe('Cache Only', function() {
                     next = true;
                 }, noOp, function() {
                     testRunner.compare(true, next, 'Expect to be onNext at least 1 time.');
+                }).
+                subscribe(noOp, done, done);
+        });
+        it('should get JSONGraph value-types out that were user created.', function(done) {
+            var model = new Model({
+                cache: {
+                    foo: 5,
+                    bar: {
+                        $type: 'atom',
+                        $hello: 'world',
+                        value: 5
+                    }
+                }
+            });
+            var onNext = sinon.spy();
+            model.
+                get('foo', 'bar').
+                _toJSONG().
+                doAction(onNext, noOp, function() {
+                    expect(onNext.calledOnce).to.be.ok;
+                    expect(onNext.getCall(0).args[0]).to.deep.equals({
+                        jsonGraph: {
+                            foo: 5,
+                            bar: {
+                                $type: 'atom',
+                                $hello: 'world',
+                                $size: 51,
+                                value: 5
+                            }
+                        },
+                        paths: [['foo'], ['bar']]
+                    });
+                }).
+                subscribe(noOp, done, done);
+        });
+        it('should get nulls out as JSONG without boxed values.', function(done) {
+            var model = new Model({
+                cache: {
+                    foo: null
+                }
+            });
+            var onNext = sinon.spy();
+            model.
+                get('foo').
+                _toJSONG().
+                doAction(onNext, noOp, function() {
+                    expect(onNext.calledOnce).to.be.ok;
+                    expect(onNext.getCall(0).args[0]).to.deep.equals({
+                        jsonGraph: {
+                            foo: null
+                        },
+                        paths: [['foo']]
+                    });
                 }).
                 subscribe(noOp, done, done);
         });

@@ -34,6 +34,4 @@ gulp.task('doc-d', gulpShell.task([
 ]));
 
 // Run in serial to fail build if lint fails.
-gulp.task('default', function(callback) {
-    return runSequence('build', 'lint', callback);
-});
+gulp.task('default', ['build-with-lint', 'lint']);

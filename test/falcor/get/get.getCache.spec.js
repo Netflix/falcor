@@ -11,6 +11,11 @@ var expect = require('chai').expect;
 var $ref = falcor.Model.ref;
 var $atom = falcor.Model.atom;
 var $error = falcor.Model.error;
+function create(factory, value) {
+    var v = factory(value);
+    v.$modelCreated = true;
+    return v;
+}
 
 describe('getCache', function() {
     it("should serialize the cache", function() {
@@ -40,13 +45,13 @@ describe('getCache', function() {
         var partial = model.getCache(["list", [0, 1]], ["list", 2, "bam"]);
         testRunner.compare({
             "list": {
-                "0": Model.atom("foo"),
-                "1": Model.atom("bar"),
+                "0": create($atom, 'foo'),
+                "1": create($atom, 'bar'),
                 "2": Model.ref("lists.baz")
             },
             "lists": {
                 "baz": {
-                    "bam": Model.atom("bam")
+                    "bam": create($atom, 'bam')
                 }
             } },
             partial,
@@ -86,22 +91,22 @@ describe('getCache', function() {
              // list of user's genres, modeled as a map with ordinal keys
              "genreLists": {
                  "0": $ref('genresById[123]'),
-                 "length": $atom(1)
+                 "length": create($atom, 1),
              },
              // map of all genres, organized by ID
              "genresById": {
                  // genre list modeled as map with ordinal keys
                  "123": {
-                     "name": $atom('Drama'),
+                     "name": create($atom, 'Drama'),
                      "0": $ref('titlesById[23]'),
                      "1": $ref('titlesById[99]'),
-                     "length": $atom(2)
+                     "length": create($atom, 2),
                  }
              },
              "titlesById": {
                  "23": {
-                     "name": $atom("Orange is the New Black"),
-                     "rating": $atom(5)
+                     "name": create($atom, "Orange is the New Black"),
+                     "rating": create($atom, 5)
                  }
              }
          };
@@ -131,7 +136,7 @@ describe('getCache', function() {
         var allCacheExpected = {
             foo: {
                 foo: $error("Error message"),
-                bar: $atom(5),
+                bar: create($atom, 5),
                 baz: $ref(["foo", "bar"])
             }
         };
@@ -141,7 +146,7 @@ describe('getCache', function() {
 
         var specificExpected = {
             foo: {
-                bar: $atom(5)
+                bar: create($atom, 5)
             }
         };
         specificExpected.foo.bar.$size = 51;
