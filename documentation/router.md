@@ -957,7 +957,7 @@ model.
     });
 ~~~
 
-#### Choosing the Routes
+#### Choosing Your Routes
 
 It would be challenging if we had to build a route for every possible path that the client might request from the virtual JSONGraph object.  Luckily this is not necessary. Why not?
 
@@ -1009,7 +1009,7 @@ Of course there may be any number of genrelists or any number of titles within a
 "titlesById[{integers}].userRating"
 ~~~
 
-If we create handlers for each of these routes, we should be able to create the illusion that the JSON object exist by matching incoming paths and retrieving data from the relevant services. 
+If we create handlers for each of these routes, we should be able to create the illusion that the JSON object exists by matching incoming paths and retrieving data from the relevant services. 
 
 We could create a separate route handler for each one of the routes listed above. However this could lead to redundant code and inefficient call patterns. For example the Router below contains two route objects, each of which differ by only a few characters.
 
@@ -1152,11 +1152,9 @@ We have chosen the following routes based on the likelihood that retrieving thes
 "titlesById[{integers}]['rating', 'userRating']
 ~~~
 
-Note that many of these routes are personalized for the current user. For example two different Netflix users will likely see completely different personalized recommendations in the their list of genres. 
+Note that many of these routes are personalized for the current user. For example two different Netflix users will likely see completely different personalized recommendations in the their list of genres. This means that the first four routes must all have access to the current user's ID. The "rating" and "userRating" fields are also specific to the current user's ID. The "rating" field is the algorithmically-predicted rating for the user based on the user's previous viewing history and user-specified ratings. The "userRating" field is the user–specified rating for the title.
 
-This means that the first four routes must all have access to the current user's ID. The "rating" and "userRating" fields are also specific to the current user's ID. The "rating" field is the algorithmically-predicted rating for the user based on the user's previous viewing history and user-specified ratings. The "userRating" field is the user–specified rating for the title.
-
-Both the recommendation service and the rating service accept a user ID. In the absence of a user ID, both services fall band to providing generic recommendations and ratings. However without a user ID it is not  possible to set a userRating with the RecommendationsService.
+Both the recommendation service and the rating service accept a user ID. In the absence of a user ID, both services fallback to providing generic recommendations and ratings. However it is not possible to set a userRating without a user ID.
 
 In order to give the Router the ability to access user–specific information we will create a Router class which accepts the current user ID as a parameter.
 
@@ -1177,15 +1175,53 @@ var NetflixRouter = function(userId){
 NetflixRouter.prototype = Object.create(BaseRouter);    
 ~~~
 
-Now that we have created a router, we can add routes to the route array defined above. Note that each route handler runs with the Router as its "this" object. As a result, each route handler will have access to the userId member defined on the Router.
+Whenever the application server received a request, we will instantiate a new instance of the NetflixRouter and pass in a userID.
 
-To demonstrate how route handlers get access to user information, let's take a stab at the first route: "genrelist.length".
+(Express example)
 
+Now that we have created a router, we can add routes to the route array defined above. Note that each route handler runs with the Router as its "this" object. As a result, each route handler will have access to the userId member defined on the Router. Now we are ready to build the handlers for the genre list routes.
+
+#### Creating the Get Handlers for the Genre List Routes
+
+All of the genre list routes will retrieve their information from the recommendation service. recommendationService's getGenreList method. This method returns a Promise of the current user's list of genres, each of which contains a personalized list of titles based on their preferences. Here's an example usage of getGenreList:
+
+~~~js
+recommendationService.
+    // passing a user ID to the service
+    getGenreList(1).
+    then(function(genrelist) {
+        console.log(JSON.stringify(genrelist, null, 4));
+    });
+~~~
+
+The code above prints the following (abbreviated) output to the console:
+
+~~~js
+{
+    genrelist: [
+        {
+            name: "Horror",
+            titles: [
+                 62873, // title ID
+                 52883, // title ID
+                 58378, // title ID
+                 // more title IDs snipped
+            ]
+        },
+        // more genre lists snipped
+    ]
+}
+~~~
+
+The getGenreList method can also be called without a user ID. If no user ID is provided the service will fallback to a non-personalized list of recommendations containing the highest rated titles in the catalog.
+
+The job of the "genrelist.rating" route's get handler is simple: retrieve the user's genre list from the recommendation service and return its length. 
+
+~~~js
 var routes = [
     {
         route: 'genrelist.length',
         get: function(pathSet) {
-               
             return recommendationService.getGenreList(this.userId)
                 .then(function(genrelist) {             
                     return {
@@ -1195,7 +1231,13 @@ var routes = [
                 });
         }
     }
- 
+]
+~~~
+
+As we can see, each route has access to the members of the Router itself. The get handler passes the Router's userId to the recommendation service, which retrieves a personalized genre list for the current user. The route transforms the result of the promise into a PathValue containing the matched path and the length.
+
+Now we should be able to retrieve this Path from the Router:
+
 
 
 As explained in previous sections, creating a base router and inheriting front it will allow the Falcor Router to build a fast route to table once at the beginning of the application,
