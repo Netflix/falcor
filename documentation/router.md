@@ -1074,8 +1074,52 @@ Let's start with the first route, because it does not require any user authentic
 
 #### "titlesById[{integers}]['name', 'year', 'description', 'boxshot']"
 
+This route matches any request for title fields that are retrieved from the title service. The title service is not personalized. It exposes generic metadata that is true for all users.  The title service has getTitles method which can be used retrieved any number of title object's by ID.
 
-The title service is not personalized. It exposes generic metadata that is true for all users, including each title's name, year, description, and
+
+
+~~~js
+var routes = [
+    {
+        route: 'genrelist[{integers:indices}].name',
+        get: function(pathSet) {
+            return recommendationService.getGenreList(this.userId)
+                .then(function(genrelist) {             
+                    // to be continued…
+                });
+        }
+    }
+]
+~~~
+
+Note that this route could match any of the following paths or path sets:
+
+~~~
+genrelist[0..1].name
+genrelist[0..2, 4...5, 9].name
+genrelist[1].name
+~~~
+
+No matter what the input, the {integers} range will normalize the incoming KeySet to an array of integers before passing it to the route handler.
+
+~~~
+genrelist[0..1, 2].name -> route.get.call(routerInstance, ["genrelist", [0, 1, 2], "name"]])
+~~~
+
+Once inside the route, we can get access to the array of integers produced by the {integers} pattern positionally. 
+
+~~~js
+    {
+        route: 'genrelist[{integers:indices}].name',
+        get: function(pathSet) {
+            // pathSet could be ["genrelist", [0, 1, 2], "name"] for example
+            var indices = pathSet[1];
+            // rest snipped
+        }
+    ]
+~~~
+
+, including each title's name, year, description, and
 This route retrieves its information
 
 The information retrieved from the rating service requires a user ID. If no user ID is provided, the rating service
