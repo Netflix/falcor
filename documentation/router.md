@@ -1232,9 +1232,11 @@ The code above prints the following (abbreviated) output to the console:
 }
 ~~~
 
-The getGenreList method can also be called without a user ID. If no user ID is provided the service will fallback to a non-personalized list of recommendations containing the highest rated titles in the catalog.
+The getGenreList method can also be called without a user ID. If no user ID is provided the service will fallback to a non-personalized list of recommendations containing the highest rated titles in the catalog. Now that we understand how the service works, let's use it to create the routes for the current user's genre list.
 
-The job of the "genrelist.rating" route's get handler is simple: retrieve the user's genre list from the recommendation service and return its length. 
+##### The "genrelist.length" route
+
+The job of the "genrelist.length" route's get handler is simple: retrieve the user's genre list from the recommendation service and return its length. 
 
 ~~~js
 var routes = [
@@ -1259,370 +1261,150 @@ Now we should be able to retrieve the length of the genre list from the Router:
 
 (example)
 
-
-
-Route handlers run in the context of the Router object rather than the route object. That means they will have access to the
-
-are the algorithmically computed predicted rating for the user, and the users actual ratings respectively.
-
-Each of these routes retrieves information from the current users personalized recommendations. Other routes such as the "userRating"
-
-
-
-
-Café headless job is to retrieve the requested values for each path from the service
-In the next section, we will define a route and a "get"  handler for each of these routes
-
- For example if two different paths can be matched by single route, but they require completely different code to retrieve their individual values, handling them a single route often provides no benefit. 
-
-Collapsing routes can reduce code and can be more efficient in many situations.  When route handlers retrieve data from services, the services typically make network requests. As a result the more paths that can be matched by a single route, the more opportunity there is for the route's handler to make coarse-grained calls to the service for multiple values. This in turn typically leads to fewer network requests.
-
-
- 
-#### The Service Layer
-
-This Netflix-lite service layer exposes three different microservices:
-
-1. The Recommendations Database
-##### The Genre List Service
- 
-The genre list service returns a list of genres, and their titles:
- 
-"http://api-global.netflix.com/apps/static/sample/genreLists"
- 
-(example output)
- 
-Note that the genre list service can contain duplicates, because the same title can appear in multiple genre lists. Later on when we expose titles to the client in a JSON Graph, we will use references to ensure that no title object appears more than once.
-
-Let's add a service to our service layer called "genreList":
-
-(Example of a genre list method in our service later class)
- 
-##### The Title Service
- 
-The title service allows titles to be requested by ID.
- 
-"http://api-global.netflix.com/apps/static/sample/titles?ids=5,6,7"
- 
-(example output)
- 
-Notice that each title has a unique identifier. Later on we will use this unique identifier to organize each title by its unique identifier in the JSON Graph.
- 
-Let's add a service to our service layer called "getTitlesById":
-
-(Example of a getTitlesById method in our service later class)
-
-##### The Search Service
- 
-The search service allows titles to be searched by a string:
-
-"http://api-global.netflix.com/apps/static/sample/search?term=house"
- 
-Let's add the search service to our service layer called "search":
-
-(Example of a search method in our service later class)
-
-#### Designing the Domain Graph
-
-When designing our JSON Graph schema, the goal is to enable the Netflix application to retrieve all of the data that it needs for any given application scenario in a single network request. In order to minimize the number of requests required by the Netflix application, we organize the data inside of the cereal graph in the same way in which the Netflix application navigates the data.
-
-When the Netflix application starts up, it displays titles in a gallery. The minimum amount of data required to display the initial gallery screen would be the URL of the first 4 boxshots in the first 3 genre lists, as well as the name of the first three genre lists.
- 
-(Image)
- 
-Ideally the Netflix application would be able to retrieve this information using the following Path Sets:
- 
-"genreList[0..3].name"
-"genreList[0..3].titles[0..4].boxshot"
- 
-In order for these paths to retrieved the necessary information, we would need the Router's JSON object to have the following structure:
-
-(example Neflix JSON)
- 
-Note that this tree can contain duplicates, because multiple genre list could contain the same title. Multiple copies of the same object in a serial graph can create inconsistency in the Netflix client's cache if changes to one copy of an object are not migrated to all of the other copies. To eliminate all duplicates, we convert this cereal schema into a JSON Graph schema.
-
-We can convert the serial object above to a JSON Graph in two easy steps:
- 
-1.     First we introduce a map that organizes all titles by their ID:
- 
-(example of what I said above)
- 
-2.     Then we replace every other title instance with a reference to its only location within the titles map.
-
-(Example of what I said above)
- 
-The JSON Graph structure above will allow titles to be navigated by position in a two-dimensional grid. However the client also needs to be able to retrieve titles using a search term. 
- 
-(Image)
- 
-Rather than forcing the client to download all of the titles and genre lists in order to run a search locally, we will add a map of all possible searches to root of the JSON Graph object.
+The router accepts the PathValue objects from the routes, and adds each of their values to a single JSON Graph object. The code above prints the following to the console:
 
 (example)
- 
-How can we add a map of every possible search to the JSON object?  This might seem impractical, because there are an infinite number of searches that a member might make. However recall that the Router only needs to create the subset of the JSON Graph that is requested by the client. That means that the entire set of searches that a member might make will never need to exist in memory at once. Instead a Router only needs to create the set of search results for the searches that the member actually makes. 
 
-Here is a sample of the JSON Graph object we want to create with our router. 
+The genre list length route is easy because it only matches one path. Next let's try a route that can match multiple paths: "genrelist[{integers}].name".
+
+
+This route starts out much the same way as the last, by retrieving the user's genre list from the recommendation service.
+
+~~~js
+var routes = [
+    {
+        route: 'genrelist[{integers:indices}].name',
+        get: function(pathSet) {
+            return recommendationService.getGenreList(this.userId)
+                .then(function(genrelist) {             
+                    // to be continued…
+                });
+        }
+    }
+]
+~~~
+
+Note that the route above could match any of the following paths or path sets:
+
+~~~
+genrelist[0..1].name
+genrelist[0..2, 4...5, 9].name
+genrelist[1].name
+~~~
+
+No matter what the input, the {integers} range will normalize the incoming KeySet to an array of integers before passing it to the route handler.
+
+~~~
+genrelist[0..1, 2].name -> route.get.call(routerInstance, ["genrelist", [0, 1, 2], "name"]])
+~~~
+
+Once inside the route, we can get access to the array of integers produced by the {integers} pattern positionally. 
+
+~~~js
+    {
+        route: 'genrelist[{integers:indices}].name',
+        get: function(pathSet) {
+            // pathSet could be ["genrelist", [0, 1, 2], "name"]] for example
+            var indices = pathSet[1];
+            // rest snipped
+        }
+    ]
+~~~
+
+Alternately we can use the alias we assigned to the pattern to retrieve the indices by name.
+
+~~~js
+    {
+        route: 'genrelist[{integers:indices}].name',
+        get: function(pathSet) {
+            // pathSet could be ["genrelist", [0, 1, 2], "name"]] for example
+            var indices = pathSet.indices;
+            // rest snipped
+        }
+    ]
+~~~
+
+If a route's get handler is passed ["genrelist", [0, 1, 2], "name"] it must return a Promise containing an Array of PathValues, one for each path in the PathSet.
+
+~~~js
+{ path: ["genreList", 0, "name"], value: "Horror"}
+{path: ["genreList", 1, "name"], value: "Thrillers"}
+{path: ["genreList", 2, "name"], value: "New Releases"}
+~~~
+
+If they route handler does not to emit a PathValue for a corresponding path.
+
+Once we retrieve the genre list from the genrelist service, we can use the map function to create a PathValue for each index the route matched.
+            // If that were the case, we would need to return a Promise of an
+            // Array containing the following PathValues: 
+            // {path: ["genreList", 0, "name"], value: "Horror"}
+            // {path: ["genreList", 1, "name"], value: "Thrillers"}
+            // {path: ["genreList", 2, "name"], value: "New Releases"}
+            return recommendationService.
+                getGenreList(this.userId).
+                then(function(genrelist) {
+                    // use the indices alias to retrieve the array (equivalent to pathSet[1])             
+                    return pathSet.indices.map(function(index) {
+                        // If we determine that the index does not exist, we must 
+                        // return an atom of undefined. Returning nothing is _not_
+                        // an acceptable response. 
+                        // Note that we are also specific about what part of the
+                        // JSON is null. We clearly respond that the 
+                        // list is null or undefined, _not_ the name of the list.
+                        var list = genrelist[index];
+
+                        if (list == null) {
+                            return { path: ["genrelist", index], value: list };
+                        }
+
+                        return {
+                            path: ['genrelist', index, 'name'],
+                            value: genrelist[index].name
+                        };
+                    });
+                });
+        }
+    }
+]
+~~~
+~~~js
+var routes = [
+    // genrelist.length route snipped,
+    {
+        route: "genrelist[{integers:indices}].name",
+        get: function (pathSet) {
+                        
+            // In this example, the pathSet could be ["genrelist", [0,1,2], "name"].
+            // If that were the case, we would need to return a Promise of an
+            // Array containing the following PathValues: 
+            // {path: ["genreList", 0, "name"], value: "Horror"}
+            // {path: ["genreList", 1, "name"], value: "Thrillers"}
+            // {path: ["genreList", 2, "name"], value: "New Releases"}
+            return recommendationService.
+                getGenreList(this.userId).
+                then(function(genrelist) {
+                    // use the indices alias to retrieve the array (equivalent to pathSet[1])             
+                    return pathSet.indices.map(function(index) {
+                        // If we determine that the index does not exist, we must 
+                        // return an atom of undefined. Returning nothing is _not_
+                        // an acceptable response. 
+                        // Note that we are also specific about what part of the
+                        // JSON is null. We clearly respond that the 
+                        // list is null or undefined, _not_ the name of the list.
+                        var list = genrelist[index];
+
+                        if (list == null) {
+                            return { path: ["genrelist", index], value: list };
+                        }
+
+                        return {
+                            path: ['genrelist', index, 'name'],
+                            value: genrelist[index].name
+                        };
+                    });
+                });
+        }
+    }
+]
+~~~
 
-(Example with a little sample data in all of the pads)
-
-In the next section we will learn how to use routes to map the data in our back and services into the schema of our JSON Graph object on-demand.
-
-#### Mapping from backend services to the JSON graph schema using Routes
-
-In order to create a virtual JSON Graph with a Router, you must create a routes that match each path requested by the client, and dynamically create the subset of the JSON Graph by retrieving the requested data from backend services.
-
-Let's take a look a look at a sample of the virtual JSON Graph object we are trying to create with our Router:
-
-(Basically the same as the previous example)
-
-A client might issue any of the following paths:
-
-(Examples of past that can be requested, even some examples requesting objects and Arrays which are invalid)
-
-How are we supposed to create routes that match this seemingly infinite variation of paths?
-
-Here is the good news: it's easier than you might think.
-
-Note that it is not possible to retrieve Arrays or Objects from a JSON Graph. The caller can only request value types from a DataSource.The JSON Graph value types include: 
-
-String
-Number
-Boolean
-Null
-Atom
-Error
-Reference
-
-Given that it is only legal for the client to retrieve value types from the JSON Graph, we can eliminate the following paths from our list of sample set of paths:
-
-(The same list of past before, but this time with all of the past and evaluate two objects and a race crossed out )
-
-While this dramatically reduces the number of paths we need to match with routes, note that the presence of references in the JSON Graph object means that there are many paths which might evaluate to the same value. For example, the following three paths all evaluate to the same value:
-
-It would seem that the ability to follow references creates a nearly endless number of possible paths to the same value type within a serial graph object. How can we possibly create routes that match all of them?
-
-More good news: we don't need to match every possible path to a value that goes through reference.
-
-Note that references are value types. If create routes that match paths prefixes, the Router will accept partial matches, and run the Route Handler. If the Route handler matches a path prefix and returns a JSON Graph subset containing a reference, the Router will optimize the requested path using the path in the reference, and then recursively match the optimized path against the set of routes again. For more information on Path optimization, see (Path Optimization).
-
-You don't need to fully understand how path optimization works right now. All you need to know is that the only paths you have to match are those that when evaluated return a value type. 
-
-##### Matching the titlesById Paths
-
-We need to create a route that matches the name, rating, boxshot, and description for a title in the titlesByIdMap. Using the {integers} keys and a keyset we can match any of these path patterns with a single route:
-
-"titlesById[{integers}]["name", "description"]
-
-(Code example ripped from the Falcor-router-demo, but calling the titles service layer)
-
-Note that the result is a promise which contains an array of PathValues. Each PathValue is mixed into the final cereal graph message.
-
-Let's say the following path was requested:
-
-"titlesById[45].name"
-
-
-
-In truth, this is much easier than it might seem because it is only possible to retrieve value types from a JSON Graph. At the JSON Graph value types include the cereal value types (string, boolean, number, null)
-
-## Creating a Router for your Application
-
-Creating a Router for your Application typically involves three steps:
-
-1. Design a JSON Graph schema that is ideal for the needs of your application
-
-2. Create a series of Routes to map between the schema of the data returned by your service layer to the schema of your application's JSON Graph
-
-3. Add session caching and request collapsing where applicable to improve efficiency
-
-In the next three sections of the document, we will go through these steps to build a Falcor endpoint for Netflix. Netflix is an application that merchandises streaming titles contains a list of titles which can be streamed online.
-
-### 1. Designing a JSON Graph schema for your application
-
-
-
-### 2. 
-## Creating the Mock
-
-Take the following JSON Graph object, which models a list of TODOs:
-
-(Example of a list of todos)
-
-Note that each task has a list of prerequisites. Each task also appears only once in the object under a map of all tasks by their ID. 
-
-## Creating a Router for the Mock
-
-In order to model the JSON Graph object using a router, we must build routes which match incoming path requests and return the requested data. The good news is that it is only legal to retrieve value types from a JSON Graph. That means that instead of matching every possible path that might be requested, we only have to match paths to the value types in our mock JSON Graph object.
-
-(List of all the paths to the value types)
-
-First we create a router, including a route which matches each of the paths above:
-
-(Example of a router which matches constant paths and returns the constant data)
-
-Now we can request the name of the first TODO in the tasks list.
-
-(Example code of requesting the first to do in the list)
-
-Note that we get a response that includes the subset of the JSON Graph that we asked for. However instead of being retrieved from memory, all of the data was retrieved from the route handler.
-
-This demonstrates that a Router is capable of creating data on-demand. However this Router is not very useful.  This router matches static paths, which means it can never serve anything other than the data for paths we've defined explicitly. In the next step we will modify our Router to use route patterns, allowing it to retrieve any number of TODOs. We will also modify the Router to retrieve the data dynamically from a service.
-
-## Retrieving Information from a service
-
-The Router we built in the previous step was only capable of serving a static JSON object. There was no way to add items to the TODO list or mark tasks as complete. Most importantly it only returns data that we explicitly created. 
-
-In this section we'll modify our Router to retrieve real data from a live service. 
-
-Let's say we have a RESTful TODO service which retrieves a list of task IDs.
-
-(Example of retrieving a rest URL from commandline and printing the results)
-
-/todos
-
-(An array of TODO IDs)
-
-We can also look up an individual TODO and the IDs of its prerequisites.
-
-/todo/4683
-
-(An example of an individual to do)
-
-To our allow Router to match any index in the TODO list, we modify our TODO list route to include the {ranges} pattern instead of a static index.
-
-(example of what I said above)
-
-The ranges pattern is typically used when the underlying data source supports a Paging API. Our TODOs service accepts query string parameters, which means the ranges pattern produces an output pathset which is ideal for passing directly to our todos service:
-
-
-
-because it produces an output that is convenient to send to a page API. Our to do list service accepts page parameters.
-
-The {ranges} pattern matches one or more integers or ranges and produces a pathset which contains an array of ranges. 
-
-For example if the following request is made to the Router...
-
-(Example of requesting a range of two dues from the router (0 to 10))
-
-...it matches the route pattern... 
-
-(The route pattern we defined above using the ranges pattern)
-
-...which passes the following output to the route handler:
-
-["todos", [{from:0, to:3}] ]
-
-
-
-
-
-
-
-
-
-set is passed to the appropriate route handler, which retrieve the requested ranges from the list.
-
-
-
-Typically the ranges pattern is used when the underlying service which retrieves list items accepts pages
-
-Clients can only request value types from a JSON Graph. That means that in order to build a router for a JSON Graph object, you must only create a route for any path in graph at which a value type may appear.
-
-
-Instead of creating a JSON object upfront and storing it in memory or on disk, you can use a Falcor Router to lazily-create JSON data requested by the client on-demand.
-
-(Example of creating identical document with router)
-
-A Router implements the DataSource interface. Models use DataSources to retrieve data from a JSON Graph object. That means you can connect a model directly to a router.
-
-(Example of connecting a model to a router)
-
-Instead of creating a JSON object all at once upfront, you can use a router to create subsets of the object on-demand.
-
-
-
-
-
-(Diagram showing how the writer worked with multiple data stores)
-
-Typically application servers use a router to create the illusion that the entire JSON Graph object is 
-
-Creating a Router
-
-A Router is made up of an Array of Route objects. Each Route object contains a path pattern matcher, and a three optional callbacks corresponding to the three operations supported by a data source: get, set, and call. Each path pattern must match the path to a value type, because it is only possible to retrieve value types from a JSON Graph. The JSON Graph value types that can be returned from a Route include:
-
-string
-boolean
-number
-null
-atom
-reference
-error
-
-Each of these value types is highlighted in green in the example JSON Graph object below:
-
-(An example JSON Graph that contains all of the value types listed above)
-
-In order for a router to simulate the JSON Graph object above, a route would need to be defined which matched every path along which a value type may be found:
-
-(A list of routes that match each and everyone of the path patterns above)
-
-As we can see from the example above, a Router allows us to requested fragments of a JSON Graph on-demand. This is a nice alternative to creating the document up-front
-
-Now that we have this list of paths, we can create routes for each path pattern:
-
-(A list of patterns that match each individual path defined above)
-
-Reference handling
-
-There may be many different paths to the same value in a graph. Rather than creating routes for every possible path to a value, you specify the routes to the references in your JSON Graph. When a router encounters a reference while evaluating a path on the output of a route handler, it optimizes the path and recursively matches the optimized path against the routes again. This process continues until the path is fully evaluated or a value type other than a reference is encountered. This path evaluation process is functionally equivalent to the path evaluation process that takes place against an in memory JSON Graph object.
-
-In the following example JSON Graph, we can access the country object using two different paths: 
-
-
-
-(Example of what I just said above)
-
-
-
-
-
-Get operations
-
-When the client requests paths from the JSON Graph object, the paths are are matched against the pattern matcher in each route object. The subset of the path set which matches the route's pattern is then passed to the route's "get" pathset handler:
-
-(Example of a subset of a path being passed to the get handler function)
-
-The router's "get" pathset handler can either return a path value for each matched path, or a JSON Graph envelope which contains a value for each matched path.
-
-(Example of a get handler returning two path values (titles by ID, 34, name, title, 34, rating)
-
-(Example of a get handler returning two values (titles by ID, 34, name, title, 34, rating) in a JSON Graph envelope)
-
-If a route handler does not return a value for a path that it matched, the value of that path is assumed to be undefined. However a Route handler should be as specific as possible about which key in a path is undefined value. In the example below, an attempt to retrieve the name of a Netflix title by identifier fails, because the title does not exist in the database. As a result, an explicit undefined value is created and positioned at the path to the title object, rather than the path to the name of the title object. This conveys that the title does not exist rather than the name of the title. 
-
-(Example of the thing I just said above)
-
-This additional context is valuable to UIs, which can use this information to decide whether or not to create a view for a title object or not.
-
-(Example of a get operation for a title's name revealing a JSON message with no value at titlesById, 347)
-
-
-
-
-
-e of returning an undefined value at using Model.undefined()
-
-
-The get handler must create a value for every path in the path set. If a path value is undefined, 
-
-When the get method is invoked on the router, each requested pathset is matched against the pattern in the route object. If the pattern matches, the subset of the path set 
-
-
-
-(Example of creating a router that matches
-
-
-uter is ideal for backends that tend to require sequential calls to serve requests. For example, if your Applications data is distributed across multiple data stores, or must be accessed through underwriting of different services, using a router can produce client/server interaction patterns similar to hand-written code.
-
-A router is made up of a series of routes
