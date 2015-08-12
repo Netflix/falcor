@@ -882,7 +882,7 @@ The {keys} can also be used to expose any key on a server object to the client.
 
 Each pattern will produce an array of results, even when matched against a single value.
 
-## How a Router Works
+## How the Router Works
 
 The router implements the Data source interface, which allows a caller to work with serial graph data indirectly using three methods: get, set, and call. Routers are unusual in that rather than work against a pre-existing JSON Graph object stored somewhere, Routers generate JSON Graph data on-demand by retrieving the requested data from one or more data sources. As a Router's JSON Graph object is sometimes referred to as a "virtual" JSON Graph.
 
@@ -1071,11 +1071,14 @@ How can we match multiple paths for values exposed by the same service without m
 
 ##### Matching Multiple Paths With KeySets
 
-The good news is that it is possible to to match multiple paths that differ by only one key using a KeySet. A KeySet is a discrete set of keys expressed as an indexer containing multiple values. In other words instead of creating The following two routes..
+The good news is that it is possible to to match multiple paths that differ by only one key using a KeySet. A KeySet is a discrete set of keys expressed as an indexer containing multiple values. In other words instead of creating the following two routes...
 
-(The routes)
+~~~js
+"titlesById[{integers}].name"
+"titlesById[{integers}].year"
+~~~
 
-...w can create a single route that matches both the name and year of a title:
+...we can create a single route that matches both the name and year of a title:
 
 ~~~js
 var router = new Router([
@@ -1089,7 +1092,7 @@ var router = new Router([
                     var jsonGraphResponse = response['jsonGraph'] = {};                    
                     var titlesById = jsonGraphResponse['titlesById'] = {};
 
-                    pathSet.titleIds.forEach(function(titleId) {
+                   pathSet.titleIds.forEach(function(titleId) {
                         var responseTitle = titles[titleId],
                             title = {};
                         if (responseTitle.error) {
@@ -1122,9 +1125,9 @@ Given the advantages of matching multiple paths with a single route,  one might 
 "titlesById[{integers}]['name', 'year', 'description', 'boxshot', 'rating', 'userRating']"
 ~~~
 
-However it doesn't always make sense to create routes that match as many paths as possible. Note that the title's "rating" and "userRating" keys are retrieved from the RatingService, while all of the other title keys are retrieved from the TitleService. As a result creating a single route which matched about the "name" and "rating" of a title wouldn't be useful, because serving each individual key would require a request to an entirely different service and as a result, entirely different code.
+However it doesn't always make sense to create routes that match as many paths as possible. Note that the title's "rating" and "userRating" keys are retrieved from the RatingService, while all of the other title keys are retrieved from the TitleService. As a result creating a single route which matched about the "name" and "rating" of a title wouldn't be useful, because serving each individual key would require a request to an entirely different service. Furthermore the code to create each of these values would be very different. Under the circumstances there is little to be gained by handling both values in a single route.
 
-A better strategy than creating routes which match as many parents as possible, is to create routes that match paths that a retrieved from the same service. The code to retrieve these values stored in the same service is likely to be similar, and it may provide us with opportunities to make a single call to retrieve multiple values.
+A better strategy than creating routes which match as many paths as possible, is to create routes that match paths that are retrieved from the same service. The code to retrieve values stored in the same service is likely to be similar, and more importantly it may provide us with opportunities to make a single service call to retrieve multiple values.
 
 In other words, we should probably create the following routes instead:
 
@@ -1136,6 +1139,8 @@ In other words, we should probably create the following routes instead:
 "titlesById[{integers}]['name', 'year', 'description', 'boxshot']"
 "titlesById[{integers}]['rating', 'userRating']
 ~~~
+
+Note that although the first four routes all retrieve their data from the recommendation service, we cannot collapse them into a single route. Two routes can only be collapsed if they are the same length and differ by one key. In the next section we will discuss how to avoid making redundant service calls between each of these genre list routes.
 
 Now that we have chosen our routes, in the next section we will create handlers for these routes. 
 
@@ -1175,11 +1180,25 @@ var NetflixRouter = function(userId){
 NetflixRouter.prototype = Object.create(BaseRouter);    
 ~~~
 
-Whenever the application server received a request, we will instantiate a new instance of the NetflixRouter and pass in a userID.
+As explained in previous sections, creating a BaseRouter class using createClass will build a route table for rapidly matching paths once when the application server starts up. This optimized route table will be shared across all new instances of the derived NetflixRouter class. This makes it an expensive to create and dispose of NetflixRouter objects.
 
-(Express example)
+Whenever the application server receives a request, we will instantiate a new instance of the NetflixRouter and pass in a userID.
 
-Now that we have created a router, we can add routes to the route array defined above. Note that each route handler runs with the Router as its "this" object. As a result, each route handler will have access to the userId member defined on the Router. Now we are ready to build the handlers for the genre list routes.
+~~~js
+var express = require('express');
+var app = express();
+var NetflixRouter = require("./netflix-router");
+var middleware = require('falcor-express');
+var getUserID = require("./auth-user");
+
+// app server setup snipped..
+
+app.use('/model.json', middleware.dataSourceRoute(function(req, res) {
+    return new NetflixRouter(getUserID(req.cookies["authToken"]))
+}));
+~~~
+
+Now that we have created a NetflixRouter class, we can add routes to it. Note that each route handler runs with the Router as its "this" object. As a result, each route handler will have access to the userId member defined on the Router. Now we are ready to build the handlers for the genre list routes.
 
 #### Creating the Get Handlers for the Genre List Routes
 
@@ -1236,11 +1255,12 @@ var routes = [
 
 As we can see, each route has access to the members of the Router itself. The get handler passes the Router's userId to the recommendation service, which retrieves a personalized genre list for the current user. The route transforms the result of the promise into a PathValue containing the matched path and the length.
 
-Now we should be able to retrieve this Path from the Router:
+Now we should be able to retrieve the length of the genre list from the Router:
+
+(example)
 
 
 
-As explained in previous sections, creating a base router and inheriting front it will allow the Falcor Router to build a fast route to table once at the beginning of the application,
 Route handlers run in the context of the Router object rather than the route object. That means they will have access to the
 
 are the algorithmically computed predicted rating for the user, and the users actual ratings respectively.
