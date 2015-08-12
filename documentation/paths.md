@@ -27,7 +27,7 @@ var model = new falcor.Model({
 // prints 'get milk from corner store'
 model.
   getValue("todos[0].name").
-  then(name => console.log(name);
+  then(name => console.log(name));
 ~~~
 
 Models can accept Paths specified in one of two ways:
@@ -48,7 +48,7 @@ Each non-null value that is not a string is converted to a string immediately pr
 
 ### Path Syntax Strings
 
-Models support JavaScript-like Path expressions via Path Syntax Strings. Path Syntax Strings are immediately parsed into Path Arrays, which has a run-time cost. 
+Models support JavaScript-like Path expressions via Path Syntax Strings. Path Syntax Strings are immediately parsed into Path Arrays, which has a run-time cost.
 
 ~~~js
 "todos[0].name" -> ["todos", 0, "name"]
@@ -115,7 +115,7 @@ A PathSet is a human-readable short-hand for a set of Paths. Any Model method wh
 In other words of writing this...
 
 ~~~js
-var response = 
+var response =
   model.get(
     "todos[0].name",
     "todos[0].done",
