@@ -6,7 +6,7 @@ page_class: "video-page"
 <div class="row">
   <div class="col-xs-12">
     {% if page.youtube_id %}
-    <div class="row">
+    <div class="row video-player">
       <div class="col-xs-12">
         <div class="embed-responsive embed-responsive-16by9">
           <iframe allowfullscreen class="embed-responsive-item" src="http://www.youtube.com/embed/{{ page.youtube_id }}?rel=0"></iframe>        
@@ -20,6 +20,6 @@ page_class: "video-page"
     <div class="video-description">
       {{ content }}
     </div>
-    {% include intrasection-navigation-links.html %}
+    {% include intrasection-navigation.html %}
   </div>
 </div>

@@ -1,5 +1,17 @@
 {% capture page_title %}{%if page.title %}{{ site.meta_defaults.title_prefix }}{{ page.title }}{% else %}{{ site.meta_defaults.title_prefix }}{{ site.meta_defaults.title }}{% endif %}{% endcapture %}
 {% capture page_description %}{%if page.description %}{{ page.description }}{% else %}{{ site.meta_defaults.description }}{% endif %}{% endcapture %}
+{% capture site_sharing_image %}https://netflix.github.io{{ site.baseurl }}/images/falcor-logo.png{% endcapture %}
+{% capture site_sharing_image_open_graph %}https://netflix.github.io{{ site.baseurl }}/images/falcor-logo-og.png{% endcapture %}
+{% assign site_social_handle = "@netflixoss" %}
+{% assign company_social_handle = "@netflix" %}
+{% capture site_url %}https://netflix.github.io{{ site.baseurl }}/{% endcapture %}
+
+{% comment %}
+The separate open graph image is necessary because facebook's share widget,
+despite requiring about a 1.91:1 aspect ratio, heavily crops images when sharing.
+Twitter, slack, google+, and others nicely resize the default image and preserve
+its wide aspect ratio.
+{% endcomment %}
 
 <!-- Basic metadata -->
 <meta charset='utf-8'>
@@ -10,11 +22,28 @@
 <title>{{ page_title }}</title>
 <meta name="description" content="{{ page_description }}">
 
+<!-- Schema.org markup for Google+ -->
+<meta itemprop="name" content="{{ page_title }}">
+<meta itemprop="description" content="{{ page_description }}">
+<meta itemprop="image" content="{{ site_sharing_image }}">
+
+<!-- Twitter Card data -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:site" content="{{ company_social_handle }}">
+<meta name="twitter:title" content="{{ page_title }}">
+<meta name="twitter:description" content="{{ page_description }}">
+<meta name="twitter:creator" content="{{ site_social_handle }}">
+<meta name="twitter:image:src" content="{{ site_sharing_image }}">
+
 <!-- Open graph metadata -->
 <meta property="og:title" content="{{ page_title }}">
 <meta property="og:type" content="website">
-<meta property="og:url" content="https://netflix.github.io{{ site.baseurl }}/">
-<meta property="og:image" content="https://netflix.github.io{{ site.baseurl }}/images/falcor-logo.png">
+<meta property="og:site_name" content="Falcor" />
+<meta property="og:url" content="{{ site_url }}">
+<meta property="og:image" content="{{ site_sharing_image_open_graph }}">
+<meta property="og:image:secure_url" content="{{ site_sharing_image_open_graph }}" />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
 <meta property="og:description" content="{{ page_description }}">
 
 <!-- All site CSS -->
