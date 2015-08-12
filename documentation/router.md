@@ -888,7 +888,7 @@ The router implements the Data source interface, which allows a caller to work w
 
 In this section we will examine how the router executes each of the DataSource methods. However rather than explain how each DataSource operation works in the abstract, we will define an sample Router and then explain how the DataSource operations are executed against it.
 
-### Building a Sample Router for the Netflix Application
+## Building a Sample Router for the Netflix Application
 
 Netflix is a online streaming video service with millions of subscribers.  When a member logs on to the Netflix service, they are presented with a list of genres, each of which contains a list of titles which they can stream.
 
@@ -927,15 +927,15 @@ We would like to create a JSON Graph object on the server that looks like this:
 
 We will create a Router that retrieves the data for this JSON Graph from three different data sources:
 
-#### 1. The Recommendation Service
+### 1. The Recommendation Service
 
 This service can be used to retrieve a personalized list of genres for each user. Each genre list contains a personalized list of titles included based on information gathered about the user's past preferences. The data in this service is stored in a separate database, and the personalized recommendations for all users are recomputed twice a day.
 
-#### 2. The Title Service
+### 2. The Title Service
 
 This service can be used to retrieve information about titles in the catalog. This information is not personalized, and changes relatively infrequently. As a result it makes sense to store it in a different database than either the personalized recommendations or the Ratings.
 
-#### 3. The Rating Service
+### 3. The Rating Service
 
 This service can be used to retrieve predicted ratings for every user and title combination. In addition, if users choose to override the predicted rating, this service is used to store their preferred rating. The rating information may be updated frequently based on user ratings, and is therefore stored in a separate database.
 
@@ -957,7 +957,7 @@ model.
     });
 ~~~
 
-#### Choosing Your Routes
+### Choosing Your Routes
 
 It would be challenging if we had to build a route for every possible path that the client might request from the virtual JSONGraph object.  Luckily this is not necessary. Why not?
 
@@ -1069,7 +1069,7 @@ model.get("titlesById[523]['name', 'year']").then(function(jsonResponse){ consol
 
 How can we match multiple paths for values exposed by the same service without making multiple calls to the same service?
 
-##### Matching Multiple Paths With KeySets
+#### Matching Multiple Paths With KeySets
 
 The good news is that it is possible to to match multiple paths that differ by only one key using a KeySet. A KeySet is a discrete set of keys expressed as an indexer containing multiple values. In other words instead of creating the following two routes...
 
@@ -1144,7 +1144,7 @@ Note that although the first four routes all retrieve their data from the recomm
 
 Now that we have chosen our routes, in the next section we will create handlers for these routes. 
 
-### Creating Route Handlers for Get Operations
+## Creating Route Handlers for Get Operations
 
 We have chosen the following routes based on the likelihood that retrieving these values together will reduce code as well as the number of calls made to the service layer.
 
@@ -1200,7 +1200,7 @@ app.use('/model.json', middleware.dataSourceRoute(function(req, res) {
 
 Now that we have created a NetflixRouter class, we can add routes to it. Note that each route handler runs with the Router as its "this" object. As a result, each route handler will have access to the userId member defined on the Router. Now we are ready to build the handlers for the genre list routes.
 
-#### Creating the Get Handlers for the Genre List Routes
+### Creating the Get Handlers for the Genre List Routes
 
 All of the genre list routes will retrieve their information from the recommendation service. recommendationService's getGenreList method. This method returns a Promise of the current user's list of genres, each of which contains a personalized list of titles based on their preferences. Here's an example usage of getGenreList:
 
@@ -1234,7 +1234,7 @@ The code above prints the following (abbreviated) output to the console:
 
 The getGenreList method can also be called without a user ID. If no user ID is provided the service will fallback to a non-personalized list of recommendations containing the highest rated titles in the catalog. Now that we understand how the service works, let's use it to create the routes for the current user's genre list.
 
-##### The "genrelist.length" route
+#### The "genrelist.length" route
 
 The job of the "genrelist.length" route's get handler is simple: retrieve the user's genre list from the recommendation service and return its length. 
 
@@ -1267,8 +1267,9 @@ The router accepts the PathValue objects from the routes, and adds each of their
 
 The genre list length route is easy because it only matches one path. Next let's try a route that can match multiple paths: "genrelist[{integers}].name".
 
+#### The "genrelist[{integers}].name" Route
 
-This route starts out much the same way as the last, by retrieving the user's genre list from the recommendation service.
+This route starts out much the same way as the previous one: by retrieving the user's genre list from the recommendation service.
 
 ~~~js
 var routes = [
@@ -1311,7 +1312,7 @@ Once inside the route, we can get access to the array of integers produced by th
     ]
 ~~~
 
-Alternately we can use the alias we assigned to the pattern to retrieve the indices by name.
+Alternately we can use the alias we assigned to the pattern to retrieve the indices.
 
 ~~~js
     {
@@ -1332,7 +1333,7 @@ If a route's get handler is passed ["genrelist", [0, 1, 2], "name"] it must retu
 {path: ["genreList", 2, "name"], value: "New Releases"}
 ~~~
 
-If they route handler does not to emit a PathValue for a corresponding path.
+If the route handler does not to emit a PathValue for a path that it is passed, the Router will 
 
 Once we retrieve the genre list from the genrelist service, we can use the map function to create a PathValue for each index the route matched.
             // If that were the case, we would need to return a Promise of an
