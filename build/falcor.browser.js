@@ -468,9 +468,8 @@ Model.prototype.getCache = function getCache() {
     var result;
     var model = this.
         withoutDataSource().
-        boxValues().
-        treatErrorsAsValues().
         _materialize();
+
     this.
         get.apply(model, paths).
         _toJSONG().
