@@ -1833,7 +1833,6 @@ module.exports = function getValueSync(pathArg) {
 },{"160":160}],22:[function(require,module,exports){
 // Copies the node
 var prefix = require(39);
-var $modelCreated = require(35);
 
 module.exports = function clone(node) {
     var outValue, i, len;
@@ -1850,7 +1849,7 @@ module.exports = function clone(node) {
 };
 
 
-},{"35":35,"39":39}],23:[function(require,module,exports){
+},{"39":39}],23:[function(require,module,exports){
 var __ref = require(42);
 var __context = require(31);
 var __refIndex = require(41);
