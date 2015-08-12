@@ -739,13 +739,17 @@ The router implements the Data source interface, which allows a caller to work w
 
 In this section we will examine how the router executes each of the DataSource methods. However rather than explain how each DataSource operation works in the abstract, we will define an sample Router and then explain how the DataSource operations are executed against it.
 
-## Walkthrough: Building a Router for Netflix
+## Walkthrough: Building a Router for Netflix-like Application
 
 Netflix is a online streaming video service with millions of subscribers.  When a member logs on to the Netflix service, they are presented with a list of genres, each of which contains a list of titles which they can stream.
 
 ![Netflix Homepage](http://netflix.github.io/falcor/images/netflix-screenshot.png)
 
-Our goal is to define a JSON graph resource on the Application server that exposes all of the data that the Netflix client needs. The serial graph schema should be designed in such a way that the Netflix application can retrieve all of the data it needs for any given application scenario in a single network request. In order to avoid creating and storing the entire JSON Graph object on the application server, we will define a Router. 
+In this exercise we will build a Router for an application similar to Netflix, which merchandises titles to members based on their preferences, and allows them to provide user ratings for each title. This exercise is purely a demonstration of how to build a Router for a web application that displays a catalog of information to a user. This is **not**intended to demonstrate how to Netflix actually works, and any similarities to the actual Netflix Router's implementation are superficial.
+
+Our goal is to define a JSON graph resource on the Application server that exposes all of the data that our Netflix clone needs. The JSON Graph schema should be designed in such a way that the  application can retrieve all of the data it needs for any given application scenario in a single network request.
+
+In order to avoid creating and storing the entire JSON Graph object on the application server, we will define a Router.
 
 We would like to create a JSON Graph object on the server that looks like this:
 
@@ -771,9 +775,8 @@ We would like to create a JSON Graph object on the server that looks like this:
       ]
     },
     // more genre lists snipped
-  ]  
+  ]
 }
-
 ~~~
 
 We will create a Router that retrieves the data for this JSON Graph from three different data sources:
@@ -795,7 +798,7 @@ Once we have built this virtual JSON Graph object, the client will be able to ma
 ~~~js
 var model = new falcor.Model({ source: new falcor.HttpDataSource("/model.json") });
 
-//  grab the name of the first four genre lists, as well as the 
+//  grab the name of the first four genre lists, as well as the
 // name and boxshot of the first five titles within each genre list
 model.
     get("genrelists[0..3].name", "genrelists[0..3].titles[0..4]['name','boxshot']").
@@ -860,7 +863,7 @@ Of course there may be any number of genrelists or any number of titles within a
 "genrelist[{integers}].titles[{integers}]"
 ~~~
 
-If we create handlers for each of these routes, we should be able to create the illusion that the JSON object exists by matching incoming paths and retrieving data from the relevant services. 
+If we create handlers for each of these routes, we should be able to create the illusion that the JSON object exists by matching incoming paths and retrieving data from the relevant services.
 
 We could create a separate route handler for each one of the routes listed above. However this could lead to redundant code and inefficient call patterns. For example the Router below contains two route objects, each of which differ by only a few characters.
 
@@ -872,7 +875,7 @@ var router = new Router([
             return titleService.getTitles(pathSet.titleIds).
                 then(function(titles) {
                     var response = {};
-                    var jsonGraphResponse = response['jsonGraph'] = {};                    
+                    var jsonGraphResponse = response['jsonGraph'] = {};
                     var titlesById = jsonGraphResponse['titlesById'] = {};
                     pathSet.titleIds.forEach(function(titleId) {
                         var titleRecord = titles[titleId],
@@ -893,7 +896,7 @@ var router = new Router([
             return titleService.getTitles(pathSet.titleIds).
                 then(function(titles) {
                     var response = {};
-                    var jsonGraphResponse = response['jsonGraph'] = {};                    
+                    var jsonGraphResponse = response['jsonGraph'] = {};
                     var titlesById = jsonGraphResponse['titlesById'] = {};
                     pathSet.titleIds.forEach(function(titleId) {
                         var titleRecord = titles[titleId],
@@ -907,7 +910,7 @@ var router = new Router([
                     return response;
                 });
         }
-    }    
+    }
 ]);
 ~~~
 
@@ -940,7 +943,7 @@ var router = new Router([
             return titleService.getTitles(pathSet.titleIds).
                 then(function(titles) {
                     var response = {};
-                    var jsonGraphResponse = response['jsonGraph'] = {};                    
+                    var jsonGraphResponse = response['jsonGraph'] = {};
                     var titlesById = jsonGraphResponse['titlesById'] = {};
 
                    pathSet.titleIds.forEach(function(titleId) {
@@ -964,7 +967,7 @@ var router = new Router([
 ]);
 ~~~
 
-Note that by matching several paths with a single route, we are able to both make a single request to the database and eliminate a large amount of repetitive code. 
+Note that by matching several paths with a single route, we are able to both make a single request to the database and eliminate a large amount of repetitive code.
 
 Given the advantages of matching multiple paths with a single route,  one might think that we would want to cover all legal paths with as few routes as possible.  For example it is possible to match any incoming path request for our application's JSON Graph schema using the following few routes:
 
@@ -997,7 +1000,7 @@ Note that although the first four routes all retrieve their data from the recomm
 
 Now that we have chosen our routes we need to consider whether our route handlers have sufficient information to create values on-demand. Note that _many of the routes in the JSON Graph object are personalized for the current user_. For example two different Netflix users will likely see completely different personalized recommendations in the their "genrelist" arrays. The "rating" and "userRating" fields are also specific to the current user. The "rating" field is the algorithmically-predicted rating for the user based on the user's previous viewing history and user-specified ratings. The "userRating" field is the user–specified rating for the title, and it should not be possible to set this value if a user is not logged in.
 
-While a login is clearly required to change data or receive personalized recommendations, we would like to be able to use to allow users to browse the catalog without logging in. That's why both the recommendations service and rating service fallback to providing generic recommendations and ratings in the absence of a user ID. 
+While a login is clearly required to change data or receive personalized recommendations, we would like to be able to use to allow users to browse the catalog without logging in. That's why both the recommendations service and rating service fallback to providing generic recommendations and ratings in the absence of a user ID.
 
 Clearly the Router's route handlers need access to the currently user's ID, if available. To provide the handlers with this information, we can create a Router class which accepts the userID in its constructor.
 
@@ -1015,7 +1018,7 @@ var NetflixRouter = function(userId){
 };
 
 // Deriving the NetflixRouter from the BaseRouter using JavaScript's classical inheritance pattern
-NetflixRouter.prototype = Object.create(BaseRouter);    
+NetflixRouter.prototype = Object.create(BaseRouter);
 ~~~
 
 As explained in previous sections, creating a BaseRouter class using createClass will build a route table for rapidly matching paths once when the application server starts up. This optimized route table will be shared across all new instances of the derived NetflixRouter class. This makes it inexpensive to create a new NetflixRouter object for every incoming server request.
@@ -1039,6 +1042,43 @@ Creating a new Router for each connection and throwing it away immediately after
 Now that we have created a NetflixRouter class, we can add routes to it. Remember that each route handler runs with the Router as its "this" object. As a result, each route handler will have access to the userId member defined on the Router. In the next section we will see how handlers use the Router's userId member to return different values depending on which user is logged in.
 
 ### Creating the Get Handlers for the "titlesById" Map
+
+Our JSON Graph object has a titlesById map that contains all of the titles in the catalog. Each title's key within the map is its ID.
+
+~~~js
+{
+  titlesById: {
+    234: {
+      "name": ”House of Cards",
+      "year": 2014,
+      "description": ”Ambition and politics...",
+      "boxshot": ”/images/9236/1919236.jpg",
+      "rating”: 4.2,
+      "userRating": 5
+    },
+    // many more titles snipped
+  }
+}
+~~~
+
+We will create this map using two different routes:
+
+~~~
+"titlesById[{integers}]['name', 'year', 'description', 'boxshot']"
+"titlesById[{integers}]['rating', 'userRating']
+~~~
+
+The first route will retrieve it's information from the title service, which is a repository of non-personalized title metadata. The second route will retrieve its information from the rating service, which provides personalized ratings based on the users past preferences.
+
+Let's start with the first route, because it does not require any user authentication:
+
+#### "titlesById[{integers}]['name', 'year', 'description', 'boxshot']"
+
+
+The title service is not personalized. It exposes generic metadata that is true for all users, including each title's name, year, description, and
+This route retrieves its information
+
+The information retrieved from the rating service requires a user ID. If no user ID is provided, the rating service
 
 
 ### Creating the Get Handlers for the Genre List Routes
