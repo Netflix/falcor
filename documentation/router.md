@@ -1267,7 +1267,7 @@ The router accepts the PathValue objects from the routes, and adds each of their
 
 The genre list length route is easy because it only matches one path. Next let's try a route that can match multiple paths: "genrelist[{integers}].name".
 
-#### The "genrelist[{integers}].name" Route
+
 
 This route starts out much the same way as the previous one: by retrieving the user's genre list from the recommendation service.
 
@@ -1285,7 +1285,7 @@ var routes = [
 ]
 ~~~
 
-Note that the route above could match any of the following paths or path sets:
+Note that this route could match any of the following paths or path sets:
 
 ~~~
 genrelist[0..1].name
@@ -1305,7 +1305,7 @@ Once inside the route, we can get access to the array of integers produced by th
     {
         route: 'genrelist[{integers:indices}].name',
         get: function(pathSet) {
-            // pathSet could be ["genrelist", [0, 1, 2], "name"]] for example
+            // pathSet could be ["genrelist", [0, 1, 2], "name"] for example
             var indices = pathSet[1];
             // rest snipped
         }
@@ -1320,7 +1320,7 @@ Alternately we can use the alias we assigned to the pattern to retrieve the indi
         get: function(pathSet) {
             // pathSet could be ["genrelist", [0, 1, 2], "name"]] for example
             var indices = pathSet.indices;
-            // rest snipped
+            // rest snipped...
         }
     ]
 ~~~
@@ -1328,36 +1328,22 @@ Alternately we can use the alias we assigned to the pattern to retrieve the indi
 If a route's get handler is passed ["genrelist", [0, 1, 2], "name"] it must return a Promise containing an Array of PathValues, one for each path in the PathSet.
 
 ~~~js
-{ path: ["genreList", 0, "name"], value: "Horror"}
-{path: ["genreList", 1, "name"], value: "Thrillers"}
-{path: ["genreList", 2, "name"], value: "New Releases"}
+{ path: ["genreList", 0, "name"], value: "Horror" }
+{ path: ["genreList", 1, "name"], value: "Thrillers" }
+{ path: ["genreList", 2, "name"], value: "New Releases" }
 ~~~
 
-If the route handler does not to emit a PathValue for a path that it is passed, the Router will 
+Once we retrieve the genre list from the genrelist service, we can use the map function to create a PathValue for each index the route matches.
 
-Once we retrieve the genre list from the genrelist service, we can use the map function to create a PathValue for each index the route matched.
-            // If that were the case, we would need to return a Promise of an
-            // Array containing the following PathValues: 
-            // {path: ["genreList", 0, "name"], value: "Horror"}
-            // {path: ["genreList", 1, "name"], value: "Thrillers"}
-            // {path: ["genreList", 2, "name"], value: "New Releases"}
+~~~js
+    {
+        route: "genrelist[{integers:indices}].name",
+        get: function (pathSet) { 
             return recommendationService.
                 getGenreList(this.userId).
                 then(function(genrelist) {
-                    // use the indices alias to retrieve the array (equivalent to pathSet[1])             
-                    return pathSet.indices.map(function(index) {
-                        // If we determine that the index does not exist, we must 
-                        // return an atom of undefined. Returning nothing is _not_
-                        // an acceptable response. 
-                        // Note that we are also specific about what part of the
-                        // JSON is null. We clearly respond that the 
-                        // list is null or undefined, _not_ the name of the list.
+                    return pathSet.indices.map(function(index) { 
                         var list = genrelist[index];
-
-                        if (list == null) {
-                            return { path: ["genrelist", index], value: list };
-                        }
-
                         return {
                             path: ['genrelist', index, 'name'],
                             value: genrelist[index].name
@@ -1368,6 +1354,76 @@ Once we retrieve the genre list from the genrelist service, we can use the map f
     }
 ]
 ~~~
+
+Now we can retrieve the name of a user's genre lists from the Router.
+
+(Example)
+
+Once again the Router converts the output into a JSON Graph object, and so we see the following console output:
+
+(Example)
+
+Let's try something else. Let's request the name of the first, second, and 900th genre, despite the fact that no user's genre list is longer than 40.
+
+(Example)
+
+When we run this code, we see the following output to the console:
+
+(Example)
+
+Note that the output is a JSON Graph error object at each individual path. Why did this happen? 
+
+We did not guard against the possibility that the list is null or undefined in our route implementation. As a result our route threw  an "undefined is not an object" error when it attempted to look up "name" on an undefined value. When the router catches an error thrown from a route handler, it creates a JSON Graph error object at every path passed to that route handler. That means we don't get any data back, not even the name of the first and second genre list.
+
+Clearly we have to be defensive when coding our route handlers, but this begs the question: "what should a route handler return when a value type is discovered along a route"? 
+
+Simple. The truth. If there is a no or undefined value at "genrelist[900]" the route should return a path value indicating as much. Note the additional check added to the route below.
+
+~~~js
+    {
+        route: "genrelist[{integers:indices}].name",
+        get: function (pathSet) { 
+            return recommendationService.
+                getGenreList(this.userId).
+                then(function(genrelist) {
+                    return pathSet.indices.map(function(index) { 
+                        var list = genrelist[index];
+                        if (list == null) {
+                            return {path: ['genrelist', index], value: list };
+                        }
+                        
+                        return {
+                            path: ['genrelist', index, 'name'],
+                            value: genrelist[index].name
+                        };
+                    });
+                });
+        }
+    }
+]
+~~~
+
+The conditional above checks the list for both null and undefined, and returns a PathValue indicating the specific path at which the null or undefined value was discovered.
+
+This practice is referred to as **branch guarding**, and it is every route handlers responsibility. If null, undefined, or _any value type_ is discovered along a path, a route handler must return a path value that indicates which path at which the value type was discovered, as well as the specific value type itself. In the example above, we only bother to check for null or undefined because we feel confident that the data has been sanitized already, and no other value type (ex. string, number) could appear instead of the genre array. Depending on how much you trust your data, you may want to be more zealous.
+
+Now we can repeat our previous request:
+
+(Example)
+
+This time the router returns and I'll put that correctly identifies the 900th list as being undefined.
+
+(Example)
+
+In this section we learned how to match multiple paths with an pattern, how to retrieve pattern matches via an alias, and the importance of branch guarding. 
+
+Now let's tackle the most challenging of all of the genre list routes...
+
+#### The "genrelist[{integers}].titles[{integers}]" Route
+
+This route contains two different patterns. As a result the number of path values the route emits must be pattern1KeySet 
+
+
 ~~~js
 var routes = [
     // genrelist.length route snipped,
@@ -1394,8 +1450,7 @@ var routes = [
                         // list is null or undefined, _not_ the name of the list.
                         var list = genrelist[index];
 
-                        if (list == null) {
-                            return { path: ["genrelist", index], value: list };
+                        n { path: ["genrelist", index], value: list };
                         }
 
                         return {
@@ -1408,4 +1463,3 @@ var routes = [
     }
 ]
 ~~~
-
