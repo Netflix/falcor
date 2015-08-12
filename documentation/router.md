@@ -18,122 +18,6 @@ A Router works by matching requested paths against a "virtual" JSON Graph object
 
 In order to create the requested subset of the JSON Graph object, the Router matches the requested paths against a series of Routes. A Route is an object with a pattern that can match a set of paths, and is responsible for creating the subset of the JSON Graph object which contains the data requested by those paths. Typically Routes build a subset of the JSON Graph object on-demand by retrieving the data from persistent data stores or web services. The Route transforms the data retrieved from the data sources into the the schema of the JSON Graph, and delivers it to the Router. Once the Router receives the JSON Graph subset from the Route, it evaluates the paths against the JSON Graph subset using the (Path Evaluation) algorithm. If the router encounters References in the JSON Graph, it may optimize the requested paths, and recursively evaluate them against the Routes. The Router's final output is the subset of virtual JSON Graph that combines all the responses produced by the evaluated the requested paths against the Routes.
 
-## Application Servers for REST services
-
-Rather than serve static resources from disk, many RESTful Application servers use Routers to create resources on-demand by retrieving data from one or more persistent datastores.
-
-For example here is a Router defined for Node's ExpressJS MVC framework which uses a route to match a request for a task resource by ID:
-
-~~~js
-var express = require('express');
-var app = express();
-
-app.get('/task/:id', function(req, res) {
-    taskService.get(req.params.id, function(error, task) {
-        if (error) {
-            res.send(500);
-        } else {
-            res.send(200, JSON.parse(task));
-        }
-    });
-});
-~~~
-
-Routers allow application servers to remain stateless. Instead of storing state on the application server, requests for information are matched against URL patterns and requests for data are routed to persistent data stores.
-
-![Traditional Application Server](../images/traditional-app-server.png)
-
-## RESTful App Servers vs. Falcor App Servers
-
-Traditional Application servers expose information at multiple URLs. Falcor App servers expose all of the data the client needs as a single JSON URL.
-
-![All data exposed at a single URL](./network-diagram.png)
-
-Exposing all of the client's data as a single HTTP resource gives the client the ability to request all of the data that it requires for any applications scenario using a single HTTP request. This allows the client to get around any restrictions on the number of concurrent HTTP requests which can be sent. It also reduces the relative overhead introduced by HTTP calls by allowing many values to be retrieved in a single request.
-
-Instead of downloading the entire JSON resource, clients pass paths to the values they want to retrieve from the JSON resource in the query string.
-
-~~~
-http://.../model.json?paths=[["todos",{from:0,to:2},"name"]]
-~~~
-
-The server responds with a subset of the JSON resource which contains the requested values. 
-
-~~~js
-{
-    "jsonGraph": {
-        "todos": {
-            "0": {
-                "name": "get milk from corner store."
-            },
-            "1": {
-                "name": "go to the ATM."
-            },
-            "2": {
-                "name": "pick up car from the shop."
-            }
-        }
-    }
-} 
-~~~
-
-Another key difference between traditional RESTful application servers and Falcor application servers is the way in which relationships are discovered. Traditional RESTful application servers specify hyperlinks to related resources. 
-
-The following request attempts to retrieve three task objects:
-
-~~~
-http://.../todos?pageOffset=0&pageSize=3
-~~~
-
-The server returns three hyperlinks to task resources.
-
-~~~js
-[
-    "/task/8964",
-    "/task/5296",
-    "/task/9721"
-]
-~~~
-
-This means that in order for a traditional client to download both a resource and its related resources, at least two JSON requests must be made.
-
-![Server Roundtrips](../images/server-roundtrips.png)
-
-Instead of using hyperlinks to refer to other resources, Falcor applications represent relationships as references to other locations within the same JSON resource. For example, the following request attempts to retrieve the name of the first three tasks in the todos list:
-
-~~~js
-http://.../model.json?paths=[["todos",{from:0,to:2},"name"]]
-~~~
-
-The Falcor application server sends the following response:
-
-~~~js
-{
-    "json": {
-        "todos": {
-            "0": { $type: "ref", value: ["todosById", 8964] },
-            "1": { $type: "ref", value: ["todosById", 5296] },
-            "2": { $type: "ref", value: ["todosById", 9721] }
-        },
-        "todosById": {
-            "8964": {
-                "name": "get milk from corner store."
-            },
-            "5296": {
-                "name": "go to the ATM."
-            },
-            "9721": {
-                "name": "pick up car from the shop."
-            }
-        }
-    }
-} 
-~~~
-
-This is possible because Falcor application servers expose all their data within a single JSON resource. The important difference between references and hyperlinks is that references can be followed on the server whereas hyperlinks must be followed on the client. That means that instead of making sequential round trips, related values can be downloaded within the same request.
-
-![One Roundtrip](../images/one-roundtrip.png)
-
 ## Contrasting a REST Router with a Falcor Router 
 
 Falcor Routers serve the same purpose as Routers for RESTful endpoints: they allow app servers to remain stateless by retrieving requested data from persistent data stores on-demand. However a Falcor Router differs from the Router used by RESTful application servers in a few ways in order to accommodate the unique way in which Falcor app servers expose their data.
@@ -241,7 +125,7 @@ The Router accepts all of these path/value pairs, adds them to a single JSON obj
 } 
 ~~~
 
-### 3. Retrieving Related Resources on the Server
+### 3. Falcor Routers can Retrieve Related Resources Without a Roundtrip
 
 In addition to allowing multiple values to be retrieved in a single request, Falcor routers can also traverse entity relationships and retrieve related values within the same request.
 
@@ -511,42 +395,9 @@ Each route is responsible for creating a subset of the JSON Graph object that co
 
 The Router combines all of these subsets of the JSON Graph object returned by each individual route into a single JSON Graph object subset, and returns it to the caller.
  
-#### Route Handler Response Formats
+#### Route Handlers
  
-Each route handler is responsible for creating a subset of the JSON Graph that contains the values found at the requested paths. These values can be delivered in one of two formats:
- 
-* JSON Graph Envelope
-* A Series of PathValues
- 
-A JSON Graph envelope is an object with a "jsonGraph" key that contains a subset of a JSON is responsible for creating the subset of the JSON Graph Envelope that contains the requested paths.
- 
-In the following example, a route returns JSON Graph envelope containing both the name and surname of a user:
- 
-~~~js
-{
-    route: 'user.["name", "surname"]',
-    get: function(pathSet) {
-        // pathSet is ["user", ["name"]] or ["user", ["surname"]] or ["user", ["name", "surname"]]
-        if (this.userId == null) {
-            throw new Error("not authorized");
-        } 
-        return userService.
-            get(this.userId).
-            then(function(userObject) {
-                var jsonGraph = {};
-                var user = jsonGraph["user"] = {};
-                // pathSet[1] is ["name"] or ["surname"] or ["name", "surname"]
-                pathSet[1].forEach(function(key) {
-                    user[key] = userObject[key];
-                });
-                
-                return { jsonGraph: jsonGraph };
-            });
-    }
-}
-~~~ 
- 
-A PathValue is an object with a path and value key. In lieu of a JSON Graph object containing all requested values, a Route can return a PathValue for each requested path:
+Each route handler for get or set operations is responsible for creating a PathValue for every path it matches. A PathValue is an object with a path and value key.
  
 ~~~js
 {
@@ -568,7 +419,7 @@ A PathValue is an object with a path and value key. In lieu of a JSON Graph obje
 }
 ~~~ 
 
-As in the previous example, this route returns the name and surname of a user. However this time it returns two PathValue objects, one containing the path and value of the name, and the other containing the path and value of the surname.
+This route returns two PathValue objects containing the name and surname of a user respectively.
  
 When a Router receives a series of PathValue's, it creates the JSON Graph envelope by writing each PathValue's value into an object at the PathValue's path.
  
@@ -591,7 +442,7 @@ When a Router receives a series of PathValue's, it creates the JSON Graph envelo
 }
 ~~~ 
 
-If your Route progressively builds up JSON Graph envelopes from a series of values, returning PathValues can be a more convenient alternative.
+Once all of the routes have finished, the Router responds with a JSON Graph object containing all of the values returned from each individual route.
  
 #### Route Handler Concurrency
  
@@ -888,7 +739,7 @@ The router implements the Data source interface, which allows a caller to work w
 
 In this section we will examine how the router executes each of the DataSource methods. However rather than explain how each DataSource operation works in the abstract, we will define an sample Router and then explain how the DataSource operations are executed against it.
 
-## Building a Sample Router for the Netflix Application
+## Walkthrough: Building a Router for Netflix
 
 Netflix is a online streaming video service with millions of subscribers.  When a member logs on to the Netflix service, they are presented with a list of genres, each of which contains a list of titles which they can stream.
 
@@ -900,16 +751,6 @@ We would like to create a JSON Graph object on the server that looks like this:
 
 ~~~js
 {
-  genrelist: [
-    {
-      name: ”Drama",
-      titles: [
-        { $type: "ref", value: ["titlesById", 234] },
-        // more title references snipped
-      ]
-    },
-    // more genre lists snipped
-  ],
   titlesById: {
     234: {
       "name": ”House of Cards",
@@ -920,22 +761,28 @@ We would like to create a JSON Graph object on the server that looks like this:
       "userRating": 5
     },
     // many more titles snipped
-  }
+  },
+  genrelist: [
+    {
+      name: ”Drama",
+      titles: [
+        { $type: "ref", value: ["titlesById", 234] },
+        // more title references snipped
+      ]
+    },
+    // more genre lists snipped
+  ]  
 }
 
 ~~~
 
 We will create a Router that retrieves the data for this JSON Graph from three different data sources:
 
-### 1. The Recommendation Service
-
-This service can be used to retrieve a personalized list of genres for each user. Each genre list contains a personalized list of titles included based on information gathered about the user's past preferences. The data in this service is stored in a separate database, and the personalized recommendations for all users are recomputed twice a day.
-
-### 2. The Title Service
+### 1. The Title Service
 
 This service can be used to retrieve information about titles in the catalog. This information is not personalized, and changes relatively infrequently. As a result it makes sense to store it in a different database than either the personalized recommendations or the Ratings.
 
-### 3. The Rating Service
+### 2. The Rating Service
 
 This service can be used to retrieve predicted ratings for every user and title combination. In addition, if users choose to override the predicted rating, this service is used to store their preferred rating. The rating information may be updated frequently based on user ratings, and is therefore stored in a separate database.
 
@@ -956,6 +803,10 @@ model.
         console.log(JSON.stringify(jsonResponse, null, 4);
     });
 ~~~
+
+### 3. The Recommendation Service
+
+This service can be used to retrieve a personalized list of genres for each user. Each genre list contains a personalized list of titles included based on information gathered about the user's past preferences. The data in this service is stored in a separate database, and the personalized recommendations for all users are recomputed twice a day.
 
 ### Choosing Your Routes
 
@@ -980,33 +831,33 @@ JSONGraph also adds three additional value types to JSON:
 Given that these are the only valid types which can be retrieved from a JSON Graph object, we only need to build the following routes to match the example JSONGraph object above.
 
 ~~~
-"genrelist.length"
-"genrelist[0].name"
-"genrelist[0].titles.length"
-"genrelist[0].titles[0]"
 "titlesById[234].name"
 "titlesById[234].year"
 "titlesById[234].description"
 "titlesById[234].boxshot"
 "titlesById[234].rating"
 "titlesById[234].userRating"
+"genrelist.length"
+"genrelist[0].name"
+"genrelist[0].titles.length"
+"genrelist[0].titles[0]"
 ~~~
 
-Once again it is not necessary to build a route that matches the paths "titlesById", "genrelist", "genrelist[0].titles", because each of these paths evaluate to either Objects or Arrays. As it is illegal to request either of these types of values from a DataSource, we do not need to worry about matching these paths with routes.
+Once again it is not necessary to build a route that matches the paths "titlesById", "genrelist", "genrelist[0].titles", because each of these paths would evaluate to either Objects or Arrays. As it is illegal to request either of these types from a DataSource, we do not need to worry about matching these paths with routes.
 
 Of course there may be any number of genrelists or any number of titles within a genrelist. Furthermore, the titlesById map may contain any number of titles. In order to match a request for any genrelist index, any index within a genrelist's titles array, or any id in the titlesById map, we will generalize our routes using the {integers} pattern.
 
 ~~~
-"genrelist.length"
-"genrelist[{integers}].name"
-"genrelist[{integers}].titles.length"
-"genrelist[{integers}].titles[{integers}]"
 "titlesById[{integers}].name"
 "titlesById[{integers}].year"
 "titlesById[{integers}].description"
 "titlesById[{integers}].boxshot"
 "titlesById[{integers}].rating"
 "titlesById[{integers}].userRating"
+"genrelist.length"
+"genrelist[{integers}].name"
+"genrelist[{integers}].titles.length"
+"genrelist[{integers}].titles[{integers}]"
 ~~~
 
 If we create handlers for each of these routes, we should be able to create the illusion that the JSON object exists by matching incoming paths and retrieving data from the relevant services. 
@@ -1118,11 +969,11 @@ Note that by matching several paths with a single route, we are able to both mak
 Given the advantages of matching multiple paths with a single route,  one might think that we would want to cover all legal paths with as few routes as possible.  For example it is possible to match any incoming path request for our application's JSON Graph schema using the following few routes:
 
 ~~~
+"titlesById[{integers}]['name', 'year', 'description', 'boxshot', 'rating', 'userRating']"
 "genrelist.length"
 "genrelist[{integers}].name"
 "genrelist[{integers}].titles.length"
 "genrelist[{integers}].titles[{integers}]"
-"titlesById[{integers}]['name', 'year', 'description', 'boxshot', 'rating', 'userRating']"
 ~~~
 
 However it doesn't always make sense to create routes that match as many paths as possible. Note that the title's "rating" and "userRating" keys are retrieved from the RatingService, while all of the other title keys are retrieved from the TitleService. As a result creating a single route which matched about the "name" and "rating" of a title wouldn't be useful, because serving each individual key would require a request to an entirely different service. Furthermore the code to create each of these values would be very different. Under the circumstances there is little to be gained by handling both values in a single route.
@@ -1132,36 +983,23 @@ A better strategy than creating routes which match as many paths as possible, is
 In other words, we should probably create the following routes instead:
 
 ~~~
+"titlesById[{integers}]['name', 'year', 'description', 'boxshot']"
+"titlesById[{integers}]['rating', 'userRating']
 "genrelist.length"
 "genrelist[{integers}].name"
 "genrelist[{integers}].titles.length"
 "genrelist[{integers}].titles[{integers}]"
-"titlesById[{integers}]['name', 'year', 'description', 'boxshot']"
-"titlesById[{integers}]['rating', 'userRating']
 ~~~
 
-Note that although the first four routes all retrieve their data from the recommendation service, we cannot collapse them into a single route. Two routes can only be collapsed if they are the same length and differ by one key. In the next section we will discuss how to avoid making redundant service calls between each of these genre list routes.
+Note that although the first four routes all retrieve their data from the recommendation service, we cannot collapse them into a single route. Two routes can only be collapsed if they are the same length and differ by one key. We will address this issue later in the walkthrough.
 
-Now that we have chosen our routes, in the next section we will create handlers for these routes. 
+## Handling Authorization
 
-## Creating Route Handlers for Get Operations
+Now that we have chosen our routes we need to consider whether our route handlers have sufficient information to create values on-demand. Note that _many of the routes in the JSON Graph object are personalized for the current user_. For example two different Netflix users will likely see completely different personalized recommendations in the their "genrelist" arrays. The "rating" and "userRating" fields are also specific to the current user. The "rating" field is the algorithmically-predicted rating for the user based on the user's previous viewing history and user-specified ratings. The "userRating" field is the user–specified rating for the title, and it should not be possible to set this value if a user is not logged in.
 
-We have chosen the following routes based on the likelihood that retrieving these values together will reduce code as well as the number of calls made to the service layer.
+While a login is clearly required to change data or receive personalized recommendations, we would like to be able to use to allow users to browse the catalog without logging in. That's why both the recommendations service and rating service fallback to providing generic recommendations and ratings in the absence of a user ID. 
 
-~~~
-"genrelist.length"
-"genrelist[{integers}].name"
-"genrelist[{integers}].titles.length"
-"genrelist[{integers}].titles[{integers}]"
-"titlesById[{integers}]['name', 'year', 'description', 'boxshot']"
-"titlesById[{integers}]['rating', 'userRating']
-~~~
-
-Note that many of these routes are personalized for the current user. For example two different Netflix users will likely see completely different personalized recommendations in the their list of genres. This means that the first four routes must all have access to the current user's ID. The "rating" and "userRating" fields are also specific to the current user's ID. The "rating" field is the algorithmically-predicted rating for the user based on the user's previous viewing history and user-specified ratings. The "userRating" field is the user–specified rating for the title.
-
-Both the recommendation service and the rating service accept a user ID. In the absence of a user ID, both services fallback to providing generic recommendations and ratings. However it is not possible to set a userRating without a user ID.
-
-In order to give the Router the ability to access user–specific information we will create a Router class which accepts the current user ID as a parameter.
+Clearly the Router's route handlers need access to the currently user's ID, if available. To provide the handlers with this information, we can create a Router class which accepts the userID in its constructor.
 
 ~~~js
 var routes = [
@@ -1180,9 +1018,7 @@ var NetflixRouter = function(userId){
 NetflixRouter.prototype = Object.create(BaseRouter);    
 ~~~
 
-As explained in previous sections, creating a BaseRouter class using createClass will build a route table for rapidly matching paths once when the application server starts up. This optimized route table will be shared across all new instances of the derived NetflixRouter class. This makes it an expensive to create and dispose of NetflixRouter objects.
-
-Whenever the application server receives a request, we will instantiate a new instance of the NetflixRouter and pass in a userID.
+As explained in previous sections, creating a BaseRouter class using createClass will build a route table for rapidly matching paths once when the application server starts up. This optimized route table will be shared across all new instances of the derived NetflixRouter class. This makes it inexpensive to create a new NetflixRouter object for every incoming server request.
 
 ~~~js
 var express = require('express');
@@ -1198,7 +1034,12 @@ app.use('/model.json', middleware.dataSourceRoute(function(req, res) {
 }));
 ~~~
 
-Now that we have created a NetflixRouter class, we can add routes to it. Note that each route handler runs with the Router as its "this" object. As a result, each route handler will have access to the userId member defined on the Router. Now we are ready to build the handlers for the genre list routes.
+Creating a new Router for each connection and throwing it away immediately after sending a response reduces the chances that we will accidentally accumulate state on the application server over its lifetime.
+
+Now that we have created a NetflixRouter class, we can add routes to it. Remember that each route handler runs with the Router as its "this" object. As a result, each route handler will have access to the userId member defined on the Router. In the next section we will see how handlers use the Router's userId member to return different values depending on which user is logged in.
+
+### Creating the Get Handlers for the "titlesById" Map
+
 
 ### Creating the Get Handlers for the Genre List Routes
 
@@ -1469,7 +1310,7 @@ var routes = [
                         // list is null or undefined, _not_ the name of the list.
                         var list = genrelist[index];
 
-                        n { path: ["genrelist", index], value: list };
+                        return { path: ["genrelist", index], value: list };
                         }
 
                         return {
