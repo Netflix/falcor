@@ -937,7 +937,7 @@ This service can be used to retrieve information about titles in the catalog. Th
 
 #### 3. The Rating Service
 
-This service can be used to retrieve predicted ratings for every user and title combination. In addition, if users choose to override the predicted rating, this service is used to store their preferred rating. The rating information may be updated frequently based on user input, and is therefore stored in a separate database.
+This service can be used to retrieve predicted ratings for every user and title combination. In addition, if users choose to override the predicted rating, this service is used to store their preferred rating. The rating information may be updated frequently based on user ratings, and is therefore stored in a separate database.
 
 Each of these services will inform a different portion of the virtual JSON object:
 
@@ -981,6 +981,7 @@ Given that these are the only valid types which can be retrieved from a JSON Gra
 
 ~~~
 "genrelist.length"
+"genrelist[0].name"
 "genrelist[0].titles.length"
 "genrelist[0].titles[0]"
 "titlesById[234].name"
@@ -991,10 +992,13 @@ Given that these are the only valid types which can be retrieved from a JSON Gra
 "titlesById[234].userRating"
 ~~~
 
+Once again it is not necessary to build a route that matches the paths "titlesById", "genrelist", "genrelist[0].titles", because each of these paths evaluate to either Objects or Arrays. As it is illegal to request either of these types of values from a DataSource, we do not need to worry about matching these paths with routes.
+
 Of course there may be any number of genrelists or any number of titles within a genrelist. Furthermore, the titlesById map may contain any number of titles. In order to match a request for any genrelist index, any index within a genrelist's titles array, or any id in the titlesById map, we will generalize our routes using the {integers} pattern.
 
 ~~~
 "genrelist.length"
+"genrelist[{integers}].name"
 "genrelist[{integers}].titles.length"
 "genrelist[{integers}].titles[{integers}]"
 "titlesById[{integers}].name"
@@ -1065,9 +1069,13 @@ model.get("titlesById[523]['name', 'year']").then(function(jsonResponse){ consol
 
 How can we match multiple paths for values exposed by the same service without making multiple calls to the same service?
 
-#### Matching PathSets With Routes
+##### Matching Multiple Paths With KeySets
 
-The good news is that it is possible to to match multiple paths that differ by only one key using an indexer that contains a discrete set of keys. In other words we can replace both routes above with a single route, as in the example below:
+The good news is that it is possible to to match multiple paths that differ by only one key using a KeySet. A KeySet is a discrete set of keys expressed as an indexer containing multiple values. In other words instead of creating The following two routes..
+
+(The routes)
+
+...w can create a single route that matches both the name and year of a title:
 
 ~~~js
 var router = new Router([
@@ -1102,18 +1110,106 @@ var router = new Router([
 ]);
 ~~~
 
-Note that by matching several paths with a single route, we are able to make a single request to the database and eliminate a large amount of repetitive code. 
+Note that by matching several paths with a single route, we are able to both make a single request to the database and eliminate a large amount of repetitive code. 
 
-Given the large efficiency gains to be made by creating routes which are capable of matching many paths simultaneously,  one might think that we would want to create as few routes as possible.  For example it is possible to match any incoming path request for the JSON Graph schema above with a small set of the following few routes:
+Given the advantages of matching multiple paths with a single route,  one might think that we would want to cover all legal paths with as few routes as possible.  For example it is possible to match any incoming path request for our application's JSON Graph schema using the following few routes:
 
 ~~~
 "genrelist.length"
+"genrelist[{integers}].name"
 "genrelist[{integers}].titles.length"
 "genrelist[{integers}].titles[{integers}]"
 "titlesById[{integers}]['name', 'year', 'description', 'boxshot', 'rating', 'userRating']"
 ~~~
 
-However it doesn't always make sense to create routes that match as many paths as possible. Note that the title's rating and user rating keys are retrieve from an entirely different service of them the titles
+However it doesn't always make sense to create routes that match as many paths as possible. Note that the title's "rating" and "userRating" keys are retrieved from the RatingService, while all of the other title keys are retrieved from the TitleService. As a result creating a single route which matched about the "name" and "rating" of a title wouldn't be useful, because serving each individual key would require a request to an entirely different service and as a result, entirely different code.
+
+A better strategy than creating routes which match as many parents as possible, is to create routes that match paths that a retrieved from the same service. The code to retrieve these values stored in the same service is likely to be similar, and it may provide us with opportunities to make a single call to retrieve multiple values.
+
+In other words, we should probably create the following routes instead:
+
+~~~
+"genrelist.length"
+"genrelist[{integers}].name"
+"genrelist[{integers}].titles.length"
+"genrelist[{integers}].titles[{integers}]"
+"titlesById[{integers}]['name', 'year', 'description', 'boxshot']"
+"titlesById[{integers}]['rating', 'userRating']
+~~~
+
+Now that we have chosen our routes, in the next section we will create handlers for these routes. 
+
+### Creating Route Handlers for Get Operations
+
+We have chosen the following routes based on the likelihood that retrieving these values together will reduce code as well as the number of calls made to the service layer.
+
+~~~
+"genrelist.length"
+"genrelist[{integers}].name"
+"genrelist[{integers}].titles.length"
+"genrelist[{integers}].titles[{integers}]"
+"titlesById[{integers}]['name', 'year', 'description', 'boxshot']"
+"titlesById[{integers}]['rating', 'userRating']
+~~~
+
+Note that many of these routes are personalized for the current user. For example two different Netflix users will likely see completely different personalized recommendations in the their list of genres. 
+
+This means that the first four routes must all have access to the current user's ID. The "rating" and "userRating" fields are also specific to the current user's ID. The "rating" field is the algorithmically-predicted rating for the user based on the user's previous viewing history and user-specified ratings. The "userRating" field is the user–specified rating for the title.
+
+Both the recommendation service and the rating service accept a user ID. In the absence of a user ID, both services fall band to providing generic recommendations and ratings. However without a user ID it is not  possible to set a userRating with the RecommendationsService.
+
+In order to give the Router the ability to access user–specific information we will create a Router class which accepts the current user ID as a parameter.
+
+~~~js
+var routes = [
+    // routes will go here
+];
+var BaseRouter = Router.createClass([routes]);
+
+// Creating a constructor for a class that derives from BaseRouter
+var NetflixRouter = function(userId){
+    // Invoking the base class constructor
+    BaseRouter.call(this);
+    this.userId = userId;
+};
+
+// Deriving the NetflixRouter from the BaseRouter using JavaScript's classical inheritance pattern
+NetflixRouter.prototype = Object.create(BaseRouter);    
+~~~
+
+Now that we have created a router, we can add routes to the route array defined above. Note that each route handler runs with the Router as its "this" object. As a result, each route handler will have access to the userId member defined on the Router.
+
+To demonstrate how route handlers get access to user information, let's take a stab at the first route: "genrelist.length".
+
+var routes = [
+    {
+        route: 'genrelist.length',
+        get: function(pathSet) {
+               
+            return recommendationService.getGenreList(this.userId)
+                .then(function(genrelist) {             
+                    return {
+                        path: ['genrelist', 'length'],
+                        value: genrelist.length
+                    };
+                });
+        }
+    }
+ 
+
+
+As explained in previous sections, creating a base router and inheriting front it will allow the Falcor Router to build a fast route to table once at the beginning of the application,
+Route handlers run in the context of the Router object rather than the route object. That means they will have access to the
+
+are the algorithmically computed predicted rating for the user, and the users actual ratings respectively.
+
+Each of these routes retrieves information from the current users personalized recommendations. Other routes such as the "userRating"
+
+
+
+
+Café headless job is to retrieve the requested values for each path from the service
+In the next section, we will define a route and a "get"  handler for each of these routes
 
  For example if two different paths can be matched by single route, but they require completely different code to retrieve their individual values, handling them a single route often provides no benefit. 
 
