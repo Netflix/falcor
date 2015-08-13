@@ -503,7 +503,7 @@ var Observable = Rx.Observable;
 }
 ~~~
 
-An Observable is similar to a Promise, with the principal difference being that an Observable can send multiple values over time. The main advantage of using a Observable over a Promise is the ability to progressively return PathValues to the Router as soon as they are returned from the underlying DataSource.  In contrast, when delivering values in a Promise, all values must be collected together in a JSON Graph envelope or an Array of PathValues and returned to the Router at the same time.
+An Observable is similar to a Promise, with the principal difference being that an Observable can send multiple values over time. The main advantage of using an Observable over a Promise is the ability to progressively return PathValues to the Router as soon as they are returned from the underlying DataSource.  In contrast, when delivering values in a Promise, all values must be collected together in a JSON Graph envelope or an Array of PathValues and returned to the Router at the same time.
  
 Using an Observable can improve throughput, because Routers may make additional requests to backend services in the event references are discovered in a Route Handler's JSON Graph output.
 
@@ -741,7 +741,7 @@ In this section we will examine how the router executes each of the DataSource m
 
 ## Walkthrough: Building a Router for Netflix-like Application
 
-Netflix is a online streaming video service with millions of subscribers.  When a member logs on to the Netflix service, they are presented with a list of genres, each of which contains a list of titles which they can stream.
+Netflix is an online streaming video service with millions of subscribers.  When a member logs on to the Netflix service, they are presented with a list of genres, each of which contains a list of titles which they can stream.
 
 ![Netflix Homepage](http://netflix.github.io/falcor/images/netflix-screenshot.png)
 
