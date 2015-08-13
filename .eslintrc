@@ -34,7 +34,7 @@
         "use-isnan": [ 2 ],
         // should we enforce valid documentation comments?
         // i.e., if you do documentation, do it right
-        // "valid-jsoc": [ 2 ],
+        // "valid-jsdoc": [ 2 ],
         "valid-typeof": [ 2 ],
 
         // best practices
