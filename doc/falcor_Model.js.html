@@ -159,9 +159,9 @@ Model.prototype = {
      * Invoke a function
      * @function
      * @param {Path} functionPath - The path to the function to invoke
-     * @param {Array.&lt;Object>} args - The arguments to pass to the function
-     * @param {Array.&lt;PathSet>} pathSuffixes - The paths to retrieve from objects returned from the function
-     * @param {Array.&lt;PathSet>} calleePaths - The paths to retrieve from function callee after successful function execution
+     * @param {Array&lt;Object>} args - The arguments to pass to the function
+     * @param {Array&lt;PathSet>} pathSuffixes - The paths to retrieve from objects returned from the function
+     * @param {Array&lt;PathSet>} calleePaths - The paths to retrieve from function callee after successful function execution
      * @param {Function} selector The selector function
      * @returns {ModelResponse.&lt;*> | Observable} The {JSONGraph} fragment and associated metadata returned from the invoked function
      */
@@ -221,7 +221,7 @@ Model.prototype = {
     },
     /**
      * Get the local {@link JSONGraph} cache. This method can be a useful to store the state of the cache
-     * @param {...Array.&lt;PathSet>} [pathSets] - The path(s) to retrieve. If no paths are specified, the entire {@link JSONGraph} is returned
+     * @param {...Array&lt;PathSet>} [pathSets] - The path(s) to retrieve. If no paths are specified, the entire {@link JSONGraph} is returned
      * @return {JSONGraph} jsonGraph - A {@link JSONGraph} fragment
      * @example
      // Storing the boxshot of the first 10 titles in the first 10 genreLists to local storage.

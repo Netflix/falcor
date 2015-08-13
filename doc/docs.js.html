@@ -223,7 +223,7 @@ model.
  * The get method retrieves an array of {@link PathSet}s from a remote Model object.
  * @name get
  * @function
- * @arg {Array.&lt;PathSet>} pathSets the path(s) to retrieve
+ * @arg {Array&lt;PathSet>} pathSets the path(s) to retrieve
  * @returns {Observable.&lt;JSONGraphEnvelope>} jsonGraphEnvelope the response returned from the server.
  * @memberof DataSource.prototype
  * @example
@@ -444,9 +444,9 @@ result.subscribe(function(jsong) {
  * @name call
  * @function
  * @arg {Path} functionPath the path to the function to invoke
- * @arg {Array.&lt;Object>} args the arguments to pass to the function
- * @arg {Array.&lt;PathSet>} pathSuffixes paths to retrieve from objects returned from the Function
- * @arg {Array.&lt;PathSet>} calleePaths paths to retrieve from function callee after successful Function execution
+ * @arg {Array&lt;Object>} args the arguments to pass to the function
+ * @arg {Array&lt;PathSet>} pathSuffixes paths to retrieve from objects returned from the Function
+ * @arg {Array&lt;PathSet>} calleePaths paths to retrieve from function callee after successful Function execution
  * @returns {Observable.&lt;JSONGraphEnvelope>} jsonGraphEnvelope the response returned from the server.
  * @memberof DataSource.prototype
  * @example
@@ -542,19 +542,19 @@ var movieNames = model.get('genreLists[0...10][0...10].name').toPathValues();
 /**
  * A JSONGraphEnvelope is an envelope that wraps a JSONGraph fragment. In addition to {@link PathValue}s and {@link JSONEnvelope}s, {@link Model}s can accept and return JSONGraphEnvelopes. In addition to a JSONGraph fragment, a {@link JSONGraphEnvelope} may contain an array of errors that occurred while an operation was being executed on a JSONGraph Model. In the event a function was executed on a Model, the JSONGraphEnvelope may also contain a list of paths to invalidate in the {@link Model}'s local cache.
  * @typedef {Object} JSONGraphEnvelope
- * @property {?Array.&lt;PathSet>} paths - The paths to the values stored in the JSONGraph fragment.
+ * @property {?Array&lt;PathSet>} paths - The paths to the values stored in the JSONGraph fragment.
  * @property {JSONGraph} jsonGraph - a JSONGraph object containing all of the values.
- * @property {?Array.&lt;Error>} errors - one or more errors that occurred while evaluating paths on a {@link Model}.
- * @property {?Array.&lt;PathSet>} invalidated - the paths to be removed from the {@link Model}'s local cache.
+ * @property {?Array&lt;Error>} errors - one or more errors that occurred while evaluating paths on a {@link Model}.
+ * @property {?Array&lt;PathSet>} invalidated - the paths to be removed from the {@link Model}'s local cache.
  */
 
 /**
  * A JSONEnvelope is an envelope that wraps a JSON fragment. In addition to {@link PathValue}s and {@link JSONGraphEnvelope}s, {@link Model}s can accept and return JSONEnvelopes. In addition to a JSON fragment, a {@link JSONEnvelope} may contain an array of errors that occurred while an operation was being executed on a JSON Model. In the event a function was executed on a Model, the JSONEnvelope may also contain a list of paths to invalidate in the {@link Model}'s local cache.
  * @typedef {Object} JSONEnvelope
- * @property {?Array.&lt;PathSet>} paths - The paths to the values stored in the JSON fragment.
+ * @property {?Array&lt;PathSet>} paths - The paths to the values stored in the JSON fragment.
  * @property {JSON} json - a JSON object containing all of the values.
- * @property {?Array.&lt;Error>} errors - one or more errors that occurred while evaluating paths on a {@link Model}.
- * @property {?Array.&lt;PathSet>} invalidated - the paths to be removed from the {@link Model}'s local cache.
+ * @property {?Array&lt;Error>} errors - one or more errors that occurred while evaluating paths on a {@link Model}.
+ * @property {?Array&lt;PathSet>} invalidated - the paths to be removed from the {@link Model}'s local cache.
  */
 
 /**
@@ -790,7 +790,7 @@ results.forEach(function(pathValue) {
 
 /**
  * {@link Path}s are an ordered list of keys describing a location in a JSONGraph model. Paths can be provided to {@link Model}s to describe the location of data in the JSONGraph model. {@link Model}s also emit {@link Path} objects alongside values retrieved from the JSONGraph model in order to provide additional context. 
- * @typedef {Array.&lt;Key>} Path
+ * @typedef {Array&lt;Key>} Path
  @example
 var $ref = falcor.Model.ref;
 var model = new falcor.Model({
@@ -847,13 +847,13 @@ values.forEach(function(pathValue) {
 
 /**
  * {@link KeySet}s are included inside of {@link PathSet} expressions. A {@link KeySet} can either be a {@link Key}, a {@link Range}, or an Array of either.
- * @typedef {(Key|Range|Array.&lt;(Key|Range)>)} KeySet
+ * @typedef {(Key|Range|Array&lt;(Key|Range)>)} KeySet
  */
 
 /**
  * {@link PathSet} Expressions are a human-readable compression format that is equivalent to a set of {@link Path} expressions. Unlike {@link Path} expressions, {@link PathSet}s can contain {@link KeySet} objects like {@link Range}s and Arrays of keys. 
  In addition to being a more terse than specifying multiple {@link Path} objects, {@link PathSet}s are generally more efficient to evaluate.
- * @typedef {Array.&lt;KeySet>} PathSet
+ * @typedef {Array&lt;KeySet>} PathSet
  * @example
 var model = new falcor.Model();
 var $ref = falcor.Model.ref;
@@ -2569,7 +2569,7 @@ model.boxValues().getValue("user.name").subscribe(function(value) {
  * the entire cache is returned.
  * @name getCache
  * @function
- * @arg {...Array.&lt;PathSet>} pathSets the path(s) to retrieve
+ * @arg {...Array&lt;PathSet>} pathSets the path(s) to retrieve
  * @returns {JSONGraph} jsonGraph a JSONGraph object to use as the local cache.
  * @memberof Model.prototype
  * @example
@@ -2905,8 +2905,8 @@ nameAndRatings.forEach(function(html) {
  * @memberof Model.prototype
  * @function
  * @arg {Path} functionPath the path to the function to invoke
- * @arg {Array.&lt;Object>} args the arguments to pass to the function
- * @arg {Array.&lt;PathSet>} pathSuffixes paths to retrieve from objects returned from the Function
+ * @arg {Array&lt;Object>} args the arguments to pass to the function
+ * @arg {Array&lt;PathSet>} pathSuffixes paths to retrieve from objects returned from the Function
  * @arg {...PathSet} calleePaths paths to retrieve from function callee after successful Function execution
  * @arg {Function} selector the selector function that retrieves the loaded data from the cache and converts it into the object that appears in the stream
  * @return {ModelResponse.&lt;Object>|Observable} either a ModelResponse containing the results of the call operation, or an Observable stream containing the results of the selector function if a selector function is provided.

@@ -34,7 +34,7 @@
 /**
  * Get data for the specified path(s)
  * @function get
- * @param {Array.&lt;PathSet>} pathSets - The path(s) to retrieve
+ * @param {Array&lt;PathSet>} pathSets - The path(s) to retrieve
  * @returns {Observable.&lt;JSONGraphEnvelope>} - The {JSONGraph} fragment and associated metadata for the path(s)
  * @memberof DataSource.prototype
  */
@@ -51,9 +51,9 @@
  * Invoke a function
  * @function call
  * @param {Path} functionPath - The path to the function to invoke
- * @param {Array.&lt;Object>} args - The arguments to pass to the function
- * @param {Array.&lt;PathSet>} pathSuffixes - The paths to retrieve from objects returned from the function
- * @param {Array.&lt;PathSet>} calleePaths - The paths to retrieve from function callee after successful function execution
+ * @param {Array&lt;Object>} args - The arguments to pass to the function
+ * @param {Array&lt;PathSet>} pathSuffixes - The paths to retrieve from objects returned from the function
+ * @param {Array&lt;PathSet>} calleePaths - The paths to retrieve from function callee after successful function execution
  * @returns {Observable.&lt;JSONGraphEnvelope>} The {JSONGraph} fragment and associated metadata returned from the invoked function
  * @memberof DataSource.prototype
  */
