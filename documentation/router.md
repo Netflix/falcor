@@ -1745,16 +1745,15 @@ Note that references are JSON Graph value types, like strings, booleans, and num
 
 (Example I requesting the first reference in the first genre list)
 
-The remaining genre list route will be left of an exercise to the user:
+The remaining genre list route will be left as an exercise for the user:
 
 ~~~
 "genrelist[{integers}].titles.length"
 ~~~
 
-
 ### Reducing Service Calls with Batching
 
-Now we have finished all of the routes required to create the genre list object in the Router's virtual JSON Graph object. Now we can make a single request to the Router and retrieve as much information about the user's personalized recommendations as we want. The following code retrieves the first two title references in the first two genres, as well as the name and length of the first two genres.
+We have finished all of the routes required to create the genre list in the Router's virtual JSON Graph object. Now we can make a single request to the Router and retrieve as much information about the user's personalized recommendations as we want. The following code retrieves the first two title references in the first two genres, as well as the name and length of the first two genres.
 
 (Example of what I said above)
 
@@ -1762,12 +1761,21 @@ The code above prints the following to the console:
 
 (Example JSON Graph output from Router)
 
-Notice that we are branch guarding at both the genre and title level. This ensures that any attempt to retrieve a genre or title that doesn't exist will not throw and will instead return the specific path at which the value was found.
+The request above matches each and everyone of the genre list routes in the Router. These individual routes work together to create what appears to be a single object. Unfortunately there is a problem: each of these routes makes the _same service call_.
 
+(Call to get genre list)
+
+This places unnecessary load on the service and its backend data store. Ideally we would like to make a single call to the recommendation service for all of these routes. One solution would be to collapse these routes, but this is not possible. Routes can only be collapsed if they are the same length, and differ by one key at the most. 
+
+
+An ideal solution would be for the service Tulare to
+
+Notice that we are branch guarding at both the genre and title level. This ensures that any attempt to retrieve a genre or title that doesn't exist will not throw and will instead return the specific path at which the value was found.
 
 The router inserts these references into the JSON Graph response:
 
 (output of the code above)
+
 
 While it is occasionally valuable to be able to retrieve references directly - particularly when preloading the contents of a list – it is uncommon. Rather than retrieve references directly, applications typically retrieve fields from reference targets.
 
