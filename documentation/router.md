@@ -1074,13 +1074,52 @@ Let's start with the first route, because it does not require any user authentic
 
 #### "titlesById[{integers}]['name', 'year', 'description', 'boxshot']"
 
-This route matches any request for title fields that are retrieved from the title service. The title service is not personalized. It exposes generic metadata that is true for all users.  The title service has getTitles method which can be used to retrieve any number of title objects by ID.
+This route matches any request for title fields that are retrieved from the title service. The title service is not personalized. It exposes generic metadata that is true for all users.  The title service has a getTitles method which can be used to retrieve any number of title objects by ID.
 
-(Example)
+~~~js
+titleService.getTitles([1, 2]).then(function(titles) { console.log(JSON.stringify(titles, null, 3)); })
+
+//will output roughly:
+{
+   "1": {
+      "doc": {
+         "year": 2011,
+         "description": "Little ones can learn a lot from George -- one of the most curious monkeys in all of literature -- with adventures narrated by William H. Macy.",
+         "rating": 1,
+         "boxshot": "http://cdn.test.nflximg.net/images/3670/3843670.jpg",
+         "name": "Curious George",
+         "_id": "1",
+         "_rev": "1-2ee1959b61d75dcd79baa1f06ede73ab"
+      }
+   },
+   "2": {
+      "doc": {
+         "year": 2011,
+         "description": "Hugh Laurie stars as the ornery Dr. Gregory House, a paradoxical physician who loathes his patients but is a genius at treating mysterious ailments.",
+         "rating": 1.1,
+         "boxshot": "http://cdn.test.nflximg.net/images/5161/4185161.jpg",
+         "name": "House, M.D.",
+         "_id": "2",
+         "_rev": "1-3ec6bbb698af163a7946825844e9fddf"
+      }
+   }
+}     
+~~~
 
 Note that the output of the title service is a map of record objects organized by each title ID. A record object is an object with a "doc" key containing the requested title. If an error occurs while attempting to retrieve a particular title, the record object will contain an error" key instead.
 
-(Example of error)
+~~~js
+{
+   "1": {
+      "error": "something went wrong."
+   },
+   "2": {
+      "error": "something went wrong."
+   }
+}     
+
+~~~
+
 
 Let's use the title service to retrieve each title's generic fields. We will start by creating a route object which matches any path that would retrieve these title fields.
 
@@ -1155,26 +1194,96 @@ Once we have access to the ids of the requested titles, we can make a call to th
             return titleService.getTitles(pathSet.titleIds).
                 then(function(titles) {
                     // code to retrieve title values goes here
-                });            
+                });
         }
     }
 ~~~
 
 Now we will use two nested forEach calls to create a path value object for every title id and title key combination.  
 
-(Example)        
+~~~js
+    {
+        route: "titlesById[{integers:titleIds}]['name','year','description','boxshot']",
+        get: function (pathSet) {
+            return titleService.getTitles(pathSet.titleIds).
+                then(function(titles) {
+
+                    var results = [];
+                    
+                    pathSet.titleIds.forEach(function(titleId) {
+                        pathSet[2].forEach(function(key) {
+                            var titleRecord = titles[titleId];
+
+                            if (titleRecord.error) {
+                                results.push({
+                                    path: ['titlesById', titleId, key],
+                                    value: $error(titleRecord.error)
+                                });
+                            } else {
+                                results.push({
+                                    path: ['titlesById', titleId, key], 
+                                    value: titleRecord.doc[key]
+                                });
+                            }
+                        });
+                    });
+                    
+                    return results;
+                });
+        }
+    }
+~~~        
                                     
-Not we should be able to retrieve title keys by ID from the Router:
+Now we should be able to retrieve title keys by ID from the Router:
 
-(Example)
+~~~js
+router.get([["titlesById", [9, 10], ["name", "year"]]]).subscribe(function(jsonGraph) {
+    console.log(JSON.stringify(jsonGraph, null, 4));
+});
+~~~
 
-The router collects up all of the path value objects  returned from route handlers, adds each value to a JSON Graph object, and returns it as a response. The code above print the following to the console:
+The router collects up all of the path value objects returned from route handlers, adds each value to a JSON Graph object, and returns it as a response.  The code above prints the following to the console:
 
-(Example)
+~~~js
+{
+    "jsonGraph": {
+        "titlesById": {
+            "10": {
+                "name": "The Reunion",
+                "year": 2011
+            },
+            "9": {
+                "name": "Snow on Tha Bluff",
+                "year": 2011
+            }
+        }
+    }
+}
+~~~
 
 What do you think will happen if we attempt to retrieve keys from a title that does not exist? Let's try to retrieve the name of a title that does not exist (id = -1), and a title that does exist (id=7). 
 
-(Example)
+~~~js
+router.get([["titlesById", [-1, 7], "name"]]).subscribe(function(jsonGraph) {
+    console.log(JSON.stringify(jsonGraph, null, 4));
+});
+
+//will output:
+{
+    "jsonGraph": {
+        "titlesById": {
+            "-1": {
+                "$type": "error",
+                "value": "undefined is not an object"
+            },
+            "7": {
+                "$type": "error",
+                "value": "undefined is not an object"
+            }
+        }
+    }
+}
+~~~
 
 Note that the output is a JSON Graph error object at each individual path. Why did this happen? 
 
@@ -1184,11 +1293,67 @@ Clearly we have to be defensive when coding our route handlers, but this begs th
 
 If there is a null or undefined value at "titleById[-1]" the route should return a path value indicating as much. Note the additional check added to the route below.
 
-(Example)
+~~~js
+    {
+        route: "titlesById[{integers:titleIds}]['name','year','description','boxshot']",
+        get: function (pathSet) {
+            return titleService.getTitles(pathSet.titleIds).
+                then(function(titles) {
+
+                    var results = [];
+                    
+                    pathSet.titleIds.forEach(function(titleId) {
+                        pathSet[2].forEach(function(key) {
+                            var titleRecord = titles[titleId];
+
+                            if (titleRecord.error) {
+                                results.push({
+                                    path: ['titlesById', titleId, key],
+                                    value: $error(titleRecord.error)
+                                });
+                            } else if (titleRecord.doc) {
+                                results.push({
+                                    path: ['titlesById', titleId, key], 
+                                    value: titleRecord.doc[key]
+                                });
+                            } else {
+                                results.push({
+                                    path: ['titlesById', titleId],
+                                    value: undefined
+                                });
+                            }
+                        });
+                    });
+                    
+                    return results;
+                });
+        }
+    }                    
+~~~
 
 Now let's see what gets printed to the console if we repeat the same request as last time:
 
-(Example)
+~~~js
+router.get([["titlesById", [-1, 7], "name"]]).subscribe(function(jsonGraph) {
+    console.log(JSON.stringify(jsonGraph, null, 4));
+});
+
+//will output:
+{
+    "jsonGraph": {
+        "titlesById": {
+            "-1": {
+                "name": {
+                    "$type": "atom"
+                }
+            },
+            "7": {
+                "name": "LEGO Ninjago: Masters of Spinjitzu: Way of the Ninja"
+            }
+        }
+    }
+}
+~~~
 
 The practice of checking for the existence of value types along the matched path is referred to as **branch guarding**, and it is every route handler's responsibility. If null, undefined, or _any JSON Graph value type_ (ex.string, number, atom), is discovered along a path, a route handler must return a PathValue that indicates which path at which the value type was discovered, as well as the specific value type found there. In the example above we only bother to check for null or undefined because we feel confident that the data has been sanitized already, and no other value type (ex. string, number) could appear instead of the title. Depending on how much you trust your data, you may want to be more zealous.
 
@@ -1196,30 +1361,109 @@ Now that we can retrieve non-personalized fields from titles, let's create a rou
 
 #### "titlesById[{integers}]['rating', 'userRating']"
 
-This route matches any request for the rating on title objects. The rating service is personalized, and provides predicted ratings for each user based on their previous preferences. In the event that there is no user ID available, the rating service will create a rating based on the ratings provided by registered members. The rating service has getRatings method which can be used to retrieve any number of rating records objects by title ID.
+This route matches any request for the rating on title objects. The rating service is personalized, and provides predicted ratings for each user based on their previous preferences. In the event that there is no user ID available, the rating service will create a rating based on the ratings provided by registered members. The rating service has a getRatings method which can be used to retrieve any number of rating records objects by title ID.
 
-(Example)
+~~~js
+ratingService.getRatings([1,2], "1").
+    then(function(titles) { console.log(JSON.stringify(titles, null, 3)); })
+
+//will output roughly:
+{
+   "1": {
+      "doc": {
+         "rating": 1,
+         "userRating": 1,
+         "_id": "1,1",
+         "_rev": "3-efaac8f74b093ada6f9c537d30a58782"
+      }
+   },
+   "2": {
+      "doc": {
+         "rating": 1.1,
+         "userRating": 1,
+         "_id": "1,2",
+         "_rev": "7-fd93ebf5868a9ab74f220f57ab53ed2d"
+      }
+   }
+} 
+~~~
 
 Note that like the title service, the output of the rating service is a map of record objects organized by each title ID. Each record object contains a "doc" field with an object that contains two fields:
 
 1. The "rating" which is the algorithmically-predicted rating based on the user's previous ratings of similar titles.
- 2. The "userRating" which, if present, is the users explicitly specified rating for this title.
+2. The "userRating" which, if present, is the users explicitly specified rating for this title.
 
 Like the title service records, the rating record will contain a "error" key instead of a "doc" key in the event that an error occurs while attempting to retrieve the rating record.
 
 Now that we understand how the rating service works, let's create a route that matches the title's rating fields. This routes get handler will follow pretty much the same template as the title service route with one exception: the rating route retrieves the userId member from the Router and passes it to the ratings service.
 
-(Example)
+~~~js
+    {
+        route: "titlesById[{integers:titleIds}]['userRating', 'rating']",
+        get: function(pathSet) {
+            var userId = this.userId;
+
+            return ratingService.getRatings(pathSet.titleIds, userId).
+                then(function(ratings) {
+                    var results = [];
+                    
+                    pathSet.titleIds.forEach(function(titleId) {
+                        pathSet[2].forEach(function(key) {
+                            var ratingRecord = ratings[titleId];
+
+                            if (ratingRecord.error) {
+                                results.push({
+                                    path: ['titlesById', titleId, key],
+                                    value: $error(ratingRecord.error)
+                                });
+                            } else if (ratingRecord.doc) {
+                                results.push({
+                                    path: ['titlesById', titleId, key], 
+                                    value: ratingRecord.doc[key]
+                                });
+                            } else {
+                                results.push({
+                                    path: ['titlesById', titleId],
+                                    value: undefined
+                                });
+                            }
+                             
+                        });
+                    });
+                    
+                    return results;
+                });
+        }
+    }
+~~~
 
 Each one of the Routers route handlers runs with the Router instance as it's "this" object. That means that our route handler has access to the Router's userId member. The handler passes the Router's userId to the recommendation service, which retrieves a personalized genre list for the current user. If the current user is not authenticated, the Router's userId will be undefined. If an undefined userId is passed to the rating service, the service simply returns a record with a generic "rating" and no "userRating" key.
 
 Now we should be able to retrieve any title field by ID.
 
-(Example that retrieves the name, year, userRating of one title - make sure to instantiate the router with a user ID of one)
+~~~js
+var falcorRouterDemoFactory = require('falcor-router-demo');
+var router = falcorRouterDemoFactory("1");
+router.get([["titlesById", 1, ["name", "year", "userRating"]]]).subscribe(function(jsonGraph) {
+    console.log(JSON.stringify(jsonGraph, null, 4));
+});
+~~~
 
 The request above matches both routes we have created. The Router adds the resulting PathValues to a single JSON Graph response. The code above prints the following to the console:
 
-(example)
+~~~js
+{
+    "jsonGraph": {
+        "titlesById": {
+            "1": {
+                "name": "Curious George",
+                "userRating": 1,
+                "year": 2011
+            }
+        }
+    }
+}
+~~~
 
 Note how the router presents the consumer with what appears to be a single title object, but sources the data for the title from multiple services. The result is a simple API for the consumer without compromising any flexibility about where data is stored on the backend.
 
@@ -1295,14 +1539,28 @@ As we can see, the route simply transforms the result of the promise into a Path
 
 Now we should be able to retrieve the length of the genre list from the Router:
 
-(example)
+~~~js
+var falcorRouterDemoFactory = require('falcor-router-demo');
+var router = falcorRouterDemoFactory("1");
+
+router.get([["genrelist", "length"]]).subscribe(function(jsonGraph) {
+    console.log(JSON.stringify(jsonGraph, null, 4));
+});
+~~~
 
 The router accepts the PathValue objects from the routes, and adds each of their values to a single JSON Graph object. The code above prints the following to the console:
 
-(example)
+~~~js
+{
+    "jsonGraph": {
+        "genrelist": {
+            "length": 29
+        }
+    }
+}
+~~~
 
 The genre list length route is easy because it only matches one path. Next let's try a route that can match multiple paths: "genrelist[{integers}].name".
-
 
 
 This route starts out much the same way as the previous one: by retrieving the user's genre list from the recommendation service.
@@ -1371,17 +1629,53 @@ If a route's get handler is passed ["genrelist", [0, 1, 2], "name"] it must retu
 
 Once we retrieve the genre list from the recommendations service, we can use the map function to create a PathValue for each index the route matches.
 
-(Example: Just include this route from the router demo without the comments)
+~~~js
+    {
+        route: "genrelist[{integers:indices}].name",
+        get: function (pathSet) {
+            return recommendationService.
+                getGenreList(this.userId).
+                then(function(genrelist) {
+                    return pathSet.indices.map(function(index) {
+                        var list = genrelist[index];
+
+                        if (list == null) {
+                            return { path: ["genrelist", index], value: list };
+                        }
+
+                        return {
+                            path: ['genrelist', index, 'name'],
+                            value: genrelist[index].name
+                        };
+                    });
+                });
+        }
+    }
+~~~
 
 Note that we have been careful to use branch guarding, and check for the existence of each individual list before attempting to retrieve the name. 
 
 Now we can retrieve the name of a user's genre lists from the Router.
 
-(Example)
+~~~js
+router.get([["genrelist", 1, "name"]]).subscribe(function(jsonGraph) {
+    console.log(JSON.stringify(jsonGraph, null, 4));
+});
+~~~
 
 Once again the Router converts the output into a JSON Graph object, and so we see the following console output:
 
-(Example)
+~~~js
+{
+    "jsonGraph": {
+        "genrelist": {
+            "1": {
+                "name": "Action & Adventure"
+            }
+        }
+    }
+}
+~~~
 
 Now let's tackle the most challenging of all of the genre list routes...
 
@@ -1407,70 +1701,52 @@ This route builds the JSON Graph references in the titles array within each genr
 
 Each reference in the titles array points to a title in the "titlesById" map. This time we will just go directly to the full solution.
 
-(Example pasted in from router demo without comments)
+~~~js
+    {
+        route: "genrelist[{integers:indices}].titles[{integers:titleIndices}]",
+        get: function (pathSet) {
+            return recommendationService.
+                getGenreList(this.userId).
+                then(function(genrelist) {
+                    var pathValues = [];
+                    pathSet.indices.forEach(function (index) {
+                        var genre = genrelist[index];
+                        
+                        if (genre == null) {
+                            pathValues.push({
+                                path: ['genrelist', index],
+                                value: genre
+                            });
+                        } else {
+                            pathSet.titleIndices.forEach(function(titleIndex) {
+                                var titleID = genrelist[index].titles[titleIndex];
 
-Notice that we are branch guarding at both the genre and title level. This ensures that any attempt to retrieve a genre or title that doesn't exist will not throw and will instead return the specific path at which the undefined value was found.
+                                if (titleID == null) {
+                                    pathValues.push({ path: ["genrelist", index, "titles", titleIndex], value: titleID });
+                                }
+                                else {
+                                    pathValues.push({
+                                        path: ['genrelist', index, 'titles', titleIndex],
+                                        value: $ref(['titlesById', titleID])
+                                    });
+                                }
+                            });
+                        }
+                    });
+                    return pathValues;
+                });
+        }
+    }
+~~~
 
-Note that references are JSON Graph value types, like strings, booleans, and numbers. That means we can retrieve these references from the Router, just like any other value type:
+Notice that we are branch guarding at both the genre and title level. This ensures that any attempt to retrieve a genre or title that doesn't exist will not throw and will instead return the specific path at which the value was found.
 
-(Example I requesting the first reference in the first genre list)
-
-The remaining genre list route will be left of an exercise to the user:
+The remaining route will be left as an exercise to the user:
 
 ~~~
 "genrelist[{integers}].titles.length"
 ~~~
 
-### Reducing Service Calls with Batching
+Note that although the first four routes all retrieve their data from the recommendation service, we cannot collapse them into a single route. Two routes can only be collapsed if they are the same length and differ by one key. We will address this issue later in the walkthrough.
 
-Now we have finished all of the routes required to create the genre list object in the Router's virtual JSON Graph object. Now we can make a single request to the Router and retrieve as much information about the user's personalized recommendations as we want. The following code retrieves the first two title references in the first two genres, as well as the name and length of the first two genres.
-
-(Example of what I said above)
-
-The code above prints the following to the console:
-
-(Example JSON Graph output from Router)
-
-
-
-
-
-The router inserts these references into the JSON Graph response:
-
-(output of the code above)
-
-While it is occasionally valuable to be able to retrieve references directly - particularly when preloading the contents of a list – it is uncommon. Rather than retrieve references directly, applications typically retrieve fields from reference targets.
-
-For example, when the user opens our application, we would like to retrieve the box shot of the first 8 titles in the first five genres so that we can display them in a grid on the screen:
-
-(Screenshot of Netflix that appeared earlier in the document)
-
-We can formulate a PathSet to retrieve this information and pass it to the Router.
-
-(Example of sending the pathSet I described above to the router)
-
-To make it easier to understand the output, let's abbreviate the previous request:
-
-(Example of sending the ["genrelist", 0, "titles", 0, "boxshot"])
-
-The code above will print of the following to the console:
-
-(The abbreviated JSON Graph output for the previous request)
-
-Note that the response from the Router includes not only the reference, but also the title found at each the reference path. Notice also that the title object only has a single key: "boxshot".
-
-Why did this happen? To understand why the writer returned this output, we must understand the process of Path Evaluation.
-
-
-
-When evaluating paths, routers follow the rules of JSON Graph path evaluation, and References are handled specially during path evaluation. If a reference is encountered while evaluating a path, and there are still keys left in the path to be evaluated, the path being evaluated is optimized using the reference path. Then the optimized path is evaluated from the root of the JSON Graph object. The process is similar to process by which a UNIX shell handles a symbolic link discovered while evaluating a file path.
-
-Let's take a look at this process in action. First we request the boxshot of the first title in the first genre list from the router. The router tries to match the path against its routes finds the following prefix match: 
-
-~~~
-"genrelist[{integers}].titles[{integers}]"
-~~~
-
-To create the value at ["genrelist", 0, "titles", 0] the Router invokes the route's "get" handler. The handler responds with the following PathValue:
-
-
+Remember that you can always check out the full source for this walk through (including the missing routes) on [github](http://github.com/netflix/falcor-router-demo).
