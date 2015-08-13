@@ -18,6 +18,12 @@ A Router works by matching requested paths against a "virtual" JSON Graph object
 
 In order to create the requested subset of the JSON Graph object, the Router matches the requested paths against a series of Routes. A Route is an object with a pattern that can match a set of paths, and is responsible for creating the subset of the JSON Graph object which contains the data requested by those paths. Typically Routes build a subset of the JSON Graph object on-demand by retrieving the data from persistent data stores or web services. The Route transforms the data retrieved from the data sources into the the schema of the JSON Graph, and delivers it to the Router. Once the Router receives the JSON Graph subset from the Route, it evaluates the paths against the JSON Graph subset using the (Path Evaluation) algorithm. If the router encounters References in the JSON Graph, it may optimize the requested paths, and recursively evaluate them against the Routes. The Router's final output is the subset of virtual JSON Graph that combines all the responses produced by the evaluated the requested paths against the Routes.
 
+## When to use a Router
+
+The Router is appropriate as an abstraction over a service layer or REST API. Using a Router over these types of APIs provides just enough flexibility to avoid client round-trips without introducing heavy-weight abstractions. Service-oriented architectures are common in systems that are designed for scalability. These systems typically store data in different data sources and expose them through a variety of different services. For example Netflix uses a Router in front of its [Microservice architecture](http://techblog.netflix.com/2015/02/a-microscope-on-microservices.html). 
+
+**It is rarely ideal to use a Router to directly access a single SQL Database**. Application's that use a single SQL store often attempt to build a single SQL Query for every server request. Router's work splitting up requests up for different sections of the JSON Graph document into seperate handlers and sending individual requests to services to retrieve the requested data. As a consequence Router's rarely have sufficient context to produce a single optimized SQL query. We are currently exploring different options for supporting this type of data access pattern in Falcor in future.
+
 ## Contrasting a REST Router with a Falcor Router 
 
 Falcor Routers serve the same purpose as Routers for RESTful endpoints: they allow app servers to remain stateless by retrieving requested data from persistent data stores on-demand. However a Falcor Router differs from the Router used by RESTful application servers in a few ways in order to accommodate the unique way in which Falcor app servers expose their data.
@@ -38,13 +44,21 @@ var router = new Router([
     {
         route: 'todos.name',
         get: function(pathSet) {
-            return todosService.getName();
+            return todosService.
+                getTodoList().
+                then(function(todoList) {
+                    return { path: ["todos", "name"], value: todoList.name };
+                });
         }
     },
     {
         route: 'todos.length',
         get: function(pathSet) {
-            return todosService.getLength();
+            return todosService.
+                getTodoList().
+                then(function(todoList) {
+                    return { path: ["todos", "length"], value: todoList.length };
+                });
         }
     }
 ]);
@@ -54,54 +68,38 @@ var router = new Router([
 
 Traditional App server Routers only need to match the URL path, because HTTP requests are designed to retrieve a single resource. In contrast a single HTTP request to a Falcor application server may contain multiple paths in the query string. As a result a single Falcor route can match multiple paths at once. Matching multiple paths in a single route can be more efficient in the event they can be retrieved with a single backend request.
 
-The following request attempts to retrieve the name of the first three tasks in the todos list:
+The following request attempts to retrieve the name and length of the todos list:
 
 ~~~js
-http://.../model.json?paths=[["todos",{from:0,to:2},"name"]]
+http://.../model.json?paths=[["todos",["name", "length"]]]
 ~~~
 
-The following route will match all three paths and handle them at the same time:
+The following route will match both paths and handle them at the same time:
 
 ~~~js
 var Router = require("falcor-router");
 var router = new Router([
     {
-        route: 'todos[{integers:indices}].name',
+        route: 'todos["name","length"]',
         get: function(pathSet) {
-            // pathSet = ["todos",[0,1,2],"name"]
-            // pathSet.indices = [0,1,2]
             return todosService.
-                getTasks(pathSet.indices).
-                then(function(taskListItems) {
-                    // taskListItems = [
-                    //  { index: 0, value: { name: "get milk from corner store", done: false } },
-                    //  { index: 1, value: { name: "go to the ATM", done: false } },
-                    //  { index: 2, value: { name: "pick up car from the shop", done: false } }
-                    // ]
-                    return taskListItems.
-                        map(function(taskListItem) {
-                            // create a response for each individual path
-                            return { path: ["todos", taskListItem.index, "name"], value: taskListItem.value.name };
-                        });
+                getTodoList().
+                then(function(todoList) {
+                    return pathSet[1].map(function(key) {
+                        return { path: ["todos", "name"], value: todoList.name };
+                    });
                 });
         }
     }
 ]);
-
-router.get([
-    ["todos", {from: 0, to: 2 }, "name"]
-]).subscribe(function(jsonGraph) {
-    console.log(JSON.stringify(jsonGraph, null, 4));
-});
 ~~~
 
 The route above retrieves the data for multiple paths using a single request to a webservice, and returns the results as a Promise of several path/value pairs.
 
 ~~~js
 [
-    { path: ["todos", 0, "name"], value: "get milk from corner store." },
-    { path: ["todos", 1, "name"], value: "go to the ATM." },
-    { path: ["todos", 2, "name"], value: "pick up car from the shop." }
+    { path: ["todos", "name"], value: "Stuff to do today" },
+    { path: ["todos", "length"], value: 10 }
 ]
 ~~~
 
@@ -111,15 +109,8 @@ The Router accepts all of these path/value pairs, adds them to a single JSON obj
 {
     "jsonGraph": {
         "todos": {
-            "0": {
-                "name": "get milk from corner store."
-            },
-            "1": {
-                "name": "go to the ATM."
-            },
-            "2": {
-                "name": "pick up car from the shop."
-            }
+            "name": "Stuff to do today",
+            "length": 10
         }
     }
 } 
@@ -262,7 +253,7 @@ class TODORouter extends
 
 ### Why Create a Router Class Instead of a Router Instance?
  
-When an Array of routes is passed to the createClass method, an internal Route Map is generated. The Route Map is a stateless data structure designed to improve the speed of pattern matching. Ideally the process of creating the Route Map should only be performed once when your Web server starts up. However Router instances often require access to connection information (ex. authorization information, included in the cookies of an HTTP Request). Creating a Router class generates the route map once, and allows the route map to be shared with every new instance of the Router class.
+When an Array of routes is passed to the createClass method, an internal Route Map is generated. The Route Map is a stateless data structure designed to improve the speed of pattern matching. Ideally the process of creating the Route Map should only be performed once when your Web server starts up. However Router instances often require access to request information (ex. authorization information included in the cookies). Creating a Router Base class generates the route map once, and allows the route map to be shared with every new instance of the Router class. This allows us to create new instances of Routers inexpensively and throw them away at the end of each request.
 
 ~~~js
 // todo-router.js
@@ -293,9 +284,9 @@ class TODORouter extends
 module.exports = TODORouter;
 ~~~
 
-These derived Router class instances can be instantiated at connection time, and passed connection information via their constructor. All route handler functions are applied to the concrete Router instance, which means that Routes can access connection state passed to the Router via the "this" pointer.
+These derived Router class instances can be instantiated at connection time, and passed request information via their constructor. All route handler functions are applied to the concrete Router instance, which means that Routes can access request information passed to the Router via the "this" pointer.
  
-Typically a single Router class is created when the application server starts up, and then one instance is created per connection and then thrown away.
+Typically one instance of the derived Router class is created is created per request and then thrown away.
 
 ~~~js
 // app.js
@@ -323,7 +314,7 @@ Each Route object passed to the Router constructor contains a pattern that can b
  
 When one of the DataSource methods is invoked on the Router object, the Router attempts to match the paths against the patterns in each route.  If a Route's pattern is matched, the corresponding route handler method is invoked.  The Route handler is expected to perform the corresponding action and generate the subset of the JSON Graph containing the requested path.
  
-For an example, take the following Router which matches the set of paths that attempts to retrieve a user name or surname:
+For an example, take the following Router:
 
 ~~~js
 var BaseRouter = Router.createClass([
@@ -360,7 +351,7 @@ AppRouter.prototype = Object.create(BaseRouter);
 Let's say the following request is made for the "name" and "surname" of the user:
 
 ~~~js 
-routerInstance.get([["user",["name","surname"]]])
+routerInstance.get([["user", ["name", "surname"]]])
 ~~~
  
 Once the Router determines that a route's pattern matches a subset of the requested Path Set, the Router will invoke the matching route's get handler with a PathSet containing the set of paths that matched the route pattern:
@@ -393,8 +384,32 @@ Each route is responsible for creating a subset of the JSON Graph object that co
 }
 ~~~ 
 
-The Router combines all of these subsets of the JSON Graph object returned by each individual route into a single JSON Graph object subset, and returns it to the caller.
- 
+The Router combines the values retrieved from each route handler into a single JSON Graph object, and returns it to the caller in an envelope. For example the code below...
+
+
+~~~js
+router.
+    get([
+        ["user", ["name", "surname"]
+    ]).
+    subscribe(function(jsonGraphEnvelope) {
+        console.log(JSON.stringify(jsonGraphEnvelope, null, 4));
+    });
+~~~
+
+...prints the following to the console:
+
+~~~js
+{
+    jsongGraph: {
+        "user": {
+            "name": "Steve",
+            "surname": "McAdams"
+        }
+    }
+}
+~~~
+
 #### Route Handlers
  
 Each route handler for get or set operations is responsible for creating a PathValue for every path it matches. A PathValue is an object with a path and value key.
@@ -407,6 +422,7 @@ Each route handler for get or set operations is responsible for creating a PathV
         if (this.userId == null) {
             throw new Error("not authorized");
         } 
+
         return userService.
             get(this.userId).
             then(function(user) {
@@ -419,9 +435,7 @@ Each route handler for get or set operations is responsible for creating a PathV
 }
 ~~~ 
 
-This route returns two PathValue objects containing the name and surname of a user respectively.
- 
-When a Router receives a series of PathValue's, it creates the JSON Graph envelope by writing each PathValue's value into an object at the PathValue's path.
+This route returns two PathValue objects containing the name and surname of a user respectively. When a Router receives a series of PathValues, it creates the JSON Graph envelope by writing each PathValue's value into an object at the PathValue's path.
  
 ~~~js
 [
@@ -446,7 +460,7 @@ Once all of the routes have finished, the Router responds with a JSON Graph obje
  
 #### Route Handler Concurrency
  
-In addition to returning either JSON Graph envelopes or path values synchronously, Router handlers can also return their data asynchronously by delivering their output data in either of the following containers:
+In addition to returning either JSON Graph envelopes or PathValues synchronously, Router handlers can also return their data asynchronously by delivering their output data in either of the following containers:
 
 * Promise
 * Observable
@@ -733,12 +747,6 @@ The {keys} can also be used to expose any key on a server object to the client.
 
 Each pattern will produce an array of results, even when matched against a single value.
 
-## How the Router Works
-
-The router implements the Data source interface, which allows a caller to work with serial graph data indirectly using three methods: get, set, and call. Routers are unusual in that rather than work against a pre-existing JSON Graph object stored somewhere, Routers generate JSON Graph data on-demand by retrieving the requested data from one or more data sources. As a Router's JSON Graph object is sometimes referred to as a "virtual" JSON Graph.
-
-In this section we will examine how the router executes each of the DataSource methods. However rather than explain how each DataSource operation works in the abstract, we will define an sample Router and then explain how the DataSource operations are executed against it.
-
 ## Walkthrough: Building a Router for Netflix-like Application
 
 Netflix is an online streaming video service with millions of subscribers.  When a member logs on to the Netflix service, they are presented with a list of genres, each of which contains a list of titles which they can stream.
@@ -747,9 +755,7 @@ Netflix is an online streaming video service with millions of subscribers.  When
 
 In this exercise we will build a Router for an application similar to Netflix, which merchandises titles to members based on their preferences, and allows them to provide user ratings for each title. This exercise is purely a demonstration of how to build a Router for a web application that displays a catalog of information to a user. This is **not**intended to demonstrate how to Netflix actually works, and any similarities to the actual Netflix Router's implementation are superficial.
 
-Our goal is to define a JSON graph resource on the Application server that exposes all of the data that our Netflix clone needs. The JSON Graph schema should be designed in such a way that the  application can retrieve all of the data it needs for any given application scenario in a single network request.
-
-In order to avoid creating and storing the entire JSON Graph object on the application server, we will define a Router.
+Our goal is to define a JSON graph resource on the Application server that exposes all of the data that our Netflix clone needs. The JSON Graph schema should be designed in such a way that the application can retrieve all of the data it needs for any given application scenario in a single network request.
 
 We would like to create a JSON Graph object on the server that looks like this:
 
@@ -801,7 +807,9 @@ var model = new falcor.Model({ source: new falcor.HttpDataSource("/model.json") 
 //  grab the name of the first four genre lists, as well as the
 // name and boxshot of the first five titles within each genre list
 model.
-    get("genrelists[0..3].name", "genrelists[0..3].titles[0..4]['name','boxshot']").
+    get(
+        "genrelists[0..3].name", 
+        "genrelists[0..3].titles[0..4]['name','boxshot']").
     then(function(jsonResponse) {
         console.log(JSON.stringify(jsonResponse, null, 4);
     });
@@ -865,63 +873,7 @@ Of course there may be any number of genrelists or any number of titles within a
 
 If we create handlers for each of these routes, we should be able to create the illusion that the JSON object exists by matching incoming paths and retrieving data from the relevant services.
 
-We could create a separate route handler for each one of the routes listed above. However this could lead to redundant code and inefficient call patterns. For example the Router below contains two route objects, each of which differ by only a few characters.
-
-~~~js
-var router = new Router([
-    {
-        route: "titlesById[{integers:titleIds}].name",
-        get: function (pathSet) {
-            return titleService.getTitles(pathSet.titleIds).
-                then(function(titles) {
-                    var response = {};
-                    var jsonGraphResponse = response['jsonGraph'] = {};
-                    var titlesById = jsonGraphResponse['titlesById'] = {};
-                    pathSet.titleIds.forEach(function(titleId) {
-                        var titleRecord = titles[titleId],
-                            title = {};
-                        if (titleRecord.error) {
-                            titlesById[titleId] = $error(titleRecord.error);
-                        } else {
-                            titlesById[titleId].name = titleRecord.doc.name
-                        }
-                    });
-                    return response;
-                });
-        }
-    },
-    {
-        route: "titlesById[{integers:titleIds}].name",
-        get: function (pathSet) {
-            return titleService.getTitles(pathSet.titleIds).
-                then(function(titles) {
-                    var response = {};
-                    var jsonGraphResponse = response['jsonGraph'] = {};
-                    var titlesById = jsonGraphResponse['titlesById'] = {};
-                    pathSet.titleIds.forEach(function(titleId) {
-                        var titleRecord = titles[titleId],
-                            title = {};
-                        if (titleRecord.error) {
-                            titlesById[titleId] = $error(titleRecord.error);
-                        } else {
-                            titlesById[titleId].year = titleRecord.doc.year
-                        }
-                    });
-                    return response;
-                });
-        }
-    }
-]);
-~~~
-
-Except for returning a title's name vs. its year, _the code in the route handlers above are nearly identical._ Worse than the repetitive code, creating a route for each individual key on the title puts more load on the title database.  For example the following request for the name and year from a given title will end up retrieving the same title from the title database twice:
-
-~~~js
-var model = new falcor.Model({ source: new falcor.HttpDataSource("/model.json") });
-model.get("titlesById[523]['name', 'year']").then(function(jsonResponse){ console.log(jsonResponse); });
-~~~
-
-How can we match multiple paths for values exposed by the same service without making multiple calls to the same service?
+We could create a separate route handler for each one of the routes listed above. However this could lead to redundant code and inefficient call patterns. Many of these routes will end up making the same service calls, and could differ by only a few characters. How do we avoid repeating ourselves?
 
 #### Matching Multiple Paths With KeySets
 
@@ -969,7 +921,7 @@ var router = new Router([
 
 Note that by matching several paths with a single route, we are able to both make a single request to the database and eliminate a large amount of repetitive code.
 
-Given the advantages of matching multiple paths with a single route,  one might think that we would want to cover all legal paths with as few routes as possible.  For example it is possible to match any incoming path request for our application's JSON Graph schema using the following few routes:
+Given the advantages of matching multiple paths with a single route, one might think that we would want to cover all legal paths with as few routes as possible. For example it is possible to match any incoming path request for our application's JSON Graph schema using the following routes:
 
 ~~~
 "titlesById[{integers}]['name', 'year', 'description', 'boxshot', 'rating', 'userRating']"
@@ -979,9 +931,9 @@ Given the advantages of matching multiple paths with a single route,  one might 
 "genrelist[{integers}].titles[{integers}]"
 ~~~
 
-However it doesn't always make sense to create routes that match as many paths as possible. Note that the title's "rating" and "userRating" keys are retrieved from the RatingService, while all of the other title keys are retrieved from the TitleService. As a result creating a single route which matched about the "name" and "rating" of a title wouldn't be useful, because serving each individual key would require a request to an entirely different service. Furthermore the code to create each of these values would be very different. Under the circumstances there is little to be gained by handling both values in a single route.
+However it doesn't always make sense to create routes that match as many paths as possible. Note that the title's "rating" and "userRating" keys are retrieved from the RatingService, while all of the other title keys are retrieved from the TitleService. As a result creating a single route which matches both the "name" and "rating" of a title wouldn't be useful, because serving each individual key would require a request to an entirely different service. Furthermore the code to create each of these values would be very different. Under the circumstances there is little to be gained by handling both these paths in a single route.
 
-A better strategy than creating routes which match as many paths as possible, is to create routes that match paths that are retrieved from the same service. The code to retrieve values stored in the same service is likely to be similar, and more importantly it may provide us with opportunities to make a single service call to retrieve multiple values.
+A better strategy than creating routes which match as many paths as possible is to create routes that match paths that are retrieved from the same service. The code to retrieve values stored in the same service is likely to be similar, and more importantly it may provide us with opportunities to make a single service call to retrieve multiple values.
 
 In other words, we should probably create the following routes instead:
 
@@ -994,11 +946,11 @@ In other words, we should probably create the following routes instead:
 "genrelist[{integers}].titles[{integers}]"
 ~~~
 
-Note that although the first four routes all retrieve their data from the recommendation service, we cannot collapse them into a single route. Two routes can only be collapsed if they are the same length and differ by one key. We will address this issue later in the walkthrough.
+Note that although the genre list routes all retrieve their data from the recommendation service, we cannot collapse them into a single route. Two routes can only be collapsed if they are the same length and differ by one key. We will address this issue later in the walkthrough.
 
 ## Handling Authorization
 
-Now that we have chosen our routes we need to consider whether our route handlers have sufficient information to create values on-demand. Note that _many of the routes in the JSON Graph object are personalized for the current user_. For example two different Netflix users will likely see completely different personalized recommendations in the their "genrelist" arrays. The "rating" and "userRating" fields are also specific to the current user. The "rating" field is the algorithmically-predicted rating for the user based on the user's previous viewing history and user-specified ratings. The "userRating" field is the user–specified rating for the title, and it should not be possible to set this value if a user is not logged in.
+Now that we have chosen our routes we need to consider whether our route handlers have sufficient information to handle requests. Note that _many of the routes in the JSON Graph object are personalized for the current user_. For example, two different Netflix users will likely see completely different personalized recommendations in their "genrelist" arrays. The "rating" and "userRating" fields are also specific to the current user. The "rating" field is the algorithmically-predicted rating for the user based on the user's previous viewing history and user-specified ratings. The "userRating" field is the user–specified rating for the title, and it should not be possible to set this value if a user is not logged in.
 
 While a login is clearly required to change data or receive personalized recommendations, we would like to be able to use to allow users to browse the catalog without logging in. That's why both the recommendations service and rating service fallback to providing generic recommendations and ratings in the absence of a user ID.
 
@@ -1146,7 +1098,7 @@ No matter what the input, the {integers} range will normalize the incoming KeySe
 titlesById[738..739, 672, 982]["boxshot", "description"] -> route.get.call(routerInstance, ["titlesById", [738, 739, 672, 982], ["boxshot", "description"]])
 ~~~
 
-The route handler's responsibility is to create a path value object for each path that the route matches. In other words, if the route matches the following PathSet...
+The route handler's responsibility is to create a PathValue object for each path that the route matches. In other words, if the route matches the following PathSet...
 
 ~~~
 "titlesById[683, 528]['name', 'year']"
@@ -1164,74 +1116,74 @@ The route handler's responsibility is to create a path value object for each pat
 Inside the route handler we can get access to the array of integers produced by the {integers} pattern positionally. 
 
 ~~~js
-    {
-        route: "titlesById[{integers}]['name','year','description','boxshot']",
-        get: function (pathSet) {
-            var ids = pathSet[1];
-            // create values here
-        }
+{
+    route: "titlesById[{integers}]['name','year','description','boxshot']",
+    get: function (pathSet) {
+        var ids = pathSet[1];
+        // create values here
     }
+}
 ~~~
 
 Alternately we can define a "titleIds" alias for the integers pattern and use the alias to retrieve the array of title ids.
 
 ~~~js
-    {
-        route: "titlesById[{integers}]['name','year','description','boxshot']",
-        get: function (pathSet) {
-            var ids = pathSet.titleIds;
-            // create values here
-        }
+{
+    route: "titlesById[{integers}]['name','year','description','boxshot']",
+    get: function (pathSet) {
+        var ids = pathSet.titleIds;
+        // create values here
     }
+}
 ~~~
 
 Once we have access to the ids of the requested titles, we can make a call to the title service to retrieve them.
 
 ~~~js
-    {
-        route: "titlesById[{integers:titleIds}]['name','year','description','boxshot']",
-        get: function (pathSet) {
-            return titleService.getTitles(pathSet.titleIds).
-                then(function(titles) {
-                    // code to retrieve title values goes here
-                });
-        }
+{
+    route: "titlesById[{integers:titleIds}]['name','year','description','boxshot']",
+    get: function (pathSet) {
+        return titleService.getTitles(pathSet.titleIds).
+            then(function(titles) {
+                // code to retrieve title values goes here
+            });
     }
+}
 ~~~
 
-Now we will use two nested forEach calls to create a path value object for every title id and title key combination.  
+Now we will use two nested forEach calls to create a PathValue object for every title id and title key combination.  
 
 ~~~js
-    {
-        route: "titlesById[{integers:titleIds}]['name','year','description','boxshot']",
-        get: function (pathSet) {
-            return titleService.getTitles(pathSet.titleIds).
-                then(function(titles) {
+{
+    route: "titlesById[{integers:titleIds}]['name','year','description','boxshot']",
+    get: function (pathSet) {
+        return titleService.getTitles(pathSet.titleIds).
+            then(function(titles) {
 
-                    var results = [];
-                    
-                    pathSet.titleIds.forEach(function(titleId) {
-                        pathSet[2].forEach(function(key) {
-                            var titleRecord = titles[titleId];
+                var results = [];
+                
+                pathSet.titleIds.forEach(function(titleId) {
+                    pathSet[2].forEach(function(key) {
+                        var titleRecord = titles[titleId];
 
-                            if (titleRecord.error) {
-                                results.push({
-                                    path: ['titlesById', titleId, key],
-                                    value: $error(titleRecord.error)
-                                });
-                            } else {
-                                results.push({
-                                    path: ['titlesById', titleId, key], 
-                                    value: titleRecord.doc[key]
-                                });
-                            }
-                        });
+                        if (titleRecord.error) {
+                            results.push({
+                                path: ['titlesById', titleId, key],
+                                value: $error(titleRecord.error)
+                            });
+                        } else {
+                            results.push({
+                                path: ['titlesById', titleId, key], 
+                                value: titleRecord.doc[key]
+                            });
+                        }
                     });
-                    
-                    return results;
                 });
-        }
+                
+                return results;
+            });
     }
+}
 ~~~        
                                     
 Now we should be able to retrieve title keys by ID from the Router:
@@ -1242,7 +1194,7 @@ router.get([["titlesById", [9, 10], ["name", "year"]]]).subscribe(function(jsonG
 });
 ~~~
 
-The router collects up all of the path value objects returned from route handlers, adds each value to a JSON Graph object, and returns it as a response.  The code above prints the following to the console:
+The router collects up all of the PathValue objects returned from route handlers, adds each value to a JSON Graph object, and returns it as a response.  The code above prints the following to the console:
 
 ~~~js
 {
@@ -1291,44 +1243,44 @@ We did not guard against the possibility that the title doesn't exist in our rou
 
 Clearly we have to be defensive when coding our route handlers, but this begs the question: "what should a route handler return when a title doesn't exist"? 
 
-If there is a null or undefined value at "titleById[-1]" the route should return a path value indicating as much. Note the additional check added to the route below.
+If there is a null or undefined value at "titleById[-1]" the route should return a PathValue indicating as much. Note the additional check added to the route below.
 
 ~~~js
-    {
-        route: "titlesById[{integers:titleIds}]['name','year','description','boxshot']",
-        get: function (pathSet) {
-            return titleService.getTitles(pathSet.titleIds).
-                then(function(titles) {
+{
+    route: "titlesById[{integers:titleIds}]['name','year','description','boxshot']",
+    get: function (pathSet) {
+        return titleService.getTitles(pathSet.titleIds).
+            then(function(titles) {
 
-                    var results = [];
-                    
-                    pathSet.titleIds.forEach(function(titleId) {
-                        pathSet[2].forEach(function(key) {
-                            var titleRecord = titles[titleId];
+                var results = [];
+                
+                pathSet.titleIds.forEach(function(titleId) {
+                    pathSet[2].forEach(function(key) {
+                        var titleRecord = titles[titleId];
 
-                            if (titleRecord.error) {
-                                results.push({
-                                    path: ['titlesById', titleId, key],
-                                    value: $error(titleRecord.error)
-                                });
-                            } else if (titleRecord.doc) {
-                                results.push({
-                                    path: ['titlesById', titleId, key], 
-                                    value: titleRecord.doc[key]
-                                });
-                            } else {
-                                results.push({
-                                    path: ['titlesById', titleId],
-                                    value: undefined
-                                });
-                            }
-                        });
+                        if (titleRecord.error) {
+                            results.push({
+                                path: ['titlesById', titleId, key],
+                                value: $error(titleRecord.error)
+                            });
+                        } else if (titleRecord.doc) {
+                            results.push({
+                                path: ['titlesById', titleId, key], 
+                                value: titleRecord.doc[key]
+                            });
+                        } else {
+                            results.push({
+                                path: ['titlesById', titleId],
+                                value: undefined
+                            });
+                        }
                     });
-                    
-                    return results;
                 });
-        }
-    }                    
+                
+                return results;
+            });
+    }
+}                    
 ~~~
 
 Now let's see what gets printed to the console if we repeat the same request as last time:
@@ -1355,6 +1307,8 @@ router.get([["titlesById", [-1, 7], "name"]]).subscribe(function(jsonGraph) {
 }
 ~~~
 
+Notice that the Router inserts a JSON Graph atom, indicating that no value is present at ["titlesById", -1].
+
 The practice of checking for the existence of value types along the matched path is referred to as **branch guarding**, and it is every route handler's responsibility. If null, undefined, or _any JSON Graph value type_ (ex.string, number, atom), is discovered along a path, a route handler must return a PathValue that indicates which path at which the value type was discovered, as well as the specific value type found there. In the example above we only bother to check for null or undefined because we feel confident that the data has been sanitized already, and no other value type (ex. string, number) could appear instead of the title. Depending on how much you trust your data, you may want to be more zealous.
 
 Now that we can retrieve non-personalized fields from titles, let's create a route that adds personalized fields like rating and userRating to our JSON Graph object.
@@ -1364,6 +1318,7 @@ Now that we can retrieve non-personalized fields from titles, let's create a rou
 This route matches any request for the rating on title objects. The rating service is personalized, and provides predicted ratings for each user based on their previous preferences. In the event that there is no user ID available, the rating service will create a rating based on the ratings provided by registered members. The rating service has a getRatings method which can be used to retrieve any number of rating records objects by title ID.
 
 ~~~js
+// "1" is userID
 ratingService.getRatings([1,2], "1").
     then(function(titles) { console.log(JSON.stringify(titles, null, 3)); })
 
@@ -1372,17 +1327,13 @@ ratingService.getRatings([1,2], "1").
    "1": {
       "doc": {
          "rating": 1,
-         "userRating": 1,
-         "_id": "1,1",
-         "_rev": "3-efaac8f74b093ada6f9c537d30a58782"
+         "userRating": 1
       }
    },
    "2": {
       "doc": {
          "rating": 1.1,
-         "userRating": 1,
-         "_id": "1,2",
-         "_rev": "7-fd93ebf5868a9ab74f220f57ab53ed2d"
+         "userRating": 1
       }
    }
 } 
@@ -1743,8 +1694,29 @@ Notice that we are branch guarding at both the genre and title level. This ensur
 
 Note that references are JSON Graph value types, like strings, booleans, and numbers. That means we can retrieve these references from the Router, just like any other value type:
 
-(Example I requesting the first reference in the first genre list)
+~~~js
+router.
+    get([
+        ["genrelist", 0, "titles" 0]
+    ]).subscribe(function(jsonGraphEnvelope) {
+        console.log(JSON.stringify(jsonGraphEnvelope, null, 4));
+    });
+~~~
 
+The code above prints the following the console:
+
+~~~js
+{
+    jsonGraph: {
+        "genrelist": {
+            0: {
+                "titles": {
+                    0: { $type: "ref", value: ["titlesById", 235] }
+            }
+        }
+    }
+}
+~~~
 The remaining genre list route will be left as an exercise for the user:
 
 ~~~
