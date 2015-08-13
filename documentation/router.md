@@ -1739,13 +1739,79 @@ Each reference in the titles array points to a title in the "titlesById" map. Th
     }
 ~~~
 
+Notice that we are branch guarding at both the genre and title level. This ensures that any attempt to retrieve a genre or title that doesn't exist will not throw and will instead return the specific path at which the undefined value was found.
+
+Note that references are JSON Graph value types, like strings, booleans, and numbers. That means we can retrieve these references from the Router, just like any other value type:
+
+(Example I requesting the first reference in the first genre list)
+
+The remaining genre list route will be left as an exercise for the user:
+
+~~~
+"genrelist[{integers}].titles.length"
+~~~
+
+### Reducing Service Calls with Batching
+
+We have finished all of the routes required to create the genre list in the Router's virtual JSON Graph object. Now we can make a single request to the Router and retrieve as much information about the user's personalized recommendations as we want. The following code retrieves the first two title references in the first two genres, as well as the name and length of the first two genres.
+
+(Example of what I said above)
+
+The code above prints the following to the console:
+
+(Example JSON Graph output from Router)
+
+The request above matches each and everyone of the genre list routes in the Router. These individual routes work together to create what appears to be a single object. Unfortunately there is a problem: each of these routes makes the _same service call_.
+
+(Call to get genre list)
+
+This places unnecessary load on the service and its backend data store. Ideally we would like to make a single call to the recommendation service for all of these routes. One solution would be to collapse these routes, but this is not possible. Routes can only be collapsed if they are the same length, and differ by one key at the most. 
+
+
+An ideal solution would be for the service Tulare to
+
 Notice that we are branch guarding at both the genre and title level. This ensures that any attempt to retrieve a genre or title that doesn't exist will not throw and will instead return the specific path at which the value was found.
+
+The router inserts these references into the JSON Graph response:
+
+(output of the code above)
+
+
+While it is occasionally valuable to be able to retrieve references directly - particularly when preloading the contents of a list – it is uncommon. Rather than retrieve references directly, applications typically retrieve fields from reference targets.
+
+For example, when the user opens our application, we would like to retrieve the box shot of the first 8 titles in the first five genres so that we can display them in a grid on the screen:
+
+(Screenshot of Netflix that appeared earlier in the document)
+
+We can formulate a PathSet to retrieve this information and pass it to the Router.
+
+(Example of sending the pathSet I described above to the router)
+
+To make it easier to understand the output, let's abbreviate the previous request:
+
+(Example of sending the ["genrelist", 0, "titles", 0, "boxshot"])
+
+The code above will print of the following to the console:
+
+(The abbreviated JSON Graph output for the previous request)
+
+Note that the response from the Router includes not only the reference, but also the title found at each the reference path. Notice also that the title object only has a single key: "boxshot".
+
+Why did this happen? To understand why the writer returned this output, we must understand the process of Path Evaluation.
+
+
+
+When evaluating paths, routers follow the rules of JSON Graph path evaluation, and References are handled specially during path evaluation. If a reference is encountered while evaluating a path, and there are still keys left in the path to be evaluated, the path being evaluated is optimized using the reference path. Then the optimized path is evaluated from the root of the JSON Graph object. The process is similar to process by which a UNIX shell handles a symbolic link discovered while evaluating a file path.
+
+Let's take a look at this process in action. First we request the boxshot of the first title in the first genre list from the router. The router tries to match the path against its routes finds the following prefix match: 
 
 The remaining route will be left as an exercise to the user:
 
 ~~~
 "genrelist[{integers}].titles.length"
 ~~~
+
+To create the value at ["genrelist", 0, "titles", 0] the Router invokes the route's "get" handler. The handler responds with the following PathValue:
 
 Note that although the first four routes all retrieve their data from the recommendation service, we cannot collapse them into a single route. Two routes can only be collapsed if they are the same length and differ by one key. We will address this issue later in the walkthrough.
 
