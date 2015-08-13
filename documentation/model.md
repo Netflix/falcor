@@ -36,7 +36,7 @@ You can associate a DataSource with a Model by passing it to the Model construct
 var model = new falcor.Model({source: new falcor.HttpDataSource('/model.json')});
 ~~~
 
-You can implement the DataSource interface to allow a Model to communicate with a remote JSON object over a different transport layer (ex. web sockets). For more information see [Data Sources](./datasources.md).
+You can implement the DataSource interface to allow a Model to communicate with a remote JSON object over a different transport layer (ex. WebSocket). For more information see [Data Sources](./datasources.md).
 
 If a Model does _not_ have a [DataSource](./datasources.md), all Model operations will be performed on the Model's local cache. When you initialize the Model, you can prime its cache with a JSON object.
  
