@@ -58,7 +58,7 @@ var model = new falcor.Model({cache: {
 model.getValue('todos[0].name').then(log);
 ~~~
 
-Note that in the example above, the name of the TODO is _pushed_ to a call back.
+Note that in the example above, the name of the TODO is _pushed_ to a callback.
  
 The main advantage of using a push API is that you can code against JSON data the same way regardless of whether the data is local or remote. This makes it very easy to begin coding your application against mocked data at first, and then work against server data later on without changing client code.
 
