@@ -1413,7 +1413,7 @@ function getWalk(model, root, curr, pathOrJSON, depthArg, seedOrFunction, positi
         var atEndOfJSONQuery = false;
         var keySet, i, len;
         if (jsonQuery) {
-            // it has a $type property means we have hit a end.
+            // it has a $type property means we have hit an end.
             if (pathOrJSON && pathOrJSON.$type) {
                 atEndOfJSONQuery = true;
             }
@@ -7146,7 +7146,7 @@ module.exports = function mergeNode(roots, parent, nodeArg, messageParent, messa
             updateGraph(parent, offset, roots.version, roots.lru);
             node = graphNode(roots[0], parent, node, key, roots.version);
         }
-        // Otherwise, cache and message are the same primitive value. Wrap in a atom and insert.
+        // Otherwise, cache and message are the same primitive value. Wrap in an atom and insert.
         else {
             roots.isDistinct = true;
             node = parent[key] = wrapNode(node, type, node);
@@ -11867,7 +11867,7 @@ Promise.prototype.nodeify = function (callback, ctx) {
 
   /**
    * Returns an observable sequence that is the result of invoking the selector on a connectable observable sequence that shares a single subscription to the underlying sequence containing only the last notification.
-   * This operator is a specialization of Multicast using a AsyncSubject.
+   * This operator is a specialization of Multicast using an AsyncSubject.
    *
    * @example
    * var res = source.publishLast();

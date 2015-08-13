@@ -1,7 +1,7 @@
 
 ## Getting Started
 
-In this barebones tutorial we will use the falcor Router to create a Virtual JSON resource. Then we will use falcor's express middleware to serve the Virtual JSON resource on a application server at the URL /model.json. We will also host a static web page on the same server which retrieves data from the Virtual JSON resource.
+In this barebones tutorial we will use the falcor Router to create a Virtual JSON resource. Then we will use falcor's express middleware to serve the Virtual JSON resource on an application server at the URL /model.json. We will also host a static web page on the same server which retrieves data from the Virtual JSON resource.
 
 ### Creating a Virtual JSON Resource
 
@@ -60,7 +60,7 @@ app.use('/model.json', falcorExpress.dataSourceRoute(function (req, res) {
   ]);
 }));
 
-// statically host all files in current directory
+// serve static files from current directory
 app.use(express.static(__dirname + '/'));
 
 var server = app.listen(3000);

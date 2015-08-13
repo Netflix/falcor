@@ -58,7 +58,7 @@ var model = new falcor.Model({cache: {
 model.getValue('todos[0].name').then(log);
 ~~~
 
-Note that in the example above, the name of the TODO is _pushed_ to a call back.
+Note that in the example above, the name of the TODO is _pushed_ to a callback.
  
 The main advantage of using a push API is that you can code against JSON data the same way regardless of whether the data is local or remote. This makes it very easy to begin coding your application against mocked data at first, and then work against server data later on without changing client code.
 
@@ -156,7 +156,7 @@ You can associate a DataSource with a Model by passing it to the Model construct
 var model = new falcor.Model({source: new falcor.HttpDataSource('/model.json')});
 ~~~
 
-You can implement the DataSource interface to allow a Model to communicate with a remote JSON object over a different transport layer (ex. web sockets). For more information see (Data Sources).
+You can implement the DataSource interface to allow a Model to communicate with a remote JSON object over a different transport layer (ex. WebSocket). For more information see (Data Sources).
 
 If a Model does _not_ have a DataSource, all Model operations will be performed on the Model's local cache. When you initialize the Model, you can prime its cache with a JSON object.
  
