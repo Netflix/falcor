@@ -1221,11 +1221,20 @@ The request above matches both routes we have created. The Router adds the resul
 
 Note how the router presents the consumer with what appears to be a single title object, but sources the data for the title from multiple services. The result is a simple API for the consumer without compromising any flexibility about where data is stored on the backend.
 
-Now we have the ability to retrieve information about any title in the catalog using that ID. However and practice our users will not be navigating titles by their unique identifier. When users start the application, they will be presented with
+Now we have the ability to retrieve information about any title in the catalog using that ID. However in practice our users will not be navigating titles by ID. When a user starts the application, they will be presented with a list of genres, each of which contains a list of recommended titles. Users will navigate through these titles positionally, scrolling vertically and horizontally. As a consequence the application needs to be able to retrieve titles by position within the user's personalized recommendations list. To accommodate this requirement, we will add the users genre list to the Router's virtual JSON Graph object.
 
-### Creating the Get Handlers for the Genre List Routes
+### Creating the Genre List Routes
 
-All of the genre list routes will retrieve their information from the recommendation service. recommendationService's getGenreList method. This method returns a Promise of the current user's list of genres, each of which contains a personalized list of titles based on their preferences. Here's an example usage of getGenreList:
+We decided to use the following routes to create the user's personalized genre list:
+
+~~~
+"genrelist.length"
+"genrelist[{integers}].name"
+"genrelist[{integers}].titles.length"
+"genrelist[{integers}].titles[{integers}]"
+~~~
+
+All of these routes will retrieve their information from the recommendation service. The recommendationService's getGenreList method returns a Promise that resolves to the current user's list of genres, each of which contains a personalized list of titles based on their preferences. Here's an example usage of getGenreList:
 
 ~~~js
 recommendationService.
@@ -1356,27 +1365,11 @@ If a route's get handler is passed ["genrelist", [0, 1, 2], "name"] it must retu
 { path: ["genreList", 2, "name"], value: "New Releases" }
 ~~~
 
-Once we retrieve the genre list from the genrelist service, we can use the map function to create a PathValue for each index the route matches.
+Once we retrieve the genre list from the recommendations service, we can use the map function to create a PathValue for each index the route matches.
 
-~~~js
-    {
-        route: "genrelist[{integers:indices}].name",
-        get: function (pathSet) { 
-            return recommendationService.
-                getGenreList(this.userId).
-                then(function(genrelist) {
-                    return pathSet.indices.map(function(index) { 
-                        var list = genrelist[index];
-                        return {
-                            path: ['genrelist', index, 'name'],
-                            value: genrelist[index].name
-                        };
-                    });
-                });
-        }
-    }
-]
-~~~
+(Example: Just include this route from the router demo without the comments)
+
+Note that we have been careful to use branch guarding, and check for the existence of each individual list before attempting to retrieve the name. 
 
 Now we can retrieve the name of a user's genre lists from the Router.
 
@@ -1385,60 +1378,6 @@ Now we can retrieve the name of a user's genre lists from the Router.
 Once again the Router converts the output into a JSON Graph object, and so we see the following console output:
 
 (Example)
-
-Let's try something else. Let's request the name of the first, second, and 900th genre, despite the fact that no user's genre list is longer than 40.
-
-(Example)
-
-When we run this code, we see the following output to the console:
-
-(Example)
-
-Note that the output is a JSON Graph error object at each individual path. Why did this happen? 
-
-We did not guard against the possibility that the list is null or undefined in our route implementation. As a result our route threw  an "undefined is not an object" error when it attempted to look up "name" on an undefined value. When the router catches an error thrown from a route handler, it creates a JSON Graph error object at every path passed to that route handler. That means we don't get any data back, not even the name of the first and second genre list.
-
-Clearly we have to be defensive when coding our route handlers, but this begs the question: "what should a route handler return when a value type is discovered along a route"? 
-
-Simple. The truth. If there is a no or undefined value at "genrelist[900]" the route should return a path value indicating as much. Note the additional check added to the route below.
-
-~~~js
-    {
-        route: "genrelist[{integers:indices}].name",
-        get: function (pathSet) { 
-            return recommendationService.
-                getGenreList(this.userId).
-                then(function(genrelist) {
-                    return pathSet.indices.map(function(index) { 
-                        var list = genrelist[index];
-                        if (list == null) {
-                            return {path: ['genrelist', index], value: list };
-                        }
-                        
-                        return {
-                            path: ['genrelist', index, 'name'],
-                            value: genrelist[index].name
-                        };
-                    });
-                });
-        }
-    }
-]
-~~~
-
-The conditional above checks the list for both null and undefined, and returns a PathValue indicating the specific path at which the null or undefined value was discovered.
-
-This practice is referred to as **branch guarding**, and it is every route handlers responsibility. If null, undefined, or _any value type_ is discovered along a path, a route handler must return a path value that indicates which path at which the value type was discovered, as well as the specific value type itself. In the example above, we only bother to check for null or undefined because we feel confident that the data has been sanitized already, and no other value type (ex. string, number) could appear instead of the genre array. Depending on how much you trust your data, you may want to be more zealous.
-
-Now we can repeat our previous request:
-
-(Example)
-
-This time the router returns and I'll put that correctly identifies the 900th list as being undefined.
-
-(Example)
-
-In this section we learned how to match multiple paths with an pattern, how to retrieve pattern matches via an alias, and the importance of branch guarding. 
 
 Now let's tackle the most challenging of all of the genre list routes...
 
@@ -1462,46 +1401,18 @@ This route builds the JSON Graph references in the titles array within each genr
 }
 ~~~
 
-Each reference in the titles array points to a title in the "titlesById" map. 
-This route contains two different patterns. As a result the number of path values the route emits must be pattern1KeySetLength * pattern2KeySetLength. In other words, if our route matches "genrelist[0..1].titles[0..1]"
+Each reference in the titles array points to a title in the "titlesById" map. This time we will just go directly to the full solution.
 
+(Example pasted in from router demo without comments)
 
-~~~js
-var routes = [
-    // genrelist.length route snipped,
-    {
-        route: "genrelist[{integers:indices}].name",
-        get: function (pathSet) {
-                        
-            // In this example, the pathSet could be ["genrelist", [0,1,2], "name"].
-            // If that were the case, we would need to return a Promise of an
-            // Array containing the following PathValues: 
-            // {path: ["genreList", 0, "name"], value: "Horror"}
-            // {path: ["genreList", 1, "name"], value: "Thrillers"}
-            // {path: ["genreList", 2, "name"], value: "New Releases"}
-            return recommendationService.
-                getGenreList(this.userId).
-                then(function(genrelist) {
-                    // use the indices alias to retrieve the array (equivalent to pathSet[1])             
-                    return pathSet.indices.map(function(index) {
-                        // If we determine that the index does not exist, we must 
-                        // return an atom of undefined. Returning nothing is _not_
-                        // an acceptable response. 
-                        // Note that we are also specific about what part of the
-                        // JSON is null. We clearly respond that the 
-                        // list is null or undefined, _not_ the name of the list.
-                        var list = genrelist[index];
+Notice that we are branch guarding at both the genre and title level. This ensures that any attempt to retrieve a genre or title that doesn't exist will not throw and will instead return the specific path at which the value was found.
 
-                        return { path: ["genrelist", index], value: list };
-                        }
+The remaining route will be left of an exercise to the user:
 
-                        return {
-                            path: ['genrelist', index, 'name'],
-                            value: genrelist[index].name
-                        };
-                    });
-                });
-        }
-    }
-]
 ~~~
+"genrelist[{integers}].titles.length"
+~~~
+
+Note that although the first four routes all retrieve their data from the recommendation service, we cannot collapse them into a single route. Two routes can only be collapsed if they are the same length and differ by one key. We will address this issue later in the walkthrough.
+
+Remember that you can always check out the full source for this walk through (including the missing routes) on [github](http://github.com/netflix/falcor-router-demo).
