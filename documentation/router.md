@@ -1041,7 +1041,7 @@ Creating a new Router for each connection and throwing it away immediately after
 
 Now that we have created a NetflixRouter class, we can add routes to it. Remember that each route handler runs with the Router as its "this" object. As a result, each route handler will have access to the userId member defined on the Router. In the next section we will see how handlers use the Router's userId member to return different values depending on which user is logged in.
 
-### Creating the Get Handlers for the "titlesById" Map
+### Creating the Routes for the "titlesById" Map
 
 Our JSON Graph object has a titlesById map that contains all of the titles in the catalog. Each title's key within the map is its ID.
 
@@ -1074,55 +1074,122 @@ Let's start with the first route, because it does not require any user authentic
 
 #### "titlesById[{integers}]['name', 'year', 'description', 'boxshot']"
 
-This route matches any request for title fields that are retrieved from the title service. The title service is not personalized. It exposes generic metadata that is true for all users.  The title service has getTitles method which can be used retrieved any number of title object's by ID.
+This route matches any request for title fields that are retrieved from the title service. The title service is not personalized. It exposes generic metadata that is true for all users.  The title service has getTitles method which can be used to retrieve any number of title objects by ID.
 
+(Example)
 
+Note that the output of the title service is a map of record objects organized by each title ID. A record object is an object with a "doc" key containing the requested title. If an error occurs while attempting to retrieve a particular title, the record object will contain an error" key instead.
+
+(Example of error)
+
+Let's use the title service to retrieve each title's generic fields. We will start by creating a route object which matches any path that would retrieve these title fields.
 
 ~~~js
-var routes = [
     {
-        route: 'genrelist[{integers:indices}].name',
-        get: function(pathSet) {
-            return recommendationService.getGenreList(this.userId)
-                .then(function(genrelist) {             
-                    // to be continued…
-                });
+        route: "titlesById[{integers}]['name','year','description','boxshot']",
+        get: function (pathSet) {
+            // code to create values goes here
         }
     }
-]
 ~~~
 
 Note that this route could match any of the following paths or path sets:
 
 ~~~
-genrelist[0..1].name
-genrelist[0..2, 4...5, 9].name
-genrelist[1].name
+titlesById[738, 6638]["name", "year"]
+titlesById[738..739, 672, 982]["boxshot", "description"]
+titlesById[573].year
 ~~~
 
 No matter what the input, the {integers} range will normalize the incoming KeySet to an array of integers before passing it to the route handler.
 
 ~~~
-genrelist[0..1, 2].name -> route.get.call(routerInstance, ["genrelist", [0, 1, 2], "name"]])
+titlesById[738..739, 672, 982]["boxshot", "description"] -> route.get.call(routerInstance, ["titlesById", [738, 739, 672, 982], ["boxshot", "description"]])
 ~~~
 
-Once inside the route, we can get access to the array of integers produced by the {integers} pattern positionally. 
+The route handler's responsibility is to create a path value object for each path that the route matches. In other words, if the route matches the following PathSet...
+
+~~~
+"titlesById[683, 528]['name', 'year']"
+~~~
+
+...the route handler must create a Promise of an array of PathValue objects, one for each of the following paths:
+
+~~~js
+["titlesById", 683, "name"]
+["titlesById", 683, "year"]
+["titlesById", 528, "name"]
+["titlesById", 528, "year"]
+~~~
+
+Inside the route handler we can get access to the array of integers produced by the {integers} pattern positionally. 
 
 ~~~js
     {
-        route: 'genrelist[{integers:indices}].name',
-        get: function(pathSet) {
-            // pathSet could be ["genrelist", [0, 1, 2], "name"] for example
-            var indices = pathSet[1];
-            // rest snipped
+        route: "titlesById[{integers}]['name','year','description','boxshot']",
+        get: function (pathSet) {
+            var ids = pathSet[1];
+            // create values here
         }
-    ]
+    }
 ~~~
 
-, including each title's name, year, description, and
-This route retrieves its information
+Alternately we can define a "titleIds" alias for the integers pattern and use the alias to retrieve the array of title ids.
 
-The information retrieved from the rating service requires a user ID. If no user ID is provided, the rating service
+~~~js
+    {
+        route: "titlesById[{integers}]['name','year','description','boxshot']",
+        get: function (pathSet) {
+            var ids = pathSet.titleIds;
+            // create values here
+        }
+    }
+~~~
+
+Once we have access to the ids of the requested titles, we can make a call to the title service to retrieve them.
+
+~~~js
+    {
+        route: "titlesById[{integers:titleIds}]['name','year','description','boxshot']",
+        get: function (pathSet) {
+            return titleService.getTitles(pathSet.titleIds).
+                then(function(titles) {
+                    // code to retrieve title values goes here
+                });            
+        }
+    }
+~~~
+
+Now we will use two nested forEach calls to create a path value object for every title id and title key combination.  
+
+(Example)        
+                                    
+Not we should be able to retrieve title keys by ID from the Router:
+
+(Example)
+
+The router collects up all of the path value objects  returned from route handlers, adds each value to a JSON Graph object, and returns it as a response. The code above print the following to the console:
+
+(Example)
+
+What do you think will happen if we attempt to retrieve keys from a title that does not exist? Let's try to retrieve the name of a title that does not exist (id = -1), and a title that does exist (id=7). 
+
+(Example)
+
+Note that the output is a JSON Graph error object at each individual path. Why did this happen? 
+
+We did not guard against the possibility that the title doesn't exist in our route handler. As a result our route threw an "undefined is not an object" error when it attempted to look up "name" on an undefined value. When the router catches an error thrown from a route handler, it creates a JSON Graph error object at every path passed to that route handler. That means we don't get any data back - not even the name of the title that does exist.
+
+Clearly we have to be defensive when coding our route handlers, but this begs the question: "what should a route handler return when a title doesn't exist"? 
+
+If there is a null or undefined value at "titleById[-1]" the route should return a path value indicating as much. Note the additional check added to the route below.
+
+(Example)
+
+Now let's repeat our request.
+
+(Example)
+
 
 
 ### Creating the Get Handlers for the Genre List Routes
@@ -1237,7 +1304,7 @@ Once inside the route, we can get access to the array of integers produced by th
     ]
 ~~~
 
-Alternately we can use the alias we assigned to the pattern to retrieve the indices.
+Alternately we can define an "indices" alias for the integers pattern and use it to retrieve the array of indices.
 
 ~~~js
     {
