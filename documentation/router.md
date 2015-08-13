@@ -1190,7 +1190,21 @@ Now let's repeat our request.
 
 (Example)
 
+The practice of checking for the existence of value types along the matched path is referred to as **branch guarding**, and it is every route handler's responsibility. If null, undefined, or _any JSON Graph value type_ (ex.string, number, atom), is discovered along a path, a route handler must return a PathValue that indicates which path at which the value type was discovered, as well as the specific value type found there. In the example above we only bother to check for null or undefined because we feel confident that the data has been sanitized already, and no other value type (ex. string, number) could appear instead of the title. Depending on how much you trust your data, you may want to be more zealous.
 
+Now that we can retrieve non-personalized fields from titles, let's create a route that adds personalized fields like rating and userRating to our JSON Graph object.
+
+#### "titlesById[{integers}]['rating', 'userRating']"
+
+This route matches any request for the rating on title objects. The rating service is personalized, and provides predicted ratings for each user based on their previous preferences. In the event that there is no user ID available, the rating service will create a rating based on the ratings provided by registered members. The rating service has getRatings method which can be used to retrieve any number of rating records objects by title ID.
+
+(Example)
+
+Note that the output of the title service is a map of record objects organized by each title ID. A record object is an object with a "doc" key containing the requested title. If an error occurs while attempting to retrieve a particular title, the record object will contain an error" key instead.
+
+(Example of error)
+
+Let's use the title service to retrieve each title's generic fields. We will start by creating a route object which matches any path that would retrieve these title fields. 
 
 ### Creating the Get Handlers for the Genre List Routes
 
