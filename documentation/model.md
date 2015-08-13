@@ -14,13 +14,13 @@ Your application can use Data Sources to retrieve JSON Graph data from the netwo
 
 1. Application views typically navigate information hierarchically in JSON format, and Data Sources return data in JSON Graph format. 
 2. Views need to be responsive to user input, but retrieving data from a Data Source may introduce considerable latency if the Data Source accesses the network.
-3. In response to user navigation (ex. scrolling through a list), views may need to repeatedly access small quantities of fine-grained data in rapid succession. Data Sources typically access the network where fine-grained requests are often inefficient, because of the overhead required to issue a request.
+3. In response to user navigation (ex. scrolling through a list), views may need to repeatedly access small quantities of fine-grained data in rapid succession. Data Sources typically access the network, therefore fine-grained requests are often inefficient because of the overhead required to issue a request.
 4. Navigating information hierarchically rather than retrieving information using id's can lead to inefficent back-end requests.
 
-For these reasons Views retrieve their data from the Model objects, which act as intermediaries between the view and the Data Source. Models abstract over Data Sources and provide several important services:
+For these reasons views retrieve their data from Model objects, which act as intermediaries between the view and the Data Source. Models abstract over Data Sources and provide several important services:
 
 * Models convert JSON Graph information retrieved from the Data Source into JSON.
-* Models reduce latency by caching data previously-retrieved from the Data Source in an in-memory cache.
+* Models reduce latency by caching data previously retrieved from the Data Source in an in-memory cache.
 * Models achieve more efficient network access patterns by batching multiple concurrent requests for information from the view into batched requests to the Data Source.
 * Models optimize your view's outgoing requests to the Data Source using previously-cached JSON Graph references.
 
@@ -58,7 +58,7 @@ var model = new falcor.Model({
     }});
 ~~~
 
-You can transform and retrieve values by passing the Model the [Paths](./paths.md) to those values within its associated JSON object.
+You can transform and retrieve values by passing the Model [Paths](./paths.md) to values within its associated JSON object.
 
 ~~~js
 // This outputs the following to the console:
@@ -89,11 +89,11 @@ There is one very important difference between working with a JSON object direct
 
 ### "Why can't I request Objects or Arrays from a Model?"
 
-_Falcor is optimized for displaying data catered to your views._ Both Arrays and Objects can contain an unbounded amount of data. Requesting an Array or Object in it's entirety is equivalent to your view requesting 'SELECT *' without a 'WHERE' clause in the SQL world. An Array that contains 5 items today, can grow to contain 10,000 items later on. This means that requests which are initially served quickly and fit the view's requirements can become slower over time as more data is added to backend data stores.
+_Falcor is optimized for displaying data catered to your views._ Both Arrays and Objects can contain an unbounded amount of data. Requesting an Array or Object in its entirety is equivalent to your view requesting 'SELECT *' without a 'WHERE' clause in the SQL world. An Array that contains 5 items today, can grow to contain 10,000 items later on. This means that requests which are initially served quickly and fit the view's requirements can become slower over time as more data is added to backend data stores.
 
-Models force developers to be explicit about which value types they would like to retrieve in order to maximize the likelihood that server requests for data will have **stable performance** over time. Rather than allow you to retrieve an entire Object, Models force you to _be explicit_ and retrieve only those values needed in a given scenario. Similarly when displaying an Array of items, Models do not allow you to retrieve the entire Array upfront. Instead you must request the first visible page of an Array, and follow up with additional page requests as the user scrolls. This allows your client code to control performance boundaries, based on the amount of data actually used in the view, as opposed to being susceptible to unexpected increases in the total amount of data available.
+Models force developers to be explicit about which value types they would like to retrieve in order to maximize the likelihood that server requests will have **stable performance** over time. Rather than allow you to retrieve an entire Object, Models force you to _be explicit_ and retrieve only those values needed in a given scenario. Similarly when displaying an Array of items, Models do not allow you to retrieve the entire Array upfront. Instead you must request the first visible page of an Array, and follow up with additional page requests as the user scrolls. This allows your client code to control performance boundaries, based on the amount of data actually used in the view, as opposed to being susceptible to unexpected increases in the total amount of data available.
 
-In the following example we page through a list of TODOs, selecting the name and done property of all the TODOs in the current page.
+In the following example we page through a list of TODOs, selecting the "name" and "done" properties of all the TODOs in the current page.
 
 ~~~js
 var model = new falcor.Model({
@@ -178,7 +178,7 @@ var model = new falcor.Model({
 
 The Falcor Model is intended to be the "M" in your MVC. Rather than interact with JSON data directly, your application's views interact with data _indirectly_ through the Model object. The Model object provides a set of familiar JavaScript APIs for working with JSON data, including get, set, and call. 
 
-Here is an example of working with JSON data directly:
+Here is an example of working with JSON data _directly_:
 
 ~~~js
 var log = console.log.bind(console)
@@ -201,7 +201,9 @@ var model = {
 console.log(model.todos[0].name);
 ~~~
 
-The main difference between working with JSON data directly and working with it indirectly through a Model object, is that the Falcor Model has a _push API_. Here is an example of working with a JSON object indirectly using a Falcor Model:
+The main difference between working with JSON data directly and working with it indirectly through a Model object, is that the Falcor Model has a _push API_. 
+
+Here is an example of working with a JSON object _indirectly_ using a Falcor Model:
 
 ~~~js
 var log = console.log.bind(console)
@@ -224,11 +226,11 @@ var model = new falcor.Model({cache: {
 model.getValue('todos[0].name').then(log);
 ~~~
 
-Note that in the example above, the name of the TODO is _pushed_ to a call back.
+Note that in the example above, the name of the TODO is _pushed_ to a callback.
  
 The main advantage of using a push API is that you can code against JSON data the same way regardless of whether the data is local or remote. This makes it very easy to begin coding your application against mocked data at first, and then work against server data later on without changing client code.
 
-In this example we retrieve the name of the first TODO from a JSON Object: 
+In this example, we retrieve the name of the first TODO from a JSON Object: 
 
 ~~~js
 var log = console.log.bind(console)
@@ -263,8 +265,8 @@ model.getValue('todos[0].name').then(log);
 When retrieving data from the Model, developers are typically attempting to do one of the following:
 
 1. Retrieve a single value
-2. Retrieving JSON Graph data as JSON
-3. Transforming JSON Graph data directly into view objects
+2. Retrieve JSON Graph data as JSON
+3. Transform JSON Graph data directly into view objects
 
 ### 1. Retrieve a Single Value
 
@@ -300,7 +302,7 @@ class Model {
 }
 ~~~
 
-While Models retrieve information from DataSources in JSON Graph format, they emit information in JSON format. You can retrieve JSON data from a Model by passing the get method any number of PathSets. In the following example, we will retrieve the names of the first two tasks in a TODOs list from a Model.
+While Models retrieve information from DataSources in JSON Graph format, they emit information in JSON format. You can retrieve JSON data from a Model by using its get method. In the following example, we will retrieve the names of the first two tasks in a TODOs list from a Model.
 
 ~~~js
 var dataSource = new falcor.HttpDataSource("/model.json");
@@ -358,7 +360,7 @@ model.get(["todos", {from: 0, to:1},"name"], ["todos", "length"]).then(function(
 
 ## Setting Values Using the Model
 
-In addition to retrieving values from a DataSource using a Model, you can also use a Model to set values into a DataSource. Set operations immediately write to the Model's local cache, and then write to the DataSource. That means that changes are reflected on the client immediately. However, if the attempt to modify the data in the DataSource fails, the Model's cache will eventually be updated with the post-set value of the DataSource. This is sometimes referred to as eventual consistency.
+In addition to retrieving values from a DataSource using a Model, you can also use a Model to set values into a DataSource. Set operations immediately write to the Model's local cache, and then write to the DataSource. That means that changes are reflected on the client immediately. However, if an attempt to modify the data in the DataSource fails, the Model's cache will eventually be updated with the post-set value of the DataSource. This is sometimes referred to as eventual consistency.
 
 When setting information using the Model, developers are usually trying to do one of the following operations:
 
@@ -376,7 +378,7 @@ class Model {
 }
 ~~~
 
-Here is an example of setting a single value using a Model using setValue:
+Here is an example of setting a single value using the setValue method:
 
 ~~~js
 var dataSource = new falcor.HttpDataSource("/model.json");
@@ -469,7 +471,7 @@ model.
 
 ### 3. Set Values Using a JSONEnvelope 
 
-Occasionally it can be less verbose to set multiple values with a JSON object rather than a series of PathValue objects. That is why set supports the following overload:
+Occasionally, it can be less verbose to set multiple values with a JSON object rather than a series of PathValue objects. That is why set supports the following overload:
 
 ~~~js
 class Model {
@@ -520,9 +522,9 @@ model.
 
 ## Calling Functions
 
-Retrieving and setting values in a JSON Graph are both examples of idempotent operations. This means that you can repeat the same set or get operation multiple times without introducing any additional side effects. This is the reason the Model can safely serve subsequent requests for the same value from its cache instead of returning to the DataSource. Furthermore, the Model can optimistically update its local cache when a value is set because it can make an educated guess about the effect that the set operation will have on the DataSource's JSON Graph object. Obviously applications built idempotent operations have nice properties. However, sometimes applications require a series of mutations to be applied transactionally.  In these instances, set and get alone are not adequate. You need to call a **function.** 
+Retrieving and setting values in a JSON Graph are both examples of idempotent operations. This means that you can repeat the same set or get operation multiple times without introducing any additional side effects. This is the reason the Model can safely serve subsequent requests for the same value from its cache instead of returning to the DataSource. Furthermore, the Model can optimistically update its local cache when a value is set because it can make an educated guess about the effect that the set operation will have on the DataSource's JSON Graph object. Obviously, idempotent operations have nice properties. However, sometimes applications require a series of mutations to be applied transactionally.  In these instances, set and get alone are not adequate. You need to call a **function.** 
 
-To allow for transactional operations, JSON Graph objects can contain functions just like JavaScript objects. Functions are considered JSON Graph objects which means they cannot be retrieved from, nor set into, a DataSource. Rather **functions can only be invoked using the call method.** 
+To allow for transactional operations, JSON Graph objects can contain functions just like JavaScript objects. Functions are considered JSON Graph objects, which means they cannot be retrieved from, nor set into, a DataSource. Rather, **functions can only be invoked using the call method.** 
 
 ~~~js
 class Model {
