@@ -1200,11 +1200,28 @@ This route matches any request for the rating on title objects. The rating servi
 
 (Example)
 
-Note that the output of the title service is a map of record objects organized by each title ID. A record object is an object with a "doc" key containing the requested title. If an error occurs while attempting to retrieve a particular title, the record object will contain an error" key instead.
+Note that like the title service, the output of the rating service is a map of record objects organized by each title ID. Each record object contains a "doc" field with an object that contains two fields:
 
-(Example of error)
+1. The "rating" which is the algorithmically-predicted rating based on the user's previous ratings of similar titles.
+ 2. The "userRating" which, if present, is the users explicitly specified rating for this title.
 
-Let's use the title service to retrieve each title's generic fields. We will start by creating a route object which matches any path that would retrieve these title fields. 
+Like the title service records, the rating record will contain a "error" key instead of a "doc" key in the event that an error occurs while attempting to retrieve the rating record.
+
+Now that we understand how the rating service works, let's create a route that matches the title's rating fields. This routes get handler will follow pretty much the same template as the title service route.
+
+(Example)
+
+Now we should be able to retrieve any title field by ID.
+
+(Example that retrieves the name, year, userRating of one title - make sure to instantiate the router with a user ID of one)
+
+The request above matches both routes we have created. The Router adds the resulting PathValues to a single JSON Graph response. The code above prints the following to the console:
+
+(example)
+
+Note how the router presents the consumer with what appears to be a single title object, but sources the data for the title from multiple services. The result is a simple API for the consumer without compromising any flexibility about where data is stored on the backend.
+
+Now we have the ability to retrieve information about any title in the catalog using that ID. However and practice our users will not be navigating titles by their unique identifier. When users start the application, they will be presented with
 
 ### Creating the Get Handlers for the Genre List Routes
 
