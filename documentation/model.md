@@ -10,23 +10,23 @@ lang: en
 
 # Model Overview
 
-Your application can use Data Sources to retrieve JSON Graph data from the network. However it is rarely ideal for your application's views to interact directly with data sources for the following reasons:
+Your application will work with a Model object, to retrieve data. It is the main API you'll work with, when working with Falcor. Accessing data through a Model removes many of the challenges applications have when working with remote data sources directly, for example:
 
-1. Application views typically navigate information hierarchically in JSON format, and Data Sources return data in JSON Graph format. 
-2. Views need to be responsive to user input, but retrieving data from a Data Source may introduce considerable latency if the Data Source accesses the network.
-3. In response to user navigation (ex. scrolling through a list), views may need to repeatedly access small quantities of fine-grained data in rapid succession. Data Sources typically access the network where fine-grained requests are often inefficient, because of the overhead required to issue a request.
-4. Navigating information hierarchically rather than retrieving information using id's can lead to inefficent back-end requests.
+1. Application views typically navigate information hierarchically, whereas data sources normally represent data relationships as graphs.
+2. Views need to be responsive to user input, but retrieving data from data sources may introduce considerable latency if the data source accesses the network.
+3. In response to user navigation (ex. scrolling through a list), views may need to repeatedly access small quantities of fine-grained data in rapid succession. Issuing multiple rapid requests for small amounts of data across the network is inefficient, because of the overhead required to issue a request.
+4. Navigating information hierarchically rather than retrieving information using id's can lead to inefficient back-end requests.
 
-For these reasons Views retrieve their data from the Model objects, which act as intermediaries between the view and the Data Source. Models abstract over Data Sources and provide several important services:
+Models act as intermediaries between the view and the data source and provides several important services to address the challenges above:
 
 * Models convert JSON Graph information retrieved from the Data Source into JSON.
-* Models reduce latency by caching data previously-retrieved from the Data Source in an in-memory cache.
+* Models reduce latency by optimally caching data previously-retrieved from the Data Source in an in-memory cache.
 * Models achieve more efficient network access patterns by batching multiple concurrent requests for information from the view into batched requests to the Data Source.
 * Models optimize your view's outgoing requests to the Data Source using previously-cached JSON Graph references.
 
 ## How the Model Works
 
-Models use a DataSource to retrieve data from the JSON object. Falcor ships with HttpDataSource, an implementation of the DataSource interface which proxies requests to another DataSource running on an HTTP server (usually a falcor Router).
+Models use a DataSource to retrieve data from the JSON object. Falcor ships with HttpDataSource, an implementation of the DataSource interface on the client, which proxies requests to another DataSource running on an HTTP server (usually a falcor Router).
  
 ![How the Model Works]({{ site.baseurl }}/falcor-end-to-end.png)
 
