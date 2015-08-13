@@ -21,7 +21,7 @@ gulp.task('lint', function() {
                 'module': false
             },
             reset: true, // dz: remove me after linting is finished, else i can't do one at the time
-            useEslintrc: true,
+            useEslintrc: true
         })).
         pipe(eslint.format()).
         pipe(eslint.failOnError()); // dz: change back after finishing to failAfterError

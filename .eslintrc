@@ -34,7 +34,7 @@
         "use-isnan": [ 2 ],
         // should we enforce valid documentation comments?
         // i.e., if you do documentation, do it right
-        // "valid-jsoc": [ 2 ],
+        // "valid-jsdoc": [ 2 ],
         "valid-typeof": [ 2 ],
 
         // best practices
@@ -60,7 +60,7 @@
         "no-labels": [ 0 ],
         "no-lone-blocks": [ 2 ],
         "no-loop-func": [ 2 ],
-        "no-multi-spaces": [ 0 ],
+        "no-multi-spaces": [ 2 ],
         "no-native-reassign": [ 2 ],
         "no-new": [ 0 ],
         "no-new-func": [ 2 ],
