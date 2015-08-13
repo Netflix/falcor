@@ -66,7 +66,7 @@ app.use('/model.json', falcorExpress.dataSourceRoute(function (req, res) {
   ]);
 }));
 
-// statically host all files in current directory
+// serve static files from current directory
 app.use(express.static(__dirname + '/'));
 
 var server = app.listen(3000);
