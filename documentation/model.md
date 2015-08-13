@@ -546,13 +546,13 @@ This is an array of arguments to be passed to the function being called.
 
 ### The Optional refPaths Argument
 
-Typically, returnValuePaths are used when the function creates a new object and returns a reference to that object. The refPaths can be passed to call in order to allow fields to be retrieved from the newly-generated object without the need for a subsequent get operation to be executed on the DataSource.
+Typically, returnValuePaths are used when the function creates a new object and returns a reference to that object. The refPaths can be passed to the call method in order to allow fields to be retrieved from the newly-generated object without the need for a subsequent get operation.
 
-In the event that any of the values returned from the function are [JSON Graph References](#JSON-Graph-References), the DataSource will append each of the refPaths to each Reference path and evaluate the resulting paths. The results of the values retrieved by evaluating the refPaths on the References returned by the function are added to the JSON Graph response by the DataSource.
+In the event that any of the values returned from the function are [JSON Graph References](#JSON-Graph-References), the DataSource will append each of the refPaths to each Reference path and evaluate the concatenated paths. The resulting values are added to the JSON Graph response by the DataSource.
 
 ### The Optional thisPaths Arguments
 
-A function is not obligated to return all of the changes that it makes to its "this" object. On the contrary, functions typically return as little data as possible by default. Instead of returning all of the changes they make to the JSON Graph object, functions allow callers to define exactly which values they would like to refresh after successful function execution by providing the refPaths and the thisPaths arguments. The goal is to allow applications to retrieve the minimum subset of data they need for each scenario. 
+A function is not obligated to return all of the changes that it makes to its "this" object. On the contrary, functions typically return as little data as possible by default. Instead of forcing functions to return all of the changes they make to the JSON Graph object, DataSources allow callers to define exactly which values they would like to refresh after successful function execution. To this end, callers can provide refPaths and thisPaths to the DataSource's call method along with the function path. After the DataSource runs the function, it retrieves the refPaths and thisPaths and adds them to the JSON Graph response.
 
 After the refPaths have been evaluated against any JSON Graph References returned by the function and added to the JSONGraphEnvelope Response, each PathSet in the thisPaths array is evaluated on the function's "this" object. The resulting values are added to the JSON Graph Response returned by the DataSource's call method.
 
