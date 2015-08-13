@@ -1186,7 +1186,7 @@ If there is a null or undefined value at "titleById[-1]" the route should return
 
 (Example)
 
-Now let's repeat our request.
+Now let's see what gets printed to the console if we repeat the same request as last time:
 
 (Example)
 
@@ -1207,9 +1207,11 @@ Note that like the title service, the output of the rating service is a map of r
 
 Like the title service records, the rating record will contain a "error" key instead of a "doc" key in the event that an error occurs while attempting to retrieve the rating record.
 
-Now that we understand how the rating service works, let's create a route that matches the title's rating fields. This routes get handler will follow pretty much the same template as the title service route.
+Now that we understand how the rating service works, let's create a route that matches the title's rating fields. This routes get handler will follow pretty much the same template as the title service route with one exception: the rating route retrieves the userId member from the Router and passes it to the ratings service.
 
 (Example)
+
+Each one of the Routers route handlers runs with the Router instance as it's "this" object. That means that our route handler has access to the Router's userId member. The handler passes the Router's userId to the recommendation service, which retrieves a personalized genre list for the current user. If the current user is not authenticated, the Router's userId will be undefined. If an undefined userId is passed to the rating service, the service simply returns a record with a generic "rating" and no "userRating" key.
 
 Now we should be able to retrieve any title field by ID.
 
@@ -1225,7 +1227,7 @@ Now we have the ability to retrieve information about any title in the catalog u
 
 ### Creating the Genre List Routes
 
-We decided to use the following routes to create the user's personalized genre list:
+We chose the following routes to create the user's personalized genre list:
 
 ~~~
 "genrelist.length"
@@ -1234,7 +1236,7 @@ We decided to use the following routes to create the user's personalized genre l
 "genrelist[{integers}].titles[{integers}]"
 ~~~
 
-All of these routes will retrieve their information from the recommendation service. The recommendationService's getGenreList method returns a Promise that resolves to the current user's list of genres, each of which contains a personalized list of titles based on their preferences. Here's an example usage of getGenreList:
+Each of these routes will retrieve their information from the recommendation service. The recommendationService's getGenreList method returns a Promise that resolves to the current user's list of genres, each of which contains a personalized list of titles based on their preferences. Here's an example usage of getGenreList:
 
 ~~~js
 recommendationService.
@@ -1264,7 +1266,9 @@ The code above prints the following (abbreviated) output to the console:
 }
 ~~~
 
-The getGenreList method can also be called without a user ID. If no user ID is provided the service will fallback to a non-personalized list of recommendations containing the highest rated titles in the catalog. Now that we understand how the service works, let's use it to create the routes for the current user's genre list.
+The getGenreList method can also be called without a user ID. If no user ID is provided the service will fallback to a non-personalized list of recommendations containing the highest rated titles in the catalog. 
+
+Now that we understand how the service works, let's use it to create the routes for the current user's genre list.
 
 #### The "genrelist.length" route
 
@@ -1287,7 +1291,7 @@ var routes = [
 ]
 ~~~
 
-As we can see, each route has access to the members of the Router itself. The get handler passes the Router's userId to the recommendation service, which retrieves a personalized genre list for the current user. The route transforms the result of the promise into a PathValue containing the matched path and the length.
+As we can see, the route simply transforms the result of the promise into a PathValue containing the matched path and the length.
 
 Now we should be able to retrieve the length of the genre list from the Router:
 
