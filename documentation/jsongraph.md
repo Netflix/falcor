@@ -46,10 +46,13 @@ Note that in the example above the JSON Graph contains references to other locat
 JSON is a ubiquitous data interchange format. Web applications often exchange data in JSON format because manipulating JSON Data in JavaScript is so easy. JSON is also map–based, which makes it easy to divide a large data set into smaller subsets and send them across the wire on demand.
 
 Unfortunately there is a downside to using JSON to send and store your Web application's data: JSON models trees, and most application domains are *graphs*. As a result, serializing a graph as JSON can introduce duplicates copies of the same entity. 
+![Graph to JSON](../images/jsong-json.png)
 
-(image)
+These duplicates take up additional space when sent across the wire, but they can also create a much bigger hazard: **stale data**. If changes made to one instance are not propagated to the others, the application may present stale data to the user if they are presented a different instance than the one they changed. 
 
-These duplicates take up additional space when sent across the wire, but they can also create a much bigger hazard: **stale data**. If changes made to one instance are not propagated to the others, the application may present stale data to the user if they are presented a different instance than the one they changed. To avoid this problem, developers often attempt to remove duplicates when integrating objects into the client cache. This usually involves assigning a unique identifier to the entity, so that the client can detect duplicates before they are added to the cache. Unfortunately as most object identifiers are not globally unique, but rather are unique among other entities of the same type, custom code must often be written for each new type added to the system.   In addition to being able to represent graphs as a JSON object, JSON Graph provides a set of abstract operations that should allow your application to be able to retrieve all the data it needs in a single round trip. The ability to retrieve precisely the data required for an application scenario in a single round trip can dramatically reduce latency. 
+![Stale Data](../images/stale-data.png)
+
+To avoid this problem, developers often attempt to remove duplicates when integrating objects into the client cache. This usually involves assigning a unique identifier to the entity, so that the client can detect duplicates before they are added to the cache. Unfortunately as most object identifiers are not globally unique, but rather are unique among other entities of the same type, custom code must often be written for each new type added to the system.   In addition to being able to represent graphs as a JSON object, JSON Graph provides a set of abstract operations that should allow your application to be able to retrieve all the data it needs in a single round trip. The ability to retrieve precisely the data required for an application scenario in a single round trip can dramatically reduce latency. 
 
 ## How Does JSON Graph Work?
 
