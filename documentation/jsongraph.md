@@ -24,7 +24,7 @@ var json = {
         "44": {
             name: "get milk from corner store",
             done: false,
-            prerequisites: [{ $type: "ref", value: ["todosById", "54"] }]
+            prerequisites: [{ $type: "ref", value: ["todosById", 54] }]
         },
         "54": {
             name: "withdraw money from ATM",
@@ -33,8 +33,8 @@ var json = {
         }
     },
     todos: [
-        { $type: "ref", value: ["todosById", "44"] },
-        { $type: "ref", value: ["todosById", "54"] }
+        { $type: "ref", value: ["todosById", 44] },
+        { $type: "ref", value: ["todosById", 54] }
     ]
 };
 ~~~
@@ -48,11 +48,15 @@ JSON is a ubiquitous data interchange format. Web applications often exchange da
 Unfortunately there is a downside to using JSON to send and store your Web application's data: JSON models trees, and most application domains are *graphs*. As a result, serializing a graph as JSON can introduce duplicates copies of the same entity. 
 ![Graph to JSON](../images/jsong-json.png)
 
-These duplicates take up additional space when sent across the wire, but they can also create a much bigger hazard: **stale data**. If changes made to one instance are not propagated to the others, the application may present stale data to the user if they are presented a different instance than the one they changed. 
+These duplicates take up additional space when sent across the wire, but they can also create a much bigger hazard: **stale data**. If changes made to one instance of an entity are not propagated to the others, the application may present stale data to the user if they are presented a different instance than the one they changed. 
 
 ![Stale Data](../images/stale-data.png)
 
-To avoid this problem, developers often attempt to remove duplicates when integrating objects into the client cache. This usually involves assigning a unique identifier to the entity, so that the client can detect duplicates before they are added to the cache. Unfortunately as most object identifiers are not globally unique, but rather are unique among other entities of the same type, custom code must often be written for each new type added to the system.   In addition to being able to represent graphs as a JSON object, JSON Graph provides a set of abstract operations that should allow your application to be able to retrieve all the data it needs in a single round trip. The ability to retrieve precisely the data required for an application scenario in a single round trip can dramatically reduce latency. 
+To avoid this problem, developers often attempt to remove duplicates when integrating entities into the client cache. 
+
+![Removing Duplicates](../images/json-graph-cache.png)
+
+This usually involves assigning a unique identifier to the entity, so that the client can detect duplicates before they are added to the cache. Unfortunately as most object identifiers are not globally unique, but rather are unique among other entities of the same type, custom code must often be written for each new type added to the system.   In addition to being able to represent graphs as a JSON object, JSON Graph provides a set of abstract operations that should allow your application to be able to retrieve all the data it needs in a single round trip. The ability to retrieve precisely the data required for an application scenario in a single round trip can dramatically reduce latency. 
 
 ## How Does JSON Graph Work?
 
@@ -62,23 +66,75 @@ Whenever an entity needs to be referenced by another entity in the same JSON gra
 
 Here is a simple example of a JSON Graph object that contains the domain data for a TODO list.
 
-(example)
+~~~js
+var json = {
+    todosById: {
+        "44": {
+            name: "get milk from corner store",
+            done: false,
+            prerequisites: [{ $type: "ref", value: ["todosById", 54] }]
+        },
+        "54": {
+            name: "withdraw money from ATM",
+            done: false,
+            prerequisites: []
+        }
+    },
+    todos: [
+        { $type: "ref", value: ["todosById", 44] },
+        { $type: "ref", value: ["todosById", 54] }
+    ]
+};
+~~~
 
 JSON Graph References are just like symbolic links in the UNIX file system. Symbolic links are just files that contain a path. However if the shell encounters a symbolic link while evaluating a path, the shell begins evaluating the path within the symbolic link. It is this awareness of symbolic links that allows graphs to be represented in a hierarchical structure.
 
 ## New Primitive Value Types 
 
-In addition to JSON’s primitive types, JSON Graph introduces three new primitive types:  1. Reference  2. Atom  3. Error   Each of these types is a JSON Graph object, but their values are always retrieved and replaced in their entirety just like a primitive JSON value.  None of the JSON Graph values can be mutated using any of the available abstract JSON Graph operations. Each of these types also has a key ”$type” which differentiates it from regular JSON objects, and describes the type of its “value” key.
+In addition to JSON’s primitive types, JSON Graph introduces three new primitive types:  
+
+1. Reference  
+2. Atom  
+3. Error   
+
+Each of these types is a JSON Graph object, but their values are always retrieved and replaced in their entirety just like a primitive JSON value.  None of the JSON Graph values can be mutated using any of the available abstract JSON Graph operations. Each of these types also has a key ”$type” which differentiates it from regular JSON objects, and describes the type of its “value” key.
 
 ### Reference   
 
-A Reference is a JSON object with a “$type” key that has a value of “ref” and a ”value” key that has a Path array as its value. A Reference’s path points to another location within the same JSON Graph object. Using references, it is possible to model a graph in JSON. Here is an example of a TODO list in which each task contains a reference to its prerequisite task: 
+A Reference is a JSON object with a “$type” key that has a value of “ref” and a ”value” key that has a Path array as its value. 
 
-(example)
+~~~js
+{ $type: "ref", value: ["todosById", 44] },
+~~~
 
-A reference is like a symbolic link in the UNIX file system. When the path is being evaluated, and a reference is encountered when there are still keys in the path left to evaluate, the reference is followed from the root to its target object, and the remaining keys in the path are evaluated. If a Reference is discovered at a path, the Reference itself is returned as the result. 
+A Reference’s path points to another location within the same JSON Graph object. Using References, it is possible to model a graph in JSON. Here is an example of a TODO list in which each task can contain References to its prerequisite tasks: 
 
-# The Abstract JSON Graph Operations  There are three abstract JSON Graph operations: 
+~~~js
+var json = {
+    todosById: {
+        "44": {
+            name: "get milk from corner store",
+            done: false,
+            prerequisites: [{ $type: "ref", value: ["todosById", 54] }]
+        },
+        "54": {
+            name: "withdraw money from ATM",
+            done: false,
+            prerequisites: []
+        }
+    },
+    todos: [
+        { $type: "ref", value: ["todosById", 44] },
+        { $type: "ref", value: ["todosById", 54] }
+    ]
+};
+~~~
+
+A Reference is like a symbolic link in the UNIX file system. When the path is being evaluated, and a Reference is encountered when there are still keys in the path left to evaluate, the reference is followed from the root to its target object, and the remaining keys in the path are evaluated. If a Reference is discovered at the last key in a path, the Reference itself is returned as the result. 
+
+## The Abstract JSON Graph Operations  
+
+There are three abstract JSON Graph operations: 
 
 1. get 
 2. set 
@@ -89,32 +145,93 @@ Each of these operations must be carried out by an intermediary. This layer of i
 Some examples of objects that are capable of carrying out the abstract JSON Graph operations are:  
 
 * DataSources
-* The Falcor model
+* The Falcor Model
 
-## The Abstract get Operation
+### The Abstract get Operation
 
-It is possible to retrieve primitive values from a JSON Graph document using the abstract get operation. The input to the abstract get operation can be any number of paths to the values to be retrieved. The output is a subset of the JSON Graph object that contains all of the primitive values encountered while evaluating the input paths. The abstract get operation must be idempotent. Executing a get operation must not change any values within the JSON Graph. 
+It is possible to retrieve primitive values from a JSON Graph document using the abstract get operation. The input to the abstract get operation can be any number of Paths to the values to be retrieved. The output is a subset of the JSON Graph object that contains all of the primitive values encountered while evaluating the input Paths. The abstract get operation must be idempotent. Executing a get operation must not change any values in the JSON Graph. 
 
 Let's walk through this process on a real JSON Graph object:
 
-(example)
+~~~js
+var json = {
+    todosById: {
+        "44": {
+            name: "get milk from corner store",
+            done: false,
+            prerequisites: [{ $type: "ref", value: ["todosById", 54] }]
+        },
+        "54": {
+            name: "withdraw money from ATM",
+            done: false,
+            prerequisites: []
+        }
+    },
+    todos: [
+        { $type: "ref", value: ["todosById", 44] },
+        { $type: "ref", value: ["todosById", 54] }
+    ]
+};
+~~~
 
-Let’s evaluate the following path in an attempt to retrieve the name of the first two tasks in the TODOs list.
+Let’s evaluate the following path in an attempt to retrieve the name of the first task in the TODOs list.
 
-(path)  
+~~~js
+["todos", 0, "name"]
+~~~
 
 First we evaluate the ”todos” key, which yields an array.  There are more keys to be evaluated, so we continue. Then we evaluate the number “0” key, and it is converted into a string using JSON stringify algorithm. We attempt to look up the value in the array, and we find a reference:  
 
-(reference value)  
+~~~js
+// JSON Graph object
+{
+    // "todosById" object snipped
+    todos: [
+        { $type: "ref", value: ["todosById", 44] },
+        // rest of list snipped
+    ]
+}
+// JSON Graph subset response
+{}
+~~~
 
-References are primitive value types, and are therefore immediately inserted into the subset of the JSON Graph object that will be produced by the abstract get operation. However References are handled specially during path evaluation. If a Reference is encountered when there are still keys left in the path to be evaluated, a new path is created. The new path is formed by concatenating the remaining keys to the end of the reference path. This process is known as “path optimization”, because the optimized path we create is a quicker route to the requested value. Path optimization produces the following path:  
-(optimized path)   
+References are primitive value types, and are therefore immediately inserted into the subset of the JSON Graph object that will be produced by the abstract get operation. 
+
+~~~js
+// JSON Graph object
+{
+    // "todosById" object snipped
+    todos: [
+        { $type: "ref", value: ["todosById", 44] },
+        // rest of list snipped
+    ]
+}
+// JSON Graph subset response
+{
+    todos: {
+        "0": { $type: "ref", value: ["todosById", 44] },
+    }
+}
+~~~
+
+However References are handled specially during path evaluation. If a Reference is encountered when there are still keys left in the path to be evaluated, a new path is created. The new path is formed by concatenating the remaining keys to the end of the reference path. This process is known as “path optimization”, because the optimized path we create is a quicker route to the requested value. Path optimization produces the following path:  
+
+~~~js
+["todosById", 44]
+{
+    // "todosById" object snipped
+    todos: [
+        { $type: "ref", value: ["todosById", 44] },
+        // rest of list snipped
+    ]
+}
+~~~
 
 Once we create an optimized path, we begin evaluating it from the root of the JSON Graph object. 
 
 (pointer to the root of the document, along with the optimized path)  
 
-Now we evaluate the “tasksById” key, which yields an object. Next, we convert the number 234 into a string using the JSON stringify algorithm. Then we look up the resulting string “234” which yields another object. Finally we look up the key “name” and we find a primitive value type ”go to the ATM”. This value is added to the JSON Graph subset and returned as the result of the abstract get operation. 
+Now we evaluate the “tasksById” key, which yields an object. Next, we convert the number 44 into a string using the JSON stringify algorithm. Then we look up the resulting string “44” which yields another object. Finally we look up the key “name” and we find a primitive value type ”withdraw money from ATM”. This value is added to the JSON Graph subset and returned as the result of the abstract get operation. 
 
 (the string result)  
 
@@ -172,7 +289,7 @@ Once we create an optimized path, we begin evaluating it from the root of the JS
 
 (pointer to the root of the document, along with the optimized path)
 
-Now we evaluate the “tasksById” key, which yields an object. Next, we convert the number 234 into a string using the JSON stringify algorithm. Then we look up the resulting string “234” which yields another object. Finally we arrive at the last key: “name”. We replace the value at this location with the new value: true. We also insert the value into the JSON Graph subset, and return the JSON Graph subset as the new result of the abstract set operation. 
+Now we evaluate the “tasksById” key, which yields an object. Next, we convert the number 44 into a string using the JSON stringify algorithm. Then we look up the resulting string “44” which yields another object. Finally we arrive at the last key: “name”. We replace the value at this location with the new value: true. We also insert the value into the JSON Graph subset, and return the JSON Graph subset as the new result of the abstract set operation. 
 
 (the string result) 
 
@@ -198,7 +315,7 @@ Once we create an optimized path, we begin evaluating it from the root of the JS
 
 (pointer to the root of the document, along with the optimized path)  
 
-Now we evaluate the “tasksById” key, which yields an object. Next, we convert the number 234 into a string using the JSON stringify algorithm. Then we look up the resulting string “234” which yields another object. Now we look up the ”name” key and find a primitive value: ”go to the ATM”. As there are more keys to be evaluated, the object evaluating the abstract set operation attempts to replace the primitive value with an object. 
+Now we evaluate the “tasksById” key, which yields an object. Next, we convert the number 44 into a string using the JSON stringify algorithm. Then we look up the resulting string “44” which yields another object. Now we look up the ”name” key and find a primitive value: ”withdraw money from ATM”. As there are more keys to be evaluated, the object evaluating the abstract set operation attempts to replace the primitive value with an object. 
 
 (example of JSON Graph subset and as well as original JSON Graph with object replaced overvalue) 
 
