@@ -56,13 +56,13 @@ To avoid this problem, developers often attempt to remove duplicates when integr
 
 ![Removing Duplicates](../images/json-graph-cache.png)
 
-This usually involves assigning a unique identifier to the entity, so that the client can detect duplicates before they are added to the cache. Unfortunately as most object identifiers are not globally unique, but rather are unique among other entities of the same type, custom code must often be written for each new type added to the system.   In addition to being able to represent graphs as a JSON object, JSON Graph provides a set of abstract operations that should allow your application to be able to retrieve all the data it needs in a single round trip. The ability to retrieve precisely the data required for an application scenario in a single round trip can dramatically reduce latency. 
+This usually involves assigning a unique identifier to the entity, so that the client can detect duplicates before they are added to the cache. Unfortunately as most object identifiers are not globally unique, but rather are unique among other entities of the same type, custom code must often be written for each new type added to the system.   In addition to being able to represent graphs as a JSON object, JSON Graph provides a set of abstract operations that allow your application to be able to retrieve all the data it needs for an application use case _in a single round trip_. This can dramatically reduce latency. 
 
 ## How Does JSON Graph Work?
 
-**JSON Graph allows a graph to be modeled as JSON without _introducing duplicates_.** Instead of inserting an entity into the same message multiple times, _each entity with a unique identifier is inserted into a single globally–unique location in the JSON Graph object_. The path to the only location within the JSON Graph object where an entity is stored is referred to as the entity's **identity path.** No two entities in an application's domain model should have the same identity path. If an entity's unique identifier (often assigned by a data store) is not globally unique, but rather only unique within the set of its like types, the entity's identity path can be changed to include both the its type and ID. This combination is usually enough to ensure that an entity's identity path is globally unique.
+**JSON Graph allows a graph to be modeled as JSON without _introducing duplicates_.** Instead of inserting an entity into the same message multiple times, _each entity with a unique identifier is inserted into a single, globally unique location in the JSON Graph object_. The Path to the only location within the JSON Graph object where an entity is stored is referred to as the entity's **Identity Path.** No two entities in an application's domain model should have the same Identity Path. If an entity's unique identifier (often assigned by a data store) is *not* globally unique, but rather only unique within the set of its like types, the entity's Identity Path can be changed to include both the its type and ID. This combination is usually enough to ensure that an entity's Identity Path is globally unique.
 
-Whenever an entity needs to be referenced by another entity in the same JSON graph object, a **Reference** with the entity's identity path is included instead. A Reference is a new value type that JSON Graph introduces to JSON to allow graph relationships to be modeled within a JSON object. 
+Whenever an entity needs to be referenced by another entity in the same JSON graph object, a **Reference** with the entity's Identity Path is included instead. A Reference is a new value type that JSON Graph introduces to JSON to allow graph relationships to be modeled within a JSON object. 
 
 Here is a simple example of a JSON Graph object that contains the domain data for a TODO list.
 
@@ -87,7 +87,15 @@ var json = {
 };
 ~~~
 
-JSON Graph References are just like symbolic links in the UNIX file system. Symbolic links are just files that contain a path. However if the shell encounters a symbolic link while evaluating a path, the shell begins evaluating the path within the symbolic link. It is this awareness of symbolic links that allows graphs to be represented in a hierarchical structure.
+JSON Graph References are just like symbolic links in the UNIX file system. Symbolic links are just files that contain a path. However if the shell encounters a symbolic link while evaluating a path, the shell begins evaluating the path within the symbolic link. It is this awareness of symbolic links that allows graphs to be represented in a hierarchical structure. Falcor provides several operations for retrieving and modifying JSON Graph objects. These operations recognize References and automatically traverse them. This allows you to ensure that the graph only contains one instance of every entity, while navigating the graph as if the entity appears in multiple places.
+
+For example, we can use the abstract get operation to retrieve the name of the prerequisite in the first task in the TODO list above.
+
+~~~js
+get(["todos", 0, "prerequisites", 0, "name"]);
+~~~
+
+The code above will eventually return a response that contains "withdraw money from ATM". Note that we navigate the graph using the same set of keys if we were traversing an in-memory JavaScript Graph. For more information, see "Abstract JSON Graph Operations".
 
 ## New Primitive Value Types 
 
@@ -97,7 +105,7 @@ In addition to JSON’s primitive types, JSON Graph introduces three new primiti
 2. Atom  
 3. Error   
 
-Each of these types is a JSON Graph object, but their values are always retrieved and replaced in their entirety just like a primitive JSON value.  None of the JSON Graph values can be mutated using any of the available abstract JSON Graph operations. Each of these types also has a key ”$type” which differentiates it from regular JSON objects, and describes the type of its “value” key.
+Each of these types is a JSON Graph object with a "$type" key that differentiates it from regular JSON objects, and describes the type of its “value” key. These three JSON Graph primitive types are always retrieved and replaced in their entirety just like a primitive JSON value.  None of the JSON Graph values can be mutated using any of the available abstract JSON Graph operations.
 
 ### Reference   
 
@@ -131,6 +139,95 @@ var json = {
 ~~~
 
 A Reference is like a symbolic link in the UNIX file system. When the path is being evaluated, and a Reference is encountered when there are still keys in the path left to evaluate, the reference is followed from the root to its target object, and the remaining keys in the path are evaluated. If a Reference is discovered at the last key in a path, the Reference itself is returned as the result. 
+
+### Atom
+
+JSON Graph allows metadata to be attached to values to control how they are handled by clients. For example, metadata can be attached to values to control how long values stay a client cache. For more information see [Sentinel Metadata](#Sentinel-Metadata).
+
+One issue is that JavaScript value types do not preserve any metadata attached to them when they are serialized as JSON:
+
+~~~js
+var number = 4;
+number['$expires'] = 5000;
+
+console.log(JSON.stringify(number, null, 4))
+
+// This outputs the following to the console:
+// 4
+~~~
+
+Atoms "box" value types inside of a JSON object, allowing metadata to be attached to them. 
+
+~~~js
+var number = {
+    $type: "atom",
+    value: 4,
+    $expires: 5000
+};
+
+console.log(JSON.stringify(number, null, 4))
+
+// This outputs the following to the console:
+// {
+//     "$type": "atom",
+//     "value": 4,
+//     "$expires": 5000
+// } 
+~~~
+
+The value of an Atom is always treated like a value type, meaning it is retrieved and set in its entirety. An Atom cannot be mutated using any of the abstract JSON Graph operations. Instead you must replace Atoms entirely using the abstract set operation.
+
+In addition to making it possible to attach metadata to JSON values, Atoms can be used to get around the restriction against retrieving JSON Objects and Arrays. Let's say that we have an Array which we are certain will remain small, like a list of video subtitles for example. By boxing the subtitles Array in an Atom, we are able to retrieve the entire Array using the abstract get operation. Here is an example using a Falcor Model, which is an object capable of executing the abstract get operation on a JSON Graph.
+
+~~~js
+var log = console.log.bind(console)
+
+var model = new falcor.Model({cache: {
+    titlesById: {
+        "44": {
+            name: "Die Hard",
+            subtitles: { $type: "atom", value: ['en', 'fr'] }
+        }
+    }
+}});
+
+model.getValue(['titlesById', 44, 'subtitles']).then(log)
+
+// This outputs the following to the console:
+// ['en', 'fr']
+~~~
+
+The result above only includes the value of the Atom because the Model unboxes Atoms by default.
+
+### Error
+
+When an object executing a JSON Graph operation encounters an error while attempting to set or retrieve a value, an Error object may be created and placed in the JSON Graph response.
+
+By default a Model delivers Errors differently than other values. If synchronous methods are used to retrieve the data from the Model the error is thrown.  If the data is asynchronously being requested from the model as an Observable or a Promise, the error will be delivered in a special callback.
+
+~~~js
+var model = new falcor.Model({cache: {
+    titlesById: {
+        "44": {
+            $type: "error",
+            value: "failure to retrieve title."
+        }
+    }
+}});
+
+// This outputs the following to the error console: {path:["titlesById", 44],value:"failure to retrieve title."}
+model.
+    getValue('titlesById[44].name').
+    then(
+        data => {
+            console.log("success");
+        },
+        pathValue => {
+            console.error(JSON.stringify(pathValue));
+        });
+~~~
+
+To learn more about the different ways to retrieve information from a Model, see [Retrieving Data from a Model](#Retrieving-Data-from-a-Model).
 
 ## The Abstract JSON Graph Operations  
 
