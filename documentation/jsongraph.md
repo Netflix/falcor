@@ -215,54 +215,67 @@ An Error is a JSON object with a “$type” key that has a value of “error”
 
 When an object executing a JSON Graph operation encounters an error while attempting to set or retrieve a value, an Error object may be created and placed in the JSON Graph response in the value's place.
 
-For example, a Router is an object which creates a virtual JSON Graph
+To understand when an Error object might appear in a JSON Graph, let's take a look at the Router object. A Router is an object which creates a virtual JSON Graph from a variety of different DataSources. Instead of creating a JSON Graph object ahead of time, the Router creates the requested values on demand by retrieving them from one or more Data Sources. The Router is capable of executing all of the abstract JSON Graph operations. As a result, the Router creates the illusion that the JSON Graph object exists even if the data is actually organized very differently and is spread across any number of different data stores. 
 
-By default a Model delivers Errors differently than other values. If synchronous methods are used to retrieve the data from the Model the error is thrown.  If the data is asynchronously being requested from the model as an Observable or a Promise, the error will be delivered in a special callback.
+Below is an example of a Router that supports retrieving the name of the current user in a virtual JSON Graph object. Instead of retrieving the data from an in-memory object, it matches the incoming path against a pattern and requests the value from a service.
 
 ~~~js
-var model = new falcor.Model({cache: {
-    titlesById: {
-        "44": {
-            $type: "error",
-            value: "failure to retrieve title."
+var router = new Router([
+    {
+        route: "user.name",
+        get: function(pathSet) {
+            return userService.getUser().
+                then(
+                    function(user) {
+                        return { path: ['user', 'name'], value: user.name };
+                    },
+                    function(error) {
+                        return { path: ['user'], value: { $type: "error", value: error.message } };
+                    });
         }
     }
-}});
-
-// This outputs the following to the error console: {path:["titlesById", 44],value:"failure to retrieve title."}
-model.
-    getValue('titlesById[44].name').
-    then(
-        data => {
-            console.log("success");
-        },
-        pathValue => {
-            console.error(JSON.stringify(pathValue));
-        });
+]);
 ~~~
 
-To learn more about the different ways to retrieve information from a Model, see [Retrieving Data from a Model](#Retrieving-Data-from-a-Model).
+As the router is not reading the data from an in-memory JSON Graph object, but is instead retrieving it from a remote data source, errors may occur. For example, the remote data source may be under heavy load and unable to serve the request before it times out. In this circumstance, the Router will insert a JSON Graph Error object in its response.
+
+~~~js
+router.get(["user", "name"]).subscribe(function(jsonGraphEnvelope) {
+    console.log(JSON.stringify(jsonGraphEnvelope, null, 4));
+});
+// prints the following to the console if the user service times out
+// {
+//     jsonGraph: {
+//         user: {
+//             $type: "error", 
+//             value: "request timed out"
+//         }
+//     }
+// }
+~~~
+
+The ability to place an Error within a JSON Graph response allows for other successfully-retrieved values to be included alongside the error in the same response. This ensures that if multiple values are requested from a JSON Graph object a single error does not prevent the caller from retrieving any data.
 
 ## The Abstract JSON Graph Operations  
 
-There are three abstract JSON Graph operations: 
+There are three abstract operations that can be carried out on a JSON Graph object: 
 
 1. get 
 2. set 
 3. call   
 
-Each of these operations must be carried out by an intermediary. This layer of indirection allows us to abstract away the location and organization of the data from the caller.
+Each of these operations must be carried out by an intermediary. This layer of indirection allows us the true location and organization of the data to be abstracted away from the caller.
  
 Some examples of objects that are capable of carrying out the abstract JSON Graph operations are:  
 
-* DataSources
-* The Falcor Model
+* Router
+* Model
 
 ### The Abstract get Operation
 
-It is possible to retrieve primitive values from a JSON Graph document using the abstract get operation. The input to the abstract get operation can be any number of Paths to the values to be retrieved. The output is a subset of the JSON Graph object that contains all of the primitive values encountered while evaluating the input Paths. The abstract get operation must be idempotent. Executing a get operation must not change any values in the JSON Graph. 
+It is possible to retrieve primitive values from a JSON Graph object using the abstract get operation. The input to the abstract get operation can be any number of Paths to the values to be retrieved. The output is a subset of the JSON Graph object that contains all of the primitive values encountered while evaluating the input Paths. The abstract get operation must be idempotent. Executing a get operation must not change any values in the JSON Graph. 
 
-Let's walk through this process on a real JSON Graph object:
+Let's walk through an abstract get operation on an example JSON Graph object:
 
 ~~~js
 var json = {
@@ -325,26 +338,57 @@ References are primitive value types, and are therefore immediately inserted int
 }
 ~~~
 
-However References are handled specially during path evaluation. If a Reference is encountered when there are still keys left in the path to be evaluated, a new path is created. The new path is formed by concatenating the remaining keys to the end of the reference path. This process is known as “path optimization”, because the optimized path we create is a quicker route to the requested value. Path optimization produces the following path:  
+References are handled specially during path evaluation. If a Reference is encountered when there are still keys left in the path to be evaluated, a new path is created. The new path is formed by concatenating the remaining keys to the end of the reference path. This process is known as “path optimization”, because the optimized path we create is a quicker route to the requested value. Path optimization produces the following path:  
 
 ~~~js
-["todosById", 44]
-{
-    // "todosById" object snipped
-    todos: [
-        { $type: "ref", value: ["todosById", 44] },
-        // rest of list snipped
-    ]
-}
+["todosById", 44].concat(["name"]) // ["todosById", 44, "name"]
 ~~~
 
 Once we create an optimized path, we begin evaluating it from the root of the JSON Graph object. 
 
-(pointer to the root of the document, along with the optimized path)  
+~~~js
+// evaluating ["todosById", 44, "name"]
+{
+    todosById: {
+        "44": {
+            name: "get milk from corner store",
+            done: false,
+            prerequisites: [{ $type: "ref", value: ["todosById", 54] }]
+        },
+        "54": {
+            name: "withdraw money from ATM",
+            done: false,
+            prerequisites: []
+        }
+    },
+    todos: [
+        { $type: "ref", value: ["todosById", 44] },
+        { $type: "ref", value: ["todosById", 54] }
+    ]
+};
+// JSON Graph subset response
+{
+    todos: {
+        "0": { $type: "ref", value: ["todosById", 44] },
+    }
+}
+~~~
 
 Now we evaluate the “tasksById” key, which yields an object. Next, we convert the number 44 into a string using the JSON stringify algorithm. Then we look up the resulting string “44” which yields another object. Finally we look up the key “name” and we find a primitive value type ”withdraw money from ATM”. This value is added to the JSON Graph subset and returned as the result of the abstract get operation. 
 
-(the string result)  
+~~~js
+// JSON Graph subset response
+{
+    todosById: {
+        "44": {
+            name: "get milk from corner store"
+        }
+    }
+    todos: {
+        "0": { $type: "ref", value: ["todosById", 44] }
+    }
+}
+~~~
 
 ###  Retrieving References  
 
