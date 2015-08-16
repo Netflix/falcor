@@ -142,7 +142,13 @@ A Reference is like a symbolic link in the UNIX file system. When the path is be
 
 ### Atom
 
-JSON Graph allows metadata to be attached to values to control how they are handled by clients. For example, metadata can be attached to values to control how long values stay a client cache. For more information see [Sentinel Metadata](#Sentinel-Metadata).
+An Atom is a JSON object with a “$type” key that has a value of “atom” and a ”value” key that contains a JSON value.
+
+~~~js
+{ $type: "atom", value: ['en', 'fr'] }
+~~~
+
+JSON Graph allows metadata to be attached to values to control how they are handled by clients. For example, metadata can be attached to values to control how long values stay a client cache. For more information see [Sentinel Metadata](./model.md#Sentinel-Metadata).
 
 One issue is that JavaScript value types do not preserve any metadata attached to them when they are serialized as JSON:
 
@@ -201,7 +207,15 @@ The result above only includes the value of the Atom because the Model unboxes A
 
 ### Error
 
-When an object executing a JSON Graph operation encounters an error while attempting to set or retrieve a value, an Error object may be created and placed in the JSON Graph response.
+An Error is a JSON object with a “$type” key that has a value of “error” and a ”value” key that contains an error that occured while executing a JSON Graph operation.
+
+~~~js
+{ $type: "atom", value: ['en', 'fr'] }
+~~~
+
+When an object executing a JSON Graph operation encounters an error while attempting to set or retrieve a value, an Error object may be created and placed in the JSON Graph response in the value's place.
+
+For example, a Router is an object which creates a virtual JSON Graph
 
 By default a Model delivers Errors differently than other values. If synchronous methods are used to retrieve the data from the Model the error is thrown.  If the data is asynchronously being requested from the model as an Observable or a Promise, the error will be delivered in a special callback.
 
