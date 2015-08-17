@@ -81,6 +81,7 @@
     "through2": "~0.6.1",
     "uglifyify": "~2.1.1",
     "underscore": "~1.6.0",
+    "sinon": "^1.15.4",
     "vinyl-source-stream": "^1.1.0",
     "xmlhttprequest": "~1.7.0"
   },
@@ -90,7 +91,6 @@
     "falcor-path-syntax": "0.2.1",
     "falcor-path-utils": "0.3.0",
     "promise": "7.0.0",
-    "rx": "2.5.3",
-    "sinon": "^1.15.4"
+    "rx": "2.5.3"
   }
 }
