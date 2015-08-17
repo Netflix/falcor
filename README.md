@@ -129,8 +129,7 @@ Now create an index.html file with the following contents:
 
 Now visit http://localhost:3000/index.html and you should see the message retrieved from the server:
 
-![Hello World]({{ site.baseurl }}/starter/helloworld.png)
-
+Hello World
 
 ## Additional Resources
 
