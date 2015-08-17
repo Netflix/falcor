@@ -785,15 +785,7 @@ We would like to create a [JSON Graph](http://netflix.github.io/falcor/documenta
 }
 ~~~
 
-We will create a Router that retrieves the data for this [JSON Graph](http://netflix.github.io/falcor/documentation/jsongraph.html) from three different data sources:
-
-### 1. The Title Service
-
-This service can be used to retrieve information about titles in the catalog. This information is not personalized, and changes relatively infrequently. As a result it makes sense to store it in a different database than either the personalized recommendations or the Ratings.
-
-### 2. The Rating Service
-
-This service can be used to retrieve predicted ratings for every user and title combination. In addition, if users choose to override the predicted rating, this service is used to store their preferred rating. The rating information may be updated frequently based on user ratings, and is therefore stored in a separate database.
+We will create a Router that retrieves the data for this [JSON Graph](http://netflix.github.io/falcor/documentation/jsongraph.html) from three different data sources.
 
 Each of these services will inform a different portion of the virtual JSON object:
 
@@ -814,6 +806,14 @@ model.
         console.log(JSON.stringify(jsonResponse, null, 4);
     });
 ~~~
+
+### 1. The Title Service
+
+This service can be used to retrieve information about titles in the catalog. This information is not personalized, and changes relatively infrequently. As a result it makes sense to store it in a different database than either the personalized recommendations or the Ratings.
+
+### 2. The Rating Service
+
+This service can be used to retrieve predicted ratings for every user and title combination. In addition, if users choose to override the predicted rating, this service is used to store their preferred rating. The rating information may be updated frequently based on user ratings, and is therefore stored in a separate database.
 
 ### 3. The Recommendation Service
 
@@ -1725,4 +1725,4 @@ The remaining genre list route will be left as an exercise for the user:
 
 #### More to Come...
 
-This guide is a work in progress. However the complete source code is available at ![falcor-router-demo](https://github.com/netflix/falcor-router-demo).
+This guide is a work in progress. However the complete source code is available at [falcor-router-demo](https://github.com/netflix/falcor-router-demo).
