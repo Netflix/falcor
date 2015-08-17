@@ -40,8 +40,8 @@
     "csv-parse": "^0.1.3",
     "diff": "~1.0.8",
     "express": "~4.9.0",
-    "falcor-http-datasource": "git+ssh://git@github.com/Netflix/falcor-http-datasource.git",
-    "falcor-router": "git+ssh://git@github.com/Netflix/falcor-router.git",
+    "falcor-http-datasource": "0.1.1",
+    "falcor-router": "0.2.4",
     "falcor-express": "git+ssh://git@github.com/Netflix/falcor-express.git",
     "gulp": "~3.8.8",
     "gulp-beautify": "~1.1.0",
@@ -79,9 +79,9 @@
   },
   "dependencies": {
     "asap": "~2.0.3",
-    "falcor-json-graph": "git+ssh://git@github.com/Netflix/falcor-json-graph.git",
-    "falcor-path-syntax": "git+ssh://git@github.com/Netflix/falcor-path-syntax.git",
-    "falcor-path-utils": "git+ssh://git@github.com/Netflix/falcor-path-utils.git",
+    "falcor-json-graph": "1.1.0",
+    "falcor-path-syntax": "0.2.1",
+    "falcor-path-utils": "0.3.0",
     "promise": "7.0.0",
     "rx": "2.5.3",
     "sinon": "^1.15.4"
