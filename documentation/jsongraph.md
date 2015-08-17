@@ -783,13 +783,51 @@ Now that we have reached the final key “completed”, we insert the boolean va
 
 The object evaluating the abstract set operation may choose to coerce the value being set into a different value. If so, the JSON Graph object, as well as the JSON Graph subset response will contain the coerced value after the abstract set operation completes. Take the following JSON Graph object, which models titles that can be viewed in an online video streaming application.   
 
-(For example)  
+~~~js
+{
+    titlesById: {
+        253: {
+            name: "House of Cards",
+            rating: 4.5,
+            userRating: null
+        }
+    }
+}
+~~~
+        
+Let’s attempt to set the user rating of the title to 10, even though the only ratings allowed are between 1 and 5.   
 
-Let’s attempt to set the rating of the title to 10, even though the only ratings allowed are between 1 and 5.   
+~~~js
+{ path: ["titlesById", 253, "userRating"], value: 9 }
+~~~
 
-(Example)  
+Firstly evaluate the “titlesById” key. We find a object, so we continue. We evaluate the number “721” key, and convert it into a string using the JSON stringify method. We find another object, so we continue. Finally we attempt to set the ”userRating” key to “9”, and the object evaluating the abstract set operation instead sets the rating to the upper bound of valid values: “5”. The number five is inserted in both the JSON Graph object, as well as the JSON Graph subset. The JSON Graph subset response is returned as the result of the abstract set operation. 
 
-Firstly evaluate the “titlesById” key. We find a object, so we continue. We evaluate the number “721” key, and convert it into a string using the JSON stringify method. We find another object, so we continue. Finally we attempt to set the ”rating” key to “9”, and the object evaluating the abstract set operation instead sets the rating to the upper bound of valid values: “5”. The number five is inserted in both the JSON Graph object, as well as the JSON Graph subset. The JSON Graph subset response is returned as the result of the abstract set operation. 
+~~~js
+// JSON Graph object
+{
+    titlesById: {
+        253: {
+            name: "House of Cards",
+            rating: 4.5,
+            userRating: 5
+        }
+    }
+}
+
+// JSON Graph Envelope response
+{
+    jsonGraph: {
+        titlesById: {
+            253: {
+                name: "House of Cards",
+                rating: 4.5,
+                userRating: 5
+            }
+        }
+    }
+}
+~~~
 
 ### The Abstract call Operation
 
@@ -797,9 +835,189 @@ A JSON Graph object is not a strict subset of JSON. Unlike JSON objects, JSON Gr
 
 Like JavaScript objects, functions can appear anywhere in the JSON Graph object. Like other non-primitive values, functions cannot be retrieved or set using the abstract get or set operations. It is only possible to call a function, and pass it arguments.  
 
-In order to call a function, you must specify the path to the function, as well as the arguments to pass to the function. The arguments can be any JSON Graph value other than a function, including arrays, objects, and the primitive values.  A function must either return the new value at every path it has changed, or add the path to  the list of invalidated paths. The invalidated paths are a list of paths that may have been changed by the function. The invalidated paths are included in the function’s response along with the JSON Graph subset. Callers remove the invalidated paths from their local cache to ensure that their cache does not contain stale data.   Let’s walk through the process of adding an item to a list using call. We will use the JSON Graph object we used in the previous section.   
+In order to call a function, you must specify the path to the function, as well as the arguments to pass to the function. The arguments can be any JSON Graph value other than a function, including arrays, objects, and the primitive values.  A function must either return the new value at every path it has changed, or add the path to  the list of invalidated paths. The invalidated paths are a list of paths that may have been changed by the function. The invalidated paths are included in the function’s response along with the JSON Graph subset. Callers remove the invalidated paths from their local cache to ensure that their cache does not contain stale data. Let’s walk through the process of adding an item to a list using call. 
 
-(same old example)   
+For this example, let's start with the following JSON Graph object:
 
-In this example, we will call the ”push” function on the TODOs list. 
+~~~js
+var jsonGraphObject = {
+    todosById: {
+        "44": {
+            name: "get milk from corner store",
+            addedAt: 29689724399,
+            done: false,
+            prerequisites: [{ $type: "ref", value: ["todosById", 54] }]
+        },
+        "54": {
+            name: "withdraw money from ATM",
+            addedAt: 15687384689,
+            done: false,
+            prerequisites: []
+        }
+    },
+    todos: [
+        { $type: "ref", value: ["todosById", 44] },
+        { $type: "ref", value: ["todosById", 54] }
+    ]
+};
+~~~
 
+The JSON Graph object also provides a function on the "todos" list with the following signature:
+
+~~~js
+add(name: String) : JSONGraphEnvelope
+~~~
+
+The add method creates a new task in the "tasksById" object, and then adds a Reference to the task to the end of the "todos" Array.
+
+Let's invoke the "add" function using the abstract call operation. The abstract call operation accepts four parameters:
+
+1. callPath
+2. arguments
+3. refPaths
+4. thisPaths
+
+The "callPath" is the path to the function within the DataSource's JSON Graph object. Note that one invocation of call can only run a single function.
+
+The "arguments" parameter is the the array of arguments to be passed to the function being called.
+
+The "refPaths" is an array of paths to retrieve from the targets of any references in the JSON Graph Envelope returned by the function. 
+
+The "thisPaths" is an array of paths to retrieve from the object on which the function is called after the function is successfully excecuted.
+
+Here is how we invoke the abstract call operation:
+
+~~~js
+call(
+    // callPath
+    ["todos", "add"],
+    // arguments
+    ["pick up car from the shop"], 
+    // refPaths
+    [
+        ["addedAt"]
+    ],
+    // thisPaths
+    [
+        ["length"]
+    ])
+~~~
+
+The add method adds a task to the "tasksById" object, sets the "addedAt" key on the task to the current time, and then adds a Reference to the new task at the end of the "todos" array. 
+
+~~~js
+// JSON Graph object after executing the ["todos", "add"] function
+{
+    todosById: {
+        "44": {
+            name: "get milk from corner store",
+            addedAt: 29689724399,
+            done: false,
+            prerequisites: [{ $type: "ref", value: ["todosById", 54] }]
+        },
+        "54": {
+            name: "withdraw money from ATM",
+            addedAt: 15687384689,
+            done: false,
+            prerequisites: []
+        },
+        "72": {
+            name: "pick up car from the shop",
+            addedAt: 30147585551,
+            done: false,
+            prerequisites: []
+        }
+    },
+    todos: [
+        { $type: "ref", value: ["todosById", 44] },
+        { $type: "ref", value: ["todosById", 54] },
+        { $type: "ref", value: ["todosById", 72] }
+    ]
+};
+~~~
+
+The function returns the following JSON Graph Envelope:
+
+~~~js
+{
+    jsonGraph: {
+        todos: {
+            "2": { $type: "ref", value: ["todosById", 72] }
+        }
+    },
+    invalidated: [
+        ["todos", "length"]
+    ],
+    paths: [
+        ["todos", 2]
+    ]
+}
+~~~
+
+Notice that instead of returning the entire contents of the "todos" list, the function has returned only a Reference to the newly-created task. Furthermore, the function has indicated that the "length" key of the "todos" list has changed, and if the caller has cached this value, then the value should be invalidated in the cache. Finally, the response contains a "paths" key with an array of paths to the values in the JSON Graph subset. Unlike get and set, there is no way of predicting what values a call operation will return in its response. The "paths" array provides easy access to the values within the JSON Graph subset, rather than forcing the caller to resort to reflection.
+
+Every function strives to return the minimum amount of data to ensure that the caller's cache does not contain stale data and the caller can retrieve values from objects newly created by the function. The intention is the give the caller the ability to request precisely the data they need from the JSON Graph object using the refPaths and thisPaths arguments. 
+
+Now the object executing the abstract call operation retrieves the refPaths from each Reference in the function response. The response contains only one Reference at ["todos", "2"]. Each path in the refPaths array is appended to each path at which a reference is found in the function's JSON Graph subset response.
+
+~~~js
+["todos", "2"].concat(["addedAt"]) // produces ["todos", "2", "addedAt"]
+~~~
+
+The object executing the abstract call operation now executes the abstract get operation to retrieve these newly-created paths. The resulting JSON Graph Envelope is merged together with the function's response:
+
+~~~js
+{
+    jsonGraph: {
+        todosById: {
+            "72": {
+                addedAt: 30147585551
+            }
+        },
+        todos: {
+            "2": { $type: "ref", value: ["todosById", 72] }
+        }
+    },
+    invalidated: [
+        ["todos", "length"]
+    ],
+    paths: [
+        ["todos", 2],
+        ["todos", 2, "addedAt"]
+    ]
+}
+~~~
+
+The refPaths array allows the caller to retrieve values from objects created by the function, without having to know the Paths to these objects.
+
+Finally the object executing the abstract get operation retrieves each Path in the thisPaths array. A new Path is created by appending each Path in the array to the function's this object Path. 
+
+~~~js
+["todos"].concat(["length"]) // produces ["todos", "length"]
+~~~
+
+The object executing the abstract call operation now executes the abstract get operation to retrieve these newly-created paths. The resulting JSON Graph Envelope is merged together with the function's response:
+
+~~~js
+{
+    jsonGraph: {
+        todosById: {
+            "72": {
+                addedAt: 30147585551
+            }
+        },
+        todos: {
+            "2": { $type: "ref", value: ["todosById", 72] },
+            length: 3
+        }
+    },
+    invalidated: [
+        ["todos", "length"]
+    ],
+    paths: [
+        ["todos", 2],
+        ["todos", 2, "addedAt"],
+        ["todos", "length"]
+    ]
+}
+~~~
