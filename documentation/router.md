@@ -10,19 +10,19 @@ lang: en
 
 # The Falcor Router
 
-A Falcor Router is an implementation of the DataSource interface. Falcor Model objects use DataSources to retrieve JSON Graph data. However Models typically run on the client and Routers typically run on the Application server. As a result communication between a Model and the Router is typically remoted across the network using an HttpDataSource.
+A Falcor Router is an implementation of the [DataSource](http://netflix.github.io/falcor/documentation/datasources.html) interface. Falcor [Model](http://netflix.github.io/falcor/documentation/model.html) objects use [DataSource](http://netflix.github.io/falcor/documentation/datasources.html)s to retrieve [JSON Graph](http://netflix.github.io/falcor/documentation/jsongraph.html) data. However [Model](http://netflix.github.io/falcor/documentation/model.html)s typically run on the client and Routers typically run on the Application server. As a result communication between a [Model](http://netflix.github.io/falcor/documentation/model.html) and the Router is typically remoted across the network using an HttpDataSource.
 
 ![Falcor End to End](../falcor-end-to-end.png)
 
-A Router works by matching requested paths against a "virtual" JSON Graph object. The JSON Graph object is referred to as "virtual", because the object rarely exists anywhere - in memory or on disk. Instead when paths are requested from the Router, the Router typically creates the necessary subsets of the JSON Graph on-demand by retrieving the necessary data from persistent data stores. Once the newly-created subset of the JSON Graph has been delivered to the caller, the Router frees the memory. This allows the Application Server running the Router to remain stateless, and keep the application's data in one or more persistent data stores.
+A Router works by matching requested [paths](http://netflix.github.io/falcor/documentation/paths.html) against a "virtual" [JSON Graph](http://netflix.github.io/falcor/documentation/jsongraph.html) object. The [JSON Graph](http://netflix.github.io/falcor/documentation/jsongraph.html) object is referred to as "virtual", because the object rarely exists anywhere - in memory or on disk. Instead when [paths](http://netflix.github.io/falcor/documentation/paths.html) are requested from the Router, the Router typically creates the necessary subsets of the [JSON Graph](http://netflix.github.io/falcor/documentation/jsongraph.html) on-demand by retrieving the necessary data from persistent data stores. Once the newly-created subset of the [JSON Graph](http://netflix.github.io/falcor/documentation/jsongraph.html) has been delivered to the caller, the Router frees the memory. This allows the Application Server running the Router to remain stateless, and keep the application's data in one or more persistent data stores.
 
-In order to create the requested subset of the JSON Graph object, the Router matches the requested paths against a series of Routes. A Route is an object with a pattern that can match a set of paths, and is responsible for creating the subset of the JSON Graph object which contains the data requested by those paths. Typically Routes build a subset of the JSON Graph object on-demand by retrieving the data from persistent data stores or web services. The Route transforms the data retrieved from the data sources into the the schema of the JSON Graph, and delivers it to the Router. Once the Router receives the JSON Graph subset from the Route, it evaluates the paths against the JSON Graph subset using the (Path Evaluation) algorithm. If the router encounters References in the JSON Graph, it may optimize the requested paths, and recursively evaluate them against the Routes. The Router's final output is the subset of virtual JSON Graph that combines all the responses produced by the evaluated the requested paths against the Routes.
+In order to create the requested subset of the [JSON Graph](http://netflix.github.io/falcor/documentation/jsongraph.html) object, the Router matches the requested [paths](http://netflix.github.io/falcor/documentation/paths.html) against a series of Routes. A Route is an object with a pattern that can match a set of [paths](http://netflix.github.io/falcor/documentation/paths.html), and is responsible for creating the subset of the [JSON Graph](http://netflix.github.io/falcor/documentation/jsongraph.html) object which contains the data requested by those [paths](http://netflix.github.io/falcor/documentation/paths.html). Typically Routes build a subset of the [JSON Graph](http://netflix.github.io/falcor/documentation/jsongraph.html) object on-demand by retrieving the data from persistent data stores or web services. The Route transforms the data retrieved from the data sources into the the schema of the [JSON Graph](http://netflix.github.io/falcor/documentation/jsongraph.html), and delivers it to the Router. Once the Router receives the [JSON Graph](http://netflix.github.io/falcor/documentation/jsongraph.html) subset from the Route, it evaluates the [paths](http://netflix.github.io/falcor/documentation/paths.html) against the [JSON Graph](http://netflix.github.io/falcor/documentation/jsongraph.html) subset using the (Path Evaluation) algorithm. If the router encounters References in the [JSON Graph](http://netflix.github.io/falcor/documentation/jsongraph.html), it may optimize the requested [paths](http://netflix.github.io/falcor/documentation/paths.html), and recursively evaluate them against the Routes. The Router's final output is the subset of virtual [JSON Graph](http://netflix.github.io/falcor/documentation/jsongraph.html) that combines all the responses produced by the evaluated the requested [paths](http://netflix.github.io/falcor/documentation/paths.html) against the Routes.
 
 ## When to use a Router
 
 The Router is appropriate as an abstraction over a service layer or REST API. Using a Router over these types of APIs provides just enough flexibility to avoid client round-trips without introducing heavy-weight abstractions. Service-oriented architectures are common in systems that are designed for scalability. These systems typically store data in different data sources and expose them through a variety of different services. For example Netflix uses a Router in front of its [Microservice architecture](http://techblog.netflix.com/2015/02/a-microscope-on-microservices.html). 
 
-**It is rarely ideal to use a Router to directly access a single SQL Database**. Application's that use a single SQL store often attempt to build a single SQL Query for every server request. Router's work splitting up requests up for different sections of the JSON Graph document into seperate handlers and sending individual requests to services to retrieve the requested data. As a consequence Router's rarely have sufficient context to produce a single optimized SQL query. We are currently exploring different options for supporting this type of data access pattern in Falcor in future.
+**It is rarely ideal to use a Router to directly access a single SQL Database**. Application's that use a single SQL store often attempt to build a single SQL Query for every server request. Router's work splitting up requests up for different sections of the [JSON Graph](http://netflix.github.io/falcor/documentation/jsongraph.html) document into seperate handlers and sending individual requests to services to retrieve the requested data. As a consequence Router's rarely have sufficient context to produce a single optimized SQL query. We are currently exploring different options for supporting this type of data access pattern in Falcor in future.
 
 ## Contrasting a REST Router with a Falcor Router 
 
@@ -32,7 +32,7 @@ There are three primary differences between a traditional Application Router and
 
 ### 1. Falcor Routers match JSON paths, not URL Paths
 
-Instead of matching patterns in URLs, the Falcor Router matches patterns in the paths requested in the query string of the single JSON resource.
+Instead of matching patterns in URLs, the Falcor Router matches patterns in the [paths](http://netflix.github.io/falcor/documentation/paths.html) requested in the query string of the single JSON resource.
 
 ~~~js
 http://.../model.json?paths=[["todos","name"],["todos","length"]]
@@ -66,7 +66,7 @@ var router = new Router([
 
 ### 2. A Single Falcor Route Can Match Multiple Paths
 
-Traditional App server Routers only need to match the URL path, because HTTP requests are designed to retrieve a single resource. In contrast a single HTTP request to a Falcor application server may contain multiple paths in the query string. As a result a single Falcor route can match multiple paths at once. Matching multiple paths in a single route can be more efficient in the event they can be retrieved with a single backend request.
+Traditional App server Routers only need to match the URL path, because HTTP requests are designed to retrieve a single resource. In contrast a single HTTP request to a Falcor application server may contain multiple [paths](http://netflix.github.io/falcor/documentation/paths.html) in the query string. As a result a single Falcor route can match multiple [paths](http://netflix.github.io/falcor/documentation/paths.html) at once. Matching multiple [paths](http://netflix.github.io/falcor/documentation/paths.html) in a single route can be more efficient in the event they can be retrieved with a single backend request.
 
 The following request attempts to retrieve the name and length of the todos list:
 
@@ -74,7 +74,7 @@ The following request attempts to retrieve the name and length of the todos list
 http://.../model.json?paths=[["todos",["name", "length"]]]
 ~~~
 
-The following route will match both paths and handle them at the same time:
+The following route will match both [paths](http://netflix.github.io/falcor/documentation/paths.html) and handle them at the same time:
 
 ~~~js
 var Router = require("falcor-router");
@@ -94,7 +94,7 @@ var router = new Router([
 ]);
 ~~~
 
-The route above retrieves the data for multiple paths using a single request to a webservice, and returns the results as a Promise of several path/value pairs.
+The route above retrieves the data for multiple [paths](http://netflix.github.io/falcor/documentation/paths.html) using a single request to a webservice, and returns the results as a Promise of several path/value pairs.
 
 ~~~js
 [
@@ -134,11 +134,11 @@ RESTful clients traverse entity relationships by making follow-up requests for t
 
 ![Server Roundtrips](../images/server-roundtrips.png)
 
-Unlike RESTful servers, Falcor Application servers expose all of an application's domain data as a single JSON Graph resource. Within a the JSON Graph resource, entity relationships are expressed as references to other entities in the same resource rather than hyperlinks to different resources. 
+Unlike RESTful servers, Falcor Application servers expose all of an application's domain data as a single [JSON Graph](http://netflix.github.io/falcor/documentation/jsongraph.html) resource. Within a the [JSON Graph](http://netflix.github.io/falcor/documentation/jsongraph.html) resource, entity relationships are expressed as references to other entities in the same resource rather than hyperlinks to different resources. 
 
-When Falcor clients request paths to values within the JSON Graph resource, Falcor Routers follow the Path Evaluation Algorithm and automatically traverse any references encountered along the path provided by the client.
+When Falcor clients request [paths](http://netflix.github.io/falcor/documentation/paths.html) to values within the [JSON Graph](http://netflix.github.io/falcor/documentation/jsongraph.html) resource, Falcor Routers follow the Path Evaluation Algorithm and automatically traverse any references encountered along the path provided by the client.
 
-For example the following path retrieves a reference to the first task object in a JSON Graph resource, much the same way as the RESTful /todos resource contains hyperlinks to task resources. 
+For example the following path retrieves a reference to the first task object in a [JSON Graph](http://netflix.github.io/falcor/documentation/jsongraph.html) resource, much the same way as the RESTful /todos resource contains hyperlinks to task resources. 
 
 ~~~js
 http://.../model.json?paths=[["todos",0]]
@@ -156,7 +156,7 @@ The server responds with the following JSONGraphEnvelope:
 } 
 ~~~
 
-However if the path is altered to retrieve keys from the entity located at the reference, the Falcor Router traverses the reference on the server and retrieves the values from the entity located at the reference path. The result is a fragment of the JSON Graph object which contains all of the references encountered during path evaluation as well as the requested value.
+However if the path is altered to retrieve keys from the entity located at the reference, the Falcor Router traverses the reference on the server and retrieves the values from the entity located at the reference path. The result is a fragment of the [JSON Graph](http://netflix.github.io/falcor/documentation/jsongraph.html) object which contains all of the references encountered during path evaluation as well as the requested value.
 
 ~~~js
 http://.../model.json?paths=[["todos",0,"name"]]
@@ -181,7 +181,7 @@ The server responds with the following JSONGraphEnvelope:
 
 ## Creating a Router Class
  
-A Router Class is created by invoking the Router.createClass method. This Class factory method accepts an Array of Route objects. Each Route object contains a path pattern, and an optional series of handlers for the various DataSource methods: get, set, and call.
+A Router Class is created by invoking the Router.createClass method. This Class factory method accepts an Array of Route objects. Each Route object contains a path pattern, and an optional series of handlers for the various [DataSource](http://netflix.github.io/falcor/documentation/datasources.html) methods: get, set, and call.
  
 ~~~js
 var Router = require("falcor-router");
@@ -310,9 +310,9 @@ var server = app.listen(80);
 
 ### Route Objects
  
-Each Route object passed to the Router constructor contains a pattern that can be used to match Path Sets, as well as three optional handlers that correspond to each of the DataSource interface's methods.
+Each Route object passed to the Router constructor contains a pattern that can be used to match Path Sets, as well as three optional handlers that correspond to each of the [DataSource](http://netflix.github.io/falcor/documentation/datasources.html) interface's methods.
  
-When one of the DataSource methods is invoked on the Router object, the Router attempts to match the paths against the patterns in each route.  If a Route's pattern is matched, the corresponding route handler method is invoked.  The Route handler is expected to perform the corresponding action and generate the subset of the JSON Graph containing the requested path.
+When one of the [DataSource](http://netflix.github.io/falcor/documentation/datasources.html) methods is invoked on the Router object, the Router attempts to match the [paths](http://netflix.github.io/falcor/documentation/paths.html) against the patterns in each route.  If a Route's pattern is matched, the corresponding route handler method is invoked.  The Route handler is expected to perform the corresponding action and generate the subset of the [JSON Graph](http://netflix.github.io/falcor/documentation/jsongraph.html) containing the requested path.
  
 For an example, take the following Router:
 
@@ -354,15 +354,15 @@ Let's say the following request is made for the "name" and "surname" of the user
 routerInstance.get([["user", ["name", "surname"]]])
 ~~~
  
-Once the Router determines that a route's pattern matches a subset of the requested Path Set, the Router will invoke the matching route's get handler with a PathSet containing the set of paths that matched the route pattern:
+Once the Router determines that a route's pattern matches a subset of the requested Path Set, the Router will invoke the matching route's get handler with a [PathSet](http://netflix.github.io/falcor/documentation/paths.html#pathsets) containing the set of [paths](http://netflix.github.io/falcor/documentation/paths.html) that matched the route pattern:
  
 ~~~js
 matchingRoute.get.call(routerInstance, ["user",["name","surname"]])
 ~~~
 
-Note that each Route handler is applied to the Router instance, meaning it can access Router properties using the "this" object.  Note as well that the matching path is passed to the handler using the Path Array syntax. 
+Note that each Route handler is applied to the Router instance, meaning it can access Router properties using the "this" object.  Note as well that the matching path is passed to the handler using the [Path Array](http://netflix.github.io/falcor/documentation/paths.html#path) syntax. 
  
-Each route is responsible for creating a subset of the JSON Graph object that contains the requested values.
+Each route is responsible for creating a subset of the [JSON Graph](http://netflix.github.io/falcor/documentation/jsongraph.html) object that contains the requested values.
  
 ~~~js
 {
@@ -384,7 +384,7 @@ Each route is responsible for creating a subset of the JSON Graph object that co
 }
 ~~~ 
 
-The Router combines the values retrieved from each route handler into a single JSON Graph object, and returns it to the caller in an envelope. For example the code below...
+The Router combines the values retrieved from each route handler into a single [JSON Graph](http://netflix.github.io/falcor/documentation/jsongraph.html) object, and returns it to the caller in an envelope. For example the code below...
 
 
 ~~~js
@@ -412,7 +412,7 @@ router.
 
 #### Route Handlers
  
-Each route handler for get or set operations is responsible for creating a PathValue for every path it matches. A PathValue is an object with a path and value key.
+Each route handler for get or set operations is responsible for creating a PathValue for every [path](http://netflix.github.io/falcor/documentation/paths.html) it matches. A PathValue is an object with a [path](http://netflix.github.io/falcor/documentation/paths.html) and value key.
  
 ~~~js
 {
@@ -435,7 +435,7 @@ Each route handler for get or set operations is responsible for creating a PathV
 }
 ~~~ 
 
-This route returns two PathValue objects containing the name and surname of a user respectively. When a Router receives a series of PathValues, it creates the JSON Graph envelope by writing each PathValue's value into an object at the PathValue's path.
+This route returns two PathValue objects containing the name and surname of a user respectively. When a Router receives a series of PathValues, it creates the [JSON Graph](http://netflix.github.io/falcor/documentation/jsongraph.html) envelope by writing each PathValue's value into an object at the PathValue's [path](http://netflix.github.io/falcor/documentation/paths.html).
  
 ~~~js
 [
@@ -456,11 +456,11 @@ This route returns two PathValue objects containing the name and surname of a us
 }
 ~~~ 
 
-Once all of the routes have finished, the Router responds with a JSON Graph object containing all of the values returned from each individual route.
+Once all of the routes have finished, the Router responds with a [JSON Graph](http://netflix.github.io/falcor/documentation/jsongraph.html) object containing all of the values returned from each individual route.
  
 #### Route Handler Concurrency
  
-In addition to returning either JSON Graph envelopes or PathValues synchronously, Router handlers can also return their data asynchronously by delivering their output data in either of the following containers:
+In addition to returning either [JSON Graph](http://netflix.github.io/falcor/documentation/jsongraph.html) envelopes or PathValues synchronously, Router handlers can also return their data asynchronously by delivering their output data in either of the following containers:
 
 * Promise
 * Observable
@@ -517,11 +517,11 @@ var Observable = Rx.Observable;
 }
 ~~~
 
-An Observable is similar to a Promise, with the principal difference being that an Observable can send multiple values over time. The main advantage of using an Observable over a Promise is the ability to progressively return PathValues to the Router as soon as they are returned from the underlying DataSource.  In contrast, when delivering values in a Promise, all values must be collected together in a JSON Graph envelope or an Array of PathValues and returned to the Router at the same time.
+An Observable is similar to a Promise, with the principal difference being that an Observable can send multiple values over time. The main advantage of using an Observable over a Promise is the ability to progressively return PathValues to the Router as soon as they are returned from the underlying [DataSource](http://netflix.github.io/falcor/documentation/datasources.html).  In contrast, when delivering values in a Promise, all values must be collected together in a [JSON Graph](http://netflix.github.io/falcor/documentation/jsongraph.html) envelope or an Array of PathValues and returned to the Router at the same time.
  
-Using an Observable can improve throughput, because Routers may make additional requests to backend services in the event references are discovered in a Route Handler's JSON Graph output.
+Using an Observable can improve throughput, because Routers may make additional requests to backend services in the event references are discovered in a Route Handler's [JSON Graph](http://netflix.github.io/falcor/documentation/jsongraph.html) output.
 
-When a Router discovers a reference before a path has been fully evaluated, it optimizes the Path and matches the newly optimized path against the Routes. When a path is optimized it is matched against the Router's Routes again. This may in turn trigger subsequent backend requests, which means that getting the references within a Route response back to the Router earlier can sometimes improve throughput.
+When a Router discovers a reference before a [path](http://netflix.github.io/falcor/documentation/paths.html) has been fully evaluated, it optimizes the Path and matches the newly optimized [path](http://netflix.github.io/falcor/documentation/paths.html) against the Routes. When a [path](http://netflix.github.io/falcor/documentation/paths.html) is optimized it is matched against the Router's Routes again. This may in turn trigger subsequent backend requests, which means that getting the references within a Route response back to the Router earlier can sometimes improve throughput.
  
 For an overview on Observable, see this [video](https://www.youtube.com/watch?v=XRYN2xt11Ek).
  
@@ -551,7 +551,7 @@ titlesById[235,223,555,111...113].name
 titlesById[{integers}].name
 ~~~
 
-...will produce the following Path Set to be passed to the route handler:
+...will produce the following [Path Sets](http://netflix.github.io/falcor/documentation/paths.html#pathsets) to be passed to the route handler:
 
 ~~~
 ["titlesById", [234,223,555,111,112,113],"name"]
@@ -622,7 +622,7 @@ genreList[0,1,5..7,9,"name"]
 genreList[{ranges}].name
 ~~~
 
-...will produce the following Path Set to be passed to the route handler:
+...will produce the following [Path Sets](http://netflix.github.io/falcor/documentation/paths.html#pathsets) to be passed to the route handler:
 
 ~~~
 ["genreList", [{from:0,to:1}, {from:5,to:7}, {from:9,to:9}], "name"]
@@ -687,7 +687,7 @@ genreList[0, 2..4, "length"]
 genreList[{keys}]
 ~~~
 
-...will produce the following Path Set to be passed to the route handler:
+...will produce the following [Path Sets](http://netflix.github.io/falcor/documentation/paths.html#pathsets) to be passed to the route handler:
 
 ~~~
 ["genreList", [0, 2, 3, 4, "length"]]
@@ -755,9 +755,9 @@ Netflix is an online streaming video service with millions of subscribers.  When
 
 In this exercise we will build a Router for an application similar to Netflix, which merchandises titles to members based on their preferences, and allows them to provide user ratings for each title. This exercise is purely a demonstration of how to build a Router for a web application that displays a catalog of information to a user. This is **not** intended to demonstrate how to Netflix actually works, and any similarities to the actual Netflix Router's implementation are superficial.
 
-Our goal is to define a JSON graph resource on the Application server that exposes all of the data that our Netflix clone needs. The JSON Graph schema should be designed in such a way that the application can retrieve all of the data it needs for any given application scenario in a single network request.
+Our goal is to define a [JSON Graph](http://netflix.github.io/falcor/documentation/jsongraph.html) resource on the Application server that exposes all of the data that our Netflix clone needs. The [JSON Graph](http://netflix.github.io/falcor/documentation/jsongraph.html) schema should be designed in such a way that the application can retrieve all of the data it needs for any given application scenario in a single network request.
 
-We would like to create a JSON Graph object on the server that looks like this:
+We would like to create a [JSON Graph](http://netflix.github.io/falcor/documentation/jsongraph.html) object on the server that looks like this:
 
 ~~~js
 {
@@ -785,7 +785,7 @@ We would like to create a JSON Graph object on the server that looks like this:
 }
 ~~~
 
-We will create a Router that retrieves the data for this JSON Graph from three different data sources:
+We will create a Router that retrieves the data for this [JSON Graph](http://netflix.github.io/falcor/documentation/jsongraph.html) from three different data sources:
 
 ### 1. The Title Service
 
@@ -799,7 +799,7 @@ Each of these services will inform a different portion of the virtual JSON objec
 
 ![Services Diagram](../images/services-diagram.png)
 
-Once we have built this virtual JSON Graph object, the client will be able to make requests like this:
+Once we have built this virtual [JSON Graph](http://netflix.github.io/falcor/documentation/jsongraph.html) object, the client will be able to make requests like this:
 
 ~~~js
 var model = new falcor.Model({ source: new falcor.HttpDataSource("/model.json") });
@@ -821,11 +821,11 @@ This service can be used to retrieve a personalized list of genres for each user
 
 ### Choosing Your Routes
 
-It would be challenging if we had to build a route for every possible path that the client might request from the virtual JSONGraph object.  Luckily this is not necessary. Why not?
+It would be challenging if we had to build a route for every possible [path](http://netflix.github.io/falcor/documentation/paths.html) that the client might request from the virtual JSONGraph object.  Luckily this is not necessary. Why not?
 
-**It is only legal to retrieve value types from a JSON Graph object.**
+**It is only legal to retrieve value types from a [JSON Graph](http://netflix.github.io/falcor/documentation/jsongraph.html) object.**
 
-As a result, it is only necessary to build routes which match paths at which primitive value types can be found. Recall that these are the JSON value types:
+As a result, it is only necessary to build routes which match [paths](http://netflix.github.io/falcor/documentation/paths.html) at which primitive value types can be found. Recall that these are the JSON value types:
 
 * null
 * string
@@ -839,7 +839,7 @@ JSONGraph also adds three additional value types to JSON:
 * atom
 * error
 
-Given that these are the only valid types which can be retrieved from a JSON Graph object, we only need to build the following routes to match the example JSONGraph object above.
+Given that these are the only valid types which can be retrieved from a [JSON Graph](http://netflix.github.io/falcor/documentation/jsongraph.html) object, we only need to build the following routes to match the example JSONGraph object above.
 
 ~~~
 "titlesById[234].name"
@@ -854,7 +854,7 @@ Given that these are the only valid types which can be retrieved from a JSON Gra
 "genrelist[0].titles[0]"
 ~~~
 
-Once again it is not necessary to build a route that matches the paths "titlesById", "genrelist", "genrelist[0].titles", because each of these paths would evaluate to either Objects or Arrays. As it is illegal to request either of these types from a DataSource, we do not need to worry about matching these paths with routes.
+Once again it is not necessary to build a route that matches the [paths](http://netflix.github.io/falcor/documentation/paths.html) "titlesById", "genrelist", "genrelist[0].titles", because each of these [paths](http://netflix.github.io/falcor/documentation/paths.html) would evaluate to either Objects or Arrays. As it is illegal to request either of these types from a [DataSource](http://netflix.github.io/falcor/documentation/datasources.html), we do not need to worry about matching these [paths](http://netflix.github.io/falcor/documentation/paths.html) with routes.
 
 Of course there may be any number of genrelists or any number of titles within a genrelist. Furthermore, the titlesById map may contain any number of titles. In order to match a request for any genrelist index, any index within a genrelist's titles array, or any id in the titlesById map, we will generalize our routes using the {integers} pattern.
 
@@ -871,13 +871,13 @@ Of course there may be any number of genrelists or any number of titles within a
 "genrelist[{integers}].titles[{integers}]"
 ~~~
 
-If we create handlers for each of these routes, we should be able to create the illusion that the JSON object exists by matching incoming paths and retrieving data from the relevant services.
+If we create handlers for each of these routes, we should be able to create the illusion that the JSON object exists by matching incoming [paths](http://netflix.github.io/falcor/documentation/paths.html) and retrieving data from the relevant services.
 
 We could create a separate route handler for each one of the routes listed above. However this could lead to redundant code and inefficient call patterns. Many of these routes will end up making the same service calls, and could differ by only a few characters. How do we avoid repeating ourselves?
 
 #### Matching Multiple Paths With KeySets
 
-The good news is that it is possible to to match multiple paths that differ by only one key using a KeySet. A KeySet is a discrete set of keys expressed as an indexer containing multiple values. In other words instead of creating the following two routes...
+The good news is that it is possible to to match multiple [paths](http://netflix.github.io/falcor/documentation/paths.html) that differ by only one key using a KeySet. A KeySet is a discrete set of keys expressed as an indexer containing multiple values. In other words instead of creating the following two routes...
 
 ~~~js
 "titlesById[{integers}].name"
@@ -919,9 +919,9 @@ var router = new Router([
 ]);
 ~~~
 
-Note that by matching several paths with a single route, we are able to both make a single request to the database and eliminate a large amount of repetitive code.
+Note that by matching several [paths](http://netflix.github.io/falcor/documentation/paths.html) with a single route, we are able to both make a single request to the database and eliminate a large amount of repetitive code.
 
-Given the advantages of matching multiple paths with a single route, one might think that we would want to cover all legal paths with as few routes as possible. For example it is possible to match any incoming path request for our application's JSON Graph schema using the following routes:
+Given the advantages of matching multiple [paths](http://netflix.github.io/falcor/documentation/paths.html) with a single route, one might think that we would want to cover all legal [paths](http://netflix.github.io/falcor/documentation/paths.html) with as few routes as possible. For example it is possible to match any incoming [path](http://netflix.github.io/falcor/documentation/paths.html) request for our application's [JSON Graph](http://netflix.github.io/falcor/documentation/jsongraph.html) schema using the following routes:
 
 ~~~
 "titlesById[{integers}]['name', 'year', 'description', 'boxshot', 'rating', 'userRating']"
@@ -931,9 +931,9 @@ Given the advantages of matching multiple paths with a single route, one might t
 "genrelist[{integers}].titles[{integers}]"
 ~~~
 
-However it doesn't always make sense to create routes that match as many paths as possible. Note that the title's "rating" and "userRating" keys are retrieved from the RatingService, while all of the other title keys are retrieved from the TitleService. As a result creating a single route which matches both the "name" and "rating" of a title wouldn't be useful, because serving each individual key would require a request to an entirely different service. Furthermore the code to create each of these values would be very different. Under the circumstances there is little to be gained by handling both these paths in a single route.
+However it doesn't always make sense to create routes that match as many [paths](http://netflix.github.io/falcor/documentation/paths.html) as possible. Note that the title's "rating" and "userRating" keys are retrieved from the RatingService, while all of the other title keys are retrieved from the TitleService. As a result creating a single route which matches both the "name" and "rating" of a title wouldn't be useful, because serving each individual key would require a request to an entirely different service. Furthermore the code to create each of these values would be very different. Under the circumstances there is little to be gained by handling both these [paths](http://netflix.github.io/falcor/documentation/paths.html) in a single route.
 
-A better strategy than creating routes which match as many paths as possible is to create routes that match paths that are retrieved from the same service. The code to retrieve values stored in the same service is likely to be similar, and more importantly it may provide us with opportunities to make a single service call to retrieve multiple values.
+A better strategy than creating routes which match as many [paths](http://netflix.github.io/falcor/documentation/paths.html) as possible is to create routes that match [paths](http://netflix.github.io/falcor/documentation/paths.html) that are retrieved from the same service. The code to retrieve values stored in the same service is likely to be similar, and more importantly it may provide us with opportunities to make a single service call to retrieve multiple values.
 
 In other words, we should probably create the following routes instead:
 
@@ -950,7 +950,7 @@ Note that although the genre list routes all retrieve their data from the recomm
 
 ## Handling Authorization
 
-Now that we have chosen our routes we need to consider whether our route handlers have sufficient information to handle requests. Note that _many of the routes in the JSON Graph object are personalized for the current user_. For example, two different Netflix users will likely see completely different personalized recommendations in their "genrelist" arrays. The "rating" and "userRating" fields are also specific to the current user. The "rating" field is the algorithmically-predicted rating for the user based on the user's previous viewing history and user-specified ratings. The "userRating" field is the user–specified rating for the title, and it should not be possible to set this value if a user is not logged in.
+Now that we have chosen our routes we need to consider whether our route handlers have sufficient information to handle requests. Note that _many of the routes in the [JSON Graph](http://netflix.github.io/falcor/documentation/jsongraph.html) object are personalized for the current user_. For example, two different Netflix users will likely see completely different personalized recommendations in their "genrelist" arrays. The "rating" and "userRating" fields are also specific to the current user. The "rating" field is the algorithmically-predicted rating for the user based on the user's previous viewing history and user-specified ratings. The "userRating" field is the user–specified rating for the title, and it should not be possible to set this value if a user is not logged in.
 
 While a login is clearly required to change data or receive personalized recommendations, we would like to be able to use to allow users to browse the catalog without logging in. That's why both the recommendations service and rating service fallback to providing generic recommendations and ratings in the absence of a user ID.
 
@@ -973,7 +973,7 @@ var NetflixRouter = function(userId){
 NetflixRouter.prototype = Object.create(BaseRouter);
 ~~~
 
-As explained in previous sections, creating a BaseRouter class using createClass will build a route table for rapidly matching paths once when the application server starts up. This optimized route table will be shared across all new instances of the derived NetflixRouter class. This makes it inexpensive to create a new NetflixRouter object for every incoming server request.
+As explained in previous sections, creating a BaseRouter class using createClass will build a route table for rapidly matching [paths](http://netflix.github.io/falcor/documentation/paths.html) once when the application server starts up. This optimized route table will be shared across all new instances of the derived NetflixRouter class. This makes it inexpensive to create a new NetflixRouter object for every incoming server request.
 
 ~~~js
 var express = require('express');
@@ -995,7 +995,7 @@ Now that we have created a NetflixRouter class, we can add routes to it. Remembe
 
 ### Creating the Routes for the "titlesById" Map
 
-Our JSON Graph object has a titlesById map that contains all of the titles in the catalog. Each title's key within the map is its ID.
+Our [JSON Graph](http://netflix.github.io/falcor/documentation/jsongraph.html) object has a titlesById map that contains all of the titles in the catalog. Each title's key within the map is its ID.
 
 ~~~js
 {
@@ -1073,7 +1073,7 @@ Note that the output of the title service is a map of record objects organized b
 ~~~
 
 
-Let's use the title service to retrieve each title's generic fields. We will start by creating a route object which matches any path that would retrieve these title fields.
+Let's use the title service to retrieve each title's generic fields. We will start by creating a route object which matches any [path](http://netflix.github.io/falcor/documentation/paths.html) that would retrieve these title fields.
 
 ~~~js
     {
@@ -1084,7 +1084,7 @@ Let's use the title service to retrieve each title's generic fields. We will sta
     }
 ~~~
 
-Note that this route could match any of the following paths or path sets:
+Note that this route could match any of the following [paths](http://netflix.github.io/falcor/documentation/paths.html) or [path sets](http://netflix.github.io/falcor/documentation/paths.html#pathsets):
 
 ~~~
 titlesById[738, 6638]["name", "year"]
@@ -1098,13 +1098,13 @@ No matter what the input, the {integers} range will normalize the incoming KeySe
 titlesById[738..739, 672, 982]["boxshot", "description"] -> route.get.call(routerInstance, ["titlesById", [738, 739, 672, 982], ["boxshot", "description"]])
 ~~~
 
-The route handler's responsibility is to create a PathValue object for each path that the route matches. In other words, if the route matches the following PathSet...
+The route handler's responsibility is to create a PathValue object for each [path](http://netflix.github.io/falcor/documentation/paths.html) that the route matches. In other words, if the route matches the following [PathSet](http://netflix.github.io/falcor/documentation/paths.html#pathsets)...
 
 ~~~
 "titlesById[683, 528]['name', 'year']"
 ~~~
 
-...the route handler must create a Promise of an array of PathValue objects, one for each of the following paths:
+...the route handler must create a Promise of an array of PathValue objects, one for each of the following [paths](http://netflix.github.io/falcor/documentation/paths.html):
 
 ~~~js
 ["titlesById", 683, "name"]
@@ -1194,7 +1194,7 @@ router.get([["titlesById", [9, 10], ["name", "year"]]]).subscribe(function(jsonG
 });
 ~~~
 
-The router collects up all of the PathValue objects returned from route handlers, adds each value to a JSON Graph object, and returns it as a response.  The code above prints the following to the console:
+The router collects up all of the PathValue objects returned from route handlers, adds each value to a [JSON Graph](http://netflix.github.io/falcor/documentation/jsongraph.html) object, and returns it as a response.  The code above prints the following to the console:
 
 ~~~js
 {
@@ -1237,9 +1237,9 @@ router.get([["titlesById", [-1, 7], "name"]]).subscribe(function(jsonGraph) {
 }
 ~~~
 
-Note that the output is a JSON Graph error object at each individual path. Why did this happen? 
+Note that the output is a [JSON Graph](http://netflix.github.io/falcor/documentation/jsongraph.html) error object at each individual [path](http://netflix.github.io/falcor/documentation/paths.html). Why did this happen? 
 
-We did not guard against the possibility that the title doesn't exist in our route handler. As a result our route threw an "undefined is not an object" error when it attempted to look up "name" on an undefined value. When the router catches an error thrown from a route handler, it creates a JSON Graph error object at every path passed to that route handler. That means we don't get any data back - not even the name of the title that does exist.
+We did not guard against the possibility that the title doesn't exist in our route handler. As a result our route threw an "undefined is not an object" error when it attempted to look up "name" on an undefined value. When the router catches an error thrown from a route handler, it creates a [JSON Graph](http://netflix.github.io/falcor/documentation/jsongraph.html) error object at every [path](http://netflix.github.io/falcor/documentation/paths.html) passed to that route handler. That means we don't get any data back - not even the name of the title that does exist.
 
 Clearly we have to be defensive when coding our route handlers, but this begs the question: "what should a route handler return when a title doesn't exist"? 
 
@@ -1307,11 +1307,11 @@ router.get([["titlesById", [-1, 7], "name"]]).subscribe(function(jsonGraph) {
 }
 ~~~
 
-Notice that the Router inserts a JSON Graph atom, indicating that no value is present at ["titlesById", -1].
+Notice that the Router inserts a [JSON Graph](http://netflix.github.io/falcor/documentation/jsongraph.html) atom, indicating that no value is present at ["titlesById", -1].
 
-The practice of checking for the existence of value types along the matched path is referred to as **branch guarding**, and it is every route handler's responsibility. If null, undefined, or _any JSON Graph value type_ (ex.string, number, atom), is discovered along a path, a route handler must return a PathValue that indicates which path at which the value type was discovered, as well as the specific value type found there. In the example above we only bother to check for null or undefined because we feel confident that the data has been sanitized already, and no other value type (ex. string, number) could appear instead of the title. Depending on how much you trust your data, you may want to be more zealous.
+The practice of checking for the existence of value types along the matched [path](http://netflix.github.io/falcor/documentation/paths.html) is referred to as **branch guarding**, and it is every route handler's responsibility. If null, undefined, or _any [JSON Graph](http://netflix.github.io/falcor/documentation/jsongraph.html) value type_ (ex.string, number, atom), is discovered along a [path](http://netflix.github.io/falcor/documentation/paths.html), a route handler must return a PathValue that indicates which [path](http://netflix.github.io/falcor/documentation/paths.html) at which the value type was discovered, as well as the specific value type found there. In the example above we only bother to check for null or undefined because we feel confident that the data has been sanitized already, and no other value type (ex. string, number) could appear instead of the title. Depending on how much you trust your data, you may want to be more zealous.
 
-Now that we can retrieve non-personalized fields from titles, let's create a route that adds personalized fields like rating and userRating to our JSON Graph object.
+Now that we can retrieve non-personalized fields from titles, let's create a route that adds personalized fields like rating and userRating to our [JSON Graph](http://netflix.github.io/falcor/documentation/jsongraph.html) object.
 
 #### "titlesById[{integers}]['rating', 'userRating']"
 
@@ -1400,7 +1400,7 @@ router.get([["titlesById", 1, ["name", "year", "userRating"]]]).subscribe(functi
 });
 ~~~
 
-The request above matches both routes we have created. The Router adds the resulting PathValues to a single JSON Graph response. The code above prints the following to the console:
+The request above matches both routes we have created. The Router adds the resulting PathValues to a single [JSON Graph](http://netflix.github.io/falcor/documentation/jsongraph.html) response. The code above prints the following to the console:
 
 ~~~js
 {
@@ -1418,7 +1418,7 @@ The request above matches both routes we have created. The Router adds the resul
 
 Note how the router presents the consumer with what appears to be a single title object, but sources the data for the title from multiple services. The result is a simple API for the consumer without compromising any flexibility about where data is stored on the backend.
 
-Now we have the ability to retrieve information about any title in the catalog using that ID. However in practice our users will not be navigating titles by ID. When a user starts the application, they will be presented with a list of genres, each of which contains a list of recommended titles. Users will navigate through these titles positionally, scrolling vertically and horizontally. As a consequence the application needs to be able to retrieve titles by position within the user's personalized recommendations list. To accommodate this requirement, we will add the users genre list to the Router's virtual JSON Graph object.
+Now we have the ability to retrieve information about any title in the catalog using that ID. However in practice our users will not be navigating titles by ID. When a user starts the application, they will be presented with a list of genres, each of which contains a list of recommended titles. Users will navigate through these titles positionally, scrolling vertically and horizontally. As a consequence the application needs to be able to retrieve titles by position within the user's personalized recommendations list. To accommodate this requirement, we will add the users genre list to the Router's virtual [JSON Graph](http://netflix.github.io/falcor/documentation/jsongraph.html) object.
 
 ### Creating the Genre List Routes
 
@@ -1486,7 +1486,7 @@ var routes = [
 ]
 ~~~
 
-As we can see, the route simply transforms the result of the promise into a PathValue containing the matched path and the length.
+As we can see, the route simply transforms the result of the promise into a PathValue containing the matched [path](http://netflix.github.io/falcor/documentation/paths.html) and the length.
 
 Now we should be able to retrieve the length of the genre list from the Router:
 
@@ -1499,7 +1499,7 @@ router.get([["genrelist", "length"]]).subscribe(function(jsonGraph) {
 });
 ~~~
 
-The router accepts the PathValue objects from the routes, and adds each of their values to a single JSON Graph object. The code above prints the following to the console:
+The router accepts the PathValue objects from the routes, and adds each of their values to a single [JSON Graph](http://netflix.github.io/falcor/documentation/jsongraph.html) object. The code above prints the following to the console:
 
 ~~~js
 {
@@ -1511,7 +1511,7 @@ The router accepts the PathValue objects from the routes, and adds each of their
 }
 ~~~
 
-The genre list length route is easy because it only matches one path. Next let's try a route that can match multiple paths: "genrelist[{integers}].name".
+The genre list length route is easy because it only matches one [path](http://netflix.github.io/falcor/documentation/paths.html). Next let's try a route that can match multiple [paths](http://netflix.github.io/falcor/documentation/paths.html): "genrelist[{integers}].name".
 
 
 This route starts out much the same way as the previous one: by retrieving the user's genre list from the recommendation service.
@@ -1530,7 +1530,7 @@ var routes = [
 ]
 ~~~
 
-Note that this route could match any of the following paths or path sets:
+Note that this route could match any of the following [paths](http://netflix.github.io/falcor/documentation/paths.html) or [path sets](http://netflix.github.io/falcor/documentation/paths.html#pathsets):
 
 ~~~
 genrelist[0..1].name
@@ -1570,7 +1570,7 @@ Alternately we can define an "indices" alias for the integers pattern and use it
     ]
 ~~~
 
-If a route's get handler is passed ["genrelist", [0, 1, 2], "name"] it must return a Promise containing an Array of PathValues, one for each path in the PathSet.
+If a route's get handler is passed ["genrelist", [0, 1, 2], "name"] it must return a Promise containing an Array of PathValues, one for each [path](http://netflix.github.io/falcor/documentation/paths.html) in the [PathSet](http://netflix.github.io/falcor/documentation/paths.html#pathsets).
 
 ~~~js
 { path: ["genreList", 0, "name"], value: "Horror" }
@@ -1614,7 +1614,7 @@ router.get([["genrelist", 1, "name"]]).subscribe(function(jsonGraph) {
 });
 ~~~
 
-Once again the Router converts the output into a JSON Graph object, and so we see the following console output:
+Once again the Router converts the output into a [JSON Graph](http://netflix.github.io/falcor/documentation/jsongraph.html) object, and so we see the following console output:
 
 ~~~js
 {
@@ -1632,7 +1632,7 @@ Now let's tackle the most challenging of all of the genre list routes...
 
 #### The "genrelist[{integers}].titles[{integers}]" Route
 
-This route builds the JSON Graph references in the titles array within each genre. In other words this route will create this portion of the JSON Graph object:
+This route builds the [JSON Graph](http://netflix.github.io/falcor/documentation/jsongraph.html) references in the titles array within each genre. In other words this route will create this portion of the [JSON Graph](http://netflix.github.io/falcor/documentation/jsongraph.html) object:
 
 ~~~js
 {
@@ -1690,9 +1690,9 @@ Each reference in the titles array points to a title in the "titlesById" map. Th
     }
 ~~~
 
-Notice that we are branch guarding at both the genre and title level. This ensures that any attempt to retrieve a genre or title that doesn't exist will not throw and will instead return the specific path at which the undefined value was found.
+Notice that we are branch guarding at both the genre and title level. This ensures that any attempt to retrieve a genre or title that doesn't exist will not throw and will instead return the specific [path](http://netflix.github.io/falcor/documentation/paths.html) at which the undefined value was found.
 
-Note that references are JSON Graph value types, like strings, booleans, and numbers. That means we can retrieve these references from the Router, just like any other value type:
+Note that references are [JSON Graph](http://netflix.github.io/falcor/documentation/jsongraph.html) value types, like strings, booleans, and numbers. That means we can retrieve these references from the Router, just like any other value type:
 
 ~~~js
 router.
@@ -1725,7 +1725,7 @@ The remaining genre list route will be left as an exercise for the user:
 
 ### Reducing Service Calls with Batching
 
-We have finished all of the routes required to create the genre list in the Router's virtual JSON Graph object. Now we can make a single request to the Router and retrieve as much information about the user's personalized recommendations as we want. The following code retrieves the first two title references in the first two genres, as well as the name and length of the first two genres.
+We have finished all of the routes required to create the genre list in the Router's virtual [JSON Graph](http://netflix.github.io/falcor/documentation/jsongraph.html) object. Now we can make a single request to the Router and retrieve as much information about the user's personalized recommendations as we want. The following code retrieves the first two title references in the first two genres, as well as the name and length of the first two genres.
 
 (Example of what I said above)
 
@@ -1742,9 +1742,9 @@ This places unnecessary load on the service and its backend data store. Ideally 
 
 An ideal solution would be for the service Tulare to
 
-Notice that we are branch guarding at both the genre and title level. This ensures that any attempt to retrieve a genre or title that doesn't exist will not throw and will instead return the specific path at which the value was found.
+Notice that we are branch guarding at both the genre and title level. This ensures that any attempt to retrieve a genre or title that doesn't exist will not throw and will instead return the specific [path](http://netflix.github.io/falcor/documentation/paths.html) at which the value was found.
 
-The router inserts these references into the JSON Graph response:
+The router inserts these references into the [JSON Graph](http://netflix.github.io/falcor/documentation/jsongraph.html) response:
 
 (output of the code above)
 
@@ -1755,7 +1755,7 @@ For example, when the user opens our application, we would like to retrieve the 
 
 (Screenshot of Netflix that appeared earlier in the document)
 
-We can formulate a PathSet to retrieve this information and pass it to the Router.
+We can formulate a [PathSet](http://netflix.github.io/falcor/documentation/paths.html#pathsets) to retrieve this information and pass it to the Router.
 
 (Example of sending the pathSet I described above to the router)
 
@@ -1767,13 +1767,13 @@ The code above will print of the following to the console:
 
 (The abbreviated JSON Graph output for the previous request)
 
-Note that the response from the Router includes not only the reference, but also the title found at each the reference path. Notice also that the title object only has a single key: "boxshot".
+Note that the response from the Router includes not only the reference, but also the title found at each the reference [path](http://netflix.github.io/falcor/documentation/paths.html). Notice also that the title object only has a single key: "boxshot".
 
-Why did this happen? To understand why the writer returned this output, we must understand the process of Path Evaluation.
+Why did this happen? To understand why the writer returned this output, we must understand the process of [Path](http://netflix.github.io/falcor/documentation/paths.html) Evaluation.
 
 
 
-When evaluating paths, routers follow the rules of JSON Graph path evaluation, and References are handled specially during path evaluation. If a reference is encountered while evaluating a path, and there are still keys left in the path to be evaluated, the path being evaluated is optimized using the reference path. Then the optimized path is evaluated from the root of the JSON Graph object. The process is similar to process by which a UNIX shell handles a symbolic link discovered while evaluating a file path.
+When evaluating paths, routers follow the rules of [JSON Graph](http://netflix.github.io/falcor/documentation/jsongraph.html) path evaluation, and References are handled specially during path evaluation. If a reference is encountered while evaluating a path, and there are still keys left in the path to be evaluated, the path being evaluated is optimized using the reference path. Then the optimized path is evaluated from the root of the [JSON Graph](http://netflix.github.io/falcor/documentation/jsongraph.html) object. The process is similar to process by which a UNIX shell handles a symbolic link discovered while evaluating a file path.
 
 Let's take a look at this process in action. First we request the boxshot of the first title in the first genre list from the router. The router tries to match the path against its routes finds the following prefix match: 
 
