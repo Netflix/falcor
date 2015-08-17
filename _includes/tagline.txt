@@ -1,1 +1,1 @@
-A JavaScript library for on-demand data fetching
+A JavaScript library for efficient data fetching
