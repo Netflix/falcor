@@ -1,11 +1,11 @@
 
 ## Getting Started
 
-In this barebones tutorial we will use the falcor Router to create a Virtual JSON resource. Then we will use falcor's express middleware to serve the Virtual JSON resource on an application server at the URL /model.json. We will also host a static web page on the same server which retrieves data from the Virtual JSON resource.
+You can check out a working example server for a Netflix-like application [here](http://github.com/netflix/falcor-express-demo) right now. Alternately you can go through this barebones tutorial in which we use the Falcor Router to create a Virtual JSON resource. Then we will use Falcor's express middleware to serve the Virtual JSON resource on an application server at the URL /model.json. We will also host a static web page on the same server which retrieves data from the Virtual JSON resource.
 
 ### Creating a Virtual JSON Resource
 
-In this example we will use the falcor Router to build a Virtual JSON resource on an app server and host it at /model.json. The JSON resource will contain the following contents:
+In this example we will use the Falcor Router to build a Virtual JSON resource on an app server and host it at /model.json. The JSON resource will contain the following contents:
 
 ~~~js
 {
@@ -104,3 +104,7 @@ Now create an index.html file with the following contents:
 Now visit http://localhost:3000/index.html and you should see the message retrieved from the server:
 
 ![Hello World]({{ site.baseurl }}/starter/helloworld.png)
+
+## More Resources
+
+For discussion and questions, use [Stack Overflow](http://stackoverflow.com/questions/tagged/falcor).
