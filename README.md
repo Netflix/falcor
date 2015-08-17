@@ -196,6 +196,7 @@ var app = express();
 var FalcorServer = require('falcor-express');
 var falcorRouterDemoFactory = require('falcor-router-demo');
 var personService = require('./personService');
+var locationService = require('./locationService');
 
 app.use(bodyParser.urlencoded({ extended: false }));
 
