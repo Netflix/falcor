@@ -310,7 +310,7 @@ var server = app.listen(80);
 
 ### Route Objects
  
-Each Route object passed to the Router constructor contains a pattern that can be used to match Path Sets, as well as three optional handlers that correspond to each of the [DataSource](http://netflix.github.io/falcor/documentation/datasources.html) interface's methods.
+Each Route object passed to the Router constructor contains a pattern that can be used to match [Path Sets](http://netflix.github.io/falcor/documentation/paths.html#pathsets), as well as three optional handlers that correspond to each of the [DataSource](http://netflix.github.io/falcor/documentation/datasources.html) interface's methods.
  
 When one of the [DataSource](http://netflix.github.io/falcor/documentation/datasources.html) methods is invoked on the Router object, the Router attempts to match the [paths](http://netflix.github.io/falcor/documentation/paths.html) against the patterns in each route.  If a Route's pattern is matched, the corresponding route handler method is invoked.  The Route handler is expected to perform the corresponding action and generate the subset of the [JSON Graph](http://netflix.github.io/falcor/documentation/jsongraph.html) containing the requested path.
  
