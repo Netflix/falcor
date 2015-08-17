@@ -1,6 +1,7 @@
 {
   "name": "falcor",
   "version": "0.1.3",
+  "description": "A JavaScript library for efficient data fetching.",  
   "main": "./lib/index.js",
   "homepage": "https://github.com/Netflix/falcor",
   "author": {
@@ -29,6 +30,12 @@
     "dist",
     "lib",
     "test"
+  ],
+  "keywords": [
+    "JSON",
+    "Netflix",
+    "Observable",
+    "falcorjs"
   ],
   "devDependencies": {
     "benchmark": "^1.0.0",
