@@ -157,10 +157,11 @@ To avoid allowing the cache to grow larger than the available memory on the devi
 
 Falcor's ability to select as much or as little data from the network in a single request gives it the flexibility to batch multiple small requests for data into a single large request. The Falcor model can be configured to collect up multiple requests, and schedule them to be sent to the data source at once.
 
-
+![Model batching](../images/batching.png)
 
 In this example, we make a request for three individual values from the Model, and only a single coarse-grained request is sent to the data source.
 
+~~~js
 var log = console.log.bind(console);
 var httpDataSource = new falcor.HttpDataSource("/model.json");
 var model = new falcor.Model({ source: httpDataSource });
@@ -172,15 +173,10 @@ batchModel.getValue("todos[2].name").then(log);
 
 // The previous three model requests only send a single request
 // to the httpDataSource: "todos[0..2].name" 
+~~~
 
 The ability to batch requests can significantly improve performance when using a network protocol with a high connection cost (ex. HTTP).
-Request Deduping
+
+### Request Deduping
 
 In addition to batching outgoing requests, the Falcor Model dedupes requests. If a request is made for a value for which there is already an outstanding request, no additional request is made. This allows individual application views to retrieve their own data without having to coordinate with other views, just as if they were retrieving data from a fast in-memory JSON store.
-Under Active Development
-
-Check out the Falcor website (http://netflix.github.io/falcor/), and feel free to fork the code on GitHub. Falcor is still under active development, and we will be unveiling a roadmap shortly. We are excited to start developing in the open, and we are looking for contributions from the community. 
-
-All JavaScript-based Netflix applications written in the last three years are currently using the Falcor client against our internal Java service layer. This developer preview includes a new Node version of our internal Java Falcor server. We've decided to invest our energy in Node for the open-source effort because of our well-publicized and ongoing migration to Node. However at this time we are not yet using the Node Router in production, because our migration to Node is not yet complete. We will be migrating to Node for Falcor data over the next year.
-
-Currently Falcor is written entirely in JavaScript. We would love to see ports to other languages, both on the server and on the client. We are also excited to see if the community can help us integrate Falcor with popular MVC frameworks.
