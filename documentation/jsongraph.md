@@ -398,15 +398,17 @@ Once we create an optimized path, we begin evaluating it from the root of the JS
 Now we evaluate the “tasksById” key, which yields an object. Next, we convert the number 44 into a string using the JSON stringify algorithm. Then we look up the resulting string “44” which yields another object. Finally we look up the key “name” and we find a primitive value type ”withdraw money from ATM”. This value is added to the JSON Graph subset and returned as the result of the abstract get operation. 
 
 ~~~js
-// JSON Graph subset response
+// JSON Graph Envelope response
 {
-    todosById: {
-        "44": {
-            name: "get milk from corner store"
+    jsonGraph: {
+        todosById: {
+            "44": {
+                name: "get milk from corner store"
+            }
+        },
+        todos: {
+            "0": { $type: "ref", value: ["todosById", 44] }
         }
-    },
-    todos: {
-        "0": { $type: "ref", value: ["todosById", 44] }
     }
 }
 ~~~
@@ -640,31 +642,142 @@ Now we evaluate the “tasksById” key, which yields an object. Next, we conver
 
 As we saw in the previous section, if we encounter a Reference while setting a Path, the Reference Path is followed to the target object. As we now know, References are handled specially during Path evaluation. However if we encounter a primitive value while setting a value into the JSON Graph object, then the primitive value is replaced with an object and the abstract set operation continues. Let’s see an example of this in practice. We will start with the same JSON graph object we used in the previous section:  
 
-(Example)  
+~~~js
+{
+    todosById: {
+        "44": {
+            name: "get milk from corner store",
+            done: false,
+            prerequisites: [{ $type: "ref", value: ["todosById", 54] }]
+        },
+        "54": {
+            name: "withdraw money from ATM",
+            done: false,
+            prerequisites: []
+        }
+    },
+    todos: [
+        { $type: "ref", value: ["todosById", 44] },
+        { $type: "ref", value: ["todosById", 54] }
+    ]
+};
+~~~
 
-This time we will attempt to replace the ”done” key value with an object that contains one value: a boolean indicating that the task was completed. We cannot insert an object into a JSON Graph. Instead we will have to insert the value at a key within the value found at the “done” key. When an attempt is made to set a value at a key within a primitive value, the primitive value will be replaced with an object first.
+This time we will attempt to replace the ”done” key value with an object that contains one value: a boolean indicating that the task was completed. We will set the following Path/value pair:
 
-(example)
+~~~js
+{ path: ["todos", 0, "done", "completed"], value: true }
+~~~
 
 First we evaluate the ”todos” key, which yields an array.  There are more keys to be evaluated, so we continue. Then we evaluate the number “0” key, and it is converted into a string using JSON stringify algorithm. We attempt to look up the value in the array, and we find a reference:  
 
-(reference value)  
+~~~js
+// JSON Graph object
+{
+    // "todosById" object snipped
+    todos: [
+        { $type: "ref", value: ["todosById", 44] },
+        // rest of list snipped
+    ]
+}
+// JSON Graph Envelope response
+{
+    jsonGraph: {}
+}
+~~~
 
 References are primitive value types, and are therefore immediately inserted into the subset of the JSON Graph object that will be produced by the abstract get operation. Then an optimized path is created using the reference path and the keys that have yet to be evaluated. 
 
-(optimized path)   
+~~~js
+["todosById", 44].concat(["done", "completed"]) // ["todosById", 44, "done", "completed"]
+~~~
 
 Once we create an optimized path, we begin evaluating it from the root of the JSON Graph object. 
 
-(pointer to the root of the document, along with the optimized path)  
+~~~js
+// setting ["todosById", 44, "done", "completed"] to true
+{
+    todosById: {
+        "44": {
+            name: "get milk from corner store",
+            done: false,
+            prerequisites: [{ $type: "ref", value: ["todosById", 54] }]
+        },
+        "54": {
+            name: "withdraw money from ATM",
+            done: false,
+            prerequisites: []
+        }
+    },
+    todos: [
+        { $type: "ref", value: ["todosById", 44] },
+        { $type: "ref", value: ["todosById", 54] }
+    ]
+};
+// JSON Graph Envelope response
+{
+    jsonGraph: {
+        todos: {
+            "0": { $type: "ref", value: ["todosById", 44] }
+        }
+    }
+}
+~~~
 
-Now we evaluate the “tasksById” key, which yields an object. Next, we convert the number 44 into a string using the JSON stringify algorithm. Then we look up the resulting string “44” which yields another object. Now we look up the ”name” key and find a primitive value: ”withdraw money from ATM”. As there are more keys to be evaluated, the object evaluating the abstract set operation attempts to replace the primitive value with an object. 
+Now we evaluate the “tasksById” key, which yields an object. Next, we convert the number 44 into a string using the JSON stringify algorithm. Then we look up the resulting string “44” which yields another object. Now we look up the ”done” key and find a primitive value: false. As there are more keys to be evaluated, the object evaluating the abstract set operation attempts to replace the primitive value with an object. 
 
-(example of JSON Graph subset and as well as original JSON Graph with object replaced overvalue) 
+~~~js
+// setting ["todosById", 44, "done", "completed"] to true
+{
+    todosById: {
+        "44": {
+            name: "get milk from corner store",
+            done: {},
+            prerequisites: [{ $type: "ref", value: ["todosById", 54] }]
+        },
+        // rest of "todosById" object snipped
+    },
+    // "todos" list snipped
+};
+// JSON Graph Envelope response
+{
+    jsonGraph: {
+        todos: {
+            "0": { $type: "ref", value: ["todosById", 44] }
+        }
+    }
+}
+~~~
 
 Now that we have reached the final key “completed”, we insert the boolean value “true” that key within the object we previously created. The value is also added at the same location within the JSON Graph subset, and returned as the result of the abstract set operation.
 
-(example of what I said above)
+~~~js
+// setting ["todosById", 44, "done", "completed"] to true
+{
+    todosById: {
+        "44": {
+            name: "get milk from corner store",
+            done: { completed: true },
+            prerequisites: [{ $type: "ref", value: ["todosById", 54] }]
+        },
+        // rest of "todosById" object snipped
+    },
+    // "todos" list snipped
+};
+// JSON Graph Envelope response
+{
+    jsonGraph: {
+        todosById: {
+            "44": {
+                done: { completed: true }
+            }
+        },
+        todos: {
+            "0": { $type: "ref", value: ["todosById", 44] }
+        }
+    }
+}
+~~~
 
 ### Value Coercion  
 
