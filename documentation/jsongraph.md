@@ -112,7 +112,7 @@ Each of these types is a JSON Graph object with a "$type" key that differentiate
 A Reference is a JSON object with a “$type” key that has a value of “ref” and a ”value” key that has a Path array as its value. 
 
 ~~~js
-{ $type: "ref", value: ["todosById", 44] },
+{ $type: "ref", value: ["todosById", 44] }
 ~~~
 
 A Reference’s Path points to another location within the same JSON Graph object. Using References, it is possible to model a graph in JSON. Here is an example of a TODO list in which each task can contain References to its prerequisite tasks: 
@@ -210,7 +210,7 @@ The result above only includes the value of the Atom because the Model unboxes A
 An Error is a JSON object with a “$type” key that has a value of “error” and a ”value” key that contains an error that occured while executing a JSON Graph operation.
 
 ~~~js
-{ $type: "atom", value: ['en', 'fr'] }
+{ $type: "error", value: "The request timed out." }
 ~~~
 
 When an object executing a JSON Graph operation encounters an error while attempting to set or retrieve a value, an Error object may be created and placed in the JSON Graph response in the value's place.
@@ -310,7 +310,7 @@ Let's walk through an abstract get operation on an example JSON Graph object:
         { $type: "ref", value: ["todosById", 44] },
         { $type: "ref", value: ["todosById", 54] }
     ]
-};
+}
 ~~~
 
 Let’s evaluate the following Path in an attempt to retrieve the name of the first task in the TODOs list.
@@ -351,7 +351,7 @@ References are primitive value types, and are therefore immediately inserted int
 {
     jsonGraph: {
         todos: {
-            "0": { $type: "ref", value: ["todosById", 44] },
+            "0": { $type: "ref", value: ["todosById", 44] }
         }
     }
 }
@@ -389,7 +389,7 @@ Once we create an optimized path, we begin evaluating it from the root of the JS
 {
     jsonGraph: {
         todos: {
-            "0": { $type: "ref", value: ["todosById", 44] },
+            "0": { $type: "ref", value: ["todosById", 44] }
         }
     }
 }
@@ -513,7 +513,7 @@ First we evaluate the ”todos” key, which yields an array.  There are more ke
 }
 ~~~
 
-## The Abstract set Operation  
+### The Abstract set Operation  
 
 In addition to retrieving values from a JSON graph object, it is possible to set values into a JSON Graph object. The abstract set operation accepts multiple Path/value pairs. It returns a subset of the JSON Graph that contains all of the References encountered during path evaluation, as well as the values inserted into the JSON Graph. It is only legal to set primitive values into a JSON Graph object. A single set operation should modify only one value in the JSON Graph for each input path. If it is necessary to set values at paths which cannot be known ahead of time, you must use an abstract call operation instead. Set operations must be idempotent. 
 
@@ -638,7 +638,7 @@ Now we evaluate the “tasksById” key, which yields an object. Next, we conver
 }
 ~~~
 
-### Setting Beyond Primitive Values  
+#### Setting Beyond Primitive Values  
 
 As we saw in the previous section, if we encounter a Reference while setting a Path, the Reference Path is followed to the target object. As we now know, References are handled specially during Path evaluation. However if we encounter a primitive value while setting a value into the JSON Graph object, then the primitive value is replaced with an object and the abstract set operation continues. Let’s see an example of this in practice. We will start with the same JSON graph object we used in the previous section:  
 
@@ -779,7 +779,7 @@ Now that we have reached the final key “completed”, we insert the boolean va
 }
 ~~~
 
-### Value Coercion  
+#### Value Coercion  
 
 The object evaluating the abstract set operation may choose to coerce the value being set into a different value. If so, the JSON Graph object, as well as the JSON Graph subset response will contain the coerced value after the abstract set operation completes. Take the following JSON Graph object, which models titles that can be viewed in an online video streaming application.   
 
@@ -791,7 +791,7 @@ Let’s attempt to set the rating of the title to 10, even though the only ratin
 
 Firstly evaluate the “titlesById” key. We find a object, so we continue. We evaluate the number “721” key, and convert it into a string using the JSON stringify method. We find another object, so we continue. Finally we attempt to set the ”rating” key to “9”, and the object evaluating the abstract set operation instead sets the rating to the upper bound of valid values: “5”. The number five is inserted in both the JSON Graph object, as well as the JSON Graph subset. The JSON Graph subset response is returned as the result of the abstract set operation. 
 
-## Call   
+### The Abstract call Operation
 
 A JSON Graph object is not a strict subset of JSON. Unlike JSON objects, JSON Graph objects may contain Functions. Functions are callable blocks of code that return a subset of the JSON Graph object. Functions can be used to change multiple resources in a single round trip. Functions are most often used for adding and removing items from a list. Functions must be used whenever multiple values need to be changed together, such as adding items to a list.  Unlike get and set operations, function calls are not guaranteed to be idempotent.
 
