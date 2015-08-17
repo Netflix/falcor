@@ -189,48 +189,52 @@ The reason that the server model is called "virtual" is that the server JSON Obj
 The following virtual model simulates a person model on the server:
 
 ```JavaScript
-// Server
-var falcor = require("falcor");
-var Router = require("falcor-router");
-var falcorExpress = require("falcor-express");
-
-var express = require("express");
+var express = require('express');
+var Router = require('falcor-router');
+var bodyParser = require('body-parser');
 var app = express();
+var FalcorServer = require('falcor-express');
+var falcorRouterDemoFactory = require('falcor-router-demo');
+var personService = require('./personService');
 
-var person = new falcor.Model({
-  source: new Router([
+app.use(bodyParser.urlencoded({ extended: false }));
+
+var personRouter = new Router([
     {
       route: "['name', 'occupation']",
-      get: (pathSet) =>
-        personDB.
-          exec(`SELECT ${pathSet[1].join(",")}
-                  FROM user
-           WHERE id = ${request.cookies.userid}`).
-           then(row => {
-             jsong: {
-                name: getProps(row, pathSet[0]),
-                occupation: getProps(row, pathSet[1])
-             }
+      // pathSet[0] could be ["name"], ["occupation"], or ["name", "occupation"]
+      get: function(pathSet) {
+        return personService.
+          getPerson().
+          then(function(person) {
+            // return path/value combination for each path in pathSet
+            return pathSet[0].
+              map(function(key) {
+                return { path: [key], value: person[key] };
+              });
+          });
     },
     {
       route: 'location["country", "city", "address"]',
       get: (pathSet) =>
-        locationServer.
-          getLocation(request.cookies.userid).
-          then(location => ({
-              jsong: { location: getProps(location, pathSet[2]) }
-          })
+        return locationService.
+          getPersonLocation().
+          then(function(location) {
+            // pathSet[1] could be ["country", "city"], ["country"], ["city", "address"], etc
+            return pathSet[1].
+              map(function(key) {
+                // return path/value combination for each path in pathSet              
+                return { path: [key], value: person[key] };
+              });
+          });
     }
-  ])
-});
+  ]);
 
-var modelServer = new falcor.HttpModelServer(person);
+app.use('/person.json', FalcorServer.dataSourceRoute(function(req, res) {
+    return personRouter;
+}));
 
-app.get("/person.json", function (req, res) {
-  falcorExpress.serve(req, function(error, output) {
-    res.end(output)
-  });
-});
+app.use(express.static('.'));
 
 var server = app.listen(80);
 ```
