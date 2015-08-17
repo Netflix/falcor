@@ -8,6 +8,9 @@ branches:
     only:
         - master
 
+# Run as a docker container
+sudo: false
+
 # Update npm to the latest version
 before_install: npm update -g npm
 
