@@ -566,13 +566,13 @@ First we evaluate the ”todos” key, which yields an array.  There are more ke
 References are primitive value types, and are therefore immediately inserted into the subset of the JSON Graph object that will be produced by the abstract set operation. However References are handled specially during [Path](http://netflix.github.io/falcor/documentation/paths.html) evaluation. If a Reference is encountered when there are still keys left in the [Path](http://netflix.github.io/falcor/documentation/paths.html) to be evaluated, a new [Path](http://netflix.github.io/falcor/documentation/paths.html) is created by concatenating the keys that have yet to be evaluated to the end of the reference [Path](http://netflix.github.io/falcor/documentation/paths.html). This process is known as “path optimization”, because the optimized [Path](http://netflix.github.io/falcor/documentation/paths.html) we create is a quicker route to the requested value. [Path](http://netflix.github.io/falcor/documentation/paths.html) optimization produces the following [Path](http://netflix.github.io/falcor/documentation/paths.html): 
 
 ~~~js
-["todosById", 44].concat(["name"]) // ["todosById", 44, "name"]
+["todosById", 44].concat(["done"]) // ["todosById", 44, "done"]
 ~~~
 
 Once we create an optimized [Path](http://netflix.github.io/falcor/documentation/paths.html), we begin evaluating it from the root of the JSON Graph object. 
 
 ~~~js
-// evaluating ["todosById", 44, "name"]
+// evaluating ["todosById", 44, "done"]
 {
     todosById: {
         "44": {
@@ -601,7 +601,7 @@ Once we create an optimized [Path](http://netflix.github.io/falcor/documentation
 }
 ~~~
 
-Now we evaluate the “tasksById” key, which yields an object. Next, we convert the number 44 into a string using the JSON stringify algorithm. Then we look up the resulting string “44” which yields another object. Finally we arrive at the last key: “name”. We replace the value at this location with the new value: true. We also insert the value into the JSON Graph subset, and return the JSON Graph subset as the new result of the abstract set operation. 
+Now we evaluate the “tasksById” key, which yields an object. Next, we convert the number 44 into a string using the JSON stringify algorithm. Then we look up the resulting string “44” which yields another object. Finally we arrive at the last key: “done”. We replace the value at this location with the new value: true. We also insert the value into the JSON Graph subset, and return the JSON Graph subset as the new result of the abstract set operation. 
 
 ~~~js
 // JSON Graph object
