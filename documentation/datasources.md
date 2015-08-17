@@ -280,11 +280,6 @@ Falcor ships with the following DataSource implementations:
 * Router (server only)
 * ModelDataSource
 
-### HttpDataSource
-
-Falcor Models typically use the HttpDataSource to connect directly to falcor middleware running on an Http server.
 ## Reference Implementation
 
 Here is a [reference implementation](https://github.com/Netflix/falcor/blob/master/examples/datasource/webWorkerSource.js) of a Data Source which retrieves information from a Model running in a WebWorker.
-##Http DataSource
-The falcor library ships with one implementation of the DataSource interface: the HttpDataSource. The HttpDataSource retrieves JSON Graph information
