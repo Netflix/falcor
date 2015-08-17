@@ -9,7 +9,7 @@ kramdown:
   toc_levels: 1..2
 # Default sitewide metadata
 meta_defaults:
-  description: "A JavaScript library for on-demand data fetching."
-  title: "Bind to the Cloud"
+  description: "A JavaScript library for efficient data fetching."
+  title: "One Model Everywhere"
   # All titles (including the default) will have this prepended to them
   title_prefix: "Falcor: "  
