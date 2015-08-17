@@ -753,7 +753,7 @@ Netflix is an online streaming video service with millions of subscribers.  When
 
 ![Netflix Homepage](http://netflix.github.io/falcor/images/netflix-screenshot.png)
 
-In this exercise we will build a Router for an application similar to Netflix, which merchandises titles to members based on their preferences, and allows them to provide user ratings for each title. This exercise is purely a demonstration of how to build a Router for a web application that displays a catalog of information to a user. This is **not** intended to demonstrate how to Netflix actually works, and any similarities to the actual Netflix Router's implementation are superficial.
+In this exercise we will build a Router for an application similar to Netflix, which merchandises titles to members based on their preferences, and allows them to provide user ratings for each title. This exercise is purely a demonstration of how to build a Router for a web application that displays a catalog of information to a user. This is **not** intended to demonstrate how to Netflix actually works, and any similarities to the actual Netflix Router's implementation are superficial. The entire source for this guide is [online](https://github.com/netflix/falcor-router-demo).
 
 Our goal is to define a [JSON Graph](http://netflix.github.io/falcor/documentation/jsongraph.html) resource on the Application server that exposes all of the data that our Netflix clone needs. The [JSON Graph](http://netflix.github.io/falcor/documentation/jsongraph.html) schema should be designed in such a way that the application can retrieve all of the data it needs for any given application scenario in a single network request.
 
