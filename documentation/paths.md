@@ -10,7 +10,7 @@ lang: en
 
 ## Paths
 
-A Path is a sequence of Keys, which is evaluated from the root of a JSON object. A path refers to a location within a JSON object. When executing JSON operations, Paths are passed to the [Model](http://netflix.github.io/falcor/documentation/model.html) to specify which values to transform/retrieve in the [Model]{@link http://netflix.github.io/falcor/documentation/model.html}'s associated JSON object.
+A Path is a sequence of Keys, which is evaluated from the root of a JSON object. A path refers to a location within a JSON object. When executing JSON operations, Paths are passed to the [Model](http://netflix.github.io/falcor/documentation/model.html) to specify which values to transform/retrieve in the [Model](http://netflix.github.io/falcor/documentation/model.html)'s associated JSON object.
 
 ~~~js
 var model = new falcor.Model({
