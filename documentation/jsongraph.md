@@ -270,6 +270,21 @@ Some examples of objects that are capable of carrying out the abstract JSON Grap
 
 * Router
 * Model
+ 
+The result of each operation is a JSON Graph envelope, which contains a subset of the JSON Graph after the operation has completed. A JSON Graph Envelope is a JSON object with a "jsonGraph" key which contains a JSON Graph subset.
+
+~~~js
+// the result of a get operation for the Path ["user", "name"]
+{
+    jsonGraph: {
+        user: {
+            name: "Anupa"
+        }
+    }
+}
+~~~
+
+When the call operation is invoked, the JSON Graph envelope may also contain a "invalidated" key which contains a list of Paths to values that the function call changed. This allows clients that are maintaining a cache of the JSON Graph to get rid of stale data. The envelope will also contain a "paths" key which contains a list of paths to the values within the JSON Graph subset. This is an optimization to allow clients to be able to process the JSON Graph subset without resorting to reflection.
 
 ### The Abstract get Operation
 
@@ -315,8 +330,10 @@ First we evaluate the ”todos” key, which yields an array.  There are more ke
         // rest of list snipped
     ]
 }
-// JSON Graph subset response
-{}
+// JSON Graph Envelope response
+{
+    jsonGraph: {}
+}
 ~~~
 
 References are primitive value types, and are therefore immediately inserted into the subset of the JSON Graph object that will be produced by the abstract get operation. 
@@ -330,10 +347,12 @@ References are primitive value types, and are therefore immediately inserted int
         // rest of list snipped
     ]
 }
-// JSON Graph subset response
+// JSON Graph Envelope response
 {
-    todos: {
-        "0": { $type: "ref", value: ["todosById", 44] },
+    jsonGraph: {
+        todos: {
+            "0": { $type: "ref", value: ["todosById", 44] },
+        }
     }
 }
 ~~~
@@ -366,10 +385,12 @@ Once we create an optimized path, we begin evaluating it from the root of the JS
         { $type: "ref", value: ["todosById", 54] }
     ]
 };
-// JSON Graph subset response
+// JSON Graph Envelope response
 {
-    todos: {
-        "0": { $type: "ref", value: ["todosById", 44] },
+    jsonGraph: {
+        todos: {
+            "0": { $type: "ref", value: ["todosById", 44] },
+        }
     }
 }
 ~~~
@@ -436,10 +457,12 @@ First we evaluate the ”todos” key, which yields an array.  There are more ke
 References are primitive value types, and are therefore inserted into the subset of the JSON Graph object that will be produced by the abstract get operation. Now there are no more keys in the path left to be evaluated, so the JSON Graph subset is returned as the result of the abstract get operation.
 
 ~~~js
-// JSON Graph subset response
+// JSON Graph Envelope response
 {
-    todos: {
-        "0": { $type: "ref", value: ["todosById", 44] }
+    jsonGraph: {
+        todos: {
+            "0": { $type: "ref", value: ["todosById", 44] }
+        }
     }
 }
 ~~~
@@ -478,10 +501,12 @@ This time we will attempt to retrieve the name of the 9th item from the TODO lis
 First we evaluate the ”todos” key, which yields an array.  There are more keys to be evaluated, so we continue. Then we evaluate the “9” key, and it is converted into a string using JSON stringify algorithm. We attempt to look up the value in the array, which yield an undefined value. The undefined value is added to the JSON Graph subset, which is returned as the result of the abstract get operation:
 
 ~~~js
-// JSON Graph subset response
+// JSON Graph Envelope response
 {
-    todos: {
-        "9": undefined
+    jsonGraph: {
+        todos: {
+            "9": undefined
+        }
     }
 }
 ~~~
@@ -530,8 +555,10 @@ First we evaluate the ”todos” key, which yields an array.  There are more ke
         // rest of list snipped
     ]
 }
-// JSON Graph subset response
-{}
+// JSON Graph Envelope response
+{
+    jsonGraph: {}
+}
 ~~~
 
 References are primitive value types, and are therefore immediately inserted into the subset of the JSON Graph object that will be produced by the abstract set operation. However References are handled specially during path evaluation. If a Reference is encountered when there are still keys left in the path to be evaluated, a new path is created by concatenating the keys that have yet to be evaluated to the end of the reference path. This process is known as “path optimization”, because the optimized path we create is a quicker route to the requested value. Path optimization produces the following path: 
@@ -562,10 +589,12 @@ Once we create an optimized path, we begin evaluating it from the root of the JS
         { $type: "ref", value: ["todosById", 54] }
     ]
 };
-// JSON Graph subset response
+// JSON Graph Envelope response
 {
-    todos: {
-        "0": { $type: "ref", value: ["todosById", 44] }
+    jsonGraph: {
+        todos: {
+            "0": { $type: "ref", value: ["todosById", 44] }
+        }
     }
 }
 ~~~
@@ -592,15 +621,17 @@ Now we evaluate the “tasksById” key, which yields an object. Next, we conver
         { $type: "ref", value: ["todosById", 54] }
     ]
 };
-// JSON Graph subset response
+// JSON Graph Envelope response
 {
-    todosById: {
-        "44": {
-            done: true
+    jsonGraph: {
+        todosById: {
+            "44": {
+                done: true
+            }
+        },
+        todos: {
+            "0": { $type: "ref", value: ["todosById", 44] }
         }
-    },
-    todos: {
-        "0": { $type: "ref", value: ["todosById", 44] }
     }
 }
 ~~~
