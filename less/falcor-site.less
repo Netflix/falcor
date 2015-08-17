@@ -53,6 +53,8 @@ body {
   
   // Lessen the content padding on mobile
   @media (max-width: @screen-xs-max) {
+    margin-bottom: @site-footer-height-xs;
+
     & > .container {
       padding-top: @navbar-height;      
     }
@@ -65,6 +67,9 @@ body {
   width: 100%;
   height: @site-footer-height;
   
+  @media (max-width: @screen-xs-max) {
+    height: @site-footer-height-xs;
+  }
   
   &, & .site-footer-content {
     display: flex;
