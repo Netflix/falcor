@@ -248,4 +248,4 @@ For detailed high-level documentation explaining the Model, the Router, and JSON
 
 For API documentation, go [here](http://netflix.github.io/falcor/doc/Model.html)
 
-For a working example of a Router, check out the [falcor-router-demo](http://github.com/netflix/router-demo).
+For a working example of a Router, check out the [falcor-router-demo](http://github.com/netflix/falcor-router-demo).
