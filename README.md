@@ -14,7 +14,7 @@ If you're including falcor in your app, via npm and `require('falcor')`, and you
 
 In webpack.config.js:
 
-```
+```js
 module.exports = {
   resolve: {
     alias: {
