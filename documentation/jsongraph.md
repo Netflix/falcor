@@ -109,13 +109,13 @@ Each of these types is a JSON Graph object with a "$type" key that differentiate
 
 ### Reference   
 
-A Reference is a JSON object with a “$type” key that has a value of “ref” and a ”value” key that has a Path array as its value. 
+A Reference is a JSON object with a “$type” key that has a value of “ref” and a ”value” key that has a [Path](http://netflix.github.io/falcor/documentation/paths.html) array as its value. 
 
 ~~~js
 { $type: "ref", value: ["todosById", 44] }
 ~~~
 
-A Reference’s Path points to another location within the same JSON Graph object. Using References, it is possible to model a graph in JSON. Here is an example of a TODO list in which each task can contain References to its prerequisite tasks: 
+A Reference’s [Path](http://netflix.github.io/falcor/documentation/paths.html) points to another location within the same JSON Graph object. Using References, it is possible to model a graph in JSON. Here is an example of a TODO list in which each task can contain References to its prerequisite tasks: 
 
 ~~~js
 {
@@ -138,7 +138,7 @@ A Reference’s Path points to another location within the same JSON Graph objec
 };
 ~~~
 
-A Reference is like a symbolic link in the UNIX file system. When the Path is being evaluated, and a Reference is encountered when there are still keys in the Path left to evaluate, the reference is followed from the root to its target object, and the remaining keys in the Path are evaluated. If a Reference is discovered at the last key in a path, the Reference itself is returned as the result. 
+A Reference is like a symbolic link in the UNIX file system. When the [Path](http://netflix.github.io/falcor/documentation/paths.html) is being evaluated, and a Reference is encountered when there are still keys in the [Path](http://netflix.github.io/falcor/documentation/paths.html) left to evaluate, the reference is followed from the root to its target object, and the remaining keys in the [Path](http://netflix.github.io/falcor/documentation/paths.html) are evaluated. If a Reference is discovered at the last key in a [path](http://netflix.github.io/falcor/documentation/paths.html), the Reference itself is returned as the result. 
 
 ### Atom
 
@@ -203,7 +203,7 @@ model.getValue(['titlesById', 44, 'subtitles']).then(log)
 // ['en', 'fr']
 ~~~
 
-The result above only includes the value of the Atom because the Model unboxes Atoms by default.
+The result above only includes the value of the Atom because the [Model](http://netflix.github.io/falcor/documentation/model.html) unboxes Atoms by default.
 
 ### Error
 
@@ -215,9 +215,9 @@ An Error is a JSON object with a “$type” key that has a value of “error”
 
 When an object executing a JSON Graph operation encounters an error while attempting to set or retrieve a value, an Error object may be created and placed in the JSON Graph response in the value's place.
 
-To understand when an Error object might appear in a JSON Graph, let's take a look at the Router object. A Router is an object which creates a virtual JSON Graph from a variety of different DataSources. Instead of creating a JSON Graph object ahead of time, the Router creates the requested values on demand by retrieving them from one or more Data Sources. The Router is capable of executing all of the abstract JSON Graph operations. As a result, the Router creates the illusion that the JSON Graph object exists even if the data is actually organized very differently and is spread across any number of different data stores. 
+To understand when an Error object might appear in a JSON Graph, let's take a look at the [Router](http://netflix.github.io/falcor/documentation/router.html) object. A [Router](http://netflix.github.io/falcor/documentation/router.html) is an object which creates a virtual JSON Graph from a variety of different [DataSource](http://netflix.github.io/falcor/documentation/datasources.html)s. Instead of creating a JSON Graph object ahead of time, the [Router](http://netflix.github.io/falcor/documentation/router.html) creates the requested values on demand by retrieving them from one or more [DataSources](http://netflix.github.io/falcor/documentation/datasources.html). The [Router](http://netflix.github.io/falcor/documentation/router.html) is capable of executing all of the abstract JSON Graph operations. As a result, the [Router](http://netflix.github.io/falcor/documentation/router.html) creates the illusion that the JSON Graph object exists even if the data is actually organized very differently and is spread across any number of different data stores. 
 
-Below is an example of a Router that supports retrieving the name of the current user in a virtual JSON Graph object. Instead of retrieving the data from an in-memory object, it matches the incoming Path against a pattern and requests the value from a service.
+Below is an example of a [Router](http://netflix.github.io/falcor/documentation/router.html) that supports retrieving the name of the current user in a virtual JSON Graph object. Instead of retrieving the data from an in-memory object, it matches the incoming [Path](http://netflix.github.io/falcor/documentation/paths.html) against a pattern and requests the value from a service.
 
 ~~~js
 var router = new Router([
@@ -237,7 +237,7 @@ var router = new Router([
 ]);
 ~~~
 
-As the router is not reading the data from an in-memory JSON Graph object, but is instead retrieving it from a remote data source, errors may occur. For example, the remote data source may be under heavy load and unable to serve the request before it times out. In this circumstance, the Router will insert a JSON Graph Error object in its response.
+As the [Router](http://netflix.github.io/falcor/documentation/router.html) is not reading the data from an in-memory JSON Graph object, but is instead retrieving it from a remote [data source](http://netflix.github.io/falcor/documentation/datasources.html), errors may occur. For example, the remote [data source](http://netflix.github.io/falcor/documentation/datasources.html) may be under heavy load and unable to serve the request before it times out. In this circumstance, the [Router](http://netflix.github.io/falcor/documentation/router.html) will insert a JSON Graph Error object in its response.
 
 ~~~js
 router.get(["user", "name"]).subscribe(function(jsonGraphEnvelope) {
@@ -268,8 +268,8 @@ Each of these operations must be carried out by an intermediary. This layer of i
  
 Some examples of objects that are capable of carrying out the abstract JSON Graph operations are:  
 
-* Router
-* Model
+* [Router](http://netflix.github.io/falcor/documentation/router.html)
+* [Model](http://netflix.github.io/falcor/documentation/model.html)
  
 The result of each operation is a JSON Graph envelope, which contains a subset of the JSON Graph after the operation has completed. A JSON Graph Envelope is a JSON object with a "jsonGraph" key which contains a JSON Graph subset.
 
@@ -284,11 +284,11 @@ The result of each operation is a JSON Graph envelope, which contains a subset o
 }
 ~~~
 
-When the call operation is invoked, the JSON Graph envelope may also contain a "invalidated" key which contains a list of Paths to values that the function call changed. This allows clients that are maintaining a cache of the JSON Graph to get rid of stale data. The envelope will also contain a "paths" key which contains a list of paths to the values within the JSON Graph subset. This is an optimization to allow clients to be able to process the JSON Graph subset without resorting to reflection.
+When the call operation is invoked, the JSON Graph envelope may also contain a "invalidated" key which contains a list of [Path](http://netflix.github.io/falcor/documentation/paths.html)s to values that the function call changed. This allows clients that are maintaining a cache of the JSON Graph to get rid of stale data. The envelope will also contain a "paths" key which contains a list of [paths](http://netflix.github.io/falcor/documentation/paths.html) to the values within the JSON Graph subset. This is an optimization to allow clients to be able to process the JSON Graph subset without resorting to reflection.
 
 ### The Abstract get Operation
 
-It is possible to retrieve primitive values from a JSON Graph object using the abstract get operation. The input to the abstract get operation can be any number of Paths to the values to be retrieved. The output is a subset of the JSON Graph object that contains all of the primitive values encountered while evaluating the input Paths. The abstract get operation must be idempotent. Executing a get operation must not change any values in the JSON Graph. 
+It is possible to retrieve primitive values from a JSON Graph object using the abstract get operation. The input to the abstract get operation can be any number of [Paths](http://netflix.github.io/falcor/documentation/paths.html) to the values to be retrieved. The output is a subset of the JSON Graph object that contains all of the primitive values encountered while evaluating the input [Paths](http://netflix.github.io/falcor/documentation/paths.html). The abstract get operation must be idempotent. Executing a get operation must not change any values in the JSON Graph. 
 
 Let's walk through an abstract get operation on an example JSON Graph object:
 
@@ -313,7 +313,7 @@ Let's walk through an abstract get operation on an example JSON Graph object:
 }
 ~~~
 
-Let’s evaluate the following Path in an attempt to retrieve the name of the first task in the TODOs list.
+Let’s evaluate the following [Path](http://netflix.github.io/falcor/documentation/paths.html) in an attempt to retrieve the name of the first task in the TODOs list.
 
 ~~~js
 ["todos", 0, "name"]
@@ -357,13 +357,13 @@ References are primitive value types, and are therefore immediately inserted int
 }
 ~~~
 
-References are handled specially during Path evaluation. If a Reference is encountered when there are still keys left in the path to be evaluated, a new Path is created. The new path is formed by concatenating the remaining keys to the end of the reference Path. This process is known as “path optimization”, because the optimized Path we create is a quicker route to the requested value. Path optimization produces the following Path:  
+References are handled specially during [Path](http://netflix.github.io/falcor/documentation/paths.html) evaluation. If a Reference is encountered when there are still keys left in the [path](http://netflix.github.io/falcor/documentation/paths.html) to be evaluated, a new [Path](http://netflix.github.io/falcor/documentation/paths.html) is created. The new [Path](http://netflix.github.io/falcor/documentation/paths.html) is formed by concatenating the remaining keys to the end of the reference [Path](http://netflix.github.io/falcor/documentation/paths.html). This process is known as “path optimization”, because the optimized [Path](http://netflix.github.io/falcor/documentation/paths.html) we create is a quicker route to the requested value. [Path](http://netflix.github.io/falcor/documentation/paths.html) optimization produces the following [Path](http://netflix.github.io/falcor/documentation/paths.html):  
 
 ~~~js
 ["todosById", 44].concat(["name"]) // ["todosById", 44, "name"]
 ~~~
 
-Once we create an optimized path, we begin evaluating it from the root of the JSON Graph object. 
+Once we create an optimized [Path](http://netflix.github.io/falcor/documentation/paths.html), we begin evaluating it from the root of the JSON Graph object. 
 
 ~~~js
 // evaluating ["todosById", 44, "name"]
@@ -415,7 +415,7 @@ Now we evaluate the “tasksById” key, which yields an object. Next, we conver
 
 ###  Retrieving References  
 
-As we saw in the previous section, when references are encountered while there are still keys in the path left to be evaluated, the path is optimized. However, if the reference is encountered and there are no more keys in the path left to be evaluated, the reference itself is returned rather than its target object. To see this process in action, let’s start with the same JSON Graph document we used in the previous section:    
+As we saw in the previous section, when references are encountered while there are still keys in the [Path](http://netflix.github.io/falcor/documentation/paths.html) left to be evaluated, the [Path](http://netflix.github.io/falcor/documentation/paths.html) is optimized. However, if the reference is encountered and there are no more keys in the [Path](http://netflix.github.io/falcor/documentation/paths.html) left to be evaluated, the reference itself is returned rather than its target object. To see this process in action, let’s start with the same JSON Graph document we used in the previous section:    
 
 ~~~js
 {
@@ -438,7 +438,7 @@ As we saw in the previous section, when references are encountered while there a
 };
 ~~~
 
-Let’s evaluate the following path to retrieve the reference to the first task in the TODO list:
+Let’s evaluate the following [Path](http://netflix.github.io/falcor/documentation/paths.html) to retrieve the reference to the first task in the TODO list:
 
 ~~~js
 ["todos", 0]
@@ -456,7 +456,7 @@ First we evaluate the ”todos” key, which yields an array.  There are more ke
 };
 ~~~
 
-References are primitive value types, and are therefore inserted into the subset of the JSON Graph object that will be produced by the abstract get operation. Now there are no more keys in the path left to be evaluated, so the JSON Graph subset is returned as the result of the abstract get operation.
+References are primitive value types, and are therefore inserted into the subset of the JSON Graph object that will be produced by the abstract get operation. Now there are no more keys in the [Path](http://netflix.github.io/falcor/documentation/paths.html) left to be evaluated, so the JSON Graph subset is returned as the result of the abstract get operation.
 
 ~~~js
 // JSON Graph Envelope response
@@ -471,7 +471,7 @@ References are primitive value types, and are therefore inserted into the subset
 
 ### Short-circuiting   
 
-If a primitive value is encountered while evaluating a path, the get operation short-circuits, and the value type is included in the JSON Graph subset that is returned as the result of the abstract get operation. Let’s take a look at this process in action. We will start with the same JSON Graph object we used in the previous section: 
+If a primitive value is encountered while evaluating a [Path](http://netflix.github.io/falcor/documentation/paths.html), the get operation short-circuits, and the value type is included in the JSON Graph subset that is returned as the result of the abstract get operation. Let’s take a look at this process in action. We will start with the same JSON Graph object we used in the previous section: 
 
 ~~~js
 {
@@ -515,7 +515,7 @@ First we evaluate the ”todos” key, which yields an array.  There are more ke
 
 ### The Abstract set Operation  
 
-In addition to retrieving values from a JSON graph object, it is possible to set values into a JSON Graph object. The abstract set operation accepts multiple Path/value pairs. It returns a subset of the JSON Graph that contains all of the References encountered during path evaluation, as well as the values inserted into the JSON Graph. It is only legal to set primitive values into a JSON Graph object. A single set operation should modify only one value in the JSON Graph for each input path. If it is necessary to set values at paths which cannot be known ahead of time, you must use an abstract call operation instead. Set operations must be idempotent. 
+In addition to retrieving values from a JSON graph object, it is possible to set values into a JSON Graph object. The abstract set operation accepts multiple [Path](http://netflix.github.io/falcor/documentation/paths.html)/value pairs. It returns a subset of the JSON Graph that contains all of the References encountered during [Path](http://netflix.github.io/falcor/documentation/paths.html) evaluation, as well as the values inserted into the JSON Graph. It is only legal to set primitive values into a JSON Graph object. A single set operation should modify only one value in the JSON Graph for each input [Path](http://netflix.github.io/falcor/documentation/paths.html). If it is necessary to set values at [paths](http://netflix.github.io/falcor/documentation/paths.html) which cannot be known ahead of time, you must use an abstract call operation instead. Set operations must be idempotent. 
 
 Let’s walk through this process using the same JSON graph object we used in the previous section.  
 
@@ -540,7 +540,7 @@ Let’s walk through this process using the same JSON graph object we used in th
 };
 ~~~
 
-We will attempt to mark the first task in the TODOs list as done using the following Path/value combination:  
+We will attempt to mark the first task in the TODOs list as done using the following [Path](http://netflix.github.io/falcor/documentation/paths.html)/value combination:  
 
 ~~~js
 { path: ["todos", 0, "done"], value: true }
@@ -563,13 +563,13 @@ First we evaluate the ”todos” key, which yields an array.  There are more ke
 }
 ~~~
 
-References are primitive value types, and are therefore immediately inserted into the subset of the JSON Graph object that will be produced by the abstract set operation. However References are handled specially during path evaluation. If a Reference is encountered when there are still keys left in the path to be evaluated, a new path is created by concatenating the keys that have yet to be evaluated to the end of the reference path. This process is known as “path optimization”, because the optimized path we create is a quicker route to the requested value. Path optimization produces the following path: 
+References are primitive value types, and are therefore immediately inserted into the subset of the JSON Graph object that will be produced by the abstract set operation. However References are handled specially during [Path](http://netflix.github.io/falcor/documentation/paths.html) evaluation. If a Reference is encountered when there are still keys left in the [Path](http://netflix.github.io/falcor/documentation/paths.html) to be evaluated, a new [Path](http://netflix.github.io/falcor/documentation/paths.html) is created by concatenating the keys that have yet to be evaluated to the end of the reference [Path](http://netflix.github.io/falcor/documentation/paths.html). This process is known as “path optimization”, because the optimized [Path](http://netflix.github.io/falcor/documentation/paths.html) we create is a quicker route to the requested value. [Path](http://netflix.github.io/falcor/documentation/paths.html) optimization produces the following [Path](http://netflix.github.io/falcor/documentation/paths.html): 
 
 ~~~js
 ["todosById", 44].concat(["name"]) // ["todosById", 44, "name"]
 ~~~
 
-Once we create an optimized path, we begin evaluating it from the root of the JSON Graph object. 
+Once we create an optimized [Path](http://netflix.github.io/falcor/documentation/paths.html), we begin evaluating it from the root of the JSON Graph object. 
 
 ~~~js
 // evaluating ["todosById", 44, "name"]
@@ -640,7 +640,7 @@ Now we evaluate the “tasksById” key, which yields an object. Next, we conver
 
 #### Setting Beyond Primitive Values  
 
-As we saw in the previous section, if we encounter a Reference while setting a Path, the Reference Path is followed to the target object. As we now know, References are handled specially during Path evaluation. However if we encounter a primitive value while setting a value into the JSON Graph object, then the primitive value is replaced with an object and the abstract set operation continues. Let’s see an example of this in practice. We will start with the same JSON graph object we used in the previous section:  
+As we saw in the previous section, if we encounter a Reference while setting a [Path](http://netflix.github.io/falcor/documentation/paths.html), the Reference [Path](http://netflix.github.io/falcor/documentation/paths.html) is followed to the target object. As we now know, References are handled specially during [Path](http://netflix.github.io/falcor/documentation/paths.html) evaluation. However if we encounter a primitive value while setting a value into the JSON Graph object, then the primitive value is replaced with an object and the abstract set operation continues. Let’s see an example of this in practice. We will start with the same JSON graph object we used in the previous section:  
 
 ~~~js
 {
@@ -663,7 +663,7 @@ As we saw in the previous section, if we encounter a Reference while setting a P
 };
 ~~~
 
-This time we will attempt to replace the ”done” key value with an object that contains one value: a boolean indicating that the task was completed. We will set the following Path/value pair:
+This time we will attempt to replace the ”done” key value with an object that contains one value: a boolean indicating that the task was completed. We will set the following [Path](http://netflix.github.io/falcor/documentation/paths.html)/value pair:
 
 ~~~js
 { path: ["todos", 0, "done", "completed"], value: true }
@@ -686,13 +686,13 @@ First we evaluate the ”todos” key, which yields an array.  There are more ke
 }
 ~~~
 
-References are primitive value types, and are therefore immediately inserted into the subset of the JSON Graph object that will be produced by the abstract get operation. Then an optimized path is created using the reference path and the keys that have yet to be evaluated. 
+References are primitive value types, and are therefore immediately inserted into the subset of the JSON Graph object that will be produced by the abstract get operation. Then an optimized [Path](http://netflix.github.io/falcor/documentation/paths.html) is created using the reference [Path](http://netflix.github.io/falcor/documentation/paths.html) and the keys that have yet to be evaluated. 
 
 ~~~js
 ["todosById", 44].concat(["done", "completed"]) // ["todosById", 44, "done", "completed"]
 ~~~
 
-Once we create an optimized path, we begin evaluating it from the root of the JSON Graph object. 
+Once we create an optimized [Path](http://netflix.github.io/falcor/documentation/paths.html), we begin evaluating it from the root of the JSON Graph object. 
 
 ~~~js
 // setting ["todosById", 44, "done", "completed"] to true
@@ -835,7 +835,7 @@ A JSON Graph object is not a strict subset of JSON. Unlike JSON objects, JSON Gr
 
 Like JavaScript objects, functions can appear anywhere in the JSON Graph object. Like other non-primitive values, functions cannot be retrieved or set using the abstract get or set operations. It is only possible to call a function, and pass it arguments.  
 
-In order to call a function, you must specify the path to the function, as well as the arguments to pass to the function. The arguments can be any JSON Graph value other than a function, including arrays, objects, and the primitive values.  A function must either return the new value at every path it has changed, or add the path to  the list of invalidated paths. The invalidated paths are a list of paths that may have been changed by the function. The invalidated paths are included in the function’s response along with the JSON Graph subset. Callers remove the invalidated paths from their local cache to ensure that their cache does not contain stale data. Let’s walk through the process of adding an item to a list using call. 
+In order to call a function, you must specify the [Path](http://netflix.github.io/falcor/documentation/paths.html) to the function, as well as the arguments to pass to the function. The arguments can be any JSON Graph value other than a function, including arrays, objects, and the primitive values.  A function must either return the new value at every [Path](http://netflix.github.io/falcor/documentation/paths.html) it has changed, or add the [Path](http://netflix.github.io/falcor/documentation/paths.html) to  the list of invalidated [paths](http://netflix.github.io/falcor/documentation/paths.html). The invalidated [paths](http://netflix.github.io/falcor/documentation/paths.html) are a list of [paths](http://netflix.github.io/falcor/documentation/paths.html) that may have been changed by the function. The invalidated [paths](http://netflix.github.io/falcor/documentation/paths.html) are included in the function’s response along with the JSON Graph subset. Callers remove the invalidated [paths](http://netflix.github.io/falcor/documentation/paths.html) from their local cache to ensure that their cache does not contain stale data. Let’s walk through the process of adding an item to a list using call. 
 
 For this example, let's start with the following JSON Graph object:
 
@@ -877,13 +877,13 @@ Let's invoke the "add" function using the abstract call operation. The abstract 
 3. refPaths
 4. thisPaths
 
-The "callPath" is the path to the function within the DataSource's JSON Graph object. Note that one invocation of call can only run a single function.
+The "callPath" is the [Path](http://netflix.github.io/falcor/documentation/paths.html) to the function within the [DataSource](http://netflix.github.io/falcor/documentation/datasources.html)'s JSON Graph object. Note that one invocation of call can only run a single function.
 
 The "arguments" parameter is the the array of arguments to be passed to the function being called.
 
-The "refPaths" is an array of paths to retrieve from the targets of any references in the JSON Graph Envelope returned by the function. 
+The "refPaths" is an array of [paths](http://netflix.github.io/falcor/documentation/paths.html) to retrieve from the targets of any references in the JSON Graph Envelope returned by the function. 
 
-The "thisPaths" is an array of paths to retrieve from the object on which the function is called after the function is successfully excecuted.
+The "thisPaths" is an array of [paths](http://netflix.github.io/falcor/documentation/paths.html) to retrieve from the object on which the function is called after the function is successfully excecuted.
 
 Here is how we invoke the abstract call operation:
 
@@ -954,17 +954,17 @@ The function returns the following JSON Graph Envelope:
 }
 ~~~
 
-Notice that instead of returning the entire contents of the "todos" list, the function has returned only a Reference to the newly-created task. Furthermore, the function has indicated that the "length" key of the "todos" list has changed, and if the caller has cached this value, then the value should be invalidated in the cache. Finally, the response contains a "paths" key with an array of paths to the values in the JSON Graph subset. Unlike get and set, there is no way of predicting what values a call operation will return in its response. The "paths" array provides easy access to the values within the JSON Graph subset, rather than forcing the caller to resort to reflection.
+Notice that instead of returning the entire contents of the "todos" list, the function has returned only a Reference to the newly-created task. Furthermore, the function has indicated that the "length" key of the "todos" list has changed, and if the caller has cached this value, then the value should be invalidated in the cache. Finally, the response contains a "paths" key with an array of [paths](http://netflix.github.io/falcor/documentation/paths.html) to the values in the JSON Graph subset. Unlike get and set, there is no way of predicting what values a call operation will return in its response. The "paths" array provides easy access to the values within the JSON Graph subset, rather than forcing the caller to resort to reflection.
 
 Every function strives to return the minimum amount of data to ensure that the caller's cache does not contain stale data and the caller can retrieve values from objects newly created by the function. The intention is the give the caller the ability to request precisely the data they need from the JSON Graph object using the refPaths and thisPaths arguments. 
 
-Now the object executing the abstract call operation retrieves the refPaths from each Reference in the function response. The response contains only one Reference at ["todos", "2"]. Each path in the refPaths array is appended to each path at which a reference is found in the function's JSON Graph subset response.
+Now the object executing the abstract call operation retrieves the refPaths from each Reference in the function response. The response contains only one Reference at ["todos", "2"]. Each [Path](http://netflix.github.io/falcor/documentation/paths.html) in the refPaths array is appended to each [Path](http://netflix.github.io/falcor/documentation/paths.html) at which a reference is found in the function's JSON Graph subset response.
 
 ~~~js
 ["todos", "2"].concat(["addedAt"]) // produces ["todos", "2", "addedAt"]
 ~~~
 
-The object executing the abstract call operation now executes the abstract get operation to retrieve these newly-created paths. The resulting JSON Graph Envelope is merged together with the function's response:
+The object executing the abstract call operation now executes the abstract get operation to retrieve these newly-created [paths](http://netflix.github.io/falcor/documentation/paths.html). The resulting JSON Graph Envelope is merged together with the function's response:
 
 ~~~js
 {
@@ -988,15 +988,15 @@ The object executing the abstract call operation now executes the abstract get o
 }
 ~~~
 
-The refPaths array allows the caller to retrieve values from objects created by the function, without having to know the Paths to these objects.
+The refPaths array allows the caller to retrieve values from objects created by the function, without having to know the [Paths](http://netflix.github.io/falcor/documentation/paths.html) to these objects.
 
-Finally the object executing the abstract get operation retrieves each Path in the thisPaths array. A new Path is created by appending each Path in the array to the function's this object Path. 
+Finally the object executing the abstract get operation retrieves each [Path](http://netflix.github.io/falcor/documentation/paths.html) in the thisPaths array. A new [Path](http://netflix.github.io/falcor/documentation/paths.html) is created by appending each [Path](http://netflix.github.io/falcor/documentation/paths.html) in the array to the function's this object [Path](http://netflix.github.io/falcor/documentation/paths.html). 
 
 ~~~js
 ["todos"].concat(["length"]) // produces ["todos", "length"]
 ~~~
 
-The object executing the abstract call operation now executes the abstract get operation to retrieve these newly-created paths. The resulting JSON Graph Envelope is merged together with the function's response:
+The object executing the abstract call operation now executes the abstract get operation to retrieve these newly-created [paths](http://netflix.github.io/falcor/documentation/paths.html). The resulting JSON Graph Envelope is merged together with the function's response:
 
 ~~~js
 {
