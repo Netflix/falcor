@@ -41,7 +41,7 @@
     "diff": "~1.0.8",
     "express": "~4.9.0",
     "falcor-http-datasource": "0.1.1",
-    "falcor-router": "0.2.5",
+    "falcor-router": "0.2.6",
     "falcor-express": "0.1.2",
     "gulp": "~3.8.8",
     "gulp-beautify": "~1.1.0",
