@@ -29,10 +29,13 @@ lang: en
       </div>
     </div>
     
-    <!-- Replay intro animation action -- not used quite yet :) -->
-    <!-- <a href="#" class="repeat-intro-animation">
+    {% comment %}
+    Replay intro animation action -- not used quite yet :)
+    <a href="#" class="repeat-intro-animation">
       <span class="icon icon-reload"></span>
-    </a> -->
+    </a>
+    {% endcomment %}
+    
   </div>
 
   <!-- the id is used exclusively for easy access by assistive technology -->
@@ -51,9 +54,11 @@ lang: en
   
   {% include javascript-includes.html %}
   
-  <!-- First visit intro animation -- not using quite yet :) -->
-  <!--
-    <script>
+  
+  {% comment %}
+  First visit intro animation -- not using quite yet :)
+  
+  <script>
     
     var INTRO_ANIMATION_FLAG_NAME = 'falcor_homepage_intro_animation_played';
     
@@ -77,5 +82,6 @@ lang: en
       });      
     });
   </script>
-  -->
+  {% endcomment %}
+
 </body>
