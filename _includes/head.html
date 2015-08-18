@@ -3,6 +3,7 @@
 {% capture site_sharing_image %}https://netflix.github.io{{ site.baseurl }}/images/falcor-logo.png{% endcapture %}
 {% capture site_sharing_image_open_graph %}http://netflix.github.io{{ site.baseurl }}/images/falcor-logo-og.png{% endcapture %}
 {% capture site_sharing_image_open_graph_secure %}https://netflix.github.io{{ site.baseurl }}/images/falcor-logo-og.png{% endcapture %}
+{% capture site_sharing_image_twitter_card %}https://netflix.github.io{{ site.baseurl }}/images/falcor-logo-twitter-card.png{% endcapture %}
 {% assign site_social_handle = "@netflixoss" %}
 {% assign company_social_handle = "@netflix" %}
 {% capture page_url %}https://netflix.github.io{{ site.baseurl }}{{ page.url }}{% endcapture %}
@@ -29,12 +30,12 @@ its wide aspect ratio.
 <meta itemprop="image" content="{{ site_sharing_image }}">
 
 <!-- Twitter Card data -->
-<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:card" content="summary">
 <meta name="twitter:site" content="{{ company_social_handle }}">
 <meta name="twitter:title" content="{{ page_title }}">
 <meta name="twitter:description" content="{{ page_description }}">
 <meta name="twitter:creator" content="{{ site_social_handle }}">
-<meta name="twitter:image:src" content="{{ site_sharing_image }}">
+<meta name="twitter:image:src" content="{{ site_sharing_image_twitter_card }}">
 
 <!-- Open graph metadata -->
 <meta property="og:title" content="{{ page_title }}">
