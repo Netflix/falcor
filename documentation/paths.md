@@ -57,7 +57,7 @@ Each non-null value that is not a string is converted to a string immediately pr
 Here are some examples of the valid Path Strings:
 
 * "todos[0].name"
-* "todos[0]["name"]"
+* 'todos[0]["name"]'
 * "todos["0"]["name"]"
 
 _Unlike_ JavaScript's Path syntax it is also possible to use indexers for the first key in the path.
