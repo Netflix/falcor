@@ -1,29 +1,24 @@
 var gulp = require("gulp");
-var clean = require("gulp-clean");
+var clean = require("del");
 
-gulp.task("clean.perf", function() {
-    return gulp.src(["./performance/bin", "./performance/out"]).
-        pipe(clean());
+gulp.task("clean.perf", function(cb) {
+    clean(["./performance/bin", "./performance/out"], cb);
 });
 
-gulp.task("clean.doc", function() {
-    return gulp.src(["./doc"]).
-        pipe(clean());
+gulp.task("clean.doc", function(cb) {
+    clean(["./doc"], cb);
 });
 
-gulp.task("clean.bin", function() {
-    return gulp.src(["./bin"]).
-        pipe(clean());
+gulp.task("clean.bin", function(cb) {
+    clean(["./bin"], cb);
 });
 
-gulp.task("clean.dist", function() {
-    return gulp.src(["./dist"]).
-        pipe(clean());
+gulp.task("clean.dist", function(cb) {
+    clean(["./dist"], cb);
 });
 
-gulp.task("clean.coverage", function() {
-    return gulp.src(["./coverage"]).
-        pipe(clean());
+gulp.task("clean.coverage", function(cb) {
+    clean(["./coverage"], cb);
 });
 
 gulp.task("clean", ["clean.doc", "clean.bin", "clean.coverage"]);
