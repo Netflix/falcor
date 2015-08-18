@@ -86,7 +86,7 @@ var router = new Router([
                 getTodoList().
                 then(function(todoList) {
                     return pathSet[1].map(function(key) {
-                        return { path: ["todos", "name"], value: todoList.name };
+                        return { path: ["todos", key], value: todoList[key] };
                     });
                 });
         }
