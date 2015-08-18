@@ -28,7 +28,7 @@ For these reasons views retrieve their data from Model objects, which act as int
 
 Models use a [DataSource](http://netflix.github.io/falcor/documentation/datasources.html) to retrieve data from the JSON object. Falcor ships with HttpDataSource, an implementation of the [DataSource](http://netflix.github.io/falcor/documentation/datasources.html) interface which proxies requests to another [DataSource](http://netflix.github.io/falcor/documentation/datasources.html) running on an HTTP server (usually a falcor Router).
  
-![How the Model Works]({{ site.baseurl }}/falcor-end-to-end.png)
+![How the Model Works]({{ site.baseurl }}/images/falcor-end-to-end.png)
 
 You can associate a [DataSource](http://netflix.github.io/falcor/documentation/datasources.html) with a Model by passing it to the Model constructor.
 
