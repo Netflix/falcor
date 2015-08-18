@@ -20,6 +20,7 @@ before_script: npm run dist;
 # ALSO NEED TO ADD .coveralls.yml, IF WE WANT TO USE IT ON THE PRIVATE
 # REPO.
 
+
 after_script:
     - cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js
     - npm run deploy-ghpages
