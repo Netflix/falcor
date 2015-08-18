@@ -110,7 +110,7 @@ Now create an index.html file with the following contents:
 <html>
   <head>
     <!-- Do _not_  rely on this URL in production. Use only during development.  -->
-    <script src="//netflix.github.io/falcor/build/falcor.browser.js"></script>
+    <script src="https://netflix.github.io/falcor/build/falcor.browser.js"></script>
     <script>
       var model = new falcor.Model({source: new falcor.HttpDataSource('/model.json') });
       
