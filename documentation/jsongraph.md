@@ -148,7 +148,7 @@ An Atom is a JSON object with a “$type” key that has a value of “atom” a
 { $type: "atom", value: ['en', 'fr'] }
 ~~~
 
-JSON Graph allows metadata to be attached to values to control how they are handled by clients. For example, metadata can be attached to values to control how long values stay a client cache. For more information see [Sentinel Metadata](./model.md#Sentinel-Metadata).
+JSON Graph allows metadata to be attached to values to control how they are handled by clients. For example, metadata can be attached to values to control how long values stay a client cache. For more information see [Sentinel Metadata](http://netflix.github.io/falcor/documentation/model.html#Sentinel-Metadata).
 
 One issue is that JavaScript value types do not preserve any metadata attached to them when they are serialized as JSON:
 
