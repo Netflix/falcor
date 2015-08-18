@@ -12,7 +12,12 @@
     "type": "git",
     "url": "https://github.com/Netflix/falcor.git"
   },
-  "license": "Apache-2.0",
+  "licenses": [
+    {
+      "type": "Apache License, Version 2.0",
+      "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
+    }
+  ],
   "scripts": {
     "test": "gulp test-coverage",
     "dist": "gulp build",
@@ -82,7 +87,7 @@
   },
   "dependencies": {
     "asap": "~2.0.3",
-    "falcor-json-graph": "1.1.0",
+    "falcor-json-graph": "1.1.3",
     "falcor-path-syntax": "0.2.1",
     "falcor-path-utils": "0.3.0",
     "promise": "7.0.0",
