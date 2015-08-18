@@ -127,7 +127,7 @@ model.
 
 Now instead of working with in-memory JSON data, Falcor remotes requests for data to the application server’s Virtual JSON object. The Router retrieve the data from the data store with the information, and sends back only the requested fields.
 
-![Falcor end-to-end](../falcor-end-to-end.png)
+![Falcor end-to-end](../images/falcor-end-to-end.png)
 
 Using an asynchronous API allows you to use the same programming model regardless of whether your data is local or remote. With Falcor it is common practice to begin development immediately by mocking the server’s JSON object. Once the server’s JSON resource has been written, the Falcor Model is connected to the server JSON using an HttpDataSource. No other client code needs to change. This approach can shrink project timelines by decoupling client and server developers.
 
