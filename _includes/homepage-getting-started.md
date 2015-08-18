@@ -29,7 +29,7 @@ Now we install the falcor Router.
 npm install falcor-router --save
 ~~~
 
-Then install express and falcor-express.  Support for [restify](https://github.com/netflix/falcor-restify) is also available.
+Then install express and falcor-express.  Support for [restify](https://github.com/netflix/falcor-restify), and [Hapi](https://github.com/netflix/falcor-hapi) is also available.
 
 ~~~bash
 npm install express --save
