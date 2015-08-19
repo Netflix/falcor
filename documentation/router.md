@@ -1129,7 +1129,7 @@ Alternately we can define a "titleIds" alias for the integers pattern and use th
 
 ~~~js
 {
-    route: "titlesById[{integers}]['name','year','description','boxshot']",
+    route: "titlesById[{integers:titleIds}]['name','year','description','boxshot']",
     get: function (pathSet) {
         var ids = pathSet.titleIds;
         // create values here
