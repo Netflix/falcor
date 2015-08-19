@@ -14,7 +14,7 @@ require('./build/gulp-perf');
 var srcDir = 'lib';
 
 gulp.task('lint', function() {
-    return gulp.src(srcDir + '/**/*.js').
+    return gulp.src(['*.js', srcDir + '/**/*.js']).
         pipe(eslint({
             globals: {
                 'require': false,
