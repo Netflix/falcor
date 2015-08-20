@@ -8,6 +8,7 @@
     # pages will be in the same directory, but that's not required.
     - what_is_falcor
     - how_does_falcor_work
+    - why_falcor
 - 
   title: Guides
   children:
