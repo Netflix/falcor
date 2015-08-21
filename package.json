@@ -29,6 +29,7 @@
     "build",
     "dist",
     "lib",
+    "browser.js",
     "test"
   ],
   "keywords": [
