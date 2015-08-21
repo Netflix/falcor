@@ -55,7 +55,7 @@
     "gulp": "~3.8.8",
     "gulp-bench": "~1.0.3",
     "gulp-concat": "~2.4.1",
-    "gulp-eslint": "^0.12.0",
+    "gulp-eslint": "^1.0.0",
     "gulp-istanbul": "~0.3.1",
     "gulp-istanbul-enforcer": "~1.0.3",
     "gulp-license": "~1.0.0",
