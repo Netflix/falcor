@@ -2,17 +2,21 @@
   <div class="container">
     <div class="row">
       <div class="col-xs-12 col-lg-10 col-lg-offset-1">
-        <div class="row site-footer-content">
-          <div class="col-xs-4">
+        <div class="row">
+          <div class="col-xs-4 site-footer-item">
             <a href="https://www.netflix.com" target="_blank">
               <img class="netflix-logo" src="{{ site.baseurl }}/images/netflix-logo.svg" alt="Netflix logo">
             </a>
           </div>
-          <div class="col-xs-8 text-right footer-links">
-            <a href="https://netflix.github.io/" target="_blank">Netflix Open Source Platform</a><br>
-            <small>{% assign current_year = site.time | date: '%Y' %}
-            &copy; 2015{% unless current_year == '2015'%}-{{ current_year }}{% endunless %}
-            NETFLIX, INC. ALL RIGHTS RESERVED</small>
+          <div class="col-xs-8 text-right site-footer-item footer-links">
+            <div>
+              <a href="https://netflix.github.io/" target="_blank">Netflix Open Source Platform</a><br>
+              <span class="copyright-notice">
+                {% assign current_year = site.time | date: '%Y' %}
+                &copy; 2015{% unless current_year == '2015'%}-{{ current_year }}{% endunless %}
+                NETFLIX, INC. ALL RIGHTS RESERVED
+              </span>
+            </div>
           </div>
         </div>
       </div>

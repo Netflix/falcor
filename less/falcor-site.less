@@ -53,8 +53,6 @@ body {
   
   // Lessen the content padding on mobile
   @media (max-width: @screen-xs-max) {
-    margin-bottom: @site-footer-height-xs;
-
     & > .container {
       padding-top: @navbar-height;      
     }
@@ -67,20 +65,30 @@ body {
   width: 100%;
   height: @site-footer-height;
   
-  @media (max-width: @screen-xs-max) {
-    height: @site-footer-height-xs;
-  }
-  
-  &, & .site-footer-content {
+  & .site-footer-item {
+    height: @site-footer-height;
     display: flex;
     align-items: center;    
   }
   
   & .footer-links {
     color: @site-footer-text-color;
+    justify-content: flex-end;
     
-    & > a {
+    & a {
       color: @site-footer-link-color;
+    }
+    
+    .copyright-notice {
+      font-size: 0.75em;
+    }
+    
+    @media (max-width: @screen-xs-max) {
+      line-height: 1;
+      
+      .copyright-notice {
+        font-size: 0.6em;
+      }
     }
   }
   
@@ -88,6 +96,7 @@ body {
     @logo-height: 0.4 * @site-footer-height;
     height: @logo-height;
   }
+  
 }
 
 .standard-page {
