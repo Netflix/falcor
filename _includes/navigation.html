@@ -3,7 +3,7 @@
     <div class="container">
       <div class="row">
         <div class="col-xs-12 col-lg-10 col-lg-offset-1">
-          
+
           <!-- Branding and mobile menu button -->
           <div class="navbar-header">
             <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target=".site-navigation" aria-expanded="false">
@@ -16,7 +16,7 @@
               <img class="img-plain navbar-logo" src="{{ site.baseurl }}/images/navigation-logo-inverse.svg" alt="Falcor logo">
             </a>
           </div>
-      
+
           <!-- Main navigation links -->
           <div class="navbar-collapse collapse site-navigation">
             <ul class="nav navbar-nav">
@@ -39,7 +39,7 @@
                   {% if navigation_item.path %}
                     <li class="{% if navigation_item.id == page.id %}active{% endif %}">
                       <a href="{{ site.baseurl }}{{ navigation_item.path }}">{{ navigation_item.title }}</a>
-                    </li>              
+                    </li>
                   {% else %}
                     {% assign item_page = site.pages | where:"id",navigation_item.id | first %}
                     <li class="{% if navigation_item.id == page.id %}active{% endif %}">
@@ -50,13 +50,14 @@
               </li>
               {% endfor %}
             </ul>
-        
-            <!-- Link to the project's GitHub repo -->
-            <ul class="nav navbar-nav navbar-right navbar-github-link">
+
+            <!-- Link to the project's GitHub repo & Twitter profile -->
+            <ul class="nav navbar-nav navbar-right navbar-links">
               <li><a href="https://github.com/Netflix/falcor">GitHub</a></li>
+              <li><a href="https://twitter.com/falcorjs">Twitter</a></li>
             </ul>
           </div>
-          
+
         </div>
       </div>
     </div>
