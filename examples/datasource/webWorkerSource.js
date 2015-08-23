@@ -101,7 +101,7 @@ WebWorkerSource.prototype = {
     // Creates an observable stream that will send a request 
     // to a Model server, and retrieve the response.
     // The request and response are correlated using a unique 
-    // identifier which the cleint sends with the request and 
+    // identifier which the client sends with the request and 
     // the server echoes back along with the response.
     _getResponse: function(action) {
         var self = this;
