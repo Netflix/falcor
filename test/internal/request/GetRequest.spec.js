@@ -1,4 +1,4 @@
-describe.only('GetRequest', function() {
+describe('GetRequest', function() {
     require('./GetRequest.batch.spec');
     require('./GetRequest.add.spec');
 });

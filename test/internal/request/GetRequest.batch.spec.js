@@ -8,6 +8,7 @@ var Model = require('./../../../lib').Model;
 var LocalDataSource = require('./../../data/LocalDataSource');
 var Cache = require('./../../data/Cache.js');
 var noOp = function() {};
+var zipArray = require('./../../zipSpy');
 
 describe('#batch', function() {
     var videos1234 = ['videos', 1234, 'summary'];
@@ -218,26 +219,3 @@ describe('#batch', function() {
         disposable2();
     });
 });
-
-function zipSpy(count, cb, maxTime) {
-    var done = false;
-    if (maxTime) {
-        setTimeout(function() {
-            if (count !== 0) {
-                done = true;
-                cb();
-            }
-        }, maxTime);
-    }
-
-    return sinon.spy(function() {
-        if (done) {
-            return;
-        }
-
-        --count;
-        if (count === 0) {
-            cb();
-        }
-    });
-}
