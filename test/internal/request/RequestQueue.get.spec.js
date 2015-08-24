@@ -89,7 +89,7 @@ describe('#get', function() {
         expect(queue._requests[0].scheduled).to.equal(true);
     });
 
-    it.only('should make a couple requests where the second argument is deduped.', function(done) {
+    it('should make a couple requests where the second argument is deduped.', function(done) {
         var scheduler = new ImmediateScheduler();
         var getSpy = sinon.spy();
         var source = new LocalDataSource(Cache(), {wait: 100});
@@ -130,247 +130,203 @@ describe('#get', function() {
         expect(queue._requests[0].scheduled).to.equal(false);
     });
 
-    it('should make a couple requests where the second argument is deduped and the first is disposed.', function(done) {
-        var onGet = sinon.spy(function() {
-            return Rx.Observable.create(function(observer) {
-                setTimeout(function() {
-                    observer.onNext({
-                        jsonGraph: {}
+    it('should make a couple requests where only part of the second request is deduped then first request is disposed.', function(done) {
+        var scheduler = new ImmediateScheduler();
+        var getSpy = sinon.spy();
+        var source = new LocalDataSource(Cache(), {wait: 100});
+        var model = new Model({source: source});
+        var queue = new RequestQueue(model, scheduler);
+
+        var zip = zipSpy(2, function() {
+
+            var onNext = sinon.spy();
+            model.
+                withoutDataSource().
+                get(videos1234, videos553).
+                doAction(onNext, noOp, function() {
+                    expect(zip.calledOnce, 'zip should be called once.').to.be.ok;
+                    expect(onNext.getCall(0).args[0]).to.deep.equals({
+                        json: {
+                            videos: {
+                                1234: {
+                                    summary: {
+                                        title: 'House of Cards',
+                                        url: '/movies/1234'
+                                    }
+                                },
+                                553: {
+                                    summary: {
+                                        title: 'Running Man',
+                                        url: '/movies/553'
+                                    }
+                                }
+                            }
+                        }
                     });
-                    observer.onCompleted();
-                }, 50);
-            });
-        });
-        var dataSource = {get: onGet};
-        var queue = new RequestQueue({
-            dataSource: dataSource
-        }, new ImmediateScheduler());
-        var callback = sinon.spy();
-        var callback2 = sinon.spy();
-        var disposable = queue.get([], [['one', 'two']], callback);
+                }).
+                subscribe(noOp, done, done);
+        }, 300);
+
+        var disposable = queue.get([videos1234], [videos1234], zip);
         expect(queue._requests.length).to.equal(1);
         expect(queue._requests[0].sent).to.equal(true);
         expect(queue._requests[0].scheduled).to.equal(false);
-        var disposable2 = queue.get([], [['one', 'two']], callback2);
+        var disposable2 = queue.get([videos1234, videos553], [videos1234, videos553], zip);
+        expect(queue._requests.length).to.equal(2);
+        expect(queue._requests[0].sent).to.equal(true);
+        expect(queue._requests[1].sent).to.equal(true);
+        expect(queue._requests[0].scheduled).to.equal(false);
+        expect(queue._requests[1].scheduled).to.equal(false);
+
+        disposable();
+    });
+
+    it('should make a couple requests where the second request is deduped and the first is disposed.', function(done) {
+        var scheduler = new ImmediateScheduler();
+        var getSpy = sinon.spy();
+        var source = new LocalDataSource(Cache(), {wait: 100});
+        var model = new Model({source: source});
+        var queue = new RequestQueue(model, scheduler);
+
+        var zip = zipSpy(2, function() {
+
+            var onNext = sinon.spy();
+            model.
+                withoutDataSource().
+                get(videos1234, videos553).
+                doAction(onNext, noOp, function() {
+                    expect(zip.calledOnce).to.be.ok;
+                    expect(onNext.getCall(0).args[0]).to.deep.equals({
+                        json: {
+                            videos: {
+                                1234: {
+                                    summary: {
+                                        title: 'House of Cards',
+                                        url: '/movies/1234'
+                                    }
+                                }
+                            }
+                        }
+                    });
+                }).
+                subscribe(noOp, done, done);
+        }, 300);
+        var disposable = queue.get([videos1234], [videos1234], zip);
+        expect(queue._requests.length).to.equal(1);
+        expect(queue._requests[0].sent).to.equal(true);
+        expect(queue._requests[0].scheduled).to.equal(false);
+        var disposable2 = queue.get([videos1234], [videos1234], zip);
         expect(queue._requests.length).to.equal(1);
         expect(queue._requests[0].sent).to.equal(true);
         expect(queue._requests[0].scheduled).to.equal(false);
 
         disposable();
-        setTimeout(function() {
-            try {
-                expect(queue._requests.length).to.equal(0);
-                expect(callback.callCount, 'callback1 should be called 0 times.').to.equal(0);
-                expect(callback2.calledOnce, 'callback2 should be called').to.be.ok;
-            } catch (e) {
-                return done(e);
-            }
-            return done();
-        }, 150);
     });
 
     it('should make a couple requests where the second argument is deduped and all the requests are disposed.', function(done) {
-        var onGet = sinon.spy(function() {
-            return Rx.Observable.create(function(observer) {
-                setTimeout(function() {
-                    observer.onNext({
-                        jsonGraph: {}
-                    });
-                    observer.onCompleted();
-                }, 50);
-            });
-        });
-        var dataSource = {get: onGet};
-        var queue = new RequestQueue({
-            dataSource: dataSource
-        }, new ImmediateScheduler());
-        var callback = sinon.spy();
-        var callback2 = sinon.spy();
-        var disposable = queue.get([], [['one', 'two']], callback);
+        var scheduler = new ImmediateScheduler();
+        var getSpy = sinon.spy();
+        var source = new LocalDataSource(Cache(), {wait: 100});
+        var model = new Model({source: source});
+        var queue = new RequestQueue(model, scheduler);
+
+        var zip = zipSpy(2, function() {
+
+            var onNext = sinon.spy();
+            model.
+                withoutDataSource().
+                get(videos1234, videos553).
+                doAction(onNext, noOp, function() {
+                    expect(zip.callCount).to.equal(0);
+                    expect(onNext.callCount).to.equal(0);
+                }).
+                subscribe(noOp, done, done);
+        }, 300);
+        var disposable = queue.get([videos1234], [videos1234], zip);
         expect(queue._requests.length).to.equal(1);
         expect(queue._requests[0].sent).to.equal(true);
         expect(queue._requests[0].scheduled).to.equal(false);
-        var disposable2 = queue.get([], [['one', 'two']], callback2);
+        var disposable2 = queue.get([videos1234], [videos1234], zip);
         expect(queue._requests.length).to.equal(1);
         expect(queue._requests[0].sent).to.equal(true);
         expect(queue._requests[0].scheduled).to.equal(false);
 
         disposable();
         disposable2();
-        setTimeout(function() {
-            try {
-                expect(queue._requests.length).to.equal(0);
-                expect(callback.callCount, 'callback1 should be called 0 times.').to.equal(0);
-                expect(callback2.callCount, 'callback2 should be called 0 times.').to.equal(0);
-            } catch (e) {
-                return done(e);
-            }
-            return done();
-        }, 150);
-    });
-
-    it('should make a couple requests where only part of the second request is deduped.', function(done) {
-        var onGet = sinon.spy(function() {
-            return Rx.Observable.create(function(observer) {
-                setTimeout(function() {
-                    observer.onNext({
-                        jsonGraph: {}
-                    });
-                    observer.onCompleted();
-                }, 50);
-            });
-        });
-        var dataSource = {get: onGet};
-        var queue = new RequestQueue({
-            dataSource: dataSource
-        }, new ImmediateScheduler());
-        var callback = sinon.spy();
-        var callback2 = sinon.spy();
-        var disposable = queue.get([], [['one', 'two']], callback);
-        expect(queue._requests.length).to.equal(1);
-        expect(queue._requests[0].sent).to.equal(true);
-        expect(queue._requests[0].scheduled).to.equal(false);
-        var disposable2 = queue.get([], [['one', 'two'], ['three', 'two']], callback2);
-        expect(queue._requests.length).to.equal(2);
-        expect(queue._requests[0].sent).to.equal(true);
-        expect(queue._requests[1].sent).to.equal(true);
-        expect(queue._requests[0].scheduled).to.equal(false);
-        expect(queue._requests[1].scheduled).to.equal(false);
-
-        setTimeout(function() {
-            try {
-                expect(queue._requests.length).to.equal(0);
-                expect(callback.calledOnce, 'callback1 should be called 0 times.').to.be.ok;
-                expect(callback2.calledOnce, 'callback2 should be called').to.be.ok;
-            } catch (e) {
-                return done(e);
-            }
-            return done();
-        }, 150);
     });
 
     it('should make a couple requests where only part of the second request is deduped then disposed.', function(done) {
-        var onGet = sinon.spy(function() {
-            return Rx.Observable.create(function(observer) {
-                setTimeout(function() {
-                    observer.onNext({
-                        jsonGraph: {}
+        var scheduler = new ImmediateScheduler();
+        var getSpy = sinon.spy();
+        var source = new LocalDataSource(Cache(), {wait: 100});
+        var model = new Model({source: source});
+        var queue = new RequestQueue(model, scheduler);
+
+        var zip = zipSpy(2, function() {
+
+            var onNext = sinon.spy();
+            model.
+                withoutDataSource().
+                get(videos1234, videos553).
+                doAction(onNext, noOp, function() {
+                    expect(zip.calledOnce).to.be.ok;
+                    expect(onNext.getCall(0).args[0]).to.deep.equals({
+                        json: {
+                            videos: {
+                                1234: {
+                                    summary: {
+                                        title: 'House of Cards',
+                                        url: '/movies/1234'
+                                    }
+                                }
+                            }
+                        }
                     });
-                    observer.onCompleted();
-                }, 50);
-            });
-        });
-        var dataSource = {get: onGet};
-        var queue = new RequestQueue({
-            dataSource: dataSource
-        }, new ImmediateScheduler());
-        var callback = sinon.spy();
-        var callback2 = sinon.spy();
-        var disposable = queue.get([], [['one', 'two']], callback);
+                }).
+                subscribe(noOp, done, done);
+        }, 300);
+        var disposable = queue.get([videos1234], [videos1234], zip);
         expect(queue._requests.length).to.equal(1);
         expect(queue._requests[0].sent).to.equal(true);
         expect(queue._requests[0].scheduled).to.equal(false);
-        var disposable2 = queue.get([], [['one', 'two'], ['three', 'two']], callback2);
+        var disposable2 = queue.get([videos1234, videos553], [videos1234, videos553], zip);
         expect(queue._requests.length).to.equal(2);
-        expect(queue._requests[0].sent).to.equal(true);
         expect(queue._requests[1].sent).to.equal(true);
-        expect(queue._requests[0].scheduled).to.equal(false);
         expect(queue._requests[1].scheduled).to.equal(false);
 
         disposable2();
-        setTimeout(function() {
-            try {
-                expect(queue._requests.length).to.equal(0);
-                expect(callback.calledOnce, 'callback1 should be called 1 times.').to.be.ok;
-                expect(callback2.callCount, 'callback2 should not be called').to.equal(0);
-            } catch (e) {
-                return done(e);
-            }
-            return done();
-        }, 150);
     });
 
-    it('should make a couple requests where only part of the second request is deduped then first request is disposed.', function(done) {
-        var onGet = sinon.spy(function() {
-            return Rx.Observable.create(function(observer) {
-                setTimeout(function() {
-                    observer.onNext({
-                        jsonGraph: {}
-                    });
-                    observer.onCompleted();
-                }, 50);
-            });
-        });
-        var dataSource = {get: onGet};
-        var queue = new RequestQueue({
-            dataSource: dataSource
-        }, new ImmediateScheduler());
-        var callback = sinon.spy();
-        var callback2 = sinon.spy();
-        var disposable = queue.get([], [['one', 'two']], callback);
+    it.only('should make a couple requests where only part of the second request is deduped then both are disposed.', function(done) {
+        var scheduler = new ImmediateScheduler();
+        var getSpy = sinon.spy();
+        var source = new LocalDataSource(Cache(), {wait: 100});
+        var model = new Model({source: source});
+        var queue = new RequestQueue(model, scheduler);
+
+        var zip = zipSpy(2, function() {
+            var onNext = sinon.spy();
+            model.
+                withoutDataSource().
+                get(videos1234, videos553).
+                doAction(onNext, noOp, function() {
+                    expect(zip.callCount).to.equal(0);
+                    expect(onNext.callCount).to.equal(0);
+                }).
+                subscribe(noOp, done, done);
+        }, 300);
+
+        var disposable = queue.get([videos1234], [videos1234], zip);
         expect(queue._requests.length).to.equal(1);
         expect(queue._requests[0].sent).to.equal(true);
         expect(queue._requests[0].scheduled).to.equal(false);
-        var disposable2 = queue.get([], [['one', 'two'], ['three', 'two']], callback2);
+        var disposable2 = queue.get([videos1234, videos553], [videos1234, videos553], zip);
         expect(queue._requests.length).to.equal(2);
-        expect(queue._requests[0].sent).to.equal(true);
         expect(queue._requests[1].sent).to.equal(true);
-        expect(queue._requests[0].scheduled).to.equal(false);
-        expect(queue._requests[1].scheduled).to.equal(false);
-
-        disposable();
-        setTimeout(function() {
-            try {
-                expect(queue._requests.length).to.equal(0);
-                expect(callback.callCount, 'callback1 should not be called').to.equal(0);
-                expect(callback2.calledOnce, 'callback2 should be called 1 times.').to.be.ok;
-            } catch (e) {
-                return done(e);
-            }
-            return done();
-        }, 150);
-    });
-
-    it('should make a couple requests where only part of the second request is deduped then both are disposed.', function(done) {
-        var onGet = sinon.spy(function() {
-            return Rx.Observable.create(function(observer) {
-                setTimeout(function() {
-                    observer.onNext({
-                        jsonGraph: {}
-                    });
-                    observer.onCompleted();
-                }, 50);
-            });
-        });
-        var dataSource = {get: onGet};
-        var queue = new RequestQueue({
-            dataSource: dataSource
-        }, new ImmediateScheduler());
-        var callback = sinon.spy();
-        var callback2 = sinon.spy();
-        var disposable = queue.get([], [['one', 'two']], callback);
-        expect(queue._requests.length).to.equal(1);
-        expect(queue._requests[0].sent).to.equal(true);
-        expect(queue._requests[0].scheduled).to.equal(false);
-        var disposable2 = queue.get([], [['one', 'two'], ['three', 'two']], callback2);
-        expect(queue._requests.length).to.equal(2);
-        expect(queue._requests[0].sent).to.equal(true);
-        expect(queue._requests[1].sent).to.equal(true);
-        expect(queue._requests[0].scheduled).to.equal(false);
         expect(queue._requests[1].scheduled).to.equal(false);
 
         disposable();
         disposable2();
-        setTimeout(function() {
-            try {
-                expect(queue._requests.length).to.equal(0);
-                expect(callback.callCount, 'callback1 should not be called').to.equal(0);
-                expect(callback2.callCount, 'callback2 should not be called').to.equal(0);
-            } catch (e) {
-                return done(e);
-            }
-            return done();
-        }, 150);
     });
 });
 
