@@ -1,3 +1,3 @@
-describe('Internal', function() {
+describe.only('Internal', function() {
     require('./request/GetRequest.spec');
 });
