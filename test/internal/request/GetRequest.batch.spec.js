@@ -9,8 +9,10 @@ var LocalDataSource = require('./../../data/LocalDataSource');
 var Cache = require('./../../data/Cache.js');
 var noOp = function() {};
 
-describe('#batch', function() {
-    it.only('should make a request to the dataSource with an immediate scheduler', function(done) {
+describe.only('#batch', function() {
+    var videos1234 = ['videos', 1234, 'summary'];
+    var videos553 = ['videos', 553, 'summary'];
+    it('should make a request to the dataSource with an immediate scheduler', function(done) {
         var inlineBoolean = true;
         var scheduler = new ImmediateScheduler();
         var getSpy = sinon.spy();
@@ -23,11 +25,11 @@ describe('#batch', function() {
             model: model
         });
 
-        var disposable = request.batch([['videos', 1234, 'summary']], [['videos', 1234, 'summary']], function(err, data) {
+        var disposable = request.batch([videos1234], [videos1234], function(err, data) {
             var onNext = sinon.spy();
             model.
                 withoutDataSource().
-                get(['videos', 1234, 'summary']).
+                get(videos1234).
                 doAction(onNext, noOp, function() {
                     expect(inlineBoolean).to.be.ok;
                     expect(getSpy.calledOnce).to.be.ok;
@@ -51,141 +53,177 @@ describe('#batch', function() {
         inlineBoolean = false;
     });
 
-    it('should make a request to the dataSource with an ASAPScheduler', function(done) {
+    it('should make a request to the dataSource with an async scheduler.', function(done) {
         var inlineBoolean = true;
         var scheduler = new ASAPScheduler();
-        var getSpy = sinon.spy(function(paths) {
-            return Rx.Observable.create(function(observer) {
-                observer.onNext({
-                    jsonGraph: {}
-                });
-                observer.onCompleted();
-            });
+        var getSpy = sinon.spy();
+        var source = new LocalDataSource(Cache(), {
+            onGet: getSpy
         });
+        var model = new Model({source: source});
         var request = new GetRequest(scheduler, {
             removeRequest: function() { },
-            model: {
-                dataSource: {
-                    get: getSpy
-                }
-            }
+            model: model
         });
         var callback = sinon.spy(function(err, data) {
-            expect(inlineBoolean).to.not.be.ok;
-            expect(data).to.deep.equals({jsonGraph: {}});
-            expect(getSpy.calledOnce).to.be.ok;
-            expect(getSpy.getCall(0).args[0]).to.deep.equals([['one', 'two']]);
+            var onNext = sinon.spy();
+            model.
+                withoutDataSource().
+                get(videos1234).
+                doAction(onNext, noOp, function() {
+                    expect(inlineBoolean).to.not.be.ok;
+                    expect(getSpy.calledOnce).to.be.ok;
+                    expect(getSpy.getCall(0).args[1]).to.deep.equals([videos1234]);
+                    expect(onNext.calledOnce).to.be.ok;
+                    expect(onNext.getCall(0).args[0]).to.deep.equals({
+                        json: {
+                            videos: {
+                                1234: {
+                                    summary: {
+                                        title: 'House of Cards',
+                                        url: '/movies/1234'
+                                    }
+                                }
+                            }
+                        }
+                    });
+                }).
+                subscribe(noOp, done, done);
         });
 
-        var disposable = request.batch([['one', 'two']], callback);
-        setTimeout(function() {
-            try {
-                throwExceptions(callback);
-                expect(callback.calledOnce);
-            } catch(e) {
-                return done(e);
-            }
-            return done();
-        }, 100);
+        var disposable = request.batch([videos1234], [videos1234], callback);
         inlineBoolean = false;
     });
 
     it('should batch some requests together.', function(done) {
         var scheduler = new ASAPScheduler();
-        var getSpy = sinon.spy(function(paths) {
-            return Rx.Observable.create(function(observer) {
-                observer.onNext({
-                    jsonGraph: {}
-                });
-                observer.onCompleted();
-            });
+        var getSpy = sinon.spy();
+        var source = new LocalDataSource(Cache(), {
+            onGet: getSpy
         });
+        var model = new Model({source: source});
         var request = new GetRequest(scheduler, {
             removeRequest: function() { },
-            model: {
-                dataSource: {
-                    get: getSpy
-                }
-            }
+            model: model
         });
 
-        var callback1 = sinon.spy(function(err, data) {
-            expect(data).to.deep.equals({jsonGraph: {}});
-            expect(getSpy.calledOnce).to.be.ok;
-            expect(getSpy.getCall(0).args[0]).to.deep.equals([[['one', 'three'], 'two']]);
+        var zip = zipSpy(2, function() {
+            var onNext = sinon.spy();
+            model.
+                withoutDataSource().
+                get(videos1234, videos553).
+                doAction(onNext, noOp, function() {
+                    expect(onNext.getCall(0).args[0]).to.deep.equals({
+                        json: {
+                            videos: {
+                                1234: {
+                                    summary: {
+                                        title: 'House of Cards',
+                                        url: '/movies/1234'
+                                    }
+                                },
+                                553: {
+                                    summary: {
+                                        title: 'Running Man',
+                                        url: '/movies/553'
+                                    }
+                                }
+                            }
+                        }
+                    });
+                }).
+                subscribe(noOp, done, done);
         });
-        var callback2 = sinon.spy(function(err, data) {
-            expect(data).to.deep.equals({jsonGraph: {}});
-        });
-
-        var disposable1 = request.batch([['one', 'two']], callback1);
-        var disposable2 = request.batch([['three', 'two']], callback2);
-
-        setTimeout(function() {
-            try {
-                throwExceptions(callback1);
-                throwExceptions(callback2);
-                expect(callback1.calledOnce);
-                expect(callback2.calledOnce);
-            } catch(e) {
-                return done(e);
-            }
-            return done();
-        }, 100);
+        var disposable1 = request.batch([videos1234], [videos1234], zip);
+        var disposable2 = request.batch([videos553], [videos553], zip);
     });
 
-    it('should batch some requests together and dispose one of them.', function(done) {
+    it('should batch some requests together and dispose the first one.', function(done) {
         var scheduler = new ASAPScheduler();
-        var getSpy = sinon.spy(function(paths) {
-            return Rx.Observable.create(function(observer) {
-                observer.onNext({
-                    jsonGraph: {}
-                });
-                observer.onCompleted();
-            });
+        var getSpy = sinon.spy();
+        var source = new LocalDataSource(Cache(), {
+            onGet: getSpy
         });
-        var removeSpy = sinon.spy(function() {});
+        var model = new Model({source: source});
         var request = new GetRequest(scheduler, {
-            removeRequest: removeSpy,
-            model: {
-                dataSource: {
-                    get: getSpy
-                }
-            }
+            removeRequest: function() { },
+            model: model
         });
 
-        var callback1 = sinon.spy(function(err, data) {
-            throw new Error('This should of never been called.');
+        var zip = zipSpy(2, function() {
+            var onNext = sinon.spy();
+            model.
+                withoutDataSource().
+                get(videos1234, videos553).
+                doAction(onNext, noOp, function() {
+                    expect(onNext.getCall(0).args[0]).to.deep.equals({
+                        json: {
+                            videos: {
+                                553: {
+                                    summary: {
+                                        title: 'Running Man',
+                                        url: '/movies/553'
+                                    }
+                                }
+                            }
+                        }
+                    });
+                }).
+                subscribe(noOp, done, done);
         });
-        var callback2 = sinon.spy(function(err, data) {
-            expect(data).to.deep.equals({jsonGraph: {}});
-            expect(getSpy.calledOnce).to.be.ok;
-            expect(getSpy.getCall(0).args[0]).to.deep.equals([['three', 'two']]);
-        });
-
-        var disposable1 = request.batch([['one', 'two']], callback1);
-        var disposable2 = request.batch([['three', 'two']], callback2);
+        var disposable1 = request.batch([videos1234], [videos1234], zip);
+        var disposable2 = request.batch([videos553], [videos553], zip);
 
         disposable1();
+        zip();
+    });
 
-        setTimeout(function() {
-            try {
-                throwExceptions(callback1);
-                throwExceptions(callback2);
-                expect(callback1.callCount).to.equals(0);
-                expect(callback2.calledOnce).to.be.ok;
-            } catch(e) {
-                return done(e);
-            }
-            return done();
-        }, 100);
+    it('should batch some requests together and dispose the second one.', function(done) {
+        var scheduler = new ASAPScheduler();
+        var getSpy = sinon.spy();
+        var source = new LocalDataSource(Cache(), {
+            onGet: getSpy
+        });
+        var model = new Model({source: source});
+        var request = new GetRequest(scheduler, {
+            removeRequest: function() { },
+            model: model
+        });
+
+        var zip = zipSpy(2, function() {
+            var onNext = sinon.spy();
+            model.
+                withoutDataSource().
+                get(videos1234, videos553).
+                doAction(onNext, noOp, function() {
+                    expect(onNext.getCall(0).args[0]).to.deep.equals({
+                        json: {
+                            videos: {
+                                1234: {
+                                    summary: {
+                                        title: 'House of Cards',
+                                        url: '/movies/1234'
+                                    }
+                                }
+                            }
+                        }
+                    });
+                }).
+                subscribe(noOp, done, done);
+        });
+        var disposable1 = request.batch([videos1234], [videos1234], zip);
+        var disposable2 = request.batch([videos553], [videos553], zip);
+
+        disposable2();
+        zip();
     });
 });
 
-function throwExceptions(spy) {
-    spy.exceptions.forEach(function(e) {
-        if (e) {
-            throw e;
+function zipSpy(count, cb) {
+    return sinon.spy(function() {
+        --count;
+        if (count === 0) {
+            cb();
         }
     });
 }
