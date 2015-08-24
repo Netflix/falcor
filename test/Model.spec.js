@@ -94,6 +94,7 @@ describe("Model", function() {
     require('./lru');
     require('./hardlink');
     require('./falcor');
+    require('./internal');
 
     describe('JSON-Graph Specification', function() {
         describe("#get", function() {
