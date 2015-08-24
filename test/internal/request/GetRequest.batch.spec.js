@@ -9,7 +9,7 @@ var LocalDataSource = require('./../../data/LocalDataSource');
 var Cache = require('./../../data/Cache.js');
 var noOp = function() {};
 
-describe.only('#batch', function() {
+describe('#batch', function() {
     var videos1234 = ['videos', 1234, 'summary'];
     var videos553 = ['videos', 553, 'summary'];
     it('should make a request to the dataSource with an immediate scheduler', function(done) {
