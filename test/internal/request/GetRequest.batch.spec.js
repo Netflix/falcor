@@ -156,6 +156,7 @@ describe('#batch', function() {
                 withoutDataSource().
                 get(videos1234, videos553).
                 doAction(onNext, noOp, function() {
+                    expect(zip.calledOnce).to.be.ok;
                     expect(onNext.getCall(0).args[0]).to.deep.equals({
                         json: {
                             videos: {
@@ -170,12 +171,11 @@ describe('#batch', function() {
                     });
                 }).
                 subscribe(noOp, done, done);
-        });
+        }, 300);
         var disposable1 = request.batch([videos1234], [videos1234], zip);
         var disposable2 = request.batch([videos553], [videos553], zip);
 
         disposable1();
-        zip();
     });
 
     it('should batch some requests together and dispose the second one.', function(done) {
@@ -196,6 +196,7 @@ describe('#batch', function() {
                 withoutDataSource().
                 get(videos1234, videos553).
                 doAction(onNext, noOp, function() {
+                    expect(zip.calledOnce).to.be.ok;
                     expect(onNext.getCall(0).args[0]).to.deep.equals({
                         json: {
                             videos: {
@@ -210,17 +211,30 @@ describe('#batch', function() {
                     });
                 }).
                 subscribe(noOp, done, done);
-        });
+        }, 300);
         var disposable1 = request.batch([videos1234], [videos1234], zip);
         var disposable2 = request.batch([videos553], [videos553], zip);
 
         disposable2();
-        zip();
     });
 });
 
-function zipSpy(count, cb) {
+function zipSpy(count, cb, maxTime) {
+    var done = false;
+    if (maxTime) {
+        setTimeout(function() {
+            if (count !== 0) {
+                done = true;
+                cb();
+            }
+        }, maxTime);
+    }
+
     return sinon.spy(function() {
+        if (done) {
+            return;
+        }
+
         --count;
         if (count === 0) {
             cb();
