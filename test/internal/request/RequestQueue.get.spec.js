@@ -20,7 +20,6 @@ describe('#get', function() {
             dataSource: dataSource
         }, new ImmediateScheduler());
         var callback = sinon.spy();
-        debugger
         var disposable = queue.get([], [['one', 'two']], callback);
 
         expect(callback.calledOnce, 'callback should be called once.').to.be.ok;

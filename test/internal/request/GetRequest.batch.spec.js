@@ -4,34 +4,49 @@ var GetRequest = require('./../../../lib/request/GetRequestV2');
 var ASAPScheduler = require('./../../../lib/schedulers/ASAPScheduler');
 var ImmediateScheduler = require('./../../../lib/schedulers/ImmediateScheduler');
 var Rx = require('rx');
+var Model = require('./../../../lib').Model;
+var LocalDataSource = require('./../../data/LocalDataSource');
+var Cache = require('./../../data/Cache.js');
+var noOp = function() {};
 
 describe('#batch', function() {
-    it('should make a request to the dataSource with an immediate scheduler', function(done) {
+    it.only('should make a request to the dataSource with an immediate scheduler', function(done) {
         var inlineBoolean = true;
         var scheduler = new ImmediateScheduler();
-        var getSpy = sinon.spy(function(paths) {
-            return Rx.Observable.create(function(observer) {
-                observer.onNext({
-                    jsonGraph: {}
-                });
-                observer.onCompleted();
-            });
+        var getSpy = sinon.spy();
+        var source = new LocalDataSource(Cache(), {
+            onGet: getSpy
         });
+        var model = new Model({source: source});
         var request = new GetRequest(scheduler, {
             removeRequest: function() { },
-            model: {
-                dataSource: {
-                    get: getSpy
-                }
-            }
+            model: model
         });
 
-        var disposable = request.batch([['one', 'two']], function(err, data) {
-            expect(inlineBoolean).to.be.ok;
-            expect(data).to.deep.equals({jsonGraph: {}});
-            expect(getSpy.calledOnce).to.be.ok;
-            expect(getSpy.getCall(0).args[0]).to.deep.equals([['one', 'two']]);
-            done();
+        var disposable = request.batch([['videos', 1234, 'summary']], [['videos', 1234, 'summary']], function(err, data) {
+            var onNext = sinon.spy();
+            model.
+                withoutDataSource().
+                get(['videos', 1234, 'summary']).
+                doAction(onNext, noOp, function() {
+                    expect(inlineBoolean).to.be.ok;
+                    expect(getSpy.calledOnce).to.be.ok;
+                    expect(getSpy.getCall(0).args[1]).to.deep.equals([['videos', 1234, 'summary']]);
+                    expect(onNext.calledOnce).to.be.ok;
+                    expect(onNext.getCall(0).args[0]).to.deep.equals({
+                        json: {
+                            videos: {
+                                1234: {
+                                    summary: {
+                                        title: 'House of Cards',
+                                        url: '/movies/1234'
+                                    }
+                                }
+                            }
+                        }
+                    });
+                }).
+                subscribe(noOp, done, done);
         });
         inlineBoolean = false;
     });
