@@ -19,8 +19,10 @@ describe('#batch', function() {
         });
         var request = new GetRequest(scheduler, {
             removeRequest: function() { },
-            dataSource: {
-                get: getSpy
+            model: {
+                dataSource: {
+                    get: getSpy
+                }
             }
         });
 
@@ -47,8 +49,10 @@ describe('#batch', function() {
         });
         var request = new GetRequest(scheduler, {
             removeRequest: function() { },
-            dataSource: {
-                get: getSpy
+            model: {
+                dataSource: {
+                    get: getSpy
+                }
             }
         });
         var callback = sinon.spy(function(err, data) {
@@ -83,8 +87,10 @@ describe('#batch', function() {
         });
         var request = new GetRequest(scheduler, {
             removeRequest: function() { },
-            dataSource: {
-                get: getSpy
+            model: {
+                dataSource: {
+                    get: getSpy
+                }
             }
         });
 
@@ -126,8 +132,10 @@ describe('#batch', function() {
         var removeSpy = sinon.spy(function() {});
         var request = new GetRequest(scheduler, {
             removeRequest: removeSpy,
-            dataSource: {
-                get: getSpy
+            model: {
+                dataSource: {
+                    get: getSpy
+                }
             }
         });
 
@@ -135,9 +143,9 @@ describe('#batch', function() {
             throw new Error('This should of never been called.');
         });
         var callback2 = sinon.spy(function(err, data) {
-                expect(data).to.deep.equals({jsonGraph: {}});
-                expect(getSpy.calledOnce).to.be.ok;
-                expect(getSpy.getCall(0).args[0]).to.deep.equals([['three', 'two']]);
+            expect(data).to.deep.equals({jsonGraph: {}});
+            expect(getSpy.calledOnce).to.be.ok;
+            expect(getSpy.getCall(0).args[0]).to.deep.equals([['three', 'two']]);
         });
 
         var disposable1 = request.batch([['one', 'two']], callback1);

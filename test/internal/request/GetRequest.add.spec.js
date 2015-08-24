@@ -21,8 +21,10 @@ describe('#add', function() {
         var removeSpy = sinon.spy(function() {});
         var request = new GetRequest(scheduler, {
             removeRequest: removeSpy,
-            dataSource: {
-                get: getSpy
+            model: {
+                dataSource: {
+                    get: getSpy
+                }
             }
         });
 
@@ -65,8 +67,10 @@ describe('#add', function() {
         var removeSpy = sinon.spy(function() {});
         var request = new GetRequest(scheduler, {
             removeRequest: removeSpy,
-            dataSource: {
-                get: getSpy
+            model: {
+                dataSource: {
+                    get: getSpy
+                }
             }
         });
 
@@ -110,8 +114,10 @@ describe('#add', function() {
         var removeSpy = sinon.spy(function() {});
         var request = new GetRequest(scheduler, {
             removeRequest: removeSpy,
-            dataSource: {
-                get: getSpy
+            model: {
+                dataSource: {
+                    get: getSpy
+                }
             }
         });
 
