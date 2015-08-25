@@ -1,7 +1,14 @@
-var Rx = require('rx');
+var Rx = require("rx");
 var TriggerDataSource = function TriggerDataSource(response) {
-    this.response = response;
     this._triggers = [];
+    this._idx = -1;
+
+    if (Array.isArray(response)) {
+        this._response = response;
+    } else {
+        this._response = [response];
+    }
+    this._length = this._response.length;
 };
 
 TriggerDataSource.prototype = {
@@ -9,7 +16,7 @@ TriggerDataSource.prototype = {
         var self = this;
         return Rx.Observable.create(function(observer) {
             self._triggers.push(function() {
-                observer.onNext(self.response);
+                observer.onNext(self._response[++self._idx % self._length]);
                 observer.onCompleted();
             });
         });
