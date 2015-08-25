@@ -49,40 +49,37 @@ var triggerDiffQV2 = new RequestQueueV2(triggerDiffModel, new ImmediateScheduler
 var triggerDiffQ = new RequestQueue(triggerDiffModel, new ImmediateScheduler());
 
 module.exports = {
-    name: "RequestQueue",
-    tests: {
-        "RequestQueueV2.get#Simple Path": function(done) {
-            triggerQV2.get(simple, simple, function() { });
-            triggerSource.trigger();
-        },
+    "RequestQueueV2.get#Simple Path": function(done) {
+        triggerQV2.get(simple, simple, function() { });
+        triggerSource.trigger();
+    },
 
-        "RequestQueue(OLD).get#Simple Path": function(done) {
-            triggerQ.get(simple).subscribe(noOp, noOp, function() { });
-            triggerSource.trigger();
-        },
+    "RequestQueue(OLD).get#Simple Path": function(done) {
+        triggerQ.get(simple).subscribe(noOp, noOp, function() { });
+        triggerSource.trigger();
+    },
 
-        "RequestQueueV2.batch-and-dedupe#Simple Path": function(done) {
-            triggerQV2.get(simple, simple, function() { });
-            triggerQV2.get(simple, simple, function() { });
-            triggerSource.trigger();
-        },
+    "RequestQueueV2.batch-and-dedupe#Simple Path": function(done) {
+        triggerQV2.get(simple, simple, function() { });
+        triggerQV2.get(simple, simple, function() { });
+        triggerSource.trigger();
+    },
 
-        "RequestQueue(OLD).batch-and-dedupe#Simple Path": function(done) {
-            triggerQ.get(simple).subscribe(noOp, noOp, function() { });
-            triggerQ.get(simple).subscribe(noOp, noOp, function() { });
-            triggerSource.trigger();
-        },
+    "RequestQueue(OLD).batch-and-dedupe#Simple Path": function(done) {
+        triggerQ.get(simple).subscribe(noOp, noOp, function() { });
+        triggerQ.get(simple).subscribe(noOp, noOp, function() { });
+        triggerSource.trigger();
+    },
 
-        "RequestQueueV2.batch-and-no-dedupe#Simple Path": function(done) {
-            triggerDiffQV2.get(simple, simple, function() { });
-            triggerDiffQV2.get(simple, simple, function() { });
-            triggerDiffSource.trigger();
-        },
+    "RequestQueueV2.batch-and-no-dedupe#Simple Path": function(done) {
+        triggerDiffQV2.get(simple, simple, function() { });
+        triggerDiffQV2.get(simple, simple, function() { });
+        triggerDiffSource.trigger();
+    },
 
-        "RequestQueue(OLD).batch-and-no-dedupe#Simple Path": function(done) {
-            triggerDiffQ.get(simple).subscribe(noOp, noOp, function() { });
-            triggerDiffQ.get(simple).subscribe(noOp, noOp, function() { });
-            triggerDiffSource.trigger();
-        }
+    "RequestQueue(OLD).batch-and-no-dedupe#Simple Path": function(done) {
+        triggerDiffQ.get(simple).subscribe(noOp, noOp, function() { });
+        triggerDiffQ.get(simple).subscribe(noOp, noOp, function() { });
+        triggerDiffSource.trigger();
     }
 };

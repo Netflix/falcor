@@ -1,7 +1,5 @@
-var testConfig = require('./testConfig')();
 var testRunner = require('./testRunner');
-var testReporter = require('./reporters/browserTestReporter');
-var testSuiteGenerator = require('./testSuiteGenerator');
+var testReporter = require('./reporters/nodeTestReporter');
 var CSVFormatter = require('./formatter/CSVFormatter');
 
 var compose = function(f, g) {
@@ -10,11 +8,7 @@ var compose = function(f, g) {
     };
 };
 
-var models = testConfig.models;
-var formats = testConfig.formats;
-var tests = testConfig.get;
-
-var suite = require('./tests/get/request-queue');
+var suite = require('./tests/standard')('Browser Tests');
 
 var gc = function() {
     if (typeof window !== 'undefined' && window && window.gc) {
