@@ -8,7 +8,7 @@ var Model = require('./../../../lib').Model;
 var LocalDataSource = require('./../../data/LocalDataSource');
 var Cache = require('./../../data/Cache.js');
 var noOp = function() {};
-var zipArray = require('./../../zipSpy');
+var zipSpy = require('./../../zipSpy');
 
 describe('#batch', function() {
     var videos1234 = ['videos', 1234, 'summary'];

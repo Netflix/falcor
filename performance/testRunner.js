@@ -72,6 +72,7 @@ function run(suites, env, onBenchmarkComplete, onComplete, log) {
             }).
             on('error', function(e) {
                 var error = e.target.error;
+                debugger
 
                 log(error);
                 log(error.stack);
@@ -86,9 +87,7 @@ function run(suites, env, onBenchmarkComplete, onComplete, log) {
                     _run();
                 }
             }).
-            run({
-                async: true
-            });
+            run({defer: false});
     };
 
     _run();

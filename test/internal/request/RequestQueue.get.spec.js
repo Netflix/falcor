@@ -297,7 +297,7 @@ describe('#get', function() {
         disposable2();
     });
 
-    it.only('should make a couple requests where only part of the second request is deduped then both are disposed.', function(done) {
+    it('should make a couple requests where only part of the second request is deduped then both are disposed.', function(done) {
         var scheduler = new ImmediateScheduler();
         var getSpy = sinon.spy();
         var source = new LocalDataSource(Cache(), {wait: 100});

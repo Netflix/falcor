@@ -8,18 +8,11 @@ var device;
 var models = testConfig.models;
 var formats = testConfig.formats;
 var tests = testConfig.get;
-var suite = testConfig.suite;
+var suite = require('./tests/get/request-queue');
 
 try {
     // Needs explicit 'npm install nf-falcor-device-perf'. Not part of package.json
     device = require('nf-falcor-device-perf');
-
-    suite.tests = testSuiteGenerator({
-        models: {
-            'model': models.modelWithSource
-        },
-        formats: ['PathMap', 'JSON']
-    });
 
     device.runTests(suite, testRunner, testSuiteGenerator, CSVFormatter);
 

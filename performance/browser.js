@@ -13,14 +13,8 @@ var compose = function(f, g) {
 var models = testConfig.models;
 var formats = testConfig.formats;
 var tests = testConfig.get;
-var suite = testConfig.suite;
 
-suite.tests = testSuiteGenerator({
-    models: {
-        'model': models.modelWithSource
-    },
-    formats: ['PathMap', 'JSON']
-});
+var suite = require('./tests/get/request-queue');
 
 var gc = function() {
     if (typeof window !== 'undefined' && window && window.gc) {
