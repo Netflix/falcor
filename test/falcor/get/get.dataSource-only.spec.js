@@ -123,6 +123,7 @@ describe('DataSource Only', function() {
         var model = new Model({
             source: new ErrorDataSource(500, 'Oops!')
         });
+        debugger
         model.
             get(['videos', 1234, 'summary']).
             doAction(noOp, function(err) {
@@ -133,17 +134,16 @@ describe('DataSource Only', function() {
                         status: 500
                     }
                 }], err);
+            }, function() {
+                throw new Error('On Completed was called. ' +
+                     'OnError should have been called.');
             }).
             subscribe(noOp, function(err) {
                 // ensure its the same error
                 if (Array.isArray(err) && isPathValue(err[0])) {
-                    done();
-                } else {
-                    done(err);
+                    return done();
                 }
-            }, function() {
-                done('On Completed was called. ' +
-                     'OnError should have been called.');
+                return done(err);
             });
     });
     it("should get all missing paths in a single request", function(done) {
