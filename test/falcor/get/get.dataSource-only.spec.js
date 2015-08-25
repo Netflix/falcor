@@ -119,7 +119,7 @@ describe('DataSource Only', function() {
                 subscribe(noOp, done, done);
         });
     });
-    it.only('should report errors from a dataSource.', function(done) {
+    it('should report errors from a dataSource.', function(done) {
         var model = new Model({
             source: new ErrorDataSource(500, 'Oops!')
         });
