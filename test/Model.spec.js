@@ -91,15 +91,8 @@ describe("Model", function() {
         testRunner.compare({$type: $atom, value: 1337}, out);
     });
 
-    require('./lru');
-    require('./hardlink');
-    require('./falcor');
-    require('./internal');
-
     describe('JSON-Graph Specification', function() {
-        describe("#get", function() {
-            require("./get")();
-        });
+        require('./get-core');
 
         describe("#set", function() {
             require("./set")();
@@ -109,4 +102,10 @@ describe("Model", function() {
             require("./invalidate")();
         });
     });
+
+    require('./lru');
+    require('./hardlink');
+    require('./falcor');
+    require('./internal');
+
 });

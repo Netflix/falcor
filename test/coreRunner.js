@@ -1,7 +1,9 @@
 var get = require('./../lib/get');
 var Model = require('./../lib');
+var expect = require('chai').expect;
 
 module.exports = function(tests) {
+    debugger
     var only = false;
     tests.forEach(function(test) {
         if (test.only) {
@@ -23,16 +25,21 @@ function run(test) {
         var isJSONG = test.isJSONG;
         var input = test.input;
         var expectedOutput = test.output;
-        var isJSONInput = Array.isArray(input[0]);
+        var isJSONInput = !Array.isArray(input[0]);
         var fnKey = 'getWith' +
-            isJSONInput ? 'JSON' : 'Paths' +
+            (isJSONInput ? 'JSON' : 'Paths') +
             'As' +
-            isJSONG ? 'JSONG' : 'PathMap';
+            (isJSONG ? 'JSONG' : 'PathMap');
         var fn = get[fnKey];
-        var model = new Model();
+        var cache = test.cache;
+        var source = test.source;
+        var model = new Model({
+            cache: cache,
+            source: source
+        });
 
         var seed = [{}];
         var out = fn(model, input, seed);
-        expect(seed).to.deep.equals(expectedOutput);
+        expect(seed[0]).to.deep.equals(expectedOutput);
     });
 }
