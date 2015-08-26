@@ -4,7 +4,7 @@ var row = [[0, {from: 0, to: 9}, 'item', 'title']];
 var complex = [[{from: 0, to: 4}, {from: 0, to: 9}, 'item', 'title']];
 var noOp = function() {};
 var ImmediateScheduler = require("./../../../lib/schedulers/ImmediateScheduler");
-var cacheGenerator = require('./../cacheGenerator');
+var CacheGenerator = require('./../../../test/CacheGenerator');
 var cache = cacheGenerator(0, 50);
 var model = new Model({
     cache: cache
