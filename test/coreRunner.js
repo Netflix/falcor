@@ -3,7 +3,6 @@ var Model = require('./../lib');
 var expect = require('chai').expect;
 
 module.exports = function(tests) {
-    debugger
     var only = false;
     tests.forEach(function(test) {
         if (test.only) {
