@@ -32,7 +32,7 @@ if [ "$TRAVIS_PULL_REQUEST" == "false" ]; then
   # Change Working Directory to $HOME
   cd $HOME
 
-  git config --global user.email "falcor@netflix.com"
+  git config --global user.email "falcorbuild@netflix.com"
   git config --global user.name "Falcor Build"
 
   git clone --quiet --branch=gh-pages git@github.com:Netflix/falcor.git $GH_PAGES_DIR > /dev/null
