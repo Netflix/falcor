@@ -1,4 +1,4 @@
-describe('Set', function() {
+xdescribe('Set', function() {
     require('./set.cache-only.spec');
     require('./set.dataSource-only.spec');
     require('./set.dataSource-and-bind.spec');

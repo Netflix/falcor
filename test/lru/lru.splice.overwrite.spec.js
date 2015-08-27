@@ -19,7 +19,7 @@ var __tail = require("./../../lib/internal/tail");
 var __next = require("./../../lib/internal/next");
 var __prev = require("./../../lib/internal/prev");
 
-describe('Overwrite', function() {
+xdescribe('Overwrite', function() {
     describe('Input Paths', function() {
         describe('AsJSONG', function() {
             it('should splice an overwritten item.', function(done) {

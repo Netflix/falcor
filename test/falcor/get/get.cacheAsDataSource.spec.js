@@ -47,23 +47,6 @@ describe('Cache as DataSource', function() {
                 subscribe(noOp, done, done);
         });
     });
-    describe('toPathValues', function() {
-        it('should get a value from falcor.', function(done) {
-            var model = new Model({ source: new Model({ source: new LocalDataSource(Cache()) }).asDataSource() });
-            var expected = Expected.Values().direct.AsValues.values[0];
-            var next = 0;
-            model.
-                get(['videos', 1234, 'summary']).
-                toPathValues().
-                doAction(function(x) {
-                    testRunner.compare(expected, x);
-                    ++next;
-                }, noOp, function() {
-                    testRunner.compare(1, next, 'Expect to be onNext 1 time.');
-                }).
-                subscribe(noOp, done, done);
-        });
-    });
     it('should report errors from a dataSource.', function(done) {
         var model = new Model({
             source: new Model({

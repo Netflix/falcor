@@ -12,14 +12,6 @@ ResponseObservable.prototype._subscribe = function(observer) {
     return this.response.subscribe(observer);
 };
 
-ResponseObservable.prototype.toPathValues = function() {
-    return new ResponseObservable(this.response.toPathValues.apply(this.response, arguments));
-};
-
-ResponseObservable.prototype.toCompactJSON = function() {
-    return new ResponseObservable(this.response.toCompactJSON.apply(this.response, arguments));
-};
-
 ResponseObservable.prototype.toJSON = function() {
     return new ResponseObservable(this.response.toJSON.apply(this.response, arguments));
 };
@@ -94,11 +86,11 @@ describe("Model", function() {
     describe('JSON-Graph Specification', function() {
         require('./get-core');
 
-        //describe("#set", function() {
-            //require("./set")();
-        //});
+        xdescribe("#set", function() {
+            require("./set")();
+        });
 
-        describe("#invalidate", function() {
+        xdescribe("#invalidate", function() {
             require("./invalidate")();
         });
     });
