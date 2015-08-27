@@ -1,59 +1,32 @@
 var falcor = require("./../../../lib");
 var Model = falcor.Model;
-var Cache = require('../../data/Cache');
-var Expected = require('../../data/expected');
 var Rx = require('rx');
-var getTestRunner = require('./../../getTestRunner');
-var testRunner = require('./../../testRunner');
+var clean = require('./../../cleanData').clean;
+var cacheGenerator = require('./../../CacheGenerator');
 var noOp = function() {};
 var Observable = Rx.Observable;
 var sinon = require('sinon');
 var expect = require('chai').expect;
 
 describe('Cache Only', function() {
-    describe('Relative Expiration', function() {
-        it('should retrieve a value from the cache that has a relative expiration that has not expired yet', function() {
-
-            var value,
-                model = new falcor.Model({
-                    cache: {
-                        user: {
-                            name: {
-                                // Metadata that indicates this object is a Sentinel
-                                $type: "atom",
-                                // The value property contains the value box by the Sentinel
-                                value: "Jim Parsons",
-                                // Metadata that dictates that this value should be purged from the {@link Model}'s cache after two minutes. Negative numbers imply that expiration occurs relative to the current time.
-                                $expires: -(1000 * 60 * 2)
-                            }
-                        }
-                    }
-                });
-
-            model.
-                get(["user", "name"]).
-                subscribe(function(out) {
-                    value = pathValue;
-                });
-
-            if (value === undefined) {
-                throw new Error("Value not retrieved from cache, despite the fact that it has not expired");
-            }
-        });
-    });
     describe('PathMap', function() {
         it('should get a value from falcor.', function(done) {
-            var model = new Model({cache: Cache()});
-            var expected = Expected.Values().direct.AsJSONG.values[0];
-            var next = false;
+            var model = new Model({
+                cache: cacheGenerator(0, 1)
+            });
+            var onNext = sinon.spy();
             model.
-                get(['videos', 1234, 'summary']).
-                _toJSONG().
-                doAction(function(x) {
-                    testRunner.compare(expected, x);
-                    next = true;
-                }, noOp, function() {
-                    testRunner.compare(true, next, 'Expect to be onNext at least 1 time.');
+                get(['videos', 0, 'title']).
+                doAction(onNext, noOp, function() {
+                    expect(onNext.getCall(0).args[0]).to.deep.equals({
+                        json: {
+                            videos: {
+                                0: {
+                                    title: 'Video 0'
+                                }
+                            }
+                        }
+                    });
                 }).
                 subscribe(noOp, done, done);
         });
@@ -61,17 +34,20 @@ describe('Cache Only', function() {
 
     describe('_toJSONG', function() {
         it('should get a value from falcor.', function(done) {
-            var model = new Model({cache: Cache()});
-            var expected = Expected.Values().direct.AsJSONG.values[0];
-            var next = false;
+            var model = new Model({
+                cache: cacheGenerator(0, 30)
+            });
+            var onNext = sinon.spy();
             model.
-                get(['videos', 1234, 'summary']).
+                get(['lolomo', 0, 0, 'item', 'title']).
                 _toJSONG().
-                doAction(function(x) {
-                    testRunner.compare(expected, x);
-                    next = true;
-                }, noOp, function() {
-                    testRunner.compare(true, next, 'Expect to be onNext at least 1 time.');
+                doAction(onNext, noOp, function() {
+                    var out = clean(onNext.getCall(0).args[0]);
+                    var expected = clean({
+                        jsonGraph: cacheGenerator(0, 1),
+                        paths: [['lolomo', 0, 0, 'item', 'title']]
+                    });
+                    expect(out).to.deep.equals(expected);
                 }).
                 subscribe(noOp, done, done);
         });

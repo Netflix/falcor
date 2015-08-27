@@ -10,7 +10,7 @@ function clean(item, options) {
     traverseAndConvert(item);
     strip(item, __key);
 
-    options = options || { strip: [] };
+    options = options || { strip: ['$size'] };
     options.strip.forEach(function(s) {
         strip(item, s);
     });

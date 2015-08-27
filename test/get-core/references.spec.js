@@ -1,6 +1,5 @@
 var getCoreRunner = require('./../getCoreRunner');
 var cacheGenerator = require('./../CacheGenerator');
-var toTree = require('falcor-path-utils').toTree;
 var jsonGraph = require('falcor-json-graph');
 var atom = jsonGraph.atom;
 var ref = jsonGraph.ref;
@@ -34,26 +33,6 @@ describe('References', function() {
     }, {
         it: 'should follow a reference to value',
         input: [['short', 'title']],
-        output: {
-            json: {
-                short: 'Short'
-            }
-        },
-        cache: referenceCache
-    }, {
-        it: 'should follow a reference to reference with JSON',
-        input: [toTree([['toReference', 'title']])],
-        output: {
-            json: {
-                toReference: {
-                    title: 'Title'
-                }
-            }
-        },
-        cache: referenceCache
-    }, {
-        it: 'should follow a reference to value with JSON',
-        input: [toTree([['short', 'title']])],
         output: {
             json: {
                 short: 'Short'
