@@ -12,7 +12,7 @@ var ErrorDataSource = require('../../data/ErrorDataSource');
 var sinon = require('sinon');
 var expect = require('chai').expect;
 
-describe('DataSource and Deref', function() {
+describe.only('DataSource and Deref', function() {
     it('should get a value from from dataSource when bound.', function(done) {
         var model = new Model({cache: M(), source: new LocalDataSource(Cache())});
         model._root.unsafeMode = true;
@@ -22,6 +22,7 @@ describe('DataSource and Deref', function() {
             deref(['genreList', 0], [0, 'summary']).
             flatMap(function(boundModel) {
                 model = boundModel;
+                debugger
                 return model.preload([1, 'summary']);
             }).
             doAction(onNext).

@@ -4,7 +4,8 @@ var atom = jsonGraph.atom;
 var VIDEO_COUNT_PER_LIST = 10;
 var AthroughZ = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
 
-module.exports = function cacheGenerator(videoStartIdx, videoCount) {
+module.exports = function cacheGenerator(videoStartIdx, videoCount, fields) {
+    fields = fields || ['title'];
     var listStartIndex = Math.floor(videoStartIdx / VIDEO_COUNT_PER_LIST);
     var startIdx = videoStartIdx % VIDEO_COUNT_PER_LIST;
     return {
@@ -13,7 +14,7 @@ module.exports = function cacheGenerator(videoStartIdx, videoCount) {
             1234: makeLolomos(listStartIndex, videoCount)
         },
         lists: makeLists(listStartIndex, startIdx, videoCount),
-        videos: makeVideos(videoStartIdx, videoCount)
+        videos: makeVideos(videoStartIdx, videoCount, fields)
     };
 };
 
@@ -27,11 +28,14 @@ function makeLolomos(startIdx, count) {
     return lists;
 }
 
-function makeVideos(startIdx, count) {
+function makeVideos(startIdx, count, fields) {
     var videos = {};
     for (var i = startIdx; i < startIdx + count; ++i) {
         videos[i] = {};
-        videos[i].title = atom('Video ' + i);
+
+        fields.forEach(function(f) {
+            videos[i][f] = atom('Video ' + i);
+        });
     }
     return videos;
 }

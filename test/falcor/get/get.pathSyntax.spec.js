@@ -1,43 +1,43 @@
 var falcor = require("./../../../lib/");
 var Model = falcor.Model;
-var Cache = require('../../data/Cache');
-var Expected = require('../../data/expected');
 var Rx = require('rx');
-var getTestRunner = require('./../../getTestRunner');
-var testRunner = require('./../../testRunner');
 var noOp = function() {};
 var Observable = Rx.Observable;
+var CacheGenerator = require('./../../CacheGenerator');
+var sinon = require('sinon');
+var expect = require('chai').expect;
 
 describe('Path Syntax', function() {
-    var model = new Model({cache: Cache()});
-    var expectedValue = Expected.Values().direct.AsJSON.values[0].json;
-    var complexValue = Expected.Complex().toOnlyLists.AsPathMap.values[0];
+    var model = new Model({cache: CacheGenerator(0, 2)});
     model._root.unsafeMode = true;
     it('should accept strings for get.', function(done) {
-        var called = false;
+        var onNext = sinon.spy();
         model.
-            get(
-                'genreList[0][0].summary',
-                {path: 'genreList[1][0].summary'}).
-            doAction(function(x) {
-                called = true;
-                testRunner.compare(complexValue, x);
-            }, noOp, function() {
-                testRunner.compare(true, called,
-                   'The onNext function was expected to be called at least once.');
+            get('lolomo[0][0].item.title', 'lolomo[0][1].item.title').
+            doAction(onNext, noOp, function() {
+                expect(onNext.getCall(0).args[0]).to.deep.equals({
+                    json: {
+                        lolomo: {
+                            0: {
+                                0: {
+                                    item: { title: 'Video 0' }
+                                },
+                                1: {
+                                    item: { title: 'Video 1' }
+                                }
+                            }
+                        }
+                    }
+                });
             }).
             subscribe(noOp, done, done);
     });
     it('should accept strings for getValue', function(done) {
-        var called = false;
+        var onNext = sinon.spy();
         model.
-            getValue('videos[1234].summary').
-            doAction(function(x) {
-                called = true;
-                testRunner.compare(expectedValue, x);
-            }, noOp, function() {
-                testRunner.compare(true, called,
-                   'The onNext function was expected to be called at least once.');
+            getValue('videos[0].title').
+            doAction(onNext, noOp, function() {
+                expect(onNext.getCall(0).args[0]).to.deep.equals('Video 0');
             }).
             subscribe(noOp, done, done);
     });

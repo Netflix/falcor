@@ -18,6 +18,7 @@ describe('Cache Only', function() {
             model.
                 get(['videos', 0, 'title']).
                 doAction(onNext, noOp, function() {
+                    expect(onNext.callCount).to.equal(1);
                     expect(onNext.getCall(0).args[0]).to.deep.equals({
                         json: {
                             videos: {

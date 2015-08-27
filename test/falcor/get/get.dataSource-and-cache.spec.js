@@ -77,14 +77,13 @@ describe('DataSource and Partial Cache', function() {
                 subscribe(noOp, done, done);
         });
     });
-    describe('toJSON', function() {
+    describe('PathMap', function() {
         it('should get multiple arguments into a single toJSON response.', function(done) {
             var model = new Model({cache: M(), source: new LocalDataSource(Cache())});
             var expected = Expected.Complex().toOnly.AsPathMap.values[0];
             var next = false;
             model.
                 get(['genreList', 0, 0, 'summary'], ['genreList', 0, 1, 'summary']).
-                toJSON().
                 doAction(function(x) {
                     next = true;
                     testRunner.compare(expected, x);
@@ -100,7 +99,6 @@ describe('DataSource and Partial Cache', function() {
             var next = false;
             model.
                 get(['genreList', 0, {to: 1}, 'summary']).
-                toJSON().
                 doAction(function(x) {
                     next = true;
                     testRunner.compare(expected, x);
@@ -141,77 +139,6 @@ describe('DataSource and Partial Cache', function() {
                     testRunner.compare(true, next, 'Expect to be onNext at least 1 time.');
                 }).
                 subscribe(noOp, done, done);
-        });
-    });
-
-    describe('toPathValues', function() {
-        it('should get multiple arguments into a single toJSON response.', function(done) {
-            var model = new Model({cache: M(), source: new LocalDataSource(Cache())});
-            var expected = Expected.Complex().toOnly.AsValues.values;
-            var count = 0;
-
-            model.
-                get(['genreList', 0, 0, 'summary'], ['genreList', 0, 1, 'summary']).
-                toPathValues().
-                doAction(function(x) {
-                    testRunner.compare(expected[count++], x);
-                }, noOp, function() {
-                    testRunner.compare(2, count, 'Expect to be onNext two times.');
-                }).
-                subscribe(noOp, done, done);
-        });
-
-        it('should get a complex argument into a single arg.', function(done) {
-            var model = new Model({cache: M(), source: new LocalDataSource(Cache())});
-            var expected = Expected.Complex().toOnly.AsValues.values;
-            var count = 0;
-
-            model.
-                get(['genreList', 0, {to: 1}, 'summary']).
-                toPathValues().
-                doAction(function(x) {
-                    testRunner.compare(expected[count++], x);
-                }, noOp, function() {
-                    testRunner.compare(2, count, 'Expect to be onNext two times.');
-                }).
-                subscribe(noOp, done, done);
-        });
-    });
-    xdescribe('Re-entrancy - NOT AN ISSUE UNTIL SYNC COMES BACK', function() {
-        it('calling set/get/call operations that execute synchronously in a selector function should not decrement syncRefCount, thereby disabling subsequent getValueSyncs within the selector functions.', function(done) {
-            var model = new falcor.Model({
-                source: {
-                    get: function() {
-                        return Rx.Observable.of({
-                            paths: [["user", "age"]],
-                            value: {
-                                user: {
-                                    age: 44
-                                }
-                            }
-                        });
-                    }
-                },
-                cache:{
-                    user: {
-                        name: "Jim"
-                    }
-                }
-            });
-            model._root.unsafeMode = false;
-
-            model.get(["user","age"], function(age) {
-                // model.withoutDataSource().get({path:["user","name"], value: 23}).subscribe();
-                model.withoutDataSource().get(["user","name"]).subscribe();
-
-                // should work, but doesn't because syncRefCount was set to 0 by get
-                try {
-                    model.getValueSync(["user", "age"]);
-                    done();
-                } catch(e) {
-                    done(new Error("Unable to run getValueSync because syncRefCount was set back to 0 when get method executed synchronously within a selector function."));
-                }
-            }).subscribe();
         });
     });
 });
