@@ -4,4 +4,5 @@ describe('Get Core', function() {
     require('./references.spec');
     require('./errors.spec');
     require('./deref.spec');
+    require('./edges.spec');
 });

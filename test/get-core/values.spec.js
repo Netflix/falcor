@@ -5,22 +5,9 @@ var jsonGraph = require('falcor-json-graph');
 var atom = jsonGraph.atom;
 var _ = require('lodash');
 
-describe.only('Values', function() {
+describe('Values', function() {
     // PathMap ----------------------------------------
     var tests = [{
-        it: 'should report nothing on empty path.',
-        input: [['videos', [], 'title']],
-        output: { },
-        cache: cacheGenerator(0, 1)
-    }, {
-        it: 'should not report an atom of undefined in non-materialize mode.',
-        input: [['videos']],
-        output: { },
-        only: true,
-        cache: {
-            videos: atom(undefined)
-        }
-    }, {
         it: 'should get a simple value out of the cache',
         input: [['videos', 0, 'title']],
         output: {

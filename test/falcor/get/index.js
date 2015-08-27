@@ -7,4 +7,7 @@ describe('Get', function() {
     require('./get.progressively.spec');
     require('./get.pathSyntax.spec');
     require('./get.getCache.spec');
+    require('./get.clone.spec');
+    require('./get.modes.spec');
+    require('./get.gen.spec');
 });

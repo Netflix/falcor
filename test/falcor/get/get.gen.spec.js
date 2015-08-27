@@ -1,4 +1,4 @@
-var falcor = require("./../../lib/");
+var falcor = require("./../../../lib/");
 var Model = falcor.Model;
 var expect = require('chai').expect;
 

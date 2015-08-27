@@ -94,9 +94,9 @@ describe("Model", function() {
     describe('JSON-Graph Specification', function() {
         require('./get-core');
 
-        describe("#set", function() {
-            require("./set")();
-        });
+        //describe("#set", function() {
+            //require("./set")();
+        //});
 
         describe("#invalidate", function() {
             require("./invalidate")();
