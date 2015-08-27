@@ -13,6 +13,8 @@ var chai = require("chai");
 var expect = chai.expect;
 var sinon = require('sinon');
 var noOp = function() {};
+var clean = require('./../../cleanData').clean;
+var cacheGenerator = require('./../../CacheGenerator');
 
 /**
  * @param newModel
@@ -149,7 +151,14 @@ describe("Call", function() {
                     add: function(listRef) {
                         return this
                             .setValue({ path: ["length"], value: 8})
-                            .flatMap(this.set({ path: [7], value: listRef }).toPathValues())
+                            .flatMap(
+                                this.set({ path: [7], value: listRef }).
+                                    map(function(data) {
+                                        return {
+                                            path: [7],
+                                            value: data.json[7]
+                                        };
+                                    }))
                             .concat(Rx.Observable["return"]({ path: [], invalidated: true }));
                     }
                 }

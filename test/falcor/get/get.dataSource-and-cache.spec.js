@@ -1,17 +1,19 @@
 var falcor = require("./../../../lib/");
 var Model = falcor.Model;
-var Expected = require('../../data/expected');
-var ReducedCache = require('../../data/ReducedCache');
-var Cache = require('../../data/Cache');
-var M = ReducedCache.MinimalCache;
 var Rx = require('rx');
-var getTestRunner = require('./../../getTestRunner');
-var testRunner = require('./../../testRunner');
 var noOp = function() {};
 var LocalDataSource = require('../../data/LocalDataSource');
 var Observable = Rx.Observable;
 var sinon = require('sinon');
 var expect = require('chai').expect;
+var clean = require('./../../cleanData').clean;
+var cacheGenerator = require('./../../CacheGenerator');
+var M = function() {
+    return cacheGenerator(0, 1);
+};
+var Cache = function() {
+    return cacheGenerator(0, 40);
+};
 
 describe('DataSource and Partial Cache', function() {
     describe('Preload Functions', function() {
@@ -20,59 +22,66 @@ describe('DataSource and Partial Cache', function() {
             var onNext = sinon.spy();
             var secondOnNext = sinon.spy();
             model.
-                preload(['videos', 1234, 'summary'], ['videos', 766, 'summary']).
-                doAction(onNext).
-                doAction(noOp, noOp, function() {
+                preload(['videos', 0, 'title'], ['videos', 1, 'title']).
+                doAction(onNext, noOp, function() {
                     expect(onNext.callCount).to.equal(0);
                 }).
                 defaultIfEmpty({}).
                 flatMap(function() {
-                    return model.get(['videos', 1234, 'summary'], ['videos', 766, 'summary']);
+                    return model.get(['videos', 0, 'title'], ['videos', 1, 'title']);
                 }).
-                doAction(secondOnNext).
-                doAction(noOp, noOp, function() {
+                doAction(secondOnNext, noOp, function() {
                     expect(secondOnNext.calledOnce).to.be.ok;
-                    testRunner.compare({
+                    expect(secondOnNext.getCall(0).args[0]).to.deep.equals({
                         json: {
                             videos: {
-                                1234: {
-                                    summary: {
-                                        title: "House of Cards",
-                                        url: "/movies/1234"
-                                    }
+                                0: {
+                                    title: 'Video 0'
                                 },
-                                766: {
-                                    summary: {
-                                        title: "Terminator 3",
-                                        url: "/movies/766"
-                                    }
+                                1: {
+                                    title: 'Video 1'
                                 }
                             }
                         }
-                    }, secondOnNext.getCall(0).args[0]);
+                    });
                 }).
                 subscribe(noOp, done, done);
         });
 
         it('should get a complex argument into a single arg.', function(done) {
-            var expected = Expected.Complex().toOnly.AsPathMap.values[0];
             var model = new Model({cache: M(), source: new LocalDataSource(Cache())});
             var onNext = sinon.spy();
             var secondOnNext = sinon.spy();
             model.
-                preload(['genreList', 0, {to: 1}, 'summary']).
+                preload(['lolomo', 0, {to: 1}, 'item', 'title']).
                 doAction(onNext).
                 doAction(noOp, noOp, function() {
                     expect(onNext.callCount).to.equal(0);
                 }).
                 defaultIfEmpty({}).
                 flatMap(function() {
-                    return model.get(['genreList', 0, {to: 1}, 'summary']);
+                    return model.get(['lolomo', 0, {to: 1}, 'item', 'title']);
                 }).
-                doAction(secondOnNext).
-                doAction(noOp, noOp, function() {
+                doAction(secondOnNext, noOp, function() {
                     expect(secondOnNext.calledOnce).to.be.ok;
-                    testRunner.compare(expected, secondOnNext.getCall(0).args[0]);
+                    expect(secondOnNext.getCall(0).args[0]).to.deep.equals({
+                        json: {
+                            lolomo: {
+                                0: {
+                                    0: {
+                                        item: {
+                                            title: 'Video 0'
+                                        }
+                                    },
+                                    1: {
+                                        item: {
+                                            title: 'Video 1'
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    });
                 }).
                 subscribe(noOp, done, done);
         });
@@ -80,30 +89,58 @@ describe('DataSource and Partial Cache', function() {
     describe('PathMap', function() {
         it('should get multiple arguments into a single toJSON response.', function(done) {
             var model = new Model({cache: M(), source: new LocalDataSource(Cache())});
-            var expected = Expected.Complex().toOnly.AsPathMap.values[0];
-            var next = false;
+            var onNext = sinon.spy();
             model.
-                get(['genreList', 0, 0, 'summary'], ['genreList', 0, 1, 'summary']).
-                doAction(function(x) {
-                    next = true;
-                    testRunner.compare(expected, x);
-                }, noOp, function() {
-                    testRunner.compare(true, next, 'Expect to be onNext at least 1 time.');
+                get(['lolomo', 0, 0, 'item', 'title'], ['lolomo', 0, 1, 'item', 'title']).
+                doAction(onNext, noOp, function() {
+                    expect(onNext.calledOnce).to.be.ok;
+                    expect(onNext.getCall(0).args[0]).to.deep.equals({
+                        json: {
+                            lolomo: {
+                                0: {
+                                    0: {
+                                        item: {
+                                            title: 'Video 0'
+                                        }
+                                    },
+                                    1: {
+                                        item: {
+                                            title: 'Video 1'
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    });
                 }).
                 subscribe(noOp, done, done);
         });
 
         it('should get a complex argument into a single arg.', function(done) {
             var model = new Model({cache: M(), source: new LocalDataSource(Cache())});
-            var expected = Expected.Complex().toOnly.AsPathMap.values[0];
-            var next = false;
+            var onNext = sinon.spy();
             model.
-                get(['genreList', 0, {to: 1}, 'summary']).
-                doAction(function(x) {
-                    next = true;
-                    testRunner.compare(expected, x);
-                }, noOp, function() {
-                    testRunner.compare(true, next, 'Expect to be onNext at least 1 time.');
+                get(['lolomo', 0, {to: 1}, 'item', 'title']).
+                doAction(onNext, noOp, function() {
+                    expect(onNext.calledOnce).to.be.ok;
+                    expect(onNext.getCall(0).args[0]).to.deep.equals({
+                        json: {
+                            lolomo: {
+                                0: {
+                                    0: {
+                                        item: {
+                                            title: 'Video 0'
+                                        }
+                                    },
+                                    1: {
+                                        item: {
+                                            title: 'Video 1'
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    });
                 }).
                 subscribe(noOp, done, done);
         });
@@ -111,32 +148,38 @@ describe('DataSource and Partial Cache', function() {
     describe('_toJSONG', function() {
         it('should get multiple arguments into a single _toJSONG response.', function(done) {
             var model = new Model({cache: M(), source: new LocalDataSource(Cache())});
-            var expected = Expected.Complex().toOnly.AsJSONG.values[0];
-            var next = false;
+            var onNext = sinon.spy();
             model.
-                get(['genreList', 0, 0, 'summary'], ['genreList', 0, 1, 'summary']).
+                get(['lolomo', 0, 0, 'item', 'title'], ['lolomo', 0, 1, 'item', 'title']).
                 _toJSONG().
-                doAction(function(x) {
-                    next = true;
-                    testRunner.compare(expected, x);
-                }, noOp, function() {
-                    testRunner.compare(true, next, 'Expect to be onNext at least 1 time.');
+                doAction(onNext, noOp, function() {
+                    expect(onNext.calledOnce).to.be.ok;
+                    var out = clean(onNext.getCall(0).args[0]);
+                    var expected = clean({
+                        jsonGraph: cacheGenerator(0, 2),
+                        paths: [['lolomo', 0, 0, 'item', 'title'],
+                            ['lolomo', 0, 1, 'item', 'title']]
+                    });
+                    expect(out).to.deep.equals(expected);
                 }).
                 subscribe(noOp, done, done);
         });
 
         it('should get a complex argument into a single arg.', function(done) {
             var model = new Model({cache: M(), source: new LocalDataSource(Cache())});
-            var expected = Expected.Complex().toOnly.AsJSONG.values[0];
-            var next = false;
+            var onNext = sinon.spy();
             model.
-                get(['genreList', 0, {to: 1}, 'summary']).
+                get(['lolomo', 0, {to: 1}, 'item', 'title']).
                 _toJSONG().
-                doAction(function(x) {
-                    next = true;
-                    testRunner.compare(expected, x);
-                }, noOp, function() {
-                    testRunner.compare(true, next, 'Expect to be onNext at least 1 time.');
+                doAction(onNext, noOp, function() {
+                    expect(onNext.calledOnce).to.be.ok;
+                    var out = clean(onNext.getCall(0).args[0]);
+                    var expected = clean({
+                        jsonGraph: cacheGenerator(0, 2),
+                        paths: [['lolomo', 0, 0, 'item', 'title'],
+                            ['lolomo', 0, 1, 'item', 'title']]
+                    });
+                    expect(out).to.deep.equals(expected);
                 }).
                 subscribe(noOp, done, done);
         });
