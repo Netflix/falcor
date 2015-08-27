@@ -1,4 +1,4 @@
-describe('Get', function() {
+describe.only('Get', function() {
     require('./get.cache-only.spec');
     require('./get.dataSource-only.spec');
     require('./get.dataSource-and-cache.spec');
