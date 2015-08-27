@@ -55,11 +55,9 @@ describe("Deref-On", function() {
             var count = 0;
             nextModel.
                 get([0, 'summary']).
-                toPathValues().
                 doAction(function(x) {
                     testRunner.compare({
-                        path: [],
-                        value: 'The humans are dead.'
+                        json: 'The humans are dead.'
                     }, x);
                     count++;
                 }, noOp, function() {
@@ -113,12 +111,11 @@ describe("Deref-On", function() {
             dataModel.
                 deref(["genreList", 0], ['summary']).
                 flatMap(function(boundModel) {
-                    return boundModel.get(['summarieses']).toPathValues();
+                    return boundModel.get(['summarieses']);
                 }).
                 doAction(function(x) {
                     testRunner.compare({
-                        path: [],
-                        value: 'The humans are dead.'
+                        json: 'The humans are dead.'
                     }, x);
                     count++;
                 }, noOp, function() {
