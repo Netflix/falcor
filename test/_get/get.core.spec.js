@@ -17,12 +17,6 @@ var Errors = Expected.Errors;
 
 describe.only('Core', function() {
     describe('Values', function() {
-        it('should get a value directly', function() {
-            getTestRunner(Values().direct);
-        });
-        it('should get a value that is a reference', function() {
-            getTestRunner(Values().reference);
-        });
         describe('Errors', function() {
             it('should get an error directly', function () {
                 getTestRunner(Values().errorBranchSummary);

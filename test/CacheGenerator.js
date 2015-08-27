@@ -8,12 +8,12 @@ module.exports = function cacheGenerator(videoStartIdx, videoCount) {
     var listStartIndex = Math.floor(videoStartIdx / VIDEO_COUNT_PER_LIST);
     var startIdx = videoStartIdx % VIDEO_COUNT_PER_LIST;
     return {
-        lolomo: ref('lolomos[1234]'),
+        lolomo: ref(['lolomos', '1234']),
         lolomos: {
             1234: makeLolomos(listStartIndex, videoCount)
         },
         lists: makeLists(listStartIndex, startIdx, videoCount),
-        videos: makeVideos(listStartIndex, videoCount)
+        videos: makeVideos(videoStartIdx, videoCount)
     };
 };
 
@@ -66,6 +66,6 @@ function makeLists(listStartIdx, videoStartIdx, count) {
 
 function makeItem(idx) {
     return {
-        item: ref(['videos', idx])
+        item: ref(['videos', '' + idx])
     };
 }

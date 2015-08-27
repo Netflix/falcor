@@ -8,7 +8,10 @@ var LocalDataSource = require("./data/LocalDataSource");
 var _ = require("lodash");
 var noOp = function() {};
 var Rx = require('rx');
-
+var cleanData = require('./cleanData');
+var clean = cleanData.clean;
+var strip = cleanData.strip;
+var traverseAndConvert = cleanData.traverseAndConvert;
 var __key = require("../lib/internal/key");
 
 module.exports = {
@@ -37,8 +40,9 @@ module.exports = {
         };
     },
     convertIntegers: traverseAndConvert,
-    clean: function(item) {
-        return clean(item, {strip: []});
+    clean: function(item, strip) {
+        strip = strip || [];
+        return clean(item, {strip: strip});
     },
     compare: function(expected, actual, messageOrOptions, options) {
         var opts = _.extend({
@@ -87,15 +91,6 @@ module.exports = {
     },
     jsonGraphDerefException: 'It is not legal to use the JSON Graph format from a bound Model. JSON Graph format can only be used from a root model.'
 };
-function clean(item, options) {
-    traverseAndConvert(item);
-    strip(item, __key, "pathSetIndex");
-
-    options.strip.forEach(function(s) {
-        strip(item, s);
-    });
-    return item;
-}
 
 function validateData(expected, actual) {
     expect(actual, "actual").to.be.ok;
@@ -141,41 +136,3 @@ function validateOperation(name, expected, actual, messageSuffix) {
     }
 }
 
-function traverseAndConvert(obj) {
-    if (Array.isArray(obj)) {
-        for (var i = 0; i < obj.length; i++) {
-            if (typeof obj[i] === "object") {
-                traverseAndConvert(obj[i]);
-            } else if (typeof obj[i] === "number") {
-                obj[i] = obj[i] + "";
-            } else if(typeof obj[i] === "undefined") {
-                obj[i] = null;
-            }
-        }
-    } else if (obj != null && typeof obj === "object") {
-        Object.keys(obj).forEach(function(k) {
-            if (typeof obj[k] === "object") {
-                traverseAndConvert(obj[k]);
-            } else if (typeof obj[k] === "number") {
-                obj[k] = obj[k] + "";
-            } else if(typeof obj[k] === "undefined") {
-                obj[k] = null;
-            }
-        });
-    }
-    return obj;
-}
-
-function strip(obj, key) {
-    var keys = Array.prototype.slice.call(arguments, 1);
-    var args = [0].concat(keys);
-    if (obj != null && typeof obj === "object") {
-        Object.keys(obj).forEach(function(k) {
-            if (~keys.indexOf(k)) {
-                delete obj[k];
-            } else if ((args[0] = obj[k]) != null && typeof obj[k] === "object") {
-                strip.apply(null, args);
-            }
-        });
-    }
-}
