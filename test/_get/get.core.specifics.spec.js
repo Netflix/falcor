@@ -20,28 +20,6 @@ var noOp = function() {};
 var sinon = require('sinon');
 
 describe('Specific Cases', function() {
-    describe('Selector Missing PathSet Index', function() {
-        it('should report the missing path indices.', function () {
-            var model = new Model({cache: Cache()}).withoutDataSource();
-            var results = model._getPathValuesAsJSON(model, [['missingPath1'], ['missingPath2'], ['missingPath3']], [{}, {}, {}]);
-            var missingPaths = results.requestedMissingPaths;
-            testRunner.compare(0, missingPaths[0].pathSetIndex);
-            testRunner.compare(1, missingPaths[1].pathSetIndex);
-            testRunner.compare(2, missingPaths[2].pathSetIndex);
-        });
-        it('should report the missing path indices on complex paths.', function () {
-            var model = new Model({cache: Cache()}).withoutDataSource();
-            var results = model._getPathValuesAsJSON(model, [['missingPath1'], ['genreList', 0, {from: 41, to: 50}, 'summary']], [{}, {}]);
-            var missingPaths = results.requestedMissingPaths;
-            testRunner.compare(0, missingPaths[0].pathSetIndex);
-            testRunner.compare(['missingPath1'], missingPaths[0]);
-            for (var i = 1; i < missingPaths.length; i++) {
-                testRunner.compare(1, missingPaths[i].pathSetIndex);
-                testRunner.compare(['genreList', 0, [40 + i], 'summary'], missingPaths[i]);
-            }
-        });
-    });
-
     describe('Seed Filling', function() {
         it('should continue to populate the seed toJSON()', function () {
             var model = new Model({cache: Cache()}).withoutDataSource();
@@ -82,66 +60,6 @@ describe('Specific Cases', function() {
                     'url': '/movies/1'
                 }
             }, seed[0].jsonGraph.videos[1].summary);
-        });
-        it('should continue to populate the seed selector.', function () {
-            var model = new Model({cache: Cache()}).withoutDataSource();
-            var seed = [{}];
-            model._getPathValuesAsJSON(model, [['videos', [0], 'summary']], seed);
-            model._getPathValuesAsJSON(model, [['videos', [1], 'summary']], seed);
-
-            testRunner.compare({
-                'title': 'Additional Title 0',
-                'url': '/movies/0'
-            }, seed[0].json[0]);
-
-            testRunner.compare({
-                'title': 'Additional Title 1',
-                'url': '/movies/1'
-            }, seed[0].json[1]);
-        });
-        it('should continue to populate multiple seeds in the selector.', function () {
-            var model = new Model({cache: Cache()}).withoutDataSource();
-            var seed = [{}, {}];
-            model._getPathValuesAsJSON(model, [
-                ['videos', [0], 'summary'],
-                ['videos', [2], 'summary']
-            ], seed);
-            model._getPathValuesAsJSON(model, [
-                ['videos', [1], 'summary'],
-                ['videos', [3], 'summary']
-            ], seed);
-
-            testRunner.compare({
-                'title': 'Additional Title 0',
-                'url': '/movies/0'
-            }, seed[0].json[0]);
-
-            testRunner.compare({
-                'title': 'Additional Title 1',
-                'url': '/movies/1'
-            }, seed[0].json[1]);
-
-            testRunner.compare({
-                'title': 'Additional Title 2',
-                'url': '/movies/2'
-            }, seed[1].json[2]);
-
-            testRunner.compare({
-                'title': 'Additional Title 3',
-                'url': '/movies/3'
-            }, seed[1].json[3]);
-        });
-        it('should fill double permute complex paths.', function () {
-            var model = new Model({cache: Cache()}).withoutDataSource();
-            var seed = [{}];
-            model._getPathValuesAsJSON(model, [
-                ['genreList', [0], [0], 'summary']
-            ], seed);
-
-            testRunner.compare({
-                'title': 'House of Cards',
-                'url': '/movies/1234'
-            }, seed[0].json[0][0]);
         });
         it('should fill double permute complex paths with partially filled seed.', function () {
             var model = new Model({cache: Cache()}).withoutDataSource();

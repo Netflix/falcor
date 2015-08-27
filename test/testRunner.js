@@ -88,8 +88,7 @@ module.exports = {
         }
 
         return obs;
-    },
-    jsonGraphDerefException: 'It is not legal to use the JSON Graph format from a bound Model. JSON Graph format can only be used from a root model.'
+    }
 };
 
 function validateData(expected, actual) {

@@ -23,7 +23,6 @@ module.exports = function(tests) {
 function run(test) {
     it(test.it, function() {
         var isJSONG = test.isJSONG;
-        var input = test.input;
 
         // Gets the expected output, if its a
         // function, then call the function to get it.
@@ -34,7 +33,8 @@ function run(test) {
         var requestedMissingPaths = test.requestedMissingPaths;
         var optimizedMissingPaths = test.optimizedMissingPaths;
         var errors = test.errors;
-        var isJSONInput = !Array.isArray(input[0]);
+        var type = test.input && test.input[0] || test.inputs[0][0];
+        var isJSONInput = !Array.isArray(type);
         var fnKey = 'getWith' +
             (isJSONInput ? 'JSON' : 'Paths') +
             'As' +
@@ -58,8 +58,24 @@ function run(test) {
             model = model.boxValues();
         }
 
+        // TODO: This is cheating, but its intentional for testing
+        if (test.deref) {
+            model._path = test.deref;
+        }
+
         var seed = [{}];
-        var out = fn(model, input, seed);
+        var out;
+
+        if (test.input) {
+            out = fn(model, test.input, seed);
+        }
+
+        else {
+            test.inputs.forEach(function(input) {
+                out = fn(model, input, seed);
+            });
+        }
+
         if (isJSONG || test.boxValues) {
             clean(seed[0], {strip: ["$size"]});
             clean(expectedOutput, {strip: ["$size"]});

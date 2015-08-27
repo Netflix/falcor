@@ -3,4 +3,5 @@ describe.only('Get Core', function() {
     require('./values.spec');
     require('./references.spec');
     require('./errors.spec');
+    require('./deref.spec');
 });
