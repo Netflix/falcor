@@ -1,4 +1,4 @@
-var falcor = require('./../../lib');
+var falcor = require('./../../../lib');
 var Model = falcor.Model;
 var expect = require('chai').expect;
 var sinon = require('sinon');
@@ -38,10 +38,9 @@ describe('Caching Issues', function() {
                 }
             }
         });
-        var clone = source.clone({});
-        source._root.unsafeMode = clone._root.unsafeMode = true;
-        var resSource = source._getPathValuesAsJSON(source, [['lolomo', 'summary']], [{}]);
-        var resClone = clone._getPathValuesAsJSON(clone, [['lolomo', 'summary']], [{}]);
+        var clone = source._clone({});
+        var resSource = source._getPathValuesAsPathMap(source, [['lolomo', 'summary']], [{}]);
+        var resClone = clone._getPathValuesAsPathMap(clone, [['lolomo', 'summary']], [{}]);
         expect(resClone).to.deep.equals(resSource);
 
         source.setCache({
@@ -49,8 +48,8 @@ describe('Caching Issues', function() {
                 name: 'Terminator 2'
             }
         });
-        resSource = source._getPathValuesAsJSON(source, [['lolomo', 'name']], [{}]);
-        resClone = clone._getPathValuesAsJSON(clone, [['lolomo', 'name']], [{}]);
+        resSource = source._getPathValuesAsPathMap(source, [['lolomo', 'name']], [{}]);
+        resClone = clone._getPathValuesAsPathMap(clone, [['lolomo', 'name']], [{}]);
         expect(resClone).to.deep.equals(resSource);
     });
 });

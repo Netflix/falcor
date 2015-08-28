@@ -36,7 +36,7 @@ module.exports = {
             subscribe(noOp, noOp, noOp);
     },
     'Tests getting empty cache to dataSource results': function() {
-        model.
+        triggerModel.
             get(row).
             subscribe(noOp, noOp, function() {
                 triggerModel._root.cache = {};
@@ -49,7 +49,7 @@ module.exports = {
             triggerSource.trigger();
     },
     'Tests getting empty cache to dataSource results again': function() {
-        model.
+        triggerModel.
             get(row).
             subscribe(noOp, noOp, function() {
                 triggerModel._root.cache = {};

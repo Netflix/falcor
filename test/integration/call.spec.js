@@ -81,22 +81,8 @@ describe('call', function() {
         var onNext = sinon.spy();
         model.
             call("genreList[0].titles.push", args, ['name']).
-            doAction(onNext).
-            doAction(noOp, noOp, function() {
-                expect(onNext.calledOnce).to.be.ok;
-                expect(onNext.getCall(0).args[0]).to.deep.equals({
-                    json: {
-                        genreList: {
-                            0: {
-                                titles: {
-                                    2: {
-                                        name: undefined
-                                    }
-                                },
-                            }
-                        }
-                    }
-                });
+            doAction(onNext, noOp, function() {
+                expect(onNext.callCount).to.equal(0);
             }).
             subscribe(noOp, done, done);
     });

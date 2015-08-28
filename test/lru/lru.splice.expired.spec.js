@@ -19,7 +19,7 @@ var __tail = require("./../../lib/internal/tail");
 var __next = require("./../../lib/internal/next");
 var __prev = require("./../../lib/internal/prev");
 
-describe('Expired', function() {
+xdescribe('Expired', function() {
     describe('Input Paths', function() {
         describe('AsJSONG', function() {
             it('should splice expired item.', function(done) {

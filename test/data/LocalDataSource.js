@@ -79,15 +79,12 @@ LocalSource.prototype = {
                     errorSelector: errorSelector});
                 jsongEnv = onSet(self, tempModel, jsongEnv);
 
-                tempModel._getPathValuesAsValues(
+                tempModel._getPathValuesAsJSONG(
                     tempModel,
                     jsongEnv.paths,
-                    function onNext(pathValue) {
-                        self.model._setPathValuesAsJSONG(self.model, [pathValue], seed);
-                    });
+                    seed);
 
                 // always output all the paths
-
                 onResults(seed[0]);
                 observer.onNext(seed[0]);
                 observer.onCompleted();
