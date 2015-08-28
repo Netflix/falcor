@@ -16,19 +16,13 @@ var results = {
     requestedPaths: []
 };
 var seed = {};
-onValue(model, node, seed, results, path, oPath, [], 'PathMap', false);
+onValue(model, node, seed, 5, results, path, oPath, false);
 
 module.exports = {
     'onValue': function() {
-        onValue(model, node, {}, results, path, oPath, [], 'PathMap', false);
+        onValue(model, node, {}, 5, results, path, oPath, false);
     },
     'onValue same': function() {
-        onValue(model, node, {}, results, path, oPath, [], 'PathMap', false);
-    },
-    'onValue same again': function() {
-        onValue(model, node, {}, results, path, oPath, [], 'PathMap', false);
-    },
-    'onValue for the peeps': function() {
-        onValue(model, node, {}, results, path, oPath, [], 'PathMap', false);
+        onValue(model, node, {}, 5, results, path, oPath, false);
     }
 };
