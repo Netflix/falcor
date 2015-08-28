@@ -1,9 +1,9 @@
 var ErrorDataSource = require("../../data/ErrorDataSource");
+var clean = require("../../cleanData").clean;
 var falcor = require("./../../../lib/");
 var Model = falcor.Model;
 var chai = require("chai");
 var expect = chai.expect;
-var testRunner = require("../../testRunner");
 var sinon = require('sinon');
 var noOp = function() {};
 var InvalidSourceError = require('../../../lib/errors/InvalidSourceError');
@@ -15,7 +15,6 @@ describe("Error", function() {
         });
         model.
             get(["test", {to: 5}, "summary"]).
-            toPathValues().
             doAction(noOp, function(err) {
                 expect(err.length).to.equal(6);
                 // not in boxValue mode
@@ -28,7 +27,7 @@ describe("Error", function() {
                 };
                 err.forEach(function(e, i) {
                     expected.path = ["test", i, "summary"];
-                    testRunner.compare(expected, e);
+                    expect(e).to.deep.equals(expected);
                 });
             }).
             subscribe(function() {
@@ -63,14 +62,16 @@ describe("Error", function() {
         var count = 0;
         model.
             get(["test", {to: 5}, "summary"]).
-            toPathValues().
             doAction(function(x) {
                 var expected = {
-                    path: ["test", count === 0 ? 0 : 5, "summary"],
-                    value: "in cache"
+                    json: {
+                        test: {
+                            0: {summary: "in cache"},
+                            5: {summary: "in cache"}
+                        }
+                    }
                 };
-                count++;
-                testRunner.compare(expected, x);
+                expect(x).to.deep.equals(expected);
             }, function(err) {
                 expect(err.length).to.equal(4);
                 // not in boxValue mode
@@ -83,9 +84,8 @@ describe("Error", function() {
                 };
                 err.forEach(function(e, i) {
                     expected.path = ["test", i + 1, "summary"];
-                    testRunner.compare(expected, e);
+                    expect(e).to.deep.equals(expected);
                 });
-                expect(count).to.equals(2);
             }).
             subscribe(noOp,
             function(e) {
@@ -145,9 +145,7 @@ describe("Error", function() {
         var onNext = sinon.spy();
         var onError = sinon.spy();
         model.
-            get({
-                json: { path: { to: { value: null } } }
-            }).
+            get(['path', 'to', 'value']).
             doAction(onNext, onError).
             doAction(noOp, function() {
                 expect(onNext.callCount).to.equal(0);

@@ -1,4 +1,4 @@
-var falcor = require('./../../lib');
+var falcor = require('./../../../lib');
 var Model = falcor.Model;
 var expect = require('chai').expect;
 var sinon = require('sinon');
@@ -16,18 +16,7 @@ describe('Caching Issues', function() {
 
         var model = new Model({source: source});
 
-        try {
-            model.
-                batch().
-                setCache(undefined).
-                subscribe();
-        } catch (e) {
-            var setCache = e.message.indexOf('setCache') >= 0;
-            var modelObject = e.message.indexOf('#<Model>') >= 0;
-            expect(setCache && modelObject).to.be.ok;
-            return ;
-        }
-        expect(false, 'should never get here').to.be.ok;
+        expect(model.batch().setCache);
     });
 
     it('should ensure that cache remains consistent amoung its clones.', function() {
@@ -38,10 +27,9 @@ describe('Caching Issues', function() {
                 }
             }
         });
-        var clone = source.clone({});
-        source._root.unsafeMode = clone._root.unsafeMode = true;
-        var resSource = source._getPathValuesAsJSON(source, [['lolomo', 'summary']], [{}]);
-        var resClone = clone._getPathValuesAsJSON(clone, [['lolomo', 'summary']], [{}]);
+        var clone = source._clone({});
+        var resSource = source._getPathValuesAsPathMap(source, [['lolomo', 'summary']], [{}]);
+        var resClone = clone._getPathValuesAsPathMap(clone, [['lolomo', 'summary']], [{}]);
         expect(resClone).to.deep.equals(resSource);
 
         source.setCache({
@@ -49,8 +37,8 @@ describe('Caching Issues', function() {
                 name: 'Terminator 2'
             }
         });
-        resSource = source._getPathValuesAsJSON(source, [['lolomo', 'name']], [{}]);
-        resClone = clone._getPathValuesAsJSON(clone, [['lolomo', 'name']], [{}]);
+        resSource = source._getPathValuesAsPathMap(source, [['lolomo', 'name']], [{}]);
+        resClone = clone._getPathValuesAsPathMap(clone, [['lolomo', 'name']], [{}]);
         expect(resClone).to.deep.equals(resSource);
     });
 });
