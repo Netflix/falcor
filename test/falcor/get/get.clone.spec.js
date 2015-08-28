@@ -16,18 +16,7 @@ describe('Caching Issues', function() {
 
         var model = new Model({source: source});
 
-        try {
-            model.
-                batch().
-                setCache(undefined).
-                subscribe();
-        } catch (e) {
-            var setCache = e.message.indexOf('setCache') >= 0;
-            var modelObject = e.message.indexOf('#<Model>') >= 0;
-            expect(setCache && modelObject).to.be.ok;
-            return ;
-        }
-        expect(false, 'should never get here').to.be.ok;
+        expect(model.batch().setCache);
     });
 
     it('should ensure that cache remains consistent amoung its clones.', function() {
