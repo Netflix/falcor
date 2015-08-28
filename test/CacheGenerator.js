@@ -31,7 +31,7 @@ function makeVideos(startIdx, count) {
     var videos = {};
     for (var i = startIdx; i < startIdx + count; ++i) {
         videos[i] = {};
-        videos[i].title = atom('Hello ' + i);
+        videos[i].title = atom('Video ' + i);
     }
     return videos;
 }
