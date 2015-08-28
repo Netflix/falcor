@@ -141,6 +141,16 @@ var lModel= new Model({
     cache: largeCache
 });
 
+var smallCache = {
+    hello: {
+        $type: 'atom',
+        value: 4
+    }
+};
+var sModel = new Model({
+    cache: smallCache
+});
+
 var walk = require('./../../../lib/get/getWalk');
 var results = {
     optimizedPaths: [],
@@ -150,6 +160,12 @@ var seed = {};
 walk(model, cache, cache, [{to: 4}], 0, seed, [], results, [], [], 'paths', 'PathMap', false);
 
 module.exports = {
+    'walk small': function() {
+        walk(sModel, smallCache, smallCache, ['hello'], 0, seed, [], results, [], [], 'paths', 'PathMap', false);
+    },
+    'walk small same': function() {
+        walk(sModel, smallCache, smallCache, ['hello'], 0, seed, [], results, [], [], 'paths', 'PathMap', false);
+    },
     'walk': function() {
         walk(model, cache, cache, [{to: 4}], 0, seed, [], results, [], [], 'paths', 'PathMap', false);
     },
