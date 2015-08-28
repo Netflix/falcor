@@ -159,64 +159,6 @@ describe('DataSource and Cache', function() {
         });
     });
 
-    describe('toPathValues', function() {
-        it('should set a value from falcor.', function(done) {
-            var model = new Model({cache: M(), source: new LocalDataSource(Cache())});
-            var e1 = {
-                newValue: '1'
-            };
-            var e2 = {
-                newValue: '2'
-            };
-            var count = 0;
-            model.
-                set(
-                    {path: ['videos', 1234, 'summary'], value: e1},
-                    {path: ['videos', 766, 'summary'], value: e2}).
-                toPathValues().
-                doAction(function(x) {
-                    if (count % 2 === 0) {
-                        testRunner.compare(
-                            {path: ['videos', 1234, 'summary'], value: e1},
-                            x);
-                    } else {
-                        testRunner.compare(
-                            {path: ['videos', 766, 'summary'], value: e2},
-                            x);
-                    }
-                    count++;
-                }, noOp, function() {
-                    testRunner.compare(4, count, 'Expected count to be called 4 times');
-                }).
-                subscribe(noOp, done, done);
-        });
-        it('should get a complex argument into a single arg.', function(done) {
-            var model = new Model({cache: M(), source: new LocalDataSource(Cache())});
-            var expected = {
-                newValue: '1'
-            };
-            var count = 0;
-            model.
-                set({path: ['genreList', 0, {to: 1}, 'summary'], value: expected}).
-                toPathValues().
-                doAction(function(x) {
-                    next = true;
-                    if (count % 2 === 0) {
-                        testRunner.compare(
-                            {path: ['genreList', 0, 0, 'summary'], value: expected},
-                            x);
-                    } else {
-                        testRunner.compare(
-                            {path: ['genreList', 0, 1, 'summary'], value: expected},
-                            x);
-                    }
-                    count++;
-                }, noOp, function() {
-                    testRunner.compare(4, count, 'Expected count to be called 4 times');
-                }).
-                subscribe(noOp, done, done);
-        });
-    });
     it('should ensure that the jsong sent to server is optimized.', function(done) {
         var model = new Model({
             cache: Cache(),

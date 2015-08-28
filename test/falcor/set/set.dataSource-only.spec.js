@@ -7,7 +7,7 @@ var LocalDataSource = require('./../../data/LocalDataSource');
 var Cache = require('./../../data/Cache');
 
 describe('DataSource.', function() {
-    it.only('should validate args are sent to the dataSource collapsed.', function(done) {
+    it('should validate args are sent to the dataSource collapsed.', function(done) {
         var onSet = sinon.spy(function(source, tmpGraph, jsonGraphFromSet) {
             return jsonGraphFromSet;
         });
