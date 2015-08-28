@@ -36,7 +36,7 @@ describe('Path Syntax', function() {
             setValue('test[0]', 6).
             doAction(function(x) {
                 called = true;
-                testRunner.compare(6, x);
+                testRunner.compare({ json: 6 }, x);
             }, noOp, function() {
                 testRunner.compare(true, called,
                    'The onNext function was expected to be called at least once.');

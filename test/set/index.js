@@ -1,6 +1,8 @@
 module.exports = function() {
-    require('./set.json-values.spec');
-    require('./set.json-sparse.spec');
-    require('./set.json-graph.spec');
-    require('./edge-cases.spec');
+    describe("set", function() {
+        require("./pathValues");
+        require("./pathMaps");
+        require("./jsonGraphs");
+        require("./edge-cases.spec");
+    });
 };

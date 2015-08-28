@@ -52,7 +52,6 @@ describe('DataSource and Deref', function() {
                     }
                 }, x);
             }, function(e) {
-                debugger
             }, function() {
                 testRunner.compare(2, count);
             }).

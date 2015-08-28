@@ -9,6 +9,11 @@ var noOp = function() {};
 var Rx = require('rx');
 var Observable = Rx.Observable;
 
+var strip = require("./support/strip");
+var $ref = require("falcor-json-graph").ref;
+var $atom = require("falcor-json-graph").atom;
+var $error = require("falcor-json-graph").error;
+
 describe("Special Cases", function() {
     it('should set in an array and the length should be set in.', function(done) {
         var model = new Model();
@@ -32,7 +37,8 @@ describe("Special Cases", function() {
             subscribe(noOp, done, done);
     });
     it('should set the cache in.', function() {
-        var model = new Model({cache: {}});
+        var model = new Model();
+        var cache = model._root.cache;
         var edgeCaseCache = {
             jsonGraph: {
                 user: {
@@ -46,21 +52,8 @@ describe("Special Cases", function() {
             ]
         };
 
-        var pathMap = [{}];
-        model._setJSONGsAsPathMap(model, [edgeCaseCache], pathMap);
-
-        testRunner.compare({
-            json: {
-                user: {
-                    name: 'Jim'
-                }
-            }
-        }, pathMap[0]);
-
-        var jsons = [{}];
-        model._root.cache = {};
-        model._setJSONGsAsJSON(model, [edgeCaseCache], jsons);
-        testRunner.compare({ json: { name: 'Jim' } }, jsons[0]);
+        model._setJSONGsAsPathMap(model, [edgeCaseCache]);
+        expect(strip(cache)).to.deep.equal(strip(edgeCaseCache.jsonGraph));
     });
     it("set blows away the cache.", function() {
         var model = new Model({});
@@ -117,34 +110,6 @@ describe("Special Cases", function() {
                 },
                 path: ["genreList", 1, 0, "summary"]
             });
-        });
-    });
-
-    it('should return the ranged items when ranges in array.', function() {
-        var JSONG = {
-            jsonGraph: {
-                foo: {
-                    0: {
-                        $type: $atom,
-                        value: 0
-                    },
-                    1: {
-                        $type: $atom,
-                        value: 75
-                    }
-                }
-            },
-            paths: [
-                ['foo', [{from: 0, to: 1}]]
-            ]
-        };
-        var model = new Model();
-        var out = [{}];
-
-        model._setJSONGsAsJSON(model, [JSONG], out);
-        expect(out[0].json).to.deep.equals({
-            0: 0,
-            1: 75
         });
     });
 });
