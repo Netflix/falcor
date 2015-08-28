@@ -19,7 +19,7 @@ var __tail = require("./../../lib/internal/tail");
 var __next = require("./../../lib/internal/next");
 var __prev = require("./../../lib/internal/prev");
 
-describe('Set', function() {
+xdescribe('Set', function() {
     describe('setPaths', function() {
         describe('PathMap', function () {
             it('should promote 1 item as head, no tail, no next/prev.', function (done) {

@@ -151,31 +151,33 @@ var sModel = new Model({
     cache: smallCache
 });
 
-var walk = require('./../../../lib/get/getWalk');
+var walk = require('./../../../lib/get/walkPath');
 var results = {
-    optimizedPaths: [],
-    requestedPaths: []
+    optimizedPaths: []
 };
 var seed = {};
-walk(model, cache, cache, [{to: 4}], 0, seed, [], results, [], [], 'paths', 'PathMap', false);
+walk(model, cache, cache, [{to: 4}], 0, seed, results, [], [], false);
+var small = ['hello'];
+var regular = [{to: 4}];
+var large = [{to: 4}, {to: 4}];
 
 module.exports = {
     'walk small': function() {
-        walk(sModel, smallCache, smallCache, ['hello'], 0, seed, [], results, [], [], 'paths', 'PathMap', false);
+        walk(sModel, smallCache, smallCache, small, 0, seed, results, [], [], false);
     },
     'walk small same': function() {
-        walk(sModel, smallCache, smallCache, ['hello'], 0, seed, [], results, [], [], 'paths', 'PathMap', false);
+        walk(sModel, smallCache, smallCache, small, 0, seed, results, [], [], false);
     },
     'walk': function() {
-        walk(model, cache, cache, [{to: 4}], 0, seed, [], results, [], [], 'paths', 'PathMap', false);
+        walk(model, cache, cache, regular, 0, seed, results, [], [], false);
     },
     'walk same': function() {
-        walk(model, cache, cache, [{to: 4}], 0, seed, [], results, [], [], 'paths', 'PathMap', false);
+        walk(model, cache, cache, regular, 0, seed, results, [], [], false);
     },
     'walk large': function() {
-        walk(lModel, largeCache, largeCache, [{to: 4}, {to: 4}], 0, seed, [], results, [], [], 'paths', 'PathMap', false);
+        walk(lModel, largeCache, largeCache, large, 0, seed, results, [], [], false);
     },
     'walk large again': function() {
-        walk(lModel, largeCache, largeCache, [{to: 4}, {to: 4}], 0, seed, [], results, [], [], 'paths', 'PathMap', false);
+        walk(lModel, largeCache, largeCache, large, 0, seed, results, [], [], false);
     }
 };
