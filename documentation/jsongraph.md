@@ -795,13 +795,13 @@ The object evaluating the abstract set operation may choose to coerce the value 
 }
 ~~~
         
-Let’s attempt to set the user rating of the title to 10, even though the only ratings allowed are between 1 and 5.   
+Let’s attempt to set the user rating of the title to 9, even though the only ratings allowed are between 1 and 5.   
 
 ~~~js
 { path: ["titlesById", 253, "userRating"], value: 9 }
 ~~~
 
-Firstly evaluate the “titlesById” key. We find a object, so we continue. We evaluate the number “721” key, and convert it into a string using the JSON stringify method. We find another object, so we continue. Finally we attempt to set the ”userRating” key to “9”, and the object evaluating the abstract set operation instead sets the rating to the upper bound of valid values: “5”. The number five is inserted in both the JSON Graph object, as well as the JSON Graph subset. The JSON Graph subset response is returned as the result of the abstract set operation. 
+Firstly evaluate the “titlesById” key. We find an object, so we continue. We evaluate the number “253” key, and convert it into a string using the JSON stringify method. We find another object, so we continue. Finally we attempt to set the ”userRating” key to “9”, and the object evaluating the abstract set operation instead sets the rating to the upper bound of valid values: “5”. The number five is inserted in both the JSON Graph object, as well as the JSON Graph subset. The JSON Graph subset response is returned as the result of the abstract set operation. 
 
 ~~~js
 // JSON Graph object
@@ -879,7 +879,7 @@ Let's invoke the "add" function using the abstract call operation. The abstract 
 
 The "callPath" is the [Path](http://netflix.github.io/falcor/documentation/paths.html) to the function within the [DataSource](http://netflix.github.io/falcor/documentation/datasources.html)'s JSON Graph object. Note that one invocation of call can only run a single function.
 
-The "arguments" parameter is the the array of arguments to be passed to the function being called.
+The "arguments" parameter is the array of arguments to be passed to the function being called.
 
 The "refPaths" is an array of [paths](http://netflix.github.io/falcor/documentation/paths.html) to retrieve from the targets of any references in the JSON Graph Envelope returned by the function. 
 
