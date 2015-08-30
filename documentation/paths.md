@@ -58,7 +58,7 @@ Here are some examples of the valid Path Strings:
 
 * "todos[0].name"
 * 'todos[0]["name"]'
-* "todos["0"]["name"]"
+* 'todos["0"]["name"]'
 
 _Unlike_ JavaScript's Path syntax it is also possible to use indexers for the first key in the path.
 
@@ -103,9 +103,9 @@ var model = new falcor.Model({
 // { path: ["todos", 0, "name"], value: 'get milk from corner store' }
 // { path: ["todos", 1, "name"], value: 'go to ATM' }
 model.
-  getValue("todos[0].name", "todos[1].name").
-  asPathValues().
-  subscribe(pathValue => console.log(JSON.stringify(pathValue));
+  get("todos[0].name", "todos[1].name").
+  toPathValues().
+  subscribe(pathValue => console.log(JSON.stringify(pathValue)));
 ~~~
 
 ## PathSets
@@ -137,7 +137,7 @@ PathSets are a superset of the Path grammer because in addition to Keys, PathSet
 * Range
 * Array of Keys or Ranges
 
-Two Paths can be collapsed into a PathSet if they are identical save for one Key position. In other words ["todos",0,"done"] can ["todos",5,"done"] be collapsed into ["todos", [0, 5], "done"]. Furthermore where a KeySet contains a sequence of consecutive integers, these keys can be collapsed into a range. In other words ["todos", 1, "done"], ["todos",  2, "done"], and ["todos", 3, "done"] can be collapsed into ["todos", { from: 1, to: 3 }, "done"].
+Two Paths can be collapsed into a PathSet if they are identical save for one Key position. In other words ["todos",0,"done"] and ["todos",5,"done"] can be collapsed into ["todos", [0, 5], "done"]. Furthermore where a KeySet contains a sequence of consecutive integers, these keys can be collapsed into a range. In other words ["todos", 1, "done"], ["todos",  2, "done"], and ["todos", 3, "done"] can be collapsed into ["todos", { from: 1, to: 3 }, "done"].
 
 [Models](http://netflix.github.io/falcor/documentation/model.html) can accept PathSets in one of two formats:
 
