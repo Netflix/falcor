@@ -8,7 +8,7 @@ var Observable = Rx.Observable;
 var sinon = require('sinon');
 var expect = require('chai').expect;
 
-describe.only('Cache Only', function() {
+describe('Cache Only', function() {
     describe('PathMap', function() {
         it('should get a value from falcor.', function(done) {
             var model = new Model({
