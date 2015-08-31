@@ -60,6 +60,10 @@ function run(test) {
             model._path = test.deref;
         }
 
+        if (test.materialize) {
+            model = model._materialize();
+        }
+
         var seed = [{}];
         var out;
 
