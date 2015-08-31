@@ -16,7 +16,11 @@ TriggerDataSource.prototype = {
         var self = this;
         return Rx.Observable.create(function(observer) {
             self._triggers.push(function() {
-                observer.onNext(self._response[++self._idx % self._length]);
+                var out = self._response[++self._idx % self._length];
+                if (typeof out === 'function') {
+                    out = out();
+                }
+                observer.onNext(out);
                 observer.onCompleted();
             });
         });
