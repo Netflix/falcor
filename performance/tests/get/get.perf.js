@@ -38,31 +38,31 @@ module.exports = {
         model.
             get(row).
             subscribe(noOp, noOp, noOp);
+    },
+    'Tests getting empty cache to dataSource results': function() {
+        triggerModel.
+            get(row).
+            subscribe(noOp, noOp, function() {
+                triggerModel._root.cache = {};
+                triggerModel._root[head] = null;
+                triggerModel._root[tail] = null;
+                triggerModel._root[prev] = null;
+                triggerModel._root[next] = null;
+                triggerModel._root.expired = [];
+            });
+            triggerSource.trigger();
+    },
+    'Tests getting empty cache to dataSource results again': function() {
+        triggerModel.
+            get(row).
+            subscribe(noOp, noOp, function() {
+                triggerModel._root.cache = {};
+                triggerModel._root[head] = null;
+                triggerModel._root[tail] = null;
+                triggerModel._root[prev] = null;
+                triggerModel._root[next] = null;
+                triggerModel._root.expired = [];
+            });
+            triggerSource.trigger();
     }
-    //'Tests getting empty cache to dataSource results': function() {
-        //triggerModel.
-            //get(row).
-            //subscribe(noOp, noOp, function() {
-                //triggerModel._root.cache = {};
-                //triggerModel._root[head] = null;
-                //triggerModel._root[tail] = null;
-                //triggerModel._root[prev] = null;
-                //triggerModel._root[next] = null;
-                //triggerModel._root.expired = [];
-            //});
-            //triggerSource.trigger();
-    //},
-    //'Tests getting empty cache to dataSource results again': function() {
-        //triggerModel.
-            //get(row).
-            //subscribe(noOp, noOp, function() {
-                //triggerModel._root.cache = {};
-                //triggerModel._root[head] = null;
-                //triggerModel._root[tail] = null;
-                //triggerModel._root[prev] = null;
-                //triggerModel._root[next] = null;
-                //triggerModel._root.expired = [];
-            //});
-            //triggerSource.trigger();
-    //}
 };
