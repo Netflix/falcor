@@ -12,7 +12,7 @@ function M() {
     return cacheGenerator(0, 1);
 }
 
-describe.only('DataSource and Deref', function() {
+describe('DataSource and Deref', function() {
     it('should get a value from from dataSource when bound.', function(done) {
         var model = new Model({cache: M(), source: new LocalDataSource(Cache())});
         model._root.unsafeMode = true;
@@ -35,14 +35,15 @@ describe.only('DataSource and Deref', function() {
             doAction(secondOnNext).
             doAction(noOp, noOp, function() {
                 expect(secondOnNext.calledOnce).to.be.ok;
-                testRunner.compare({
-                    1: {
-                        summary: {
-                            title: "Terminator 3",
-                            url: "/movies/766"
+                expect(secondOnNext.getCall(0).args[0]).to.deep.equals({
+                    json: {
+                        1: {
+                            item: {
+                                title: 'Video 1'
+                            }
                         }
                     }
-                }, secondOnNext.getCall(0).args[0].json);
+                });
             }).
             subscribe(noOp, done, done);
     });
