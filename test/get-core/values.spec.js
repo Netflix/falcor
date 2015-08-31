@@ -71,6 +71,34 @@ describe('Values', function() {
         },
         cache: cacheGenerator(0, 30)
     }, {
+        it: 'should allow for a null at the end to get a value behind a reference.',
+        input: [['lolomo', null]],
+        output: {
+            json: {
+                lolomo: 'value'
+            }
+        },
+        cache: {
+            lolomo: jsonGraph.ref(['test', 'value']),
+            test: {
+                value: atom('value')
+            }
+        }
+    }, {
+        it: 'should not get the value after the reference.',
+        input: [['lolomo']],
+        output: {
+            json: {
+                lolomo: ['test', 'value']
+            }
+        },
+        cache: {
+            lolomo: jsonGraph.ref(['test', 'value']),
+            test: {
+                value: atom('value')
+            }
+        }
+    }, {
 
     // JSONGraph ----------------------------------------
         it: 'should get JSONGraph for a single value out',

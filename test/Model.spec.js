@@ -86,9 +86,9 @@ describe("Model", function() {
     describe('JSON-Graph Specification', function() {
         require('./get-core');
 
-        xdescribe("#set", function() {
-            require("./set")();
-        });
+        //xdescribe("#set", function() {
+            //require("./set")();
+        //});
 
         xdescribe("#invalidate", function() {
             require("./invalidate")();

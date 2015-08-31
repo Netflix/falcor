@@ -201,7 +201,6 @@ var querys = {
 
 function singleItem(query, output) {
     var model = new Model({cache: {}});
-    debugger
     return testRunner.set(model, _.cloneDeep(querys[1][query]), output).
         do(function () {
             expect(model._root[__head].value).to.equal('i am 1');

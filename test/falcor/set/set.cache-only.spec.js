@@ -29,7 +29,6 @@ describe('Cache Only', function() {
             var next = false;
             model.
                 set({path: ['videos', 1234, 'summary'], value: value}).
-                toJSON().
                 doAction(function(x) {
                     testRunner.compare(expected, x);
                     next = true;

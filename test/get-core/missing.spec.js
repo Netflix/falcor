@@ -38,6 +38,16 @@ describe('Missing', function() {
             ['toMissing1', 'title']
         ],
         cache: missingCache
+    }, {
+        it: 'should report a value when materialized.',
+        input: [['missing', 'title']],
+        materialize: true,
+        output: {
+            json: {
+                missing: { $type: 'atom' }
+            }
+        },
+        cache: missingCache
     }];
 
     getCoreRunner(tests);
