@@ -184,5 +184,74 @@ describe('DataSource Only', function() {
             }).
             subscribe(noOp, done, done);
     });
+
+    it('should be able to dispose of getRequests.', function(done) {
+        var onGet = sinon.spy();
+        var source = new LocalDataSource(cacheGenerator(0, 2), {
+            onGet: onGet
+        });
+        var model = new Model({source: source}).batch();
+        var onNext = sinon.spy();
+        var disposable = model.
+            get(['videos', 0, 'title']).
+            doAction(onNext, noOp, function() {
+                throw new Error('Should not of completed.  It was disposed.');
+            }).
+            subscribe(noOp, done);
+
+
+        disposable.dispose();
+        setTimeout(function() {
+            try {
+                expect(onNext.callCount).to.equal(0);
+                expect(onGet.callCount).to.equal(0);
+            } catch(e) {
+                return done(e);
+            }
+            return done();
+        }, 200);
+    });
+
+    it('should be able to dispose one of two get requests..', function(done) {
+        var onGet = sinon.spy();
+        var source = new LocalDataSource(cacheGenerator(0, 2), {
+            onGet: onGet
+        });
+        var model = new Model({source: source}).batch();
+        var onNext = sinon.spy();
+        var disposable = model.
+            get(['videos', 0, 'title']).
+            doAction(onNext, noOp, function() {
+                throw new Error('Should not of completed.  It was disposed.');
+            }).
+            subscribe(noOp, done);
+        var onNext2 = sinon.spy();
+        model.
+            get(['videos', 0, 'title']).
+            doAction(onNext2).
+            subscribe(noOp, done);
+
+
+        disposable.dispose();
+        setTimeout(function() {
+            try {
+                expect(onNext.callCount).to.equal(0);
+                expect(onGet.callCount).to.equal(1);
+                expect(onNext2.calledOnce).to.be.ok;
+                expect(onNext2.getCall(0).args[0]).to.deep.equals({
+                    json: {
+                        videos: {
+                            0: {
+                                title: 'Video 0'
+                            }
+                        }
+                    }
+                });
+            } catch(e) {
+                return done(e);
+            }
+            return done();
+        }, 200);
+    });
 });
 
