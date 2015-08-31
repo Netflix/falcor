@@ -65,26 +65,24 @@ module.exports = {
     },
     get: function(model, query, output) {
         var obs;
-        if (output === 'selector') {
-            throw 'noeuhntoe';
-        }
         if (output === 'preload') {
             obs = model.preload(query);
-        } else {
-            obs = model.get(query)[output]();
+        }
+        else if (output === 'toJSON') {
+            obs = model.get(query);
+        }
+
+        else {
+            obs = model.get(query)._toJSONG();
         }
 
         return obs;
     },
     set: function(model, query, output) {
         var obs;
-        if (output === 'selector') {
-            throw 'noeuhntoe';
-        }
-        if (output === 'preload') {
-            obs = model.set(query, noOp);
-        } else {
-            obs = model.set(query)[output]();
+        obs = model.set(query);
+        if (output === '_toJSONG') {
+            obs = obs._toJSONG();
         }
 
         return obs;

@@ -20,7 +20,6 @@ describe('Cache as DataSource', function() {
             var next = false;
             model.
                 get(['videos', 1234, 'summary']).
-                toJSON().
                 doAction(function(x) {
                     testRunner.compare(expected, x);
                     next = true;
