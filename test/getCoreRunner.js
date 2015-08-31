@@ -35,10 +35,7 @@ function run(test) {
         var errors = test.errors;
         var type = test.input && test.input[0] || test.inputs[0][0];
         var isJSONInput = !Array.isArray(type);
-        var fnKey = 'getWith' +
-            (isJSONInput ? 'JSON' : 'Paths') +
-            'As' +
-            (isJSONG ? 'JSONGraph' : 'PathMap');
+        var fnKey = 'getWithPathsAs' + (isJSONG ? 'JSONGraph' : 'PathMap');
         var fn = get[fnKey];
         var cache = test.cache;
         if (typeof cache === 'function') {
