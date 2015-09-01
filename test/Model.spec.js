@@ -86,11 +86,11 @@ describe("Model", function() {
     describe('JSON-Graph Specification', function() {
         require('./get-core');
 
-        //xdescribe("#set", function() {
-            //require("./set")();
-        //});
+        describe("#set", function() {
+            require("./set")();
+        });
 
-        xdescribe("#invalidate", function() {
+        describe("#invalidate", function() {
             require("./invalidate")();
         });
     });

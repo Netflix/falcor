@@ -33,7 +33,7 @@ describe('Adding', function() {
                 subscribe(noOp, done, done);
         });
     });
-    xdescribe('setPaths', function() {
+    describe('setPaths', function() {
         it('should perform a hard-link with back references _toJSONG.', function(done) {
             setTest(setPath, '_toJSONG').
                 subscribe(noOp, done, done);
@@ -47,7 +47,7 @@ describe('Adding', function() {
                 subscribe(noOp, done, done);
         });
     });
-    xdescribe('setJSON', function() {
+    describe('setJSON', function() {
         it('should perform a hard-link with back references _toJSONG.', function(done) {
             setTest(setJSON, '_toJSONG').
                 subscribe(noOp, done, done);

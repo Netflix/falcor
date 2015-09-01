@@ -1,5 +1,5 @@
 module.exports = function() {
-    describe("set", function() {
+    describe("Set Core", function() {
         require("./pathValues");
         require("./pathMaps");
         require("./jsonGraphs");
