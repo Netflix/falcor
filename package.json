@@ -90,7 +90,7 @@
     "falcor-json-graph": "1.1.5",
     "falcor-path-syntax": "0.2.1",
     "falcor-path-utils": "0.3.4",
-    "promise": "^7.0.4",
+    "promise": "7.0.4",
     "rx": "2.5.3"
   }
 }
