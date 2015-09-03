@@ -19,7 +19,7 @@ var __tail = require("./../../lib/internal/tail");
 var __next = require("./../../lib/internal/next");
 var __prev = require("./../../lib/internal/prev");
 
-xdescribe('Overwrite', function() {
+describe('Overwrite', function() {
     describe('Input Paths', function() {
         describe('AsJSONG', function() {
             it('should splice an overwritten item.', function(done) {
@@ -46,7 +46,7 @@ xdescribe('Overwrite', function() {
             });
         });
     });
-    describe('Input PathMaps', function() {
+    xdescribe('Input PathMaps', function() {
         describe('AsJSONG', function() {
             it('should splice an overwritten item.', function(done) {
                 spliceOverwrite({json: 'overwrite'}, '_toJSONG').

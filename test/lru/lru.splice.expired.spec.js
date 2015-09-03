@@ -19,7 +19,7 @@ var __tail = require("./../../lib/internal/tail");
 var __next = require("./../../lib/internal/next");
 var __prev = require("./../../lib/internal/prev");
 
-xdescribe('Expired', function() {
+describe('Expired', function() {
     describe('Input Paths', function() {
         describe('AsJSONG', function() {
             it('should splice expired item.', function(done) {
@@ -27,7 +27,7 @@ xdescribe('Expired', function() {
                     subscribe(noOp, done, done);
             });
         });
-        describe('AsPathValues', function() {
+        xdescribe('AsPathValues', function() {
             it('should splice expired item.', function(done) {
                 spliceExpired(['expireSoon', 'summary'], 'toPathValues').
                     subscribe(noOp, done, done);
@@ -46,14 +46,14 @@ xdescribe('Expired', function() {
             });
         });
     });
-    describe('Input PathMaps', function() {
+    xdescribe('Input PathMaps', function() {
         describe('AsJSONG', function() {
             it('should splice expired item.', function(done) {
                 spliceExpired({ json: { expireSoon: { summary: null } } }, '_toJSONG').
                     subscribe(noOp, done, done);
             });
         });
-        describe('AsPathValues', function() {
+        xdescribe('AsPathValues', function() {
             it('should splice expired item.', function(done) {
                 spliceExpired({ json: { expireSoon: { summary: null } } }, 'toPathValues').
                     subscribe(noOp, done, done);

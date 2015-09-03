@@ -58,8 +58,8 @@ describe('Removing', function() {
 });
 describe('Expired', function() {
     var getPath = ['genreList', 0, 1, 'summary'];
-    var setPath = {path: ['genreList', 0, 1, 'summary'], value: {should: 'not set'}};
-    var setJSON = {json: {genreList: {0: {1: {summary: 'no set'}}}}};
+    var setPath = {path: ['genreList', 0, 1, 'summary'], value: {should: 'set'}};
+    var setJSON = {json: {genreList: {0: {1: {summary: 'set'}}}}};
     var setJSONG = {
         jsonGraph: {
             genreList: {
@@ -72,7 +72,8 @@ describe('Expired', function() {
                 abcd: {
                     1: {
                         summary: {
-                            should: 'not set'
+                            $type: "atom",
+                            value: { should: 'set' }
                         }
                     }
                 }
@@ -166,7 +167,7 @@ function setExpireyAndGet(query, output, get) {
             // var lhs = model._root.cache.genreList[0];
             // var rhs = model._root.cache.lists.abcd;
             expect(lhs[__ref_index]).to.not.be.ok;
-            expect(rhs[__refs_length]).to.not.be.ok;
+            expect(rhs[__ref + 0]).to.not.equal(lhs);
             expect(lhs[__context]).to.not.equal(rhs);
         });
 }

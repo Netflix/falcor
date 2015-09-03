@@ -17,6 +17,7 @@ describe('DataSource.', function() {
         var model = new Model({
             source: dataSource
         });
+
         model.
             set({
                 json: {

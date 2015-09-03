@@ -20,7 +20,6 @@ ErrorDataSource.prototype = {
         });
     },
     set: function(paths) {
-        debugger;
         return Rx.Observable.throw({
             $type: 'error',
             value: _.assign({

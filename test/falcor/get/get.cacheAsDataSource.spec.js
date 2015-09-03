@@ -8,7 +8,7 @@ var testRunner = require('./../../testRunner');
 var noOp = function() {};
 var LocalDataSource = require('../../data/LocalDataSource');
 var ErrorDataSource = require('../../data/ErrorDataSource');
-var isPathValue = require("./../../../lib/support/is-path-value");
+var isPathValue = require("./../../../lib/support/isPathValue");
 var expect = require("chai").expect;
 var sinon = require('sinon');
 
