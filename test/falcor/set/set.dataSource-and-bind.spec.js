@@ -9,7 +9,7 @@ var testRunner = require('./../../testRunner');
 var noOp = function() {};
 var LocalDataSource = require('../../data/LocalDataSource');
 var ErrorDataSource = require('../../data/ErrorDataSource');
-var isPathValue = require("./../../../lib/support/is-path-value");
+var isPathValue = require("./../../../lib/support/isPathValue");
 
 describe('DataSource and Deref', function() {
     it('should perform multiple trips to a dataSource.', function(done) {
@@ -52,7 +52,6 @@ describe('DataSource and Deref', function() {
                     }
                 }, x);
             }, function(e) {
-                debugger
             }, function() {
                 testRunner.compare(2, count);
             }).

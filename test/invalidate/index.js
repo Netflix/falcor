@@ -5,8 +5,8 @@ var falcor = require('./../../lib');
 var Model = falcor.Model;
 
 module.exports = function() {
-    require('./invalidate.path-sets.spec');
-    require('./invalidate.json-sparse.spec');
+    require("./pathMaps");
+    require("./pathSets");
     it('should invalidate with pathSyntax', function(done) {
         var model = new Model({
             cache: {
