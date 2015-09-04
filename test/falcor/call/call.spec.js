@@ -25,6 +25,21 @@ function getModel(newModel, cache) {
 }
 
 describe("Call", function() {
+
+    it("executes a remote call on a bound Model and sends the call and extra paths relative to the root", function(done) {
+        var model = getDataModel({
+            call: function(callPath, args, suffixes, extraPaths) {
+                expect(callPath).to.deep.equal(["lists", "add"]);
+                expect(extraPaths).to.deep.equal([[0, "summary"]]);
+                done();
+            }
+        }, Cache());
+        model
+            ._clone({ _path: ["lists"] })
+            .call(["add"], [], [], [[0, "summary"]])
+            .subscribe(noOp, noOp, noOp);
+    })
+
     it("executes a local function with the call args", function(done) {
 
         var model = getDataModel(new LocalDataSource(Cache()), ReducedCache());
