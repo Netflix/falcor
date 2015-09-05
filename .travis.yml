@@ -12,7 +12,7 @@ branches:
 sudo: false
 
 # Update npm to the latest version
-before_install: npm update -g npm
+before_install: npm update -g npm; npm cache clean;
 
 # travis runs 'npm install' by default, as the 'install' step
 
