@@ -146,12 +146,9 @@ describe("Error", function() {
         var onError = sinon.spy();
         model.
             get(['path', 'to', 'value']).
-            doAction(onNext, onError).
-            doAction(noOp, function() {
+            doAction(onNext, function(e) {
                 expect(onNext.callCount).to.equal(0);
-                expect(onError.calledOnce).to.be.ok;
-                expect(onError.getCall(0).args[0].name).to.equals(InvalidSourceError.name);
-                correct = true;
+                expect(InvalidSourceError.is(e), 'Expect error co be an InvalidSourceError').to.be.ok;
             }).
             subscribe(noOp, function(e) {
                 if (isAssertionError(e)) {

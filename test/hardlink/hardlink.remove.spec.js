@@ -58,7 +58,6 @@ describe('Removing', function() {
 });
 describe('Expired', function() {
     var getPath = ['genreList', 0, 1, 'summary'];
-    var getJSON = {json: {genreList: {0: {1: {summary: null}}}}};
     var setPath = {path: ['genreList', 0, 1, 'summary'], value: {should: 'set'}};
     var setJSON = {json: {genreList: {0: {1: {summary: 'set'}}}}};
     var setJSONG = {

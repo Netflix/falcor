@@ -8,14 +8,16 @@ var ImmediateScheduler = require("./../../../lib/schedulers/ImmediateScheduler")
 
 // single data trigger
 var TriggerDataSource = require("./../../TriggerDataSource");
-var triggerSource = new TriggerDataSource({
-    jsonGraph: {
-        videos: {
-            1234: {
-                summary: "Test"
+var triggerSource = new TriggerDataSource(function () {
+    return {
+        jsonGraph: {
+            videos: {
+                1234: {
+                    summary: "Test"
+                }
             }
         }
-    }
+    };
 });
 var triggerModel = new Model({
     source: triggerSource
@@ -24,22 +26,26 @@ var triggerQV2 = new RequestQueueV2(triggerModel, new ImmediateScheduler());
 var triggerQ = new RequestQueue(triggerModel, new ImmediateScheduler());
 
 // Multiple data trigger
-var triggerDiffSource = new TriggerDataSource([{
-    jsonGraph: {
-        videos: {
-            1234: {
-                summary: "Test"
+var triggerDiffSource = new TriggerDataSource([function() {
+    return {
+        jsonGraph: {
+            videos: {
+                1234: {
+                    summary: "Test"
+                }
             }
         }
-    }
-}, {
-    jsonGraph: {
-        videos: {
-            555: {
-                summary: "Test"
+    };
+}, function () {
+    return {
+        jsonGraph: {
+            videos: {
+                555: {
+                    summary: "Test"
+                }
             }
         }
-    }
+    };
 }]);
 
 var triggerDiffModel = new Model({
