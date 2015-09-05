@@ -10,6 +10,7 @@ var sinon = require('sinon');
 var cacheGenerator = require('./../../CacheGenerator');
 var clean = require('./../../cleanData').clean;
 var atom = require('falcor-json-graph').atom;
+var MaxRetryExceededError = require('./../../../lib/errors/MaxRetryExceededError');
 
 describe('DataSource Only', function() {
     var dataSource = new LocalDataSource(cacheGenerator(0, 2, ['title', 'art']));
@@ -253,5 +254,23 @@ describe('DataSource Only', function() {
             return done();
         }, 200);
     });
+    it('should throw a MaxRetryExceededError.', function(done) {
+        var model = new Model({ source: new LocalDataSource({}) });
+
+        model.
+            get(['videos', 0, 'title']).
+            doAction(noOp, function(e) {
+                expect(MaxRetryExceededError.is(e), 'MaxRetryExceededError expected.').to.be.ok;
+            }).
+            subscribe(noOp, function(e) {
+                if (isAssertionError(e)) {
+                    return done(e);
+                }
+                return done();
+            }, done.bind('should not complete'));
+    });
 });
 
+function isAssertionError(e) {
+    return e.hasOwnProperty('expected') && e.hasOwnProperty('actual');
+}
