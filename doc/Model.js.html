@@ -18,8 +18,7 @@ id: api
         <pre class="prettyprint source linenums"><code>var ModelRoot = require("./ModelRoot");
 var ModelDataSourceAdapter = require("./ModelDataSourceAdapter");
 
-var RequestQueue = require("./request/RequestQueue");
-var GetResponse = require("./response/GetResponse");
+var RequestQueue = require("./request/RequestQueueRx");
 var ModelResponse = require("./response/ModelResponse");
 var SetResponse = require("./response/SetResponse");
 var CallResponse = require("./response/CallResponse");
@@ -29,40 +28,34 @@ var ASAPScheduler = require("./schedulers/ASAPScheduler");
 var TimeoutScheduler = require("./schedulers/TimeoutScheduler");
 var ImmediateScheduler = require("./schedulers/ImmediateScheduler");
 
-var identity = require("./support/identity");
 var arrayClone = require("./support/array-clone");
 var arraySlice = require("./support/array-slice");
 
 var collectLru = require("./lru/collect");
 var pathSyntax = require("falcor-path-syntax");
 
-var getSize = require("./support/get-size");
-var isObject = require("./support/is-object");
-var isFunction = require("./support/is-function");
-var isPathValue = require("./support/is-path-value");
-var isPrimitive = require("./support/is-primitive");
-var isJsonEnvelope = require("./support/is-json-envelope");
-var isJsonGraphEnvelope = require("./support/is-json-graph-envelope");
+var getSize = require("./support/getSize");
+var isObject = require("./support/isObject");
+var isFunction = require("./support/isFunction");
+var isPrimitive = require("./support/isPrimitive");
+var isJSONEnvelope = require("./support/isJSONEnvelope");
+var isJSONGraphEnvelope = require("./support/isJSONGraphEnvelope");
 
-var setCache = require("./set/set-cache");
-var setJsonGraphAsJsonDense = require("./set/set-json-graph-as-json-dense");
+var setCache = require("./set/setPathMaps");
+var setJSONGraphs = require("./set/setJSONGraphs");
 var jsong = require("falcor-json-graph");
 var ID = 0;
-var validateInput = require("./support/validate-input");
+var validateInput = require("./support/validateInput");
 var noOp = function() {};
-
-var GET_VALID_INPUT = {
-    path: true,
-    pathValue: true,
-    pathSyntax: true,
-    json: true
-};
+var getCache = require("./get/getCache");
+var get = require("./get");
 var SET_VALID_INPUT = {
     pathValue: true,
     pathSyntax: true,
     json: true,
     jsonGraph: true
 };
+var GET_VALID_INPUT = require("./response/get/validInput");
 
 module.exports = Model;
 
@@ -158,16 +151,7 @@ Model.prototype._collectRatio = 0.75;
  * @param {...PathSet} path - the path(s) to retrieve
  * @return {ModelResponse.&lt;JSONEnvelope>} - the requested data as JSON
  */
-Model.prototype.get = function get() {
-    var out = validateInput(arguments, GET_VALID_INPUT, "get");
-    if (out !== true) {
-        return new ModelResponse(function(o) {
-            o.onError(out);
-        });
-    }
-    return this._get.apply(this, arguments);
-};
-
+Model.prototype.get = require("./response/get");
 /**
  * Sets the value at one or more places in the JSONGraph model. The set method accepts one or more {@link PathValue}s, each of which is a combination of a location in the document and the value to place there.  In addition to accepting  {@link PathValue}s, the set method also returns the values after the set operation is complete.
  * @function
@@ -196,35 +180,16 @@ Model.prototype.preload = function preload() {
             o.onError(out);
         });
     }
-    var args = Array.prototype.slice.apply(arguments, []);
-    var preloadOperation = this._get.apply(this, args.concat(identity));
-    return new ModelResponse(function preloadModelResponse(observer) {
-        preloadOperation.
-            subscribe(
-                identity,
-                function(e) {
-                    observer.onError(e);
-                }, function() {
-                    observer.onCompleted();
-                });
+    var args = Array.prototype.slice.call(arguments);
+    var self = this;
+    return new ModelResponse(function(obs) {
+        return self.get.apply(self, args).subscribe(function() {
+        }, function(err) {
+            obs.onError(err);
+        }, function() {
+            obs.onCompleted();
+        });
     });
-};
-
-Model.prototype._get = function _get() {
-    var args;
-    var argsIdx = -1;
-    var argsLen = arguments.length;
-    var selector = arguments[argsLen - 1];
-    if (isFunction(selector)) {
-        argsLen = argsLen - 1;
-    } else {
-        selector = void 0;
-    }
-    args = new Array(argsLen);
-    while (++argsIdx &lt; argsLen) {
-        args[argsIdx] = arguments[argsIdx];
-    }
-    return GetResponse.create(this, args, selector);
 };
 
 Model.prototype._set = function _set() {
@@ -348,21 +313,7 @@ Model.prototype.deref = require("./deref");
 
  // The code above prints "Jim" to the console.
  */
-Model.prototype.getValue = function getValue(path) {
-    var parsedPath = pathSyntax.fromPath(path);
-    var pathIdx = 0;
-    var pathLen = parsedPath.length;
-    while (++pathIdx &lt; pathLen) {
-        if (typeof parsedPath[pathIdx] === "object") {
-            /* eslint-disable no-loop-func */
-            return new ModelResponse(function(o) {
-                o.onError(new Error("Paths must be simple paths"));
-            });
-            /* eslint-enable no-loop-func */
-        }
-    }
-    return this._get(parsedPath, identity);
-};
+Model.prototype.getValue = require("./get/getValue");
 
 /**
  * Set value for a single {@link Path}.
@@ -380,22 +331,7 @@ Model.prototype.getValue = function getValue(path) {
 
  // The code above prints "Jim" to the console.
  */
-Model.prototype.setValue = function setValue(pathArg, valueArg) {
-    var value = isPathValue(pathArg) ? pathArg : Model.pathValue(pathArg, valueArg);
-    var pathIdx = 0;
-    var path = value.path;
-    var pathLen = path.length;
-    while (++pathIdx &lt; pathLen) {
-        if (typeof path[pathIdx] === "object") {
-            /* eslint-disable no-loop-func */
-            return new ModelResponse(function(o) {
-                o.onError(new Error("Paths must be simple paths"));
-            });
-            /* eslint-enable no-loop-func */
-        }
-    }
-    return this._set(value, identity);
-};
+Model.prototype.setValue = require("./set/setValue");
 
 // TODO: Does not throw if given a PathSet rather than a Path, not sure if it should or not.
 // TODO: Doc not accurate? I was able to invoke directly against the Model, perhaps because I don't have a data source?
@@ -421,17 +357,20 @@ Model.prototype.setCache = function modelSetCache(cacheOrJSONGraphEnvelope) {
     var cache = this._root.cache;
     if (cacheOrJSONGraphEnvelope !== cache) {
         var modelRoot = this._root;
+        var boundPath = this._path;
+        this._path = [];
         this._root.cache = {};
         if (typeof cache !== "undefined") {
             collectLru(modelRoot, modelRoot.expired, getSize(cache), 0);
         }
-        if (isJsonGraphEnvelope(cacheOrJSONGraphEnvelope)) {
-            setJsonGraphAsJsonDense(this, [cacheOrJSONGraphEnvelope], []);
-        } else if (isJsonEnvelope(cacheOrJSONGraphEnvelope)) {
-            setCache(this, cacheOrJSONGraphEnvelope.json);
+        if (isJSONGraphEnvelope(cacheOrJSONGraphEnvelope)) {
+            setJSONGraphs(this, [cacheOrJSONGraphEnvelope]);
+        } else if (isJSONEnvelope(cacheOrJSONGraphEnvelope)) {
+            setCache(this, [cacheOrJSONGraphEnvelope]);
         } else if (isObject(cacheOrJSONGraphEnvelope)) {
-            setCache(this, cacheOrJSONGraphEnvelope);
+            setCache(this, [{ json: cacheOrJSONGraphEnvelope }]);
         }
+        this._path = boundPath;
     } else if (typeof cache === "undefined") {
         this._root.cache = {};
     }
@@ -446,25 +385,17 @@ Model.prototype.setCache = function modelSetCache(cacheOrJSONGraphEnvelope) {
  // Storing the boxshot of the first 10 titles in the first 10 genreLists to local storage.
  localStorage.setItem('cache', JSON.stringify(model.getCache("genreLists[0...10][0...10].boxshot")));
  */
-Model.prototype.getCache = function getCache() {
+Model.prototype.getCache = function _getCache() {
     var paths = arraySlice(arguments);
     if (paths.length === 0) {
-        paths[0] = {
-            json: this._root.cache
-        };
+        return getCache(this._root.cache);
     }
-    var result;
-    var model = this.
-        withoutDataSource().
-        _materialize();
 
-    this.
-        get.apply(model, paths).
-        _toJSONG().
-        subscribe(function(envelope) {
-            result = envelope.jsonGraph || envelope.jsong;
-        });
-    return result;
+    var result = [{}];
+    var path = this._path;
+    get.getWithPathsAsJSONGraph(this, paths, result);
+    this._path = path;
+    return result[0].jsonGraph;
 };
 
 /**
@@ -648,39 +579,32 @@ Model.prototype.getPath = function getPath() {
     return arrayClone(this._path);
 };
 
-var getWalk = require("./get/getWalk");
-
 Model.prototype._getBoundValue = require("./get/getBoundValue");
 Model.prototype._getVersion = require("./get/getVersion");
 Model.prototype._getValueSync = require("./get/getValueSync");
-Model.prototype._getPathValuesAsValues = require("./get/getAsValues")(getWalk);
-Model.prototype._getPathValuesAsJSON = require("./get/getAsJSON")(getWalk);
-Model.prototype._getPathValuesAsPathMap = require("./get/getAsPathMap")(getWalk);
-Model.prototype._getPathValuesAsJSONG = require("./get/getAsJSONG")(getWalk);
-Model.prototype._getPathMapsAsValues = require("./get/getAsValues")(getWalk);
-Model.prototype._getPathMapsAsJSON = require("./get/getAsJSON")(getWalk);
-Model.prototype._getPathMapsAsPathMap = require("./get/getAsPathMap")(getWalk);
-Model.prototype._getPathMapsAsJSONG = require("./get/getAsJSONG")(getWalk);
 
-Model.prototype._setPathValuesAsJSON = require("./set/set-json-values-as-json-dense");
-Model.prototype._setPathValuesAsJSONG = require("./set/set-json-values-as-json-graph");
-Model.prototype._setPathValuesAsPathMap = require("./set/set-json-values-as-json-sparse");
-Model.prototype._setPathValuesAsValues = require("./set/set-json-values-as-json-values");
+Model.prototype._getPathValuesAsPathMap = get.getWithPathsAsPathMap;
+Model.prototype._getPathValuesAsJSONG = get.getWithPathsAsJSONGraph;
 
-Model.prototype._setPathMapsAsJSON = require("./set/set-json-sparse-as-json-dense");
-Model.prototype._setPathMapsAsJSONG = require("./set/set-json-sparse-as-json-graph");
-Model.prototype._setPathMapsAsPathMap = require("./set/set-json-sparse-as-json-sparse");
-Model.prototype._setPathMapsAsValues = require("./set/set-json-sparse-as-json-values");
+Model.prototype._setPathValuesAsJSON = require("./set/setPathValues");
+Model.prototype._setPathValuesAsJSONG = require("./set/setPathValues");
+Model.prototype._setPathValuesAsPathMap = require("./set/setPathValues");
+Model.prototype._setPathValuesAsValues = require("./set/setPathValues");
 
-Model.prototype._setJSONGsAsJSON = require("./set/set-json-graph-as-json-dense");
-Model.prototype._setJSONGsAsJSONG = require("./set/set-json-graph-as-json-graph");
-Model.prototype._setJSONGsAsPathMap = require("./set/set-json-graph-as-json-sparse");
-Model.prototype._setJSONGsAsValues = require("./set/set-json-graph-as-json-values");
+Model.prototype._setPathMapsAsJSON = require("./set/setPathMaps");
+Model.prototype._setPathMapsAsJSONG = require("./set/setPathMaps");
+Model.prototype._setPathMapsAsPathMap = require("./set/setPathMaps");
+Model.prototype._setPathMapsAsValues = require("./set/setPathMaps");
 
-Model.prototype._setCache = require("./set/set-cache");
+Model.prototype._setJSONGsAsJSON = require("./set/setJSONGraphs");
+Model.prototype._setJSONGsAsJSONG = require("./set/setJSONGraphs");
+Model.prototype._setJSONGsAsPathMap = require("./set/setJSONGraphs");
+Model.prototype._setJSONGsAsValues = require("./set/setJSONGraphs");
 
-Model.prototype._invalidatePathValuesAsJSON = require("./invalidate/invalidate-path-sets-as-json-dense");
-Model.prototype._invalidatePathMapsAsJSON = require("./invalidate/invalidate-json-sparse-as-json-dense");
+Model.prototype._setCache = require("./set/setPathMaps");
+
+Model.prototype._invalidatePathValuesAsJSON = require("./invalidate/invalidatePathSets");
+Model.prototype._invalidatePathMapsAsJSON = require("./invalidate/invalidatePathMaps");
 </code></pre>
     </article>
 </section>
@@ -816,10 +740,6 @@ Model.prototype._invalidatePathMapsAsJSON = require("./invalidate/invalidate-jso
             </li>
         
             <li class="toc-api-subgroup-item">
-                <a href="Model.html#getValue" data-target="#getValue">getValue</a>
-            </li>
-        
-            <li class="toc-api-subgroup-item">
                 <a href="Model.html#getVersion" data-target="#getVersion">getVersion</a>
             </li>
         
@@ -837,10 +757,6 @@ Model.prototype._invalidatePathMapsAsJSON = require("./invalidate/invalidate-jso
         
             <li class="toc-api-subgroup-item">
                 <a href="Model.html#setCache" data-target="#setCache">setCache</a>
-            </li>
-        
-            <li class="toc-api-subgroup-item">
-                <a href="Model.html#setValue" data-target="#setValue">setValue</a>
             </li>
         
             <li class="toc-api-subgroup-item">

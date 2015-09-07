@@ -1,6 +1,6 @@
 ---
 layout: api-page
-title: "typedefs/KeySet.js"
+title: "get/getCache.js"
 id: api
 ---
 
@@ -11,14 +11,58 @@ id: api
   
       
 <h2>
-    typedefs/KeySet.js
+    get/getCache.js
 </h2>
 <section>
     <article>
-        <pre class="prettyprint source linenums"><code>/**
- * A part of a {@link PathSet} that can be either a {@link Key}, {@link Range}, or Array of either.
- * @typedef {(Key|Range|Array.&lt;(Key|Range)>)} KeySet
+        <pre class="prettyprint source linenums"><code>var $modelCreated = require("./../internal/model-created");
+var clone = require("./util/clone");
+var prefix = require("./../internal/prefix");
+
+/**
+ * decends and copies the cache.
  */
+module.exports = function getCache(cache) {
+    var out = {};
+    _copyCache(cache, out);
+
+    return out;
+};
+
+function _copyCache(node, out, fromKey) {
+    // copy and return
+
+    Object.
+        keys(node).
+        filter(function(k) {
+            return k[0] !== prefix &amp;&amp; k !== "$size";
+        }).
+        forEach(function(key) {
+            var cacheNext = node[key];
+            var outNext = out[key];
+
+            if (!outNext) {
+                outNext = out[key] = {};
+            }
+
+            // Paste the node into the out cache.
+            if (cacheNext.$type) {
+                var isObject = cacheNext.value &amp;&amp; typeof cacheNext.value === "object";
+                var isUserCreatedcacheNext = !node[$modelCreated];
+                var value;
+                if (isObject || isUserCreatedcacheNext) {
+                    value = clone(cacheNext);
+                } else {
+                    value = cacheNext.value;
+                }
+
+                out[key] = value;
+                return;
+            }
+
+            _copyCache(cacheNext, outNext, key);
+        });
+}
 </code></pre>
     </article>
 </section>

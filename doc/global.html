@@ -50,6 +50,338 @@ id: api
       
 
       
+          <h3 class="subsection-title">Methods</h3>
+
+          
+              
+<section class="method-section">
+    
+        
+
+        <h4 class="name section-header function-name" id="GetRequestV2"><span class="type-signature"></span>GetRequestV2<span class="signature">(scheduler, requestQueue)</span><span class="type-signature return-signature"></span></h4>
+
+        
+    
+
+        
+        <div class="description">
+            <p>Creates a new GetRequest.  This GetRequest takes a scheduler and
+the request queue.  Once the scheduler fires, all batched requests
+will be sent to the server.  Upon request completion, the data is
+merged back into the cache and all callbacks are notified.</p>
+        </div>
+        
+
+    
+
+    
+
+    
+
+    
+        <h5>Parameters:</h5>
+        
+
+<div class="parameters-section">
+    <table class="params">
+        <thead>
+        <tr>
+            
+            <th class="header-name-and-attributes">
+              Name
+              
+            </th>
+            
+
+            <th class="header-type">Type</th>
+
+            
+
+            <th class="last header-description">Description</th>
+        </tr>
+        </thead>
+
+        <tbody>
+        
+
+            <tr>
+                
+                    <td>
+                        <span class="name">scheduler</span>
+                        
+                    </td>
+                
+
+                <td class="type">
+                
+                    
+<span class="param-type">Scheduler</span>
+
+
+                
+                </td>
+
+                
+
+                <td class="description last"><p>-</p></td>
+            </tr>
+
+        
+
+            <tr>
+                
+                    <td>
+                        <span class="name">requestQueue</span>
+                        
+                    </td>
+                
+
+                <td class="type">
+                
+                    
+<span class="param-type"><a href="global.html#RequestQueueV2">RequestQueueV2</a></span>
+
+
+                
+                </td>
+
+                
+
+                <td class="description last"><p>-</p></td>
+            </tr>
+
+        
+        </tbody>
+    </table>
+</div>
+
+    
+
+    
+
+
+
+
+  <dl class="details">
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+      <dt class="tag-source">Source:</dt>
+      <dd class="tag-source">
+          <a href="request_GetRequestV2.js.html">request/GetRequestV2.js</a>, <a href="request_GetRequestV2.js.html#line19">line 19</a>
+      </dd>
+      
+
+      
+
+      
+
+      
+  </dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</section>
+          
+              
+<section class="method-section">
+    
+        
+
+        <h4 class="name section-header function-name" id="RequestQueueV2"><span class="type-signature"></span>RequestQueueV2<span class="signature">(model, scheduler)</span><span class="type-signature return-signature"></span></h4>
+
+        
+    
+
+        
+        <div class="description">
+            <p>The request queue is responsible for queuing the operations to
+the model&quot;s dataSource.</p>
+        </div>
+        
+
+    
+
+    
+
+    
+
+    
+        <h5>Parameters:</h5>
+        
+
+<div class="parameters-section">
+    <table class="params">
+        <thead>
+        <tr>
+            
+            <th class="header-name-and-attributes">
+              Name
+              
+            </th>
+            
+
+            <th class="header-type">Type</th>
+
+            
+
+            <th class="last header-description">Description</th>
+        </tr>
+        </thead>
+
+        <tbody>
+        
+
+            <tr>
+                
+                    <td>
+                        <span class="name">model</span>
+                        
+                    </td>
+                
+
+                <td class="type">
+                
+                    
+<span class="param-type"><a href="Model.html">Model</a></span>
+
+
+                
+                </td>
+
+                
+
+                <td class="description last"><p>-</p></td>
+            </tr>
+
+        
+
+            <tr>
+                
+                    <td>
+                        <span class="name">scheduler</span>
+                        
+                    </td>
+                
+
+                <td class="type">
+                
+                    
+<span class="param-type">Scheduler</span>
+
+
+                
+                </td>
+
+                
+
+                <td class="description last"><p>-</p></td>
+            </tr>
+
+        
+        </tbody>
+    </table>
+</div>
+
+    
+
+    
+
+
+
+
+  <dl class="details">
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+      <dt class="tag-source">Source:</dt>
+      <dd class="tag-source">
+          <a href="request_RequestQueueV2.js.html">request/RequestQueueV2.js</a>, <a href="request_RequestQueueV2.js.html#line11">line 11</a>
+      </dd>
+      
+
+      
+
+      
+
+      
+  </dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</section>
+          
+      
 
       
           <h3 class="subsection-title">Type Definitions</h3>
@@ -1653,10 +1985,6 @@ or
             </li>
         
             <li class="toc-api-subgroup-item">
-                <a href="Model.html#getValue" data-target="#getValue">getValue</a>
-            </li>
-        
-            <li class="toc-api-subgroup-item">
                 <a href="Model.html#getVersion" data-target="#getVersion">getVersion</a>
             </li>
         
@@ -1674,10 +2002,6 @@ or
         
             <li class="toc-api-subgroup-item">
                 <a href="Model.html#setCache" data-target="#setCache">setCache</a>
-            </li>
-        
-            <li class="toc-api-subgroup-item">
-                <a href="Model.html#setValue" data-target="#setValue">setValue</a>
             </li>
         
             <li class="toc-api-subgroup-item">
