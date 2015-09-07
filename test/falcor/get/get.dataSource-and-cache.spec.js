@@ -185,8 +185,8 @@ describe('DataSource and Partial Cache', function() {
                 subscribe(noOp, done, done);
         });
     });
-    describe.only('Progressively', function() {
-        it('should get multiple arguments into a single toJSON response.', function(done) {
+    describe('Progressively', function() {
+        it('should get multiple arguments with multiple trips to the dataSource into a single toJSON response.', function(done) {
             var model = new Model({cache: M(), source: new LocalDataSource(Cache())});
             var count = 0;
             model.
@@ -234,7 +234,7 @@ describe('DataSource and Partial Cache', function() {
                 subscribe(noOp, done, done);
         });
 
-        it('should get a complex argument into a single arg.', function(done) {
+        it('should get complex path with multiple trips to the dataSource into a single toJSON response.', function(done) {
             var model = new Model({cache: M(), source: new LocalDataSource(Cache())});
             var count = 0;
             model.
