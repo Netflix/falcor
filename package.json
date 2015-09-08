@@ -23,6 +23,7 @@
     "dist": "gulp build",
     "doc": "gulp doc",
     "perf": "gulp perf-run",
+    "device": "devicePerfRunner",
     "deploy-ghpages": "./build/deploy-ghpages.sh"
   },
   "files": [
