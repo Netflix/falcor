@@ -261,8 +261,8 @@ response.subscribe(jsonGraphEnvelope => JSON.stringify(jsonGraphEnvelope, null, 
 //                     { $type: "ref", value: ['todosById', 97] }
 //                 ]
 //             },
-//             "54": { name: 'withdraw money from ATM', done: false },
-//             "97": { name: 'pick car up from shop', done: false }
+//             "54": { name: 'withdraw money from ATM', done: true },
+//             "97": { name: 'pick car up from shop', done: true }
 //         }
 //     }
 // }
