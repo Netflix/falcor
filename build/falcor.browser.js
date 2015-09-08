@@ -3729,7 +3729,7 @@ module.exports = InvalidateResponse;
 },{"157":157,"60":60}],62:[function(require,module,exports){
 var falcor = require(30);
 
-var Rx = require(157);
+var Rx = require(157) && require(156);
 var Observable = Rx.Observable;
 
 var arraySlice = require(81);
@@ -3927,7 +3927,7 @@ function subscribeToResponse(observer) {
 
 module.exports = ModelResponse;
 
-},{"101":101,"157":157,"30":30,"81":81}],63:[function(require,module,exports){
+},{"101":101,"156":156,"157":157,"30":30,"81":81}],63:[function(require,module,exports){
 var Rx = require(157);
 var Observable = Rx.Observable;
 var Disposable = Rx.Disposable;

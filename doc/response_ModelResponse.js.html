@@ -17,7 +17,7 @@ id: api
     <article>
         <pre class="prettyprint source linenums"><code>var falcor = require("./../");
 
-var Rx = require("rx/dist/rx");
+var Rx = require("rx/dist/rx") &amp;&amp; require("rx/dist/rx.aggregates");
 var Observable = Rx.Observable;
 
 var arraySlice = require("./../support/array-slice");

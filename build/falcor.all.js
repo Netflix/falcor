@@ -3737,7 +3737,7 @@ module.exports = InvalidateResponse;
 },{"228":228,"61":61}],63:[function(require,module,exports){
 var falcor = require(31);
 
-var Rx = require(228);
+var Rx = require(228) && require(226);
 var Observable = Rx.Observable;
 
 var arraySlice = require(82);
@@ -3935,7 +3935,7 @@ function subscribeToResponse(observer) {
 
 module.exports = ModelResponse;
 
-},{"102":102,"228":228,"31":31,"82":82}],64:[function(require,module,exports){
+},{"102":102,"226":226,"228":228,"31":31,"82":82}],64:[function(require,module,exports){
 var Rx = require(228);
 var Observable = Rx.Observable;
 var Disposable = Rx.Disposable;
