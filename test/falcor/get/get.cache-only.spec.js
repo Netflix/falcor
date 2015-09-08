@@ -43,6 +43,34 @@ describe('Cache Only', function() {
                 }).
                 subscribe(noOp, done, done);
         });
+
+        it.only('should use a promise to get request.', function(done) {
+            var model = new Model({
+                cache: cacheGenerator(0, 1)
+            });
+            var onNext = sinon.spy();
+            var onError = sinon.spy();
+            model.
+                get(['videos', 0, 'title']).
+                then(onNext, onError).
+                then(function() {
+                    if (onError.callCount) {
+                        return done(onError.getCall(0).args[0]);
+                    }
+
+                    expect(onNext.callCount).to.equal(1);
+                    expect(onNext.getCall(0).args[0]).to.deep.equals({
+                        json: {
+                            videos: {
+                                0: {
+                                    title: 'Video 0'
+                                }
+                            }
+                        }
+                    });
+                }).
+                then(function() { done(); }, done);
+        });
     });
 
     describe('_toJSONG', function() {
