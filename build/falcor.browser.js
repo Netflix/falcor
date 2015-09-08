@@ -4154,8 +4154,9 @@ var GetResponse = module.exports = function GetResponse(model, paths,
 
 GetResponse.prototype = Object.create(Observable.prototype);
 
-// becomes a subscribable from ModelResponse.
+// becomes a subscribable/thenable from ModelResponse.
 GetResponse.prototype.subscribe = ModelResponse.prototype.subscribe;
+GetResponse.prototype.then = ModelResponse.prototype.then;
 
 /**
  * Makes the output of a get response JSONGraph instead of json.
