@@ -31,6 +31,18 @@ describe('Cache Only', function() {
                 }).
                 subscribe(noOp, done, done);
         });
+        it('should just complete on empty paths.', function(done) {
+            var model = new Model({
+                cache: cacheGenerator(0, 1)
+            });
+            var onNext = sinon.spy();
+            model.
+                get(['videos', [], 'title']).
+                doAction(onNext, noOp, function() {
+                    expect(onNext.callCount).to.equal(0);
+                }).
+                subscribe(noOp, done, done);
+        });
     });
 
     describe('_toJSONG', function() {
