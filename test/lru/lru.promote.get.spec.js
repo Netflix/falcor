@@ -1,18 +1,11 @@
 var falcor = require("./../../lib/");
 var Model = falcor.Model;
-var Rx = require("rx");
-var LocalDataSource = require("../data/LocalDataSource");
-var Cache = require("../data/Cache");
-var ReducedCache = require("../data/ReducedCache");
-var Expected = require("../data/expected");
-var getTestRunner = require("../getTestRunner");
-var testRunner = require("../testRunner");
-var Bound = Expected.Bound;
 var chai = require("chai");
 var expect = chai.expect;
-var noOp = function() {};
-var getDataModel = testRunner.getModel;
 var _ = require('lodash');
+var get = require('./../../lib/get');
+var getWithPathsAsJSONGraph = get.getWithPathsAsJSONGraph;
+var getWithPathsAsPathMap = get.getWithPathsAsPathMap;
 
 var __head = require("./../../lib/internal/head");
 var __tail = require("./../../lib/internal/tail");
@@ -21,76 +14,73 @@ var __prev = require("./../../lib/internal/prev");
 
 describe('Get', function () {
     describe('getPaths', function () {
-        it('should promote the get item to the head _toJSONG.', function (done) {
-            testPaths('_toJSONG').
-                subscribe(noOp, done, done);
+        it('should promote the get item to the head _toJSONG.', function() {
+            var model = new Model();
+            model.set({json: {1: 'I am 1'}}).subscribe();
+            model.set({json: {2: 'I am 2'}}).subscribe();
+            model.set({json: {3: 'I am 3'}}).subscribe();
+
+            getWithPathsAsJSONGraph(model, [['1']], [{}]);
+            expect(model._root[__head].value).to.equal('I am 1');
         });
-        it('should promote the get item to the head toJSON.', function (done) {
-            testPaths('toJSON').
-                subscribe(noOp, done, done);
+        it('should promote the get item to the head toJSON.', function() {
+            var model = new Model();
+            model.set({json: {1: 'I am 1'}}).subscribe();
+            model.set({json: {2: 'I am 2'}}).subscribe();
+            model.set({json: {3: 'I am 3'}}).subscribe();
+
+            getWithPathsAsPathMap(model, [['1']], [{}]);
+            expect(model._root[__head].value).to.equal('I am 1');
         });
     });
 });
 describe('Multiple Gets', function () {
-    it('should promote the get item to the head toJSON.', function (done) {
-        testMultiplePaths('toJSON').
-            subscribe(noOp, done, done);
+    it('should promote the get item to the head toJSON.', function() {
+        var model = new Model();
+        model.set({json: {1: 'I am 1'}}).subscribe();
+        model.set({json: {2: 'I am 2'}}).subscribe();
+        model.set({json: {3: 'I am 3'}}).subscribe();
+
+        expect(model._root[__head].value).to.equal('I am 3');
+        expect(model._root[__head][__next].value).to.equal('I am 2');
+        expect(model._root[__head][__next][__next].value).to.equal('I am 1');
+        getWithPathsAsPathMap(model, [['2']], [{}]);
+        getWithPathsAsPathMap(model, [['1']], [{}]);
+        var current = model._root[__head];
+        expect(current.value).to.equal('I am 1');
+        current = current[__next];
+        expect(current.value).to.equal('I am 2');
+        current = current[__next];
+        expect(current.value).to.equal('I am 3');
+        expect(current[__next]).to.equal(undefined);
+        current = current[__prev];
+        expect(current.value).to.equal('I am 2');
+        current = current[__prev];
+        expect(current.value).to.equal('I am 1');
+        expect(current[__prev]).to.equal(undefined);
     });
-    it('should promote the get item to the head _toJSONG.', function (done) {
-        testMultiplePaths('_toJSONG').
-            subscribe(noOp, done, done);
+    it('should promote the get item to the head _toJSONG.', function() {
+        var model = new Model();
+        model.set({json: {1: 'I am 1'}}).subscribe();
+        model.set({json: {2: 'I am 2'}}).subscribe();
+        model.set({json: {3: 'I am 3'}}).subscribe();
+
+        expect(model._root[__head].value).to.equal('I am 3');
+        expect(model._root[__head][__next].value).to.equal('I am 2');
+        expect(model._root[__head][__next][__next].value).to.equal('I am 1');
+        getWithPathsAsJSONGraph(model, [['2']], [{}]);
+        getWithPathsAsJSONGraph(model, [['1']], [{}]);
+        var current = model._root[__head];
+        expect(current.value).to.equal('I am 1');
+        current = current[__next];
+        expect(current.value).to.equal('I am 2');
+        current = current[__next];
+        expect(current.value).to.equal('I am 3');
+        expect(current[__next]).to.equal(undefined);
+        current = current[__prev];
+        expect(current.value).to.equal('I am 2');
+        current = current[__prev];
+        expect(current.value).to.equal('I am 1');
+        expect(current[__prev]).to.equal(undefined);
     });
 });
-
-var cache = {
-    1: {
-        $type: 'atom',
-        value: 'i am 1'
-    },
-    2: {
-        $type: 'atom',
-        value: 'i am 2'
-    },
-    3: {
-        $type: 'atom',
-        value: 'i am 3'
-    }
-};
-var getPaths1 = ['1'];
-var getPaths2 = ['2'];
-var getPaths3 = ['3'];
-function testPaths(output, model, q) {
-    model = model || new Model({cache: _.cloneDeep(cache)});
-    q = q || getQueryPath(model);
-    return testRunner.
-        get(model, q, output).
-        do(noOp, noOp, function() {
-            expect(model._root[__head].value).to.equal(cache[q[0]].value);
-        });
-}
-function testMultiplePaths(output) {
-    var model = new Model({cache: _.cloneDeep(cache)});
-    var multipleOrder = ['i am 3', 'i am 2', 'i am 1'];
-    return testPaths(output, model, getPaths1).
-        concat(testPaths(output, model, getPaths2)).
-        concat(testPaths(output, model, getPaths3)).
-        do(noOp, noOp, function() {
-            var curr = model._root[__head];
-            multipleOrder.forEach(function(value) {
-                expect(curr.value).to.equal(value);
-                curr = curr[__next];
-            });
-            curr = model._root[__tail];
-            multipleOrder.reverse().forEach(function(value) {
-                expect(curr.value).to.equal(value);
-                curr = curr[__prev];
-            });
-        });
-}
-
-function getQueryPath(model) {
-    if (model._root[__head].value === 'i am 1') {
-        return _.cloneDeep(getPaths2);
-    }
-    return _.cloneDeep(getPaths1);
-}

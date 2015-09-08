@@ -14,6 +14,7 @@ var MaxRetryExceededError = require('./../../../lib/errors/MaxRetryExceededError
 
 describe('DataSource Only', function() {
     var dataSource = new LocalDataSource(cacheGenerator(0, 2, ['title', 'art']));
+
     describe('Preload Functions', function() {
         it('should get a value from falcor.', function(done) {
             var model = new Model({source: dataSource});
@@ -256,7 +257,6 @@ describe('DataSource Only', function() {
     });
     it('should throw a MaxRetryExceededError.', function(done) {
         var model = new Model({ source: new LocalDataSource({}) });
-
         model.
             get(['videos', 0, 'title']).
             doAction(noOp, function(e) {

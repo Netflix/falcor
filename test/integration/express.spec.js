@@ -7,6 +7,8 @@ var falcor = require('./../../browser');
 var Model = falcor.Model;
 var HttpDataSource = falcor.HttpDataSource;
 var expect = require('chai').expect;
+var sinon = require('sinon');
+var noOp = function() {};
 
 describe('Express Integration', function() {
     var server;
@@ -34,12 +36,27 @@ describe('Express Integration', function() {
         var model = new falcor.Model({
             source: new falcor.HttpDataSource('http://localhost:1337/model.json')
         });
+        var onNext = sinon.spy();
 
-         model.
-             get('genrelist[0].titles[0].name').
-             subscribe(function (data) {
-                expect(data.json.genrelist[0].titles[0].name).to.equal('Curious George');
-             }, done, done);
+        model.
+            get('genrelist[0].titles[0].name').
+            doAction(onNext, noOp, function() {
+                expect(onNext.calledOnce).to.be.ok;
+                expect(onNext.getCall(0).args[0]).to.deep.equals({
+                    json: {
+                        genrelist: {
+                            0: {
+                                titles: {
+                                    0: {
+                                        name: 'Curious George'
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            }).
+            subscribe(noOp, done, done);
     });
 
     afterEach(function() {
