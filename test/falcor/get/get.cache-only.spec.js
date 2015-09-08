@@ -44,7 +44,7 @@ describe('Cache Only', function() {
                 subscribe(noOp, done, done);
         });
 
-        it.only('should use a promise to get request.', function(done) {
+        it('should use a promise to get request.', function(done) {
             var model = new Model({
                 cache: cacheGenerator(0, 1)
             });
