@@ -1749,20 +1749,22 @@ module.exports = function walkPath(model, root, curr, path,
     var keySet, i;
     keySet = path[depth];
 
-    var iteratorNote = {};
-    var isKeySet = false;
+    var isKeySet = typeof keySet === 'object';
     var optimizedLength = optimizedPath.length;
     var previousOptimizedPath = optimizedPath;
     var nextDepth = depth + 1;
-    var key = iterateKeySet(keySet, iteratorNote);
+    var iteratorNote = false;
+    var key = keySet;
+    if (isKeySet) {
+        iteratorNote = {};
+        key = iterateKeySet(keySet, iteratorNote);
+    }
 
     // The key can be undefined if there is an empty path.  An example of an
     // empty path is: [lolomo, [], summary]
-    if (key === undefined && iteratorNote.done) {
+    if (key === undefined && iteratorNote && iteratorNote.done) {
         return;
     }
-
-    isKeySet = !iteratorNote.done;
 
     // loop over every key over the keySet
     do {
@@ -1799,7 +1801,11 @@ module.exports = function walkPath(model, root, curr, path,
                 fromReference = true;
                 next = ref[0];
                 var refPath = ref[1];
-                optimizedPath = refPath.slice();
+                var refLength = refPath.length;
+                optimizedPath = [];
+                for (i = 0; i < refLength; ++i) {
+                    optimizedPath[i] = refPath[i];
+                }
             }
         }
 
@@ -1816,11 +1822,11 @@ module.exports = function walkPath(model, root, curr, path,
         }
 
         // If the iteratorNote is not done, get the next key.
-        if (!iteratorNote.done) {
+        if (iteratorNote && !iteratorNote.done) {
             key = iterateKeySet(keySet, iteratorNote);
         }
 
-    } while (!iteratorNote.done);
+    } while (iteratorNote && !iteratorNote.done);
 };
 
 },{"11":11,"116":116,"143":143,"22":22,"26":26}],31:[function(require,module,exports){
