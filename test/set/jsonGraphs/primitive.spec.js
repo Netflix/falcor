@@ -11,6 +11,29 @@ var setJSONGraphs = require("../../../lib/set/setJSONGraphs");
 
 describe("a primitive value", function() {
 
+    it('should set a null object into an empty cache wrapping it in an atom.', function() {
+        var cache = {};
+        var version = 0;
+        var jsonGraphEnvelope = {
+            jsonGraph: {
+                a: {
+                    b: null
+                }
+            },
+            paths: [['a', 'b']]
+        };
+
+        setJSONGraphs(
+            getModel({cache: cache, version: version++}),
+            [jsonGraphEnvelope]);
+
+        expect(strip(cache)).to.deep.equal(strip({
+            a: {
+                b: $atom(null)
+            }
+        }));
+    });
+
     it("throws with a `null` key in a branch position", function() {
 
         var lru = new Object();

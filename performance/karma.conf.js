@@ -75,8 +75,9 @@ module.exports = function(config) {
 
     // Configure the jUnit reporter
     junitReporter: {
-      outputFile: 'out/junit-benchmark.xml',
-      suite: 'unit'
+      outputDir: 'out',
+      outputFile: 'junit-benchmark.xml',
+      suite: 'Perf Tests'
     },
 
     benchmarkCSVReporter: {
