@@ -130,7 +130,7 @@ describe("an expired value", function() {
             }]
         );
 
-        expect(optimizedPaths.length).to.equal(0);
+        expect(optimizedPaths[1].length).to.equal(0);
         expect(strip(cache)).to.deep.equal(strip({
             grid: $ref("grids['id']"),
             grids: { id: { 0: $ref("lists['id']") } },

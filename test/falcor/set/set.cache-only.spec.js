@@ -37,6 +37,29 @@ describe('Cache Only', function() {
                 }).
                 subscribe(noOp, done, done);
         });
+        it('should set a pathMap across references and return a corresponding pathMap', function(done) {
+            var model = new Model({cache: Cache()});
+            var pathMap = { json: { genreList: { 0: { 0: {
+                summary: Model.atom({
+                    "title": "Terminator 2",
+                    "url": "/movies/333"
+                }) }}}}};
+            var expected = { json: { genreList: { 0: { 0: {
+                summary: {
+                    "title": "Terminator 2",
+                    "url": "/movies/333"
+                }}}}}};
+            var next = false;
+            model.
+                set(pathMap).
+                doAction(function(x) {
+                    testRunner.compare(expected, x);
+                    next = true;
+                }, noOp, function() {
+                    testRunner.compare(true, next, 'Expect to be onNext at least 1 time.');
+                }).
+                subscribe(noOp, done, done);
+        });
     });
     describe('_toJSONG', function() {
         it('should get a value from falcor.', function(done) {
