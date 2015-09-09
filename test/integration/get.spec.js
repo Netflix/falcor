@@ -9,7 +9,7 @@ var sinon = require('sinon');
 var noOp = function() {};
 var Router = require('falcor-router');
 
-describe.only('Get Integration Tests', function() {
+describe('Get Integration Tests', function() {
     var server;
     beforeEach(function(done) {
         var app = express();
