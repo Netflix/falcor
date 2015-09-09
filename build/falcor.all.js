@@ -5500,6 +5500,7 @@ var __parent = require(38);
 
 var $ref = require(116);
 var $error = require(115);
+var $atom = require(114);
 var getSize = require(86);
 var getTimestamp = require(87);
 var isObject = require(97);
@@ -5524,13 +5525,31 @@ module.exports = function mergeJSONGraphNode(
         cTimestamp, mTimestamp;
 
     // If the cache and message are the same, we can probably return early:
-    // - If they're both null-sy, return null.
+    // - If they're both nullsy,
+    //   - If null then the node needs to be wrapped in an atom and inserted.
+    //     This happens from whole branch merging when a leaf is just a null value
+    //     instead of being wrapped in an atom.
+    //   - If undefined then return null (previous behavior).
     // - If they're both branches, return the branch.
     // - If they're both edges, continue below.
     if (node === message) {
-        if (node == null) {
+
+        // There should not be undefined values.  Those should always be
+        // wrapped in an $atom
+        if (message === null) {
+            node = wrapNode(message, undefined, message);
+            parent = updateNodeAncestors(parent, -node.$size, lru, version);
+            node = insertNode(node, parent, key);
+            promote(lru, node);
             return node;
-        } else {
+        }
+
+        // The messange and cache are both undefined, therefore return null.
+        else if (message === undefined) {
+            return message;
+        }
+
+        else {
             cIsObject = isObject(node);
             if (cIsObject) {
                 // Is the cache node a branch? If so, return the cache branch.
@@ -5681,7 +5700,7 @@ module.exports = function mergeJSONGraphNode(
     return node;
 };
 
-},{"106":106,"111":111,"113":113,"115":115,"116":116,"35":35,"38":38,"49":49,"84":84,"86":86,"87":87,"91":91,"93":93,"94":94,"97":97}],101:[function(require,module,exports){
+},{"106":106,"111":111,"113":113,"114":114,"115":115,"116":116,"35":35,"38":38,"49":49,"84":84,"86":86,"87":87,"91":91,"93":93,"94":94,"97":97}],101:[function(require,module,exports){
 var $ref = require(116);
 var $error = require(115);
 var getType = require(88);
