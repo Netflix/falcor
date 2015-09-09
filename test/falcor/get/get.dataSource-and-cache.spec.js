@@ -8,6 +8,7 @@ var sinon = require('sinon');
 var expect = require('chai').expect;
 var clean = require('./../../cleanData').clean;
 var cacheGenerator = require('./../../CacheGenerator');
+
 var M = function() {
     return cacheGenerator(0, 1);
 };
@@ -180,6 +181,103 @@ describe('DataSource and Partial Cache', function() {
                             ['lolomo', 0, 1, 'item', 'title']]
                     });
                     expect(out).to.deep.equals(expected);
+                }).
+                subscribe(noOp, done, done);
+        });
+    });
+    describe('Progressively', function() {
+        it('should get multiple arguments with multiple trips to the dataSource into a single toJSON response.', function(done) {
+            var model = new Model({cache: M(), source: new LocalDataSource(Cache())});
+            var count = 0;
+            model.
+                get(['lolomo', 0, 0, 'item', 'title'], ['lolomo', 0, 1, 'item', 'title']).
+                progressively().
+                doAction(function(x) {
+                    count++;
+                    if (count === 1) {
+                        expect(x).to.deep.equals({
+                            json: {
+                                lolomo: {
+                                    0: {
+                                        0: {
+                                            item: {
+                                                title: 'Video 0'
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        });
+                    } else {
+                        expect(x).to.deep.equals({
+                            json: {
+                                lolomo: {
+                                    0: {
+                                        0: {
+                                            item: {
+                                                title: 'Video 0'
+                                            }
+                                        },
+                                        1: {
+                                            item: {
+                                                title: 'Video 1'
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        });
+                    }
+                }, noOp, function() {
+                    expect(count).to.equals(2);
+                }).
+                subscribe(noOp, done, done);
+        });
+
+        it('should get complex path with multiple trips to the dataSource into a single toJSON response.', function(done) {
+            var model = new Model({cache: M(), source: new LocalDataSource(Cache())});
+            var count = 0;
+            model.
+                get(['lolomo', 0, {to: 1}, 'item', 'title']).
+                progressively().
+                doAction(function(x) {
+                    count++;
+                    if (count === 1) {
+                        expect(x).to.deep.equals({
+                            json: {
+                                lolomo: {
+                                    0: {
+                                        0: {
+                                            item: {
+                                                title: 'Video 0'
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        });
+                    } else {
+                        expect(x).to.deep.equals({
+                            json: {
+                                lolomo: {
+                                    0: {
+                                        0: {
+                                            item: {
+                                                title: 'Video 0'
+                                            }
+                                        },
+                                        1: {
+                                            item: {
+                                                title: 'Video 1'
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        });
+                    }
+                }, noOp, function() {
+                    expect(count).to.equals(2);
                 }).
                 subscribe(noOp, done, done);
         });

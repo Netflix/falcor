@@ -21,6 +21,6 @@ gulp.task("clean.coverage", function(cb) {
     clean(["./coverage"], cb);
 });
 
-gulp.task("clean", ["clean.doc", "clean.bin", "clean.coverage"]);
+gulp.task("clean", ["clean.doc", "clean.bin", "clean.coverage", "clean.perf"]);
 gulp.task("clean.dev", ["clean.bin"]);
 

@@ -99,6 +99,11 @@ describe('Values', function() {
             }
         }
     }, {
+        it: 'should have no output for empty paths.',
+        input: [['lolomo', 0, [], 'item', 'title']],
+        output: {},
+        cache: cacheGenerator(0, 1)
+    }, {
 
     // JSONGraph ----------------------------------------
         it: 'should get JSONGraph for a single value out',

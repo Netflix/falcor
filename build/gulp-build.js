@@ -12,14 +12,15 @@ var licenseInfo = {
     year: '2015'
 };
 
-gulp.task('build', ['build.browser']);
-gulp.task('dist', ['dist.browser']);
-gulp.task('all', ['build.browser', 'dist.browser']);
+gulp.task('build', ['build.browser', 'build.all']);
+gulp.task('dist', ['dist.browser', 'dist.all']);
+gulp.task('all', ['build.browser', 'dist.browser', 'build.all', 'dist.all']);
 gulp.task('build-with-lint', ['build.browser', 'dist.browser', 'lint']);
 
 gulp.task('dist.browser', ['clean.dist'], function(cb) {
     build({
         file: ['./browser.js'],
+        outName: "falcor.browser",
         browserifyOptions: { standalone: 'falcor' },
         debug: false
     }, cb);
@@ -28,16 +29,33 @@ gulp.task('dist.browser', ['clean.dist'], function(cb) {
 gulp.task('build.browser', ['clean.dist'], function(cb) {
     return build({
         file: ['./browser.js'],
+        outName: "falcor.browser",
         browserifyOptions: { standalone: 'falcor' }
     }, cb);
 });
 
+gulp.task('dist.all', ['clean.dist'], function(cb) {
+    build({
+        file: ['./all.js'],
+        outName: "falcor.all",
+        browserifyOptions: { standalone: 'falcor' },
+        debug: false
+    }, cb);
+});
+
+gulp.task('build.all', ['clean.dist'], function(cb) {
+    return build({
+        file: ['./all.js'],
+        outName: "falcor.all",
+        browserifyOptions: { standalone: 'falcor' }
+    }, cb);
+});
 
 function build(options, cb) {
     options = _.assign({
         file: '',
         browserifyOptions: {},
-        outName: 'falcor.browser',
+        outName: options.outName,
         dest: 'dist',
         debug: true
     }, options);
