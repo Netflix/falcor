@@ -5,7 +5,7 @@ var atom = jsonGraph.atom;
 var ref = jsonGraph.ref;
 var _ = require('lodash');
 
-describe.only('Missing', function() {
+describe('Missing', function() {
 
     var missingCache = function() {
         return {
