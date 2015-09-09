@@ -48,6 +48,44 @@ describe('Missing', function() {
             }
         },
         cache: missingCache
+    }, {
+        it: 'should report missing paths through many complex keys.',
+        input: [[{to:1}, {to:1}, {to:1}, 'summary']],
+        output: { },
+        optimizedMissingPaths: [
+            [0, 0, 0, 'summary'],
+            [0, 0, 1, 'summary'],
+            [0, 1, 0, 'summary'],
+            [0, 1, 1, 'summary'],
+            [1, 0, {to: 1}, 'summary'],
+            [1, 1, {to: 1}, 'summary'],
+        ],
+        cache: {
+            0: {
+                0: {
+                    // Missing Leaf
+                    0: {
+                        title: '0',
+                    },
+                    1: {
+                        title: '1',
+                    }
+                },
+                1: {
+                    // Missing Branch
+                    3: {
+                        title: '2',
+                    },
+                    4: {
+                        title: '3',
+                    }
+                }
+            },
+            // Missing complex key.
+            1: {
+                length: 1
+            }
+        }
     }];
 
     getCoreRunner(tests);

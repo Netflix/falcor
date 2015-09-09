@@ -67,6 +67,7 @@ function run(test) {
         var seed = [{}];
         var out;
 
+        debugger
         if (test.input) {
             out = fn(model, test.input, seed);
         }

@@ -132,6 +132,7 @@ describe('Values', function() {
     }, {
         it: 'should get JSONGraph through references with complex pathSet.',
         input: [['lolomo', {to: 1}, {to: 1}, 'item', 'title']],
+        only: true,
         isJSONG: true,
         output: {
             jsonGraph: _.merge(cacheGenerator(0, 2), cacheGenerator(10, 2)),
