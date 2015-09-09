@@ -81,14 +81,9 @@ describe.only('Missing', function() {
                     }
                 }
             },
+            // Missing complex key.
             1: {
-                0: {
-                    // Missing complex key.
-                    length: 0
-                },
-                1: {
-                    length: 0
-                }
+                length: 1
             }
         }
     }];
