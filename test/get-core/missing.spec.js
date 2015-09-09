@@ -5,7 +5,7 @@ var atom = jsonGraph.atom;
 var ref = jsonGraph.ref;
 var _ = require('lodash');
 
-describe('Missing', function() {
+describe.only('Missing', function() {
 
     var missingCache = function() {
         return {
@@ -48,6 +48,46 @@ describe('Missing', function() {
             }
         },
         cache: missingCache
+    }, {
+        it: 'should report missing paths through many complex keys.',
+        input: [[{to:1}, {to:1}, {to:1}, 'summary']],
+        output: { },
+        optimizedMissingPaths: [
+            [0, 0, 0, 'summary'],
+            [0, 0, 1, 'summary'],
+            [0, 1, 0, 'summary'],
+            [0, 1, 1, 'summary'],
+            [1, 0, {to: 1}, 'summary'],
+            [1, 1, {to: 1}, 'summary'],
+        ],
+        cache: {
+            0: {
+                0: {
+                    0: {
+                        title: '0',
+                    },
+                    1: {
+                        title: '1',
+                    }
+                },
+                1: {
+                    0: {
+                        title: '2',
+                    },
+                    1: {
+                        title: '3',
+                    }
+                }
+            },
+            1: {
+                0: {
+                    length: 0
+                },
+                1: {
+                    length: 0
+                }
+            }
+        }
     }];
 
     getCoreRunner(tests);

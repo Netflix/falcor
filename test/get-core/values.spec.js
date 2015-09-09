@@ -4,7 +4,7 @@ var jsonGraph = require('falcor-json-graph');
 var atom = jsonGraph.atom;
 var _ = require('lodash');
 
-describe.only('Values', function() {
+describe('Values', function() {
     // PathMap ----------------------------------------
     var tests = [{
         it: 'should get a simple value out of the cache',
