@@ -121,7 +121,7 @@ describe("an expired value", function() {
 
         do {} while (Date.now() - startTime < 10);
 
-        var optimizedPaths = setJSONGraphs(
+        var successfulPaths = setJSONGraphs(
             getModel({ lru: lru, cache: cache, expired: expired, version: version++ }), [{
                 paths: [["grid", 0, 0, "director"]],
                 jsonGraph: $jsonGraph([
@@ -130,7 +130,7 @@ describe("an expired value", function() {
             }]
         );
 
-        expect(optimizedPaths.length).to.equal(0);
+        expect(successfulPaths[1].length).to.equal(0);
         expect(strip(cache)).to.deep.equal(strip({
             grid: $ref("grids['id']"),
             grids: { id: { 0: $ref("lists['id']") } },
