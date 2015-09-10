@@ -3157,12 +3157,12 @@ SetRequest.prototype.getSourceObserver = function getSourceObserver(observer) {
 
             model._path = emptyArray;
 
-            var optimizedPaths = setJSONGraphs(model, [{
+            var successfulPaths = setJSONGraphs(model, [{
                 paths: paths,
                 jsonGraph: jsonGraphEnvelope.jsonGraph
             }], null, errorSelector, comparator);
 
-            jsonGraphEnvelope.paths = optimizedPaths;
+            jsonGraphEnvelope.paths = successfulPaths[1];
 
             model._path = bound;
 
@@ -4015,7 +4015,7 @@ function subscribeToLocalSet(observer) {
         return Disposable.empty;
     }
 
-    var paths = [];
+    var requestedPaths = [];
     var optimizedPaths = [];
     var model = this.model;
     var isMaster = this.isMaster;
@@ -4040,19 +4040,19 @@ function subscribeToLocalSet(observer) {
             var operationFunc = model[operationName];
             var successfulPaths = operationFunc(model, methodArgs, null, errorSelector);
 
-            optimizedPaths.push.apply(optimizedPaths, successfulPaths);
+            optimizedPaths.push.apply(optimizedPaths, successfulPaths[1]);
 
             if (inputType === "PathValues") {
-                paths.push.apply(paths, methodArgs.map(pluckPath));
+                requestedPaths.push.apply(requestedPaths, methodArgs.map(pluckPath));
             } else if (inputType === "JSONGs") {
-                paths.push.apply(paths, arrayFlatMap(methodArgs, pluckEnvelopePaths));
+                requestedPaths.push.apply(requestedPaths, arrayFlatMap(methodArgs, pluckEnvelopePaths));
             } else {
-                paths.push.apply(paths, successfulPaths);
+                requestedPaths.push.apply(requestedPaths, successfulPaths[0]);
             }
         }
     }
 
-    this.paths = paths;
+    this.requestedPaths = requestedPaths;
 
     if (isMaster) {
         this.isCompleted = true;
@@ -4067,7 +4067,7 @@ function subscribeToLocalSet(observer) {
 }
 
 function subscribeToFollowupGet(observer) {
-    var response = new GetResponse(this.model, this.paths);
+    var response = new GetResponse(this.model, this.requestedPaths);
     if (this.outputFormat === "AsJSONG") {
         response = response._toJSONG();
     }
@@ -4505,6 +4505,7 @@ module.exports = function setJSONGraphs(model, jsonGraphEnvelopes, x, errorSelec
 
     var requestedPath = [];
     var optimizedPath = [];
+    var requestedPaths = [];
     var optimizedPaths = [];
     var jsonGraphEnvelopeIndex = -1;
     var jsonGraphEnvelopeCount = jsonGraphEnvelopes.length;
@@ -4527,7 +4528,7 @@ module.exports = function setJSONGraphs(model, jsonGraphEnvelopes, x, errorSelec
                 path, 0,
                 cache, cache, cache,
                 jsonGraph, jsonGraph, jsonGraph,
-                optimizedPaths, requestedPath, optimizedPath,
+                requestedPaths, optimizedPaths, requestedPath, optimizedPath,
                 version, expired, lru, comparator, errorSelector
             );
         }
@@ -4540,14 +4541,14 @@ module.exports = function setJSONGraphs(model, jsonGraphEnvelopes, x, errorSelec
         rootChangeHandler();
     }
 
-    return optimizedPaths;
+    return [requestedPaths, optimizedPaths];
 };
 
 /* eslint-disable no-constant-condition */
 function setJSONGraphPathSet(
     path, depth, root, parent, node,
     messageRoot, messageParent, message,
-    optimizedPaths, requestedPath, optimizedPath,
+    requestedPaths, optimizedPaths, requestedPath, optimizedPath,
     version, expired, lru, comparator, errorSelector) {
 
     var note = {};
@@ -4572,11 +4573,12 @@ function setJSONGraphPathSet(
                 setJSONGraphPathSet(
                     path, depth + 1, root, nextParent, nextNode,
                     messageRoot, results[3], results[2],
-                    optimizedPaths, requestedPath, optimizedPath,
+                    requestedPaths, optimizedPaths, requestedPath, optimizedPath,
                     version, expired, lru, comparator, errorSelector
                 );
             } else {
                 promote(lru, nextNode);
+                requestedPaths.push(requestedPath.slice(0, requestedPath.index + 1));
                 optimizedPaths.push(optimizedPath.slice(0, optimizedPath.index));
             }
         }
@@ -4586,8 +4588,6 @@ function setJSONGraphPathSet(
         }
         optimizedPath.index = optimizedIndex;
     } while (true);
-
-    return optimizedPaths;
 }
 /* eslint-enable */
 
@@ -4741,6 +4741,7 @@ module.exports = function setPathMaps(model, pathMapEnvelopes, x, errorSelector,
     var initialVersion = cache[__version];
 
     var requestedPath = [];
+    var requestedPaths = [];
     var optimizedPaths = [];
     var optimizedIndex = bound.length;
     var pathMapIndex = -1;
@@ -4754,7 +4755,7 @@ module.exports = function setPathMaps(model, pathMapEnvelopes, x, errorSelector,
 
         setPathMap(
             pathMapEnvelope.json, 0, cache, parent, node,
-            optimizedPaths, requestedPath, optimizedPath,
+            requestedPaths, optimizedPaths, requestedPath, optimizedPath,
             version, expired, lru, comparator, errorSelector
         );
     }
@@ -4766,13 +4767,13 @@ module.exports = function setPathMaps(model, pathMapEnvelopes, x, errorSelector,
         rootChangeHandler();
     }
 
-    return optimizedPaths;
+    return [requestedPaths, optimizedPaths];
 };
 
 /* eslint-disable no-constant-condition */
 function setPathMap(
     pathMap, depth, root, parent, node,
-    optimizedPaths, requestedPath, optimizedPath,
+    requestedPaths, optimizedPaths, requestedPath, optimizedPath,
     version, expired, lru, comparator, errorSelector) {
 
     var keys = getKeys(pathMap);
@@ -4802,11 +4803,12 @@ function setPathMap(
                     setPathMap(
                         child, depth + 1,
                         root, nextParent, nextNode,
-                        optimizedPaths, requestedPath, optimizedPath,
+                        requestedPaths, optimizedPaths, requestedPath, optimizedPath,
                         version, expired, lru, comparator, errorSelector
                     );
                 } else {
                     promote(lru, nextNode);
+                    requestedPaths.push(requestedPath.slice(0, requestedPath.index + 1));
                     optimizedPaths.push(optimizedPath.slice(0, optimizedPath.index));
                 }
             }
@@ -4816,8 +4818,6 @@ function setPathMap(
             optimizedPath.index = optimizedIndex;
         } while (true);
     }
-
-    return optimizedPaths;
 }
 /* eslint-enable */
 
@@ -4992,6 +4992,7 @@ module.exports = function setPathValues(model, pathValues, x, errorSelector, com
     var initialVersion = cache[__version];
 
     var requestedPath = [];
+    var requestedPaths = [];
     var optimizedPaths = [];
     var optimizedIndex = bound.length;
     var pathValueIndex = -1;
@@ -5007,7 +5008,7 @@ module.exports = function setPathValues(model, pathValues, x, errorSelector, com
 
         setPathSet(
             value, path, 0, cache, parent, node,
-            optimizedPaths, requestedPath, optimizedPath,
+            requestedPaths, optimizedPaths, requestedPath, optimizedPath,
             version, expired, lru, comparator, errorSelector
         );
     }
@@ -5019,13 +5020,13 @@ module.exports = function setPathValues(model, pathValues, x, errorSelector, com
         rootChangeHandler();
     }
 
-    return optimizedPaths;
+    return [requestedPaths, optimizedPaths];
 };
 
 /* eslint-disable no-constant-condition */
 function setPathSet(
     value, path, depth, root, parent, node,
-    optimizedPaths, requestedPath, optimizedPath,
+    requestedPaths, optimizedPaths, requestedPath, optimizedPath,
     version, expired, lru, comparator, errorSelector) {
 
     var note = {};
@@ -5050,11 +5051,12 @@ function setPathSet(
                 setPathSet(
                     value, path, depth + 1,
                     root, nextParent, nextNode,
-                    optimizedPaths, requestedPath, optimizedPath,
+                    requestedPaths, optimizedPaths, requestedPath, optimizedPath,
                     version, expired, lru, comparator, errorSelector
                 );
             } else {
                 promote(lru, nextNode);
+                requestedPaths.push(requestedPath.slice(0, requestedPath.index + 1));
                 optimizedPaths.push(optimizedPath.slice(0, optimizedPath.index));
             }
         }
@@ -5064,8 +5066,6 @@ function setPathSet(
         }
         optimizedPath.index = optimizedIndex;
     } while (true);
-
-    return optimizedPaths;
 }
 /* eslint-enable */
 

@@ -60,6 +60,7 @@ module.exports = function setPathMaps(model, pathMapEnvelopes, x, errorSelector,
     var initialVersion = cache[__version];
 
     var requestedPath = [];
+    var requestedPaths = [];
     var optimizedPaths = [];
     var optimizedIndex = bound.length;
     var pathMapIndex = -1;
@@ -73,7 +74,7 @@ module.exports = function setPathMaps(model, pathMapEnvelopes, x, errorSelector,
 
         setPathMap(
             pathMapEnvelope.json, 0, cache, parent, node,
-            optimizedPaths, requestedPath, optimizedPath,
+            requestedPaths, optimizedPaths, requestedPath, optimizedPath,
             version, expired, lru, comparator, errorSelector
         );
     }
@@ -85,13 +86,13 @@ module.exports = function setPathMaps(model, pathMapEnvelopes, x, errorSelector,
         rootChangeHandler();
     }
 
-    return optimizedPaths;
+    return [requestedPaths, optimizedPaths];
 };
 
 /* eslint-disable no-constant-condition */
 function setPathMap(
     pathMap, depth, root, parent, node,
-    optimizedPaths, requestedPath, optimizedPath,
+    requestedPaths, optimizedPaths, requestedPath, optimizedPath,
     version, expired, lru, comparator, errorSelector) {
 
     var keys = getKeys(pathMap);
@@ -121,11 +122,12 @@ function setPathMap(
                     setPathMap(
                         child, depth + 1,
                         root, nextParent, nextNode,
-                        optimizedPaths, requestedPath, optimizedPath,
+                        requestedPaths, optimizedPaths, requestedPath, optimizedPath,
                         version, expired, lru, comparator, errorSelector
                     );
                 } else {
                     promote(lru, nextNode);
+                    requestedPaths.push(requestedPath.slice(0, requestedPath.index + 1));
                     optimizedPaths.push(optimizedPath.slice(0, optimizedPath.index));
                 }
             }
@@ -135,8 +137,6 @@ function setPathMap(
             optimizedPath.index = optimizedIndex;
         } while (true);
     }
-
-    return optimizedPaths;
 }
 /* eslint-enable */
 

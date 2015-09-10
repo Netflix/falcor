@@ -52,6 +52,7 @@ module.exports = function setJSONGraphs(model, jsonGraphEnvelopes, x, errorSelec
 
     var requestedPath = [];
     var optimizedPath = [];
+    var requestedPaths = [];
     var optimizedPaths = [];
     var jsonGraphEnvelopeIndex = -1;
     var jsonGraphEnvelopeCount = jsonGraphEnvelopes.length;
@@ -74,7 +75,7 @@ module.exports = function setJSONGraphs(model, jsonGraphEnvelopes, x, errorSelec
                 path, 0,
                 cache, cache, cache,
                 jsonGraph, jsonGraph, jsonGraph,
-                optimizedPaths, requestedPath, optimizedPath,
+                requestedPaths, optimizedPaths, requestedPath, optimizedPath,
                 version, expired, lru, comparator, errorSelector
             );
         }
@@ -87,14 +88,14 @@ module.exports = function setJSONGraphs(model, jsonGraphEnvelopes, x, errorSelec
         rootChangeHandler();
     }
 
-    return optimizedPaths;
+    return [requestedPaths, optimizedPaths];
 };
 
 /* eslint-disable no-constant-condition */
 function setJSONGraphPathSet(
     path, depth, root, parent, node,
     messageRoot, messageParent, message,
-    optimizedPaths, requestedPath, optimizedPath,
+    requestedPaths, optimizedPaths, requestedPath, optimizedPath,
     version, expired, lru, comparator, errorSelector) {
 
     var note = {};
@@ -119,11 +120,12 @@ function setJSONGraphPathSet(
                 setJSONGraphPathSet(
                     path, depth + 1, root, nextParent, nextNode,
                     messageRoot, results[3], results[2],
-                    optimizedPaths, requestedPath, optimizedPath,
+                    requestedPaths, optimizedPaths, requestedPath, optimizedPath,
                     version, expired, lru, comparator, errorSelector
                 );
             } else {
                 promote(lru, nextNode);
+                requestedPaths.push(requestedPath.slice(0, requestedPath.index + 1));
                 optimizedPaths.push(optimizedPath.slice(0, optimizedPath.index));
             }
         }
@@ -133,8 +135,6 @@ function setJSONGraphPathSet(
         }
         optimizedPath.index = optimizedIndex;
     } while (true);
-
-    return optimizedPaths;
 }
 /* eslint-enable */
 
