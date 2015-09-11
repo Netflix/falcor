@@ -21,6 +21,47 @@ describe('Deref', function() {
         },
         deref: ['videos', 0],
         cache: cacheGenerator(0, 1)
+    }, {
+        it: 'should get multiple arguments out of the cache.',
+        input: [
+            [0, 'item', 'title'],
+            [1, 'item', 'title']
+        ],
+        output: {
+            json: {
+                0: {
+                    item: {
+                        title: 'Video 0'
+                    }
+                },
+                1: {
+                    item: {
+                        title: 'Video 1'
+                    }
+                }
+            }
+        },
+        deref: ['lists', 'A'],
+        cache: cacheGenerator(0, 2)
+    }, {
+        it: 'should get multiple arguments as missing paths from the cache.',
+        input: [
+            ['b', 'c'],
+            ['b', 'd']
+        ],
+        output: { },
+        deref: ['a'],
+        optimizedMissingPaths: [
+            ['a', 'b', 'c'],
+            ['a', 'b', 'd']
+        ],
+        cache: {
+            a: {
+                b: {
+                    e: '&'
+                }
+            }
+        }
     }];
 
     it('should throw an error when bound and calling jsonGraph.', function() {
