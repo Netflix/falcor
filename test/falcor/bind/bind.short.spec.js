@@ -17,6 +17,8 @@ var $atom = require("./../../../lib/types/atom");
 var $error = require("./../../../lib/types/error");
 var $ref = require("./../../../lib/types/ref");
 var sinon = require('sinon');
+var ModelResponse = require('./../../../lib/response/ModelResponse');
+var atom = Model.atom;
 
 describe("Deref-Short", function() {
     describe('Sync', function() {

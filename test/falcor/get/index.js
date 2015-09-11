@@ -1,10 +1,3 @@
-var Model = require('./../../../lib').Model;
-var expect = require('chai').expect;
-var sinon = require('sinon');
-var ModelResponse = require('./../../../lib/response/ModelResponse');
-var atom = Model.atom;
-var InvalidModelError = require('./../../../lib/errors/InvalidModelError');
-
 describe('Get', function() {
     require('./get.cache-only.spec');
     require('./get.dataSource-only.spec');
