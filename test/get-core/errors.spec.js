@@ -7,12 +7,16 @@ var error = jsonGraph.error;
 var _ = require('lodash');
 
 describe('Errors', function() {
+    var expired = error('expired');
+    expired.$expires = Date.now() - 1000;
+
     var errorCache = function() {
         return {
             reference: ref(['to', 'error']),
             to: {
-                error: error('Oops!')
-            }
+                error: error('Oops!'),
+                expired: expired
+            },
         };
     };
 
@@ -58,6 +62,14 @@ describe('Errors', function() {
         },
         treatErrorsAsValues: true,
         boxValues: true,
+        cache: errorCache
+    }, {
+        it: 'should not report an expired error.',
+        input: [['to', 'expired']],
+        output: { },
+        optimizedMissingPaths: [
+            ['to', 'expired']
+        ],
         cache: errorCache
     }];
 
