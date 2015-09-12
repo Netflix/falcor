@@ -19,37 +19,43 @@ describe('References', function() {
         };
     };
 
-    var tests = [{
-        it: 'should follow a reference to reference',
-        input: [['toReference', 'title']],
-        output: {
-            json: {
-                toReference: {
-                    title: 'Title'
+    it('should follow a reference to reference', function() {
+        getCoreRunner({
+            input: [['toReference', 'title']],
+            output: {
+                json: {
+                    toReference: {
+                        title: 'Title'
+                    }
                 }
-            }
-        },
-        cache: referenceCache
-    }, {
-        it: 'should follow a reference to value',
-        input: [['short', 'title']],
-        output: {
-            json: {
-                short: 'Short'
-            }
-        },
-        cache: referenceCache
-    }, {
-        it: 'should never follow inner references.',
-        input: [['circular', 'title']],
-        output: {
-            json: {
-                circular: ['circular', 'next']
-            }
-        },
-        cache: referenceCache
-    }];
+            },
+            cache: referenceCache
+        });
+    });
 
-    getCoreRunner(tests);
+    it('should follow a reference to value', function() {
+        getCoreRunner({
+            input: [['short', 'title']],
+            output: {
+                json: {
+                    short: 'Short'
+                }
+            },
+            cache: referenceCache
+        });
+    });
+
+    it('should never follow inner references.', function() {
+        getCoreRunner({
+            input: [['circular', 'title']],
+            output: {
+                json: {
+                    circular: ['circular', 'next']
+                }
+            },
+            cache: referenceCache
+        });
+    });
+
 });
 

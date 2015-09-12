@@ -20,59 +20,66 @@ describe('Errors', function() {
         };
     };
 
-    var tests = [{
-        it: 'should report error with path.',
-        input: [['to', 'error']],
-        output: { },
-        errors: [{
-            path: ['to', 'error'],
-            value: 'Oops!'
-        }],
-        cache: errorCache
-    }, {
-        it: 'should report error path with null from reference.',
-        input: [['reference', 'title']],
-        output: { },
-        errors: [{
-            path: ['reference', null],
-            value: 'Oops!'
-        }],
-        cache: errorCache
-    }, {
-        it: 'should report error with path in treateErrorsAsValues.',
-        input: [['to', 'error']],
-        output: {
-            json: {
-                to: {
-                    error: 'Oops!'
+    it('should report error with path.', function() {
+        getCoreRunner({
+            input: [['to', 'error']],
+            output: { },
+            errors: [{
+                path: ['to', 'error'],
+                value: 'Oops!'
+            }],
+            cache: errorCache
+        });
+    });
+    it('should report error path with null from reference.', function() {
+        getCoreRunner({
+            input: [['reference', 'title']],
+            output: { },
+            errors: [{
+                path: ['reference', null],
+                value: 'Oops!'
+            }],
+            cache: errorCache
+        });
+    });
+    it('should report error with path in treateErrorsAsValues.', function() {
+        getCoreRunner({
+            input: [['to', 'error']],
+            output: {
+                json: {
+                    to: {
+                        error: 'Oops!'
+                    }
                 }
-            }
-        },
-        treatErrorsAsValues: true,
-        cache: errorCache
-    }, {
-        it: 'should report error with path in treateErrorsAsValues and boxValues.',
-        input: [['to', 'error']],
-        output: {
-            json: {
-                to: {
-                    error: error('Oops!')
+            },
+            treatErrorsAsValues: true,
+            cache: errorCache
+        });
+    });
+    it('should report error with path in treateErrorsAsValues and boxValues.', function() {
+        getCoreRunner({
+            input: [['to', 'error']],
+            output: {
+                json: {
+                    to: {
+                        error: error('Oops!')
+                    }
                 }
-            }
-        },
-        treatErrorsAsValues: true,
-        boxValues: true,
-        cache: errorCache
-    }, {
-        it: 'should not report an expired error.',
-        input: [['to', 'expired']],
-        output: { },
-        optimizedMissingPaths: [
-            ['to', 'expired']
-        ],
-        cache: errorCache
-    }];
-
-    getCoreRunner(tests);
+            },
+            treatErrorsAsValues: true,
+            boxValues: true,
+            cache: errorCache
+        });
+    });
+    it('should not report an expired error.', function() {
+        getCoreRunner({
+            input: [['to', 'expired']],
+            output: { },
+            optimizedMissingPaths: [
+                ['to', 'expired']
+            ],
+            cache: errorCache
+        });
+    });
 });
 
