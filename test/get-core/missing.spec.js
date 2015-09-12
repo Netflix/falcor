@@ -18,76 +18,82 @@ describe('Missing', function() {
             }
         };
     };
-    var tests = [{
-        it: 'should report a missing path.',
-        input: [['missing', 'title']],
-        output: { },
-        requestedMissingPaths: [['missing', 'title']],
-        optimizedMissingPaths: [['toMissing', 'title']],
-        cache: missingCache
-    }, {
-        it: 'should report a missing path.',
-        input: [['multi', {to: 1}, 0, 'title']],
-        output: { },
-        requestedMissingPaths: [
-            ['multi', 0, 0, 'title'],
-            ['multi', 1, 0, 'title']
-        ],
-        optimizedMissingPaths: [
-            ['toMissing0', 0, 'title'],
-            ['toMissing1', 'title']
-        ],
-        cache: missingCache
-    }, {
-        it: 'should report a value when materialized.',
-        input: [['missing', 'title']],
-        materialize: true,
-        output: {
-            json: {
-                missing: { $type: 'atom' }
-            }
-        },
-        cache: missingCache
-    }, {
-        it: 'should report missing paths through many complex keys.',
-        input: [[{to:1}, {to:1}, {to:1}, 'summary']],
-        output: { },
-        optimizedMissingPaths: [
-            [0, 0, 0, 'summary'],
-            [0, 0, 1, 'summary'],
-            [0, 1, 0, 'summary'],
-            [0, 1, 1, 'summary'],
-            [1, 0, {to: 1}, 'summary'],
-            [1, 1, {to: 1}, 'summary'],
-        ],
-        cache: {
-            0: {
-                0: {
-                    // Missing Leaf
-                    0: {
-                        title: '0',
-                    },
-                    1: {
-                        title: '1',
-                    }
-                },
-                1: {
-                    // Missing Branch
-                    3: {
-                        title: '2',
-                    },
-                    4: {
-                        title: '3',
-                    }
+    it('should report a missing path.', function() {
+        getCoreRunner({
+            input: [['missing', 'title']],
+            output: { },
+            requestedMissingPaths: [['missing', 'title']],
+            optimizedMissingPaths: [['toMissing', 'title']],
+            cache: missingCache
+        });
+    });
+    it('should report a missing path.', function() {
+        getCoreRunner({
+            input: [['multi', {to: 1}, 0, 'title']],
+            output: { },
+            requestedMissingPaths: [
+                ['multi', 0, 0, 'title'],
+                ['multi', 1, 0, 'title']
+            ],
+            optimizedMissingPaths: [
+                ['toMissing0', 0, 'title'],
+                ['toMissing1', 'title']
+            ],
+            cache: missingCache
+        });
+    });
+    it('should report a value when materialized.', function() {
+        getCoreRunner({
+            input: [['missing', 'title']],
+            materialize: true,
+            output: {
+                json: {
+                    missing: { $type: 'atom' }
                 }
             },
-            // Missing complex key.
-            1: {
-                length: 1
+            cache: missingCache
+        });
+    });
+    it('should report missing paths through many complex keys.', function() {
+        getCoreRunner({
+            input: [[{to:1}, {to:1}, {to:1}, 'summary']],
+            output: { },
+            optimizedMissingPaths: [
+                [0, 0, 0, 'summary'],
+                [0, 0, 1, 'summary'],
+                [0, 1, 0, 'summary'],
+                [0, 1, 1, 'summary'],
+                [1, 0, {to: 1}, 'summary'],
+                [1, 1, {to: 1}, 'summary'],
+            ],
+            cache: {
+                0: {
+                    0: {
+                        // Missing Leaf
+                        0: {
+                            title: '0',
+                        },
+                        1: {
+                            title: '1',
+                        }
+                    },
+                    1: {
+                        // Missing Branch
+                        3: {
+                            title: '2',
+                        },
+                        4: {
+                            title: '3',
+                        }
+                    }
+                },
+                // Missing complex key.
+                1: {
+                    length: 1
+                }
             }
-        }
-    }];
+        });
+    });
 
-    getCoreRunner(tests);
 });
 
