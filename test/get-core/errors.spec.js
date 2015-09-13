@@ -15,8 +15,13 @@ describe('Errors', function() {
             reference: ref(['to', 'error']),
             to: {
                 error: error('Oops!'),
-                expired: expired
+                expired: expired,
+                title: 'Hello World'
             },
+            list: {
+                0: ref(['to']),
+                1: ref(['to', 'error'])
+            }
         };
     };
 
@@ -78,6 +83,28 @@ describe('Errors', function() {
             optimizedMissingPaths: [
                 ['to', 'expired']
             ],
+            cache: errorCache
+        });
+    });
+
+    it('should report both values and errors when error is less length than value path.', function() {
+        getCoreRunner({
+            input: [
+                ['list', {to: 1}, 'title']
+            ],
+            output: {
+                json: {
+                    list: {
+                        0: {
+                            title: 'Hello World'
+                        }
+                    }
+                }
+            },
+            errors: [{
+                path: ['list', 1, null],
+                value: 'Oops!'
+            }],
             cache: errorCache
         });
     });

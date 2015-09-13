@@ -13,6 +13,7 @@ describe('References', function() {
             circular: ref(['circular', 'next']),
             to: {
                 reference: ref(['to']),
+                toValue: ref(['to', 'title']),
                 title: 'Title'
             },
             toShort: 'Short'
@@ -56,6 +57,26 @@ describe('References', function() {
             cache: referenceCache
         });
     });
+
+    it('should ensure that values are followed correctly when through references and previous paths have longer lengths to litter the requested path.', function() {
+        getCoreRunner({
+            input: [
+                ['to', ['reference', 'toValue'], 'title'],
+            ],
+            output: {
+                json: {
+                    to: {
+                        reference: {
+                            title: 'Title'
+                        },
+                        toValue: 'Title'
+                    }
+                }
+            },
+            cache: referenceCache
+        });
+    });
+
 
 });
 
