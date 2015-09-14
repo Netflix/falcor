@@ -71,6 +71,30 @@ describe('Values', function() {
         },
         cache: cacheGenerator(0, 30)
     }, {
+        it: 'should allow for multiple arguments with different length paths.',
+        input: [
+            ['lolomo', 0, 'length'],
+            ['lolomo', 'length']
+        ],
+        output: {
+            json: {
+                lolomo: {
+                    length: 1,
+                    0: {
+                        length: 1337
+                    }
+                }
+            }
+        },
+        cache: {
+            lolomo: {
+                length: 1,
+                0: {
+                    length: 1337
+                }
+            }
+        }
+    }, {
         it: 'should allow for a null at the end to get a value behind a reference.',
         input: [['lolomo', null]],
         output: {
@@ -120,6 +144,35 @@ describe('Values', function() {
             paths: [['videos', 0, 'title']]
         },
         cache: cacheGenerator(0, 1)
+    }, {
+        it: 'should allow for multiple arguments with different length paths as JSONGraph.',
+        input: [
+            ['lolomo', 0, 'length'],
+            ['lolomo', 'length']
+        ],
+        output: {
+            jsonGraph: {
+                lolomo: {
+                    length: 1,
+                    0: {
+                        length: 1337
+                    }
+                }
+            },
+            paths: [
+                ['lolomo', 0, 'length'],
+                ['lolomo', 'length']
+            ]
+        },
+        isJSONG: true,
+        cache: {
+            lolomo: {
+                length: 1,
+                0: {
+                    length: 1337
+                }
+            }
+        }
     }, {
         it: 'should get JSONGraph through references.',
         input: [['lolomo', 0, 0, 'item', 'title']],
