@@ -1596,7 +1596,7 @@ module.exports = function onValueType(
     // If there is an error, then report it as a value if
     else if (currType === $error) {
         if (fromReference) {
-            requestedPath.push(null);
+            requestedPath[depth] = null;
         }
         if (isJSONG || model._treatErrorsAsValues) {
             onValue(model, node, seed, depth, outerResults, requestedPath,
@@ -1609,7 +1609,7 @@ module.exports = function onValueType(
     // Report the value
     else {
         if (fromReference) {
-            requestedPath[depth + 1] = null;
+            requestedPath[depth] = null;
         }
 
         if (!requiresMaterializedToReport ||
