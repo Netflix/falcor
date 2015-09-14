@@ -14,60 +14,60 @@
  * permissions and limitations under the License.
  */
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.falcor = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
-var falcor = require(30);
-var jsong = require(130);
+var falcor = require(33);
+var jsong = require(133);
 
 falcor.atom = jsong.atom;
 falcor.ref = jsong.ref;
 falcor.error = jsong.error;
 falcor.pathValue = jsong.pathValue;
 
-falcor.HttpDataSource = require(125);
+falcor.HttpDataSource = require(128);
 
 module.exports = falcor;
 
-},{"125":125,"130":130,"30":30}],2:[function(require,module,exports){
+},{"128":128,"133":133,"33":33}],2:[function(require,module,exports){
 var ModelRoot = require(4);
 var ModelDataSourceAdapter = require(3);
 
-var RequestQueue = require(53);
-var ModelResponse = require(62);
-var SetResponse = require(63);
-var CallResponse = require(59);
-var InvalidateResponse = require(61);
+var RequestQueue = require(56);
+var ModelResponse = require(65);
+var SetResponse = require(66);
+var CallResponse = require(62);
+var InvalidateResponse = require(64);
 
-var ASAPScheduler = require(71);
-var TimeoutScheduler = require(73);
-var ImmediateScheduler = require(72);
+var ASAPScheduler = require(74);
+var TimeoutScheduler = require(76);
+var ImmediateScheduler = require(75);
 
-var arrayClone = require(79);
-var arraySlice = require(82);
+var arrayClone = require(82);
+var arraySlice = require(85);
 
-var collectLru = require(47);
-var pathSyntax = require(134);
+var collectLru = require(50);
+var pathSyntax = require(137);
 
-var getSize = require(86);
-var isObject = require(97);
-var isFunction = require(94);
-var isPrimitive = require(99);
-var isJSONEnvelope = require(95);
-var isJSONGraphEnvelope = require(96);
+var getSize = require(89);
+var isObject = require(100);
+var isFunction = require(97);
+var isPrimitive = require(102);
+var isJSONEnvelope = require(98);
+var isJSONGraphEnvelope = require(99);
 
-var setCache = require(75);
-var setJSONGraphs = require(74);
-var jsong = require(130);
+var setCache = require(78);
+var setJSONGraphs = require(77);
+var jsong = require(133);
 var ID = 0;
-var validateInput = require(112);
+var validateInput = require(115);
 var noOp = function() {};
-var getCache = require(13);
-var get = require(17);
+var getCache = require(15);
+var get = require(20);
 var SET_VALID_INPUT = {
     pathValue: true,
     pathSyntax: true,
     json: true,
     jsonGraph: true
 };
-var GET_VALID_INPUT = require(70);
+var GET_VALID_INPUT = require(73);
 
 module.exports = Model;
 
@@ -163,7 +163,7 @@ Model.prototype._collectRatio = 0.75;
  * @param {...PathSet} path - the path(s) to retrieve
  * @return {ModelResponse.<JSONEnvelope>} - the requested data as JSON
  */
-Model.prototype.get = require(69);
+Model.prototype.get = require(72);
 
 /**
  * The get method retrieves several {@link Path}s or {@link PathSet}s from a {@link Model}. The get method loads each value into a JSON object and returns in a ModelResponse.
@@ -172,7 +172,7 @@ Model.prototype.get = require(69);
  * @param {Array.<PathSet>} paths - the path(s) to retrieve
  * @return {ModelResponse.<JSONEnvelope>} - the requested data as JSON
  */
-Model.prototype._getWithPaths = require(68);
+Model.prototype._getWithPaths = require(71);
 
 /**
  * Sets the value at one or more places in the JSONGraph model. The set method accepts one or more {@link PathValue}s, each of which is a combination of a location in the document and the value to place there.  In addition to accepting  {@link PathValue}s, the set method also returns the values after the set operation is complete.
@@ -335,7 +335,7 @@ Model.prototype.deref = require(5);
 
  // The code above prints "Jim" to the console.
  */
-Model.prototype.getValue = require(14);
+Model.prototype.getValue = require(17);
 
 /**
  * Set value for a single {@link Path}.
@@ -353,7 +353,7 @@ Model.prototype.getValue = require(14);
 
  // The code above prints "Jim" to the console.
  */
-Model.prototype.setValue = require(77);
+Model.prototype.setValue = require(80);
 
 // TODO: Does not throw if given a PathSet rather than a Path, not sure if it should or not.
 // TODO: Doc not accurate? I was able to invoke directly against the Model, perhaps because I don't have a data source?
@@ -365,9 +365,9 @@ Model.prototype.setValue = require(77);
  * @arg {Path} path - the path to retrieve
  * @return {*} - the value for the specified path
  */
-Model.prototype._getValueSync = require(22);
+Model.prototype._getValueSync = require(25);
 
-Model.prototype._setValueSync = require(78);
+Model.prototype._setValueSync = require(81);
 
 Model.prototype._derefSync = require(6);
 
@@ -601,34 +601,34 @@ Model.prototype.getPath = function getPath() {
     return arrayClone(this._path);
 };
 
-Model.prototype._getBoundValue = require(12);
-Model.prototype._getVersion = require(16);
-Model.prototype._getValueSync = require(15);
+Model.prototype._getBoundValue = require(14);
+Model.prototype._getVersion = require(19);
+Model.prototype._getValueSync = require(18);
 
 Model.prototype._getPathValuesAsPathMap = get.getWithPathsAsPathMap;
 Model.prototype._getPathValuesAsJSONG = get.getWithPathsAsJSONGraph;
 
-Model.prototype._setPathValuesAsJSON = require(76);
-Model.prototype._setPathValuesAsJSONG = require(76);
-Model.prototype._setPathValuesAsPathMap = require(76);
-Model.prototype._setPathValuesAsValues = require(76);
+Model.prototype._setPathValuesAsJSON = require(79);
+Model.prototype._setPathValuesAsJSONG = require(79);
+Model.prototype._setPathValuesAsPathMap = require(79);
+Model.prototype._setPathValuesAsValues = require(79);
 
-Model.prototype._setPathMapsAsJSON = require(75);
-Model.prototype._setPathMapsAsJSONG = require(75);
-Model.prototype._setPathMapsAsPathMap = require(75);
-Model.prototype._setPathMapsAsValues = require(75);
+Model.prototype._setPathMapsAsJSON = require(78);
+Model.prototype._setPathMapsAsJSONG = require(78);
+Model.prototype._setPathMapsAsPathMap = require(78);
+Model.prototype._setPathMapsAsValues = require(78);
 
-Model.prototype._setJSONGsAsJSON = require(74);
-Model.prototype._setJSONGsAsJSONG = require(74);
-Model.prototype._setJSONGsAsPathMap = require(74);
-Model.prototype._setJSONGsAsValues = require(74);
+Model.prototype._setJSONGsAsJSON = require(77);
+Model.prototype._setJSONGsAsJSONG = require(77);
+Model.prototype._setJSONGsAsPathMap = require(77);
+Model.prototype._setJSONGsAsValues = require(77);
 
-Model.prototype._setCache = require(75);
+Model.prototype._setCache = require(78);
 
-Model.prototype._invalidatePathValuesAsJSON = require(46);
-Model.prototype._invalidatePathMapsAsJSON = require(45);
+Model.prototype._invalidatePathValuesAsJSON = require(49);
+Model.prototype._invalidatePathMapsAsJSON = require(48);
 
-},{"112":112,"12":12,"13":13,"130":130,"134":134,"14":14,"15":15,"16":16,"17":17,"22":22,"3":3,"4":4,"45":45,"46":46,"47":47,"5":5,"53":53,"59":59,"6":6,"61":61,"62":62,"63":63,"68":68,"69":69,"70":70,"71":71,"72":72,"73":73,"74":74,"75":75,"76":76,"77":77,"78":78,"79":79,"82":82,"86":86,"94":94,"95":95,"96":96,"97":97,"99":99}],3:[function(require,module,exports){
+},{"100":100,"102":102,"115":115,"133":133,"137":137,"14":14,"15":15,"17":17,"18":18,"19":19,"20":20,"25":25,"3":3,"4":4,"48":48,"49":49,"5":5,"50":50,"56":56,"6":6,"62":62,"64":64,"65":65,"66":66,"71":71,"72":72,"73":73,"74":74,"75":75,"76":76,"77":77,"78":78,"79":79,"80":80,"81":81,"82":82,"85":85,"89":89,"97":97,"98":98,"99":99}],3:[function(require,module,exports){
 function ModelDataSourceAdapter(model) {
     this._model = model._materialize().boxValues().treatErrorsAsValues();
 }
@@ -649,9 +649,9 @@ ModelDataSourceAdapter.prototype.call = function call(path, args, suffixes, path
 module.exports = ModelDataSourceAdapter;
 
 },{}],4:[function(require,module,exports){
-var isFunction = require(94);
-var hasOwn = require(89);
-var ImmediateScheduler = require(72);
+var isFunction = require(97);
+var hasOwn = require(92);
+var ImmediateScheduler = require(75);
 
 function ModelRoot(o) {
 
@@ -688,9 +688,9 @@ ModelRoot.prototype.comparator = function comparator(a, b) {
 
 module.exports = ModelRoot;
 
-},{"72":72,"89":89,"94":94}],5:[function(require,module,exports){
-var Rx = require(158);
-var pathSyntax = require(134);
+},{"75":75,"92":92,"97":97}],5:[function(require,module,exports){
+var Rx = require(161);
+var pathSyntax = require(137);
 
 module.exports = function deref(boundPathArg) {
 
@@ -751,11 +751,11 @@ module.exports = function deref(boundPathArg) {
     });
 };
 
-},{"134":134,"158":158}],6:[function(require,module,exports){
-var $error = require(115);
-var pathSyntax = require(134);
-var getBoundValue = require(12);
-var getType = require(88);
+},{"137":137,"161":161}],6:[function(require,module,exports){
+var $error = require(118);
+var pathSyntax = require(137);
+var getBoundValue = require(14);
+var getType = require(91);
 
 module.exports = function derefSync(boundPathArg) {
 
@@ -791,7 +791,31 @@ module.exports = function derefSync(boundPathArg) {
     return this._clone({ _path: path });
 };
 
-},{"115":115,"12":12,"134":134,"88":88}],7:[function(require,module,exports){
+},{"118":118,"137":137,"14":14,"91":91}],7:[function(require,module,exports){
+/**
+ * When a bound model attempts to retrieve JSONGraph it should throw an
+ * error.
+ *
+ * @private
+ */
+function BoundJSONGraphModelError() {
+    this.message = BoundJSONGraphModelError.message;
+    this.stack = (new Error()).stack;
+}
+
+// instanceof will be an error, but stack will be correct because its defined in the constructor.
+BoundJSONGraphModelError.prototype = new Error();
+BoundJSONGraphModelError.prototype.name = "BoundJSONGraphModelError";
+BoundJSONGraphModelError.message =
+    "It is not legal to use the JSON Graph " +
+    "format from a bound Model. JSON Graph format" +
+    " can only be used from a root model.";
+
+module.exports = BoundJSONGraphModelError;
+
+},{}],8:[function(require,module,exports){
+var NAME = "InvalidModelError";
+var MESSAGE = "The boundPath of the model is not valid since a value or error was found before the path end.";
 /**
  * An InvalidModelError can only happen when a user binds, whether sync
  * or async to shorted value.  See the unit tests for examples.
@@ -800,7 +824,7 @@ module.exports = function derefSync(boundPathArg) {
  * @private
  */
 function InvalidModelError(boundPath, shortedPath) {
-    this.message = "The boundPath of the model is not valid since a value or error was found before the path end.";
+    this.message = MESSAGE;
     this.stack = (new Error()).stack;
     this.boundPath = boundPath;
     this.shortedPath = shortedPath;
@@ -808,11 +832,13 @@ function InvalidModelError(boundPath, shortedPath) {
 
 // instanceof will be an error, but stack will be correct because its defined in the constructor.
 InvalidModelError.prototype = new Error();
-InvalidModelError.prototype.name = "InvalidModel";
+InvalidModelError.prototype.name = NAME;
+InvalidModelError.name = NAME;
+InvalidModelError.message = MESSAGE;
 
 module.exports = InvalidModelError;
 
-},{}],8:[function(require,module,exports){
+},{}],9:[function(require,module,exports){
 var NAME = "InvalidSourceError";
 /**
  * InvalidSourceError happens when a dataSource syncronously throws
@@ -838,7 +864,7 @@ InvalidSourceError.is = function(e) {
 
 module.exports = InvalidSourceError;
 
-},{}],9:[function(require,module,exports){
+},{}],10:[function(require,module,exports){
 var NAME = "MaxRetryExceededError";
 /**
  * A request can only be retried up to a specified limit.  Once that
@@ -862,14 +888,23 @@ MaxRetryExceededError.is = function(e) {
 
 module.exports = MaxRetryExceededError;
 
-},{}],10:[function(require,module,exports){
-var hardLink = require(24);
+},{}],11:[function(require,module,exports){
+/**
+ * The SHORTED constant.  Since what is returned from a
+ * cache position lookop will always be an object, any non
+ * object will do fine for a constant.
+ * @private
+ */
+module.exports = 1;
+
+},{}],12:[function(require,module,exports){
+var hardLink = require(27);
 var createHardlink = hardLink.create;
-var onValue = require(20);
-var isExpired = require(25);
-var $ref = require(116);
-var __context = require(31);
-var promote = require(27).promote;
+var onValue = require(23);
+var isExpired = require(28);
+var $ref = require(119);
+var __context = require(34);
+var promote = require(30).promote;
 
 /* eslint-disable no-constant-condition */
 function followReference(model, root, nodeArg, referenceContainerArg,
@@ -955,8 +990,11 @@ function followReference(model, root, nodeArg, referenceContainerArg,
 
 module.exports = followReference;
 
-},{"116":116,"20":20,"24":24,"25":25,"27":27,"31":31}],11:[function(require,module,exports){
-var getBoundValue = require(12);
+},{"119":119,"23":23,"27":27,"28":28,"30":30,"34":34}],13:[function(require,module,exports){
+var getCachePosition = require(16);
+var InvalidModelError = require(8);
+var BoundJSONGraphModelError = require(7);
+var SHORTED = require(11);
 
 module.exports = function get(walk, isJSONG) {
     return function innerGet(model, paths, seed) {
@@ -968,38 +1006,56 @@ module.exports = function get(walk, isJSONG) {
         var cache = model._root.cache;
         var boundPath = model._path;
         var currentCachePosition = cache;
-        var optimizedPath;
+        var optimizedPath, optimizedLength = boundPath.length;
+        var i, len;
+        var requestedPath = [];
 
         // If the model is bound, then get that cache position.
-        if (boundPath.length) {
+        if (optimizedLength) {
+
+            // JSONGraph output cannot ever be bound or else it will
+            // throw an error.
             if (isJSONG) {
-                throw new Error("It is not legal to use the JSON Graph " +
-                                "format from a bound Model. JSON Graph format" +
-                                " can only be used from a root model.");
+                return {
+                    criticalError: new BoundJSONGraphModelError()
+                };
             }
-            var boundValue = getBoundValue(model, boundPath);
-            currentCachePosition = boundValue.value;
-            optimizedPath = boundValue.path;
+            currentCachePosition = getCachePosition(model, boundPath);
+
+            // If there was a short, then we 'throw an error' to the outside
+            // calling function which will onError the observer.
+            if (currentCachePosition === SHORTED) {
+                return {
+                    criticalError: new InvalidModelError(boundPath, boundPath)
+                };
+            }
+
+            // We need to get the new cache position and copy the bound
+            // path.
+            optimizedPath = [];
+            for (i = 0; i < optimizedLength; ++i) {
+                optimizedPath[i] = boundPath[i];
+            }
         }
 
         // Update the optimized path if we
         else {
             optimizedPath = [];
+            optimizedLength = 0;
         }
 
-        var optimizedLength = optimizedPath.length;
-        for (var i = 0, len = paths.length; i < len; i++) {
+        for (i = 0, len = paths.length; i < len; i++) {
             walk(model, cache, currentCachePosition, paths[i], 0,
-                 valueNode, results, [], optimizedPath,
+                 valueNode, results, requestedPath, optimizedPath,
                  optimizedLength, isJSONG);
         }
         return results;
     };
 };
 
-},{"12":12}],12:[function(require,module,exports){
-var getValueSync = require(15);
-var InvalidModelError = require(7);
+},{"11":11,"16":16,"7":7,"8":8}],14:[function(require,module,exports){
+var getValueSync = require(18);
+var InvalidModelError = require(8);
 
 module.exports = function getBoundValue(model, pathArg) {
 
@@ -1044,10 +1100,10 @@ module.exports = function getBoundValue(model, pathArg) {
     };
 };
 
-},{"15":15,"7":7}],13:[function(require,module,exports){
-var $modelCreated = require(35);
-var clone = require(23);
-var prefix = require(38);
+},{"18":18,"8":8}],15:[function(require,module,exports){
+var $modelCreated = require(38);
+var clone = require(26);
+var prefix = require(41);
 
 /**
  * decends and copies the cache.
@@ -1094,9 +1150,40 @@ function _copyCache(node, out, fromKey) {
         });
 }
 
-},{"23":23,"35":35,"38":38}],14:[function(require,module,exports){
-var ModelResponse = require(62);
-var pathSyntax = require(134);
+},{"26":26,"38":38,"41":41}],16:[function(require,module,exports){
+var SHORTED = require(11);
+/**
+ * getCachePosition makes a fast walk to the bound value since all bound
+ * paths are the most possible optimized path.
+ *
+ * @param {Model} model -
+ * @param {Array} path -
+ * @returns {Mixed} - undefined if there is nothing in this position.
+ * @private
+ */
+module.exports = function getCachePosition(model, path) {
+    var currentCachePosition = model._root.cache;
+    var depth = -1;
+    var maxDepth = path.length;
+
+    // The loop is simple now, we follow the current cache position until
+    //
+    while (++depth < maxDepth &&
+           currentCachePosition && !currentCachePosition.$type) {
+
+        currentCachePosition = currentCachePosition[path[depth]];
+    }
+
+    if (depth !== maxDepth && currentCachePosition) {
+        return SHORTED;
+    }
+
+    return currentCachePosition;
+};
+
+},{"11":11}],17:[function(require,module,exports){
+var ModelResponse = require(65);
+var pathSyntax = require(137);
 
 module.exports = function getValue(path) {
     var parsedPath = pathSyntax.fromPath(path);
@@ -1131,14 +1218,14 @@ module.exports = function getValue(path) {
     });
 };
 
-},{"134":134,"62":62}],15:[function(require,module,exports){
-var followReference = require(10);
-var clone = require(23);
-var isExpired = require(25);
-var promote = require(27).promote;
-var $ref = require(116);
-var $atom = require(114);
-var $error = require(115);
+},{"137":137,"65":65}],18:[function(require,module,exports){
+var followReference = require(12);
+var clone = require(26);
+var isExpired = require(28);
+var promote = require(30).promote;
+var $ref = require(119);
+var $atom = require(117);
+var $error = require(118);
 
 module.exports = function getValueSync(model, simplePath, noClone) {
     var root = model._root.cache;
@@ -1247,8 +1334,8 @@ module.exports = function getValueSync(model, simplePath, noClone) {
     };
 };
 
-},{"10":10,"114":114,"115":115,"116":116,"23":23,"25":25,"27":27}],16:[function(require,module,exports){
-var __version = require(44);
+},{"117":117,"118":118,"119":119,"12":12,"26":26,"28":28,"30":30}],19:[function(require,module,exports){
+var __version = require(47);
 
 module.exports = function _getVersion(model, path) {
     // ultra fast clone for boxed values.
@@ -1261,23 +1348,23 @@ module.exports = function _getVersion(model, path) {
     return (version == null) ? -1 : version;
 };
 
-},{"44":44}],17:[function(require,module,exports){
-var get = require(11);
-var walkPath = require(29);
+},{"47":47}],20:[function(require,module,exports){
+var get = require(13);
+var walkPath = require(32);
 
 var getWithPathsAsPathMap = get(walkPath, false);
 var getWithPathsAsJSONGraph = get(walkPath, true);
 
 module.exports = {
-    getValueSync: require(15),
-    getBoundValue: require(12),
+    getValueSync: require(18),
+    getBoundValue: require(14),
     getWithPathsAsPathMap: getWithPathsAsPathMap,
     getWithPathsAsJSONGraph: getWithPathsAsJSONGraph
 };
 
-},{"11":11,"12":12,"15":15,"29":29}],18:[function(require,module,exports){
-var lru = require(27);
-var clone = require(23);
+},{"13":13,"14":14,"18":18,"32":32}],21:[function(require,module,exports){
+var lru = require(30);
+var clone = require(26);
 var promote = lru.promote;
 
 module.exports = function onError(model, node, depth,
@@ -1297,8 +1384,8 @@ module.exports = function onError(model, node, depth,
     promote(model, node);
 };
 
-},{"23":23,"27":27}],19:[function(require,module,exports){
-var support = require(28);
+},{"26":26,"30":30}],22:[function(require,module,exports){
+var support = require(31);
 var fastCopy = support.fastCopy;
 
 module.exports = function onMissing(model, path, depth,
@@ -1333,14 +1420,14 @@ function concatAndInsertMissing(model, remainingPath, depth, requestedPath,
         optimizedPath.slice(0, optimizedLength).concat(remainingPath));
 }
 
-},{"28":28}],20:[function(require,module,exports){
-var lru = require(27);
-var clone = require(23);
+},{"31":31}],23:[function(require,module,exports){
+var lru = require(30);
+var clone = require(26);
 var promote = lru.promote;
-var $ref = require(116);
-var $atom = require(114);
-var $error = require(115);
-var $modelCreated = require(35);
+var $ref = require(119);
+var $atom = require(117);
+var $error = require(118);
+var $modelCreated = require(38);
 
 module.exports = function onValue(model, node, seed, depth, outerResults,
                                   requestedPath, optimizedPath, optimizedLength,
@@ -1454,18 +1541,18 @@ module.exports = function onValue(model, node, seed, depth, outerResults,
     }
 };
 
-},{"114":114,"115":115,"116":116,"23":23,"27":27,"35":35}],21:[function(require,module,exports){
-var isExpired = require(25);
-var hardLink = require(24);
-var lru = require(27);
+},{"117":117,"118":118,"119":119,"26":26,"30":30,"38":38}],24:[function(require,module,exports){
+var isExpired = require(28);
+var hardLink = require(27);
+var lru = require(30);
 var removeHardlink = hardLink.remove;
 var splice = lru.splice;
-var $error = require(115);
-var onError = require(18);
-var onValue = require(20);
-var onMissing = require(19);
-var isMaterialized = require(26);
-var __invalidated = require(33);
+var $error = require(118);
+var onError = require(21);
+var onValue = require(23);
+var onMissing = require(22);
+var isMaterialized = require(29);
+var __invalidated = require(36);
 
 /**
  * When we land on a valueType (or nothing) then we need to report it out to
@@ -1535,8 +1622,8 @@ module.exports = function onValueType(
 };
 
 
-},{"115":115,"18":18,"19":19,"20":20,"24":24,"25":25,"26":26,"27":27,"33":33}],22:[function(require,module,exports){
-var pathSyntax = require(134);
+},{"118":118,"21":21,"22":22,"23":23,"27":27,"28":28,"29":29,"30":30,"36":36}],25:[function(require,module,exports){
+var pathSyntax = require(137);
 
 module.exports = function getValueSync(pathArg) {
     var path = pathSyntax.fromPath(pathArg);
@@ -1549,9 +1636,9 @@ module.exports = function getValueSync(pathArg) {
     return this._syncCheck("getValueSync") && this._getValueSync(this, path).value;
 };
 
-},{"134":134}],23:[function(require,module,exports){
+},{"137":137}],26:[function(require,module,exports){
 // Copies the node
-var prefix = require(38);
+var prefix = require(41);
 
 module.exports = function clone(node) {
     var outValue, i, len;
@@ -1568,11 +1655,11 @@ module.exports = function clone(node) {
 };
 
 
-},{"38":38}],24:[function(require,module,exports){
-var __ref = require(41);
-var __context = require(31);
-var __refIndex = require(40);
-var __refsLength = require(42);
+},{"41":41}],27:[function(require,module,exports){
+var __ref = require(44);
+var __context = require(34);
+var __refIndex = require(43);
+var __refsLength = require(45);
 
 function createHardlink(from, to) {
 
@@ -1608,24 +1695,24 @@ module.exports = {
     remove: removeHardlink
 };
 
-},{"31":31,"40":40,"41":41,"42":42}],25:[function(require,module,exports){
-var now = require(103);
+},{"34":34,"43":43,"44":44,"45":45}],28:[function(require,module,exports){
+var now = require(106);
 module.exports = function isExpired(node) {
     var $expires = node.$expires === void 0 && -1 || node.$expires;
     return $expires !== -1 && $expires !== 1 && ($expires === 0 || $expires < now());
 };
 
-},{"103":103}],26:[function(require,module,exports){
+},{"106":106}],29:[function(require,module,exports){
 module.exports = function isMaterialized(model) {
     return model._materialized && !model._source;
 };
 
-},{}],27:[function(require,module,exports){
-var __head = require(32);
-var __tail = require(43);
-var __next = require(36);
-var __prev = require(39);
-var __invalidated = require(33);
+},{}],30:[function(require,module,exports){
+var __head = require(35);
+var __tail = require(46);
+var __next = require(39);
+var __prev = require(42);
+var __invalidated = require(36);
 
 // [H] -> Next -> ... -> [T]
 // [T] -> Prev -> ... -> [H]
@@ -1683,7 +1770,7 @@ module.exports = {
     splice: lruSplice
 };
 
-},{"32":32,"33":33,"36":36,"39":39,"43":43}],28:[function(require,module,exports){
+},{"35":35,"36":36,"39":39,"42":42,"46":46}],31:[function(require,module,exports){
 function fastCopy(arr, iArg) {
     var a = [], len, j, i;
     for (j = 0, i = iArg || 0, len = arr.length; i < len; j++, i++) {
@@ -1724,12 +1811,12 @@ module.exports = {
     fastCopy: fastCopy
 };
 
-},{}],29:[function(require,module,exports){
-var followReference = require(10);
-var onValueType = require(21);
-var isExpired = require(25);
-var iterateKeySet = require(143).iterateKeySet;
-var $ref = require(116);
+},{}],32:[function(require,module,exports){
+var followReference = require(12);
+var onValueType = require(24);
+var isExpired = require(28);
+var iterateKeySet = require(146).iterateKeySet;
+var $ref = require(119);
 
 module.exports = function walkPath(model, root, curr, path, depth, seed,
                                    outerResults, requestedPath,
@@ -1827,7 +1914,7 @@ module.exports = function walkPath(model, root, curr, path, depth, seed,
     } while (iteratorNote && !iteratorNote.done);
 };
 
-},{"10":10,"116":116,"143":143,"21":21,"25":25}],30:[function(require,module,exports){
+},{"119":119,"12":12,"146":146,"24":24,"28":28}],33:[function(require,module,exports){
 "use strict";
 
 function falcor(opts) {
@@ -1837,84 +1924,84 @@ function falcor(opts) {
 if (typeof Promise === "function") {
     falcor.Promise = Promise;
 } else {
-    falcor.Promise = require(150);
+    falcor.Promise = require(153);
 }
 
 module.exports = falcor;
 
 falcor.Model = require(2);
 
-},{"150":150,"2":2}],31:[function(require,module,exports){
-module.exports = require(38) + "context";
+},{"153":153,"2":2}],34:[function(require,module,exports){
+module.exports = require(41) + "context";
 
-},{"38":38}],32:[function(require,module,exports){
-module.exports = require(38) + "head";
+},{"41":41}],35:[function(require,module,exports){
+module.exports = require(41) + "head";
 
-},{"38":38}],33:[function(require,module,exports){
-module.exports = require(38) + "invalidated";
+},{"41":41}],36:[function(require,module,exports){
+module.exports = require(41) + "invalidated";
 
-},{"38":38}],34:[function(require,module,exports){
-module.exports = require(38) + "key";
+},{"41":41}],37:[function(require,module,exports){
+module.exports = require(41) + "key";
 
-},{"38":38}],35:[function(require,module,exports){
+},{"41":41}],38:[function(require,module,exports){
 module.exports = "$modelCreated";
 
-},{}],36:[function(require,module,exports){
-module.exports = require(38) + "next";
+},{}],39:[function(require,module,exports){
+module.exports = require(41) + "next";
 
-},{"38":38}],37:[function(require,module,exports){
-module.exports = require(38) + "parent";
+},{"41":41}],40:[function(require,module,exports){
+module.exports = require(41) + "parent";
 
-},{"38":38}],38:[function(require,module,exports){
+},{"41":41}],41:[function(require,module,exports){
 /**
  * http://en.wikipedia.org/wiki/Delimiter#ASCIIDelimitedText
  * record separator character.
  */
 module.exports = String.fromCharCode(30);
 
-},{}],39:[function(require,module,exports){
-module.exports = require(38) + "prev";
+},{}],42:[function(require,module,exports){
+module.exports = require(41) + "prev";
 
-},{"38":38}],40:[function(require,module,exports){
-module.exports = require(38) + "ref-index";
+},{"41":41}],43:[function(require,module,exports){
+module.exports = require(41) + "ref-index";
 
-},{"38":38}],41:[function(require,module,exports){
-module.exports = require(38) + "ref";
+},{"41":41}],44:[function(require,module,exports){
+module.exports = require(41) + "ref";
 
-},{"38":38}],42:[function(require,module,exports){
-module.exports = require(38) + "refs-length";
+},{"41":41}],45:[function(require,module,exports){
+module.exports = require(41) + "refs-length";
 
-},{"38":38}],43:[function(require,module,exports){
-module.exports = require(38) + "tail";
+},{"41":41}],46:[function(require,module,exports){
+module.exports = require(41) + "tail";
 
-},{"38":38}],44:[function(require,module,exports){
-module.exports = require(38) + "version";
+},{"41":41}],47:[function(require,module,exports){
+module.exports = require(41) + "version";
 
-},{"38":38}],45:[function(require,module,exports){
-var __key = require(34);
-var __ref = require(41);
-var __prefix = require(38);
-var __parent = require(37);
-var __context = require(31);
-var __version = require(44);
-var __refIndex = require(40);
-var __refsLength = require(42);
+},{"41":41}],48:[function(require,module,exports){
+var __key = require(37);
+var __ref = require(44);
+var __prefix = require(41);
+var __parent = require(40);
+var __context = require(34);
+var __version = require(47);
+var __refIndex = require(43);
+var __refsLength = require(45);
 
-var $ref = require(116);
+var $ref = require(119);
 
-var getBoundValue = require(12);
+var getBoundValue = require(14);
 
-var promote = require(48);
-var getSize = require(86);
-var hasOwn = require(89);
-var isObject = require(97);
-var isExpired = require(93);
-var isFunction = require(94);
-var isPrimitive = require(99);
-var expireNode = require(84);
-var incrementVersion = require(90);
-var updateNodeAncestors = require(111);
-var removeNodeAndDescendants = require(105);
+var promote = require(51);
+var getSize = require(89);
+var hasOwn = require(92);
+var isObject = require(100);
+var isExpired = require(96);
+var isFunction = require(97);
+var isPrimitive = require(102);
+var expireNode = require(87);
+var incrementVersion = require(93);
+var updateNodeAncestors = require(114);
+var removeNodeAndDescendants = require(108);
 
 /**
  * Sets a list of PathMaps into a JSON Graph.
@@ -2080,29 +2167,29 @@ function invalidateNode(
     return [node, parent];
 }
 
-},{"105":105,"111":111,"116":116,"12":12,"31":31,"34":34,"37":37,"38":38,"40":40,"41":41,"42":42,"44":44,"48":48,"84":84,"86":86,"89":89,"90":90,"93":93,"94":94,"97":97,"99":99}],46:[function(require,module,exports){
-var __key = require(34);
-var __ref = require(41);
-var __parent = require(37);
-var __context = require(31);
-var __version = require(44);
-var __refIndex = require(40);
-var __refsLength = require(42);
+},{"100":100,"102":102,"108":108,"114":114,"119":119,"14":14,"34":34,"37":37,"40":40,"41":41,"43":43,"44":44,"45":45,"47":47,"51":51,"87":87,"89":89,"92":92,"93":93,"96":96,"97":97}],49:[function(require,module,exports){
+var __key = require(37);
+var __ref = require(44);
+var __parent = require(40);
+var __context = require(34);
+var __version = require(47);
+var __refIndex = require(43);
+var __refsLength = require(45);
 
-var $ref = require(116);
+var $ref = require(119);
 
-var getBoundValue = require(12);
+var getBoundValue = require(14);
 
-var promote = require(48);
-var getSize = require(86);
-var isExpired = require(93);
-var isFunction = require(94);
-var isPrimitive = require(99);
-var expireNode = require(84);
-var iterateKeySet = require(143).iterateKeySet;
-var incrementVersion = require(90);
-var updateNodeAncestors = require(111);
-var removeNodeAndDescendants = require(105);
+var promote = require(51);
+var getSize = require(89);
+var isExpired = require(96);
+var isFunction = require(97);
+var isPrimitive = require(102);
+var expireNode = require(87);
+var iterateKeySet = require(146).iterateKeySet;
+var incrementVersion = require(93);
+var updateNodeAncestors = require(114);
+var removeNodeAndDescendants = require(108);
 
 /**
  * Invalidates a list of Paths in a JSON Graph.
@@ -2266,17 +2353,17 @@ function invalidateNode(
     return [node, parent];
 }
 
-},{"105":105,"111":111,"116":116,"12":12,"143":143,"31":31,"34":34,"37":37,"40":40,"41":41,"42":42,"44":44,"48":48,"84":84,"86":86,"90":90,"93":93,"94":94,"99":99}],47:[function(require,module,exports){
-var __key = require(34);
-var __parent = require(37);
+},{"102":102,"108":108,"114":114,"119":119,"14":14,"146":146,"34":34,"37":37,"40":40,"43":43,"44":44,"45":45,"47":47,"51":51,"87":87,"89":89,"93":93,"96":96,"97":97}],50:[function(require,module,exports){
+var __key = require(37);
+var __parent = require(40);
 
-var __head = require(32);
-var __tail = require(43);
-var __next = require(36);
-var __prev = require(39);
+var __head = require(35);
+var __tail = require(46);
+var __next = require(39);
+var __prev = require(42);
 
-var removeNode = require(104);
-var updateNodeAncestors = require(111);
+var removeNode = require(107);
+var updateNodeAncestors = require(114);
 
 module.exports = function collect(lru, expired, totalArg, max, ratioArg, version) {
 
@@ -2326,14 +2413,14 @@ module.exports = function collect(lru, expired, totalArg, max, ratioArg, version
     }
 };
 
-},{"104":104,"111":111,"32":32,"34":34,"36":36,"37":37,"39":39,"43":43}],48:[function(require,module,exports){
-var $expiresNever = require(117);
-var __head = require(32);
-var __tail = require(43);
-var __next = require(36);
-var __prev = require(39);
+},{"107":107,"114":114,"35":35,"37":37,"39":39,"40":40,"42":42,"46":46}],51:[function(require,module,exports){
+var $expiresNever = require(120);
+var __head = require(35);
+var __tail = require(46);
+var __next = require(39);
+var __prev = require(42);
 
-var isObject = require(97);
+var isObject = require(100);
 
 module.exports = function lruPromote(root, node) {
 
@@ -2372,11 +2459,11 @@ module.exports = function lruPromote(root, node) {
     return node;
 };
 
-},{"117":117,"32":32,"36":36,"39":39,"43":43,"97":97}],49:[function(require,module,exports){
-var __head = require(32);
-var __tail = require(43);
-var __next = require(36);
-var __prev = require(39);
+},{"100":100,"120":120,"35":35,"39":39,"42":42,"46":46}],52:[function(require,module,exports){
+var __head = require(35);
+var __tail = require(46);
+var __next = require(39);
+var __prev = require(42);
 
 module.exports = function lruSplice(root, node) {
 
@@ -2405,14 +2492,14 @@ module.exports = function lruSplice(root, node) {
     head = tail = next = prev = void 0;
 };
 
-},{"32":32,"36":36,"39":39,"43":43}],50:[function(require,module,exports){
-var complement = require(57);
-var flushGetRequest = require(58);
+},{"35":35,"39":39,"42":42,"46":46}],53:[function(require,module,exports){
+var complement = require(60);
+var flushGetRequest = require(61);
 var REQUEST_ID = 0;
-var GetRequestType = require(55).GetRequest;
-var setJSONGraphs = require(74);
-var setPathValues = require(76);
-var $error = require(115);
+var GetRequestType = require(58).GetRequest;
+var setJSONGraphs = require(77);
+var setPathValues = require(79);
+var $error = require(118);
 var emptyArray = [];
 
 /**
@@ -2636,16 +2723,16 @@ function flattenRequestedPaths(requested) {
 
 module.exports = GetRequestV2;
 
-},{"115":115,"55":55,"57":57,"58":58,"74":74,"76":76}],51:[function(require,module,exports){
-var Rx = require(158);
+},{"118":118,"58":58,"60":60,"61":61,"77":77,"79":79}],54:[function(require,module,exports){
+var Rx = require(161);
 var Observer = Rx.Observer;
 var Observable = Rx.Observable;
 var Disposable = Rx.Disposable;
 var SerialDisposable = Rx.SerialDisposable;
 var CompositeDisposable = Rx.CompositeDisposable;
-var InvalidSourceError = require(8);
+var InvalidSourceError = require(9);
 
-var falcorPathUtils = require(143);
+var falcorPathUtils = require(146);
 var iterateKeySet = falcorPathUtils.iterateKeySet;
 
 function Request() {
@@ -2812,14 +2899,14 @@ Request.prototype._subscribe = function _subscribe(observer) {
 
 module.exports = Request;
 
-},{"143":143,"158":158,"8":8}],52:[function(require,module,exports){
+},{"146":146,"161":161,"9":9}],55:[function(require,module,exports){
 
-var SetRequest = require(56);
+var SetRequest = require(59);
 
-var prefix = require(38);
-var getType = require(88);
-var isObject = require(97);
-var falcorPathUtils = require(143);
+var prefix = require(41);
+var getType = require(91);
+var isObject = require(100);
+var falcorPathUtils = require(146);
 
 /* eslint-disable no-labels block-scoped-var */
 function RequestQueue(model, scheduler) {
@@ -2947,9 +3034,9 @@ RequestQueue.prototype.mergeJSONGraphs = function mergeJSONGraphs(aggregate, res
 
 module.exports = RequestQueue;
 
-},{"143":143,"38":38,"56":56,"88":88,"97":97}],53:[function(require,module,exports){
-var RequestQueue = require(52);
-var RequestQueueV2 = require(54);
+},{"100":100,"146":146,"41":41,"59":59,"91":91}],56:[function(require,module,exports){
+var RequestQueue = require(55);
+var RequestQueueV2 = require(57);
 
 function RequestQueueRx(model, scheduler) {
     this.model = model;
@@ -2966,9 +3053,9 @@ RequestQueueRx.prototype.call = RequestQueue.prototype.call;
 
 module.exports = RequestQueueRx;
 
-},{"52":52,"54":54}],54:[function(require,module,exports){
-var RequestTypes = require(55);
-var GetRequest = require(50);
+},{"55":55,"57":57}],57:[function(require,module,exports){
+var RequestTypes = require(58);
+var GetRequest = require(53);
 
 /**
  * The request queue is responsible for queuing the operations to
@@ -3105,21 +3192,21 @@ RequestQueueV2.prototype = {
 
 module.exports = RequestQueueV2;
 
-},{"50":50,"55":55}],55:[function(require,module,exports){
+},{"53":53,"58":58}],58:[function(require,module,exports){
 module.exports = {
     GetRequest: "GET"
 };
 
-},{}],56:[function(require,module,exports){
-var Rx = require(158);
+},{}],59:[function(require,module,exports){
+var Rx = require(161);
 var Observer = Rx.Observer;
 
-var Request = require(51);
+var Request = require(54);
 
-var arrayMap = require(81);
+var arrayMap = require(84);
 
-var setJSONGraphs = require(74);
-var setPathValues = require(76);
+var setJSONGraphs = require(77);
+var setPathValues = require(79);
 
 var emptyArray = new Array(0);
 
@@ -3197,9 +3284,9 @@ SetRequest.prototype.getSourceObserver = function getSourceObserver(observer) {
 
 module.exports = SetRequest;
 
-},{"158":158,"51":51,"74":74,"76":76,"81":81}],57:[function(require,module,exports){
-var hasIntersection = require(143).hasIntersection;
-var arraySlice = require(82);
+},{"161":161,"54":54,"77":77,"79":79,"84":84}],60:[function(require,module,exports){
+var hasIntersection = require(146).hasIntersection;
+var arraySlice = require(85);
 
 /**
  * creates the complement of the requested and optimized paths
@@ -3249,8 +3336,8 @@ module.exports = function complement(requested, optimized, tree) {
     return [requestedIntersection, optimizedComplement, requestedComplement ];
 };
 
-},{"143":143,"82":82}],58:[function(require,module,exports){
-var pathUtils = require(143);
+},{"146":146,"85":85}],61:[function(require,module,exports){
+var pathUtils = require(146);
 var toTree = pathUtils.toTree;
 var toPaths = pathUtils.toPaths;
 
@@ -3330,17 +3417,17 @@ module.exports = function flushGetRequest(request, listOfPaths, callback) {
 };
 
 
-},{"143":143}],59:[function(require,module,exports){
-var Rx = require(158) && require(157);
+},{"146":146}],62:[function(require,module,exports){
+var Rx = require(161) && require(160);
 var Observable = Rx.Observable;
 var CompositeDisposable = Rx.CompositeDisposable;
 
-var ModelResponse = require(62);
-var InvalidSourceError = require(8);
+var ModelResponse = require(65);
+var InvalidSourceError = require(9);
 
-var pathSyntax = require(134);
+var pathSyntax = require(137);
 
-var $ref = require(116);
+var $ref = require(119);
 
 function CallResponse(subscribe) {
     Observable.call(this, subscribe || subscribeToResponse);
@@ -3581,23 +3668,23 @@ function subscribeToResponse(observer) {
 
 module.exports = CallResponse;
 
-},{"116":116,"134":134,"157":157,"158":158,"62":62,"8":8}],60:[function(require,module,exports){
-var Rx = require(158);
+},{"119":119,"137":137,"160":160,"161":161,"65":65,"9":9}],63:[function(require,module,exports){
+var Rx = require(161);
 var Observable = Rx.Observable;
 
-var ModelResponse = require(62);
+var ModelResponse = require(65);
 
-var pathSyntax = require(134);
+var pathSyntax = require(137);
 
-var getSize = require(86);
-var collectLru = require(47);
+var getSize = require(89);
+var collectLru = require(50);
 
-var arrayClone = require(79);
+var arrayClone = require(82);
 
 var isArray = Array.isArray;
-var isPathValue = require(98);
-var isJSONEnvelope = require(95);
-var isJSONGraphEnvelope = require(96);
+var isPathValue = require(101);
+var isJSONEnvelope = require(98);
+var isJSONGraphEnvelope = require(99);
 
 function IdempotentResponse(subscribe) {
     Observable.call(this, subscribe);
@@ -3687,11 +3774,11 @@ IdempotentResponse.prototype.ensureCollect = function ensureCollect(model) {
 
 module.exports = IdempotentResponse;
 
-},{"134":134,"158":158,"47":47,"62":62,"79":79,"86":86,"95":95,"96":96,"98":98}],61:[function(require,module,exports){
-var Rx = require(158);
+},{"101":101,"137":137,"161":161,"50":50,"65":65,"82":82,"89":89,"98":98,"99":99}],64:[function(require,module,exports){
+var Rx = require(161);
 var Disposable = Rx.Disposable;
 
-var IdempotentResponse = require(60);
+var IdempotentResponse = require(63);
 
 function InvalidateResponse(subscribe) {
     IdempotentResponse.call(this, subscribe || subscribeToInvalidateResponse);
@@ -3732,15 +3819,15 @@ function subscribeToInvalidateResponse(observer) {
 
 module.exports = InvalidateResponse;
 
-},{"158":158,"60":60}],62:[function(require,module,exports){
-var falcor = require(30);
+},{"161":161,"63":63}],65:[function(require,module,exports){
+var falcor = require(33);
 
-var Rx = require(158) && require(157);
+var Rx = require(161) && require(160);
 var Observable = Rx.Observable;
 
-var arraySlice = require(82);
+var arraySlice = require(85);
 
-var noop = require(102);
+var noop = require(105);
 
 var jsongMixin = { outputFormat: { value: "AsJSONG" } };
 var progressiveMixin = { isProgressive: { value: true } };
@@ -3933,15 +4020,15 @@ function subscribeToResponse(observer) {
 
 module.exports = ModelResponse;
 
-},{"102":102,"157":157,"158":158,"30":30,"82":82}],63:[function(require,module,exports){
-var Rx = require(158);
+},{"105":105,"160":160,"161":161,"33":33,"85":85}],66:[function(require,module,exports){
+var Rx = require(161);
 var Observable = Rx.Observable;
 var Disposable = Rx.Disposable;
-var GetResponse = require(65);
-var IdempotentResponse = require(60);
-var InvalidSourceError = require(8);
+var GetResponse = require(68);
+var IdempotentResponse = require(63);
+var InvalidSourceError = require(9);
 
-var arrayFlatMap = require(80);
+var arrayFlatMap = require(83);
 var emptyArray = new Array(0);
 
 function SetResponse(subscribe) {
@@ -4093,7 +4180,7 @@ function pluckEnvelopePaths(jsonGraphEnvelope) {
 
 module.exports = SetResponse;
 
-},{"158":158,"60":60,"65":65,"8":8,"80":80}],64:[function(require,module,exports){
+},{"161":161,"63":63,"68":68,"83":83,"9":9}],67:[function(require,module,exports){
 /**
  * Will allow for state tracking of the current disposable.  Also fulfills the
  * disposable interface.
@@ -4133,12 +4220,12 @@ AssignableDisposable.prototype = {
 
 module.exports = AssignableDisposable;
 
-},{}],65:[function(require,module,exports){
-var ModelResponse = require(62);
-var checkCacheAndReport = require(66);
-var getRequestCycle = require(67);
+},{}],68:[function(require,module,exports){
+var ModelResponse = require(65);
+var checkCacheAndReport = require(69);
+var getRequestCycle = require(70);
 var empty = {dispose: function() {}};
-var Observable = require(158).Observable;
+var Observable = require(161).Observable;
 
 /**
  * The get response.  It takes in a model and paths and starts
@@ -4207,8 +4294,8 @@ GetResponse.prototype._subscribe = function _subscribe(observer) {
                            observer, seed, errors, 1);
 };
 
-},{"158":158,"62":62,"66":66,"67":67}],66:[function(require,module,exports){
-var gets = require(17);
+},{"161":161,"65":65,"69":69,"70":70}],69:[function(require,module,exports){
+var gets = require(20);
 var getWithPathsAsJSONGraph = gets.getWithPathsAsJSONGraph;
 var getWithPathsAsPathMap = gets.getWithPathsAsPathMap;
 
@@ -4236,6 +4323,14 @@ module.exports = function checkCacheAndReport(model, requestedPaths, observer,
         results = getWithPathsAsJSONGraph(model, requestedPaths, seed);
     } else {
         results = getWithPathsAsPathMap(model, requestedPaths, seed);
+    }
+
+    // We must communicate critical errors from get that are critical
+    // errors such as bound path is broken or this is a JSONGraph request
+    // with a bound path.
+    if (results.criticalError) {
+        observer.onError(results.criticalError);
+        return null;
     }
 
     // We are done when there are no missing paths or the model does not
@@ -4281,13 +4376,13 @@ module.exports = function checkCacheAndReport(model, requestedPaths, observer,
     return results;
 };
 
-},{"17":17}],67:[function(require,module,exports){
-var checkCacheAndReport = require(66);
-var MaxRetryExceededError = require(9);
-var fastCat = require(28).fastCat;
-var collectLru = require(47);
-var getSize = require(86);
-var AssignableDisposable = require(64);
+},{"20":20}],70:[function(require,module,exports){
+var checkCacheAndReport = require(69);
+var MaxRetryExceededError = require(10);
+var fastCat = require(31).fastCat;
+var collectLru = require(50);
+var getSize = require(89);
+var AssignableDisposable = require(67);
 
 /**
  * The get request cycle for checking the cache and reporting
@@ -4368,8 +4463,8 @@ module.exports = function getRequestCycle(getResponse, model, results, observer,
     return disposable;
 };
 
-},{"28":28,"47":47,"64":64,"66":66,"86":86,"9":9}],68:[function(require,module,exports){
-var GetResponse = require(65);
+},{"10":10,"31":31,"50":50,"67":67,"69":69,"89":89}],71:[function(require,module,exports){
+var GetResponse = require(68);
 
 /**
  * Performs a get on the cache and if there are missing paths
@@ -4380,12 +4475,12 @@ module.exports = function getWithPaths(paths) {
     return new GetResponse(this, paths);
 };
 
-},{"65":65}],69:[function(require,module,exports){
-var pathSyntax = require(134);
-var ModelResponse = require(62);
-var GET_VALID_INPUT = require(70);
-var validateInput = require(112);
-var GetResponse = require(65);
+},{"68":68}],72:[function(require,module,exports){
+var pathSyntax = require(137);
+var ModelResponse = require(65);
+var GET_VALID_INPUT = require(73);
+var validateInput = require(115);
+var GetResponse = require(68);
 
 /**
  * Performs a get on the cache and if there are missing paths
@@ -4406,15 +4501,15 @@ module.exports = function get() {
     return new GetResponse(this, paths);
 };
 
-},{"112":112,"134":134,"62":62,"65":65,"70":70}],70:[function(require,module,exports){
+},{"115":115,"137":137,"65":65,"68":68,"73":73}],73:[function(require,module,exports){
 module.exports = {
     path: true,
     pathSyntax: true
 };
 
-},{}],71:[function(require,module,exports){
-var asap = require(119);
-var Rx = require(158);
+},{}],74:[function(require,module,exports){
+var asap = require(122);
+var Rx = require(161);
 var Disposable = Rx.Disposable;
 
 function ASAPScheduler() {}
@@ -4434,8 +4529,8 @@ ASAPScheduler.prototype.scheduleWithState = function scheduleWithState(state, ac
 
 module.exports = ASAPScheduler;
 
-},{"119":119,"158":158}],72:[function(require,module,exports){
-var Rx = require(158);
+},{"122":122,"161":161}],75:[function(require,module,exports){
+var Rx = require(161);
 var Disposable = Rx.Disposable;
 
 function ImmediateScheduler() {}
@@ -4452,8 +4547,8 @@ ImmediateScheduler.prototype.scheduleWithState = function scheduleWithState(stat
 
 module.exports = ImmediateScheduler;
 
-},{"158":158}],73:[function(require,module,exports){
-var Rx = require(158);
+},{"161":161}],76:[function(require,module,exports){
+var Rx = require(161);
 var Disposable = Rx.Disposable;
 
 function TimeoutScheduler(delay) {
@@ -4485,24 +4580,24 @@ TimeoutScheduler.prototype.scheduleWithState = function scheduleWithState(state,
 
 module.exports = TimeoutScheduler;
 
-},{"158":158}],74:[function(require,module,exports){
-var __key = require(34);
-var __ref = require(41);
-var __context = require(31);
-var __version = require(44);
-var __refIndex = require(40);
-var __refsLength = require(42);
+},{"161":161}],77:[function(require,module,exports){
+var __key = require(37);
+var __ref = require(44);
+var __context = require(34);
+var __version = require(47);
+var __refIndex = require(43);
+var __refsLength = require(45);
 
-var $ref = require(116);
+var $ref = require(119);
 
-var promote = require(48);
-var isExpired = require(92);
-var isFunction = require(94);
-var isPrimitive = require(99);
-var expireNode = require(84);
-var iterateKeySet = require(143).iterateKeySet;
-var incrementVersion = require(90);
-var mergeJSONGraphNode = require(100);
+var promote = require(51);
+var isExpired = require(95);
+var isFunction = require(97);
+var isPrimitive = require(102);
+var expireNode = require(87);
+var iterateKeySet = require(146).iterateKeySet;
+var incrementVersion = require(93);
+var mergeJSONGraphNode = require(103);
 
 /**
  * Merges a list of JSON Graph Envelopes into a cache JSON Graph.
@@ -4713,30 +4808,30 @@ function setNode(
     return [node, parent, message, messageParent];
 }
 
-},{"100":100,"116":116,"143":143,"31":31,"34":34,"40":40,"41":41,"42":42,"44":44,"48":48,"84":84,"90":90,"92":92,"94":94,"99":99}],75:[function(require,module,exports){
-var __key = require(34);
-var __ref = require(41);
-var __prefix = require(38);
-var __parent = require(37);
-var __context = require(31);
-var __version = require(44);
-var __refIndex = require(40);
-var __refsLength = require(42);
+},{"102":102,"103":103,"119":119,"146":146,"34":34,"37":37,"43":43,"44":44,"45":45,"47":47,"51":51,"87":87,"93":93,"95":95,"97":97}],78:[function(require,module,exports){
+var __key = require(37);
+var __ref = require(44);
+var __prefix = require(41);
+var __parent = require(40);
+var __context = require(34);
+var __version = require(47);
+var __refIndex = require(43);
+var __refsLength = require(45);
 
-var $ref = require(116);
+var $ref = require(119);
 
-var getBoundValue = require(12);
+var getBoundValue = require(14);
 
 var isArray = Array.isArray;
-var promote = require(48);
-var hasOwn = require(89);
-var isObject = require(97);
-var isExpired = require(93);
-var isFunction = require(94);
-var isPrimitive = require(99);
-var expireNode = require(84);
-var incrementVersion = require(90);
-var mergeValueOrInsertBranch = require(101);
+var promote = require(51);
+var hasOwn = require(92);
+var isObject = require(100);
+var isExpired = require(96);
+var isFunction = require(97);
+var isPrimitive = require(102);
+var expireNode = require(87);
+var incrementVersion = require(93);
+var mergeValueOrInsertBranch = require(104);
 
 /**
  * Sets a list of PathMaps into a JSON Graph.
@@ -4967,27 +5062,27 @@ function getKeys(pathMap) {
     return void 0;
 }
 
-},{"101":101,"116":116,"12":12,"31":31,"34":34,"37":37,"38":38,"40":40,"41":41,"42":42,"44":44,"48":48,"84":84,"89":89,"90":90,"93":93,"94":94,"97":97,"99":99}],76:[function(require,module,exports){
-var __key = require(34);
-var __ref = require(41);
-var __parent = require(37);
-var __context = require(31);
-var __version = require(44);
-var __refIndex = require(40);
-var __refsLength = require(42);
+},{"100":100,"102":102,"104":104,"119":119,"14":14,"34":34,"37":37,"40":40,"41":41,"43":43,"44":44,"45":45,"47":47,"51":51,"87":87,"92":92,"93":93,"96":96,"97":97}],79:[function(require,module,exports){
+var __key = require(37);
+var __ref = require(44);
+var __parent = require(40);
+var __context = require(34);
+var __version = require(47);
+var __refIndex = require(43);
+var __refsLength = require(45);
 
-var $ref = require(116);
+var $ref = require(119);
 
-var getBoundValue = require(12);
+var getBoundValue = require(14);
 
-var promote = require(48);
-var isExpired = require(93);
-var isFunction = require(94);
-var isPrimitive = require(99);
-var expireNode = require(84);
-var iterateKeySet = require(143).iterateKeySet;
-var incrementVersion = require(90);
-var mergeValueOrInsertBranch = require(101);
+var promote = require(51);
+var isExpired = require(96);
+var isFunction = require(97);
+var isPrimitive = require(102);
+var expireNode = require(87);
+var iterateKeySet = require(146).iterateKeySet;
+var incrementVersion = require(93);
+var mergeValueOrInsertBranch = require(104);
 
 /**
  * Sets a list of PathValues into a JSON Graph.
@@ -5196,10 +5291,10 @@ function setNode(
     return [node, parent];
 }
 
-},{"101":101,"116":116,"12":12,"143":143,"31":31,"34":34,"37":37,"40":40,"41":41,"42":42,"44":44,"48":48,"84":84,"90":90,"93":93,"94":94,"99":99}],77:[function(require,module,exports){
-var jsong = require(130);
-var ModelResponse = require(62);
-var isPathValue = require(98);
+},{"102":102,"104":104,"119":119,"14":14,"146":146,"34":34,"37":37,"40":40,"43":43,"44":44,"45":45,"47":47,"51":51,"87":87,"93":93,"96":96,"97":97}],80:[function(require,module,exports){
+var jsong = require(133);
+var ModelResponse = require(65);
+var isPathValue = require(101);
 
 module.exports = function setValue(pathArg, valueArg) {
     var value = isPathValue(pathArg) ? pathArg : jsong.pathValue(pathArg, valueArg);
@@ -5234,10 +5329,10 @@ module.exports = function setValue(pathArg, valueArg) {
     });
 };
 
-},{"130":130,"62":62,"98":98}],78:[function(require,module,exports){
-var pathSyntax = require(134);
-var isPathValue = require(98);
-var setPathValues = require(76);
+},{"101":101,"133":133,"65":65}],81:[function(require,module,exports){
+var pathSyntax = require(137);
+var isPathValue = require(101);
+var setPathValues = require(79);
 
 module.exports = function setValueSync(pathArg, valueArg, errorSelectorArg, comparatorArg) {
 
@@ -5275,7 +5370,7 @@ module.exports = function setValueSync(pathArg, valueArg, errorSelectorArg, comp
     }
 };
 
-},{"134":134,"76":76,"98":98}],79:[function(require,module,exports){
+},{"101":101,"137":137,"79":79}],82:[function(require,module,exports){
 module.exports = function arrayClone(array) {
     if (!array) {
         return array;
@@ -5289,7 +5384,7 @@ module.exports = function arrayClone(array) {
     return array2;
 };
 
-},{}],80:[function(require,module,exports){
+},{}],83:[function(require,module,exports){
 module.exports = function arrayFlatMap(array, selector) {
     var index = -1;
     var i = -1;
@@ -5306,7 +5401,7 @@ module.exports = function arrayFlatMap(array, selector) {
     return array2;
 };
 
-},{}],81:[function(require,module,exports){
+},{}],84:[function(require,module,exports){
 module.exports = function arrayMap(array, selector) {
     var i = -1;
     var n = array.length;
@@ -5317,7 +5412,7 @@ module.exports = function arrayMap(array, selector) {
     return array2;
 };
 
-},{}],82:[function(require,module,exports){
+},{}],85:[function(require,module,exports){
 module.exports = function arraySlice(array, indexArg, endArg) {
     var index = indexArg || 0;
     var i = -1;
@@ -5338,11 +5433,11 @@ module.exports = function arraySlice(array, indexArg, endArg) {
     return array2;
 };
 
-},{}],83:[function(require,module,exports){
-var prefix = require(38);
-var hasOwn = require(89);
+},{}],86:[function(require,module,exports){
+var prefix = require(41);
+var hasOwn = require(92);
 var isArray = Array.isArray;
-var isObject = require(97);
+var isObject = require(100);
 
 module.exports = function clone(value) {
     var dest = value;
@@ -5359,9 +5454,9 @@ module.exports = function clone(value) {
     return dest;
 };
 
-},{"38":38,"89":89,"97":97}],84:[function(require,module,exports){
-var splice = require(49);
-var __invalidated = require(33);
+},{"100":100,"41":41,"92":92}],87:[function(require,module,exports){
+var splice = require(52);
+var __invalidated = require(36);
 
 module.exports = function expireNode(node, expired, lru) {
     if (!node[__invalidated]) {
@@ -5372,26 +5467,26 @@ module.exports = function expireNode(node, expired, lru) {
     return node;
 };
 
-},{"33":33,"49":49}],85:[function(require,module,exports){
-var isObject = require(97);
+},{"36":36,"52":52}],88:[function(require,module,exports){
+var isObject = require(100);
 module.exports = function getSize(node) {
     return isObject(node) && node.$expires || undefined;
 };
 
-},{"97":97}],86:[function(require,module,exports){
-var isObject = require(97);
+},{"100":100}],89:[function(require,module,exports){
+var isObject = require(100);
 module.exports = function getSize(node) {
     return isObject(node) && node.$size || 0;
 };
 
-},{"97":97}],87:[function(require,module,exports){
-var isObject = require(97);
+},{"100":100}],90:[function(require,module,exports){
+var isObject = require(100);
 module.exports = function getTimestamp(node) {
     return isObject(node) && node.$timestamp || undefined;
 };
 
-},{"97":97}],88:[function(require,module,exports){
-var isObject = require(97);
+},{"100":100}],91:[function(require,module,exports){
+var isObject = require(100);
 
 module.exports = function getType(node, anyType) {
     var type = isObject(node) && node.$type || void 0;
@@ -5401,24 +5496,24 @@ module.exports = function getType(node, anyType) {
     return type;
 };
 
-},{"97":97}],89:[function(require,module,exports){
-var isObject = require(97);
+},{"100":100}],92:[function(require,module,exports){
+var isObject = require(100);
 var hasOwn = Object.prototype.hasOwnProperty;
 
 module.exports = function(obj, prop) {
   return isObject(obj) && hasOwn.call(obj, prop);
 };
 
-},{"97":97}],90:[function(require,module,exports){
+},{"100":100}],93:[function(require,module,exports){
 var version = 1;
 module.exports = function incrementVersion() {
     return version++;
 };
 
-},{}],91:[function(require,module,exports){
-var __key = require(34);
-var __parent = require(37);
-var __version = require(44);
+},{}],94:[function(require,module,exports){
+var __key = require(37);
+var __parent = require(40);
+var __version = require(47);
 
 module.exports = function insertNode(node, parent, key, version) {
     node[__key] = key;
@@ -5428,10 +5523,10 @@ module.exports = function insertNode(node, parent, key, version) {
     return node;
 };
 
-},{"34":34,"37":37,"44":44}],92:[function(require,module,exports){
-var now = require(103);
-var $now = require(118);
-var $never = require(117);
+},{"37":37,"40":40,"47":47}],95:[function(require,module,exports){
+var now = require(106);
+var $now = require(121);
+var $never = require(120);
 
 module.exports = function isAlreadyExpired(node) {
     var exp = node.$expires;
@@ -5441,10 +5536,10 @@ module.exports = function isAlreadyExpired(node) {
         exp < now());
 };
 
-},{"103":103,"117":117,"118":118}],93:[function(require,module,exports){
-var now = require(103);
-var $now = require(118);
-var $never = require(117);
+},{"106":106,"120":120,"121":121}],96:[function(require,module,exports){
+var now = require(106);
+var $now = require(121);
+var $never = require(120);
 
 module.exports = function isExpired(node) {
     var exp = node.$expires;
@@ -5453,23 +5548,23 @@ module.exports = function isExpired(node) {
         exp === $now || exp < now());
 };
 
-},{"103":103,"117":117,"118":118}],94:[function(require,module,exports){
+},{"106":106,"120":120,"121":121}],97:[function(require,module,exports){
 var functionTypeof = "function";
 
 module.exports = function isFunction(func) {
     return Boolean(func) && typeof func === functionTypeof;
 };
 
-},{}],95:[function(require,module,exports){
-var isObject = require(97);
+},{}],98:[function(require,module,exports){
+var isObject = require(100);
 
 module.exports = function isJSONEnvelope(envelope) {
     return isObject(envelope) && ("json" in envelope);
 };
 
-},{"97":97}],96:[function(require,module,exports){
+},{"100":100}],99:[function(require,module,exports){
 var isArray = Array.isArray;
-var isObject = require(97);
+var isObject = require(100);
 
 module.exports = function isJSONGraphEnvelope(envelope) {
     return isObject(envelope) && isArray(envelope.paths) && (
@@ -5481,15 +5576,15 @@ module.exports = function isJSONGraphEnvelope(envelope) {
     );
 };
 
-},{"97":97}],97:[function(require,module,exports){
+},{"100":100}],100:[function(require,module,exports){
 var objTypeof = "object";
 module.exports = function isObject(value) {
     return value !== null && typeof value === objTypeof;
 };
 
-},{}],98:[function(require,module,exports){
+},{}],101:[function(require,module,exports){
 var isArray = Array.isArray;
-var isObject = require(97);
+var isObject = require(100);
 
 module.exports = function isPathValue(pathValue) {
     return isObject(pathValue) && (
@@ -5498,30 +5593,30 @@ module.exports = function isPathValue(pathValue) {
         ));
 };
 
-},{"97":97}],99:[function(require,module,exports){
+},{"100":100}],102:[function(require,module,exports){
 var objTypeof = "object";
 module.exports = function isPrimitive(value) {
     return value == null || typeof value !== objTypeof;
 };
 
-},{}],100:[function(require,module,exports){
-var __key = require(34);
-var __parent = require(37);
+},{}],103:[function(require,module,exports){
+var __key = require(37);
+var __parent = require(40);
 
-var $ref = require(116);
-var $error = require(115);
-var getSize = require(86);
-var getTimestamp = require(87);
-var isObject = require(97);
-var isExpired = require(93);
-var isFunction = require(94);
+var $ref = require(119);
+var $error = require(118);
+var getSize = require(89);
+var getTimestamp = require(90);
+var isObject = require(100);
+var isExpired = require(96);
+var isFunction = require(97);
 
-var promote = require(48);
-var wrapNode = require(113);
-var insertNode = require(91);
-var expireNode = require(84);
-var replaceNode = require(106);
-var updateNodeAncestors = require(111);
+var promote = require(51);
+var wrapNode = require(116);
+var insertNode = require(94);
+var expireNode = require(87);
+var replaceNode = require(109);
+var updateNodeAncestors = require(114);
 
 module.exports = function mergeJSONGraphNode(
     parent, node, message, key, requestedPath, optimizedPath,
@@ -5709,23 +5804,23 @@ module.exports = function mergeJSONGraphNode(
     return node;
 };
 
-},{"106":106,"111":111,"113":113,"115":115,"116":116,"34":34,"37":37,"48":48,"84":84,"86":86,"87":87,"91":91,"93":93,"94":94,"97":97}],101:[function(require,module,exports){
-var $ref = require(116);
-var $error = require(115);
-var getType = require(88);
-var getSize = require(86);
-var getTimestamp = require(87);
+},{"100":100,"109":109,"114":114,"116":116,"118":118,"119":119,"37":37,"40":40,"51":51,"87":87,"89":89,"90":90,"94":94,"96":96,"97":97}],104:[function(require,module,exports){
+var $ref = require(119);
+var $error = require(118);
+var getType = require(91);
+var getSize = require(89);
+var getTimestamp = require(90);
 
-var isExpired = require(93);
-var isPrimitive = require(99);
-var isFunction = require(94);
+var isExpired = require(96);
+var isPrimitive = require(102);
+var isFunction = require(97);
 
-var wrapNode = require(113);
-var expireNode = require(84);
-var insertNode = require(91);
-var replaceNode = require(106);
-var updateNodeAncestors = require(111);
-var updateBackReferenceVersions = require(110);
+var wrapNode = require(116);
+var expireNode = require(87);
+var insertNode = require(94);
+var replaceNode = require(109);
+var updateNodeAncestors = require(114);
+var updateBackReferenceVersions = require(113);
 
 module.exports = function mergeValueOrInsertBranch(
     parent, node, key, value,
@@ -5777,19 +5872,19 @@ module.exports = function mergeValueOrInsertBranch(
     return node;
 };
 
-},{"106":106,"110":110,"111":111,"113":113,"115":115,"116":116,"84":84,"86":86,"87":87,"88":88,"91":91,"93":93,"94":94,"99":99}],102:[function(require,module,exports){
+},{"102":102,"109":109,"113":113,"114":114,"116":116,"118":118,"119":119,"87":87,"89":89,"90":90,"91":91,"94":94,"96":96,"97":97}],105:[function(require,module,exports){
 module.exports = function noop() {};
 
-},{}],103:[function(require,module,exports){
+},{}],106:[function(require,module,exports){
 module.exports = Date.now;
 
-},{}],104:[function(require,module,exports){
-var $ref = require(116);
-var __parent = require(37);
-var splice = require(49);
-var isObject = require(97);
-var unlinkBackReferences = require(108);
-var unlinkForwardReference = require(109);
+},{}],107:[function(require,module,exports){
+var $ref = require(119);
+var __parent = require(40);
+var splice = require(52);
+var isObject = require(100);
+var unlinkBackReferences = require(111);
+var unlinkForwardReference = require(112);
 
 module.exports = function removeNode(node, parent, key, lru) {
     if (isObject(node)) {
@@ -5807,10 +5902,10 @@ module.exports = function removeNode(node, parent, key, lru) {
     return false;
 };
 
-},{"108":108,"109":109,"116":116,"37":37,"49":49,"97":97}],105:[function(require,module,exports){
-var hasOwn = require(89);
-var prefix = require(38);
-var removeNode = require(104);
+},{"100":100,"111":111,"112":112,"119":119,"40":40,"52":52}],108:[function(require,module,exports){
+var hasOwn = require(92);
+var prefix = require(41);
+var removeNode = require(107);
 
 module.exports = function removeNodeAndDescendants(node, parent, key, lru) {
     if (removeNode(node, parent, key, lru)) {
@@ -5826,10 +5921,10 @@ module.exports = function removeNodeAndDescendants(node, parent, key, lru) {
     return false;
 };
 
-},{"104":104,"38":38,"89":89}],106:[function(require,module,exports){
-var isObject = require(97);
-var transferBackReferences = require(107);
-var removeNodeAndDescendants = require(105);
+},{"107":107,"41":41,"92":92}],109:[function(require,module,exports){
+var isObject = require(100);
+var transferBackReferences = require(110);
+var removeNodeAndDescendants = require(108);
 
 module.exports = function replaceNode(node, replacement, parent, key, lru) {
     if (node === replacement) {
@@ -5842,10 +5937,10 @@ module.exports = function replaceNode(node, replacement, parent, key, lru) {
     return replacement;
 };
 
-},{"105":105,"107":107,"97":97}],107:[function(require,module,exports){
-var __ref = require(41);
-var __context = require(31);
-var __refsLength = require(42);
+},{"100":100,"108":108,"110":110}],110:[function(require,module,exports){
+var __ref = require(44);
+var __context = require(34);
+var __refsLength = require(45);
 
 module.exports = function transferBackReferences(fromNode, destNode) {
     var fromNodeRefsLength = fromNode[__refsLength] || 0,
@@ -5864,11 +5959,11 @@ module.exports = function transferBackReferences(fromNode, destNode) {
     return destNode;
 };
 
-},{"31":31,"41":41,"42":42}],108:[function(require,module,exports){
-var __ref = require(41);
-var __context = require(31);
-var __refIndex = require(40);
-var __refsLength = require(42);
+},{"34":34,"44":44,"45":45}],111:[function(require,module,exports){
+var __ref = require(44);
+var __context = require(34);
+var __refIndex = require(43);
+var __refsLength = require(45);
 
 module.exports = function unlinkBackReferences(node) {
     var i = -1, n = node[__refsLength] || 0;
@@ -5882,11 +5977,11 @@ module.exports = function unlinkBackReferences(node) {
     return node;
 };
 
-},{"31":31,"40":40,"41":41,"42":42}],109:[function(require,module,exports){
-var __ref = require(41);
-var __context = require(31);
-var __refIndex = require(40);
-var __refsLength = require(42);
+},{"34":34,"43":43,"44":44,"45":45}],112:[function(require,module,exports){
+var __ref = require(44);
+var __context = require(34);
+var __refIndex = require(43);
+var __refsLength = require(45);
 
 module.exports = function unlinkForwardReference(reference) {
     var destination = reference[__context];
@@ -5902,11 +5997,11 @@ module.exports = function unlinkForwardReference(reference) {
     return reference;
 };
 
-},{"31":31,"40":40,"41":41,"42":42}],110:[function(require,module,exports){
-var __ref = require(41);
-var __parent = require(37);
-var __version = require(44);
-var __refsLength = require(42);
+},{"34":34,"43":43,"44":44,"45":45}],113:[function(require,module,exports){
+var __ref = require(44);
+var __parent = require(40);
+var __version = require(47);
+var __refsLength = require(45);
 
 module.exports = function updateBackReferenceVersions(nodeArg, version) {
     var stack = [nodeArg];
@@ -5926,12 +6021,12 @@ module.exports = function updateBackReferenceVersions(nodeArg, version) {
     return nodeArg;
 };
 
-},{"37":37,"41":41,"42":42,"44":44}],111:[function(require,module,exports){
-var __key = require(34);
-var __version = require(44);
-var __parent = require(37);
-var removeNode = require(104);
-var updateBackReferenceVersions = require(110);
+},{"40":40,"44":44,"45":45,"47":47}],114:[function(require,module,exports){
+var __key = require(37);
+var __version = require(47);
+var __parent = require(40);
+var removeNode = require(107);
+var updateBackReferenceVersions = require(113);
 
 module.exports = function updateNodeAncestors(nodeArg, offset, lru, version) {
     var child = nodeArg;
@@ -5948,12 +6043,12 @@ module.exports = function updateNodeAncestors(nodeArg, offset, lru, version) {
     return nodeArg;
 };
 
-},{"104":104,"110":110,"34":34,"37":37,"44":44}],112:[function(require,module,exports){
+},{"107":107,"113":113,"37":37,"40":40,"47":47}],115:[function(require,module,exports){
 var isArray = Array.isArray;
-var isPathValue = require(98);
-var isJSONGraphEnvelope = require(96);
-var isJSONEnvelope = require(95);
-var pathSyntax = require(134);
+var isPathValue = require(101);
+var isJSONGraphEnvelope = require(99);
+var isJSONEnvelope = require(98);
+var pathSyntax = require(137);
 
 /**
  *
@@ -6006,21 +6101,21 @@ module.exports = function validateInput(args, allowedInput, method) {
     return true;
 };
 
-},{"134":134,"95":95,"96":96,"98":98}],113:[function(require,module,exports){
-var jsong = require(130);
+},{"101":101,"137":137,"98":98,"99":99}],116:[function(require,module,exports){
+var jsong = require(133);
 var $atom = jsong.atom;
 
-var now = require(103);
-var expiresNow = require(118);
+var now = require(106);
+var expiresNow = require(121);
 
-var __modelCreated = require(35);
+var __modelCreated = require(38);
 
 var atomSize = 50;
 
-var clone = require(83);
+var clone = require(86);
 var isArray = Array.isArray;
-var getSize = require(86);
-var getExpires = require(85);
+var getSize = require(89);
+var getExpires = require(88);
 
 module.exports = function wrapNode(nodeArg, typeArg, value) {
 
@@ -6069,26 +6164,26 @@ module.exports = function wrapNode(nodeArg, typeArg, value) {
     return node;
 };
 
-},{"103":103,"118":118,"130":130,"35":35,"83":83,"85":85,"86":86}],114:[function(require,module,exports){
+},{"106":106,"121":121,"133":133,"38":38,"86":86,"88":88,"89":89}],117:[function(require,module,exports){
 module.exports = "atom";
 
-},{}],115:[function(require,module,exports){
+},{}],118:[function(require,module,exports){
 module.exports = "error";
 
-},{}],116:[function(require,module,exports){
+},{}],119:[function(require,module,exports){
 module.exports = "ref";
 
-},{}],117:[function(require,module,exports){
+},{}],120:[function(require,module,exports){
 module.exports = 1;
 
-},{}],118:[function(require,module,exports){
+},{}],121:[function(require,module,exports){
 module.exports = 0;
 
-},{}],119:[function(require,module,exports){
+},{}],122:[function(require,module,exports){
 "use strict";
 
 // rawAsap provides everything we need except exception management.
-var rawAsap = require(120);
+var rawAsap = require(123);
 // RawTasks are recycled to reduce GC churn.
 var freeTasks = [];
 // We queue errors to ensure they are thrown in right order (FIFO).
@@ -6152,7 +6247,7 @@ RawTask.prototype.call = function () {
     }
 };
 
-},{"120":120}],120:[function(require,module,exports){
+},{"123":123}],123:[function(require,module,exports){
 (function (global){
 "use strict";
 
@@ -6376,7 +6471,7 @@ rawAsap.makeRequestCallFromTimer = makeRequestCallFromTimer;
 // https://github.com/tildeio/rsvp.js/blob/cddf7232546a9cf858524b75cde6f9edf72620a7/lib/rsvp/asap.js
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],121:[function(require,module,exports){
+},{}],124:[function(require,module,exports){
 (function (process){
 "use strict";
 
@@ -6458,7 +6553,7 @@ function requestFlush() {
         if (!domain) {
             // Lazy execute the domain module.
             // Only employed if the user elects to use domains.
-            domain = require(122);
+            domain = require(125);
         }
         domain.active = process.domain = null;
     }
@@ -6480,12 +6575,12 @@ function requestFlush() {
     }
 }
 
-}).call(this,require(124))
-},{"122":122,"124":124}],122:[function(require,module,exports){
+}).call(this,require(127))
+},{"125":125,"127":127}],125:[function(require,module,exports){
 /*global define:false require:false */
 module.exports = (function(){
 	// Import Events
-	var events = require(123)
+	var events = require(126)
 
 	// Export Domain
 	var domain = {}
@@ -6549,7 +6644,7 @@ module.exports = (function(){
 	};
 	return domain
 }).call(this)
-},{"123":123}],123:[function(require,module,exports){
+},{"126":126}],126:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -6852,7 +6947,7 @@ function isUndefined(arg) {
   return arg === void 0;
 }
 
-},{}],124:[function(require,module,exports){
+},{}],127:[function(require,module,exports){
 // shim for using process in browser
 
 var process = module.exports = {};
@@ -6945,10 +7040,10 @@ process.chdir = function (dir) {
 };
 process.umask = function() { return 0; };
 
-},{}],125:[function(require,module,exports){
+},{}],128:[function(require,module,exports){
 'use strict';
-var request = require(129);
-var buildQueryObject = require(126);
+var request = require(132);
+var buildQueryObject = require(129);
 var isArray = Array.isArray;
 
 function simpleExtend(obj, obj2) {
@@ -7046,7 +7141,7 @@ XMLHttpSource['default'] = XMLHttpSource;
 // commonjs
 module.exports = XMLHttpSource;
 
-},{"126":126,"129":129}],126:[function(require,module,exports){
+},{"129":129,"132":132}],129:[function(require,module,exports){
 'use strict';
 module.exports = function buildQueryObject(url, method, queryData) {
   var qData = [];
@@ -7075,7 +7170,7 @@ module.exports = function buildQueryObject(url, method, queryData) {
   return data;
 };
 
-},{}],127:[function(require,module,exports){
+},{}],130:[function(require,module,exports){
 (function (global){
 'use strict';
 // Get CORS support even for older IE
@@ -7091,7 +7186,7 @@ module.exports = function getCORSRequest() {
 };
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],128:[function(require,module,exports){
+},{}],131:[function(require,module,exports){
 (function (global){
 'use strict';
 module.exports = function getXMLHttpRequest() {
@@ -7119,10 +7214,10 @@ module.exports = function getXMLHttpRequest() {
 };
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],129:[function(require,module,exports){
+},{}],132:[function(require,module,exports){
 'use strict';
-var getXMLHttpRequest = require(128);
-var getCORSRequest = require(127);
+var getXMLHttpRequest = require(131);
+var getCORSRequest = require(130);
 var hasOwnProp = Object.prototype.hasOwnProperty;
 
 var noop = function() {};
@@ -7342,8 +7437,8 @@ function onXhrError(observer, xhr, status, e) {
 
 module.exports = request;
 
-},{"127":127,"128":128}],130:[function(require,module,exports){
-var pathSyntax = require(134);
+},{"130":130,"131":131}],133:[function(require,module,exports){
+var pathSyntax = require(137);
 
 function sentinel(type, value, props) {
     var copy = Object.create(null);
@@ -7382,14 +7477,14 @@ module.exports = {
     }    
 };
 
-},{"134":134}],131:[function(require,module,exports){
+},{"137":137}],134:[function(require,module,exports){
 module.exports = {
     integers: 'integers',
     ranges: 'ranges',
     keys: 'keys'
 };
 
-},{}],132:[function(require,module,exports){
+},{}],135:[function(require,module,exports){
 var TokenTypes = {
     token: 'token',
     dotSeparator: '.',
@@ -7407,7 +7502,7 @@ var TokenTypes = {
 
 module.exports = TokenTypes;
 
-},{}],133:[function(require,module,exports){
+},{}],136:[function(require,module,exports){
 module.exports = {
     indexer: {
         nested: 'Indexers cannot be nested.',
@@ -7441,10 +7536,10 @@ module.exports = {
 };
 
 
-},{}],134:[function(require,module,exports){
-var Tokenizer = require(140);
-var head = require(135);
-var RoutedTokens = require(131);
+},{}],137:[function(require,module,exports){
+var Tokenizer = require(143);
+var head = require(138);
+var RoutedTokens = require(134);
 
 var parser = function parser(string, extendedRules) {
     return head(new Tokenizer(string, extendedRules));
@@ -7501,10 +7596,10 @@ parser.fromPath = function(path, ext) {
 // Potential routed tokens.
 parser.RoutedTokens = RoutedTokens;
 
-},{"131":131,"135":135,"140":140}],135:[function(require,module,exports){
-var TokenTypes = require(132);
-var E = require(133);
-var indexer = require(136);
+},{"134":134,"138":138,"143":143}],138:[function(require,module,exports){
+var TokenTypes = require(135);
+var E = require(136);
+var indexer = require(139);
 
 /**
  * The top level of the parse tree.  This returns the generated path
@@ -7562,13 +7657,13 @@ module.exports = function head(tokenizer) {
 };
 
 
-},{"132":132,"133":133,"136":136}],136:[function(require,module,exports){
-var TokenTypes = require(132);
-var E = require(133);
+},{"135":135,"136":136,"139":139}],139:[function(require,module,exports){
+var TokenTypes = require(135);
+var E = require(136);
 var idxE = E.indexer;
-var range = require(138);
-var quote = require(137);
-var routed = require(139);
+var range = require(141);
+var quote = require(140);
+var routed = require(142);
 
 /**
  * The indexer is all the logic that happens in between
@@ -7678,9 +7773,9 @@ module.exports = function indexer(tokenizer, openingToken, state, out) {
 };
 
 
-},{"132":132,"133":133,"137":137,"138":138,"139":139}],137:[function(require,module,exports){
-var TokenTypes = require(132);
-var E = require(133);
+},{"135":135,"136":136,"140":140,"141":141,"142":142}],140:[function(require,module,exports){
+var TokenTypes = require(135);
+var E = require(136);
 var quoteE = E.quote;
 
 /**
@@ -7762,10 +7857,10 @@ module.exports = function quote(tokenizer, openingToken, state, out) {
 };
 
 
-},{"132":132,"133":133}],138:[function(require,module,exports){
-var Tokenizer = require(140);
-var TokenTypes = require(132);
-var E = require(133);
+},{"135":135,"136":136}],141:[function(require,module,exports){
+var Tokenizer = require(143);
+var TokenTypes = require(135);
+var E = require(136);
 
 /**
  * The indexer is all the logic that happens in between
@@ -7841,10 +7936,10 @@ module.exports = function range(tokenizer, openingToken, state, out) {
 };
 
 
-},{"132":132,"133":133,"140":140}],139:[function(require,module,exports){
-var TokenTypes = require(132);
-var RoutedTokens = require(131);
-var E = require(133);
+},{"135":135,"136":136,"143":143}],142:[function(require,module,exports){
+var TokenTypes = require(135);
+var RoutedTokens = require(134);
+var E = require(136);
 var routedE = E.routed;
 
 /**
@@ -7907,8 +8002,8 @@ module.exports = function routed(tokenizer, openingToken, state, out) {
 };
 
 
-},{"131":131,"132":132,"133":133}],140:[function(require,module,exports){
-var TokenTypes = require(132);
+},{"134":134,"135":135,"136":136}],143:[function(require,module,exports){
+var TokenTypes = require(135);
 var DOT_SEPARATOR = '.';
 var COMMA_SEPARATOR = ',';
 var OPENING_BRACKET = '[';
@@ -8059,9 +8154,9 @@ function getNext(string, idx, ext) {
 
 
 
-},{"132":132}],141:[function(require,module,exports){
-var toPaths = require(147);
-var toTree = require(148);
+},{"135":135}],144:[function(require,module,exports){
+var toPaths = require(150);
+var toTree = require(151);
 
 module.exports = function collapse(paths) {
     var collapseMap = paths.
@@ -8083,8 +8178,8 @@ module.exports = function collapse(paths) {
     return toPaths(collapseMap);
 };
 
-},{"147":147,"148":148}],142:[function(require,module,exports){
-var iterateKeySet = require(144);
+},{"150":150,"151":151}],145:[function(require,module,exports){
+var iterateKeySet = require(147);
 
 /**
  * Tests to see if the intersection should be stripped from the
@@ -8132,19 +8227,19 @@ module.exports = function hasIntersection(tree, path, depth) {
     return intersects;
 };
 
-},{"144":144}],143:[function(require,module,exports){
+},{"147":147}],146:[function(require,module,exports){
 module.exports = {
-    iterateKeySet: require(144),
-    toTree: require(148),
-    toTreeWithUnion: require(149),
-    pathsComplementFromTree: require(146),
-    pathsComplementFromLengthTree: require(145),
-    hasIntersection: require(142),
-    toPaths: require(147),
-    collapse: require(141)
+    iterateKeySet: require(147),
+    toTree: require(151),
+    toTreeWithUnion: require(152),
+    pathsComplementFromTree: require(149),
+    pathsComplementFromLengthTree: require(148),
+    hasIntersection: require(145),
+    toPaths: require(150),
+    collapse: require(144)
 };
 
-},{"141":141,"142":142,"144":144,"145":145,"146":146,"147":147,"148":148,"149":149}],144:[function(require,module,exports){
+},{"144":144,"145":145,"147":147,"148":148,"149":149,"150":150,"151":151,"152":152}],147:[function(require,module,exports){
 var isArray = Array.isArray;
 
 /**
@@ -8251,8 +8346,8 @@ function initializeNote(key, note) {
     note.arrayOffset = 0;
 }
 
-},{}],145:[function(require,module,exports){
-var hasIntersection = require(142);
+},{}],148:[function(require,module,exports){
+var hasIntersection = require(145);
 
 /**
  * Compares the paths passed in with the tree.  Any of the paths that are in
@@ -8281,8 +8376,8 @@ module.exports = function pathsComplementFromLengthTree(paths, tree) {
 };
 
 
-},{"142":142}],146:[function(require,module,exports){
-var hasIntersection = require(142);
+},{"145":145}],149:[function(require,module,exports){
+var hasIntersection = require(145);
 
 /**
  * Compares the paths passed in with the tree.  Any of the paths that are in
@@ -8310,7 +8405,7 @@ module.exports = function pathsComplementFromTree(paths, tree) {
 };
 
 
-},{"142":142}],147:[function(require,module,exports){
+},{"145":145}],150:[function(require,module,exports){
 var isArray = Array.isArray;
 var typeOfObject = "object";
 
@@ -8532,8 +8627,8 @@ function isNumber(val) {
 }
 
 
-},{}],148:[function(require,module,exports){
-var iterateKeySet = require(144);
+},{}],151:[function(require,module,exports){
+var iterateKeySet = require(147);
 var isArray = Array.isArray;
 
 /**
@@ -8578,17 +8673,17 @@ function innerToTree(seed, path, depth) {
 }
 
 
-},{"144":144}],149:[function(require,module,exports){
+},{"147":147}],152:[function(require,module,exports){
 
-},{}],150:[function(require,module,exports){
+},{}],153:[function(require,module,exports){
 'use strict';
 
-module.exports = require(155)
+module.exports = require(158)
 
-},{"155":155}],151:[function(require,module,exports){
+},{"158":158}],154:[function(require,module,exports){
 'use strict';
 
-var asap = require(121);
+var asap = require(124);
 
 function noop() {}
 
@@ -8771,10 +8866,10 @@ function doResolve(fn, promise) {
   }
 }
 
-},{"121":121}],152:[function(require,module,exports){
+},{"124":124}],155:[function(require,module,exports){
 'use strict';
 
-var Promise = require(151);
+var Promise = require(154);
 
 module.exports = Promise;
 Promise.prototype.done = function (onFulfilled, onRejected) {
@@ -8786,12 +8881,12 @@ Promise.prototype.done = function (onFulfilled, onRejected) {
   });
 };
 
-},{"151":151}],153:[function(require,module,exports){
+},{"154":154}],156:[function(require,module,exports){
 'use strict';
 
 //This file contains the ES6 extensions to the core Promises/A+ API
 
-var Promise = require(151);
+var Promise = require(154);
 
 module.exports = Promise;
 
@@ -8895,10 +8990,10 @@ Promise.prototype['catch'] = function (onRejected) {
   return this.then(null, onRejected);
 };
 
-},{"151":151}],154:[function(require,module,exports){
+},{"154":154}],157:[function(require,module,exports){
 'use strict';
 
-var Promise = require(151);
+var Promise = require(154);
 
 module.exports = Promise;
 Promise.prototype['finally'] = function (f) {
@@ -8913,23 +9008,23 @@ Promise.prototype['finally'] = function (f) {
   });
 };
 
-},{"151":151}],155:[function(require,module,exports){
+},{"154":154}],158:[function(require,module,exports){
 'use strict';
 
-module.exports = require(151);
-require(152);
-require(154);
-require(153);
+module.exports = require(154);
+require(155);
+require(157);
 require(156);
+require(159);
 
-},{"151":151,"152":152,"153":153,"154":154,"156":156}],156:[function(require,module,exports){
+},{"154":154,"155":155,"156":156,"157":157,"159":159}],159:[function(require,module,exports){
 'use strict';
 
 // This file contains then/promise specific extensions that are only useful
 // for node.js interop
 
-var Promise = require(151);
-var asap = require(119);
+var Promise = require(154);
+var asap = require(122);
 
 module.exports = Promise;
 
@@ -8995,7 +9090,7 @@ Promise.prototype.nodeify = function (callback, ctx) {
   });
 }
 
-},{"119":119,"151":151}],157:[function(require,module,exports){
+},{"122":122,"154":154}],160:[function(require,module,exports){
 (function (global){
 // Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
@@ -9025,7 +9120,7 @@ Promise.prototype.nodeify = function (callback, ctx) {
             return factory(root, exports, Rx);
         });
     } else if (typeof module === 'object' && module && module.exports === freeExports) {
-        module.exports = factory(root, module.exports, require(158));
+        module.exports = factory(root, module.exports, require(161));
     } else {
         root.Rx = factory(root, {}, root.Rx);
     }
@@ -9837,7 +9932,7 @@ Promise.prototype.nodeify = function (callback, ctx) {
 }));
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"158":158}],158:[function(require,module,exports){
+},{"161":161}],161:[function(require,module,exports){
 (function (process,global){
 // Copyright (c) Microsoft Open Technologies, Inc. All rights reserved. See License.txt in the project root for license information.
 
@@ -15427,6 +15522,6 @@ Promise.prototype.nodeify = function (callback, ctx) {
 
 }.call(this));
 
-}).call(this,require(124),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"124":124}]},{},[1])(1)
+}).call(this,require(127),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
+},{"127":127}]},{},[1])(1)
 });
