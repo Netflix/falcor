@@ -17,6 +17,8 @@ var $atom = require("./../../../lib/types/atom");
 var $error = require("./../../../lib/types/error");
 var $ref = require("./../../../lib/types/ref");
 var sinon = require('sinon');
+var ModelResponse = require('./../../../lib/response/ModelResponse');
+var atom = Model.atom;
 
 describe("Deref-Short", function() {
     describe('Sync', function() {
@@ -64,6 +66,53 @@ describe("Deref-Short", function() {
         });
     });
     describe('Async', function() {
+        it('should properly forward on invalid sources.', function(done) {
+            var source = {
+                get: function() {
+                    return new ModelResponse(function(observer) {
+                        setTimeout(function() {
+                            observer.onNext({
+                                jsonGraph: {
+                                    a: atom('short that')
+                                },
+                                paths: [['a', 'b', 'd']]
+                            });
+                            observer.onCompleted();
+                        });
+                    });
+                }
+            };
+            var model = new Model({
+                source: source,
+                cache: {
+                    a: {
+                        b: {
+                            c: '1 2 3'
+                        }
+                    }
+                }
+            });
+
+            var onNext = sinon.spy();
+            var noThrow = false;
+            model._path = ['a', 'b'];
+            model.
+                get(['a', 'b', 'd']).
+                doAction(onNext, function(err) {
+                    expect(err.name).to.equal(InvalidModelError.name);
+                    expect(err.message).to.equal(InvalidModelError.message);
+                    noThrow = true;
+                }).
+                subscribe(
+                    done.bind(null, 'onNext should not happen.'),
+                    function(e) {
+                        if (noThrow) {
+                            return done();
+                        }
+                        done(e);
+                    },
+                    done.bind(null, 'onCompleted should not happen.'));
+        });
         it("bound to a path that short-circuits in a branch key position on error.", function(done) {
             var dataModel = new Model({cache: {
                 genreList: {

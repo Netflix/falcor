@@ -1,20 +1,12 @@
 var falcor = require("./../../../lib/");
 var Model = falcor.Model;
-var Rx = require("rx");
-var LocalDataSource = require("../../data/LocalDataSource");
-var Cache = require("../../data/Cache");
-var Expected = require("../../data/expected");
-var getTestRunner = require("../../getTestRunner");
-var testRunner = require("../../testRunner");
-var References = Expected.References;
-var Complex = Expected.Complex;
-var Values = Expected.Values;
 var chai = require("chai");
 var expect = chai.expect;
 var noOp = function() {};
 var InvalidModelError = require('./../../../lib/errors/InvalidModelError');
 var $atom = require('./../../../lib/types/atom');
 var $error = require('./../../../lib/types/error');
+var sinon = require('sinon');
 
 describe("Deref-On", function() {
     describe('Sync', function() {
@@ -36,7 +28,7 @@ describe("Deref-On", function() {
                 dataModel._derefSync(["genreList", 0]);
             } catch (e) {
                 throwError = true;
-                testRunner.compare({ message: 'The humans are dead.' }, e);
+                expect(e.message).to.equals('The humans are dead.');
             }
             expect(throwError).to.be.ok;
         });
@@ -52,16 +44,14 @@ describe("Deref-On", function() {
             }});
 
             var nextModel = dataModel._derefSync(["genreList", 0]);
-            var count = 0;
+            var onNext = sinon.spy();
             nextModel.
                 get([0, 'summary']).
-                doAction(function(x) {
-                    testRunner.compare({
+                doAction(onNext, noOp, function() {
+                    expect(onNext.calledOnce).to.be.ok;
+                    expect(onNext.getCall(0).args[0]).to.deep.equals({
                         json: 'The humans are dead.'
-                    }, x);
-                    count++;
-                }, noOp, function() {
-                    expect(count).to.equals(1);
+                    });
                 }).
                 subscribe(noOp, done, done);
         });
@@ -79,22 +69,22 @@ describe("Deref-On", function() {
                 }
             }});
 
-            var throwError = false;
+            var expectPassed = false;
             dataModel.
                 deref(["genreList", 0], ['summary']).
-                doAction(
-                    function() { throw 'onNext should not happen.'; },
+                doAction(noOp, function(e) {
+                    expect(e).to.deep.equals({ message: 'The humans are dead.' });
+                    expectPassed = true;
+                }).
+                subscribe(
+                    done.bind(null, 'onNext should not happen.'),
                     function(e) {
-                        testRunner.compare({ message: 'The humans are dead.' }, e);
-                        throwError = true;
+                        if (expectPassed) {
+                            return done();
+                        }
+                        done(e);
                     },
-                    function() { throw 'onCompleted should not happen.'; }).
-                subscribe(noOp, function(e) {
-                    if (throwError) {
-                        return done();
-                    }
-                    done(e);
-                }, done);
+                    done.bind(null, 'onCompleted should not happen.'));
         });
 
         it("bound to a path that lands on a value.", function(done) {
@@ -107,19 +97,17 @@ describe("Deref-On", function() {
                 }
             }});
 
-            var count = 0;
+            var onNext = sinon.spy();
             dataModel.
                 deref(["genreList", 0], ['summary']).
                 flatMap(function(boundModel) {
                     return boundModel.get(['summarieses']);
                 }).
-                doAction(function(x) {
-                    testRunner.compare({
+                doAction(onNext, noOp, function() {
+                    expect(onNext.calledOnce).to.be.ok;
+                    expect(onNext.getCall(0).args[0]).to.deep.equals({
                         json: 'The humans are dead.'
-                    }, x);
-                    count++;
-                }, noOp, function() {
-                    expect(count).to.equals(1);
+                    });
                 }).
                 subscribe(noOp, done, done);
         });

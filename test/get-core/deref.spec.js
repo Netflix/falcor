@@ -6,8 +6,8 @@ var atom = jsonGraph.atom;
 var _ = require('lodash');
 var error = jsonGraph.error;
 var expect = require('chai').expect;
-var jsonGraphDerefException = 'It is not legal to use the JSON Graph format from a bound Model. JSON Graph format can only be used from a root model.'
 var Model = require('./../../lib').Model;
+var BoundJSONGraphModelError = require('./../../lib/errors/BoundJSONGraphModelError');
 
 describe('Deref', function() {
     // PathMap ----------------------------------------
@@ -70,17 +70,13 @@ describe('Deref', function() {
     });
 
     it('should throw an error when bound and calling jsonGraph.', function() {
-        var threw = false;
         var model = new Model({
             cache: cacheGenerator(0, 1)
         })._derefSync(['videos', 0]);
-        try {
-            model._getPathValuesAsJSONG(model, [['summary']], [{}]);
-        } catch(ex) {
-            threw = true;
-            expect(jsonGraphDerefException).to.equal(ex.message);
-        }
-        expect(threw).to.be.ok;
+
+        var res = model._getPathValuesAsJSONG(model, [['summary']], [{}]);
+        expect(res.criticalError.name).to.equals(BoundJSONGraphModelError.name);
+        expect(res.criticalError.message).to.equals(BoundJSONGraphModelError.message);
     });
 
 });
