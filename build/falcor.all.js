@@ -928,7 +928,7 @@ function followReference(model, root, nodeArg, referenceContainerArg,
                 if (type === $ref) {
                     if (isJSONG) {
                         onValue(model, next, seed, null, null, null,
-                                reference, isJSONG);
+                                reference, reference.length, isJSONG);
                     } else {
                         promote(model, next);
                     }
@@ -1351,8 +1351,8 @@ var $error = require(116);
 var $modelCreated = require(36);
 
 module.exports = function onValue(model, node, seed, depth, outerResults,
-                                  requestedPath, optimizedPath, isJSONG,
-                                  fromReference) {
+                                  requestedPath, optimizedPath, optimizedLength,
+                                  isJSONG, fromReference) {
     // Preload
     if (!seed) {
         return;
@@ -1402,7 +1402,6 @@ module.exports = function onValue(model, node, seed, depth, outerResults,
         valueNode = node.value;
     }
 
-    // Required so outside knows that there was at least one value retrieved.
     if (outerResults) {
         outerResults.hasValue = true;
     }
@@ -1413,7 +1412,7 @@ module.exports = function onValue(model, node, seed, depth, outerResults,
             curr = seed.jsonGraph = {};
             seed.paths = [];
         }
-        for (i = 0, len = optimizedPath.length - 1; i < len; i++) {
+        for (i = 0, len = optimizedLength - 1; i < len; i++) {
             key = optimizedPath[i];
 
             if (!curr[key]) {
@@ -1428,14 +1427,14 @@ module.exports = function onValue(model, node, seed, depth, outerResults,
         // TODO: Special case? do string comparisons make big difference?
         curr[key] = materialized ? {$type: $atom} : valueNode;
         if (requestedPath) {
-            seed.paths.push(requestedPath.concat());
+            seed.paths.push(requestedPath.slice(0, depth));
         }
     }
 
     // The output is pathMap and the depth is 0.  It is just a
     // value report it as the found JSON
     else if (depth === 0) {
-            seed.json = valueNode;
+        seed.json = valueNode;
     }
 
     // The output is pathMap but we need to build the pathMap before
@@ -1494,7 +1493,8 @@ module.exports = function onValueType(
     if (!node || !currType) {
         if (isMaterialized(model)) {
             onValue(model, node, seed, depth, outerResults,
-                    requestedPath, optimizedPath, isJSONG, fromReference);
+                    requestedPath, optimizedPath, optimizedLength,
+                    isJSONG, fromReference);
         } else {
             onMissing(model, path, depth,
                       outerResults, requestedPath,
@@ -1520,8 +1520,8 @@ module.exports = function onValueType(
             requestedPath.push(null);
         }
         if (isJSONG || model._treatErrorsAsValues) {
-            onValue(model, node, seed, depth, outerResults,
-                    requestedPath, optimizedPath, isJSONG, fromReference);
+            onValue(model, node, seed, depth, outerResults, requestedPath,
+                    optimizedPath, optimizedLength, isJSONG, fromReference);
         } else {
             onError(model, node, depth, requestedPath, outerResults);
         }
@@ -1536,8 +1536,8 @@ module.exports = function onValueType(
         if (!requiresMaterializedToReport ||
             requiresMaterializedToReport && isMaterialized(model)) {
 
-            onValue(model, node, seed, depth, outerResults,
-                    requestedPath, optimizedPath, isJSONG, fromReference);
+            onValue(model, node, seed, depth, outerResults, requestedPath,
+                    optimizedPath, optimizedLength, isJSONG, fromReference);
         }
     }
 };
