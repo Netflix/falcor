@@ -1,19 +1,26 @@
-var __key = require("../lib/internal/key");
+var __key = require('./../lib/internal/key');
+
+var internalKeys = ['__parent', '__path', '__key', '__version'];
 
 module.exports = {
     clean: clean,
     strip: strip,
+    internalKeys: internalKeys,
+    stripDerefAndVersionKeys: function(item) {
+        strip.apply(null, [item, '$size'].concat(internalKeys));
+        return item;
+    },
     traverseAndConvert: traverseAndConvert
 };
 
 function clean(item, options) {
-    traverseAndConvert(item);
-    strip(item, __key);
+    options = options || {
+        strip: ['$size'].concat(internalKeys)
+    };
 
-    options = options || { strip: ['$size'] };
-    options.strip.forEach(function(s) {
-        strip(item, s);
-    });
+    strip.apply(null, [item, __key].concat(options.strip));
+    traverseAndConvert(item);
+
     return item;
 }
 

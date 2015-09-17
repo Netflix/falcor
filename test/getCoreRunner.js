@@ -60,10 +60,9 @@ module.exports = function(testConfig) {
         });
     }
 
-    if (isJSONG || testConfig.boxValues) {
-        clean(seed[0], {strip: ["$size"]});
-        clean(expectedOutput, {strip: ["$size"]});
-    }
+    // $size is stripped out of basic core tests.
+    clean(seed[0]);
+    clean(expectedOutput);
 
     if (expectedOutput) {
         expect(seed[0]).to.deep.equals(expectedOutput);
