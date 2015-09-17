@@ -15,6 +15,7 @@ var ErrorDataSource = require('../../data/ErrorDataSource');
 var $error = require('./../../../lib/types/error');
 var expect = require('chai').expect;
 var sinon = require('sinon');
+var strip = require('./../../cleanData').stripDerefAndVersionKeys;
 
 describe('DataSource and Cache', function() {
     xit('should accept jsongraph without paths from the datasource', function(done) {
@@ -73,7 +74,7 @@ describe('DataSource and Cache', function() {
                                 }
                             }
                         }
-                    }}, x);
+                    }}, strip(x));
                 }, noOp, function() {
                     testRunner.compare(true, next, 'Expect to be onNext at least 1 time.');
                 }).
@@ -104,7 +105,7 @@ describe('DataSource and Cache', function() {
                                 }
                             }
                         }
-                    }}, x);
+                    }}, strip(x));
                 }, noOp, function() {
                     testRunner.compare(true, next, 'Expect to be onNext at least 1 time.');
                 }).
@@ -138,7 +139,7 @@ describe('DataSource and Cache', function() {
                 doAction(onNext, noOp, function() {
                     expect(onSet.calledTwice, 'onSet to be called 2x').to.be.ok;
                     expect(onNext.calledOnce, 'onNext to be called 1x').to.be.ok;
-                    expect(onNext.getCall(0).args[0]).to.deep.equals({
+                    expect(strip(onNext.getCall(0).args[0])).to.deep.equals({
                         json: {
                             genreList: {
                                 0: {

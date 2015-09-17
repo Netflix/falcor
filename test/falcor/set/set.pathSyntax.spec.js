@@ -5,6 +5,7 @@ var Expected = require('../../data/expected');
 var Rx = require('rx');
 var getTestRunner = require('./../../getTestRunner');
 var testRunner = require('./../../testRunner');
+var strip = require('./../../cleanData').stripDerefAndVersionKeys;
 var noOp = function() {};
 var Observable = Rx.Observable;
 
@@ -23,7 +24,7 @@ describe('Path Syntax', function() {
                     test: {
                         0: 5
                     }
-                }, x.json);
+                }, strip(x.json));
             }, noOp, function() {
                 testRunner.compare(true, called,
                    'The onNext function was expected to be called at least once.');
