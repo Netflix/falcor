@@ -57,7 +57,9 @@ describe('Edges', function() {
             output: {
                 json: {
                     videos: {
+                        __key: 'videos',
                         1234: {
+                            __key: 1234,
                             title: 'Running Man'
                         }
                     }

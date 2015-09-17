@@ -53,6 +53,7 @@ describe('Errors', function() {
             output: {
                 json: {
                     to: {
+                        __key: 'to',
                         error: 'Oops!'
                     }
                 }
@@ -67,6 +68,7 @@ describe('Errors', function() {
             output: {
                 json: {
                     to: {
+                        __key: 'to',
                         error: error('Oops!')
                     }
                 }
@@ -95,7 +97,9 @@ describe('Errors', function() {
             output: {
                 json: {
                     list: {
+                        __key: 'list',
                         0: {
+                            __path: ['to'],
                             title: 'Hello World'
                         }
                     }

@@ -5,6 +5,7 @@ var LocalDataSource = require('../../data/LocalDataSource');
 var sinon = require('sinon');
 var expect = require('chai').expect;
 var cacheGenerator = require('./../../CacheGenerator');
+var clean = require('./../../cleanData').stripDerefAndVersionKeys;
 function Cache() {
     return cacheGenerator(0, 50);
 }
@@ -35,7 +36,7 @@ describe('DataSource and Deref', function() {
             doAction(secondOnNext).
             doAction(noOp, noOp, function() {
                 expect(secondOnNext.calledOnce).to.be.ok;
-                expect(secondOnNext.getCall(0).args[0]).to.deep.equals({
+                expect(clean(secondOnNext.getCall(0).args[0])).to.deep.equals({
                     json: {
                         1: {
                             item: {

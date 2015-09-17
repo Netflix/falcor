@@ -4,6 +4,7 @@ var Rx = require('rx');
 var noOp = function() {};
 var Observable = Rx.Observable;
 var CacheGenerator = require('./../../CacheGenerator');
+var strip = require('./../../cleanData').stripDerefAndVersionKeys;
 var sinon = require('sinon');
 var expect = require('chai').expect;
 
@@ -15,7 +16,7 @@ describe('Path Syntax', function() {
         model.
             get('lolomo[0][0].item.title', 'lolomo[0][1].item.title').
             doAction(onNext, noOp, function() {
-                expect(onNext.getCall(0).args[0]).to.deep.equals({
+                expect(strip(onNext.getCall(0).args[0])).to.deep.equals({
                     json: {
                         lolomo: {
                             0: {

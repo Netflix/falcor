@@ -60,9 +60,12 @@ module.exports = function(testConfig) {
         });
     }
 
+
     // $size is stripped out of basic core tests.
-    clean(seed[0]);
-    clean(expectedOutput);
+    // We have to strip out parent as well from the output since it will produce
+    // infinite recursion.
+    clean(seed[0], {strip: ['$size', '__parent']});
+    clean(expectedOutput, {strip: ['$size']});
 
     if (expectedOutput) {
         expect(seed[0]).to.deep.equals(expectedOutput);

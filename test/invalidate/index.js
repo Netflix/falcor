@@ -3,6 +3,7 @@ var expect = require('chai').expect;
 var noOp = function() {};
 var falcor = require('./../../lib');
 var Model = falcor.Model;
+var strip = require("./../cleanData").stripDerefAndVersionKeys;
 
 module.exports = function() {
     require("./pathMaps");
@@ -24,7 +25,7 @@ module.exports = function() {
             get('foo.bar', 'foo.bazz').
             doAction(onNext, noOp, function() {
                 expect(onNext.calledOnce).to.be.ok;
-                expect(onNext.getCall(0).args[0]).to.deep.equals({
+                expect(strip(onNext.getCall(0).args[0])).to.deep.equals({
                     json: {
                         foo: {
                             bazz: 7

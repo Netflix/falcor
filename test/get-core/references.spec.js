@@ -26,6 +26,9 @@ describe('References', function() {
             output: {
                 json: {
                     toReference: {
+                        // Should be the second references reference not
+                        // toReferences reference.
+                        __path: ['to'],
                         title: 'Title'
                     }
                 }
@@ -66,7 +69,9 @@ describe('References', function() {
             output: {
                 json: {
                     to: {
+                        __key: 'to',
                         reference: {
+                            __path: ['to'],
                             title: 'Title'
                         },
                         toValue: 'Title'

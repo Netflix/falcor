@@ -1,47 +1,66 @@
 var falcor = require("./../../../lib/");
 var Model = falcor.Model;
-var Cache = require('../../data/Cache');
-var Expected = require('../../data/expected');
-var Rx = require('rx');
-var getTestRunner = require('./../../getTestRunner');
-var testRunner = require('./../../testRunner');
 var noOp = function() {};
 var LocalDataSource = require('../../data/LocalDataSource');
 var ErrorDataSource = require('../../data/ErrorDataSource');
 var isPathValue = require("./../../../lib/support/isPathValue");
 var expect = require("chai").expect;
 var sinon = require('sinon');
+var clean = require('./../../cleanData').stripDerefAndVersionKeys;
+var cacheGenerator = require('./../../CacheGenerator');
+var atom = Model.atom;
 
 describe('Cache as DataSource', function() {
     describe('toJSON', function() {
         it('should get a value from falcor.', function(done) {
-            var model = new Model({ source: new Model({ source: new LocalDataSource(Cache()) }).asDataSource() });
-            var expected = Expected.Values().direct.AsPathMap.values[0];
-            var next = false;
+            var model = new Model({
+                source: new Model({
+                    source: new LocalDataSource(cacheGenerator(0, 1))
+                }).asDataSource()
+            });
+            var onNext = sinon.spy();
             model.
-                get(['videos', 1234, 'summary']).
-                doAction(function(x) {
-                    testRunner.compare(expected, x);
-                    next = true;
-                }, noOp, function() {
-                    testRunner.compare(true, next, 'Expect to be onNext at least 1 time.');
+                get(['videos', 0, 'title']).
+                doAction(onNext, noOp, function() {
+                    expect(onNext.calledOnce).to.be.ok;
+                    expect(clean(onNext.getCall(0).args[0])).to.deep.equals({
+                        json: {
+                            videos: {
+                                0: {
+                                    title: 'Video 0'
+                                }
+                            }
+                        }
+                    });
                 }).
                 subscribe(noOp, done, done);
         });
     });
     describe('_toJSONG', function() {
         it('should get a value from falcor.', function(done) {
-            var model = new Model({ source: new Model({ source: new LocalDataSource(Cache()) }).asDataSource() });
-            var expected = Expected.Values().direct.AsJSONG.values[0];
-            var next = false;
+            var model = new Model({
+                source: new Model({
+                    source: new LocalDataSource(cacheGenerator(0, 1))
+                }).asDataSource()
+            });
+            var onNext = sinon.spy();
             model.
-                get(['videos', 1234, 'summary']).
+                get(['videos', 0, 'title']).
                 _toJSONG().
-                doAction(function(x) {
-                    testRunner.compare(expected, x);
-                    next = true;
-                }, noOp, function() {
-                    testRunner.compare(true, next, 'Expect to be onNext at least 1 time.');
+                doAction(onNext, noOp, function() {
+                    expect(onNext.calledOnce).to.be.ok;
+                    expect(clean(onNext.getCall(0).args[0])).to.deep.equals({
+                        jsonGraph: {
+                            videos: {
+                                0: {
+                                    title: atom('Video 0')
+                                }
+                            }
+                        },
+                        paths: [
+                            ['videos', 0, 'title']
+                        ]
+                    });
                 }).
                 subscribe(noOp, done, done);
         });
@@ -55,13 +74,13 @@ describe('Cache as DataSource', function() {
         model.
             get(['videos', 1234, 'summary']).
             doAction(noOp, function(err) {
-                testRunner.compare([{
+                expect(err).to.deep.equals([{
                     path: ['videos', 1234, 'summary'],
                     value: {
                         message: 'Oops!',
                         status: 500
                     }
-                }], err);
+                }]);
             }).
             subscribe(noOp, function(err) {
                 // ensure its the same error

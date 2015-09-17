@@ -12,7 +12,9 @@ describe('Values', function() {
             output: {
                 json: {
                     videos: {
+                        __key: 'videos',
                         0: {
+                            __key: 0,
                             title: 'Video 0'
                         }
                     }
@@ -27,9 +29,13 @@ describe('Values', function() {
             output: {
                 json: {
                     lolomo: {
+                        __path: ['lolomos', 1234],
                         0: {
+                            __path: ['lists', 'A'],
                             0: {
+                                __key: 0,
                                 item: {
+                                    __path: ['videos', 0],
                                     title: 'Video 0'
                                 }
                             }
@@ -46,26 +52,37 @@ describe('Values', function() {
             output: {
                 json: {
                     lolomo: {
+                        __path: ['lolomos', 1234],
                         0: {
+                            __path: ['lists', 'A'],
                             0: {
+                                __key: 0,
                                 item: {
+                                    __path: ['videos', 0],
                                     title: 'Video 0'
                                 }
                             },
                             1: {
+                                __key: 1,
                                 item: {
+                                    __path: ['videos', 1],
                                     title: 'Video 1'
                                 }
                             }
                         },
                         1: {
+                            __path: ['lists', 'B'],
                             0: {
+                                __key: 0,
                                 item: {
+                                    __path: ['videos', 10],
                                     title: 'Video 10'
                                 }
                             },
                             1: {
+                                __key: 1,
                                 item: {
+                                    __path: ['videos', 11],
                                     title: 'Video 11'
                                 }
                             }
@@ -85,8 +102,10 @@ describe('Values', function() {
             output: {
                 json: {
                     lolomo: {
+                        __key: 'lolomo',
                         length: 1,
                         0: {
+                            __key: 0,
                             length: 1337
                         }
                     }

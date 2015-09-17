@@ -3,7 +3,6 @@ var Model = falcor.Model;
 var expect = require('chai').expect;
 var $path = require("./../../lib/types/ref");
 var $atom = require("./../../lib/types/atom");
-var testRunner = require('../testRunner');
 var sinon = require('sinon');
 var noOp = function() {};
 var Rx = require('rx');
@@ -13,6 +12,7 @@ var strip = require("./support/strip");
 var $ref = require("falcor-json-graph").ref;
 var $atom = require("falcor-json-graph").atom;
 var $error = require("falcor-json-graph").error;
+var cleanStrip = require("./../cleanData").stripDerefAndVersionKeys;
 
 describe("Special Cases", function() {
     it('should set in an array and the length should be set in.', function(done) {
@@ -30,7 +30,7 @@ describe("Special Cases", function() {
             doAction(onNext).
             doAction(noOp, noOp, function() {
                 expect(onNext.calledOnce).to.be.ok;
-                expect(onNext.getCall(0).args[0]).to.deep.equals({
+                expect(cleanStrip(onNext.getCall(0).args[0])).to.deep.equals({
                     json: {foo: { length: 1 } }
                 });
             }).
