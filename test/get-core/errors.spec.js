@@ -5,6 +5,9 @@ var jsonGraph = require('falcor-json-graph');
 var ref = jsonGraph.ref;
 var error = jsonGraph.error;
 var _ = require('lodash');
+var __key = require('./../../lib/internal/key');
+var __path = require('./../../lib/internal/path');
+var __parent = require('./../../lib/internal/parent');
 
 describe('Errors', function() {
     var expired = error('expired');
@@ -48,14 +51,15 @@ describe('Errors', function() {
         });
     });
     it('should report error with path in treateErrorsAsValues.', function() {
+        var to = {
+            error: 'Oops!'
+        };
+        to[__key] = 'to';
         getCoreRunner({
             input: [['to', 'error']],
             output: {
                 json: {
-                    to: {
-                        __key: 'to',
-                        error: 'Oops!'
-                    }
+                    to: to
                 }
             },
             treatErrorsAsValues: true,
@@ -63,14 +67,15 @@ describe('Errors', function() {
         });
     });
     it('should report error with path in treateErrorsAsValues and boxValues.', function() {
+        var to = {
+            error: error('Oops!')
+        };
+        to[__key] = 'to';
         getCoreRunner({
             input: [['to', 'error']],
             output: {
                 json: {
-                    to: {
-                        __key: 'to',
-                        error: error('Oops!')
-                    }
+                    to: to
                 }
             },
             treatErrorsAsValues: true,
@@ -90,19 +95,20 @@ describe('Errors', function() {
     });
 
     it('should report both values and errors when error is less length than value path.', function() {
+        var list = {
+            0: {
+                title: 'Hello World'
+            }
+        };
+        list[__key] = 'list';
+        list[0][__path] = ['to'];
         getCoreRunner({
             input: [
                 ['list', {to: 1}, 'title']
             ],
             output: {
                 json: {
-                    list: {
-                        __key: 'list',
-                        0: {
-                            __path: ['to'],
-                            title: 'Hello World'
-                        }
-                    }
+                    list: list
                 }
             },
             errors: [{

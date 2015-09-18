@@ -35,15 +35,18 @@ describe('DataSource and Deref', function() {
         });
         var onNext = sinon.spy();
         model.
-            deref(['lolomo', 0], [0, 'item', 'title']).
-            flatMap(function(m) {
-                return m.
+            get(['lolomo', 0, 0, 'item', 'title']).
+            flatMap(function(x) {
+                return model.
+                    deref(x.json.lolomo[0]).
                     set(
                         {path: [0, 'item', 'title'], value: 1337},
                         {path: [1, 'item', 'title'], value: 7331});
             }).
-            doAction(onNext, noOp, function() {
+            doAction(onNext).
+            doAction(noOp, noOp, function() {
                 expect(count).to.equals(2);
+                expect(onNext.calledOnce).to.be.ok;
                 expect(strip(onNext.getCall(0).args[0])).to.deep.equals({
                     json: {
                         0: {

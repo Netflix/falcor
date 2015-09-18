@@ -4,6 +4,6 @@ describe('Operations', function() {
     require('./call');
     require('./invalidate');
     require('./schedulers');
-    require('./bind');
+    require('./deref');
     require('./error');
 });

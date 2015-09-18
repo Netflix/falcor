@@ -5,7 +5,7 @@ var LocalDataSource = require('../../data/LocalDataSource');
 var sinon = require('sinon');
 var expect = require('chai').expect;
 var cacheGenerator = require('./../../CacheGenerator');
-var clean = require('./../../cleanData').stripDerefAndVersionKeys;
+var strip = require('./../../cleanData').stripDerefAndVersionKeys;
 function Cache() {
     return cacheGenerator(0, 50);
 }
@@ -18,25 +18,17 @@ describe('DataSource and Deref', function() {
         var model = new Model({cache: M(), source: new LocalDataSource(Cache())});
         model._root.unsafeMode = true;
         var onNext = sinon.spy();
-        var secondOnNext = sinon.spy();
         model.
-            deref(['lolomo', 0], [0, 'item', 'title']).
-            flatMap(function(boundModel) {
-                model = boundModel;
-                return model.preload([1, 'item', 'title']);
+            get(['lolomo', 0, 0, 'item', 'title']).
+            flatMap(function(x) {
+                return model.
+                    deref(x.json.lolomo[0]).
+                    get([1, 'item', 'title']);
             }).
             doAction(onNext).
             doAction(noOp, noOp, function() {
-                expect(onNext.callCount).to.equal(0);
-            }).
-            defaultIfEmpty({}).
-            flatMap(function() {
-                return model.get([1, 'item', 'title']);
-            }).
-            doAction(secondOnNext).
-            doAction(noOp, noOp, function() {
-                expect(secondOnNext.calledOnce).to.be.ok;
-                expect(clean(secondOnNext.getCall(0).args[0])).to.deep.equals({
+                expect(onNext.calledOnce).to.be.ok;
+                expect(strip(onNext.getCall(0).args[0])).to.deep.equals({
                     json: {
                         1: {
                             item: {

@@ -1,6 +1,8 @@
 var __key = require('./../lib/internal/key');
+var __path = require('./../lib/internal/path');
+var __parent = require('./../lib/internal/parent');
 
-var internalKeys = ['__parent', '__path', '__key', '__version'];
+var internalKeys = [__parent, __path, __key, '__version'];
 
 module.exports = {
     clean: clean,
