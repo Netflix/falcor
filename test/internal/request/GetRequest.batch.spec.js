@@ -6,13 +6,17 @@ var ImmediateScheduler = require('./../../../lib/schedulers/ImmediateScheduler')
 var Rx = require('rx');
 var Model = require('./../../../lib').Model;
 var LocalDataSource = require('./../../data/LocalDataSource');
-var Cache = require('./../../data/Cache.js');
-var noOp = function() {};
 var zipSpy = require('./../../zipSpy');
 
+var cacheGenerator = require('./../../CacheGenerator');
+var strip = require('./../../cleanData').stripDerefAndVersionKeys;
+var noOp = function() {};
+var Cache = function() { return cacheGenerator(0, 2); };
+
 describe('#batch', function() {
-    var videos1234 = ['videos', 1234, 'summary'];
-    var videos553 = ['videos', 553, 'summary'];
+    var videos0 = ['videos', 0, 'title'];
+    var videos1 = ['videos', 1, 'title'];
+
     it('should make a request to the dataSource with an immediate scheduler', function(done) {
         var inlineBoolean = true;
         var scheduler = new ImmediateScheduler();
@@ -26,24 +30,21 @@ describe('#batch', function() {
             model: model
         });
 
-        var disposable = request.batch([videos1234], [videos1234], function(err, data) {
+        var disposable = request.batch([videos0], [videos0], function(err, data) {
             var onNext = sinon.spy();
             model.
                 withoutDataSource().
-                get(videos1234).
+                get(videos0).
                 doAction(onNext, noOp, function() {
                     expect(inlineBoolean).to.be.ok;
                     expect(getSpy.calledOnce).to.be.ok;
-                    expect(getSpy.getCall(0).args[1]).to.deep.equals([['videos', 1234, 'summary']]);
+                    expect(getSpy.getCall(0).args[1]).to.deep.equals([videos0]);
                     expect(onNext.calledOnce).to.be.ok;
-                    expect(onNext.getCall(0).args[0]).to.deep.equals({
+                    expect(strip(onNext.getCall(0).args[0])).to.deep.equals({
                         json: {
                             videos: {
-                                1234: {
-                                    summary: {
-                                        title: 'House of Cards',
-                                        url: '/movies/1234'
-                                    }
+                                0: {
+                                    title: 'Video 0'
                                 }
                             }
                         }
@@ -70,20 +71,17 @@ describe('#batch', function() {
             var onNext = sinon.spy();
             model.
                 withoutDataSource().
-                get(videos1234).
+                get(videos0).
                 doAction(onNext, noOp, function() {
                     expect(inlineBoolean).to.not.be.ok;
                     expect(getSpy.calledOnce).to.be.ok;
-                    expect(getSpy.getCall(0).args[1]).to.deep.equals([videos1234]);
+                    expect(getSpy.getCall(0).args[1]).to.deep.equals([videos0]);
                     expect(onNext.calledOnce).to.be.ok;
-                    expect(onNext.getCall(0).args[0]).to.deep.equals({
+                    expect(strip(onNext.getCall(0).args[0])).to.deep.equals({
                         json: {
                             videos: {
-                                1234: {
-                                    summary: {
-                                        title: 'House of Cards',
-                                        url: '/movies/1234'
-                                    }
+                                0: {
+                                    title: 'Video 0'
                                 }
                             }
                         }
@@ -92,7 +90,7 @@ describe('#batch', function() {
                 subscribe(noOp, done, done);
         });
 
-        var disposable = request.batch([videos1234], [videos1234], callback);
+        var disposable = request.batch([videos0], [videos0], callback);
         inlineBoolean = false;
     });
 
@@ -112,22 +110,16 @@ describe('#batch', function() {
             var onNext = sinon.spy();
             model.
                 withoutDataSource().
-                get(videos1234, videos553).
+                get(videos0, videos1).
                 doAction(onNext, noOp, function() {
-                    expect(onNext.getCall(0).args[0]).to.deep.equals({
+                    expect(strip(onNext.getCall(0).args[0])).to.deep.equals({
                         json: {
                             videos: {
-                                1234: {
-                                    summary: {
-                                        title: 'House of Cards',
-                                        url: '/movies/1234'
-                                    }
+                                0: {
+                                    title: 'Video 0'
                                 },
-                                553: {
-                                    summary: {
-                                        title: 'Running Man',
-                                        url: '/movies/553'
-                                    }
+                                1: {
+                                    title: 'Video 1'
                                 }
                             }
                         }
@@ -135,8 +127,8 @@ describe('#batch', function() {
                 }).
                 subscribe(noOp, done, done);
         });
-        var disposable1 = request.batch([videos1234], [videos1234], zip);
-        var disposable2 = request.batch([videos553], [videos553], zip);
+        var disposable1 = request.batch([videos0], [videos0], zip);
+        var disposable2 = request.batch([videos1], [videos1], zip);
     });
 
     it('should batch some requests together and dispose the first one.', function(done) {
@@ -155,17 +147,14 @@ describe('#batch', function() {
             var onNext = sinon.spy();
             model.
                 withoutDataSource().
-                get(videos1234, videos553).
+                get(videos0, videos1).
                 doAction(onNext, noOp, function() {
                     expect(zip.calledOnce).to.be.ok;
-                    expect(onNext.getCall(0).args[0]).to.deep.equals({
+                    expect(strip(onNext.getCall(0).args[0])).to.deep.equals({
                         json: {
                             videos: {
-                                553: {
-                                    summary: {
-                                        title: 'Running Man',
-                                        url: '/movies/553'
-                                    }
+                                1: {
+                                    title: 'Video 1'
                                 }
                             }
                         }
@@ -173,8 +162,8 @@ describe('#batch', function() {
                 }).
                 subscribe(noOp, done, done);
         }, 300);
-        var disposable1 = request.batch([videos1234], [videos1234], zip);
-        var disposable2 = request.batch([videos553], [videos553], zip);
+        var disposable1 = request.batch([videos0], [videos0], zip);
+        var disposable2 = request.batch([videos1], [videos1], zip);
 
         disposable1();
     });
@@ -195,17 +184,14 @@ describe('#batch', function() {
             var onNext = sinon.spy();
             model.
                 withoutDataSource().
-                get(videos1234, videos553).
+                get(videos0, videos1).
                 doAction(onNext, noOp, function() {
                     expect(zip.calledOnce).to.be.ok;
-                    expect(onNext.getCall(0).args[0]).to.deep.equals({
+                    expect(strip(onNext.getCall(0).args[0])).to.deep.equals({
                         json: {
                             videos: {
-                                1234: {
-                                    summary: {
-                                        title: 'House of Cards',
-                                        url: '/movies/1234'
-                                    }
+                                0: {
+                                    title: 'Video 0'
                                 }
                             }
                         }
@@ -213,8 +199,8 @@ describe('#batch', function() {
                 }).
                 subscribe(noOp, done, done);
         }, 300);
-        var disposable1 = request.batch([videos1234], [videos1234], zip);
-        var disposable2 = request.batch([videos553], [videos553], zip);
+        var disposable1 = request.batch([videos0], [videos0], zip);
+        var disposable2 = request.batch([videos1], [videos1], zip);
 
         disposable2();
     });
