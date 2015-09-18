@@ -1,5 +1,6 @@
 var falcor = require('./../../../lib');
 var InvalidModelError = require('./../../../lib/errors/InvalidModelError');
+var InvalidDerefInputError = require('./../../../lib/errors/InvalidDerefInputError');
 var Model = falcor.Model;
 var sinon = require('sinon');
 var expect = require('chai').expect;
@@ -44,5 +45,15 @@ describe('Error cases', function() {
                         },
                         done.bind(null, new Error('onCompleted shouldnt be called')));
             });
+    });
+
+    it('should throw on invalid input.', function(done) {
+        try {
+            new Model().deref('testing');
+        } catch (e) {
+            expect(e.name).to.equals(InvalidDerefInputError.name);
+            return done();
+        }
+        done(new Error('should of thrown an error.'));
     });
 });
