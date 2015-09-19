@@ -59,7 +59,7 @@ var router = new Router([
          });
     }
   }
-});
+]);
 ~~~
 
 The Falcor Router allows you to expose a single JSON model to the client, while giving you the flexibility to store your data anywhere. 
