@@ -6,13 +6,17 @@ var ImmediateScheduler = require('./../../../lib/schedulers/ImmediateScheduler')
 var Rx = require('rx');
 var Model = require('./../../../lib').Model;
 var LocalDataSource = require('./../../data/LocalDataSource');
-var Cache = require('./../../data/Cache.js');
 var noOp = function() {};
 var zipSpy = require('./../../zipSpy');
 
+var cacheGenerator = require('./../../CacheGenerator');
+var strip = require('./../../cleanData').stripDerefAndVersionKeys;
+var noOp = function() {};
+var Cache = function() { return cacheGenerator(0, 2); };
+
 describe('#get', function() {
-    var videos1234 = ['videos', 1234, 'summary'];
-    var videos553 = ['videos', 553, 'summary'];
+    var videos0 = ['videos', 0, 'title'];
+    var videos1 = ['videos', 1, 'title'];
     it('should make a simple get request.', function(done) {
         var scheduler = new ImmediateScheduler();
         var getSpy = sinon.spy();
@@ -20,22 +24,19 @@ describe('#get', function() {
         var model = new Model({source: source});
         var queue = new RequestQueue(model, scheduler);
         var callback = sinon.spy();
-        var disposable = queue.get([videos1234], [videos1234], callback);
+        var disposable = queue.get([videos0], [videos0], callback);
 
         expect(callback.calledOnce, 'callback should be called once.').to.be.ok;
         var onNext = sinon.spy();
         model.
             withoutDataSource().
-            get(videos1234).
+            get(videos0).
             doAction(onNext, noOp, function() {
-                expect(onNext.getCall(0).args[0]).to.deep.equals({
+                expect(strip(onNext.getCall(0).args[0])).to.deep.equals({
                     json: {
                         videos: {
-                            1234: {
-                                summary: {
-                                    title: 'House of Cards',
-                                    url: '/movies/1234'
-                                }
+                            0: {
+                                title: 'Video 0'
                             }
                         }
                     }
@@ -58,22 +59,16 @@ describe('#get', function() {
             var onNext = sinon.spy();
             model.
                 withoutDataSource().
-                get(videos1234, videos553).
+                get(videos0, videos1).
                 doAction(onNext, noOp, function() {
-                    expect(onNext.getCall(0).args[0]).to.deep.equals({
+                    expect(strip(onNext.getCall(0).args[0])).to.deep.equals({
                         json: {
                             videos: {
-                                1234: {
-                                    summary: {
-                                        title: 'House of Cards',
-                                        url: '/movies/1234'
-                                    }
+                                0: {
+                                    title: 'Video 0'
                                 },
-                                553: {
-                                    summary: {
-                                        title: 'Running Man',
-                                        url: '/movies/553'
-                                    }
+                                1: {
+                                    title: 'Video 1'
                                 }
                             }
                         }
@@ -81,8 +76,8 @@ describe('#get', function() {
                 }).
                 subscribe(noOp, done, done);
         });
-        var disposable = queue.get([videos1234], [videos1234], zip);
-        var disposable2 = queue.get([videos553], [videos553], zip);
+        var disposable = queue.get([videos0], [videos0], zip);
+        var disposable2 = queue.get([videos1], [videos1], zip);
 
         expect(queue._requests.length).to.equal(1);
         expect(queue._requests[0].sent).to.equal(false);
@@ -103,16 +98,13 @@ describe('#get', function() {
             var onNext = sinon.spy();
             model.
                 withoutDataSource().
-                get(videos1234, videos553).
+                get(videos0, videos1).
                 doAction(onNext, noOp, function() {
-                    expect(onNext.getCall(0).args[0]).to.deep.equals({
+                    expect(strip(onNext.getCall(0).args[0])).to.deep.equals({
                         json: {
                             videos: {
-                                1234: {
-                                    summary: {
-                                        title: 'House of Cards',
-                                        url: '/movies/1234'
-                                    }
+                                0: {
+                                    title: 'Video 0'
                                 }
                             }
                         }
@@ -120,11 +112,11 @@ describe('#get', function() {
                 }).
                 subscribe(noOp, done, done);
         });
-        var disposable = queue.get([videos1234], [videos1234], zip);
+        var disposable = queue.get([videos0], [videos0], zip);
         expect(queue._requests.length).to.equal(1);
         expect(queue._requests[0].sent).to.equal(true);
         expect(queue._requests[0].scheduled).to.equal(false);
-        var disposable2 = queue.get([videos1234], [videos1234], zip);
+        var disposable2 = queue.get([videos0], [videos0], zip);
         expect(queue._requests.length).to.equal(1);
         expect(queue._requests[0].sent).to.equal(true);
         expect(queue._requests[0].scheduled).to.equal(false);
@@ -142,23 +134,17 @@ describe('#get', function() {
             var onNext = sinon.spy();
             model.
                 withoutDataSource().
-                get(videos1234, videos553).
+                get(videos0, videos1).
                 doAction(onNext, noOp, function() {
                     expect(zip.calledOnce, 'zip should be called once.').to.be.ok;
-                    expect(onNext.getCall(0).args[0]).to.deep.equals({
+                    expect(strip(onNext.getCall(0).args[0])).to.deep.equals({
                         json: {
                             videos: {
-                                1234: {
-                                    summary: {
-                                        title: 'House of Cards',
-                                        url: '/movies/1234'
-                                    }
+                                0: {
+                                    title: 'Video 0'
                                 },
-                                553: {
-                                    summary: {
-                                        title: 'Running Man',
-                                        url: '/movies/553'
-                                    }
+                                1: {
+                                    title: 'Video 1'
                                 }
                             }
                         }
@@ -167,11 +153,11 @@ describe('#get', function() {
                 subscribe(noOp, done, done);
         }, 300);
 
-        var disposable = queue.get([videos1234], [videos1234], zip);
+        var disposable = queue.get([videos0], [videos0], zip);
         expect(queue._requests.length).to.equal(1);
         expect(queue._requests[0].sent).to.equal(true);
         expect(queue._requests[0].scheduled).to.equal(false);
-        var disposable2 = queue.get([videos1234, videos553], [videos1234, videos553], zip);
+        var disposable2 = queue.get([videos0, videos1], [videos0, videos1], zip);
         expect(queue._requests.length).to.equal(2);
         expect(queue._requests[0].sent).to.equal(true);
         expect(queue._requests[1].sent).to.equal(true);
@@ -193,17 +179,14 @@ describe('#get', function() {
             var onNext = sinon.spy();
             model.
                 withoutDataSource().
-                get(videos1234, videos553).
+                get(videos0, videos1).
                 doAction(onNext, noOp, function() {
                     expect(zip.calledOnce).to.be.ok;
-                    expect(onNext.getCall(0).args[0]).to.deep.equals({
+                    expect(strip(onNext.getCall(0).args[0])).to.deep.equals({
                         json: {
                             videos: {
-                                1234: {
-                                    summary: {
-                                        title: 'House of Cards',
-                                        url: '/movies/1234'
-                                    }
+                                0: {
+                                    title: 'Video 0'
                                 }
                             }
                         }
@@ -211,11 +194,11 @@ describe('#get', function() {
                 }).
                 subscribe(noOp, done, done);
         }, 300);
-        var disposable = queue.get([videos1234], [videos1234], zip);
+        var disposable = queue.get([videos0], [videos0], zip);
         expect(queue._requests.length).to.equal(1);
         expect(queue._requests[0].sent).to.equal(true);
         expect(queue._requests[0].scheduled).to.equal(false);
-        var disposable2 = queue.get([videos1234], [videos1234], zip);
+        var disposable2 = queue.get([videos0], [videos0], zip);
         expect(queue._requests.length).to.equal(1);
         expect(queue._requests[0].sent).to.equal(true);
         expect(queue._requests[0].scheduled).to.equal(false);
@@ -235,18 +218,18 @@ describe('#get', function() {
             var onNext = sinon.spy();
             model.
                 withoutDataSource().
-                get(videos1234, videos553).
+                get(videos0, videos1).
                 doAction(onNext, noOp, function() {
                     expect(zip.callCount).to.equal(0);
                     expect(onNext.callCount).to.equal(0);
                 }).
                 subscribe(noOp, done, done);
         }, 300);
-        var disposable = queue.get([videos1234], [videos1234], zip);
+        var disposable = queue.get([videos0], [videos0], zip);
         expect(queue._requests.length).to.equal(1);
         expect(queue._requests[0].sent).to.equal(true);
         expect(queue._requests[0].scheduled).to.equal(false);
-        var disposable2 = queue.get([videos1234], [videos1234], zip);
+        var disposable2 = queue.get([videos0], [videos0], zip);
         expect(queue._requests.length).to.equal(1);
         expect(queue._requests[0].sent).to.equal(true);
         expect(queue._requests[0].scheduled).to.equal(false);
@@ -267,17 +250,14 @@ describe('#get', function() {
             var onNext = sinon.spy();
             model.
                 withoutDataSource().
-                get(videos1234, videos553).
+                get(videos0, videos1).
                 doAction(onNext, noOp, function() {
                     expect(zip.calledOnce).to.be.ok;
-                    expect(onNext.getCall(0).args[0]).to.deep.equals({
+                    expect(strip(onNext.getCall(0).args[0])).to.deep.equals({
                         json: {
                             videos: {
-                                1234: {
-                                    summary: {
-                                        title: 'House of Cards',
-                                        url: '/movies/1234'
-                                    }
+                                0: {
+                                    title: 'Video 0'
                                 }
                             }
                         }
@@ -285,11 +265,11 @@ describe('#get', function() {
                 }).
                 subscribe(noOp, done, done);
         }, 300);
-        var disposable = queue.get([videos1234], [videos1234], zip);
+        var disposable = queue.get([videos0], [videos0], zip);
         expect(queue._requests.length).to.equal(1);
         expect(queue._requests[0].sent).to.equal(true);
         expect(queue._requests[0].scheduled).to.equal(false);
-        var disposable2 = queue.get([videos1234, videos553], [videos1234, videos553], zip);
+        var disposable2 = queue.get([videos0, videos1], [videos0, videos1], zip);
         expect(queue._requests.length).to.equal(2);
         expect(queue._requests[1].sent).to.equal(true);
         expect(queue._requests[1].scheduled).to.equal(false);
@@ -308,7 +288,7 @@ describe('#get', function() {
             var onNext = sinon.spy();
             model.
                 withoutDataSource().
-                get(videos1234, videos553).
+                get(videos0, videos1).
                 doAction(onNext, noOp, function() {
                     expect(zip.callCount).to.equal(0);
                     expect(onNext.callCount).to.equal(0);
@@ -316,11 +296,11 @@ describe('#get', function() {
                 subscribe(noOp, done, done);
         }, 300);
 
-        var disposable = queue.get([videos1234], [videos1234], zip);
+        var disposable = queue.get([videos0], [videos0], zip);
         expect(queue._requests.length).to.equal(1);
         expect(queue._requests[0].sent).to.equal(true);
         expect(queue._requests[0].scheduled).to.equal(false);
-        var disposable2 = queue.get([videos1234, videos553], [videos1234, videos553], zip);
+        var disposable2 = queue.get([videos0, videos1], [videos0, videos1], zip);
         expect(queue._requests.length).to.equal(2);
         expect(queue._requests[1].sent).to.equal(true);
         expect(queue._requests[1].scheduled).to.equal(false);

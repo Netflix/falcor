@@ -7,6 +7,7 @@ var noOp = function() {};
 var Observable = Rx.Observable;
 var sinon = require('sinon');
 var expect = require('chai').expect;
+var clean = require('./../../cleanData').stripDerefAndVersionKeys;
 
 describe('Cache Only', function() {
     describe('PathMap', function() {
@@ -19,7 +20,7 @@ describe('Cache Only', function() {
                 get(['videos', 0, 'title']).
                 doAction(onNext, noOp, function() {
                     expect(onNext.callCount).to.equal(1);
-                    expect(onNext.getCall(0).args[0]).to.deep.equals({
+                    expect(clean(onNext.getCall(0).args[0])).to.deep.equals({
                         json: {
                             videos: {
                                 0: {
@@ -59,7 +60,7 @@ describe('Cache Only', function() {
                     }
 
                     expect(onNext.callCount).to.equal(1);
-                    expect(onNext.getCall(0).args[0]).to.deep.equals({
+                    expect(clean(onNext.getCall(0).args[0])).to.deep.equals({
                         json: {
                             videos: {
                                 0: {

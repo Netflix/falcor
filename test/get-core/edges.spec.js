@@ -7,6 +7,7 @@ var ref = jsonGraph.ref;
 var $ref = require('./../../lib/types/ref');
 var $atom = require('./../../lib/types/atom');
 var _ = require('lodash');
+var __key = require('./../../lib/internal/key');
 
 describe('Edges', function() {
     // PathMap ----------------------------------------
@@ -52,16 +53,20 @@ describe('Edges', function() {
         });
     });
     it('should get out a relative expired item.', function() {
+        var output = {
+            videos: {
+                1234: {
+                    title: 'Running Man'
+                }
+            }
+        };
+        output.videos[__key] = 'videos';
+        output.videos[1234][__key] = 1234;
+
         getCoreRunner({
             input: [['videos', 1234, 'title']],
             output: {
-                json: {
-                    videos: {
-                        1234: {
-                            title: 'Running Man'
-                        }
-                    }
-                }
+                json: output
             },
             cache: {
                 videos: {

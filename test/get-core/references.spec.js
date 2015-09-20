@@ -4,6 +4,9 @@ var jsonGraph = require('falcor-json-graph');
 var atom = jsonGraph.atom;
 var ref = jsonGraph.ref;
 var _ = require('lodash');
+var __key = require('./../../lib/internal/key');
+var __path = require('./../../lib/internal/path');
+var __parent = require('./../../lib/internal/parent');
 
 describe('References', function() {
     var referenceCache = function() {
@@ -21,13 +24,17 @@ describe('References', function() {
     };
 
     it('should follow a reference to reference', function() {
+        var toReference = {
+            title: 'Title'
+        };
+        // Should be the second references reference not
+        // toReferences reference.
+        toReference[__path] = ['to'];
         getCoreRunner({
             input: [['toReference', 'title']],
             output: {
                 json: {
-                    toReference: {
-                        title: 'Title'
-                    }
+                    toReference: toReference
                 }
             },
             cache: referenceCache
@@ -59,18 +66,21 @@ describe('References', function() {
     });
 
     it('should ensure that values are followed correctly when through references and previous paths have longer lengths to litter the requested path.', function() {
+        var to = {
+            reference: {
+                title: 'Title'
+            },
+            toValue: 'Title'
+        };
+        to[__key] = 'to';
+        to.reference[__path] = ['to'];
         getCoreRunner({
             input: [
                 ['to', ['reference', 'toValue'], 'title'],
             ],
             output: {
                 json: {
-                    to: {
-                        reference: {
-                            title: 'Title'
-                        },
-                        toValue: 'Title'
-                    }
+                    to: to
                 }
             },
             cache: referenceCache

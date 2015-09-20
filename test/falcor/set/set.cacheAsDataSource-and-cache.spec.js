@@ -14,6 +14,7 @@ var LocalDataSource = require('../../data/LocalDataSource');
 var ErrorDataSource = require('../../data/ErrorDataSource');
 var $error = require('./../../../lib/types/error');
 var expect = require('chai').expect;
+var strip = require('./../../cleanData').stripDerefAndVersionKeys;
 
 describe('Cache as DataSource and Cache', function() {
     describe('Seeds', function() {
@@ -47,7 +48,7 @@ describe('Cache as DataSource and Cache', function() {
                                 }
                             }
                         }
-                    }}, x);
+                    }}, strip(x));
                 }, noOp, function() {
                     testRunner.compare(true, next, 'Expect to be onNext at least 1 time.');
                 }).
@@ -80,7 +81,7 @@ describe('Cache as DataSource and Cache', function() {
                                 }
                             }
                         }
-                    }}, x);
+                    }}, strip(x));
                 }, noOp, function() {
                     testRunner.compare(true, next, 'Expect to be onNext at least 1 time.');
                 }).

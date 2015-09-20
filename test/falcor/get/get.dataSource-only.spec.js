@@ -8,9 +8,9 @@ var isPathValue = require("./../../../lib/support/isPathValue");
 var expect = require("chai").expect;
 var sinon = require('sinon');
 var cacheGenerator = require('./../../CacheGenerator');
-var clean = require('./../../cleanData').clean;
 var atom = require('falcor-json-graph').atom;
 var MaxRetryExceededError = require('./../../../lib/errors/MaxRetryExceededError');
+var strip = require('./../../cleanData').stripDerefAndVersionKeys;
 
 describe('DataSource Only', function() {
     var dataSource = new LocalDataSource(cacheGenerator(0, 2, ['title', 'art']));
@@ -31,8 +31,9 @@ describe('DataSource Only', function() {
                 }).
                 doAction(secondOnNext, noOp, function() {
                     expect(secondOnNext.calledOnce).to.be.ok;
-                    expect(secondOnNext.getCall(0).args[0]).to.deep.equals({
-                        json: {videos: {0: {title: 'Video 0'}}}
+                    expect(strip(secondOnNext.getCall(0).args[0])).to.deep.equals({
+                        json: {
+                            videos: {0: {title: 'Video 0'}}}
                     });
                 }).
                 subscribe(noOp, done, done);
@@ -64,7 +65,7 @@ describe('DataSource Only', function() {
                 doAction(secondOnNext).
                 doAction(noOp, noOp, function() {
                     expect(secondOnNext.calledOnce).to.be.ok;
-                    expect(secondOnNext.getCall(0).args[0]).to.deep.equals({
+                    expect(strip(secondOnNext.getCall(0).args[0])).to.deep.equals({
                         json: {videos: {0: {title: 'Video 0'}}}
                     });
                 }).
@@ -78,7 +79,7 @@ describe('DataSource Only', function() {
             model.
                 get(['videos', 0, 'title']).
                 doAction(onNext, noOp, function() {
-                    expect(onNext.getCall(0).args[0]).to.deep.equals({
+                    expect(strip(onNext.getCall(0).args[0])).to.deep.equals({
                         json: {videos: {0: {title: 'Video 0'}}}
                     });
                 }).
@@ -93,7 +94,7 @@ describe('DataSource Only', function() {
                 get(['videos', 0, 'title']).
                 _toJSONG().
                 doAction(onNext, noOp, function() {
-                    expect(clean(onNext.getCall(0).args[0])).to.deep.equals({
+                    expect(strip(onNext.getCall(0).args[0])).to.deep.equals({
                         jsonGraph: {
                             videos: {
                                 0: {
@@ -101,7 +102,7 @@ describe('DataSource Only', function() {
                                 }
                             }
                         },
-                        paths: clean([['videos', 0, 'title']])
+                        paths: [['videos', 0, 'title']]
                     });
                 }).
                 subscribe(noOp, done, done);
@@ -240,7 +241,7 @@ describe('DataSource Only', function() {
                 expect(onNext.callCount).to.equal(0);
                 expect(onGet.callCount).to.equal(1);
                 expect(onNext2.calledOnce).to.be.ok;
-                expect(onNext2.getCall(0).args[0]).to.deep.equals({
+                expect(strip(onNext2.getCall(0).args[0])).to.deep.equals({
                     json: {
                         videos: {
                             0: {

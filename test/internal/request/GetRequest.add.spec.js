@@ -6,12 +6,15 @@ var ImmediateScheduler = require('./../../../lib/schedulers/ImmediateScheduler')
 var Rx = require('rx');
 var Model = require('./../../../lib').Model;
 var LocalDataSource = require('./../../data/LocalDataSource');
-var Cache = require('./../../data/Cache.js');
+var cacheGenerator = require('./../../CacheGenerator');
+var strip = require('./../../cleanData').stripDerefAndVersionKeys;
 var noOp = function() {};
 
+var Cache = function() { return cacheGenerator(0, 2); };
 describe('#add', function() {
-    var videos1234 = ['videos', 1234, 'summary'];
-    var videos553 = ['videos', 553, 'summary'];
+    var videos0 = ['videos', 0, 'title'];
+    var videos1 = ['videos', 1, 'title'];
+
     it('should send a request and dedupe another.', function(done) {
         var scheduler = new ImmediateScheduler();
         var getSpy = sinon.spy();
@@ -29,35 +32,32 @@ describe('#add', function() {
             var onNext = sinon.spy();
             model.
                 withoutDataSource().
-                get(videos1234, videos553).
+                get(videos0, videos1).
                 doAction(onNext, noOp, function() {
                     expect(getSpy.calledOnce).to.be.ok;
-                    expect(getSpy.getCall(0).args[1]).to.deep.equals([videos1234]);
+                    expect(getSpy.getCall(0).args[1]).to.deep.equals([videos0]);
                     expect(onNext.calledOnce).to.be.ok;
-                    expect(onNext.getCall(0).args[0]).to.deep.equals({
+                    expect(strip(onNext.getCall(0).args[0])).to.deep.equals({
                         json: {
                             videos: {
-                                1234: {
-                                    summary: {
-                                        title: 'House of Cards',
-                                        url: '/movies/1234'
-                                    }
+                                0: {
+                                    title: 'Video 0',
                                 }
                             }
                         }
                     });
 
                     expect(results[0]).to.be.ok;
-                    expect(results[1]).to.deep.equals([videos553]);
-                    expect(results[2]).to.deep.equals([videos553]);
+                    expect(results[1]).to.deep.equals([videos1]);
+                    expect(results[2]).to.deep.equals([videos1]);
                 }).
                 subscribe(noOp, done, done);
         });
 
-        var disposable1 = request.batch([videos1234], [videos1234], zip);
+        var disposable1 = request.batch([videos0], [videos0], zip);
         expect(request.sent, 'request should be sent').to.be.ok;
 
-        var results = request.add([videos1234, videos553], [videos1234, videos553], zip);
+        var results = request.add([videos0, videos1], [videos0, videos1], zip);
     });
 
     it('should send a request and dedupe another when dedupe is in second position.', function(done) {
@@ -77,35 +77,32 @@ describe('#add', function() {
             var onNext = sinon.spy();
             model.
                 withoutDataSource().
-                get(videos1234, videos553).
+                get(videos0, videos1).
                 doAction(onNext, noOp, function() {
                     expect(getSpy.calledOnce).to.be.ok;
-                    expect(getSpy.getCall(0).args[1]).to.deep.equals([videos1234]);
+                    expect(getSpy.getCall(0).args[1]).to.deep.equals([videos0]);
                     expect(onNext.calledOnce).to.be.ok;
-                    expect(onNext.getCall(0).args[0]).to.deep.equals({
+                    expect(strip(onNext.getCall(0).args[0])).to.deep.equals({
                         json: {
                             videos: {
-                                1234: {
-                                    summary: {
-                                        title: 'House of Cards',
-                                        url: '/movies/1234'
-                                    }
+                                0: {
+                                    title: 'Video 0',
                                 }
                             }
                         }
                     });
 
                     expect(results[0]).to.be.ok;
-                    expect(results[1], 'the requested complement should be 553').to.deep.equals([videos553]);
-                    expect(results[2], 'the optimized complement should be 553').to.deep.equals([videos553]);
+                    expect(results[1], 'the requested complement should be 553').to.deep.equals([videos1]);
+                    expect(results[2], 'the optimized complement should be 553').to.deep.equals([videos1]);
                 }).
                 subscribe(noOp, done, done);
         });
 
-        var disposable1 = request.batch([videos1234], [videos1234], zip);
+        var disposable1 = request.batch([videos0], [videos0], zip);
         expect(request.sent, 'request should be sent').to.be.ok;
 
-        var results = request.add([videos553, videos1234], [videos553, videos1234], zip);
+        var results = request.add([videos1, videos0], [videos1, videos0], zip);
     });
 
 
@@ -126,34 +123,31 @@ describe('#add', function() {
             var onNext = sinon.spy();
             model.
                 withoutDataSource().
-                get(videos1234, videos553).
+                get(videos0, videos1).
                 doAction(onNext, noOp, function() {
                     expect(getSpy.calledOnce, 'dataSource get').to.be.ok;
-                    expect(getSpy.getCall(0).args[1]).to.deep.equals([videos1234]);
+                    expect(getSpy.getCall(0).args[1]).to.deep.equals([videos0]);
                     expect(onNext.calledOnce, 'onNext get').to.be.ok;
-                    expect(onNext.getCall(0).args[0]).to.deep.equals({
+                    expect(strip(onNext.getCall(0).args[0])).to.deep.equals({
                         json: {
                             videos: {
-                                1234: {
-                                    summary: {
-                                        title: 'House of Cards',
-                                        url: '/movies/1234'
-                                    }
+                                0: {
+                                    title: 'Video 0',
                                 }
                             }
                         }
                     });
 
                     expect(results[0]).to.be.ok;
-                    expect(results[1]).to.deep.equals([videos553]);
-                    expect(results[2]).to.deep.equals([videos553]);
+                    expect(results[1]).to.deep.equals([videos1]);
+                    expect(results[2]).to.deep.equals([videos1]);
                 }).
                 subscribe(noOp, done, done);
         });
-        var disposable1 = request.batch([videos1234], [videos1234], zip);
+        var disposable1 = request.batch([videos0], [videos0], zip);
         expect(request.sent, 'request should be sent').to.be.ok;
 
-        var results = request.add([videos1234, videos553], [videos1234, videos553], zip);
+        var results = request.add([videos0, videos1], [videos0, videos1], zip);
         zip();
     });
 
@@ -175,34 +169,31 @@ describe('#add', function() {
             var onNext = sinon.spy();
             model.
                 withoutDataSource().
-                get(videos1234, videos553).
+                get(videos0, videos1).
                 doAction(onNext, noOp, function() {
                     expect(getSpy.calledOnce, 'dataSource get').to.be.ok;
-                    expect(getSpy.getCall(0).args[1]).to.deep.equals([videos1234]);
+                    expect(getSpy.getCall(0).args[1]).to.deep.equals([videos0]);
                     expect(onNext.calledOnce, 'onNext get').to.be.ok;
-                    expect(onNext.getCall(0).args[0]).to.deep.equals({
+                    expect(strip(onNext.getCall(0).args[0])).to.deep.equals({
                         json: {
                             videos: {
-                                1234: {
-                                    summary: {
-                                        title: 'House of Cards',
-                                        url: '/movies/1234'
-                                    }
+                                0: {
+                                    title: 'Video 0',
                                 }
                             }
                         }
                     });
 
                     expect(results[0]).to.be.ok;
-                    expect(results[1]).to.deep.equals([videos553]);
-                    expect(results[2]).to.deep.equals([videos553]);
+                    expect(results[1]).to.deep.equals([videos1]);
+                    expect(results[2]).to.deep.equals([videos1]);
                 }).
                 subscribe(noOp, done, done);
         });
-        var disposable1 = request.batch([videos1234], [videos1234], zip);
+        var disposable1 = request.batch([videos0], [videos0], zip);
         expect(request.sent, 'request should be sent').to.be.ok;
 
-        var results = request.add([videos1234, videos553], [videos1234, videos553], zip);
+        var results = request.add([videos0, videos1], [videos0, videos1], zip);
         results[3]();
         zip();
     });

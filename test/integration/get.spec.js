@@ -8,6 +8,7 @@ var expect = require('chai').expect;
 var sinon = require('sinon');
 var noOp = function() {};
 var Router = require('falcor-router');
+var strip = require('./../cleanData').stripDerefAndVersionKeys;
 
 describe('Get Integration Tests', function() {
     var server;
@@ -49,7 +50,7 @@ describe('Get Integration Tests', function() {
             get(['thing', 'prop']).
             doAction(onNext, noOp, function() {
                 expect(onNext.calledOnce).to.be.ok;
-                expect(onNext.getCall(0).args[0]).to.deep.equals({
+                expect(strip(onNext.getCall(0).args[0])).to.deep.equals({
                     json: {
                         thing: {
                             prop: null

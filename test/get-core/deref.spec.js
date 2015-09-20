@@ -1,6 +1,6 @@
 var getCoreRunner = require('./../getCoreRunner');
 var cacheGenerator = require('./../CacheGenerator');
-var toTree = require('falcor-path-utils').toTree;
+var outputGenerator = require('./../outputGenerator');
 var jsonGraph = require('falcor-json-graph');
 var atom = jsonGraph.atom;
 var _ = require('lodash');
@@ -8,6 +8,11 @@ var error = jsonGraph.error;
 var expect = require('chai').expect;
 var Model = require('./../../lib').Model;
 var BoundJSONGraphModelError = require('./../../lib/errors/BoundJSONGraphModelError');
+var sinon = require('sinon');
+var noOp = function() {};
+var __key = require('./../../lib/internal/key');
+var __path = require('./../../lib/internal/path');
+var __parent = require('./../../lib/internal/parent');
 
 describe('Deref', function() {
     // PathMap ----------------------------------------
@@ -24,24 +29,15 @@ describe('Deref', function() {
         });
     });
     it('should get multiple arguments out of the cache.', function() {
+        var output = outputGenerator.lolomoGenerator([0], [0, 1]).json.lolomo[0];
+        delete output[__path];
         getCoreRunner({
             input: [
                 [0, 'item', 'title'],
                 [1, 'item', 'title']
             ],
             output: {
-                json: {
-                    0: {
-                        item: {
-                            title: 'Video 0'
-                        }
-                    },
-                    1: {
-                        item: {
-                            title: 'Video 1'
-                        }
-                    }
-                }
+                json: output
             },
             deref: ['lists', 'A'],
             cache: cacheGenerator(0, 2)
@@ -79,5 +75,49 @@ describe('Deref', function() {
         expect(res.criticalError.message).to.equals(BoundJSONGraphModelError.message);
     });
 
+    it('should ensure that correct parents are produced for non-paths.', function(done) {
+        var model = new Model({
+            cache: {
+                a: {
+                    b: {
+                        e: '&'
+                    }
+                }
+            }
+        });
+
+        var onNext = sinon.spy();
+        model.
+            get(['a', 'b', 'e']).
+            doAction(onNext, noOp, function() {
+                expect(onNext.calledOnce).to.be.ok;
+                var json = onNext.getCall(0).args[0].json;
+
+                // Top level
+                expect(json[__parent]).to.be.not.ok;
+                expect(json[__path]).to.be.not.ok;
+                expect(json[__key]).to.be.not.ok;
+
+                // a
+                var a = json.a;
+                expect(a[__parent]).to.equals(null);
+                expect(a[__path]).to.be.not.ok;
+                expect(a[__key]).to.equals('a');
+
+                // b
+                var b = a.b;
+                expect(b[__parent][__key]).to.equals('a');
+                expect(b[__path]).to.be.not.ok;
+                expect(b[__key]).to.equals('b');
+
+                // e
+                var e = b.e;
+                expect(e[__parent]).to.be.not.ok;
+                expect(e[__path]).to.be.not.ok;
+                expect(e[__key]).to.be.not.ok;
+                expect(e).to.equals('&');
+            }).
+            subscribe(noOp, done, done);
+    });
 });
 

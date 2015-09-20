@@ -2,6 +2,7 @@ var get = require('./../lib/get');
 var Model = require('./../lib');
 var expect = require('chai').expect;
 var clean = require('./cleanData').clean;
+var __parent = require('./../lib/internal/parent');
 
 module.exports = function(testConfig) {
     var isJSONG = testConfig.isJSONG;
@@ -60,10 +61,12 @@ module.exports = function(testConfig) {
         });
     }
 
-    if (isJSONG || testConfig.boxValues) {
-        clean(seed[0], {strip: ["$size"]});
-        clean(expectedOutput, {strip: ["$size"]});
-    }
+
+    // $size is stripped out of basic core tests.
+    // We have to strip out parent as well from the output since it will produce
+    // infinite recursion.
+    clean(seed[0], {strip: ['$size', __parent]});
+    clean(expectedOutput, {strip: ['$size', __parent]});
 
     if (expectedOutput) {
         expect(seed[0]).to.deep.equals(expectedOutput);

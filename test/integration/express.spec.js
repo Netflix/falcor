@@ -9,6 +9,7 @@ var HttpDataSource = falcor.HttpDataSource;
 var expect = require('chai').expect;
 var sinon = require('sinon');
 var noOp = function() {};
+var strip = require('./../cleanData').stripDerefAndVersionKeys;
 
 describe('Express Integration', function() {
     var server;
@@ -42,7 +43,7 @@ describe('Express Integration', function() {
             get('genrelist[0].titles[0].name').
             doAction(onNext, noOp, function() {
                 expect(onNext.calledOnce).to.be.ok;
-                expect(onNext.getCall(0).args[0]).to.deep.equals({
+                expect(strip(onNext.getCall(0).args[0])).to.deep.equals({
                     json: {
                         genrelist: {
                             0: {

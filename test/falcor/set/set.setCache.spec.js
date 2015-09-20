@@ -4,6 +4,7 @@ var Rx = require('rx');
 var expect = require('chai').expect;
 var Cache = require('../../data/Cache');
 var LocalDataSource = require('../../data/LocalDataSource');
+var clean = require('../../cleanData').stripDerefAndVersionKeys;
 var $ref = Model.ref;
 
 describe('Cache Only', function() {
@@ -14,7 +15,7 @@ describe('Cache Only', function() {
         })});
         model.setCache({});
         model.get("a.b.c").subscribe(function(x) {
-            expect(x).to.deep.equal({
+            expect(clean(x)).to.deep.equal({
                 json: { a: { b: { c: "foo" } }}
             });
         }, done, done);
@@ -26,7 +27,7 @@ describe('Cache Only', function() {
         })});
         model.setCache(undefined);
         model.get("a.b.c").subscribe(function(x) {
-            expect(x).to.deep.equal({
+            expect(clean(x)).to.deep.equal({
                 json: { a: { b: { c: "foo" } }}
             });
         }, done, done);
@@ -42,7 +43,7 @@ describe('Cache Only', function() {
             })});
         model.setCache({});
         model.get("a.b.c").subscribe(function(x) {
-            expect(x).to.deep.equal({
+            expect(clean(x)).to.deep.equal({
                 json: { a: { b: { c: "foo" } }}
             });
         }, done, done);
@@ -58,7 +59,7 @@ describe('Cache Only', function() {
             })});
         model.setCache(undefined);
         model.get("a.b.c").subscribe(function(x) {
-            expect(x).to.deep.equal({
+            expect(clean(x)).to.deep.equal({
                 json: { a: { b: { c: "foo" } }}
             });
         }, done, done);
@@ -77,7 +78,7 @@ describe('Cache Only', function() {
                 d: { c: "foo" }
             });
         model.get("a.b.c").subscribe(function(x) {
-            expect(x).to.deep.equal({
+            expect(clean(x)).to.deep.equal({
                 json: { a: { b: { c: "foo" } }}
             });
         }, done, done);
@@ -94,13 +95,13 @@ describe('Cache Only', function() {
         var cache = model.getCache();
         model.setCache({});
         model.get("a.b.c").subscribe(function(x) {
-            expect(x).to.deep.equal({
+            expect(clean(x)).to.deep.equal({
                 json: { a: { b: { c: "foo" } }}
             });
         });
         model.setCache(cache);
         model.get("a.b.c").subscribe(function(x) {
-            expect(x).to.deep.equal({
+            expect(clean(x)).to.deep.equal({
                 json: { a: { b: { c: "foo" } }}
             });
         }, done, done);

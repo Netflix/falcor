@@ -5,9 +5,7 @@ var noOp = function() {};
 var chai = require('chai');
 var expect = chai.expect;
 var sinon = require('sinon');
-var LocalDataSource = require('./../data/LocalDataSource');
-var Cache = require('./../data/Cache');
-var ReducedCache = require('./../data/ReducedCache').ReducedCache;
+var strip = require('./../cleanData').stripDerefAndVersionKeys;
 var $ref = falcor.Model.ref;
 
 describe('call', function() {
@@ -43,7 +41,7 @@ describe('call', function() {
             call("genreList[0].titles.push", args, ['name']).
             doAction(onNext, noOp, function() {
                 expect(onNext.calledOnce).to.be.ok;
-                expect(onNext.getCall(0).args[0]).to.deep.equals({
+                expect(strip(onNext.getCall(0).args[0])).to.deep.equals({
                     json: {
                         genreList: {
                             0: {
