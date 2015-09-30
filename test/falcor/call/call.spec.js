@@ -85,7 +85,7 @@ describe("Call", function() {
             }).
             subscribe(noOp, done, done);
     });
-    it.only('should sent parsed arguments to the dataSource.', function(done) {
+    it('should sent parsed arguments to the dataSource.', function(done) {
         var call = sinon.spy(function() {
             return {
                 subscribe: function(onNext, onError, onCompleted) {
