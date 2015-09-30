@@ -119,5 +119,38 @@ describe('Deref', function() {
             }).
             subscribe(noOp, done, done);
     });
+
+    it('ensures that the sequencial get / deref works correctly.', function(done) {
+        var model = new Model({
+            cache: {
+                a: {
+                    b: {
+                        e: '&'
+                    }
+                }
+            }
+        });
+
+        model.get(['a', 'b', 'e']).subscribe(function(json) {
+            model = model.deref(json.json.a);
+        });
+
+        model.get(['b', 'e']).subscribe(function(json) {
+            model = model.deref(json.json.b);
+        });
+
+        var onNext = sinon.spy();
+        model.
+            get(['e']).
+            doAction(onNext, noOp, function() {
+                expect(onNext.calledOnce).to.be.ok;
+                expect(onNext.getCall(0).args[0]).to.deep.equals({
+                    json: {
+                        e: '&'
+                    }
+                });
+            }).
+            subscribe(noOp, done, done);
+    });
 });
 
