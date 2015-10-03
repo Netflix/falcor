@@ -66,7 +66,7 @@ describe('DataSource.', function() {
             source: dataSource
         });
         model.
-            setValue('videos[1234].another_prop', '').
+            setValue(['videos', 1234, 'another_prop'], '').
             doAction(noOp, noOp, function() {
                 expect(onSet.calledOnce).to.be.ok;
 

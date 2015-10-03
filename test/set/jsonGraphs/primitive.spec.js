@@ -64,7 +64,7 @@ describe("a primitive value", function() {
         setJSONGraphs(
             getModel({ cache: cache, version: version++ }), [
             $jsonGraphEnvelope([
-                $pathValue("movies['pulp-fiction'].title", "Pulp Fiction")
+                $pathValue(["movies", 'pulp-fiction', 'title'], "Pulp Fiction")
             ])]
         );
 
@@ -86,26 +86,26 @@ describe("a primitive value", function() {
         setJSONGraphs(
             getModel({ lru: lru, cache: cache, version: version++ }), [
             $jsonGraphEnvelope([
-                $pathValue("grid", $ref("grids['id']")),
-                $pathValue("grids['id'][0]", $ref("lists['id']")),
-                $pathValue("lists['id'][0]", $ref("movies['pulp-fiction']")),
-                $pathValue("movies['pulp-fiction']", "Pulp Fiction")
+                $pathValue(["grid"], $ref(["grids", 'id'])),
+                $pathValue(["grids", 'id', 0], $ref(["lists", 'id'])),
+                $pathValue(["lists", 'id', 0], $ref(["movies", 'pulp-fiction'])),
+                $pathValue(["movies", 'pulp-fiction', 'title'], "Pulp Fiction")
             ])]
         );
 
         setJSONGraphs(
             getModel({ lru: lru, cache: cache, version: version++ }), [{
-                paths: [["grid", 0, 0, "title"]],
+                paths: ["grid", 0, 0, "title"],
                 jsonGraph: $jsonGraph([
-                    $pathValue("movies['pulp-fiction'].title", "Pulp Fiction")
+                    $pathValue(["movies", 'pulp-fiction', 'title'], "Pulp Fiction")
                 ])
             }]
         );
 
         expect(strip(cache)).to.deep.equal(strip({
-            grid: $ref("grids['id']"),
-            grids: { id: { 0: $ref("lists['id']") } },
-            lists: { id: { 0: $ref("movies['pulp-fiction']") } },
+            grid: $ref(["grids", 'id']),
+            grids: { id: { 0: $ref(["lists", 'id']) } },
+            lists: { id: { 0: $ref(["movies", 'pulp-fiction']) } },
             movies: {
                 "pulp-fiction": {
                     title: $atom("Pulp Fiction")
@@ -122,18 +122,18 @@ describe("a primitive value", function() {
         setJSONGraphs(
             getModel({ cache: cache, version: version++ }), [
             $jsonGraphEnvelope([
-                $pathValue("grid", $ref("grids['id']")),
-                $pathValue("grids['id'][0]", $ref("lists['id']")),
-                $pathValue("lists['id'][1]", $ref("movies['kill-bill-1']")),
-                $pathValue("movies['kill-bill-1'].title", $atom()),
-                $pathValue("grid[0][1].title", "Kill Bill Vol. 1")
+                $pathValue(["grid"], $ref(["grids", 'id'])),
+                $pathValue(["grids", 'id', 0], $ref(["lists", 'id'])),
+                $pathValue(["lists", 'id', 1], $ref(["movies", 'kill-bill-1'])),
+                $pathValue(["movies", 'kill-bill-1', 'title'], $atom()),
+                $pathValue(["grid", 0, 1, 'title'], "Kill Bill Vol. 1")
             ])]
         );
 
         expect(strip(cache)).to.deep.equal(strip({
-            grid: $ref("grids['id']"),
-            grids: { id: { 0: $ref("lists['id']") } },
-            lists: { id: { 1: $ref("movies['kill-bill-1']") } },
+            grid: $ref(["grids", 'id']),
+            grids: { id: { 0: $ref(["lists", 'id']) } },
+            lists: { id: { 1: $ref(["movies", 'kill-bill-1']) } },
             movies: {
                 "kill-bill-1": {
                     title: $atom("Kill Bill Vol. 1")
@@ -151,9 +151,9 @@ describe("a primitive value", function() {
         setJSONGraphs(
             getModel({ cache: cache, version: version++ }), [
             $jsonGraphEnvelope([
-                $pathValue("grid", $ref("grids['id']")),
-                $pathValue("grids['id'][0]", $ref("lists['id']")),
-                $pathValue("lists['id'][2]", $ref("movies['reservior-dogs']"))
+                $pathValue(["grid"], $ref(["grids", 'id'])),
+                $pathValue(["grids", 'id', 0], $ref(["lists", 'id'])),
+                $pathValue(["lists", 'id', 2], $ref(["movies", 'reservior-dogs']))
             ])]
         );
 
@@ -161,15 +161,15 @@ describe("a primitive value", function() {
             getModel({ cache: cache, version: version++ }), [{
                 paths: [["grid", 0, 2, "title"]],
                 jsonGraph: $jsonGraph([
-                    $pathValue("movies['reservior-dogs'].title", "Reservior Dogs")
+                    $pathValue(["movies", 'reservior-dogs', 'title'], "Reservior Dogs")
                 ])
             }]
         );
 
         expect(strip(cache)).to.deep.equal(strip({
-            grid: $ref("grids['id']"),
-            grids: { id: { 0: $ref("lists['id']") } },
-            lists: { id: { 2: $ref("movies['reservior-dogs']") } },
+            grid: $ref(["grids", 'id']),
+            grids: { id: { 0: $ref(["lists", 'id']) } },
+            lists: { id: { 2: $ref(["movies", 'reservior-dogs']) } },
             movies: {
                 "reservior-dogs": {
                     title: $atom("Reservior Dogs")
@@ -186,9 +186,9 @@ describe("a primitive value", function() {
         setJSONGraphs(
             getModel({ cache: cache, version: version++ }), [
             $jsonGraphEnvelope([
-                $pathValue("grid", $ref("grids['id']")),
-                $pathValue("grids['id'][0]", $ref("lists['id']")),
-                $pathValue("lists['id'][2]", $ref("movies['reservior-dogs']"))
+                $pathValue(["grid"], $ref(["grids", 'id'])),
+                $pathValue(["grids", 'id', 0], $ref(["lists", 'id'])),
+                $pathValue(["lists", 'id', 2], $ref(["movies", 'reservior-dogs']))
             ])]
         );
 
@@ -196,15 +196,15 @@ describe("a primitive value", function() {
             getModel({ cache: cache, version: version++ }), [{
                 paths: [["grid", 0, 2, null]],
                 jsonGraph: $jsonGraph([
-                    $pathValue("movies['reservior-dogs']", "Reservior Dogs")
+                    $pathValue(["movies", 'reservior-dogs'], "Reservior Dogs")
                 ])
             }]
         );
 
         expect(strip(cache)).to.deep.equal(strip({
-            grid: $ref("grids['id']"),
-            grids: { id: { 0: $ref("lists['id']") } },
-            lists: { id: { 2: $ref("movies['reservior-dogs']") } },
+            grid: $ref(["grids", 'id']),
+            grids: { id: { 0: $ref(["lists", 'id']) } },
+            lists: { id: { 2: $ref(["movies", 'reservior-dogs']) } },
             movies: { "reservior-dogs": $atom("Reservior Dogs") }
         }));
     });
@@ -219,7 +219,7 @@ describe("a primitive value", function() {
                 setJSONGraphs(
                     getModel({ cache: cache, version: version++ }), [
                     $jsonGraphEnvelope([
-                        $pathValue("movies['pulp-fiction', 'kill-bill-1', 'reservior-dogs'].director", "Quentin Tarantino")
+                        $pathValue(["movies", ['pulp-fiction', 'kill-bill-1', 'reservior-dogs'], 'director'], "Quentin Tarantino")
                     ])]
                 );
 
@@ -239,23 +239,23 @@ describe("a primitive value", function() {
                 setJSONGraphs(
                     getModel({ cache: cache, version: version++ }), [
                     $jsonGraphEnvelope([
-                        $pathValue("grid", $ref("grids['id']")),
-                        $pathValue("grids['id'][0]", $ref("lists['id']")),
-                        $pathValue("lists['id'][0]", $ref("movies['pulp-fiction']")),
-                        $pathValue("lists['id'][1]", $ref("movies['kill-bill-1']")),
-                        $pathValue("lists['id'][2]", $ref("movies['reservior-dogs']")),
-                        $pathValue("movies['kill-bill-1'].director", $atom()),
-                        $pathValue("grid[0][0, 1, 2].director", "Quentin Tarantino")
+                        $pathValue(["grid"], $ref(["grids", 'id'])),
+                        $pathValue(["grids", 'id', 0], $ref(["lists", 'id'])),
+                        $pathValue(["lists", 'id', 0], $ref(["movies", 'pulp-fiction'])),
+                        $pathValue(["lists", 'id', 1], $ref(["movies", 'kill-bill-1'])),
+                        $pathValue(["lists", 'id', 2], $ref(["movies", 'reservior-dogs'])),
+                        $pathValue(["movies", 'kill-bill-1', 'director'], $atom()),
+                        $pathValue(["grid", 0, [0, 1, 2], 'director'], "Quentin Tarantino")
                     ])]
                 );
 
                 expect(strip(cache)).to.deep.equal(strip({
-                    grid: $ref("grids['id']"),
-                    grids: { id: { 0: $ref("lists['id']") } },
+                    grid: $ref(["grids", 'id']),
+                    grids: { id: { 0: $ref(["lists", 'id']) } },
                     lists: { id: {
-                        0: $ref("movies['pulp-fiction']"),
-                        1: $ref("movies['kill-bill-1']"),
-                        2: $ref("movies['reservior-dogs']") }
+                        0: $ref(["movies", 'pulp-fiction']),
+                        1: $ref(["movies", 'kill-bill-1']),
+                        2: $ref(["movies", 'reservior-dogs']) }
                     },
                     movies: {
                         "pulp-fiction": { "director": $atom("Quentin Tarantino") },
@@ -274,23 +274,23 @@ describe("a primitive value", function() {
                 setJSONGraphs(
                     getModel({ cache: cache, version: version++ }), [
                     $jsonGraphEnvelope([
-                        $pathValue("grid", $ref("grids['id']")),
-                        $pathValue("grids['id'][0]", $ref("lists['id']")),
-                        $pathValue("lists['id'][0]", $ref("movies['pulp-fiction']")),
-                        $pathValue("lists['id'][1]", $ref("movies['kill-bill-1']")),
-                        $pathValue("lists['id'][2]", $ref("movies['reservior-dogs']")),
-                        $pathValue("movies['kill-bill-1'].director", $atom()),
-                        $pathValue("grid[0][0..2].director", "Quentin Tarantino")
+                        $pathValue(["grid"], $ref(["grids", 'id'])),
+                        $pathValue(["grids", 'id', 0], $ref(["lists", 'id'])),
+                        $pathValue(["lists", 'id', 0], $ref(["movies", 'pulp-fiction'])),
+                        $pathValue(["lists", 'id', 1], $ref(["movies", 'kill-bill-1'])),
+                        $pathValue(["lists", 'id', 2], $ref(["movies", 'reservior-dogs'])),
+                        $pathValue(["movies", 'kill-bill-1', 'director'], $atom()),
+                        $pathValue(["grid", 0, {from: 0, to: 2}, 'director'], "Quentin Tarantino")
                     ])]
                 );
 
                 expect(strip(cache)).to.deep.equal(strip({
-                    grid: $ref("grids['id']"),
-                    grids: { id: { 0: $ref("lists['id']") } },
+                    grid: $ref(["grids", 'id']),
+                    grids: { id: { 0: $ref(["lists", 'id']) } },
                     lists: { id: {
-                        0: $ref("movies['pulp-fiction']"),
-                        1: $ref("movies['kill-bill-1']"),
-                        2: $ref("movies['reservior-dogs']") }
+                        0: $ref(["movies", 'pulp-fiction']),
+                        1: $ref(["movies", 'kill-bill-1']),
+                        2: $ref(["movies", 'reservior-dogs']) }
                     },
                     movies: {
                         "pulp-fiction": { "director": $atom("Quentin Tarantino") },
@@ -307,21 +307,21 @@ describe("a primitive value", function() {
                 setJSONGraphs(
                     getModel({ cache: cache, version: version++ }), [
                     $jsonGraphEnvelope([
-                        $pathValue("grid", $ref("grids['id']")),
-                        $pathValue("grids['id'][0]", $ref("lists['id']")),
-                        $pathValue("lists['id'][1]", $ref("movies['kill-bill-1']")),
-                        $pathValue("lists['id'][2]", $ref("movies['reservior-dogs']")),
-                        $pathValue("movies['kill-bill-1'].director", $atom()),
-                        $pathValue("grid[0][1..2].director", "Quentin Tarantino")
+                        $pathValue(["grid"], $ref(["grids", 'id'])),
+                        $pathValue(["grids", 'id', 0], $ref(["lists", 'id'])),
+                        $pathValue(["lists", 'id', 1], $ref(["movies", 'kill-bill-1'])),
+                        $pathValue(["lists", 'id', 2], $ref(["movies", 'reservior-dogs'])),
+                        $pathValue(["movies", 'kill-bill-1', 'director'], $atom()),
+                        $pathValue(["grid", 0, {from: 1, to: 2}, 'director'], "Quentin Tarantino")
                     ])]
                 );
 
                 expect(strip(cache)).to.deep.equal(strip({
-                    grid: $ref("grids['id']"),
-                    grids: { id: { 0: $ref("lists['id']") } },
+                    grid: $ref(["grids", 'id']),
+                    grids: { id: { 0: $ref(["lists", 'id']) } },
                     lists: { id: {
-                        1: $ref("movies['kill-bill-1']"),
-                        2: $ref("movies['reservior-dogs']") }
+                        1: $ref(["movies", 'kill-bill-1']),
+                        2: $ref(["movies", 'reservior-dogs']) }
                     },
                     movies: {
                         "kill-bill-1": { "director": $atom("Quentin Tarantino") },
@@ -337,23 +337,23 @@ describe("a primitive value", function() {
                 setJSONGraphs(
                     getModel({ cache: cache, version: version++ }), [
                     $jsonGraphEnvelope([
-                        $pathValue("grid", $ref("grids['id']")),
-                        $pathValue("grids['id'][0]", $ref("lists['id']")),
-                        $pathValue("lists['id'][0]", $ref("movies['pulp-fiction']")),
-                        $pathValue("lists['id'][1]", $ref("movies['kill-bill-1']")),
-                        $pathValue("lists['id'][2]", $ref("movies['reservior-dogs']")),
-                        $pathValue("movies['kill-bill-1'].director", $atom()),
+                        $pathValue(["grid"], $ref(["grids", 'id'])),
+                        $pathValue(["grids", 'id', 0], $ref(["lists", 'id'])),
+                        $pathValue(["lists", 'id', 0], $ref(["movies", 'pulp-fiction'])),
+                        $pathValue(["lists", 'id', 1], $ref(["movies", 'kill-bill-1'])),
+                        $pathValue(["lists", 'id', 2], $ref(["movies", 'reservior-dogs'])),
+                        $pathValue(["movies", 'kill-bill-1', 'director'], $atom()),
                         $pathValue(["grid", 0, {length: 3}, "director"], "Quentin Tarantino")
                     ])]
                 );
 
                 expect(strip(cache)).to.deep.equal(strip({
-                    grid: $ref("grids['id']"),
-                    grids: { id: { 0: $ref("lists['id']") } },
+                    grid: $ref(["grids", 'id']),
+                    grids: { id: { 0: $ref(["lists", 'id']) } },
                     lists: { id: {
-                        0: $ref("movies['pulp-fiction']"),
-                        1: $ref("movies['kill-bill-1']"),
-                        2: $ref("movies['reservior-dogs']") }
+                        0: $ref(["movies", 'pulp-fiction']),
+                        1: $ref(["movies", 'kill-bill-1']),
+                        2: $ref(["movies", 'reservior-dogs']) }
                     },
                     movies: {
                         "pulp-fiction": { "director": $atom("Quentin Tarantino") },
@@ -370,21 +370,21 @@ describe("a primitive value", function() {
                 setJSONGraphs(
                     getModel({ cache: cache, version: version++ }), [
                     $jsonGraphEnvelope([
-                        $pathValue("grid", $ref("grids['id']")),
-                        $pathValue("grids['id'][0]", $ref("lists['id']")),
-                        $pathValue("lists['id'][1]", $ref("movies['kill-bill-1']")),
-                        $pathValue("lists['id'][2]", $ref("movies['reservior-dogs']")),
-                        $pathValue("movies['kill-bill-1'].director", $atom()),
+                        $pathValue(["grid"], $ref(["grids", 'id'])),
+                        $pathValue(["grids", 'id', 0], $ref(["lists", 'id'])),
+                        $pathValue(["lists", 'id', 1], $ref(["movies", 'kill-bill-1'])),
+                        $pathValue(["lists", 'id', 2], $ref(["movies", 'reservior-dogs'])),
+                        $pathValue(["movies", 'kill-bill-1', 'director'], $atom()),
                         $pathValue(["grid", 0, {from: 1, length: 2}, "director"], "Quentin Tarantino")
                     ])]
                 );
 
                 expect(strip(cache)).to.deep.equal(strip({
-                    grid: $ref("grids['id']"),
-                    grids: { id: { 0: $ref("lists['id']") } },
+                    grid: $ref(["grids", 'id']),
+                    grids: { id: { 0: $ref(["lists", 'id']) } },
                     lists: { id: {
-                        1: $ref("movies['kill-bill-1']"),
-                        2: $ref("movies['reservior-dogs']") }
+                        1: $ref(["movies", 'kill-bill-1']),
+                        2: $ref(["movies", 'reservior-dogs']) }
                     },
                     movies: {
                         "kill-bill-1": { "director": $atom("Quentin Tarantino") },
@@ -400,23 +400,23 @@ describe("a primitive value", function() {
                 setJSONGraphs(
                     getModel({ cache: cache, version: version++ }), [
                     $jsonGraphEnvelope([
-                        $pathValue("grid", $ref("grids['id']")),
-                        $pathValue("grids['id'][0]", $ref("lists['id']")),
-                        $pathValue("lists['id'][0]", $ref("movies['pulp-fiction']")),
-                        $pathValue("lists['id'][1]", $ref("movies['kill-bill-1']")),
-                        $pathValue("lists['id'][2]", $ref("movies['reservior-dogs']")),
-                        $pathValue("movies['kill-bill-1'].director", $atom()),
+                        $pathValue(["grid"], $ref(["grids", 'id'])),
+                        $pathValue(["grids", 'id', 0], $ref(["lists", 'id'])),
+                        $pathValue(["lists", 'id', 0], $ref(["movies", 'pulp-fiction'])),
+                        $pathValue(["lists", 'id', 1], $ref(["movies", 'kill-bill-1'])),
+                        $pathValue(["lists", 'id', 2], $ref(["movies", 'reservior-dogs'])),
+                        $pathValue(["movies", 'kill-bill-1', 'director'], $atom()),
                         $pathValue(["grid", 0, [{length: 3}], "director"], "Quentin Tarantino")
                     ])]
                 );
 
                 expect(strip(cache)).to.deep.equal(strip({
-                    grid: $ref("grids['id']"),
-                    grids: { id: { 0: $ref("lists['id']") } },
+                    grid: $ref(["grids", 'id']),
+                    grids: { id: { 0: $ref(["lists", 'id']) } },
                     lists: { id: {
-                        0: $ref("movies['pulp-fiction']"),
-                        1: $ref("movies['kill-bill-1']"),
-                        2: $ref("movies['reservior-dogs']") }
+                        0: $ref(["movies", 'pulp-fiction']),
+                        1: $ref(["movies", 'kill-bill-1']),
+                        2: $ref(["movies", 'reservior-dogs']) }
                     },
                     movies: {
                         "pulp-fiction": { "director": $atom("Quentin Tarantino") },

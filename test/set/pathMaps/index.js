@@ -1,4 +1,4 @@
-describe.only("setPathMaps", function() {
+describe("setPathMaps", function() {
     require("./primitive.spec");
     require("./atom.spec");
     require("./expired.spec");

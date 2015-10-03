@@ -16,7 +16,7 @@ describe("an atom", function() {
 
         setPathValues(
             getModel({ cache: cache, version: version++ }), [
-                $pathValue("movies['pulp-fiction'].summary", $atom({
+                $pathValue(["movies", 'pulp-fiction', 'summary'], $atom({
                     title: "Pulp Fiction",
                     url: "/movies/id/pulp-fiction"
                 }))
@@ -43,16 +43,16 @@ describe("an atom", function() {
 
         setPathValues(
             getModel({ lru: lru, cache: cache, version: version++ }), [
-                $pathValue("grid", $ref("grids['id']")),
-                $pathValue("grids['id'][0]", $ref("lists['id']")),
-                $pathValue("lists['id'][0]", $ref("movies['pulp-fiction']")),
-                $pathValue("movies['pulp-fiction']", "Pulp Fiction")
+                $pathValue(["grid"], $ref(["grids", 'id'])),
+                $pathValue(["grids", 'id', 0], $ref(["lists", 'id'])),
+                $pathValue(["lists", 'id', 0], $ref(["movies", 'pulp-fiction'])),
+                $pathValue(["movies", 'pulp-fiction'], "Pulp Fiction")
             ]
         );
 
         setPathValues(
             getModel({ lru: lru, cache: cache, version: version++ }), [
-                $pathValue("grid[0][0].summary", $atom({
+                $pathValue(["grid", 0, 0, 'summary'], $atom({
                     title: "Pulp Fiction",
                     url: "/movies/id/pulp-fiction"
                 }))
@@ -60,9 +60,9 @@ describe("an atom", function() {
         );
 
         expect(strip(cache)).to.deep.equal(strip({
-            grid: $ref("grids['id']"),
-            grids: { id: { 0: $ref("lists['id']") } },
-            lists: { id: { 0: $ref("movies['pulp-fiction']") } },
+            grid: $ref(["grids", 'id']),
+            grids: { id: { 0: $ref(["lists", 'id']) } },
+            lists: { id: { 0: $ref(["movies", 'pulp-fiction']) } },
             movies: {
                 "pulp-fiction": {
                     summary: $atom({
@@ -81,11 +81,11 @@ describe("an atom", function() {
 
         setPathValues(
             getModel({ cache: cache, version: version++ }), [
-                $pathValue("grid", $ref("grids['id']")),
-                $pathValue("grids['id'][0]", $ref("lists['id']")),
-                $pathValue("lists['id'][1]", $ref("movies['kill-bill-1']")),
-                $pathValue("movies['kill-bill-1'].summary", $atom()),
-                $pathValue("grid[0][1].summary", $atom({
+                $pathValue(["grid"], $ref(["grids", 'id'])),
+                $pathValue(["grids", 'id', 0], $ref(["lists", 'id'])),
+                $pathValue(["lists", 'id', 1], $ref(["movies", 'kill-bill-1'])),
+                $pathValue(["movies", 'kill-bill-1', 'summary'], $atom()),
+                $pathValue(["grid", 0, 1, 'summary'], $atom({
                     title: "Kill Bill: Vol. 1",
                     url: "/movies/id/kill-bill-1"
                 }))
@@ -93,9 +93,9 @@ describe("an atom", function() {
         );
 
         expect(strip(cache)).to.deep.equal(strip({
-            grid: $ref("grids['id']"),
-            grids: { id: { 0: $ref("lists['id']") } },
-            lists: { id: { 1: $ref("movies['kill-bill-1']") } },
+            grid: $ref(["grids", 'id']),
+            grids: { id: { 0: $ref(["lists", 'id']) } },
+            lists: { id: { 1: $ref(["movies", 'kill-bill-1']) } },
             movies: {
                 "kill-bill-1": {
                     summary: $atom({
@@ -114,10 +114,10 @@ describe("an atom", function() {
 
         setPathValues(
             getModel({ cache: cache, version: version++ }), [
-                $pathValue("grid", $ref("grids['id']")),
-                $pathValue("grids['id'][0]", $ref("lists['id']")),
-                $pathValue("lists['id'][2]", $ref("movies['reservior-dogs']")),
-                $pathValue("grid[0][2].summary", $atom({
+                $pathValue(["grid"], $ref(["grids", 'id'])),
+                $pathValue(["grids", 'id', 0], $ref(["lists", 'id'])),
+                $pathValue(["lists", 'id', 2], $ref(["movies", 'reservior-dogs'])),
+                $pathValue(["grid", 0, 2, 'summary'], $atom({
                     title: "Reservior Dogs",
                     url: "/movies/id/reservior-dogs"
                 }))
@@ -125,9 +125,9 @@ describe("an atom", function() {
         );
 
         expect(strip(cache)).to.deep.equal(strip({
-            grid: $ref("grids['id']"),
-            grids: { id: { 0: $ref("lists['id']") } },
-            lists: { id: { 2: $ref("movies['reservior-dogs']") } },
+            grid: $ref(["grids", 'id']),
+            grids: { id: { 0: $ref(["lists", 'id']) } },
+            lists: { id: { 2: $ref(["movies", 'reservior-dogs']) } },
             movies: {
                 "reservior-dogs": {
                     summary: $atom({
@@ -146,9 +146,9 @@ describe("an atom", function() {
 
         setPathValues(
             getModel({ cache: cache, version: version++ }), [
-                $pathValue("grid", $ref("grids['id']")),
-                $pathValue("grids['id'][0]", $ref("lists['id']")),
-                $pathValue("lists['id'][2]", $ref("movies['reservior-dogs']")),
+                $pathValue(["grid"], $ref(["grids", 'id'])),
+                $pathValue(["grids", 'id', 0], $ref(["lists", 'id'])),
+                $pathValue(["lists", 'id', 2], $ref(["movies", 'reservior-dogs'])),
                 $pathValue(["grid", 0, 2, null], $atom({
                     title: "Reservior Dogs",
                     url: "/movies/id/reservior-dogs"
@@ -157,9 +157,9 @@ describe("an atom", function() {
         );
 
         expect(strip(cache)).to.deep.equal(strip({
-            grid: $ref("grids['id']"),
-            grids: { id: { 0: $ref("lists['id']") } },
-            lists: { id: { 2: $ref("movies['reservior-dogs']") } },
+            grid: $ref(["grids", 'id']),
+            grids: { id: { 0: $ref(["lists", 'id']) } },
+            lists: { id: { 2: $ref(["movies", 'reservior-dogs']) } },
             movies: { "reservior-dogs": $atom({
                 title: "Reservior Dogs",
                 url: "/movies/id/reservior-dogs"
@@ -176,7 +176,7 @@ describe("an atom", function() {
 
         setPathValues(
             getModel({ lru: lru, cache: cache, version: version++ }), [
-                $pathValue("movies['pulp-fiction'].summary", $atom({
+                $pathValue(["movies", 'pulp-fiction', 'summary'], $atom({
                     title: "Pulp Fiction",
                     url: "/movies/id/pulp-fiction"
                 }, { $timestamp: startTime }))
@@ -185,7 +185,7 @@ describe("an atom", function() {
 
         setPathValues(
             getModel({ lru: lru, cache: cache, version: version++ }), [
-                $pathValue("movies['pulp-fiction'].summary", $atom({
+                $pathValue(["movies", 'pulp-fiction', 'summary'], $atom({
                     title: "Kill Bill",
                     url: "/movies/id/kill-bill-1"
                 }, { $timestamp: startTime - 10 }))
@@ -212,7 +212,7 @@ describe("an atom", function() {
                 var version = 0;
                 setPathValues(
                     getModel({ cache: cache, version: version++ }), [
-                        $pathValue("movies['pulp-fiction', 'kill-bill-1', 'reservior-dogs'].genres", ["Crime", "Drama", "Thriller"])
+                        $pathValue(["movies", ['pulp-fiction', 'kill-bill-1', 'reservior-dogs'], 'genres'], ["Crime", "Drama", "Thriller"])
                     ]
                 );
 
@@ -230,23 +230,23 @@ describe("an atom", function() {
                 var version = 0;
                 setPathValues(
                     getModel({ cache: cache, version: version++ }), [
-                        $pathValue("grid", $ref("grids['id']")),
-                        $pathValue("grids['id'][0]", $ref("lists['id']")),
-                        $pathValue("lists['id'][0]", $ref("movies['pulp-fiction']")),
-                        $pathValue("lists['id'][1]", $ref("movies['kill-bill-1']")),
-                        $pathValue("lists['id'][2]", $ref("movies['reservior-dogs']")),
-                        $pathValue("movies['kill-bill-1'].genres", $atom()),
-                        $pathValue("grid[0][0, 1, 2].genres", $atom(["Crime", "Drama", "Thriller"]))
+                        $pathValue(["grid"], $ref(["grids", 'id'])),
+                        $pathValue(["grids", 'id', 0], $ref(["lists", 'id'])),
+                        $pathValue(["lists", 'id', 0], $ref(["movies", 'pulp-fiction'])),
+                        $pathValue(["lists", 'id', 1], $ref(["movies", 'kill-bill-1'])),
+                        $pathValue(["lists", 'id', 2], $ref(["movies", 'reservior-dogs'])),
+                        $pathValue(["movies", 'kill-bill-1', 'genres'], $atom()),
+                        $pathValue(["grid", 0, [0, 1, 2], 'genres'], $atom(["Crime", "Drama", "Thriller"]))
                     ]
                 );
 
                 expect(strip(cache)).to.deep.equal(strip({
-                    grid: $ref("grids['id']"),
-                    grids: { id: { 0: $ref("lists['id']") } },
+                    grid: $ref(["grids", 'id']),
+                    grids: { id: { 0: $ref(["lists", 'id']) } },
                     lists: { id: {
-                        0: $ref("movies['pulp-fiction']"),
-                        1: $ref("movies['kill-bill-1']"),
-                        2: $ref("movies['reservior-dogs']") }
+                        0: $ref(["movies", 'pulp-fiction']),
+                        1: $ref(["movies", 'kill-bill-1']),
+                        2: $ref(["movies", 'reservior-dogs']) }
                     },
                     movies: {
                         "pulp-fiction": { "genres": $atom(["Crime", "Drama", "Thriller"]) },
@@ -263,23 +263,23 @@ describe("an atom", function() {
                 var version = 0;
                 setPathValues(
                     getModel({ cache: cache, version: version++ }), [
-                        $pathValue("grid", $ref("grids['id']")),
-                        $pathValue("grids['id'][0]", $ref("lists['id']")),
-                        $pathValue("lists['id'][0]", $ref("movies['pulp-fiction']")),
-                        $pathValue("lists['id'][1]", $ref("movies['kill-bill-1']")),
-                        $pathValue("lists['id'][2]", $ref("movies['reservior-dogs']")),
-                        $pathValue("movies['kill-bill-1'].genres", $atom()),
-                        $pathValue("grid[0][0..2].genres", $atom(["Crime", "Drama", "Thriller"]))
+                        $pathValue(["grid"], $ref(["grids", 'id'])),
+                        $pathValue(["grids", 'id', 0], $ref(["lists", 'id'])),
+                        $pathValue(["lists", 'id', 0], $ref(["movies", 'pulp-fiction'])),
+                        $pathValue(["lists", 'id', 1], $ref(["movies", 'kill-bill-1'])),
+                        $pathValue(["lists", 'id', 2], $ref(["movies", 'reservior-dogs'])),
+                        $pathValue(["movies", 'kill-bill-1', 'genres'], $atom()),
+                        $pathValue(["grid", 0, {from: 0, to: 2}, 'genres'], $atom(["Crime", "Drama", "Thriller"]))
                     ]
                 );
 
                 expect(strip(cache)).to.deep.equal(strip({
-                    grid: $ref("grids['id']"),
-                    grids: { id: { 0: $ref("lists['id']") } },
+                    grid: $ref(["grids", 'id']),
+                    grids: { id: { 0: $ref(["lists", 'id']) } },
                     lists: { id: {
-                        0: $ref("movies['pulp-fiction']"),
-                        1: $ref("movies['kill-bill-1']"),
-                        2: $ref("movies['reservior-dogs']") }
+                        0: $ref(["movies", 'pulp-fiction']),
+                        1: $ref(["movies", 'kill-bill-1']),
+                        2: $ref(["movies", 'reservior-dogs']) }
                     },
                     movies: {
                         "pulp-fiction": { "genres": $atom(["Crime", "Drama", "Thriller"]) },
@@ -294,21 +294,21 @@ describe("an atom", function() {
                 var version = 0;
                 setPathValues(
                     getModel({ cache: cache, version: version++ }), [
-                        $pathValue("grid", $ref("grids['id']")),
-                        $pathValue("grids['id'][0]", $ref("lists['id']")),
-                        $pathValue("lists['id'][1]", $ref("movies['kill-bill-1']")),
-                        $pathValue("lists['id'][2]", $ref("movies['reservior-dogs']")),
-                        $pathValue("movies['kill-bill-1'].genres", $atom()),
-                        $pathValue("grid[0][1..2].genres", $atom(["Crime", "Drama", "Thriller"]))
+                        $pathValue(["grid"], $ref(["grids", 'id'])),
+                        $pathValue(["grids", 'id', 0], $ref(["lists", 'id'])),
+                        $pathValue(["lists", 'id', 1], $ref(["movies", 'kill-bill-1'])),
+                        $pathValue(["lists", 'id', 2], $ref(["movies", 'reservior-dogs'])),
+                        $pathValue(["movies", 'kill-bill-1', 'genres'], $atom()),
+                        $pathValue(["grid", 0, {from: 1, to: 2}, 'genres'], $atom(["Crime", "Drama", "Thriller"]))
                     ]
                 );
 
                 expect(strip(cache)).to.deep.equal(strip({
-                    grid: $ref("grids['id']"),
-                    grids: { id: { 0: $ref("lists['id']") } },
+                    grid: $ref(["grids", 'id']),
+                    grids: { id: { 0: $ref(["lists", 'id']) } },
                     lists: { id: {
-                        1: $ref("movies['kill-bill-1']"),
-                        2: $ref("movies['reservior-dogs']") }
+                        1: $ref(["movies", 'kill-bill-1']),
+                        2: $ref(["movies", 'reservior-dogs']) }
                     },
                     movies: {
                         "kill-bill-1": { "genres": $atom(["Crime", "Drama", "Thriller"]) },
@@ -322,23 +322,23 @@ describe("an atom", function() {
                 var version = 0;
                 setPathValues(
                     getModel({ cache: cache, version: version++ }), [
-                        $pathValue("grid", $ref("grids['id']")),
-                        $pathValue("grids['id'][0]", $ref("lists['id']")),
-                        $pathValue("lists['id'][0]", $ref("movies['pulp-fiction']")),
-                        $pathValue("lists['id'][1]", $ref("movies['kill-bill-1']")),
-                        $pathValue("lists['id'][2]", $ref("movies['reservior-dogs']")),
-                        $pathValue("movies['kill-bill-1'].genres", $atom()),
-                        $pathValue(["grid", 0, {length: 3}, "genres"], $atom(["Crime", "Drama", "Thriller"]))
+                        $pathValue(["grid"], $ref(["grids", 'id'])),
+                        $pathValue(["grids", 'id', 0], $ref(["lists", 'id'])),
+                        $pathValue(["lists", 'id', 0], $ref(["movies", 'pulp-fiction'])),
+                        $pathValue(["lists", 'id', 1], $ref(["movies", 'kill-bill-1'])),
+                        $pathValue(["lists", 'id', 2], $ref(["movies", 'reservior-dogs'])),
+                        $pathValue(["movies", 'kill-bill-1', 'genres'], $atom()),
+                        $pathValue([["grid"], 0, {length: 3}, "genres"], $atom(["Crime", "Drama", "Thriller"]))
                     ]
                 );
 
                 expect(strip(cache)).to.deep.equal(strip({
-                    grid: $ref("grids['id']"),
-                    grids: { id: { 0: $ref("lists['id']") } },
+                    grid: $ref(["grids", 'id']),
+                    grids: { id: { 0: $ref(["lists", 'id']) } },
                     lists: { id: {
-                        0: $ref("movies['pulp-fiction']"),
-                        1: $ref("movies['kill-bill-1']"),
-                        2: $ref("movies['reservior-dogs']") }
+                        0: $ref(["movies", 'pulp-fiction']),
+                        1: $ref(["movies", 'kill-bill-1']),
+                        2: $ref(["movies", 'reservior-dogs']) }
                     },
                     movies: {
                         "pulp-fiction": { "genres": $atom(["Crime", "Drama", "Thriller"]) },
@@ -353,21 +353,21 @@ describe("an atom", function() {
                 var version = 0;
                 setPathValues(
                     getModel({ cache: cache, version: version++ }), [
-                        $pathValue("grid", $ref("grids['id']")),
-                        $pathValue("grids['id'][0]", $ref("lists['id']")),
-                        $pathValue("lists['id'][1]", $ref("movies['kill-bill-1']")),
-                        $pathValue("lists['id'][2]", $ref("movies['reservior-dogs']")),
-                        $pathValue("movies['kill-bill-1'].genres", $atom()),
-                        $pathValue(["grid", 0, {from: 1, length: 2}, "genres"], $atom(["Crime", "Drama", "Thriller"]))
+                        $pathValue(["grid"], $ref(["grids", 'id'])),
+                        $pathValue(["grids", 'id', 0], $ref(["lists", 'id'])),
+                        $pathValue(["lists", 'id', 1], $ref(["movies", 'kill-bill-1'])),
+                        $pathValue(["lists", 'id', 2], $ref(["movies", 'reservior-dogs'])),
+                        $pathValue(["movies", 'kill-bill-1', 'genres'], $atom()),
+                        $pathValue([["grid"], 0, {from: 1, length: 2}, "genres"], $atom(["Crime", "Drama", "Thriller"]))
                     ]
                 );
 
                 expect(strip(cache)).to.deep.equal(strip({
-                    grid: $ref("grids['id']"),
-                    grids: { id: { 0: $ref("lists['id']") } },
+                    grid: $ref(["grids", 'id']),
+                    grids: { id: { 0: $ref(["lists", 'id']) } },
                     lists: { id: {
-                        1: $ref("movies['kill-bill-1']"),
-                        2: $ref("movies['reservior-dogs']") }
+                        1: $ref(["movies", 'kill-bill-1']),
+                        2: $ref(["movies", 'reservior-dogs']) }
                     },
                     movies: {
                         "kill-bill-1": { "genres": $atom(["Crime", "Drama", "Thriller"]) },
@@ -381,23 +381,23 @@ describe("an atom", function() {
                 var version = 0;
                 setPathValues(
                     getModel({ cache: cache, version: version++ }), [
-                        $pathValue("grid", $ref("grids['id']")),
-                        $pathValue("grids['id'][0]", $ref("lists['id']")),
-                        $pathValue("lists['id'][0]", $ref("movies['pulp-fiction']")),
-                        $pathValue("lists['id'][1]", $ref("movies['kill-bill-1']")),
-                        $pathValue("lists['id'][2]", $ref("movies['reservior-dogs']")),
-                        $pathValue("movies['kill-bill-1'].genres", $atom()),
-                        $pathValue(["grid", 0, [{length: 3}], "genres"], $atom(["Crime", "Drama", "Thriller"]))
+                        $pathValue(["grid"], $ref(["grids", 'id'])),
+                        $pathValue(["grids", 'id', 0], $ref(["lists", 'id'])),
+                        $pathValue(["lists", 'id', 0], $ref(["movies", 'pulp-fiction'])),
+                        $pathValue(["lists", 'id', 1], $ref(["movies", 'kill-bill-1'])),
+                        $pathValue(["lists", 'id', 2], $ref(["movies", 'reservior-dogs'])),
+                        $pathValue(["movies", 'kill-bill-1', 'genres'], $atom()),
+                        $pathValue([["grid"], 0, [{length: 3}], "genres"], $atom(["Crime", "Drama", "Thriller"]))
                     ]
                 );
 
                 expect(strip(cache)).to.deep.equal(strip({
-                    grid: $ref("grids['id']"),
-                    grids: { id: { 0: $ref("lists['id']") } },
+                    grid: $ref(["grids", 'id']),
+                    grids: { id: { 0: $ref(["lists", 'id']) } },
                     lists: { id: {
-                        0: $ref("movies['pulp-fiction']"),
-                        1: $ref("movies['kill-bill-1']"),
-                        2: $ref("movies['reservior-dogs']") }
+                        0: $ref(["movies", 'pulp-fiction']),
+                        1: $ref(["movies", 'kill-bill-1']),
+                        2: $ref(["movies", 'reservior-dogs']) }
                     },
                     movies: {
                         "pulp-fiction": { "genres": $atom(["Crime", "Drama", "Thriller"]) },

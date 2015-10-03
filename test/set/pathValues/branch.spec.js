@@ -16,8 +16,8 @@ describe("a primitive over a branch", function() {
         var version = 0;
         setPathValues(
             getModel({ cache: cache, version: version++ }), [
-                $pathValue("movies['pulp-fiction'].title", "Pulp Fiction"),
-                $pathValue("movies['pulp-fiction']", "Pulp Fiction")
+                $pathValue(["movies", 'pulp-fiction', 'title'], "Pulp Fiction"),
+                $pathValue(["movies", 'pulp-fiction'], "Pulp Fiction")
             ]
         );
 
@@ -32,23 +32,23 @@ describe("a primitive over a branch", function() {
         var version = 0;
         setPathValues(
             getModel({ cache: cache, version: version++ }), [
-                $pathValue("grid", $ref("grids['id']")),
-                $pathValue("grids['id'][0]", $ref("lists['id']")),
-                $pathValue("lists['id'][0]", $ref("movies['pulp-fiction']")),
-                $pathValue("movies['pulp-fiction'].title", "Pulp Fiction")
+                $pathValue(["grid"], $ref(["grids", 'id'])),
+                $pathValue(["grids", 'id', 0], $ref(["lists", 'id'])),
+                $pathValue(["lists", 'id', 0], $ref(["movies", 'pulp-fiction'])),
+                $pathValue(["movies", 'pulp-fiction', 'title'], "Pulp Fiction")
             ]
         );
 
         setPathValues(
             getModel({ cache: cache, version: version++ }), [
-                $pathValue(["grid", 0, 0, null], "Pulp Fiction")
+                $pathValue([["grid"], 0, 0, null], "Pulp Fiction")
             ]
         );
 
         expect(strip(cache)).to.deep.equal(strip({
-            grid: $ref("grids['id']"),
-            grids: { id: { 0: $ref("lists['id']") } },
-            lists: { id: { 0: $ref("movies['pulp-fiction']") } },
+            grid: $ref(["grids", 'id']),
+            grids: { id: { 0: $ref(["lists", 'id']) } },
+            lists: { id: { 0: $ref(["movies", 'pulp-fiction']) } },
             movies: { "pulp-fiction": $atom("Pulp Fiction") }
         }));
     });
@@ -62,8 +62,8 @@ describe("set an error over a branch", function() {
         var version = 0;
         setPathValues(
             getModel({ cache: cache, version: version++ }), [
-                $pathValue("movies['pulp-fiction'].title", "Pulp Fiction"),
-                $pathValue("movies['pulp-fiction']", $error("oops"))
+                $pathValue(["movies", 'pulp-fiction', 'title'], "Pulp Fiction"),
+                $pathValue(["movies", 'pulp-fiction'], $error("oops"))
             ]
         );
 
@@ -78,23 +78,23 @@ describe("set an error over a branch", function() {
         var version = 0;
         setPathValues(
             getModel({ cache: cache, version: version++ }), [
-                $pathValue("grid", $ref("grids['id']")),
-                $pathValue("grids['id'][0]", $ref("lists['id']")),
-                $pathValue("lists['id'][0]", $ref("movies['pulp-fiction']")),
-                $pathValue("movies['pulp-fiction'].title", "Pulp Fiction")
+                $pathValue(["grid"], $ref(["grids", 'id'])),
+                $pathValue(["grids", 'id', 0], $ref(["lists", 'id'])),
+                $pathValue(["lists", 'id', 0], $ref(["movies", 'pulp-fiction'])),
+                $pathValue(["movies", 'pulp-fiction', 'title'], "Pulp Fiction")
             ]
         );
 
         setPathValues(
             getModel({ cache: cache, version: version++ }), [
-                $pathValue(["grid", 0, 0, null], $error("oops"))
+                $pathValue([["grid"], 0, 0, null], $error("oops"))
             ]
         );
 
         expect(strip(cache)).to.deep.equal(strip({
-            grid: $ref("grids['id']"),
-            grids: { id: { 0: $ref("lists['id']") } },
-            lists: { id: { 0: $ref("movies['pulp-fiction']") } },
+            grid: $ref(["grids", 'id']),
+            grids: { id: { 0: $ref(["lists", 'id']) } },
+            lists: { id: { 0: $ref(["movies", 'pulp-fiction']) } },
             movies: { "pulp-fiction": $error("oops") }
         }));
     });

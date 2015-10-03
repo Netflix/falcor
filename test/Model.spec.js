@@ -69,9 +69,6 @@ describe("Model", function() {
         var out = Model.ref(ref);
         testRunner.compare({$type: $ref, value: ref}, out);
 
-        out = Model.ref('a.b.c');
-        testRunner.compare({$type: $ref, value: ref}, out);
-
         out = Model.error(err);
         testRunner.compare({$type: $error, value: err}, out);
 

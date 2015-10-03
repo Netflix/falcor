@@ -19,8 +19,8 @@ describe("an expired value", function() {
         setJSONGraphs(
             getModel({ cache: cache, version: version++ }), [
             $jsonGraphEnvelope([
-                $pathValue("grid", $ref("grids['id']")),
-                $pathValue("grids['id'][0]", $ref("lists['id']", {
+                $pathValue(["grid"], $ref(["grids", 'id'])),
+                $pathValue(["grids", 'id', 0], $ref(["lists", 'id'], {
                     $expires: -1000
                 }))
             ])]
@@ -31,8 +31,8 @@ describe("an expired value", function() {
 
         expect(expires > Date.now()).to.be.true;
         expect(strip(cache)).to.deep.equal(strip({
-            grid: $ref("grids['id']"),
-            grids: { id: { 0: $ref("lists['id']") } }
+            grid: $ref(["grids", 'id']),
+            grids: { id: { 0: $ref(["lists", 'id']) } }
         }));
     });
 
@@ -46,21 +46,21 @@ describe("an expired value", function() {
             getModel({ cache: cache, expired: expired, version: version++ }), [{
                 paths: [["grid", 0, 0, "title"]],
                 jsonGraph: $jsonGraph([
-                    $pathValue("grid", $ref("grids['id']")),
-                    $pathValue("grids['id'][0]", $ref("lists['id']", {
+                    $pathValue(["grid"], $ref(["grids", 'id'])),
+                    $pathValue(["grids", 'id', 0], $ref(["lists", 'id'], {
                         $expires: 0
                     })),
-                    $pathValue("lists['id'][0]", $ref("movies['pulp-fiction']")),
-                    $pathValue("movies['pulp-fiction'].title", "Pulp Fiction")
+                    $pathValue(["lists", 'id', 0], $ref(["movies", 'pulp-fiction'])),
+                    $pathValue(["movies", 'pulp-fiction', 'title'], "Pulp Fiction")
                 ])
             }]
         );
 
         expect(expired.length).to.equal(1);
         expect(strip(cache)).to.deep.equal(strip({
-            grid: $ref("grids['id']"),
-            grids: { id: { 0: $ref("lists['id']") } },
-            lists: { id: { 0: $ref("movies['pulp-fiction']") } },
+            grid: $ref(["grids", 'id']),
+            grids: { id: { 0: $ref(["lists", 'id']) } },
+            lists: { id: { 0: $ref(["movies", 'pulp-fiction']) } },
             movies: {
                 "pulp-fiction": {
                     "title": $atom("Pulp Fiction")
@@ -80,20 +80,20 @@ describe("an expired value", function() {
             getModel({ cache: cache, expired: expired, version: version++ }), [{
                 paths: [["grid", 0, 0, "title"]],
                 jsonGraph: $jsonGraph([
-                    $pathValue("grid", $ref("grids['id']")),
-                    $pathValue("grids['id'][0]", $ref("lists['id']", {
+                    $pathValue(["grid"], $ref(["grids", 'id'])),
+                    $pathValue(["grids", 'id', 0], $ref(["lists", 'id'], {
                         $expires: startTime - 10
                     })),
-                    $pathValue("lists['id'][0]", $ref("movies['pulp-fiction']")),
-                    $pathValue("movies['pulp-fiction'].title", "Pulp Fiction")
+                    $pathValue(["lists", 'id', 0], $ref(["movies", 'pulp-fiction'])),
+                    $pathValue(["movies", 'pulp-fiction', 'title'], "Pulp Fiction")
                 ])
             }]
         );
 
         expect(expired.length).to.equal(1);
         expect(strip(cache)).to.deep.equal(strip({
-            grid: $ref("grids['id']"),
-            grids: { id: { 0: $ref("lists['id']") } }
+            grid: $ref(["grids", 'id']),
+            grids: { id: { 0: $ref(["lists", 'id']) } }
         }));
     });
 
@@ -109,12 +109,12 @@ describe("an expired value", function() {
             getModel({ lru: lru, cache: cache, expired: expired, version: version++ }), [{
                 paths: [["grid", 0, 0, "title"]],
                 jsonGraph: $jsonGraph([
-                    $pathValue("grid", $ref("grids['id']")),
-                    $pathValue("grids['id'][0]", $ref("lists['id']", {
+                    $pathValue(["grid"], $ref(["grids", 'id'])),
+                    $pathValue(["grids", 'id', 0], $ref(["lists", 'id'], {
                         $expires: -5
                     })),
-                    $pathValue("lists['id'][0]", $ref("movies['pulp-fiction']")),
-                    $pathValue("movies['pulp-fiction'].title", "Pulp Fiction")
+                    $pathValue(["lists", 'id', 0], $ref(["movies", 'pulp-fiction'])),
+                    $pathValue(["movies", 'pulp-fiction', 'title'], "Pulp Fiction")
                 ])
             }]
         );
@@ -125,16 +125,16 @@ describe("an expired value", function() {
             getModel({ lru: lru, cache: cache, expired: expired, version: version++ }), [{
                 paths: [["grid", 0, 0, "director"]],
                 jsonGraph: $jsonGraph([
-                    $pathValue("movies['pulp-fiction'].director", "Quentin Tarantino")
+                    $pathValue(["movies", 'pulp-fiction', 'director'], "Quentin Tarantino")
                 ])
             }]
         );
 
         expect(successfulPaths[1].length).to.equal(0);
         expect(strip(cache)).to.deep.equal(strip({
-            grid: $ref("grids['id']"),
-            grids: { id: { 0: $ref("lists['id']") } },
-            lists: { id: { 0: $ref("movies['pulp-fiction']") } },
+            grid: $ref(["grids", 'id']),
+            grids: { id: { 0: $ref(["lists", 'id']) } },
+            lists: { id: { 0: $ref(["movies", 'pulp-fiction']) } },
             movies: {
                 "pulp-fiction": {
                     "title": $atom("Pulp Fiction")

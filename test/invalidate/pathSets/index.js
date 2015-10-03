@@ -19,12 +19,12 @@ describe("invalidatePathSets", function() {
 
         setPathValues(
             getModel({ lru: lru, cache: cache, version: version++ }), [
-            $pathValue("movies['pulp-fiction'].title")
+            $pathValue(["movies", 'pulp-fiction', 'title'])
         ]);
 
         invalidatePathSets(
             getModel({ lru: lru, cache: cache, version: version++ }), [
-            $path("movies['pulp-fiction'].title")
+            $path(["movies", 'pulp-fiction', 'title'])
         ]);
 
         expect(strip(cache)).to.deep.equal(strip({}));
@@ -38,23 +38,23 @@ describe("invalidatePathSets", function() {
 
         setPathValues(
             getModel({ lru: lru, cache: cache, version: version++ }), [
-                $pathValue("grid", $ref("grids['id']")),
-                $pathValue("grids['id'][0]", $ref("lists['id']")),
-                $pathValue("lists['id'][0]", $ref("movies['pulp-fiction']")),
-                $pathValue("movies['pulp-fiction']", "Pulp Fiction")
+                $pathValue(["grid"], $ref(["grids", 'id'])),
+                $pathValue(["grids", 'id', 0], $ref(["lists", 'id'])),
+                $pathValue(["lists", 'id', 0], $ref(["movies", 'pulp-fiction'])),
+                $pathValue(["movies", 'pulp-fiction'], "Pulp Fiction")
             ]
         );
 
         invalidatePathSets(
             getModel({ lru: lru, cache: cache, version: version++ }), [
-                $path("grid[0][0].title")
+                $path(["grid", 0, 0, 'title'])
             ]
         );
 
         expect(strip(cache)).to.deep.equal(strip({
-            grid: $ref("grids['id']"),
-            grids: { id: { 0: $ref("lists['id']") } },
-            lists: { id: { 0: $ref("movies['pulp-fiction']") } }
+            grid: $ref(["grids", 'id']),
+            grids: { id: { 0: $ref(["lists", 'id']) } },
+            lists: { id: { 0: $ref(["movies", 'pulp-fiction']) } }
         }));
     });
 
@@ -66,23 +66,23 @@ describe("invalidatePathSets", function() {
 
         setPathValues(
             getModel({ lru: lru, cache: cache, version: version++ }), [
-                $pathValue("grid", $ref("grids['id']")),
-                $pathValue("grids['id'][0]", $ref("lists['id']")),
-                $pathValue("lists['id'][1]", $ref("movies['kill-bill-1']")),
-                $pathValue("movies['kill-bill-1'].title", $atom())
+                $pathValue(["grid"], $ref(["grids", 'id'])),
+                $pathValue(["grids", 'id', 0], $ref(["lists", 'id'])),
+                $pathValue(["lists", 'id', 1], $ref(["movies", 'kill-bill-1'])),
+                $pathValue(["movies", 'kill-bill-1', 'title'], $atom())
             ]
         );
 
         invalidatePathSets(
             getModel({ lru: lru, cache: cache, version: version++ }), [
-                $path("grid[0][1].title")
+                $path(["grid", 0, 1, 'title'])
             ]
         );
 
         expect(strip(cache)).to.deep.equal(strip({
-            grid: $ref("grids['id']"),
-            grids: { id: { 0: $ref("lists['id']") } },
-            lists: { id: { 1: $ref("movies['kill-bill-1']") } }
+            grid: $ref(["grids", 'id']),
+            grids: { id: { 0: $ref(["lists", 'id']) } },
+            lists: { id: { 1: $ref(["movies", 'kill-bill-1']) } }
         }));
     });
 
@@ -95,22 +95,22 @@ describe("invalidatePathSets", function() {
 
         setPathValues(
             getModel({ lru: lru, cache: cache, version: version++ }), [
-                $pathValue("grid", $ref("grids['id']")),
-                $pathValue("grids['id'][0]", $ref("lists['id']")),
-                $pathValue("lists['id'][2]", $ref("movies['reservior-dogs']"))
+                $pathValue(["grid"], $ref(["grids", 'id'])),
+                $pathValue(["grids", 'id', 0], $ref(["lists", 'id'])),
+                $pathValue(["lists", 'id', 2], $ref(["movies", 'reservior-dogs']))
             ]
         );
 
         invalidatePathSets(
             getModel({ lru: lru, cache: cache, version: version++ }), [
-                $path("grid[0][2].title")
+                $path(["grid", 0, 2, 'title'])
             ]
         );
 
         expect(strip(cache)).to.deep.equal(strip({
-            grid: $ref("grids['id']"),
-            grids: { id: { 0: $ref("lists['id']") } },
-            lists: { id: { 2: $ref("movies['reservior-dogs']") } }
+            grid: $ref(["grids", 'id']),
+            grids: { id: { 0: $ref(["lists", 'id']) } },
+            lists: { id: { 2: $ref(["movies", 'reservior-dogs']) } }
         }));
     });
 
@@ -122,10 +122,10 @@ describe("invalidatePathSets", function() {
 
         setPathValues(
             getModel({ lru: lru, cache: cache, version: version++ }), [
-                $pathValue("grid", $ref("grids['id']")),
-                $pathValue("grids['id'][0]", $ref("lists['id']")),
-                $pathValue("lists['id'][2]", $ref("movies['reservior-dogs']")),
-                $pathValue("movies['reservior-dogs'].title", "Reservior Dogs")
+                $pathValue(["grid"], $ref(["grids", 'id'])),
+                $pathValue(["grids", 'id', 0], $ref(["lists", 'id'])),
+                $pathValue(["lists", 'id', 2], $ref(["movies", 'reservior-dogs'])),
+                $pathValue(["movies", 'reservior-dogs', 'title'], "Reservior Dogs")
             ]
         );
 
@@ -136,9 +136,9 @@ describe("invalidatePathSets", function() {
         );
 
         expect(strip(cache)).to.deep.equal(strip({
-            grid: $ref("grids['id']"),
-            grids: { id: { 0: $ref("lists['id']") } },
-            lists: { id: { 2: $ref("movies['reservior-dogs']") } }
+            grid: $ref(["grids", 'id']),
+            grids: { id: { 0: $ref(["lists", 'id']) } },
+            lists: { id: { 2: $ref(["movies", 'reservior-dogs']) } }
         }));
     });
 
@@ -152,13 +152,13 @@ describe("invalidatePathSets", function() {
 
                 setPathValues(
                     getModel({ lru: lru, cache: cache, version: version++ }), [
-                        $pathValue("movies['pulp-fiction', 'kill-bill-1', 'reservior-dogs'].director", "Quentin Tarantino")
+                        $pathValue(["movies", ['pulp-fiction', 'kill-bill-1', 'reservior-dogs'], 'director'], "Quentin Tarantino")
                     ]
                 );
 
                 invalidatePathSets(
                     getModel({ lru: lru, cache: cache, version: version++ }), [
-                        $path("movies['pulp-fiction', 'kill-bill-1', 'reservior-dogs'].director")
+                        $path(["movies", ['pulp-fiction', 'kill-bill-1', 'reservior-dogs'], 'director'])
                     ]
                 );
 
@@ -172,28 +172,28 @@ describe("invalidatePathSets", function() {
 
                 setPathValues(
                     getModel({ lru: lru, cache: cache, version: version++ }), [
-                        $pathValue("grid", $ref("grids['id']")),
-                        $pathValue("grids['id'][0]", $ref("lists['id']")),
-                        $pathValue("lists['id'][0]", $ref("movies['pulp-fiction']")),
-                        $pathValue("lists['id'][1]", $ref("movies['kill-bill-1']")),
-                        $pathValue("lists['id'][2]", $ref("movies['reservior-dogs']")),
-                        $pathValue("movies['kill-bill-1'].director", $atom())
+                        $pathValue(["grid"], $ref(["grids", 'id'])),
+                        $pathValue(["grids", 'id', 0], $ref(["lists", 'id'])),
+                        $pathValue(["lists", 'id', 0], $ref(["movies", 'pulp-fiction'])),
+                        $pathValue(["lists", 'id', 1], $ref(["movies", 'kill-bill-1'])),
+                        $pathValue(["lists", 'id', 2], $ref(["movies", 'reservior-dogs'])),
+                        $pathValue(["movies", 'kill-bill-1', 'director'], $atom())
                     ]
                 );
 
                 invalidatePathSets(
                     getModel({ lru: lru, cache: cache, version: version++ }), [
-                        $path("grid[0][0, 1, 2].director")
+                        $path(["grid", 0, [0, 1, 2], 'director'])
                     ]
                 );
 
                 expect(strip(cache)).to.deep.equal(strip({
-                    grid: $ref("grids['id']"),
-                    grids: { id: { 0: $ref("lists['id']") } },
+                    grid: $ref(["grids", 'id']),
+                    grids: { id: { 0: $ref(["lists", 'id']) } },
                     lists: { id: {
-                        0: $ref("movies['pulp-fiction']"),
-                        1: $ref("movies['kill-bill-1']"),
-                        2: $ref("movies['reservior-dogs']") }
+                        0: $ref(["movies", 'pulp-fiction']),
+                        1: $ref(["movies", 'kill-bill-1']),
+                        2: $ref(["movies", 'reservior-dogs']) }
                     }
                 }));
             });
@@ -207,28 +207,28 @@ describe("invalidatePathSets", function() {
 
                 setPathValues(
                     getModel({ lru: lru, cache: cache, version: version++ }), [
-                        $pathValue("grid", $ref("grids['id']")),
-                        $pathValue("grids['id'][0]", $ref("lists['id']")),
-                        $pathValue("lists['id'][0]", $ref("movies['pulp-fiction']")),
-                        $pathValue("lists['id'][1]", $ref("movies['kill-bill-1']")),
-                        $pathValue("lists['id'][2]", $ref("movies['reservior-dogs']")),
-                        $pathValue("movies['kill-bill-1'].director", $atom())
+                        $pathValue(["grid"], $ref(["grids", 'id'])),
+                        $pathValue(["grids", 'id', 0], $ref(["lists", 'id'])),
+                        $pathValue(["lists", 'id', 0], $ref(["movies", 'pulp-fiction'])),
+                        $pathValue(["lists", 'id', 1], $ref(["movies", 'kill-bill-1'])),
+                        $pathValue(["lists", 'id', 2], $ref(["movies", 'reservior-dogs'])),
+                        $pathValue(["movies", 'kill-bill-1', 'director'], $atom())
                     ]
                 );
 
                 invalidatePathSets(
                     getModel({ lru: lru, cache: cache, version: version++ }), [
-                        $path("grid[0][0..2].director")
+                        $path(["grid", 0, {from: 0, to: 2}, 'director'])
                     ]
                 );
 
                 expect(strip(cache)).to.deep.equal(strip({
-                    grid: $ref("grids['id']"),
-                    grids: { id: { 0: $ref("lists['id']") } },
+                    grid: $ref(["grids", 'id']),
+                    grids: { id: { 0: $ref(["lists", 'id']) } },
                     lists: { id: {
-                        0: $ref("movies['pulp-fiction']"),
-                        1: $ref("movies['kill-bill-1']"),
-                        2: $ref("movies['reservior-dogs']") }
+                        0: $ref(["movies", 'pulp-fiction']),
+                        1: $ref(["movies", 'kill-bill-1']),
+                        2: $ref(["movies", 'reservior-dogs']) }
                     }
                 }));
             });
@@ -240,26 +240,26 @@ describe("invalidatePathSets", function() {
 
                 setPathValues(
                     getModel({ lru: lru, cache: cache, version: version++ }), [
-                        $pathValue("grid", $ref("grids['id']")),
-                        $pathValue("grids['id'][0]", $ref("lists['id']")),
-                        $pathValue("lists['id'][1]", $ref("movies['kill-bill-1']")),
-                        $pathValue("lists['id'][2]", $ref("movies['reservior-dogs']")),
-                        $pathValue("movies['kill-bill-1'].director", $atom())
+                        $pathValue(["grid"], $ref(["grids", 'id'])),
+                        $pathValue(["grids", 'id', 0], $ref(["lists", 'id'])),
+                        $pathValue(["lists", 'id', 1], $ref(["movies", 'kill-bill-1'])),
+                        $pathValue(["lists", 'id', 2], $ref(["movies", 'reservior-dogs'])),
+                        $pathValue(["movies", 'kill-bill-1', 'director'], $atom())
                     ]
                 );
 
                 invalidatePathSets(
                     getModel({ lru: lru, cache: cache, version: version++ }), [
-                        $path("grid[0][1..2].director")
+                        $path(["grid", 0, {from: 1, to: 2}, 'director'])
                     ]
                 );
 
                 expect(strip(cache)).to.deep.equal(strip({
-                    grid: $ref("grids['id']"),
-                    grids: { id: { 0: $ref("lists['id']") } },
+                    grid: $ref(["grids", 'id']),
+                    grids: { id: { 0: $ref(["lists", 'id']) } },
                     lists: { id: {
-                        1: $ref("movies['kill-bill-1']"),
-                        2: $ref("movies['reservior-dogs']") }
+                        1: $ref(["movies", 'kill-bill-1']),
+                        2: $ref(["movies", 'reservior-dogs']) }
                     }
                 }));
             });
@@ -271,12 +271,12 @@ describe("invalidatePathSets", function() {
 
                 setPathValues(
                     getModel({ lru: lru, cache: cache, version: version++ }), [
-                        $pathValue("grid", $ref("grids['id']")),
-                        $pathValue("grids['id'][0]", $ref("lists['id']")),
-                        $pathValue("lists['id'][0]", $ref("movies['pulp-fiction']")),
-                        $pathValue("lists['id'][1]", $ref("movies['kill-bill-1']")),
-                        $pathValue("lists['id'][2]", $ref("movies['reservior-dogs']")),
-                        $pathValue("movies['kill-bill-1'].director", $atom())
+                        $pathValue(["grid"], $ref(["grids", 'id'])),
+                        $pathValue(["grids", 'id', 0], $ref(["lists", 'id'])),
+                        $pathValue(["lists", 'id', 0], $ref(["movies", 'pulp-fiction'])),
+                        $pathValue(["lists", 'id', 1], $ref(["movies", 'kill-bill-1'])),
+                        $pathValue(["lists", 'id', 2], $ref(["movies", 'reservior-dogs'])),
+                        $pathValue(["movies", 'kill-bill-1', 'director'], $atom())
                     ]
                 );
 
@@ -287,12 +287,12 @@ describe("invalidatePathSets", function() {
                 );
 
                 expect(strip(cache)).to.deep.equal(strip({
-                    grid: $ref("grids['id']"),
-                    grids: { id: { 0: $ref("lists['id']") } },
+                    grid: $ref(["grids", 'id']),
+                    grids: { id: { 0: $ref(["lists", 'id']) } },
                     lists: { id: {
-                        0: $ref("movies['pulp-fiction']"),
-                        1: $ref("movies['kill-bill-1']"),
-                        2: $ref("movies['reservior-dogs']") }
+                        0: $ref(["movies", 'pulp-fiction']),
+                        1: $ref(["movies", 'kill-bill-1']),
+                        2: $ref(["movies", 'reservior-dogs']) }
                     }
                 }));
             });
@@ -304,11 +304,11 @@ describe("invalidatePathSets", function() {
 
                 setPathValues(
                     getModel({ lru: lru, cache: cache, version: version++ }), [
-                        $pathValue("grid", $ref("grids['id']")),
-                        $pathValue("grids['id'][0]", $ref("lists['id']")),
-                        $pathValue("lists['id'][1]", $ref("movies['kill-bill-1']")),
-                        $pathValue("lists['id'][2]", $ref("movies['reservior-dogs']")),
-                        $pathValue("movies['kill-bill-1'].director", $atom())
+                        $pathValue(["grid"], $ref(["grids", 'id'])),
+                        $pathValue(["grids", 'id', 0], $ref(["lists", 'id'])),
+                        $pathValue(["lists", 'id', 1], $ref(["movies", 'kill-bill-1'])),
+                        $pathValue(["lists", 'id', 2], $ref(["movies", 'reservior-dogs'])),
+                        $pathValue(["movies", 'kill-bill-1', 'director'], $atom())
                     ]
                 );
 
@@ -319,11 +319,11 @@ describe("invalidatePathSets", function() {
                 );
 
                 expect(strip(cache)).to.deep.equal(strip({
-                    grid: $ref("grids['id']"),
-                    grids: { id: { 0: $ref("lists['id']") } },
+                    grid: $ref(["grids", 'id']),
+                    grids: { id: { 0: $ref(["lists", 'id']) } },
                     lists: { id: {
-                        1: $ref("movies['kill-bill-1']"),
-                        2: $ref("movies['reservior-dogs']") }
+                        1: $ref(["movies", 'kill-bill-1']),
+                        2: $ref(["movies", 'reservior-dogs']) }
                     }
                 }));
             });
@@ -335,12 +335,12 @@ describe("invalidatePathSets", function() {
 
                 setPathValues(
                     getModel({ lru: lru, cache: cache, version: version++ }), [
-                        $pathValue("grid", $ref("grids['id']")),
-                        $pathValue("grids['id'][0]", $ref("lists['id']")),
-                        $pathValue("lists['id'][0]", $ref("movies['pulp-fiction']")),
-                        $pathValue("lists['id'][1]", $ref("movies['kill-bill-1']")),
-                        $pathValue("lists['id'][2]", $ref("movies['reservior-dogs']")),
-                        $pathValue("movies['kill-bill-1'].director", $atom())
+                        $pathValue(["grid"], $ref(["grids", 'id'])),
+                        $pathValue(["grids", 'id', 0], $ref(["lists", 'id'])),
+                        $pathValue(["lists", 'id', 0], $ref(["movies", 'pulp-fiction'])),
+                        $pathValue(["lists", 'id', 1], $ref(["movies", 'kill-bill-1'])),
+                        $pathValue(["lists", 'id', 2], $ref(["movies", 'reservior-dogs'])),
+                        $pathValue(["movies", 'kill-bill-1', 'director'], $atom())
                     ]
                 );
 
@@ -351,12 +351,12 @@ describe("invalidatePathSets", function() {
                 );
 
                 expect(strip(cache)).to.deep.equal(strip({
-                    grid: $ref("grids['id']"),
-                    grids: { id: { 0: $ref("lists['id']") } },
+                    grid: $ref(["grids", 'id']),
+                    grids: { id: { 0: $ref(["lists", 'id']) } },
                     lists: { id: {
-                        0: $ref("movies['pulp-fiction']"),
-                        1: $ref("movies['kill-bill-1']"),
-                        2: $ref("movies['reservior-dogs']") }
+                        0: $ref(["movies", 'pulp-fiction']),
+                        1: $ref(["movies", 'kill-bill-1']),
+                        2: $ref(["movies", 'reservior-dogs']) }
                     }
                 }));
             });
