@@ -79,7 +79,7 @@
   },
   "dependencies": {
     "asap": "2.0.3",
-    "falcor-json-graph": "1.1.5",
+    "falcor-json-graph": "2.0.0",
     "falcor-path-utils": "0.3.4",
     "promise": "7.0.4",
     "rx": "2.5.3"

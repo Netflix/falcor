@@ -16,8 +16,8 @@ describe("a primitive over a branch", function() {
         var version = 0;
         setPathMaps(
             getModel({ cache: cache, version: version++ }), [
-                $pathMapEnvelope("movies['pulp-fiction'].title", "Pulp Fiction"),
-                $pathMapEnvelope("movies['pulp-fiction']", "Pulp Fiction")
+                $pathMapEnvelope(["movies", 'pulp-fiction', 'title'], "Pulp Fiction"),
+                $pathMapEnvelope(["movies", 'pulp-fiction'], "Pulp Fiction")
             ]
         );
 
@@ -32,10 +32,10 @@ describe("a primitive over a branch", function() {
         var version = 0;
         setPathMaps(
             getModel({ cache: cache, version: version++ }), [
-                $pathMapEnvelope("grid", $ref("grids['id']")),
-                $pathMapEnvelope("grids['id'][0]", $ref("lists['id']")),
-                $pathMapEnvelope("lists['id'][0]", $ref("movies['pulp-fiction']")),
-                $pathMapEnvelope("movies['pulp-fiction'].title", "Pulp Fiction")
+                $pathMapEnvelope("grid", $ref(["grids", 'id'])),
+                $pathMapEnvelope(["grids", 'id', 0], $ref(["lists", 'id'])),
+                $pathMapEnvelope(["lists", 'id', 0], $ref(["movies", 'pulp-fiction'])),
+                $pathMapEnvelope(["movies", 'pulp-fiction', 'title'], "Pulp Fiction")
             ]
         );
 
@@ -46,9 +46,9 @@ describe("a primitive over a branch", function() {
         );
 
         expect(strip(cache)).to.deep.equal(strip({
-            grid: $ref("grids['id']"),
-            grids: { id: { 0: $ref("lists['id']") } },
-            lists: { id: { 0: $ref("movies['pulp-fiction']") } },
+            grid: $ref(["grids", 'id']),
+            grids: { id: { 0: $ref(["lists", 'id']) } },
+            lists: { id: { 0: $ref(["movies", 'pulp-fiction']) } },
             movies: { "pulp-fiction": $atom("Pulp Fiction") }
         }));
     });
@@ -62,8 +62,8 @@ describe("set an error over a branch", function() {
         var version = 0;
         setPathMaps(
             getModel({ cache: cache, version: version++ }), [
-                $pathMapEnvelope("movies['pulp-fiction'].title", "Pulp Fiction"),
-                $pathMapEnvelope("movies['pulp-fiction']", $error("oops"))
+                $pathMapEnvelope(["movies", 'pulp-fiction', 'title'], "Pulp Fiction"),
+                $pathMapEnvelope(["movies", 'pulp-fiction'], $error("oops"))
             ]
         );
 
@@ -78,10 +78,10 @@ describe("set an error over a branch", function() {
         var version = 0;
         setPathMaps(
             getModel({ cache: cache, version: version++ }), [
-                $pathMapEnvelope("grid", $ref("grids['id']")),
-                $pathMapEnvelope("grids['id'][0]", $ref("lists['id']")),
-                $pathMapEnvelope("lists['id'][0]", $ref("movies['pulp-fiction']")),
-                $pathMapEnvelope("movies['pulp-fiction'].title", "Pulp Fiction")
+                $pathMapEnvelope("grid", $ref(["grids", 'id'])),
+                $pathMapEnvelope(["grids", 'id', 0], $ref(["lists", 'id'])),
+                $pathMapEnvelope(["lists", 'id', 0], $ref(["movies", 'pulp-fiction'])),
+                $pathMapEnvelope(["movies", 'pulp-fiction', 'title'], "Pulp Fiction")
             ]
         );
 
@@ -92,9 +92,9 @@ describe("set an error over a branch", function() {
         );
 
         expect(strip(cache)).to.deep.equal(strip({
-            grid: $ref("grids['id']"),
-            grids: { id: { 0: $ref("lists['id']") } },
-            lists: { id: { 0: $ref("movies['pulp-fiction']") } },
+            grid: $ref(["grids", 'id']),
+            grids: { id: { 0: $ref(["lists", 'id']) } },
+            lists: { id: { 0: $ref(["movies", 'pulp-fiction']) } },
             movies: { "pulp-fiction": $error("oops") }
         }));
     });
