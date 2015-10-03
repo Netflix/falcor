@@ -85,4 +85,43 @@ describe("Call", function() {
             }).
             subscribe(noOp, done, done);
     });
+    it('should sent parsed arguments to the dataSource.', function(done) {
+        var call = sinon.spy(function() {
+            return {
+                subscribe: function(onNext, onError, onCompleted) {
+                    onNext({jsonGraph: {
+                        a: {
+                            b: 'hello'
+                        }
+                    }, paths: [
+                        ['a', 'b']
+                    ]});
+                    onCompleted();
+                }
+            };
+        });
+        var model = new Model({
+            source: {
+                call: call
+            }
+        });
+        model.
+            call('test.again', [], ['oneSuffix.a', 'twoSuffix.b'], ['onePath.a', 'twoPath.b']).
+            doAction(noOp, noOp, function() {
+                expect(call.calledOnce).to.be.ok;
+
+                var callArgs = call.getCall(0).args;
+                expect(callArgs[0]).to.deep.equals(['test', 'again']);
+                expect(callArgs[1]).to.deep.equals([]);
+                expect(callArgs[2]).to.deep.equals([
+                    ['oneSuffix', 'a'],
+                    ['twoSuffix', 'b']
+                ]);
+                expect(callArgs[3]).to.deep.equals([
+                    ['onePath', 'a'],
+                    ['twoPath', 'b']
+                ]);
+            }).
+            subscribe(noOp, done, done);
+    });
 });
