@@ -26,6 +26,11 @@ if [ "$TRAVIS_PULL_REQUEST" == "false" ]; then
   npm run doc
   npm run dist
 
+  git add dist/.
+  git commit -m "Travis build $TRAVIS_BUILD_NUMBER committed dist/"
+  # origin implied, whichever branch we're building implied
+  git push
+
   cp -R doc $FALCOR_DOCS_DIR
   cp -R dist $FALCOR_BUILD_DIR
 
