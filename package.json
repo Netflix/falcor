@@ -20,7 +20,7 @@
   ],
   "scripts": {
     "test": "gulp test-coverage",
-    "dist": "gulp build",
+    "dist": "gulp all",
     "doc": "gulp doc",
     "perf": "gulp perf-run",
     "device": "devicePerfRunner",
