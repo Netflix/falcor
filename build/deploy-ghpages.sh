@@ -7,6 +7,7 @@ if [ "$TRAVIS_PULL_REQUEST" == "false" ]; then
   FALCOR_DOCS_DIR=$TEMP_DIR/falcordocs
   FALCOR_BUILD_DIR=$TEMP_DIR/falcorbuild
   GH_PAGES_DIR=$TEMP_DIR/gh-pages
+  DEPLOYABLE_REPO=https://${GH_TOKEN}@github.com/Netflix/falcor.git
 
   mkdir -p $TEMP_DIR
 
@@ -25,14 +26,17 @@ if [ "$TRAVIS_PULL_REQUEST" == "false" ]; then
   git config --global user.email "falcorbuild@netflix.com"
   git config --global user.name "Falcor Build"
 
+  # Need https url to push changes, and also need to move from detached head to built branch.
+  git remote add deployable $DEPLOYABLE_REPO
+  git checkout $TRAVIS_BRANCH
+
   # Generate Docs
   npm run doc
   npm run dist
 
   git add dist/.
   git commit -m "Travis build $TRAVIS_BUILD_NUMBER committed dist/"
-  # origin implied, whichever branch we're building implied
-  git push
+  git push deployable $TRAVIS_BRANCH
 
   cp -R doc $FALCOR_DOCS_DIR
   cp -R dist $FALCOR_BUILD_DIR
@@ -40,7 +44,7 @@ if [ "$TRAVIS_PULL_REQUEST" == "false" ]; then
   # Change Working Directory to $HOME
   cd $HOME
 
-  git clone --quiet --branch=gh-pages https://${GH_TOKEN}@github.com/Netflix/falcor.git $GH_PAGES_DIR > /dev/null
+  git clone --quiet --branch=gh-pages $DEPLOYABLE_REPO $GH_PAGES_DIR > /dev/null
 
   # Change Working Directory to $HOME/gh-pages
   cd $GH_PAGES_DIR
