@@ -22,6 +22,9 @@ if [ "$TRAVIS_PULL_REQUEST" == "false" ]; then
     rm -rf $GH_PAGES_DIR
   fi
 
+  git config --global user.email "falcorbuild@netflix.com"
+  git config --global user.name "Falcor Build"
+
   # Generate Docs
   npm run doc
   npm run dist
@@ -36,9 +39,6 @@ if [ "$TRAVIS_PULL_REQUEST" == "false" ]; then
 
   # Change Working Directory to $HOME
   cd $HOME
-
-  git config --global user.email "falcorbuild@netflix.com"
-  git config --global user.name "Falcor Build"
 
   git clone --quiet --branch=gh-pages https://${GH_TOKEN}@github.com/Netflix/falcor.git $GH_PAGES_DIR > /dev/null
 
