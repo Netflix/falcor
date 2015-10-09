@@ -16,8 +16,8 @@ describe("an expired value", function() {
 
         setPathMaps(
             getModel({ cache: cache, version: version++ }), [
-                $pathMapEnvelope("grid", $ref("grids['id']")),
-                $pathMapEnvelope("grids['id'][0]", $ref("lists['id']", {
+                $pathMapEnvelope(["grid"], $ref(["grids", 'id'])),
+                $pathMapEnvelope(["grids", 'id', 0], $ref(["lists", 'id'], {
                     $expires: -1000
                 }))
             ]
@@ -27,8 +27,8 @@ describe("an expired value", function() {
 
         expect(expires > Date.now()).to.be.true;
         expect(strip(cache)).to.deep.equal(strip({
-            grid: $ref("grids['id']"),
-            grids: { id: { 0: $ref("lists['id']") } }
+            grid: $ref(["grids", 'id']),
+            grids: { id: { 0: $ref(["lists", 'id']) } }
         }));
     });
 
@@ -41,17 +41,17 @@ describe("an expired value", function() {
 
         setPathMaps(
             getModel({ cache: cache, expired: expired, version: version++ }), [
-                $pathMapEnvelope("grid", $ref("grids['id']")),
-                $pathMapEnvelope("grids['id'][0]", $ref("lists['id']", {
+                $pathMapEnvelope(["grid"], $ref(["grids", 'id'])),
+                $pathMapEnvelope(["grids", 'id', 0], $ref(["lists", 'id'], {
                     $expires: 0
                 })),
-                $pathMapEnvelope("grid[0][0].title", "Pulp Fiction")
+                $pathMapEnvelope(["grid", 0, 0, 'title'], "Pulp Fiction")
             ]
         );
 
         expect(expired.length).to.equal(1);
         expect(strip(cache)).to.deep.equal(strip({
-            grid: $ref("grids['id']"),
+            grid: $ref(["grids", 'id']),
             grids: { id: { 0: { 0: { title: $atom("Pulp Fiction") } } } }
         }));
     });
@@ -65,17 +65,17 @@ describe("an expired value", function() {
 
         setPathMaps(
             getModel({ cache: cache, expired: expired, version: version++ }), [
-                $pathMapEnvelope("grid", $ref("grids['id']")),
-                $pathMapEnvelope("grids['id'][0]", $ref("lists['id']", {
+                $pathMapEnvelope(["grid"], $ref(["grids", 'id'])),
+                $pathMapEnvelope(["grids", 'id', 0], $ref(["lists", 'id'], {
                     $expires: startTime - 10
                 })),
-                $pathMapEnvelope("grid[0][0].title", "Pulp Fiction")
+                $pathMapEnvelope(["grid", 0, 0, 'title'], "Pulp Fiction")
             ]
         );
 
         expect(expired.length).to.equal(1);
         expect(strip(cache)).to.deep.equal(strip({
-            grid: $ref("grids['id']"),
+            grid: $ref(["grids", 'id']),
             grids: { id: { 0: { 0: { title: $atom("Pulp Fiction") } } } }
         }));
     });

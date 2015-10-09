@@ -134,7 +134,7 @@ describe('Cache as DataSource', function() {
 
         var onNext = sinon.spy();
         model.
-            get("lolomo.summary", "lolomo[0..2].summary").
+            get(["lolomo", "summary"], ["lolomo", {to: 2}, "summary"]).
             doAction(onNext).
             doAction(noOp, noOp, function() {
                 var data = onNext.getCall(0).args[0];

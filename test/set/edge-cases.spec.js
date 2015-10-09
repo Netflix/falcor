@@ -25,7 +25,7 @@ describe("Special Cases", function() {
                 }
             }).
             flatMap(function() {
-                return model.get('foo.length');
+                return model.get(['foo', 'length']);
             }).
             doAction(onNext).
             doAction(noOp, noOp, function() {

@@ -19,7 +19,7 @@ describe("a primitive value", function() {
         try {
             setPathMaps(
                 getModel({ lru: lru, cache: cache, version: version++ }), [
-                $pathMapEnvelope(["movies", null, "pulp-fiction", "title"], "Pulp Fiction")
+                $pathMapEnvelope([["movies", null, "pulp-fiction", "title"], "Pulp Fiction"])
             ]);
         } catch(e) {
             errored = true;
@@ -35,7 +35,7 @@ describe("a primitive value", function() {
         var version = 0;
         setPathMaps(
             getModel({ cache: cache, version: version++ }), [
-            $pathMapEnvelope("movies['pulp-fiction'].title", "Pulp Fiction")
+            $pathMapEnvelope(["movies", 'pulp-fiction', 'title'], "Pulp Fiction")
         ]);
 
         expect(strip(cache)).to.deep.equal(strip({
@@ -54,23 +54,23 @@ describe("a primitive value", function() {
         var version = 0;
         setPathMaps(
             getModel({ lru: lru, cache: cache, version: version++ }), [
-                $pathMapEnvelope("grid", $ref("grids['id']")),
-                $pathMapEnvelope("grids['id'][0]", $ref("lists['id']")),
-                $pathMapEnvelope("lists['id'][0]", $ref("movies['pulp-fiction']")),
-                $pathMapEnvelope("movies['pulp-fiction']", "Pulp Fiction")
+                $pathMapEnvelope(["grid"], $ref(["grids", 'id'])),
+                $pathMapEnvelope(["grids", 'id', 0], $ref(["lists", 'id'])),
+                $pathMapEnvelope(["lists", 'id', 0], $ref(["movies", 'pulp-fiction'])),
+                $pathMapEnvelope(["movies", 'pulp-fiction'], "Pulp Fiction")
             ]
         );
 
         setPathMaps(
             getModel({ lru: lru, cache: cache, version: version++ }), [
-                $pathMapEnvelope("grid[0][0].title", "Pulp Fiction")
+                $pathMapEnvelope(["grid", 0, 0, 'title'], "Pulp Fiction")
             ]
         );
 
         expect(strip(cache)).to.deep.equal(strip({
-            grid: $ref("grids['id']"),
-            grids: { id: { 0: $ref("lists['id']") } },
-            lists: { id: { 0: $ref("movies['pulp-fiction']") } },
+            grid: $ref(["grids", 'id']),
+            grids: { id: { 0: $ref(["lists", 'id']) } },
+            lists: { id: { 0: $ref(["movies", 'pulp-fiction']) } },
             movies: {
                 "pulp-fiction": {
                     title: $atom("Pulp Fiction")
@@ -85,18 +85,18 @@ describe("a primitive value", function() {
         var version = 0;
         setPathMaps(
             getModel({ cache: cache, version: version++ }), [
-                $pathMapEnvelope("grid", $ref("grids['id']")),
-                $pathMapEnvelope("grids['id'][0]", $ref("lists['id']")),
-                $pathMapEnvelope("lists['id'][1]", $ref("movies['kill-bill-1']")),
-                $pathMapEnvelope("movies['kill-bill-1'].title", $atom()),
-                $pathMapEnvelope("grid[0][1].title", "Kill Bill Vol. 1")
+                $pathMapEnvelope(["grid"], $ref(["grids", 'id'])),
+                $pathMapEnvelope(["grids", 'id', 0], $ref(["lists", 'id'])),
+                $pathMapEnvelope(["lists", 'id', 1], $ref(["movies", 'kill-bill-1'])),
+                $pathMapEnvelope(["movies", 'kill-bill-1', 'title'], $atom()),
+                $pathMapEnvelope(["grid", 0, 1, 'title'], "Kill Bill Vol. 1")
             ]
         );
 
         expect(strip(cache)).to.deep.equal(strip({
-            grid: $ref("grids['id']"),
-            grids: { id: { 0: $ref("lists['id']") } },
-            lists: { id: { 1: $ref("movies['kill-bill-1']") } },
+            grid: $ref(["grids", 'id']),
+            grids: { id: { 0: $ref(["lists", 'id']) } },
+            lists: { id: { 1: $ref(["movies", 'kill-bill-1']) } },
             movies: {
                 "kill-bill-1": {
                     title: $atom("Kill Bill Vol. 1")
@@ -112,17 +112,17 @@ describe("a primitive value", function() {
         var version = 0;
         setPathMaps(
             getModel({ cache: cache, version: version++ }), [
-                $pathMapEnvelope("grid", $ref("grids['id']")),
-                $pathMapEnvelope("grids['id'][0]", $ref("lists['id']")),
-                $pathMapEnvelope("lists['id'][2]", $ref("movies['reservior-dogs']")),
-                $pathMapEnvelope("grid[0][2].title", "Reservior Dogs")
+                $pathMapEnvelope(["grid"], $ref(["grids", 'id'])),
+                $pathMapEnvelope(["grids", 'id', 0], $ref(["lists", 'id'])),
+                $pathMapEnvelope(["lists", 'id', 2], $ref(["movies", 'reservior-dogs'])),
+                $pathMapEnvelope(["grid", 0, 2, 'title'], "Reservior Dogs")
             ]
         );
 
         expect(strip(cache)).to.deep.equal(strip({
-            grid: $ref("grids['id']"),
-            grids: { id: { 0: $ref("lists['id']") } },
-            lists: { id: { 2: $ref("movies['reservior-dogs']") } },
+            grid: $ref(["grids", 'id']),
+            grids: { id: { 0: $ref(["lists", 'id']) } },
+            lists: { id: { 2: $ref(["movies", 'reservior-dogs']) } },
             movies: {
                 "reservior-dogs": {
                     title: $atom("Reservior Dogs")
@@ -137,17 +137,17 @@ describe("a primitive value", function() {
         var version = 0;
         setPathMaps(
             getModel({ cache: cache, version: version++ }), [
-                $pathMapEnvelope("grid", $ref("grids['id']")),
-                $pathMapEnvelope("grids['id'][0]", $ref("lists['id']")),
-                $pathMapEnvelope("lists['id'][2]", $ref("movies['reservior-dogs']")),
+                $pathMapEnvelope(["grid"], $ref(["grids", 'id'])),
+                $pathMapEnvelope(["grids", 'id', 0], $ref(["lists", 'id'])),
+                $pathMapEnvelope(["lists", 'id', 2], $ref(["movies", 'reservior-dogs'])),
                 $pathMapEnvelope(["grid", 0, 2, null], "Reservior Dogs")
             ]
         );
 
         expect(strip(cache)).to.deep.equal(strip({
-            grid: $ref("grids['id']"),
-            grids: { id: { 0: $ref("lists['id']") } },
-            lists: { id: { 2: $ref("movies['reservior-dogs']") } },
+            grid: $ref(["grids", 'id']),
+            grids: { id: { 0: $ref(["lists", 'id']) } },
+            lists: { id: { 2: $ref(["movies", 'reservior-dogs']) } },
             movies: { "reservior-dogs": $atom("Reservior Dogs") }
         }));
     });
@@ -160,7 +160,7 @@ describe("a primitive value", function() {
                 var version = 0;
                 setPathMaps(
                     getModel({ cache: cache, version: version++ }), [
-                        $pathMapEnvelope("movies['pulp-fiction', 'kill-bill-1', 'reservior-dogs'].director", "Quentin Tarantino")
+                        $pathMapEnvelope(["movies", ['pulp-fiction', 'kill-bill-1', 'reservior-dogs'], 'director'], "Quentin Tarantino")
                     ]
                 );
 
@@ -178,23 +178,23 @@ describe("a primitive value", function() {
                 var version = 0;
                 setPathMaps(
                     getModel({ cache: cache, version: version++ }), [
-                        $pathMapEnvelope("grid", $ref("grids['id']")),
-                        $pathMapEnvelope("grids['id'][0]", $ref("lists['id']")),
-                        $pathMapEnvelope("lists['id'][0]", $ref("movies['pulp-fiction']")),
-                        $pathMapEnvelope("lists['id'][1]", $ref("movies['kill-bill-1']")),
-                        $pathMapEnvelope("lists['id'][2]", $ref("movies['reservior-dogs']")),
-                        $pathMapEnvelope("movies['kill-bill-1'].director", $atom()),
-                        $pathMapEnvelope("grid[0][0, 1, 2].director", "Quentin Tarantino")
+                        $pathMapEnvelope(["grid"], $ref(["grids", 'id'])),
+                        $pathMapEnvelope(["grids", 'id', 0], $ref(["lists", 'id'])),
+                        $pathMapEnvelope(["lists", 'id', 0], $ref(["movies", 'pulp-fiction'])),
+                        $pathMapEnvelope(["lists", 'id', 1], $ref(["movies", 'kill-bill-1'])),
+                        $pathMapEnvelope(["lists", 'id', 2], $ref(["movies", 'reservior-dogs'])),
+                        $pathMapEnvelope(["movies", 'kill-bill-1', 'director'], $atom()),
+                        $pathMapEnvelope(["grid", 0, [0, 1, 2], 'director'], "Quentin Tarantino")
                     ]
                 );
 
                 expect(strip(cache)).to.deep.equal(strip({
-                    grid: $ref("grids['id']"),
-                    grids: { id: { 0: $ref("lists['id']") } },
+                    grid: $ref(["grids", 'id']),
+                    grids: { id: { 0: $ref(["lists", 'id']) } },
                     lists: { id: {
-                        0: $ref("movies['pulp-fiction']"),
-                        1: $ref("movies['kill-bill-1']"),
-                        2: $ref("movies['reservior-dogs']") }
+                        0: $ref(["movies", 'pulp-fiction']),
+                        1: $ref(["movies", 'kill-bill-1']),
+                        2: $ref(["movies", 'reservior-dogs']) }
                     },
                     movies: {
                         "pulp-fiction": { "director": $atom("Quentin Tarantino") },
@@ -211,23 +211,23 @@ describe("a primitive value", function() {
                 var version = 0;
                 setPathMaps(
                     getModel({ cache: cache, version: version++ }), [
-                        $pathMapEnvelope("grid", $ref("grids['id']")),
-                        $pathMapEnvelope("grids['id'][0]", $ref("lists['id']")),
-                        $pathMapEnvelope("lists['id'][0]", $ref("movies['pulp-fiction']")),
-                        $pathMapEnvelope("lists['id'][1]", $ref("movies['kill-bill-1']")),
-                        $pathMapEnvelope("lists['id'][2]", $ref("movies['reservior-dogs']")),
-                        $pathMapEnvelope("movies['kill-bill-1'].director", $atom()),
-                        $pathMapEnvelope("grid[0][0..2].director", "Quentin Tarantino")
+                        $pathMapEnvelope(["grid"], $ref(["grids", 'id'])),
+                        $pathMapEnvelope(["grids", 'id', 0], $ref(["lists", 'id'])),
+                        $pathMapEnvelope(["lists", 'id', 0], $ref(["movies", 'pulp-fiction'])),
+                        $pathMapEnvelope(["lists", 'id', 1], $ref(["movies", 'kill-bill-1'])),
+                        $pathMapEnvelope(["lists", 'id', 2], $ref(["movies", 'reservior-dogs'])),
+                        $pathMapEnvelope(["movies", 'kill-bill-1', 'director'], $atom()),
+                        $pathMapEnvelope(["grid", 0, {from: 0, to: 2}, 'director'], "Quentin Tarantino")
                     ]
                 );
 
                 expect(strip(cache)).to.deep.equal(strip({
-                    grid: $ref("grids['id']"),
-                    grids: { id: { 0: $ref("lists['id']") } },
+                    grid: $ref(["grids", 'id']),
+                    grids: { id: { 0: $ref(["lists", 'id']) } },
                     lists: { id: {
-                        0: $ref("movies['pulp-fiction']"),
-                        1: $ref("movies['kill-bill-1']"),
-                        2: $ref("movies['reservior-dogs']") }
+                        0: $ref(["movies", 'pulp-fiction']),
+                        1: $ref(["movies", 'kill-bill-1']),
+                        2: $ref(["movies", 'reservior-dogs']) }
                     },
                     movies: {
                         "pulp-fiction": { "director": $atom("Quentin Tarantino") },
@@ -242,21 +242,21 @@ describe("a primitive value", function() {
                 var version = 0;
                 setPathMaps(
                     getModel({ cache: cache, version: version++ }), [
-                        $pathMapEnvelope("grid", $ref("grids['id']")),
-                        $pathMapEnvelope("grids['id'][0]", $ref("lists['id']")),
-                        $pathMapEnvelope("lists['id'][1]", $ref("movies['kill-bill-1']")),
-                        $pathMapEnvelope("lists['id'][2]", $ref("movies['reservior-dogs']")),
-                        $pathMapEnvelope("movies['kill-bill-1'].director", $atom()),
-                        $pathMapEnvelope("grid[0][1..2].director", "Quentin Tarantino")
+                        $pathMapEnvelope(["grid"], $ref(["grids", 'id'])),
+                        $pathMapEnvelope(["grids", 'id', 0], $ref(["lists", 'id'])),
+                        $pathMapEnvelope(["lists", 'id', 1], $ref(["movies", 'kill-bill-1'])),
+                        $pathMapEnvelope(["lists", 'id', 2], $ref(["movies", 'reservior-dogs'])),
+                        $pathMapEnvelope(["movies", 'kill-bill-1', 'director'], $atom()),
+                        $pathMapEnvelope(["grid", 0, {from: 1, to: 2}, 'director'], "Quentin Tarantino")
                     ]
                 );
 
                 expect(strip(cache)).to.deep.equal(strip({
-                    grid: $ref("grids['id']"),
-                    grids: { id: { 0: $ref("lists['id']") } },
+                    grid: $ref(["grids", 'id']),
+                    grids: { id: { 0: $ref(["lists", 'id']) } },
                     lists: { id: {
-                        1: $ref("movies['kill-bill-1']"),
-                        2: $ref("movies['reservior-dogs']") }
+                        1: $ref(["movies", 'kill-bill-1']),
+                        2: $ref(["movies", 'reservior-dogs']) }
                     },
                     movies: {
                         "kill-bill-1": { "director": $atom("Quentin Tarantino") },
@@ -270,23 +270,23 @@ describe("a primitive value", function() {
                 var version = 0;
                 setPathMaps(
                     getModel({ cache: cache, version: version++ }), [
-                        $pathMapEnvelope("grid", $ref("grids['id']")),
-                        $pathMapEnvelope("grids['id'][0]", $ref("lists['id']")),
-                        $pathMapEnvelope("lists['id'][0]", $ref("movies['pulp-fiction']")),
-                        $pathMapEnvelope("lists['id'][1]", $ref("movies['kill-bill-1']")),
-                        $pathMapEnvelope("lists['id'][2]", $ref("movies['reservior-dogs']")),
-                        $pathMapEnvelope("movies['kill-bill-1'].director", $atom()),
+                        $pathMapEnvelope(["grid"], $ref(["grids", 'id'])),
+                        $pathMapEnvelope(["grids", 'id', 0], $ref(["lists", 'id'])),
+                        $pathMapEnvelope(["lists", 'id', 0], $ref(["movies", 'pulp-fiction'])),
+                        $pathMapEnvelope(["lists", 'id', 1], $ref(["movies", 'kill-bill-1'])),
+                        $pathMapEnvelope(["lists", 'id', 2], $ref(["movies", 'reservior-dogs'])),
+                        $pathMapEnvelope(["movies", 'kill-bill-1', 'director'], $atom()),
                         $pathMapEnvelope(["grid", 0, {length: 3}, "director"], "Quentin Tarantino")
                     ]
                 );
 
                 expect(strip(cache)).to.deep.equal(strip({
-                    grid: $ref("grids['id']"),
-                    grids: { id: { 0: $ref("lists['id']") } },
+                    grid: $ref(["grids", 'id']),
+                    grids: { id: { 0: $ref(["lists", 'id']) } },
                     lists: { id: {
-                        0: $ref("movies['pulp-fiction']"),
-                        1: $ref("movies['kill-bill-1']"),
-                        2: $ref("movies['reservior-dogs']") }
+                        0: $ref(["movies", 'pulp-fiction']),
+                        1: $ref(["movies", 'kill-bill-1']),
+                        2: $ref(["movies", 'reservior-dogs']) }
                     },
                     movies: {
                         "pulp-fiction": { "director": $atom("Quentin Tarantino") },
@@ -301,21 +301,21 @@ describe("a primitive value", function() {
                 var version = 0;
                 setPathMaps(
                     getModel({ cache: cache, version: version++ }), [
-                        $pathMapEnvelope("grid", $ref("grids['id']")),
-                        $pathMapEnvelope("grids['id'][0]", $ref("lists['id']")),
-                        $pathMapEnvelope("lists['id'][1]", $ref("movies['kill-bill-1']")),
-                        $pathMapEnvelope("lists['id'][2]", $ref("movies['reservior-dogs']")),
-                        $pathMapEnvelope("movies['kill-bill-1'].director", $atom()),
+                        $pathMapEnvelope(["grid"], $ref(["grids", 'id'])),
+                        $pathMapEnvelope(["grids", 'id', 0], $ref(["lists", 'id'])),
+                        $pathMapEnvelope(["lists", 'id', 1], $ref(["movies", 'kill-bill-1'])),
+                        $pathMapEnvelope(["lists", 'id', 2], $ref(["movies", 'reservior-dogs'])),
+                        $pathMapEnvelope(["movies", 'kill-bill-1', 'director'], $atom()),
                         $pathMapEnvelope(["grid", 0, {from: 1, length: 2}, "director"], "Quentin Tarantino")
                     ]
                 );
 
                 expect(strip(cache)).to.deep.equal(strip({
-                    grid: $ref("grids['id']"),
-                    grids: { id: { 0: $ref("lists['id']") } },
+                    grid: $ref(["grids", 'id']),
+                    grids: { id: { 0: $ref(["lists", 'id']) } },
                     lists: { id: {
-                        1: $ref("movies['kill-bill-1']"),
-                        2: $ref("movies['reservior-dogs']") }
+                        1: $ref(["movies", 'kill-bill-1']),
+                        2: $ref(["movies", 'reservior-dogs']) }
                     },
                     movies: {
                         "kill-bill-1": { "director": $atom("Quentin Tarantino") },
@@ -329,23 +329,23 @@ describe("a primitive value", function() {
                 var version = 0;
                 setPathMaps(
                     getModel({ cache: cache, version: version++ }), [
-                        $pathMapEnvelope("grid", $ref("grids['id']")),
-                        $pathMapEnvelope("grids['id'][0]", $ref("lists['id']")),
-                        $pathMapEnvelope("lists['id'][0]", $ref("movies['pulp-fiction']")),
-                        $pathMapEnvelope("lists['id'][1]", $ref("movies['kill-bill-1']")),
-                        $pathMapEnvelope("lists['id'][2]", $ref("movies['reservior-dogs']")),
-                        $pathMapEnvelope("movies['kill-bill-1'].director", $atom()),
+                        $pathMapEnvelope(["grid"], $ref(["grids", 'id'])),
+                        $pathMapEnvelope(["grids", 'id', 0], $ref(["lists", 'id'])),
+                        $pathMapEnvelope(["lists", 'id', 0], $ref(["movies", 'pulp-fiction'])),
+                        $pathMapEnvelope(["lists", 'id', 1], $ref(["movies", 'kill-bill-1'])),
+                        $pathMapEnvelope(["lists", 'id', 2], $ref(["movies", 'reservior-dogs'])),
+                        $pathMapEnvelope(["movies", 'kill-bill-1', 'director'], $atom()),
                         $pathMapEnvelope(["grid", 0, [{length: 3}], "director"], "Quentin Tarantino")
                     ]
                 );
 
                 expect(strip(cache)).to.deep.equal(strip({
-                    grid: $ref("grids['id']"),
-                    grids: { id: { 0: $ref("lists['id']") } },
+                    grid: $ref(["grids", 'id']),
+                    grids: { id: { 0: $ref(["lists", 'id']) } },
                     lists: { id: {
-                        0: $ref("movies['pulp-fiction']"),
-                        1: $ref("movies['kill-bill-1']"),
-                        2: $ref("movies['reservior-dogs']") }
+                        0: $ref(["movies", 'pulp-fiction']),
+                        1: $ref(["movies", 'kill-bill-1']),
+                        2: $ref(["movies", 'reservior-dogs']) }
                     },
                     movies: {
                         "pulp-fiction": { "director": $atom("Quentin Tarantino") },
