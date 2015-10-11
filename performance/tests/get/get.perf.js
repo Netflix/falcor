@@ -71,7 +71,7 @@ function batchingRequests() {
 
 var out = module.exports = {};
 
-for (var i = 0; i < 5; ++i) {
-    out['primed cache ' + i] = primedCache;
+for (var i = 0; i < 20; ++i) {
+    out['batching requests ' + i] = batchingRequests;
 }
 
