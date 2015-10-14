@@ -3483,16 +3483,10 @@ module.exports = function flushGetRequest(request, listOfPaths, callback) {
 
 
 },{"147":147}],64:[function(require,module,exports){
-var Rx = require(163) && require(162);
-var Observable = Rx.Observable;
-var CompositeDisposable = Rx.CompositeDisposable;
-
 var ModelResponse = require(67);
 var InvalidSourceError = require(10);
 
 var pathSyntax = require(138);
-var derefSync = require(6);
-var $ref = require(121);
 
 function CallResponse(model, callPath, args, suffix, paths) {
     this.callPath = pathSyntax.fromPath(callPath);
@@ -3523,10 +3517,11 @@ function subscribeToResponse(observer) {
     var boundPath = model._path;
     var boundCallPath = boundPath.concat(callPath);
 
+    /*eslint-disable consistent-return*/
     // Precisely the same error as the router when a call function does not
     // exist.
     if (!model._source) {
-        observer.onError(new Error('function does not exist'));
+        observer.onError(new Error("function does not exist"));
         return;
     }
 
@@ -3564,11 +3559,12 @@ function subscribeToResponse(observer) {
                     observer.onCompleted();
                 });
         });
+    /*eslint-enable consistent-return*/
 }
 
 module.exports = CallResponse;
 
-},{"10":10,"121":121,"138":138,"162":162,"163":163,"6":6,"67":67}],65:[function(require,module,exports){
+},{"10":10,"138":138,"67":67}],65:[function(require,module,exports){
 var Rx = require(163);
 var Observable = Rx.Observable;
 
