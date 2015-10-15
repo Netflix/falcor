@@ -37,11 +37,11 @@ var incrementVersion = require("./../support/incrementVersion");
 var mergeValueOrInsertBranch = require("./../support/mergeValueOrInsertBranch");
 
 /**
- * Sets a list of PathValues into a JSON Graph.
+ * Sets a list of {@link PathValue}s into a {@link JSONGraph}.
  * @function
- * @param {Object} model - the Model for which to insert the PathValues.
- * @param {Array.&lt;PathValue>} pathValues - the PathValues to set.
- * @return {Array.&lt;Path>} - a list of optimized paths for the successfully set values.
+ * @param {Object} model - the Model for which to insert the {@link PathValue}s.
+ * @param {Array.&lt;PathValue>} pathValues - the list of {@link PathValue}s to set.
+ * @return {Array.&lt;Array.&lt;Path>>} - an Array of Arrays where each inner Array is a list of requested and optimized paths (respectively) for the successfully set values.
  */
 
 module.exports = function setPathValues(model, pathValues, x, errorSelector, comparator) {
