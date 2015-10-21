@@ -214,7 +214,7 @@ var TODORouter = function(userId){
 };
 
 // Creating a derived class using JavaScript's classical inheritance pattern
-TODORouter.prototype = Object.create(BaseRouter);
+TODORouter.prototype = Object.create(BaseRouter.prototype);
 ~~~
 
 The next version of JavaScript (ES2015) has native support for classes. If you are using a version of node that supports classes, or you are using a transpiler, you can write this code instead of the code seen above:
