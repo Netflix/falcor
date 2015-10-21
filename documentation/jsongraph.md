@@ -395,7 +395,7 @@ Once we create an optimized [Path](http://netflix.github.io/falcor/documentation
 }
 ~~~
 
-Now we evaluate the “tasksById” key, which yields an object. Next, we convert the number 44 into a string using the JSON stringify algorithm. Then we look up the resulting string “44” which yields another object. Finally we look up the key “name” and we find a primitive value type ”withdraw money from ATM”. This value is added to the JSON Graph subset and returned as the result of the abstract get operation. 
+Now we evaluate the “todosById” key, which yields an object. Next, we convert the number 44 into a string using the JSON stringify algorithm. Then we look up the resulting string “44” which yields another object. Finally we look up the key “name” and we find a primitive value type ”withdraw money from ATM”. This value is added to the JSON Graph subset and returned as the result of the abstract get operation. 
 
 ~~~js
 // JSON Graph Envelope response
@@ -601,7 +601,7 @@ Once we create an optimized [Path](http://netflix.github.io/falcor/documentation
 }
 ~~~
 
-Now we evaluate the “tasksById” key, which yields an object. Next, we convert the number 44 into a string using the JSON stringify algorithm. Then we look up the resulting string “44” which yields another object. Finally we arrive at the last key: “done”. We replace the value at this location with the new value: true. We also insert the value into the JSON Graph subset, and return the JSON Graph subset as the new result of the abstract set operation. 
+Now we evaluate the “todosById” key, which yields an object. Next, we convert the number 44 into a string using the JSON stringify algorithm. Then we look up the resulting string “44” which yields another object. Finally we arrive at the last key: “done”. We replace the value at this location with the new value: true. We also insert the value into the JSON Graph subset, and return the JSON Graph subset as the new result of the abstract set operation. 
 
 ~~~js
 // JSON Graph object
@@ -724,7 +724,7 @@ Once we create an optimized [Path](http://netflix.github.io/falcor/documentation
 }
 ~~~
 
-Now we evaluate the “tasksById” key, which yields an object. Next, we convert the number 44 into a string using the JSON stringify algorithm. Then we look up the resulting string “44” which yields another object. Now we look up the ”done” key and find a primitive value: false. As there are more keys to be evaluated, the object evaluating the abstract set operation attempts to replace the primitive value with an object. 
+Now we evaluate the “todosById” key, which yields an object. Next, we convert the number 44 into a string using the JSON stringify algorithm. Then we look up the resulting string “44” which yields another object. Now we look up the ”done” key and find a primitive value: false. As there are more keys to be evaluated, the object evaluating the abstract set operation attempts to replace the primitive value with an object. 
 
 ~~~js
 // setting ["todosById", 44, "done", "completed"] to true
@@ -868,7 +868,7 @@ The JSON Graph object also provides a function on the "todos" list with the foll
 add(name: String) : JSONGraphEnvelope
 ~~~
 
-The add method creates a new task in the "tasksById" object, and then adds a Reference to the task to the end of the "todos" Array.
+The add method creates a new task in the "todosById" object, and then adds a Reference to the task to the end of the "todos" Array.
 
 Let's invoke the "add" function using the abstract call operation. The abstract call operation accepts four parameters:
 
@@ -903,7 +903,7 @@ call(
     ])
 ~~~
 
-The add method adds a task to the "tasksById" object, sets the "addedAt" key on the task to the current time, and then adds a Reference to the new task at the end of the "todos" array. 
+The add method adds a task to the "todos" object, sets the "addedAt" key on the task to the current time, and then adds a Reference to the new task at the end of the "todos" array. 
 
 ~~~js
 // JSON Graph object after executing the ["todos", "add"] function
