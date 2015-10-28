@@ -158,7 +158,7 @@ describe('DataSource and Partial Cache', function() {
                 get(['lolomo', 0, {to: 1}, 'item', 'title']).
                 doAction(onNext, noOp, function() {
                     expect(onNext.calledOnce).to.be.ok;
-                    expect(strip(onNext.getCall(0).args[0])).to.deep.equals({
+                    expect(onNext.getCall(0).args[0]).to.deep.equals({
                         json: {
                             lolomo: {
                                 0: {
