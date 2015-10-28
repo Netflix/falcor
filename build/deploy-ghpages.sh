@@ -1,13 +1,14 @@
 #!/bin/bash
 
 if [ "$TRAVIS_PULL_REQUEST" == "false" ]; then
-  echo -e "Starting to update gh-pages\n"
+  echo -e "Building and committing dist...\n"
 
   TEMP_DIR=$HOME/tmp
   FALCOR_DOCS_DIR=$TEMP_DIR/falcordocs
   FALCOR_BUILD_DIR=$TEMP_DIR/falcorbuild
   GH_PAGES_DIR=$TEMP_DIR/gh-pages
   DEPLOYABLE_REPO=https://${GH_TOKEN}@github.com/Netflix/falcor.git
+  CURRENT_RELEASE=0.x
 
   mkdir -p $TEMP_DIR
 
@@ -38,23 +39,28 @@ if [ "$TRAVIS_PULL_REQUEST" == "false" ]; then
   git commit -m "Travis build $TRAVIS_BUILD_NUMBER committed dist/"
   git push deployable $TRAVIS_BRANCH
 
-  cp -R doc $FALCOR_DOCS_DIR
-  cp -R dist $FALCOR_BUILD_DIR
+  if [ "$TRAVIS_BRANCH" == "$CURRENT_RELEASE" ]; then
 
-  # Change Working Directory to $HOME
-  cd $HOME
+    echo -e "Updating gh-pages...\n"
 
-  git clone --quiet --branch=gh-pages $DEPLOYABLE_REPO $GH_PAGES_DIR > /dev/null
+    cp -R doc $FALCOR_DOCS_DIR
+    cp -R dist $FALCOR_BUILD_DIR
 
-  # Change Working Directory to $HOME/gh-pages
-  cd $GH_PAGES_DIR
+    # Change Working Directory to $HOME
+    cd $HOME
 
-  rsync -r $FALCOR_DOCS_DIR/ doc/
-  rsync -r $FALCOR_BUILD_DIR/ build/
+    git clone --quiet --branch=gh-pages $DEPLOYABLE_REPO $GH_PAGES_DIR > /dev/null
 
-  git add .
-  git commit -m "Travis build $TRAVIS_BUILD_NUMBER pushed to gh-pages"
-  git push origin gh-pages
+    # Change Working Directory to $HOME/gh-pages
+    cd $GH_PAGES_DIR
 
-  echo -e "Deployed docs and build to gh-pages\n"
+    rsync -r $FALCOR_DOCS_DIR/ doc/
+    rsync -r $FALCOR_BUILD_DIR/ build/
+
+    git add .
+    git commit -m "Travis build $TRAVIS_BUILD_NUMBER off $TRAVIS_BRANCH pushed to gh-pages"
+    git push origin gh-pages
+
+    echo -e "Deployed docs and build to gh-pages\n"
+  fi
 fi
