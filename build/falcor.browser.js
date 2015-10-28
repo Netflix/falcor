@@ -3576,6 +3576,7 @@ var getSize = require(91);
 var collectLru = require(52);
 
 var arrayClone = require(84);
+var __version = require(49);
 
 var isArray = Array.isArray;
 var isPathValue = require(103);
@@ -3659,7 +3660,8 @@ IdempotentResponse.prototype.ensureCollect = function ensureCollect(model) {
         var modelCache = modelRoot.cache;
 
         modelRoot.collectionScheduler.schedule(function collectThisPass() {
-            collectLru(modelRoot, modelRoot.expired, getSize(modelCache), model._maxSize, model._collectRatio);
+            collectLru(modelRoot, modelRoot.expired, getSize(modelCache),
+                model._maxSize, model._collectRatio, modelCache[__version]);
         });
     });
 
@@ -3670,7 +3672,7 @@ IdempotentResponse.prototype.ensureCollect = function ensureCollect(model) {
 
 module.exports = IdempotentResponse;
 
-},{"100":100,"101":101,"103":103,"135":135,"160":160,"52":52,"67":67,"84":84,"91":91}],66:[function(require,module,exports){
+},{"100":100,"101":101,"103":103,"135":135,"160":160,"49":49,"52":52,"67":67,"84":84,"91":91}],66:[function(require,module,exports){
 var Rx = require(160);
 var Disposable = Rx.Disposable;
 
@@ -4279,6 +4281,7 @@ var fastCat = require(32).fastCat;
 var collectLru = require(52);
 var getSize = require(91);
 var AssignableDisposable = require(69);
+var __version = require(49);
 
 /**
  * The get request cycle for checking the cache and reporting
@@ -4350,8 +4353,10 @@ module.exports = function getRequestCycle(getResponse, model, results, observer,
 
                 var modelRoot = model._root;
                 var modelCache = modelRoot.cache;
+                var currentVersion = modelCache[__version];
+
                 collectLru(modelRoot, modelRoot.expired, getSize(modelCache),
-                        model._maxSize, model._collectRatio);
+                        model._maxSize, model._collectRatio, currentVersion);
             }
 
         });
@@ -4359,7 +4364,7 @@ module.exports = function getRequestCycle(getResponse, model, results, observer,
     return disposable;
 };
 
-},{"11":11,"32":32,"52":52,"69":69,"71":71,"91":91}],73:[function(require,module,exports){
+},{"11":11,"32":32,"49":49,"52":52,"69":69,"71":71,"91":91}],73:[function(require,module,exports){
 var GetResponse = require(70);
 
 /**
