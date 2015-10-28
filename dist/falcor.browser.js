@@ -833,7 +833,6 @@ function InvalidModelError(boundPath, shortedPath) {
 // instanceof will be an error, but stack will be correct because its defined in the constructor.
 InvalidModelError.prototype = new Error();
 InvalidModelError.prototype.name = NAME;
-InvalidModelError.name = NAME;
 InvalidModelError.message = MESSAGE;
 
 module.exports = InvalidModelError;
@@ -857,7 +856,6 @@ function InvalidSourceError(error) {
 // in the constructor.
 InvalidSourceError.prototype = new Error();
 InvalidSourceError.prototype.name = NAME;
-InvalidSourceError.name = NAME;
 InvalidSourceError.is = function(e) {
     return e && e.name === NAME;
 };
@@ -881,7 +879,6 @@ function MaxRetryExceededError() {
 // in the constructor.
 MaxRetryExceededError.prototype = new Error();
 MaxRetryExceededError.prototype.name = NAME;
-MaxRetryExceededError.name = NAME;
 MaxRetryExceededError.is = function(e) {
     return e && e.name === NAME;
 };
@@ -7085,7 +7082,7 @@ parser.fromPathsOrPathValues = function(paths, ext) {
     }
 
     var out = [];
-    for (i = 0, len = paths.length; i < len; i++) {
+    for (var i = 0, len = paths.length; i < len; i++) {
 
         // Is the path a string
         if (typeof paths[i] === 'string') {
@@ -7602,6 +7599,8 @@ function getNext(string, idx, ext) {
     var token = '';
     var specialChars = ext ?
         EXT_SPECIAL_CHARACTERS : SPECIAL_CHARACTERS;
+    var done;
+
     do {
 
         done = idx + 1 >= string.length;
