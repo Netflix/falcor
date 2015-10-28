@@ -33,7 +33,7 @@ id: api
 
  /**
  * The subscribe method is a synonym for {@link Observable.prototype.forEach} and triggers the execution of the Observable, causing the values within to be pushed to a callback. An Observable is like a pipe of water that is closed. When forEach is called, we open the valve and the values within are pushed at us.  These values can be received using either callbacks or an {@link Observer} object.
- * @name subscribe
+ * @name forEach
  * @memberof Observable.prototype
  * @function
  * @arg {?Observable~onNextCallback} onNext a callback that accepts the next value in the stream of values
@@ -289,10 +289,6 @@ id: api
             </li>
         
             <li class="toc-api-subgroup-item">
-                <a href="ModelResponse.html#subscribe" data-target="#subscribe">subscribe</a>
-            </li>
-        
-            <li class="toc-api-subgroup-item">
                 <a href="ModelResponse.html#toPathValues" data-target="#toPathValues">toPathValues</a>
             </li>
          
@@ -322,7 +318,7 @@ id: api
             </li>
         
             <li class="toc-api-subgroup-item">
-                <a href="Observable.html#subscribe" data-target="#subscribe">subscribe</a>
+                <a href="Observable.html#forEach" data-target="#forEach">forEach</a>
             </li>
          
     </ul>

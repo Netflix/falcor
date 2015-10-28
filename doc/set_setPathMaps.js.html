@@ -40,11 +40,11 @@ var incrementVersion = require("./../support/incrementVersion");
 var mergeValueOrInsertBranch = require("./../support/mergeValueOrInsertBranch");
 
 /**
- * Sets a list of {@link PathMapEnvelope}s into a {@link JSONGraph}.
+ * Sets a list of PathMaps into a JSON Graph.
  * @function
  * @param {Object} model - the Model for which to insert the PathMaps.
- * @param {Array.&lt;PathMapEnvelope>} pathMapEnvelopes - the a list of {@link PathMapEnvelope}s to set.
- * @return {Array.&lt;Array.&lt;Path>>} - an Array of Arrays where each inner Array is a list of requested and optimized paths (respectively) for the successfully set values.
+ * @param {Array.&lt;PathMapEnvelope>} pathMapEnvelopes - the a list of @PathMapEnvelopes to set.
+ * @return {Array.&lt;Path>} - a list of optimized paths for the successfully set values.
  */
 
 module.exports = function setPathMaps(model, pathMapEnvelopes, x, errorSelector, comparator) {
@@ -486,10 +486,6 @@ function getKeys(pathMap) {
             </li>
         
             <li class="toc-api-subgroup-item">
-                <a href="ModelResponse.html#subscribe" data-target="#subscribe">subscribe</a>
-            </li>
-        
-            <li class="toc-api-subgroup-item">
                 <a href="ModelResponse.html#toPathValues" data-target="#toPathValues">toPathValues</a>
             </li>
          
@@ -519,7 +515,7 @@ function getKeys(pathMap) {
             </li>
         
             <li class="toc-api-subgroup-item">
-                <a href="Observable.html#subscribe" data-target="#subscribe">subscribe</a>
+                <a href="Observable.html#forEach" data-target="#forEach">forEach</a>
             </li>
          
     </ul>

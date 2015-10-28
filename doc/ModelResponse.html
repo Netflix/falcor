@@ -308,12 +308,12 @@ id: api
       
 
       
-      <dt class="inherited-from">Inherited From:</dt>
-      <dd class="inherited-from">
+
+      
+      <dt class="tag-overrides">Overrides:</dt>
+      <dd class="tag-overrides">
           <a href="Observable.html#forEach">Observable#forEach</a>
       </dd>
-      
-
       
 
       
@@ -538,244 +538,6 @@ model.
 //         }
 //     }
 // }</code></pre>
-
-    
-</section>
-          
-              
-<section class="method-section">
-    
-        
-
-        <h4 class="name section-header function-name" id="subscribe"><span class="type-signature"></span>subscribe<span class="signature">(onNext<span class="signature-attributes">nullable</span>, onError<span class="signature-attributes">nullable</span>, onCompleted<span class="signature-attributes">nullable</span>)</span><span class="type-signature return-signature"> &rarr; {<a href="Subscription.html">Subscription</a>}</span></h4>
-
-        
-    
-
-        
-        <div class="description">
-            <p>The subscribe method is a synonym for Observable.prototype.forEach and triggers the execution of the Observable, causing the values within to be pushed to a callback. An Observable is like a pipe of water that is closed. When forEach is called, we open the valve and the values within are pushed at us.  These values can be received using either callbacks or an Observer object.</p>
-        </div>
-        
-
-    
-
-    
-
-    
-
-    
-        <h5>Parameters:</h5>
-        
-
-<div class="parameters-section">
-    <table class="params">
-        <thead>
-        <tr>
-            
-            <th class="header-name-and-attributes">
-              Name
-              
-                &amp; Attributes
-              
-            </th>
-            
-
-            <th class="header-type">Type</th>
-
-            
-
-            <th class="last header-description">Description</th>
-        </tr>
-        </thead>
-
-        <tbody>
-        
-
-            <tr>
-                
-                    <td>
-                        <span class="name">onNext</span>
-                        
-                            
-                        
-                            
-                                <br>
-                                <span class="attribute">nullable</span>
-                            
-                        
-                            
-                        
-                    </td>
-                
-
-                <td class="type">
-                
-                    
-<span class="param-type"><a href="Observable.html#~onNextCallback">Observable~onNextCallback</a></span>
-
-
-                
-                </td>
-
-                
-
-                <td class="description last"><p>a callback that accepts the next value in the stream of values</p></td>
-            </tr>
-
-        
-
-            <tr>
-                
-                    <td>
-                        <span class="name">onError</span>
-                        
-                            
-                        
-                            
-                                <br>
-                                <span class="attribute">nullable</span>
-                            
-                        
-                            
-                        
-                    </td>
-                
-
-                <td class="type">
-                
-                    
-<span class="param-type"><a href="Observable.html#~onErrorCallback">Observable~onErrorCallback</a></span>
-
-
-                
-                </td>
-
-                
-
-                <td class="description last"><p>a callback that accepts an error that occurred while evaluating the operation underlying the <a href="Observable.html">Observable</a> stream</p></td>
-            </tr>
-
-        
-
-            <tr>
-                
-                    <td>
-                        <span class="name">onCompleted</span>
-                        
-                            
-                        
-                            
-                                <br>
-                                <span class="attribute">nullable</span>
-                            
-                        
-                            
-                        
-                    </td>
-                
-
-                <td class="type">
-                
-                    
-<span class="param-type"><a href="Observable.html#~onCompletedCallback">Observable~onCompletedCallback</a></span>
-
-
-                
-                </td>
-
-                
-
-                <td class="description last"><p>a callback that is invoked when the <a href="Observable.html">Observable</a> stream has ended, and the <a href="Observable.html#~onNextCallback">Observable~onNextCallback</a> will not receive any more values</p></td>
-            </tr>
-
-        
-        </tbody>
-    </table>
-</div>
-
-    
-
-    
-
-
-
-
-  <dl class="details">
-
-      
-
-      
-
-      
-
-      
-      <dt class="tag-overrides">Overrides:</dt>
-      <dd class="tag-overrides">
-          <a href="Observable.html#subscribe">Observable#subscribe</a>
-      </dd>
-      
-
-      
-
-      
-
-      
-
-      
-
-      
-
-      
-
-      
-
-      
-
-      
-      <dt class="tag-source">Source:</dt>
-      <dd class="tag-source">
-          <a href="typedefs_Observable.js.html">typedefs/Observable.js</a>, <a href="typedefs_Observable.js.html#line17">line 17</a>
-      </dd>
-      
-
-      
-
-      
-
-      
-  </dl>
-
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    
-    
-            
-
-
-<dl class="return-type">
-    <dt>
-        Return Type: 
-    </dt>
-    <dd>
-        
-<span class="param-type"><a href="Subscription.html">Subscription</a></span>
-
-
-    </dd>
-</dl>
-
-        
 
     
 </section>
@@ -1125,10 +887,6 @@ model.
             </li>
         
             <li class="toc-api-subgroup-item">
-                <a href="ModelResponse.html#subscribe" data-target="#subscribe">subscribe</a>
-            </li>
-        
-            <li class="toc-api-subgroup-item">
                 <a href="ModelResponse.html#toPathValues" data-target="#toPathValues">toPathValues</a>
             </li>
          
@@ -1158,7 +916,7 @@ model.
             </li>
         
             <li class="toc-api-subgroup-item">
-                <a href="Observable.html#subscribe" data-target="#subscribe">subscribe</a>
+                <a href="Observable.html#forEach" data-target="#forEach">forEach</a>
             </li>
          
     </ul>

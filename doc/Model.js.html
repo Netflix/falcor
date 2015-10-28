@@ -248,7 +248,7 @@ Model.prototype.call = function call() {
         }
     }
 
-    return new CallResponse(this, args[0], args[1], args[2], args[3]);
+    return CallResponse.create(this, args);
 };
 
 /**
@@ -834,10 +834,6 @@ Model.prototype._invalidatePathMapsAsJSON = require("./invalidate/invalidatePath
             </li>
         
             <li class="toc-api-subgroup-item">
-                <a href="ModelResponse.html#subscribe" data-target="#subscribe">subscribe</a>
-            </li>
-        
-            <li class="toc-api-subgroup-item">
                 <a href="ModelResponse.html#toPathValues" data-target="#toPathValues">toPathValues</a>
             </li>
          
@@ -867,7 +863,7 @@ Model.prototype._invalidatePathMapsAsJSON = require("./invalidate/invalidatePath
             </li>
         
             <li class="toc-api-subgroup-item">
-                <a href="Observable.html#subscribe" data-target="#subscribe">subscribe</a>
+                <a href="Observable.html#forEach" data-target="#forEach">forEach</a>
             </li>
          
     </ul>
