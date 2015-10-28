@@ -145,6 +145,44 @@ describe('DataSource and Partial Cache', function() {
                 }).
                 subscribe(noOp, done, done);
         });
+
+        it('should get a complex argument into a single arg and collect to max cache size.', function(done) {
+            var model = new Model({
+                cache: M(),
+                source: new LocalDataSource(Cache()),
+                maxSize: 0
+            });
+            var cache = model._root.cache;
+            var onNext = sinon.spy();
+            model.
+                get(['lolomo', 0, {to: 1}, 'item', 'title']).
+                doAction(onNext, noOp, function() {
+                    expect(onNext.calledOnce).to.be.ok;
+                    expect(strip(onNext.getCall(0).args[0])).to.deep.equals({
+                        json: {
+                            lolomo: {
+                                0: {
+                                    0: {
+                                        item: {
+                                            title: 'Video 0'
+                                        }
+                                    },
+                                    1: {
+                                        item: {
+                                            title: 'Video 1'
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    });
+                }).
+                finally(function() {
+                    expect(cache['$size']).to.equal(0);
+                    done();
+                }).
+                subscribe(noOp, done, noOp);
+        });
     });
     describe('_toJSONG', function() {
         it('should get multiple arguments into a single _toJSONG response.', function(done) {
