@@ -3584,6 +3584,7 @@ var getSize = require(92);
 var collectLru = require(53);
 
 var arrayClone = require(85);
+var __version = require(50);
 
 var isArray = Array.isArray;
 var isPathValue = require(104);
@@ -3667,7 +3668,8 @@ IdempotentResponse.prototype.ensureCollect = function ensureCollect(model) {
         var modelCache = modelRoot.cache;
 
         modelRoot.collectionScheduler.schedule(function collectThisPass() {
-            collectLru(modelRoot, modelRoot.expired, getSize(modelCache), model._maxSize, model._collectRatio);
+            collectLru(modelRoot, modelRoot.expired, getSize(modelCache),
+                model._maxSize, model._collectRatio, modelCache[__version]);
         });
     });
 
@@ -3678,7 +3680,7 @@ IdempotentResponse.prototype.ensureCollect = function ensureCollect(model) {
 
 module.exports = IdempotentResponse;
 
-},{"101":101,"102":102,"104":104,"136":136,"231":231,"53":53,"68":68,"85":85,"92":92}],67:[function(require,module,exports){
+},{"101":101,"102":102,"104":104,"136":136,"231":231,"50":50,"53":53,"68":68,"85":85,"92":92}],67:[function(require,module,exports){
 var Rx = require(231);
 var Disposable = Rx.Disposable;
 
@@ -4287,6 +4289,7 @@ var fastCat = require(33).fastCat;
 var collectLru = require(53);
 var getSize = require(92);
 var AssignableDisposable = require(70);
+var __version = require(50);
 
 /**
  * The get request cycle for checking the cache and reporting
@@ -4358,8 +4361,10 @@ module.exports = function getRequestCycle(getResponse, model, results, observer,
 
                 var modelRoot = model._root;
                 var modelCache = modelRoot.cache;
+                var currentVersion = modelCache[__version];
+
                 collectLru(modelRoot, modelRoot.expired, getSize(modelCache),
-                        model._maxSize, model._collectRatio);
+                        model._maxSize, model._collectRatio, currentVersion);
             }
 
         });
@@ -4367,7 +4372,7 @@ module.exports = function getRequestCycle(getResponse, model, results, observer,
     return disposable;
 };
 
-},{"12":12,"33":33,"53":53,"70":70,"72":72,"92":92}],74:[function(require,module,exports){
+},{"12":12,"33":33,"50":50,"53":53,"70":70,"72":72,"92":92}],74:[function(require,module,exports){
 var GetResponse = require(71);
 
 /**
@@ -8017,8 +8022,66 @@ arguments[4][134][0].apply(exports,arguments)
 },{"134":134}],154:[function(require,module,exports){
 arguments[4][135][0].apply(exports,arguments)
 },{"135":135}],155:[function(require,module,exports){
-arguments[4][136][0].apply(exports,arguments)
-},{"136":136,"152":152,"156":156,"161":161}],156:[function(require,module,exports){
+var Tokenizer = require(161);
+var head = require(156);
+var RoutedTokens = require(152);
+
+var parser = function parser(string, extendedRules) {
+    return head(new Tokenizer(string, extendedRules));
+};
+
+module.exports = parser;
+
+// Constructs the paths from paths / pathValues that have strings.
+// If it does not have a string, just moves the value into the return
+// results.
+parser.fromPathsOrPathValues = function(paths, ext) {
+    if (!paths) {
+        return [];
+    }
+
+    var out = [];
+    for (var i = 0, len = paths.length; i < len; i++) {
+
+        // Is the path a string
+        if (typeof paths[i] === 'string') {
+            out[i] = parser(paths[i], ext);
+        }
+
+        // is the path a path value with a string value.
+        else if (typeof paths[i].path === 'string') {
+            out[i] = {
+                path: parser(paths[i].path, ext), value: paths[i].value
+            };
+        }
+
+        // just copy it over.
+        else {
+            out[i] = paths[i];
+        }
+    }
+
+    return out;
+};
+
+// If the argument is a string, this with convert, else just return
+// the path provided.
+parser.fromPath = function(path, ext) {
+    if (!path) {
+        return [];
+    }
+
+    if (typeof path === 'string') {
+        return parser(path, ext);
+    }
+
+    return path;
+};
+
+// Potential routed tokens.
+parser.RoutedTokens = RoutedTokens;
+
+},{"152":152,"156":156,"161":161}],156:[function(require,module,exports){
 arguments[4][137][0].apply(exports,arguments)
 },{"137":137,"153":153,"154":154,"157":157}],157:[function(require,module,exports){
 arguments[4][138][0].apply(exports,arguments)
@@ -8330,13 +8393,14 @@ function merge(config, cache, message, depth, path, fromParent, fromKey) {
     }
 
     // The message at this point should always be defined.
-    if (message.$type || typeOfMessage !== 'object') {
+    // Reached the end of the JSONG message path
+    if (message === null || typeOfMessage !== 'object' || message.$type) {
         fromParent[fromKey] = clone(message);
 
         // NOTE: If we have found a reference at our cloning position
         // and we have resolved our path then add the reference to
         // the unfulfilledRefernces.
-        if (message.$type === $ref) {
+        if (message && message.$type === $ref) {
             var references = config.references;
             references.push({
                 path: cloneArray(requestedPath),
@@ -8351,7 +8415,7 @@ function merge(config, cache, message, depth, path, fromParent, fromKey) {
             var values = config.values;
             values.push({
                 path: cloneArray(requestedPath),
-                value: message.type ? message.value : message
+                value: (message && message.type) ? message.value : message
             });
         }
 
@@ -8371,6 +8435,7 @@ function merge(config, cache, message, depth, path, fromParent, fromKey) {
         // just follow cache, else attempt to follow message.
         var cacheRes = cache[key];
         var messageRes = message[key];
+
         var nextPath = path;
         var nextDepth = depth + 1;
         if (updateRequestedPath) {
@@ -8378,14 +8443,14 @@ function merge(config, cache, message, depth, path, fromParent, fromKey) {
         }
 
         // Cache does not exist but message does.
-        if (!cacheRes) {
+        if (cacheRes === undefined) {
             cacheRes = cache[key] = {};
         }
 
         // TODO: Can we hit a leaf node in the cache when traversing?
 
-        if (messageRes) {
-            var nextIgnoreCount = 0;
+        if (messageRes !== undefined) {
+            var nextIgnoreCount = ignoreCount;
 
             // TODO: Potential performance gain since we know that
             // references are always pathSets of 1, they can be evaluated
@@ -8393,7 +8458,7 @@ function merge(config, cache, message, depth, path, fromParent, fromKey) {
 
             // There is only a need to consider message references since the
             // merge is only for the path that is provided.
-            if (messageRes.$type === $ref && depth < path.length - 1) {
+            if (messageRes && messageRes.$type === $ref && depth < path.length - 1) {
                 nextDepth = 0;
                 nextPath = catAndSlice(messageRes.value, path, depth + 1);
                 cache[key] = clone(messageRes);
@@ -8641,7 +8706,7 @@ function innerPathValueMerge(cache, pathValue) {
 /*eslint-disable*/
 module.exports = {
     callJSONGraphWithouPaths: 'Any JSONG-Graph returned from call must have paths.',
-    innerReferences: 'References with inner references are not allowe.',
+    innerReferences: 'References with inner references are not allowed.',
     unknown: 'Unknown Error',
     routeWithSamePrecedence: 'Two routes cannot have the same precedence or path.',
     circularReference: 'There appears to be a circular reference, maximum reference following exceeded.'
@@ -10355,9 +10420,9 @@ module.exports = function runByPrecedence(pathSet, matches, actionRunner) {
     // Precendence matching
     var sortedMatches = matches.
         sort(function(a, b) {
-            if (a.precedence > b.precedence) {
+            if (a.precedence < b.precedence) {
                 return 1;
-            } else if (a.precedence < b.precedence) {
+            } else if (a.precedence > b.precedence) {
                 return -1;
             }
 
