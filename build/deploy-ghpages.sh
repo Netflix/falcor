@@ -39,10 +39,10 @@ if [ "$TRAVIS_PULL_REQUEST" == "false" ]; then
   git commit -m "Travis build $TRAVIS_BUILD_NUMBER committed dist/"
   git push deployable $TRAVIS_BRANCH
 
-  if [ "$TRAVIS_BRANCH" == "$CURRENT_RELEASE"] then;
-  
+  if [ "$TRAVIS_BRANCH" == "$CURRENT_RELEASE" ]; then
+
     echo -e "Updating gh-pages...\n"
-  
+
     cp -R doc $FALCOR_DOCS_DIR
     cp -R dist $FALCOR_BUILD_DIR
 
