@@ -110,16 +110,12 @@ describe('call', function() {
         var args = [falcor.Model.ref('titlesById[1]')];
 
         var onNext = sinon.spy();
-        var onError = sinon.spy();
 
         model.
             call("genreList[0].titles.push", args).
-            doAction(onNext, onError).
-            subscribe(onNext, onError, function() {
-
-                expect(onError.callCount).to.equal(0);
+            doAction(onNext, noOp, noOp).
+            subscribe(noOp, done, function() {
                 expect(onNext.callCount).to.equal(0);
-
                 done();
             });
     });
