@@ -11,6 +11,7 @@ node_js:
 branches:
     only:
         - master
+        - 0.x
 
 # Run as a docker container
 sudo: false
