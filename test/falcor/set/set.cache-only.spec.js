@@ -6,7 +6,7 @@ var sinon = require('sinon');
 var strip = require('./../../cleanData').stripDerefAndVersionKeys;
 var cacheGenerator = require('./../../CacheGenerator');
 
-describe('Cache Only', function() {
+describe.only('Cache Only', function() {
     describe('toJSON', function() {
         it('should set a value from falcor.', function(done) {
             var model = new Model({
@@ -22,6 +22,55 @@ describe('Cache Only', function() {
                             videos: {
                                 0: {
                                     title: 'V0'
+                                }
+                            }
+                        }
+                    });
+                }).
+                subscribe(noOp, done, done);
+        });
+
+        it.only('should correctly output with many different input types.', function(done) {
+            var model = new Model({
+                cache: cacheGenerator(0, 3)
+            });
+            var onNext = sinon.spy();
+            debugger
+            model.
+                set({
+                    path: ['videos', 0, 'title'],
+                    value: 'V0'
+                }, {
+                    jsonGraph: {
+                        videos: {
+                            1: {
+                                title: 'V1'
+                            }
+                        }
+                    },
+                    paths: [['videos', 1, 'title']]
+                }, {
+                    json: {
+                        videos: {
+                            2: {
+                                title: 'V2'
+                            }
+                        }
+                    }
+                }).
+                doAction(onNext, noOp, function() {
+                    expect(onNext.calledOnce).to.be.ok;
+                    expect(strip(onNext.getCall(0).args[0])).to.deep.equals({
+                        json: {
+                            videos: {
+                                0: {
+                                    title: 'V0'
+                                },
+                                1: {
+                                    title: 'V1'
+                                },
+                                2: {
+                                    title: 'V2'
                                 }
                             }
                         }
