@@ -32,6 +32,7 @@ describe('DataSource.', function() {
                 }
             }).
             doAction(noOp, noOp, function() {
+                debugger
                 expect(onSet.calledOnce).to.be.ok;
 
                 var cleaned = onSet.getCall(0).args[2];
@@ -48,8 +49,7 @@ describe('DataSource.', function() {
                         }
                     },
                     paths: [
-                        ['videos', 444, 'rating'],
-                        ['videos', 1234, 'rating']
+                        ['videos', [444, 1234], 'rating']
                     ]
                 });
             }).
