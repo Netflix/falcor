@@ -7,7 +7,7 @@ var LocalDataSource = require('./../../data/LocalDataSource');
 var Cache = require('./../../data/Cache');
 
 describe('DataSource.', function() {
-    it('should validate args are sent to the dataSource collapsed.', function(done) {
+    it.only('should validate args are sent to the dataSource collapsed.', function(done) {
         var onSet = sinon.spy(function(source, tmpGraph, jsonGraphFromSet) {
             return jsonGraphFromSet;
         });
@@ -48,7 +48,8 @@ describe('DataSource.', function() {
                         }
                     },
                     paths: [
-                        ['videos', [444, 1234], 'rating']
+                        ['videos', 444, 'rating'],
+                        ['videos', 1234, 'rating']
                     ]
                 });
             }).

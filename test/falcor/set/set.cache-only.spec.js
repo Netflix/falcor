@@ -6,7 +6,7 @@ var sinon = require('sinon');
 var strip = require('./../../cleanData').stripDerefAndVersionKeys;
 var cacheGenerator = require('./../../CacheGenerator');
 
-describe.only('Cache Only', function() {
+describe('Cache Only', function() {
     describe('toJSON', function() {
         it('should set a value from falcor.', function(done) {
             var model = new Model({
@@ -30,12 +30,11 @@ describe.only('Cache Only', function() {
                 subscribe(noOp, done, done);
         });
 
-        it.only('should correctly output with many different input types.', function(done) {
+        it('should correctly output with many different input types.', function(done) {
             var model = new Model({
                 cache: cacheGenerator(0, 3)
             });
             var onNext = sinon.spy();
-            debugger
             model.
                 set({
                     path: ['videos', 0, 'title'],
