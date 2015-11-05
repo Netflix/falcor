@@ -29,6 +29,54 @@ describe('Cache Only', function() {
                 }).
                 subscribe(noOp, done, done);
         });
+
+        it('should correctly output with many different input types.', function(done) {
+            var model = new Model({
+                cache: cacheGenerator(0, 3)
+            });
+            var onNext = sinon.spy();
+            model.
+                set({
+                    path: ['videos', 0, 'title'],
+                    value: 'V0'
+                }, {
+                    jsonGraph: {
+                        videos: {
+                            1: {
+                                title: 'V1'
+                            }
+                        }
+                    },
+                    paths: [['videos', 1, 'title']]
+                }, {
+                    json: {
+                        videos: {
+                            2: {
+                                title: 'V2'
+                            }
+                        }
+                    }
+                }).
+                doAction(onNext, noOp, function() {
+                    expect(onNext.calledOnce).to.be.ok;
+                    expect(strip(onNext.getCall(0).args[0])).to.deep.equals({
+                        json: {
+                            videos: {
+                                0: {
+                                    title: 'V0'
+                                },
+                                1: {
+                                    title: 'V1'
+                                },
+                                2: {
+                                    title: 'V2'
+                                }
+                            }
+                        }
+                    });
+                }).
+                subscribe(noOp, done, done);
+        });
     });
     describe('_toJSONG', function() {
         it('should get a value from falcor.', function(done) {
