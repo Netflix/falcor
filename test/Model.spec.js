@@ -7,6 +7,7 @@ var expect = chai.expect;
 var $ref = require('./../lib/types/ref');
 var $error = require('./../lib/types/error');
 var $atom = require('./../lib/types/atom');
+GLOBAL.toObservable = require('./toObs');
 
 describe("Model", function() {
 

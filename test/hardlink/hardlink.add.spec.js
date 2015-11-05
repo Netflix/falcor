@@ -72,7 +72,7 @@ function getTest(query, output) {
     expect(rhs[__refs_length]).to.not.be.ok;
     expect(lhs[__context]).to.not.be.ok;
 
-    return testRunner.get(model, _.cloneDeep(query), output).
+    return toObservable(testRunner.get(model, _.cloneDeep(query), output)).
         do(noOp, noOp, function() {
             expect(lhs[__ref_index]).to.equal(0);
             expect(rhs[__refs_length]).to.equal(1);
@@ -90,7 +90,7 @@ function setTest(query, output) {
     expect(rhs[__refs_length]).to.not.be.ok;
     expect(lhs[__context]).to.not.be.ok;
 
-    return testRunner.set(model, _.cloneDeep(query), output).
+    return toObservable(testRunner.set(model, _.cloneDeep(query), output)).
         do(noOp, noOp, function() {
             expect(lhs[__ref_index]).to.equal(0);
             expect(rhs[__refs_length]).to.equal(1);
