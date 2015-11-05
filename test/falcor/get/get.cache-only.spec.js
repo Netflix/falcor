@@ -56,7 +56,7 @@ describe('Cache Only', function() {
                 then(onNext, onError).
                 then(function() {
                     if (onError.callCount) {
-                        return done(onError.getCall(0).args[0]);
+                        throw onError.getCall(0).args[0];
                     }
 
                     expect(onNext.callCount).to.equal(1);
