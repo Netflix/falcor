@@ -52,7 +52,7 @@ describe("Special Cases", function() {
             ]
         };
 
-        model._setJSONGsAsPathMap(model, [edgeCaseCache]);
+        model._setJSONGs(model, [edgeCaseCache]);
         expect(strip(cache)).to.deep.equal(strip(edgeCaseCache.jsonGraph));
     });
     it("set blows away the cache.", function() {
@@ -94,9 +94,8 @@ describe("Special Cases", function() {
             }
         ];
 
-        var seed = [{}];
         set.forEach(function(s, i) {
-            model._setJSONGsAsPathMap(model, [s], seed);
+            model._setJSONGs(model, [s]);
             if (i === 2) {
                 expect(model._root.cache.lists).to.be.ok;
             }

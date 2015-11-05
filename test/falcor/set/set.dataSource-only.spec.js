@@ -5,6 +5,7 @@ var expect = require('chai').expect;
 var sinon = require('sinon');
 var LocalDataSource = require('./../../data/LocalDataSource');
 var Cache = require('./../../data/Cache');
+var strip = require('./../../cleanData').stripDerefAndVersionKeys;
 
 describe('DataSource.', function() {
     it('should validate args are sent to the dataSource collapsed.', function(done) {
@@ -32,7 +33,6 @@ describe('DataSource.', function() {
                 }
             }).
             doAction(noOp, noOp, function() {
-                debugger
                 expect(onSet.calledOnce).to.be.ok;
 
                 var cleaned = onSet.getCall(0).args[2];
@@ -126,6 +126,71 @@ describe('DataSource.', function() {
                         ['videos', 1234, 'another_prop']
                     ]
                 });
+            }).
+            subscribe(noOp, done, done);
+    });
+
+    it('should report paths progressively.', function(done) {
+        var onSet = function(source, tmpGraph, jsonGraphFromSet) {
+            jsonGraphFromSet.jsonGraph.videos[444].rating = 5;
+            return jsonGraphFromSet;
+        };
+        var dataSource = new LocalDataSource(Cache(), {
+            onSet: onSet
+        });
+        var model = new Model({
+            source: dataSource
+        });
+
+        var count = 0;
+        model.
+            set({
+                json: {
+                    videos: {
+                        1234: {
+                            rating: 5
+                        },
+                        444: {
+                            rating: 3
+                        }
+                    }
+                }
+            }).
+            progressively().
+            doAction(function(x) {
+                if (count === 0) {
+                    expect(strip(x)).to.deep.equals({
+                        json: {
+                            videos: {
+                                1234: {
+                                    rating: 5
+                                },
+                                444: {
+                                    rating: 3
+                                }
+                            }
+                        }
+                    });
+                }
+
+                else {
+                    expect(strip(x)).to.deep.equals({
+                        json: {
+                            videos: {
+                                1234: {
+                                    rating: 5
+                                },
+                                444: {
+                                    rating: 5
+                                }
+                            }
+                        }
+                    });
+                }
+
+                count++;
+            }, noOp, function() {
+                expect(count === 2, 'onNext to be called 2x').to.be.ok;
             }).
             subscribe(noOp, done, done);
     });
