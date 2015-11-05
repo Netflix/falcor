@@ -38,11 +38,10 @@ module.exports = falcor;
 var ModelRoot = require(5);
 var ModelDataSourceAdapter = require(4);
 
-var RequestQueue = require(59);
-var ModelResponse = require(68);
-var SetResponse = require(69);
-var CallResponse = require(65);
-var InvalidateResponse = require(67);
+var RequestQueue = require(57);
+var ModelResponse = require(65);
+var CallResponse = require(63);
+var InvalidateResponse = require(64);
 
 var ASAPScheduler = require(77);
 var TimeoutScheduler = require(79);
@@ -56,7 +55,6 @@ var pathSyntax = require(136);
 
 var getSize = require(92);
 var isObject = require(103);
-var isFunction = require(100);
 var isPrimitive = require(105);
 var isJSONEnvelope = require(101);
 var isJSONGraphEnvelope = require(102);
@@ -69,13 +67,7 @@ var validateInput = require(118);
 var noOp = function() {};
 var getCache = require(17);
 var get = require(22);
-var SET_VALID_INPUT = {
-    pathValue: true,
-    pathSyntax: true,
-    json: true,
-    jsonGraph: true
-};
-var GET_VALID_INPUT = require(76);
+var GET_VALID_INPUT = require(71);
 
 module.exports = Model;
 
@@ -171,7 +163,7 @@ Model.prototype._collectRatio = 0.75;
  * @param {...PathSet} path - the path(s) to retrieve
  * @return {ModelResponse.<JSONEnvelope>} - the requested data as JSON
  */
-Model.prototype.get = require(75);
+Model.prototype.get = require(70);
 
 /**
  * The get method retrieves several {@link Path}s or {@link PathSet}s from a {@link Model}. The get method loads each value into a JSON object and returns in a ModelResponse.
@@ -180,28 +172,20 @@ Model.prototype.get = require(75);
  * @param {Array.<PathSet>} paths - the path(s) to retrieve
  * @return {ModelResponse.<JSONEnvelope>} - the requested data as JSON
  */
-Model.prototype._getWithPaths = require(74);
+Model.prototype._getWithPaths = require(69);
 
 /**
  * Sets the value at one or more places in the JSONGraph model. The set method accepts one or more {@link PathValue}s, each of which is a combination of a location in the document and the value to place there.  In addition to accepting  {@link PathValue}s, the set method also returns the values after the set operation is complete.
  * @function
- * @return {ModelResponse.<JSON>} - an {@link Observable} stream containing the values in the JSONGraph model after the set was attempted
+ * @return {ModelResponse.<JSONEnvelope>} - an {@link Observable} stream containing the values in the JSONGraph model after the set was attempted
  */
-Model.prototype.set = function set() {
-    var out = validateInput(arguments, SET_VALID_INPUT, "set");
-    if (out !== true) {
-        return new ModelResponse(function(o) {
-            o.onError(out);
-        });
-    }
-    return this._set.apply(this, arguments);
-};
+Model.prototype.set = require(73);
 
 /**
  * The preload method retrieves several {@link Path}s or {@link PathSet}s from a {@link Model} and loads them into the Model cache.
  * @function
  * @param {...PathSet} path - the path(s) to retrieve
- * @return {ModelResponse.<Object>} - a ModelResponse that completes when the data has been loaded into the cache.
+ * @return {ModelResponse.<JSONEnvelope>} - a ModelResponse that completes when the data has been loaded into the cache.
  */
 Model.prototype.preload = function preload() {
     var out = validateInput(arguments, GET_VALID_INPUT, "preload");
@@ -222,23 +206,6 @@ Model.prototype.preload = function preload() {
     });
 };
 
-Model.prototype._set = function _set() {
-    var args;
-    var argsIdx = -1;
-    var argsLen = arguments.length;
-    var selector = arguments[argsLen - 1];
-    if (isFunction(selector)) {
-        argsLen = argsLen - 1;
-    } else {
-        selector = void 0;
-    }
-    args = new Array(argsLen);
-    while (++argsIdx < argsLen) {
-        args[argsIdx] = arguments[argsIdx];
-    }
-    return SetResponse.create(this, args, selector);
-};
-
 /**
  * Invokes a function in the JSON Graph.
  * @function
@@ -246,7 +213,7 @@ Model.prototype._set = function _set() {
  * @param {Array.<Object>} args - the arguments to pass to the function
  * @param {Array.<PathSet>} refPaths - the paths to retrieve from the JSON Graph References in the message returned from the function
  * @param {Array.<PathSet>} thisPaths - the paths to retrieve from function's this object after successful function execution
- * @returns {ModelResponse.<JSONEnvelope> - a JSONEnvelope contains the values returned from the function
+ * @return {ModelResponse.<JSONEnvelope> - a JSONEnvelope contains the values returned from the function
  */
 Model.prototype.call = function call() {
     var args;
@@ -280,18 +247,16 @@ Model.prototype.invalidate = function invalidate() {
     var args;
     var argsIdx = -1;
     var argsLen = arguments.length;
-    var selector = arguments[argsLen - 1];
-    args = new Array(argsLen);
+    args = [];
     while (++argsIdx < argsLen) {
         args[argsIdx] = pathSyntax.fromPath(arguments[argsIdx]);
-        if (typeof args[argsIdx] !== "object") {
+        if (!Array.isArray(args[argsIdx])) {
             throw new Error("Invalid argument");
         }
     }
 
     // creates the obs, subscribes and will throw the errors if encountered.
-    InvalidateResponse.
-        create(this, args, selector).
+    (new InvalidateResponse(this, args)).
         subscribe(noOp, function(e) {
             throw e;
         });
@@ -616,27 +581,15 @@ Model.prototype._getValueSync = require(20);
 Model.prototype._getPathValuesAsPathMap = get.getWithPathsAsPathMap;
 Model.prototype._getPathValuesAsJSONG = get.getWithPathsAsJSONGraph;
 
-Model.prototype._setPathValuesAsJSON = require(82);
-Model.prototype._setPathValuesAsJSONG = require(82);
-Model.prototype._setPathValuesAsPathMap = require(82);
-Model.prototype._setPathValuesAsValues = require(82);
-
-Model.prototype._setPathMapsAsJSON = require(81);
-Model.prototype._setPathMapsAsJSONG = require(81);
-Model.prototype._setPathMapsAsPathMap = require(81);
-Model.prototype._setPathMapsAsValues = require(81);
-
-Model.prototype._setJSONGsAsJSON = require(80);
-Model.prototype._setJSONGsAsJSONG = require(80);
-Model.prototype._setJSONGsAsPathMap = require(80);
-Model.prototype._setJSONGsAsValues = require(80);
-
+Model.prototype._setPathValues = require(82);
+Model.prototype._setPathMaps = require(81);
+Model.prototype._setJSONGs = require(80);
 Model.prototype._setCache = require(81);
 
-Model.prototype._invalidatePathValuesAsJSON = require(52);
-Model.prototype._invalidatePathMapsAsJSON = require(51);
+Model.prototype._invalidatePathValues = require(52);
+Model.prototype._invalidatePathMaps = require(51);
 
-},{"100":100,"101":101,"102":102,"103":103,"105":105,"118":118,"132":132,"136":136,"16":16,"17":17,"19":19,"20":20,"21":21,"22":22,"27":27,"4":4,"5":5,"51":51,"52":52,"53":53,"59":59,"6":6,"65":65,"67":67,"68":68,"69":69,"7":7,"74":74,"75":75,"76":76,"77":77,"78":78,"79":79,"80":80,"81":81,"82":82,"83":83,"84":84,"85":85,"88":88,"92":92}],4:[function(require,module,exports){
+},{"101":101,"102":102,"103":103,"105":105,"118":118,"132":132,"136":136,"16":16,"17":17,"19":19,"20":20,"21":21,"22":22,"27":27,"4":4,"5":5,"51":51,"52":52,"53":53,"57":57,"6":6,"63":63,"64":64,"65":65,"69":69,"7":7,"70":70,"71":71,"73":73,"77":77,"78":78,"79":79,"80":80,"81":81,"82":82,"83":83,"84":84,"85":85,"88":88,"92":92}],4:[function(require,module,exports){
 function ModelDataSourceAdapter(model) {
     this._model = model._materialize().boxValues().treatErrorsAsValues();
 }
@@ -1222,7 +1175,7 @@ module.exports = function getCachePosition(model, path) {
 };
 
 },{"13":13}],19:[function(require,module,exports){
-var ModelResponse = require(68);
+var ModelResponse = require(65);
 var pathSyntax = require(136);
 
 module.exports = function getValue(path) {
@@ -1258,7 +1211,7 @@ module.exports = function getValue(path) {
     });
 };
 
-},{"136":136,"68":68}],20:[function(require,module,exports){
+},{"136":136,"65":65}],20:[function(require,module,exports){
 var followReference = require(14);
 var clone = require(28);
 var isExpired = require(30);
@@ -2566,10 +2519,10 @@ module.exports = function lruSplice(root, node) {
 };
 
 },{"37":37,"41":41,"45":45,"49":49}],56:[function(require,module,exports){
-var complement = require(63);
-var flushGetRequest = require(64);
+var complement = require(59);
+var flushGetRequest = require(60);
 var REQUEST_ID = 0;
-var GetRequestType = require(61).GetRequest;
+var GetRequestType = require(58).GetRequest;
 var setJSONGraphs = require(80);
 var setPathValues = require(82);
 var $error = require(121);
@@ -2796,339 +2749,11 @@ function flattenRequestedPaths(requested) {
 
 module.exports = GetRequestV2;
 
-},{"121":121,"61":61,"63":63,"64":64,"80":80,"82":82}],57:[function(require,module,exports){
-var Rx = require(231);
-var Observer = Rx.Observer;
-var Observable = Rx.Observable;
-var Disposable = Rx.Disposable;
-var SerialDisposable = Rx.SerialDisposable;
-var CompositeDisposable = Rx.CompositeDisposable;
-var InvalidSourceError = require(11);
-
-var falcorPathUtils = require(145);
-var iterateKeySet = falcorPathUtils.iterateKeySet;
-
-function Request() {
-    this.length = 0;
-    this.pending = false;
-    this.pathmaps = [];
-    Observable.call(this, this._subscribe);
-}
-
-Request.create = function create(queue, model, index) {
-    var request = new this();
-    request.queue = queue;
-    request.model = model;
-    request.index = index;
-    return request;
-};
-
-Request.prototype = Object.create(Observable.prototype);
-
-Request.prototype.constructor = Request;
-
-Request.prototype.insertPath = function insertPathIntoRequest(path, union, parentArg, indexArg, countArg) {
-
-    var index = indexArg || 0;
-    var count = countArg || path.length - 1;
-    var parent = parentArg || this.pathmaps[count + 1] || (this.pathmaps[count + 1] = Object.create(null));
-
-    if (parent === void 0 || parent === null) {
-        return false;
-    }
-
-    var key, node;
-    var keySet = path[index];
-    var iteratorNote = {};
-    key = iterateKeySet(keySet, iteratorNote);
-
-    // Determines if the key needs to go through permutation or not.
-    // All object based keys require this.
-
-    do {
-        node = parent[key];
-        if (index < count) {
-            if (node == null) {
-                if (union) {
-                    return false;
-                }
-                node = parent[key] = Object.create(null);
-            }
-            if (this.insertPath(path, union, node, index + 1, count) === false) {
-                return false;
-            }
-        } else {
-            parent[key] = (node || 0) + 1;
-            this.length += 1;
-        }
-
-        if (!iteratorNote.done) {
-            key = iterateKeySet(keySet, iteratorNote);
-        }
-    } while (!iteratorNote.done);
-
-    return true;
-};
-
-/* eslint-disable guard-for-in */
-Request.prototype.removePath = function removePathFromRequest(path, parentArg, indexArg, countArg) {
-
-    var index = indexArg || 0;
-    var count = countArg || path.length - 1;
-    var parent = parentArg || this.pathmaps[count + 1];
-
-    if (parent === void 0 || parent === null) {
-        return true;
-    }
-
-    var key, node, deleted = 0;
-    var keySet = path[index];
-    var iteratorNote = {};
-
-    key = iterateKeySet(keySet, iteratorNote);
-    do {
-        node = parent[key];
-        if (node === void 0 || node === null) {
-            continue;
-        } else if (index < count) {
-            deleted += this.removePath(path, node, index + 1, count);
-            var emptyNodeKey = void 0;
-            for (emptyNodeKey in node) {
-                break;
-            }
-            if (emptyNodeKey === void 0) {
-                delete parent[key];
-            }
-        } else {
-            node = parent[key] = (node || 1) - 1;
-            if (node === 0) {
-                delete parent[key];
-            }
-            deleted += 1;
-            this.length -= 1;
-        }
-
-        if (!iteratorNote.done) {
-            key = iterateKeySet(keySet, iteratorNote);
-        }
-    } while (!iteratorNote.done);
-
-    return deleted;
-};
-/* eslint-enable */
-
-Request.prototype.getSourceObserver = function getSourceObserver(observer) {
-    var request = this;
-    return Observer.create(
-        function onNext(envelope) {
-            envelope.jsonGraph = envelope.jsonGraph ||
-                envelope.jsong ||
-                envelope.values ||
-                envelope.value;
-            envelope.index = request.index;
-            observer.onNext(envelope);
-        },
-        function onError(e) {
-            observer.onError(e);
-        },
-        function onCompleted() {
-            observer.onCompleted();
-        });
-};
-
-Request.prototype._subscribe = function _subscribe(observer) {
-
-    var request = this;
-    var queue = this.queue;
-
-    request.pending = true;
-
-    var isDisposed = false;
-    var sourceSubscription = new SerialDisposable();
-    var queueDisposable = Disposable.create(function() {
-        if (!isDisposed) {
-            isDisposed = true;
-            if (queue) {
-                queue._remove(request);
-            }
-        }
-    });
-
-    var disposables = new CompositeDisposable(sourceSubscription, queueDisposable);
-
-    try {
-        sourceSubscription.setDisposable(
-            this.model._source[this.method](this.getSourceArgs())
-            .subscribe(this.getSourceObserver(observer)));
-    } catch (e) {
-
-        // We need a way to communicate out to the rest of the world that
-        // this error needs to continue its propagation.
-        throw new InvalidSourceError(e);
-    }
-
-    return disposables;
-};
-
-module.exports = Request;
-
-},{"11":11,"145":145,"231":231}],58:[function(require,module,exports){
-
-var SetRequest = require(62);
-
-var prefix = require(44);
-var getType = require(94);
-var isObject = require(103);
-var falcorPathUtils = require(145);
-
-/* eslint-disable no-labels block-scoped-var */
-function RequestQueue(model, scheduler) {
-    this.total = 0;
-    this.model = model;
-    this.requests = [];
-    this.scheduler = scheduler;
-}
-
-RequestQueue.prototype.set = function setRequest(jsonGraphEnvelope) {
-    jsonGraphEnvelope.paths = falcorPathUtils.collapse(jsonGraphEnvelope.paths);
-    return SetRequest.create(this.model, jsonGraphEnvelope);
-};
-
-RequestQueue.prototype._remove = function removeRequest(request) {
-    var requests = this.requests;
-    var index = requests.indexOf(request);
-    if (index !== -1) {
-        requests.splice(index, 1);
-    }
-};
-
-RequestQueue.prototype.distributePaths = function distributePathsAcrossRequests(paths, requests, RequestType) {
-
-    var model = this.model;
-    var pathsIndex = -1;
-    var pathsCount = paths.length;
-
-    var requestIndex = -1;
-    var requestCount = requests.length;
-    var participatingRequests = [];
-    var pendingRequest;
-    var request;
-
-    insertPath: while (++pathsIndex < pathsCount) {
-
-        var path = paths[pathsIndex];
-
-        requestIndex = -1;
-
-        while (++requestIndex < requestCount) {
-            request = requests[requestIndex];
-            if (request.insertPath(path, request.pending)) {
-                participatingRequests[requestIndex] = request;
-                continue insertPath;
-            }
-        }
-
-        if (!pendingRequest) {
-            pendingRequest = RequestType.create(this, model, this.total++);
-            requests[requestIndex] = pendingRequest;
-            participatingRequests[requestCount++] = pendingRequest;
-        }
-
-        pendingRequest.insertPath(path, false);
-    }
-
-    var pathRequests = [];
-    var pathRequestsIndex = -1;
-
-    requestIndex = -1;
-
-    while (++requestIndex < requestCount) {
-        request = participatingRequests[requestIndex];
-        if (request != null) {
-            pathRequests[++pathRequestsIndex] = request;
-        }
-    }
-
-    return pathRequests;
-};
-
-RequestQueue.prototype.mergeJSONGraphs = function mergeJSONGraphs(aggregate, response) {
-
-    var depth = 0;
-    var contexts = [];
-    var messages = [];
-    var keystack = [];
-    var latestIndex = aggregate.index;
-    var responseIndex = response.index;
-
-    aggregate.index = Math.max(latestIndex, responseIndex);
-
-    contexts[-1] = aggregate.jsonGraph || {};
-    messages[-1] = response.jsonGraph || {};
-
-    recursing: while (depth > -1) {
-
-        var context = contexts[depth - 1];
-        var message = messages[depth - 1];
-        var keys = keystack[depth - 1] || (keystack[depth - 1] = Object.keys(message));
-
-        while (keys.length > 0) {
-
-            var key = keys.pop();
-
-            if (key[0] === prefix) {
-                continue;
-            }
-
-            if (context.hasOwnProperty(key)) {
-                var node = context[key];
-                var nodeType = getType(node);
-                var messageNode = message[key];
-                var messageType = getType(messageNode);
-                if (isObject(node) && isObject(messageNode) && !nodeType && !messageType) {
-                    contexts[depth] = node;
-                    messages[depth] = messageNode;
-                    depth += 1;
-                    continue recursing;
-                } else if (responseIndex > latestIndex) {
-                    context[key] = messageNode;
-                }
-            } else {
-                context[key] = message[key];
-            }
-        }
-
-        depth -= 1;
-    }
-
-    return aggregate;
-};
-/* eslint-enable */
-
-module.exports = RequestQueue;
-
-},{"103":103,"145":145,"44":44,"62":62,"94":94}],59:[function(require,module,exports){
-var RequestQueue = require(58);
-var RequestQueueV2 = require(60);
-
-function RequestQueueRx(model, scheduler) {
-    this.model = model;
-    this.scheduler = scheduler;
-    this.requests = this._requests = [];
-}
-
-// RX MONKEY PATCH
-RequestQueueRx.prototype.get = RequestQueueV2.prototype.get;
-RequestQueueRx.prototype.removeRequest = RequestQueueV2.prototype.removeRequest;
-
-RequestQueueRx.prototype.set = RequestQueue.prototype.set;
-RequestQueueRx.prototype.call = RequestQueue.prototype.call;
-
-module.exports = RequestQueueRx;
-
-},{"58":58,"60":60}],60:[function(require,module,exports){
-var RequestTypes = require(61);
+},{"121":121,"58":58,"59":59,"60":60,"80":80,"82":82}],57:[function(require,module,exports){
+var RequestTypes = require(58);
+var sendSetRequest = require(61);
 var GetRequest = require(56);
+var falcorPathUtils = require(145);
 
 /**
  * The request queue is responsible for queuing the operations to
@@ -3149,6 +2774,18 @@ RequestQueueV2.prototype = {
      */
     setScheduler: function(scheduler) {
         this.scheduler = scheduler;
+    },
+
+    /**
+     * performs a set against the dataSource.  Sets, though are not batched
+     * currently could be batched potentially in the future.  Since no batching
+     * is required the setRequest action is simplified significantly.
+     *
+     * @param {JSONGraphEnvelope) jsonGraph -
+     */
+    set: function(jsonGraph, cb) {
+        jsonGraph.paths = falcorPathUtils.collapse(jsonGraph.paths);
+        return sendSetRequest(jsonGraph, this.model, cb);
     },
 
     /**
@@ -3265,99 +2902,12 @@ RequestQueueV2.prototype = {
 
 module.exports = RequestQueueV2;
 
-},{"56":56,"61":61}],61:[function(require,module,exports){
+},{"145":145,"56":56,"58":58,"61":61}],58:[function(require,module,exports){
 module.exports = {
     GetRequest: "GET"
 };
 
-},{}],62:[function(require,module,exports){
-var Rx = require(231);
-var Observer = Rx.Observer;
-
-var Request = require(57);
-
-var arrayMap = require(87);
-
-var setJSONGraphs = require(80);
-var setPathValues = require(82);
-
-var emptyArray = new Array(0);
-
-function SetRequest() {
-    Request.call(this);
-}
-
-SetRequest.create = function create(model, jsonGraphEnvelope) {
-    var request = new SetRequest();
-    request.model = model;
-    request.jsonGraphEnvelope = jsonGraphEnvelope;
-    return request;
-};
-
-SetRequest.prototype = Object.create(Request.prototype);
-SetRequest.prototype.constructor = SetRequest;
-
-SetRequest.prototype.method = "set";
-SetRequest.prototype.insertPath = function() {
-    return false;
-};
-SetRequest.prototype.removePath = function() {
-    return 0;
-};
-
-SetRequest.prototype.getSourceArgs = function getSourceArgs() {
-    return this.jsonGraphEnvelope;
-};
-
-SetRequest.prototype.getSourceObserver = function getSourceObserver(observer) {
-
-    var model = this.model;
-    var bound = model._path;
-    var paths = this.jsonGraphEnvelope.paths;
-    var modelRoot = model._root;
-    var errorSelector = modelRoot.errorSelector;
-    var comparator = modelRoot.comparator;
-
-    return Request.prototype.getSourceObserver.call(this, Observer.create(
-        function onNext(jsonGraphEnvelope) {
-
-            model._path = emptyArray;
-
-            var successfulPaths = setJSONGraphs(model, [{
-                paths: paths,
-                jsonGraph: jsonGraphEnvelope.jsonGraph
-            }], null, errorSelector, comparator);
-
-            jsonGraphEnvelope.paths = successfulPaths[1];
-
-            model._path = bound;
-
-            observer.onNext(jsonGraphEnvelope);
-        },
-        function onError(error) {
-
-            model._path = emptyArray;
-
-            setPathValues(model, arrayMap(paths, function(path) {
-                return {
-                    path: path,
-                    value: error
-                };
-            }), null, errorSelector, comparator);
-
-            model._path = bound;
-
-            observer.onError(error);
-        },
-        function onCompleted() {
-            observer.onCompleted();
-        }
-    ));
-};
-
-module.exports = SetRequest;
-
-},{"231":231,"57":57,"80":80,"82":82,"87":87}],63:[function(require,module,exports){
+},{}],59:[function(require,module,exports){
 var hasIntersection = require(145).hasIntersection;
 var arraySlice = require(88);
 
@@ -3409,7 +2959,7 @@ module.exports = function complement(requested, optimized, tree) {
     return [requestedIntersection, optimizedComplement, requestedComplement ];
 };
 
-},{"145":145,"88":88}],64:[function(require,module,exports){
+},{"145":145,"88":88}],60:[function(require,module,exports){
 var pathUtils = require(145);
 var toTree = pathUtils.toTree;
 var toPaths = pathUtils.toPaths;
@@ -3490,8 +3040,130 @@ module.exports = function flushGetRequest(request, listOfPaths, callback) {
 };
 
 
-},{"145":145}],65:[function(require,module,exports){
-var ModelResponse = require(68);
+},{"145":145}],61:[function(require,module,exports){
+var arrayMap = require(87);
+var setJSONGraphs = require(80);
+var setPathValues = require(82);
+var InvalidSourceError = require(11);
+
+var emptyArray = [];
+var emptyDisposable = {dispose: function() {}};
+
+/**
+ * A set request is not an object like GetRequest.  It simply only needs to
+ * close over a couple values and its never batched together (at least not now).
+ *
+ * @private
+ * @param {JSONGraphEnvelope} jsonGraph -
+ * @param {Model} model -
+ * @param {Function} callback -
+ */
+var sendSetRequest = function(originalJsonGraph, model, callback) {
+    var paths = originalJsonGraph.paths;
+    var modelRoot = model._root;
+    var errorSelector = modelRoot.errorSelector;
+    var comparator = modelRoot.comparator;
+    var boundPath = model._path;
+    var resultingJsonGraphEnvelope;
+
+    // This is analogous to GetRequest _merge / flushGetRequest
+    // SetRequests are just considerably simplier.
+    try {
+        var setObservable = model._source.
+            set(originalJsonGraph);
+    } catch (e) {
+        callback(new InvalidSourceError());
+        return emptyDisposable;
+    }
+
+    var disposable = setObservable.
+        subscribe(function onNext(jsonGraphEnvelope) {
+            // When disposed, no data is inserted into.  This can sync resolve
+            // and if thats the case then its undefined.
+            if (disposable && disposable.disposed) {
+                return;
+            }
+
+            // onNext will insert all data into the model then save the json
+            // envelope from the incoming result.
+            model._path = emptyArray;
+
+            var successfulPaths = setJSONGraphs(model, [{
+                paths: paths,
+                jsonGraph: jsonGraphEnvelope.jsonGraph
+            }], null, errorSelector, comparator);
+
+            jsonGraphEnvelope.paths = successfulPaths[1];
+
+            model._path = boundPath;
+            resultingJsonGraphEnvelope = jsonGraphEnvelope;
+        }, function onError(dataSourceError) {
+            if (disposable && disposable.disposed) {
+                return;
+            }
+            model._path = emptyArray;
+
+            setPathValues(model, arrayMap(paths, function(path) {
+                return {
+                    path: path,
+                    value: dataSourceError
+                };
+            }), null, errorSelector, comparator);
+
+            model._path = boundPath;
+
+            callback(dataSourceError);
+        }, function onCompleted() {
+            callback(null, resultingJsonGraphEnvelope);
+        });
+
+    return disposable;
+};
+
+module.exports = sendSetRequest;
+
+},{"11":11,"80":80,"82":82,"87":87}],62:[function(require,module,exports){
+/**
+ * Will allow for state tracking of the current disposable.  Also fulfills the
+ * disposable interface.
+ * @private
+ */
+var AssignableDisposable = function AssignableDisposable(disosableCallback) {
+    this.disposed = false;
+    this.currentDisposable = disosableCallback;
+};
+
+
+AssignableDisposable.prototype = {
+
+    /**
+     * Disposes of the current disposable.  This would be the getRequestCycle
+     * disposable.
+     */
+    dispose: function dispose() {
+        if (this.disposed || !this.currentDisposable) {
+            return;
+        }
+        this.disposed = true;
+
+        // If the current disposable fulfills the disposable interface or just
+        // a disposable function.
+        var currentDisposable = this.currentDisposable;
+        if (currentDisposable.dispose) {
+            currentDisposable.dispose();
+        }
+
+        else {
+            currentDisposable();
+        }
+    }
+};
+
+
+module.exports = AssignableDisposable;
+
+},{}],63:[function(require,module,exports){
+var ModelResponse = require(65);
 var InvalidSourceError = require(11);
 
 var pathSyntax = require(136);
@@ -3507,13 +3179,10 @@ function CallResponse(model, callPath, args, suffix, paths) {
         this.suffix = suffix.map(pathSyntax.fromPath);
     }
     this.model = model;
-    this._subscribe = subscribeToResponse;
 }
 
-CallResponse.create = ModelResponse.create;
-CallResponse.prototype.subscribe = ModelResponse.prototype.subscribe;
-
-function subscribeToResponse(observer) {
+CallResponse.prototype = Object.create(ModelResponse.prototype);
+CallResponse.prototype._subscribe = function _subscribe(observer) {
     var callPath = this.callPath;
     var callArgs = this.args;
     var suffixes = this.suffix;
@@ -3568,53 +3237,25 @@ function subscribeToResponse(observer) {
                 });
         });
     /*eslint-enable consistent-return*/
-}
+};
 
 module.exports = CallResponse;
 
-},{"11":11,"136":136,"68":68}],66:[function(require,module,exports){
+},{"11":11,"136":136,"65":65}],64:[function(require,module,exports){
 var Rx = require(231);
-var Observable = Rx.Observable;
-
-var ModelResponse = require(68);
-
-var pathSyntax = require(136);
-
-var getSize = require(92);
-var collectLru = require(53);
-
-var arrayClone = require(85);
-var __version = require(50);
-
+var Disposable = Rx.Disposable;
 var isArray = Array.isArray;
+var ModelResponse = require(65);
 var isPathValue = require(104);
 var isJSONEnvelope = require(101);
-var isJSONGraphEnvelope = require(102);
 
-function IdempotentResponse(subscribe) {
-    Observable.call(this, subscribe);
-}
-
-IdempotentResponse.create = ModelResponse.create;
-
-IdempotentResponse.prototype = Object.create(Observable.prototype);
-IdempotentResponse.prototype.constructor = IdempotentResponse;
-
-IdempotentResponse.prototype.subscribeCount = 0;
-IdempotentResponse.prototype.subscribeLimit = 10;
-
-IdempotentResponse.prototype.initialize = function initializeResponse() {
-
-    var model = this.model;
-    var outputFormat = this.outputFormat || "AsPathMap";
-    var isProgressive = this.isProgressive;
-    var values = [{}];
+function InvalidateResponse(model, args) {
+    // TODO: This should be removed.  There should only be 1 type of arguments
+    // coming in, but we have strayed from documentation.
+    this._model = model;
 
     var groups = [];
-    var args = this.args;
-
     var group, groupType;
-
     var argIndex = -1;
     var argCount = args.length;
 
@@ -3622,17 +3263,16 @@ IdempotentResponse.prototype.initialize = function initializeResponse() {
     while (++argIndex < argCount) {
         var arg = args[argIndex];
         var argType;
-        if (isArray(arg) || typeof arg === "string") {
-            arg = pathSyntax.fromPath(arg);
+        if (isArray(arg)) {
             argType = "PathValues";
         } else if (isPathValue(arg)) {
-            arg.path = pathSyntax.fromPath(arg.path);
             argType = "PathValues";
-        } else if (isJSONGraphEnvelope(arg)) {
-            argType = "JSONGs";
         } else if (isJSONEnvelope(arg)) {
             argType = "PathMaps";
+        } else {
+            throw new Error("Invalid Input");
         }
+
         if (groupType !== argType) {
             groupType = argType;
             group = {
@@ -3640,103 +3280,46 @@ IdempotentResponse.prototype.initialize = function initializeResponse() {
                 arguments: []
             };
             groups.push(group);
-            group.values = values;
         }
 
         group.arguments.push(arg);
     }
 
-    this.boundPath = arrayClone(model._path);
-    this.groups = groups;
-    this.outputFormat = outputFormat;
-    this.isProgressive = isProgressive;
-    this.isCompleted = false;
-    this.isMaster = model._source == null;
-    this.values = values;
-
-    return this;
-};
-
-IdempotentResponse.prototype.invokeSourceRequest = function invokeSourceRequest(model) {
-    return this;
-};
-
-IdempotentResponse.prototype.ensureCollect = function ensureCollect(model) {
-    var ensured = this.finally(function ensureCollect() {
-
-        var modelRoot = model._root;
-        var modelCache = modelRoot.cache;
-
-        modelRoot.collectionScheduler.schedule(function collectThisPass() {
-            collectLru(modelRoot, modelRoot.expired, getSize(modelCache),
-                model._maxSize, model._collectRatio, modelCache[__version]);
-        });
-    });
-
-    return new this.constructor(function(observer) {
-        return ensured.subscribe(observer);
-    });
-};
-
-module.exports = IdempotentResponse;
-
-},{"101":101,"102":102,"104":104,"136":136,"231":231,"50":50,"53":53,"68":68,"85":85,"92":92}],67:[function(require,module,exports){
-var Rx = require(231);
-var Disposable = Rx.Disposable;
-
-var IdempotentResponse = require(66);
-
-function InvalidateResponse(subscribe) {
-    IdempotentResponse.call(this, subscribe || subscribeToInvalidateResponse);
+    this._groups = groups;
 }
 
-InvalidateResponse.create = IdempotentResponse.create;
+InvalidateResponse.prototype = Object.create(ModelResponse.prototype);
+InvalidateResponse.prototype.progressively = function progressively() {
+    return this;
+};
+InvalidateResponse.prototype._toJSONG = function _toJSONG() {
+    return this;
+};
 
-InvalidateResponse.prototype = Object.create(IdempotentResponse.prototype);
-InvalidateResponse.prototype.method = "invalidate";
-InvalidateResponse.prototype.constructor = InvalidateResponse;
+InvalidateResponse.prototype._subscribe = function _subscribe(observer) {
 
-function subscribeToInvalidateResponse(observer) {
-
-    var model = this.model;
-    var method = this.method;
-
-    var groups = this.groups;
-    var groupIndex = -1;
-    var groupCount = groups.length;
-
-    while (++groupIndex < groupCount) {
-
-        var group = groups[groupIndex];
+    var model = this._model;
+    this._groups.forEach(function(group) {
         var inputType = group.inputType;
         var methodArgs = group.arguments;
-
-        if (methodArgs.length > 0) {
-            var operationName = "_" + method + inputType + "AsJSON";
-            var operationFunc = model[operationName];
-            operationFunc(model, methodArgs);
-        }
-    }
-
+        var operationName = "_invalidate" + inputType;
+        var operationFunc = model[operationName];
+        operationFunc(model, methodArgs);
+    });
     observer.onCompleted();
 
     return Disposable.empty;
-}
+};
 
 module.exports = InvalidateResponse;
 
-},{"231":231,"66":66}],68:[function(require,module,exports){
+},{"101":101,"104":104,"231":231,"65":65}],65:[function(require,module,exports){
 var falcor = require(35);
 
 var Rx = require(231) && require(229);
 var Observable = Rx.Observable;
 
-var arraySlice = require(88);
-
 var noop = require(108);
-
-var jsongMixin = { outputFormat: { value: "AsJSONG" } };
-var progressiveMixin = { isProgressive: { value: true } };
 
 /**
  * A ModelResponse is a container for the results of a get, set, or call operation performed on a Model. The ModelResponse provides methods which can be used to specify the output format of the data retrieved from a Model, as well as how that data is delivered.
@@ -3747,28 +3330,7 @@ function ModelResponse(subscribe) {
     this._subscribe = subscribe;
 }
 
-ModelResponse.create = function create(model, args) {
-    var response = new ModelResponse(subscribeToResponse);
-    // TODO: make these private
-    response.args = args;
-    response.type = this;
-    response.model = model;
-    return response;
-};
-
 ModelResponse.prototype = Object.create(Observable.prototype);
-
-ModelResponse.prototype.constructor = ModelResponse;
-
-ModelResponse.prototype._mixin = function mixin() {
-    var self = this;
-    var mixins = arraySlice(arguments);
-    return new self.constructor(function(observer) {
-        return self.subscribe(mixins.reduce(function(proto, mixin2) {
-            return Object.create(proto, mixin2);
-        }, observer));
-    });
-};
 
 /**
  * Converts the data format of the data in a JSONGraph Model response to a stream of path values.
@@ -3800,7 +3362,7 @@ model.
  */
 
 ModelResponse.prototype._toJSONG = function toJSONG() {
-    return this._mixin(jsongMixin);
+    return this;
 };
 
 /**
@@ -3861,13 +3423,17 @@ model.
 // }
 */
 ModelResponse.prototype.progressively = function progressively() {
-    return this._mixin(progressiveMixin);
+    return this;
 };
 
 ModelResponse.prototype.subscribe = function subscribe(a, b, c) {
     var observer = a;
     if (!observer || typeof observer !== "object") {
-        observer = { onNext: a || noop, onError: b || noop, onCompleted: c || noop };
+        observer = {
+            onNext: a || noop,
+            onError: b || noop,
+            onCompleted: c || noop
+        };
     }
     var subscription = this._subscribe(observer);
     switch (typeof subscription) {
@@ -3905,233 +3471,13 @@ ModelResponse.prototype.then = function then(onNext, onError) {
     }).then(onNext, onError);
 };
 
-function subscribeToResponse(observer) {
-
-    var model = this.model;
-    var response = new this.type();
-
-    response.model = model;
-    response.args = this.args;
-    response.outputFormat = observer.outputFormat || "AsPathMap";
-    response.isProgressive = observer.isProgressive || false;
-    response.subscribeCount = 0;
-    response.subscribeLimit = observer.retryLimit || 10;
-
-    return (response
-        .initialize()
-        .invokeSourceRequest(model)
-        .ensureCollect(model)
-        .subscribe(observer));
-}
-
 module.exports = ModelResponse;
 
-},{"108":108,"229":229,"231":231,"35":35,"88":88}],69:[function(require,module,exports){
-var Rx = require(231);
-var Observable = Rx.Observable;
-var Disposable = Rx.Disposable;
-var GetResponse = require(71);
-var IdempotentResponse = require(66);
-var InvalidSourceError = require(11);
-
-var arrayFlatMap = require(86);
-var emptyArray = new Array(0);
-
-function SetResponse(subscribe) {
-    IdempotentResponse.call(this, subscribe || subscribeToSetResponse);
-}
-
-SetResponse.create = IdempotentResponse.create;
-
-SetResponse.prototype = Object.create(IdempotentResponse.prototype);
-SetResponse.prototype.method = "set";
-SetResponse.prototype.constructor = SetResponse;
-
-SetResponse.prototype.invokeSourceRequest = function invokeSourceRequest(model) {
-
-    var source = this;
-    var caught = this.catch(function setJSONGraph(results) {
-
-        var requestObs;
-        if (results && results.invokeSourceRequest === true) {
-
-            var envelope = {};
-            var boundPath = model._path;
-            var optimizedPaths = results.optimizedPaths;
-
-            model._path = emptyArray;
-            model._getPathValuesAsJSONG(model._materialize().withoutDataSource(), optimizedPaths, [envelope]);
-            model._path = boundPath;
-            requestObs = model.
-                _request.set(envelope).
-                do(
-                    function setResponseEnvelope(envelope2) {
-                        source.isCompleted = optimizedPaths.length === envelope2.paths.length;
-                    },
-                    function setResponseError() {
-                        source.isCompleted = true;
-                    }
-                ).
-                materialize().
-                flatMap(function(notification) {
-                    if (notification.kind === "C") {
-                        return Observable.empty();
-                    }
-                    if (notification.kind === "E") {
-                        var ex = notification.exception;
-                        if (InvalidSourceError.is(ex)) {
-                            return Observable.throw(notification.exception);
-                        }
-                    }
-                    return caught;
-                });
-        }
-        else {
-            requestObs = Observable.throw(results);
-        }
-
-        return requestObs;
-    });
-
-    return new this.constructor(function(observer) {
-        return caught.subscribe(observer);
-    });
-};
-
-function subscribeToSetResponse(observer) {
-
-    if (this.isCompleted) {
-        return subscribeToFollowupGet.call(this, observer);
-    }
-
-    return subscribeToLocalSet.call(this, observer);
-}
-
-function subscribeToLocalSet(observer) {
-
-    if (this.subscribeCount++ > this.subscribeLimit) {
-        observer.onError("Loop kill switch thrown.");
-        return Disposable.empty;
-    }
-
-    var requestedPaths = [];
-    var optimizedPaths = [];
-    var model = this.model;
-    var isMaster = this.isMaster;
-    var modelRoot = model._root;
-    var outputFormat = this.outputFormat;
-    var errorSelector = modelRoot.errorSelector;
-
-    var method = this.method;
-    var groups = this.groups;
-    var groupIndex = -1;
-    var groupCount = groups.length;
-
-    while (++groupIndex < groupCount) {
-
-        var group = groups[groupIndex];
-        var inputType = group.inputType;
-        var methodArgs = group.arguments;
-
-        if (methodArgs.length > 0) {
-
-            var operationName = "_" + method + inputType + outputFormat;
-            var operationFunc = model[operationName];
-            var successfulPaths = operationFunc(model, methodArgs, null, errorSelector);
-
-            optimizedPaths.push.apply(optimizedPaths, successfulPaths[1]);
-
-            if (inputType === "PathValues") {
-                requestedPaths.push.apply(requestedPaths, methodArgs.map(pluckPath));
-            } else if (inputType === "JSONGs") {
-                requestedPaths.push.apply(requestedPaths, arrayFlatMap(methodArgs, pluckEnvelopePaths));
-            } else {
-                requestedPaths.push.apply(requestedPaths, successfulPaths[0]);
-            }
-        }
-    }
-
-    this.requestedPaths = requestedPaths;
-
-    if (isMaster) {
-        this.isCompleted = true;
-        return subscribeToFollowupGet.call(this, observer);
-    } else {
-        observer.onError({
-            method: method,
-            optimizedPaths: optimizedPaths,
-            invokeSourceRequest: true
-        });
-    }
-}
-
-function subscribeToFollowupGet(observer) {
-    var response = new GetResponse(this.model, this.requestedPaths);
-    if (this.outputFormat === "AsJSONG") {
-        response = response._toJSONG();
-    }
-    if (this.isProgressive) {
-        response = response.progressively();
-    }
-    return response.subscribe(observer);
-}
-
-function pluckPath(pathValue) {
-    return pathValue.path;
-}
-
-function pluckEnvelopePaths(jsonGraphEnvelope) {
-    return jsonGraphEnvelope.paths;
-}
-
-module.exports = SetResponse;
-
-},{"11":11,"231":231,"66":66,"71":71,"86":86}],70:[function(require,module,exports){
-/**
- * Will allow for state tracking of the current disposable.  Also fulfills the
- * disposable interface.
- * @private
- */
-var AssignableDisposable = function AssignableDisposable(disosableCallback) {
-    this.disposed = false;
-    this.currentDisposable = disosableCallback;
-};
-
-
-AssignableDisposable.prototype = {
-
-    /**
-     * Disposes of the current disposable.  This would be the getRequestCycle
-     * disposable.
-     */
-    dispose: function dispose() {
-        if (this.disposed || !this.currentDisposable) {
-            return;
-        }
-        this.disposed = true;
-
-        // If the current disposable fulfills the disposable interface or just
-        // a disposable function.
-        var currentDisposable = this.currentDisposable;
-        if (currentDisposable.dispose) {
-            currentDisposable.dispose();
-        }
-
-        else {
-            currentDisposable();
-        }
-    }
-};
-
-
-module.exports = AssignableDisposable;
-
-},{}],71:[function(require,module,exports){
-var ModelResponse = require(68);
-var checkCacheAndReport = require(72);
-var getRequestCycle = require(73);
+},{"108":108,"229":229,"231":231,"35":35}],66:[function(require,module,exports){
+var ModelResponse = require(65);
+var checkCacheAndReport = require(67);
+var getRequestCycle = require(68);
 var empty = {dispose: function() {}};
-var Observable = require(231).Observable;
 
 /**
  * The get response.  It takes in a model and paths and starts
@@ -4150,11 +3496,7 @@ var GetResponse = module.exports = function GetResponse(model, paths,
     this.isProgressive = isProgressive || false;
 };
 
-GetResponse.prototype = Object.create(Observable.prototype);
-
-// becomes a subscribable/thenable from ModelResponse.
-GetResponse.prototype.subscribe = ModelResponse.prototype.subscribe;
-GetResponse.prototype.then = ModelResponse.prototype.then;
+GetResponse.prototype = Object.create(ModelResponse.prototype);
 
 /**
  * Makes the output of a get response JSONGraph instead of json.
@@ -4200,7 +3542,7 @@ GetResponse.prototype._subscribe = function _subscribe(observer) {
                            observer, seed, errors, 1);
 };
 
-},{"231":231,"68":68,"72":72,"73":73}],72:[function(require,module,exports){
+},{"65":65,"67":67,"68":68}],67:[function(require,module,exports){
 var gets = require(22);
 var getWithPathsAsJSONGraph = gets.getWithPathsAsJSONGraph;
 var getWithPathsAsPathMap = gets.getWithPathsAsPathMap;
@@ -4282,13 +3624,13 @@ module.exports = function checkCacheAndReport(model, requestedPaths, observer,
     return results;
 };
 
-},{"22":22}],73:[function(require,module,exports){
-var checkCacheAndReport = require(72);
+},{"22":22}],68:[function(require,module,exports){
+var checkCacheAndReport = require(67);
 var MaxRetryExceededError = require(12);
 var fastCat = require(33).fastCat;
 var collectLru = require(53);
 var getSize = require(92);
-var AssignableDisposable = require(70);
+var AssignableDisposable = require(62);
 var __version = require(50);
 
 /**
@@ -4372,8 +3714,8 @@ module.exports = function getRequestCycle(getResponse, model, results, observer,
     return disposable;
 };
 
-},{"12":12,"33":33,"50":50,"53":53,"70":70,"72":72,"92":92}],74:[function(require,module,exports){
-var GetResponse = require(71);
+},{"12":12,"33":33,"50":50,"53":53,"62":62,"67":67,"92":92}],69:[function(require,module,exports){
+var GetResponse = require(66);
 
 /**
  * Performs a get on the cache and if there are missing paths
@@ -4384,12 +3726,12 @@ module.exports = function getWithPaths(paths) {
     return new GetResponse(this, paths);
 };
 
-},{"71":71}],75:[function(require,module,exports){
+},{"66":66}],70:[function(require,module,exports){
 var pathSyntax = require(136);
-var ModelResponse = require(68);
-var GET_VALID_INPUT = require(76);
+var ModelResponse = require(65);
+var GET_VALID_INPUT = require(71);
 var validateInput = require(118);
-var GetResponse = require(71);
+var GetResponse = require(66);
 
 /**
  * Performs a get on the cache and if there are missing paths
@@ -4410,11 +3752,315 @@ module.exports = function get() {
     return new GetResponse(this, paths);
 };
 
-},{"118":118,"136":136,"68":68,"71":71,"76":76}],76:[function(require,module,exports){
+},{"118":118,"136":136,"65":65,"66":66,"71":71}],71:[function(require,module,exports){
 module.exports = {
     path: true,
     pathSyntax: true
 };
+
+},{}],72:[function(require,module,exports){
+var ModelResponse = require(65);
+var pathSyntax = require(136);
+var isArray = Array.isArray;
+var isPathValue = require(104);
+var isJSONGraphEnvelope = require(102);
+var isJSONEnvelope = require(101);
+var setRequestCycle = require(75);
+
+/**
+ *  The set response is responsible for doing the request loop for the set
+ * operation and subscribing to the follow up get.
+ *
+ * The constructors job is to parse out the arguments and put them in their
+ * groups.  The following subscribe will do the actual cache set and dataSource
+ * operation remoting.
+ *
+ * @param {Model} model -
+ * @param {Array} args - The array of arguments that can be JSONGraph, JSON, or
+ * pathValues.
+ * @param {Boolean} isJSONGraph - if the request is a jsonGraph output format.
+ * @param {Boolean} isProgressive - progressive output.
+ * @private
+ */
+var SetResponse = module.exports = function SetResponse(model, args,
+                                                        isJSONGraph,
+                                                        isProgressive) {
+
+    // The response properties.
+    this._model = model;
+    this._isJSONGraph = isJSONGraph || false;
+    this._isProgressive = isProgressive || false;
+    this._initialArgs = args;
+    this._value = [{}];
+
+    var groups = [];
+    var group, groupType;
+    var argIndex = -1;
+    var argCount = args.length;
+
+    // Validation of arguments have been moved out of this function.
+    while (++argIndex < argCount) {
+        var arg = args[argIndex];
+        var argType;
+        if (isArray(arg) || typeof arg === "string") {
+            arg = pathSyntax.fromPath(arg);
+            argType = "PathValues";
+        } else if (isPathValue(arg)) {
+            arg.path = pathSyntax.fromPath(arg.path);
+            argType = "PathValues";
+        } else if (isJSONGraphEnvelope(arg)) {
+            argType = "JSONGs";
+        } else if (isJSONEnvelope(arg)) {
+            argType = "PathMaps";
+        }
+
+        if (groupType !== argType) {
+            groupType = argType;
+            group = {
+                inputType: argType,
+                arguments: []
+            };
+            groups.push(group);
+        }
+
+        group.arguments.push(arg);
+    }
+
+    this._groups = groups;
+};
+
+SetResponse.prototype = Object.create(ModelResponse.prototype);
+
+/**
+ * The subscribe function will setup the remoting of the operation and cache
+ * setting.
+ *
+ * @private
+ */
+SetResponse.prototype._subscribe = function _subscribe(observer) {
+    var groups = this._groups;
+    var model = this._model;
+    var isJSONGraph = this._isJSONGraph;
+    var isProgressive = this._isProgressive;
+
+    // Starts the async request cycle.
+    return setRequestCycle(
+        model, observer, groups, isJSONGraph, isProgressive, 0);
+};
+
+/**
+ * Makes the output of a get response JSONGraph instead of json.
+ * @private
+ */
+SetResponse.prototype._toJSONG = function _toJSONGraph() {
+    return new SetResponse(this._model, this._initialArgs,
+                           true, this._isProgressive);
+};
+
+/**
+ * Progressively responding to data in the cache instead of once the whole
+ * operation is complete.
+ * @public
+ */
+SetResponse.prototype.progressively = function progressively() {
+    return new SetResponse(this._model, this._initialArgs,
+                           this._isJSONGraph, true);
+};
+
+},{"101":101,"102":102,"104":104,"136":136,"65":65,"75":75}],73:[function(require,module,exports){
+var setValidInput = require(76);
+var validateInput = require(118);
+var SetResponse = require(72);
+var ModelResponse = require(65);
+
+module.exports = function set() {
+    var out = validateInput(arguments, setValidInput, "set");
+    if (out !== true) {
+        return new ModelResponse(function(o) {
+            o.onError(out);
+        });
+    }
+
+    var argsIdx = -1;
+    var argsLen = arguments.length;
+    var args = [];
+    while (++argsIdx < argsLen) {
+        args[argsIdx] = arguments[argsIdx];
+    }
+    return new SetResponse(this, args);
+};
+
+},{"118":118,"65":65,"72":72,"76":76}],74:[function(require,module,exports){
+var arrayFlatMap = require(86);
+
+/**
+ * Takes the groups that are created in the SetResponse constructor and sets
+ * them into the cache.
+ */
+module.exports = function setGroupsIntoCache(model, groups) {
+    var modelRoot = model._root;
+    var errorSelector = modelRoot.errorSelector;
+    var groupIndex = -1;
+    var groupCount = groups.length;
+    var requestedPaths = [];
+    var optimizedPaths = [];
+    var returnValue = {
+        requestedPaths: requestedPaths,
+        optimizedPaths: optimizedPaths
+    };
+
+    // Takes each of the groups and normalizes their input into
+    // requested paths and optimized paths.
+    while (++groupIndex < groupCount) {
+
+        var group = groups[groupIndex];
+        var inputType = group.inputType;
+        var methodArgs = group.arguments;
+
+        if (methodArgs.length > 0) {
+            var operationName = "_set" + inputType;
+            var operationFunc = model[operationName];
+            var successfulPaths = operationFunc(model, methodArgs, null, errorSelector);
+
+            optimizedPaths.push.apply(optimizedPaths, successfulPaths[1]);
+
+            if (inputType === "PathValues") {
+                requestedPaths.push.apply(requestedPaths, methodArgs.map(pluckPath));
+            } else if (inputType === "JSONGs") {
+                requestedPaths.push.apply(requestedPaths, arrayFlatMap(methodArgs, pluckEnvelopePaths));
+            } else {
+                requestedPaths.push.apply(requestedPaths, successfulPaths[0]);
+            }
+        }
+    }
+
+    return returnValue;
+};
+
+function pluckPath(pathValue) {
+    return pathValue.path;
+}
+
+function pluckEnvelopePaths(jsonGraphEnvelope) {
+    return jsonGraphEnvelope.paths;
+}
+
+},{"86":86}],75:[function(require,module,exports){
+var emptyArray = [];
+var AssignableDisposable = require(62);
+var GetResponse = require(66);
+var setGroupsIntoCache = require(74);
+var getWithPathsAsPathMap = require(22).getWithPathsAsPathMap;
+var InvalidSourceError = require(11);
+var MaxRetryExceededError = require(12);
+
+/**
+ * The request cycle for set.  This is responsible for requesting to dataSource
+ * and allowing disposing inflight requests.
+ */
+module.exports = function setRequestCycle(model, observer, groups,
+                                          isJSONGraph, isProgressive, count) {
+    // we have exceeded the maximum retry limit.
+    if (count === 10) {
+        throw new MaxRetryExceededError();
+    }
+
+    var requestedAndOptimizedPaths = setGroupsIntoCache(model, groups);
+    var optimizedPaths = requestedAndOptimizedPaths.optimizedPaths;
+    var requestedPaths = requestedAndOptimizedPaths.requestedPaths;
+    var isMaster = model._source === undefined;
+
+    // Local set only.  We perform a follow up get.  If performance is ever
+    // a requirement simply requiring in checkCacheAndReport and use get request
+    // internals.  Figured this is more "pure".
+    if (isMaster) {
+        var get = new GetResponse(model, requestedPaths,
+                                  isJSONGraph, isProgressive);
+        return get.subscribe(observer);
+    }
+
+
+    // Progressively output the data from the first set.
+    if (isProgressive) {
+        var json = {};
+        getWithPathsAsPathMap(model, requestedPaths, [json]);
+        observer.onNext(json);
+    }
+
+    var currentJSONGraph = getJSONGraph(model, optimizedPaths);
+    var disposable = new AssignableDisposable();
+
+    // Sends out the setRequest.  The Queue will call the callback with the
+    // JSONGraph envelope / error.
+    var requestDisposable = model._request.
+        // TODO: There is error handling that has not been addressed yet.
+
+        // If disposed before this point then the sendSetRequest will not
+        // further any callbacks.  Therefore, if we are at this spot, we are
+        // not disposed yet.
+        set(currentJSONGraph, function(error, jsonGraphEnv) {
+            if (typeof error === InvalidSourceError) {
+                return observer.onError(error);
+            }
+
+            // TODO: This seems like there are errors with this approach, but
+            // for sanity sake I am going to keep this logic in here until a
+            // rethink can be done.
+            var isCompleted = false;
+            if (error || optimizedPaths.length === jsonGraphEnv.paths.length) {
+                isCompleted = true;
+            }
+
+            // Happy case.  One request to the dataSource will fulfill the
+            // required paths.
+            if (isCompleted) {
+                disposable.currentDisposable =
+                    subscribeToFollowupGet(model, observer, requestedPaths,
+                                          isJSONGraph, isProgressive);
+            }
+
+            // TODO: The unhappy case.  I am unsure how this can even be
+            // achieved.
+            else {
+                // We need to restart the setRequestCycle.
+                setRequestCycle(model, observer, groups, isJSONGraph,
+                                isProgressive, count + 1);
+            }
+        });
+
+    // Sets the current disposable as the requestDisposable.
+    disposable.currentDisposable = requestDisposable;
+
+    return disposable;
+};
+
+function getJSONGraph(model, optimizedPaths) {
+    var boundPath = model._path;
+    var envelope = {};
+    model._path = emptyArray;
+    model._getPathValuesAsJSONG(model._materialize().withoutDataSource(), optimizedPaths, [envelope]);
+    model._path = boundPath;
+
+    return envelope;
+}
+
+function subscribeToFollowupGet(model, observer, requestedPaths, isJSONGraph,
+                               isProgressive) {
+
+    // Creates a new response and subscribes to it with the original observer.
+    var response = new GetResponse(model, requestedPaths, isJSONGraph,
+                                   isProgressive);
+    return response.subscribe(observer);
+}
+
+},{"11":11,"12":12,"22":22,"62":62,"66":66,"74":74}],76:[function(require,module,exports){
+module.exports = {
+    pathValue: true,
+    pathSyntax: true,
+    json: true,
+    jsonGraph: true
+};
+
 
 },{}],77:[function(require,module,exports){
 var asap = require(125);
@@ -5202,7 +4848,7 @@ function setNode(
 
 },{"100":100,"105":105,"107":107,"122":122,"145":145,"16":16,"36":36,"39":39,"42":42,"46":46,"47":47,"48":48,"50":50,"54":54,"90":90,"96":96,"99":99}],83:[function(require,module,exports){
 var jsong = require(132);
-var ModelResponse = require(68);
+var ModelResponse = require(65);
 var isPathValue = require(104);
 
 module.exports = function setValue(pathArg, valueArg) {
@@ -5221,7 +4867,7 @@ module.exports = function setValue(pathArg, valueArg) {
     }
     var self = this;
     return new ModelResponse(function(obs) {
-        return self._set(value).subscribe(function(data) {
+        return self.set(value).subscribe(function(data) {
             var curr = data.json;
             var depth = -1;
             var length = path.length;
@@ -5238,7 +4884,7 @@ module.exports = function setValue(pathArg, valueArg) {
     });
 };
 
-},{"104":104,"132":132,"68":68}],84:[function(require,module,exports){
+},{"104":104,"132":132,"65":65}],84:[function(require,module,exports){
 var pathSyntax = require(136);
 var isPathValue = require(104);
 var setPathValues = require(82);
