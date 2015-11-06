@@ -255,33 +255,50 @@ Model.prototype.invalidate = function invalidate() {
 };
 
 /**
- * Returns a new {@link Model} bound to a location within the {@link JSONGraph}. The bound location is never a {@link Reference}: any {@link Reference}s encountered while resolving the bound {@link Path} are always replaced with the {@link Reference}s target value. For subsequent operations on the {@link Model}, all paths will be evaluated relative to the bound path. Deref allows you to:
- * - Expose only a fragment of the {@link JSONGraph} to components, rather than the entire graph
+ * Returns a new {@link Model} bound to a location within the {@link
+ * JSONGraph}. The bound location is never a {@link Reference}: any {@link
+ * Reference}s encountered while resolving the bound {@link Path} are always
+ * replaced with the {@link Reference}s target value. For subsequent operations
+ * on the {@link Model}, all paths will be evaluated relative to the bound
+ * path. Deref allows you to:
+ * - Expose only a fragment of the {@link JSONGraph} to components, rather than
+ *   the entire graph
  * - Hide the location of a {@link JSONGraph} fragment from components
- * - Optimize for executing multiple operations and path looksup at/below the same location in the {@link JSONGraph}
+ * - Optimize for executing multiple operations and path looksup at/below the
+ *   same location in the {@link JSONGraph}
  * @method
- * @param {Path} derefPath - the path to the object that the new Model should refer to
- * @param {...PathSet} relativePathsToPreload - paths (relative to the dereference path) to preload before Model is created
- * @return {Observable.<Model>} - an Observable stream with a single value, the dereferenced {@link Model}, or an empty stream if nothing is found at the path
+ * @param {Path} derefPath - the path to the object that the new Model should
+ * refer to
+ * @return {Model} - the dereferenced {@link Model}, or an empty stream if
+ * nothing is found at the path
  * @example
-var model = new falcor.Model({
+var Model = falcor.Model;
+var model = new Model({
   cache: {
     users: [
-      { $type: "ref", value: ["usersById", 32] }
+      Model.ref(["usersById", 32])
     ],
     usersById: {
       32: {
-	name: "Steve",
+        name: "Steve",
         surname: "McGuire"
       }
     }
   }
 });
-model.deref(["users", 0], "name").subscribe(function(userModel){
-  console.log(userModel.getPath());
+
+model.
+    get(['users', 0, 'name']).
+    subscribe(function(jsonEnv) {
+        var userModel = model.deref(jsonEnv.json.users[0]);
+        console.log(model.getPath());
+        console.log(userModel.getPath());
+   });
 });
 
-// prints ["usersById", 32] because userModel refers to target of reference at ["users", 0]
+// prints the following:
+// []
+// ["usersById", 32] - because userModel refers to target of reference at ["users", 0]
  */
 Model.prototype.deref = require(5);
 
@@ -332,8 +349,14 @@ Model.prototype.setValue = require(82);
  */
 Model.prototype._getValueSync = require(26);
 
+/**
+ * @private
+ */
 Model.prototype._setValueSync = require(83);
 
+/**
+ * @private
+ */
 Model.prototype._derefSync = require(6);
 
 /**
@@ -543,24 +566,33 @@ Model.prototype.toJSON = function toJSON() {
  * Returns the {@link Path} to the object within the JSON Graph that this Model references.
  * @return {Path}
  * @example
-var model = new falcor.Model({
+var Model = falcor.Model;
+var model = new Model({
   cache: {
     users: [
-      { $type: "ref", value: ["usersById", 32] }
+      Model.ref(["usersById", 32])
     ],
     usersById: {
       32: {
-	name: "Steve",
+        name: "Steve",
         surname: "McGuire"
       }
     }
   }
 });
-model.deref(["users", 0], "name").subscribe(function(userModel){
-  console.log(userModel.getPath());
+
+model.
+    get(['users', 0, 'name']).
+    subscribe(function(jsonEnv) {
+        var userModel = model.deref(jsonEnv.json.users[0]);
+        console.log(model.getPath());
+        console.log(userModel.getPath());
+   });
 });
 
-// prints ["usersById", 32] because userModel refers to target of reference at ["users", 0]
+// prints the following:
+// []
+// ["usersById", 32] - because userModel refers to target of reference at ["users", 0]
  */
 Model.prototype.getPath = function getPath() {
     return arrayClone(this._path);
@@ -3181,6 +3213,10 @@ var InvalidSourceError = require(10);
 
 var pathSyntax = require(135);
 
+/**
+ * @private
+ * @augments ModelResponse
+ */
 function CallResponse(model, callPath, args, suffix, paths) {
     this.callPath = pathSyntax.fromPath(callPath);
     this.args = args;
@@ -3338,35 +3374,6 @@ function ModelResponse(subscribe) {
     this._subscribe = subscribe;
 }
 
-/**
- * Converts the data format of the data in a JSONGraph Model response to a stream of path values.
- * @name toPathValues
- * @memberof ModelResponse.prototype
- * @function
- * @return ModelResponse.<PathValue>
- * @example
-var model = new falcor.Model({
-  cache: {
-    user: {
-      name: "Steve",
-      surname: "McGuire"
-    }
-  }
-});
-
-model.
-  get(["user",["name", "surname"]]).
-  toPathValues().
-  // this method will be called twice, once with the result of ["user", "name"]
-  // and once with the result of ["user", "surname"]
-  subscribe(function(pathValue){
-    console.log(JSON.stringify(pathValue));
-  });
-// prints...
-"{\"path\":[\"user\",\"name\"],\"value\":\"Steve\"}"
-"{\"path\":[\"user\",\"surname\"],\"value\":\"McGuire\"}"
- */
-
 ModelResponse.prototype._toJSONG = function toJSONG() {
     return this;
 };
@@ -3432,7 +3439,8 @@ ModelResponse.prototype.progressively = function progressively() {
     return this;
 };
 
-ModelResponse.prototype.subscribe = function subscribe(a, b, c) {
+ModelResponse.prototype.subscribe =
+ModelResponse.prototype.forEach = function subscribe(a, b, c) {
     var observer = a;
     if (!observer || typeof observer !== "object") {
         observer = {
@@ -3493,6 +3501,7 @@ var empty = {dispose: function() {}};
  * and closures.
  * @param {Model} model -
  * @param {Array} paths -
+ * @augments ModelResponse
  * @private
  */
 var GetResponse = module.exports = function GetResponse(model, paths,
@@ -3793,6 +3802,7 @@ var setRequestCycle = require(74);
  * pathValues.
  * @param {Boolean} isJSONGraph - if the request is a jsonGraph output format.
  * @param {Boolean} isProgressive - progressive output.
+ * @augments ModelResponse
  * @private
  */
 var SetResponse = module.exports = function SetResponse(model, args,
