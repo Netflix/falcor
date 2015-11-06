@@ -32,10 +32,8 @@ If your application relies on that behavior there are two possible upgrade
 paths.  If your application does not rely on Rx, but only the `subscribe` from
 Observable then nothing has changed except for file size.
 
-##### Option 1
+#### Option 1
 Alter the prototype for `get`, `set`, and `call` to return `Rx.Observables`.
-This only needs to be done once, but is considered _dirty_ since it alters the
-prototype.
 
 ```javascript
 var Rx = require('rx');
@@ -71,7 +69,15 @@ function convertToRx(model, method, args) {
 }
 ```
 
-##### Option 2
+##### Pros
+* This upgrade only has to be done once and required once for the whole
+application to recieve the benefits.
+
+##### Cons
+* In the same vein, the whole application is forced into using the Rx based
+falcor whether it wants to or not since the prototype has been edited.
+
+#### Option 2
 Wrap all calls to falcor with a Falcor.Subscribable -> Rx.Observable call.
 This is _better_ than prototype overriding, but its more tedious to implement.
 
@@ -95,6 +101,13 @@ doAction(function() {
 }).
 subscribe();
 ```
+
+##### Pros
+* Its a more controlled approach since its opt-in only.
+
+##### Cons
+* This has to be done everywhere a call to falcor is made and Rx is the desired
+output format.
 
 Deref
 -------------
