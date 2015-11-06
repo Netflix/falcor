@@ -13,8 +13,8 @@ describe("Error", function() {
         var model = new Model({
             source: new ErrorDataSource(503, "Timeout")
         });
-        model.
-            get(["test", {to: 5}, "summary"]).
+        toObservable(model.
+            get(["test", {to: 5}, "summary"])).
             doAction(noOp, function(err) {
                 expect(err.length).to.equal(6);
                 // not in boxValue mode
@@ -60,8 +60,8 @@ describe("Error", function() {
             }
         });
         var count = 0;
-        model.
-            get(["test", {to: 5}, "summary"]).
+        toObservable(model.
+            get(["test", {to: 5}, "summary"])).
             doAction(function(x) {
                 var expected = {
                     json: {
@@ -109,7 +109,7 @@ describe("Error", function() {
         var model = new falcor.Model({ source: routes });
         var onNext = sinon.spy();
         var onError = sinon.spy();
-        model.
+        toObservable(model.
             set({
                 paths: [['titlesById', 242, 'rating']],
                 jsonGraph: {
@@ -119,7 +119,7 @@ describe("Error", function() {
                         }
                     }
                 }
-            }).
+            })).
             doAction(onNext, onError).
             doAction(noOp, function() {
                 expect(onNext.callCount).to.equal(0);
@@ -143,11 +143,11 @@ describe("Error", function() {
         var model = new falcor.Model({ source: routes });
         var onNext = sinon.spy();
         var onError = sinon.spy();
-        model.
-            get(['path', 'to', 'value']).
+        toObservable(model.
+            get(['path', 'to', 'value'])).
             doAction(onNext, function(e) {
                 expect(onNext.callCount).to.equal(0);
-                expect(InvalidSourceError.is(e), 'Expect error co be an InvalidSourceError').to.be.ok;
+                expect(e.name, 'Expect error to be an InvalidSourceError').to.equals(InvalidSourceError.name);
             }).
             subscribe(noOp, function(e) {
                 if (isAssertionError(e)) {
@@ -165,8 +165,8 @@ describe("Error", function() {
         };
         var model = new falcor.Model({ source: routes });
         var onNext = sinon.spy();
-        model.
-            call(['videos', 1234, 'rating'], 5).
+        toObservable(model.
+            call(['videos', 1234, 'rating'], 5)).
             doAction(onNext).
             doAction(noOp, function(err) {
                 expect(onNext.callCount).to.equal(0);

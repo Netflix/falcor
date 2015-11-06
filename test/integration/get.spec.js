@@ -46,8 +46,8 @@ describe('Get Integration Tests', function() {
         });
         var onNext = sinon.spy();
 
-        model.
-            get(['thing', 'prop']).
+        toObservable(model.
+            get(['thing', 'prop'])).
             doAction(onNext, noOp, function() {
                 expect(onNext.calledOnce).to.be.ok;
                 expect(strip(onNext.getCall(0).args[0])).to.deep.equals({

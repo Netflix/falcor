@@ -19,7 +19,7 @@ describe('DataSource.', function() {
             source: dataSource
         });
 
-        model.
+        toObservable(model.
             set({
                 json: {
                     videos: {
@@ -31,7 +31,7 @@ describe('DataSource.', function() {
                         }
                     }
                 }
-            }).
+            })).
             doAction(noOp, noOp, function() {
                 expect(onSet.calledOnce).to.be.ok;
 
@@ -66,8 +66,8 @@ describe('DataSource.', function() {
         var model = new Model({
             source: dataSource
         });
-        model.
-            setValue('videos[1234].another_prop', '').
+        toObservable(model.
+            setValue('videos[1234].another_prop', '')).
             doAction(noOp, noOp, function() {
                 expect(onSet.calledOnce).to.be.ok;
 
@@ -98,7 +98,7 @@ describe('DataSource.', function() {
         var model = new Model({
             source: dataSource
         });
-        model.
+        toObservable(model.
             set({
                 json: {
                     videos: {
@@ -107,7 +107,7 @@ describe('DataSource.', function() {
                         }
                     }
                 }
-            }).
+            })).
             doAction(noOp, noOp, function() {
                 expect(onSet.calledOnce).to.be.ok;
 
@@ -143,7 +143,7 @@ describe('DataSource.', function() {
         });
 
         var count = 0;
-        model.
+        toObservable(model.
             set({
                 json: {
                     videos: {
@@ -156,7 +156,7 @@ describe('DataSource.', function() {
                     }
                 }
             }).
-            progressively().
+            progressively()).
             doAction(function(x) {
                 if (count === 0) {
                     expect(strip(x)).to.deep.equals({

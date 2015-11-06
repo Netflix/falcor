@@ -12,14 +12,17 @@ describe("root onChange handler", function () {
             }
         });
 
-        model.set({
-            path: ["a", "b", "c"],
-            value: "foo"
-        }).ensure(function() {
-            if(changed === true) {
-                calledBeforeEnsure = true;
-            }
-        }).subscribe();
+        toObservable(model.
+            set({
+                path: ["a", "b", "c"],
+                value: "foo"
+            })).
+            ensure(function() {
+                if(changed === true) {
+                    calledBeforeEnsure = true;
+                }
+            }).
+            subscribe();
 
         expect(changed, "onChange wasn't called.").to.be.ok;
         expect(calledBeforeEnsure, "onChange wasn't called before the subscription was disposed.").to.be.ok;

@@ -30,9 +30,9 @@ describe('#add', function() {
 
         var zip = zipSpy(2, function() {
             var onNext = sinon.spy();
-            model.
+            toObservable(model.
                 withoutDataSource().
-                get(videos0, videos1).
+                get(videos0, videos1)).
                 doAction(onNext, noOp, function() {
                     expect(getSpy.calledOnce).to.be.ok;
                     expect(getSpy.getCall(0).args[1]).to.deep.equals([videos0]);
@@ -75,9 +75,9 @@ describe('#add', function() {
 
         var zip = zipSpy(2, function() {
             var onNext = sinon.spy();
-            model.
+            toObservable(model.
                 withoutDataSource().
-                get(videos0, videos1).
+                get(videos0, videos1)).
                 doAction(onNext, noOp, function() {
                     expect(getSpy.calledOnce).to.be.ok;
                     expect(getSpy.getCall(0).args[1]).to.deep.equals([videos0]);
@@ -121,9 +121,9 @@ describe('#add', function() {
 
         var zip = zipSpy(2, function() {
             var onNext = sinon.spy();
-            model.
+            toObservable(model.
                 withoutDataSource().
-                get(videos0, videos1).
+                get(videos0, videos1)).
                 doAction(onNext, noOp, function() {
                     expect(getSpy.calledOnce, 'dataSource get').to.be.ok;
                     expect(getSpy.getCall(0).args[1]).to.deep.equals([videos0]);
@@ -167,9 +167,9 @@ describe('#add', function() {
 
         var zip = zipSpy(2, function() {
             var onNext = sinon.spy();
-            model.
+            toObservable(model.
                 withoutDataSource().
-                get(videos0, videos1).
+                get(videos0, videos1)).
                 doAction(onNext, noOp, function() {
                     expect(getSpy.calledOnce, 'dataSource get').to.be.ok;
                     expect(getSpy.getCall(0).args[1]).to.deep.equals([videos0]);

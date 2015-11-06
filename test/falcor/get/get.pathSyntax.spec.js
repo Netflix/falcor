@@ -9,7 +9,7 @@ var strip = require('./../../cleanData').stripDerefAndVersionKeys;
 var sinon = require('sinon');
 var expect = require('chai').expect;
 
-describe.only('Path Syntax', function() {
+describe('Path Syntax', function() {
     var model = new Model({cache: CacheGenerator(0, 2)});
     model._root.unsafeMode = true;
     it('should accept strings for get.', function(done) {

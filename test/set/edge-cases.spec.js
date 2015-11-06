@@ -18,12 +18,12 @@ describe("Special Cases", function() {
     it('should set in an array and the length should be set in.', function(done) {
         var model = new Model();
         var onNext = sinon.spy();
-        model.
+        toObservable(model.
             set({
                 json: {
                     foo: ['bar']
                 }
-            }).
+            })).
             flatMap(function() {
                 return model.get('foo.length');
             }).

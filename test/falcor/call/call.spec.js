@@ -30,9 +30,9 @@ describe("Call", function() {
             }
         });
 
-        model.
+        toObservable(model.
             _clone({ _path: ["lists"] }).
-            call(["add"], [], [], [[0, "summary"]]).
+            call(["add"], [], [], [[0, "summary"]])).
             subscribe(noOp, noOp, noOp);
     });
 
@@ -60,8 +60,8 @@ describe("Call", function() {
 
         var onNext = sinon.spy();
         var onNext2 = sinon.spy();
-        model.
-            call(["test"], []).
+        toObservable(model.
+            call(["test"], [])).
             doAction(onNext, noOp, function() {
                 expect(onNext.calledOnce).to.be.ok;
                 expect(strip(onNext.getCall(0).args[0])).to.deep.equals({
@@ -105,8 +105,8 @@ describe("Call", function() {
                 call: call
             }
         });
-        model.
-            call('test.again', [], ['oneSuffix.a', 'twoSuffix.b'], ['onePath.a', 'twoPath.b']).
+        toObservable(model.
+            call('test.again', [], ['oneSuffix.a', 'twoSuffix.b'], ['onePath.a', 'twoPath.b'])).
             doAction(noOp, noOp, function() {
                 expect(call.calledOnce).to.be.ok;
 

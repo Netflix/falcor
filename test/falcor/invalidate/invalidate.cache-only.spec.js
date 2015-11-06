@@ -23,9 +23,9 @@ describe("Cache Only", function() {
         model.
             invalidate(["videos", 0, "title"]);
 
-        model.
+        toObservable(model.
             withoutDataSource().
-            get(["videos", 0, "title"]).
+            get(["videos", 0, "title"])).
             doAction(function(x) {
                 throw inspect(x, {depth: 10}) + " should not be onNext'd";
             }).
@@ -61,9 +61,9 @@ describe("Cache Only", function() {
         model.
             invalidate(["videos", 0]);
 
-        model.
+        toObservable(model.
             withoutDataSource().
-            get(summary.slice()).
+            get(summary.slice())).
             doAction(function(x) {
                 throw inspect(x, {depth: 10}) + " should not be onNext'd";
             }).
@@ -93,9 +93,9 @@ describe("Cache Only", function() {
         model.
             invalidate(["lolomo", 0]);
 
-        model.
+        toObservable(model.
             withoutDataSource().
-            get(summary.slice()).
+            get(summary.slice())).
             doAction(function(x) {
                 throw inspect(x, {depth: 10}) + " should not be onNext'd";
             }).

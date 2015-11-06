@@ -13,8 +13,8 @@ describe('Cache Only', function() {
                 cache: cacheGenerator(0, 1)
             });
             var onNext = sinon.spy();
-            model.
-                set({path: ['videos', 0, 'title'], value: 'V0'}).
+            toObservable(model.
+                set({path: ['videos', 0, 'title'], value: 'V0'})).
                 doAction(onNext, noOp, function() {
                     expect(onNext.calledOnce).to.be.ok;
                     expect(strip(onNext.getCall(0).args[0])).to.deep.equals({
@@ -35,7 +35,7 @@ describe('Cache Only', function() {
                 cache: cacheGenerator(0, 3)
             });
             var onNext = sinon.spy();
-            model.
+            toObservable(model.
                 set({
                     path: ['videos', 0, 'title'],
                     value: 'V0'
@@ -56,7 +56,7 @@ describe('Cache Only', function() {
                             }
                         }
                     }
-                }).
+                })).
                 doAction(onNext, noOp, function() {
                     expect(onNext.calledOnce).to.be.ok;
                     expect(strip(onNext.getCall(0).args[0])).to.deep.equals({
@@ -84,9 +84,9 @@ describe('Cache Only', function() {
                 cache: cacheGenerator(0, 1)
             });
             var onNext = sinon.spy();
-            model.
+            toObservable(model.
                 set({path: ['videos', 0, 'title'], value: 'V0'}).
-                _toJSONG().
+                _toJSONG()).
                 doAction(onNext, noOp, function() {
                     expect(onNext.calledOnce).to.be.ok;
                     expect(strip(onNext.getCall(0).args[0])).to.deep.equals({
