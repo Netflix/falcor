@@ -2,8 +2,8 @@
 No More Rx
 -------
 
-Rx has been removed from the prototype of `ModelResponse`.  In `0.x` branches
-of falcor the `ModelResponse` class was implemented in the following way.
+In 0.x `ModelResponse`'s prototype inherited from Rx.Observable in the following
+way.
 
 ```javascript
 var Rx = require('rx/dist/rx');
@@ -98,14 +98,10 @@ subscribe();
 
 Deref
 -------------
-The old deref worked is such a way that the path to be dereference and leaves
-were required to successfully deref to that location.  If the leaves did not
-exist within the cache then a network request was made to fill in the cache.
+`deref` has changed to use the output from a `ModelResponse` instead of
+specifying the destination via path and leaves.
 
-The new deref works completely different.  Instead of specifying a path via an
-array, the output from get is used.  Lets go over some examples:
-
-First lets build a model with some initial cache.
+Lets create a model with some initial cache.
 ```javascript
 var model = new Model({
     cache: {
@@ -126,9 +122,12 @@ var model = new Model({
 });
 ```
 
-If we were to use `deref` in the old we would have to perform the following.
+If we were to use `deref` in the **old** way we would have to perform the
+following to derefernce to [genreLists, 0, 0].
 ```javascript
 model.
+    // Creates a dataSource (more than likely means a network call) call since
+    // imageUrl does not exist in the cache.
     deref(['genreLists', 0, 0], ['title', 'imageUrl']).
     subscribe(function(boundModel) {
         // equivalent to model.get(['genreLists', 0, 0, 'title'])
@@ -140,7 +139,7 @@ model.
     });
 ```
 
-The new `deref` works from the output of `get`, so the same thing could be
+The new `deref` works from the output of `ModelResponse`, so the same thing could be
 accomplished with the following.
 ```javascript
 model.
@@ -151,6 +150,7 @@ model.
 
         // equivalent to model.get(['genreLists', 0, 0, 'title'])
         // -> { json: { title: 'Total Recall (June 1st, 1990)' } }
+        // If 'imageUrl' is used then a dataSource call would be made.
         boundModel.get(['title'])...
 
         // Other rendering stuff / application logic
