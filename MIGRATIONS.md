@@ -2,8 +2,8 @@
 No More Rx
 -------
 
-In 0.x `ModelResponse`'s prototype inherited from Rx.Observable in the following
-way.
+In 0.x `ModelResponse`'s prototype inherited from `Rx.Observable` in the
+following way.
 
 ```javascript
 var Rx = require('rx/dist/rx');
@@ -13,7 +13,7 @@ ModelResponse.prototype = Object.create(Rx.Observable.prototype);
 ...
 ```
 
-This means that after a `get`, `set`, or `call` any rx operator could be used.
+This means that after a `get`, `set`, or `call` any `Rx` operator could be used.
 E.G.
 
 ```javascript
@@ -29,8 +29,8 @@ model.
 ```
 
 If your application relies on that behavior there are two possible upgrade
-paths.  If your application does not rely on Rx, but only the `subscribe` from
-Observable then nothing has changed except for file size.
+paths.  If your application does not rely on `Rx`, but only the `subscribe` from
+`Observable` then nothing has changed except for file size.
 
 #### Option 1
 Alter the prototype for `get`, `set`, and `call` to return `Rx.Observables`.
@@ -79,7 +79,6 @@ falcor whether it wants to or not since the prototype has been edited.
 
 #### Option 2
 Wrap all calls to falcor with a Falcor.Subscribable -> Rx.Observable call.
-This is _better_ than prototype overriding, but its more tedious to implement.
 
 ```javascript
 var Rx = require('rx');
@@ -108,6 +107,7 @@ subscribe();
 ##### Cons
 * This has to be done everywhere a call to falcor is made and Rx is the desired
 output format.
+  * can be a bit tedious :)
 
 Deref
 -------------
@@ -152,6 +152,12 @@ model.
     });
 ```
 
+##### Cons
+* The knowledge of leaves were required.
+* Potential additional network requests could be made.
+* Always async.
+* Not very simple to explain how this works.
+
 The new `deref` works from the output of `ModelResponse`, so the same thing could be
 accomplished with the following.
 ```javascript
@@ -170,3 +176,8 @@ model.
         ...
     });
 ```
+
+##### Pros
+* Simpler to grok/use
+* Promotes better application architecture.
+* Always syncronous.
