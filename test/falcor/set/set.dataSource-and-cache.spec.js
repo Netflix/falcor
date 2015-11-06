@@ -35,14 +35,15 @@ describe('DataSource and Cache', function() {
         model = new falcor.Model({
             source: mockDataSource
         });
-        model.setValue('titlesById[0].rating', 5).then(function(value) {
-            return model.withoutDataSource().getValue('titlesById[0].rating').then(function(postSetValue) {
-                testRunner.compare(postSetValue, value, 'value after Model.set without paths not equal to same value retrieved from Model.')
-                done();
+        model.
+            setValue('titlesById[0].rating', 5).then(function(value) {
+                return model.withoutDataSource().getValue('titlesById[0].rating').then(function(postSetValue) {
+                    testRunner.compare(postSetValue, value, 'value after Model.set without paths not equal to same value retrieved from Model.')
+                    done();
+                });
+            }, function(error) {
+                testRunner.compare(true, false, 'Model.set operation was not able to accept jsonGraph without paths from the dataSource.');
             });
-        }, function(error) {
-            testRunner.compare(true, false, 'Model.set operation was not able to accept jsonGraph without paths from the dataSource.');
-        });
     });
 
     describe('Seeds', function() {
@@ -55,10 +56,10 @@ describe('DataSource and Cache', function() {
                 newValue: '2'
             };
             var next = false;
-            model.
+            toObservable(model.
                 set(
                     {path: ['videos', 1234, 'summary'], value: e1},
-                    {path: ['videos', 766, 'summary'], value: e2}).
+                    {path: ['videos', 766, 'summary'], value: e2})).
                 doAction(function(x) {
                     next = true;
                     testRunner.compare({ json: {
@@ -86,8 +87,8 @@ describe('DataSource and Cache', function() {
                 newValue: '1'
             };
             var next = false;
-            model.
-                set({path: ['genreList', 0, {to: 1}, 'summary'], value: expected}).
+            toObservable(model.
+                set({path: ['genreList', 0, {to: 1}, 'summary'], value: expected})).
                 doAction(function(x) {
                     next = true;
                     testRunner.compare({ json: {
@@ -132,10 +133,10 @@ describe('DataSource and Cache', function() {
                 })
             });
             var onNext = sinon.spy();
-            model.
+            toObservable(model.
                 set(
                     {path: ['genreList', 0, 0, 'summary'], value: 1337},
-                    {path: ['genreList', 1, 1, 'summary'], value: 7331}).
+                    {path: ['genreList', 1, 1, 'summary'], value: 7331})).
                 doAction(onNext, noOp, function() {
                     expect(onSet.calledTwice, 'onSet to be called 2x').to.be.ok;
                     expect(onNext.calledOnce, 'onNext to be called 1x').to.be.ok;
@@ -182,8 +183,8 @@ describe('DataSource and Cache', function() {
         });
         var called = false;
         var sourceCalled = false;
-        model.
-            set({path: ['genreList', 0, 0, 'summary'], value: 5}).
+        toObservable(model.
+            set({path: ['genreList', 0, 0, 'summary'], value: 5})).
             doAction(function(x) {
                 called = true;
             }, noOp, function() {
@@ -201,9 +202,9 @@ describe('DataSource and Cache', function() {
             }
         });
         var called = false;
-        model.
+        toObservable(model.
             boxValues().
-            set({path: ['genreList', 0, 0, 'summary'], value: 5}).
+            set({path: ['genreList', 0, 0, 'summary'], value: 5})).
             doAction(function(x) {
                 expect(false, 'onNext should not be called.').to.be.ok;
             }, function(e) {

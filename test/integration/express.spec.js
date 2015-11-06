@@ -39,8 +39,8 @@ describe('Express Integration', function() {
         });
         var onNext = sinon.spy();
 
-        model.
-            get('genrelist[0].titles[0].name').
+        toObservable(model.
+            get('genrelist[0].titles[0].name')).
             doAction(onNext, noOp, function() {
                 expect(onNext.calledOnce).to.be.ok;
                 expect(strip(onNext.getCall(0).args[0])).to.deep.equals({

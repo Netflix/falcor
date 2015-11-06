@@ -87,8 +87,8 @@ describe('Deref', function() {
         });
 
         var onNext = sinon.spy();
-        model.
-            get(['a', 'b', 'e']).
+        toObservable(model.
+            get(['a', 'b', 'e'])).
             doAction(onNext, noOp, function() {
                 expect(onNext.calledOnce).to.be.ok;
                 var json = onNext.getCall(0).args[0].json;
@@ -140,8 +140,8 @@ describe('Deref', function() {
         });
 
         var onNext = sinon.spy();
-        model.
-            get(['e']).
+        toObservable(model.
+            get(['e'])).
             doAction(onNext, noOp, function() {
                 expect(onNext.calledOnce).to.be.ok;
                 expect(onNext.getCall(0).args[0]).to.deep.equals({

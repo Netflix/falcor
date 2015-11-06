@@ -21,8 +21,8 @@ module.exports = function() {
         model.invalidate('foo.bar');
 
         var onNext = sinon.spy();
-        model.
-            get('foo.bar', 'foo.bazz').
+        toObservable(model.
+            get('foo.bar', 'foo.bazz')).
             doAction(onNext, noOp, function() {
                 expect(onNext.calledOnce).to.be.ok;
                 expect(strip(onNext.getCall(0).args[0])).to.deep.equals({

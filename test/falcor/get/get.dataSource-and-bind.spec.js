@@ -18,8 +18,8 @@ describe('DataSource and Deref', function() {
         var model = new Model({cache: M(), source: new LocalDataSource(Cache())});
         model._root.unsafeMode = true;
         var onNext = sinon.spy();
-        model.
-            get(['lolomo', 0, 0, 'item', 'title']).
+        toObservable(model.
+            get(['lolomo', 0, 0, 'item', 'title'])).
             flatMap(function(x) {
                 return model.
                     deref(x.json.lolomo[0]).

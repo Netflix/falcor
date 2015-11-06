@@ -30,8 +30,8 @@ describe('Error cases', function() {
                     }).
                     subscribe();
 
-                lolomoModel.
-                    get([0, 0, 'item', 'title']).
+                toObservable(lolomoModel.
+                    get([0, 0, 'item', 'title'])).
                     doAction(onNext, function(err) {
                         expect(err.message).to.equals(InvalidModelError.message);
                     }).

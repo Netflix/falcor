@@ -11,8 +11,8 @@ describe('Path Syntax', function() {
         var onNext = sinon.spy();
         var model = new Model();
 
-        model.
-            set({path: 'test[0]', value: 5}).
+        toObservable(model.
+            set({path: 'test[0]', value: 5})).
             doAction(onNext, noOp, function() {
                 expect(onNext.calledOnce).to.be.ok;
                 expect(strip(onNext.getCall(0).args[0])).to.deep.equals({
@@ -29,8 +29,8 @@ describe('Path Syntax', function() {
         var onNext = sinon.spy();
         var model = new Model();
 
-        model.
-            setValue('test[0]', 6).
+        toObservable(model.
+            setValue('test[0]', 6)).
             doAction(onNext, noOp, function() {
                 expect(onNext.calledOnce).to.be.ok;
                 expect(strip(onNext.getCall(0).args[0])).to.equals(6);

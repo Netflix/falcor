@@ -19,8 +19,8 @@ describe('Cache as DataSource', function() {
                 }).asDataSource()
             });
             var onNext = sinon.spy();
-            model.
-                get(['videos', 0, 'title']).
+            toObservable(model.
+                get(['videos', 0, 'title'])).
                 doAction(onNext, noOp, function() {
                     expect(onNext.calledOnce).to.be.ok;
                     expect(clean(onNext.getCall(0).args[0])).to.deep.equals({
@@ -44,9 +44,9 @@ describe('Cache as DataSource', function() {
                 }).asDataSource()
             });
             var onNext = sinon.spy();
-            model.
+            toObservable(model.
                 get(['videos', 0, 'title']).
-                _toJSONG().
+                _toJSONG()).
                 doAction(onNext, noOp, function() {
                     expect(onNext.calledOnce).to.be.ok;
                     expect(clean(onNext.getCall(0).args[0])).to.deep.equals({
@@ -71,8 +71,8 @@ describe('Cache as DataSource', function() {
                 source: new ErrorDataSource(500, 'Oops!')
             }).asDataSource()
         });
-        model.
-            get(['videos', 1234, 'summary']).
+        toObservable(model.
+            get(['videos', 1234, 'summary'])).
             doAction(noOp, function(err) {
                 expect(err).to.deep.equals([{
                     path: ['videos', 1234, 'summary'],
@@ -133,8 +133,8 @@ describe('Cache as DataSource', function() {
 
 
         var onNext = sinon.spy();
-        model.
-            get("lolomo.summary", "lolomo[0..2].summary").
+        toObservable(model.
+            get("lolomo.summary", "lolomo[0..2].summary")).
             doAction(onNext).
             doAction(noOp, noOp, function() {
                 var data = onNext.getCall(0).args[0];

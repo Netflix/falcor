@@ -12,8 +12,8 @@ describe('Spec', function() {
         });
 
         var onNext = sinon.spy();
-        model.
-            get(['lolomo', 0, 0, 'item', 'title']).
+        toObservable(model.
+            get(['lolomo', 0, 0, 'item', 'title'])).
             doAction(onNext, noOp, function() {
                 expect(onNext.calledOnce).to.be.ok;
 
@@ -31,8 +31,8 @@ describe('Spec', function() {
         });
 
         var onNext = sinon.spy();
-        model.
-            get(['lolomo', 0, 0, 'item', 'title']).
+        toObservable(model.
+            get(['lolomo', 0, 0, 'item', 'title'])).
             doAction(onNext, noOp, function() {
                 expect(onNext.calledOnce).to.be.ok;
 
@@ -58,8 +58,8 @@ describe('Spec', function() {
         });
 
         var onNext = sinon.spy();
-        model.
-            get(['a', 'b', 'c', 'd']).
+        toObservable(model.
+            get(['a', 'b', 'c', 'd'])).
             doAction(onNext, noOp, function() {
                 expect(onNext.calledOnce).to.be.ok;
 
@@ -85,8 +85,8 @@ describe('Spec', function() {
         });
 
         var onNext = sinon.spy();
-        model.
-            get(['a', 'b', 'c', 'd']).
+        toObservable(model.
+            get(['a', 'b', 'c', 'd'])).
             doAction(onNext, noOp, function() {
                 expect(onNext.calledOnce).to.be.ok;
 

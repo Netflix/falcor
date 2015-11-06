@@ -34,8 +34,8 @@ describe('DataSource and Deref', function() {
             })
         });
         var onNext = sinon.spy();
-        model.
-            get(['lolomo', 0, 0, 'item', 'title']).
+        toObservable(model.
+            get(['lolomo', 0, 0, 'item', 'title'])).
             flatMap(function(x) {
                 return model.
                     deref(x.json.lolomo[0]).

@@ -22,8 +22,8 @@ describe('DataSource and Partial Cache', function() {
             var model = new Model({cache: M(), source: new LocalDataSource(Cache())});
             var onNext = sinon.spy();
             var secondOnNext = sinon.spy();
-            model.
-                preload(['videos', 0, 'title'], ['videos', 1, 'title']).
+            toObservable(model.
+                preload(['videos', 0, 'title'], ['videos', 1, 'title'])).
                 doAction(onNext, noOp, function() {
                     expect(onNext.callCount).to.equal(0);
                 }).
@@ -53,8 +53,8 @@ describe('DataSource and Partial Cache', function() {
             var model = new Model({cache: M(), source: new LocalDataSource(Cache())});
             var onNext = sinon.spy();
             var secondOnNext = sinon.spy();
-            model.
-                preload(['lolomo', 0, {to: 1}, 'item', 'title']).
+            toObservable(model.
+                preload(['lolomo', 0, {to: 1}, 'item', 'title'])).
                 doAction(onNext).
                 doAction(noOp, noOp, function() {
                     expect(onNext.callCount).to.equal(0);
@@ -91,8 +91,8 @@ describe('DataSource and Partial Cache', function() {
         it('should get multiple arguments into a single toJSON response.', function(done) {
             var model = new Model({cache: M(), source: new LocalDataSource(Cache())});
             var onNext = sinon.spy();
-            model.
-                get(['lolomo', 0, 0, 'item', 'title'], ['lolomo', 0, 1, 'item', 'title']).
+            toObservable(model.
+                get(['lolomo', 0, 0, 'item', 'title'], ['lolomo', 0, 1, 'item', 'title'])).
                 doAction(onNext, noOp, function() {
                     expect(onNext.calledOnce).to.be.ok;
                     expect(strip(onNext.getCall(0).args[0])).to.deep.equals({
@@ -120,8 +120,8 @@ describe('DataSource and Partial Cache', function() {
         it('should get a complex argument into a single arg.', function(done) {
             var model = new Model({cache: M(), source: new LocalDataSource(Cache())});
             var onNext = sinon.spy();
-            model.
-                get(['lolomo', 0, {to: 1}, 'item', 'title']).
+            toObservable(model.
+                get(['lolomo', 0, {to: 1}, 'item', 'title'])).
                 doAction(onNext, noOp, function() {
                     expect(onNext.calledOnce).to.be.ok;
                     expect(strip(onNext.getCall(0).args[0])).to.deep.equals({
@@ -154,8 +154,8 @@ describe('DataSource and Partial Cache', function() {
             });
             var cache = model._root.cache;
             var onNext = sinon.spy();
-            model.
-                get(['lolomo', 0, {to: 1}, 'item', 'title']).
+            toObservable(model.
+                get(['lolomo', 0, {to: 1}, 'item', 'title'])).
                 doAction(onNext, noOp, function() {
                     expect(onNext.calledOnce).to.be.ok;
                     expect(strip(onNext.getCall(0).args[0])).to.deep.equals({
@@ -188,9 +188,9 @@ describe('DataSource and Partial Cache', function() {
         it('should get multiple arguments into a single _toJSONG response.', function(done) {
             var model = new Model({cache: M(), source: new LocalDataSource(Cache())});
             var onNext = sinon.spy();
-            model.
+            toObservable(model.
                 get(['lolomo', 0, 0, 'item', 'title'], ['lolomo', 0, 1, 'item', 'title']).
-                _toJSONG().
+                _toJSONG()).
                 doAction(onNext, noOp, function() {
                     expect(onNext.calledOnce).to.be.ok;
                     var out = strip(onNext.getCall(0).args[0]);
@@ -207,9 +207,9 @@ describe('DataSource and Partial Cache', function() {
         it('should get a complex argument into a single arg.', function(done) {
             var model = new Model({cache: M(), source: new LocalDataSource(Cache())});
             var onNext = sinon.spy();
-            model.
+            toObservable(model.
                 get(['lolomo', 0, {to: 1}, 'item', 'title']).
-                _toJSONG().
+                _toJSONG()).
                 doAction(onNext, noOp, function() {
                     expect(onNext.calledOnce).to.be.ok;
                     var out = strip(onNext.getCall(0).args[0]);
@@ -227,9 +227,9 @@ describe('DataSource and Partial Cache', function() {
         it('should get multiple arguments with multiple trips to the dataSource into a single toJSON response.', function(done) {
             var model = new Model({cache: M(), source: new LocalDataSource(Cache())});
             var count = 0;
-            model.
+            toObservable(model.
                 get(['lolomo', 0, 0, 'item', 'title'], ['lolomo', 0, 1, 'item', 'title']).
-                progressively().
+                progressively()).
                 doAction(function(x) {
                     count++;
                     if (count === 1) {
@@ -275,9 +275,9 @@ describe('DataSource and Partial Cache', function() {
         it('should get complex path with multiple trips to the dataSource into a single toJSON response.', function(done) {
             var model = new Model({cache: M(), source: new LocalDataSource(Cache())});
             var count = 0;
-            model.
+            toObservable(model.
                 get(['lolomo', 0, {to: 1}, 'item', 'title']).
-                progressively().
+                progressively()).
                 doAction(function(x) {
                     count++;
                     if (count === 1) {

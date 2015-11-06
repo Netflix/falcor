@@ -32,9 +32,9 @@ describe('#batch', function() {
 
         var disposable = request.batch([videos0], [videos0], function(err, data) {
             var onNext = sinon.spy();
-            model.
+            toObservable(model.
                 withoutDataSource().
-                get(videos0).
+                get(videos0)).
                 doAction(onNext, noOp, function() {
                     expect(inlineBoolean).to.be.ok;
                     expect(getSpy.calledOnce).to.be.ok;
@@ -69,9 +69,9 @@ describe('#batch', function() {
         });
         var callback = sinon.spy(function(err, data) {
             var onNext = sinon.spy();
-            model.
+            toObservable(model.
                 withoutDataSource().
-                get(videos0).
+                get(videos0)).
                 doAction(onNext, noOp, function() {
                     expect(inlineBoolean).to.not.be.ok;
                     expect(getSpy.calledOnce).to.be.ok;
@@ -108,9 +108,9 @@ describe('#batch', function() {
 
         var zip = zipSpy(2, function() {
             var onNext = sinon.spy();
-            model.
+            toObservable(model.
                 withoutDataSource().
-                get(videos0, videos1).
+                get(videos0, videos1)).
                 doAction(onNext, noOp, function() {
                     expect(strip(onNext.getCall(0).args[0])).to.deep.equals({
                         json: {
@@ -145,9 +145,9 @@ describe('#batch', function() {
 
         var zip = zipSpy(2, function() {
             var onNext = sinon.spy();
-            model.
+            toObservable(model.
                 withoutDataSource().
-                get(videos0, videos1).
+                get(videos0, videos1)).
                 doAction(onNext, noOp, function() {
                     expect(zip.calledOnce).to.be.ok;
                     expect(strip(onNext.getCall(0).args[0])).to.deep.equals({
@@ -182,9 +182,9 @@ describe('#batch', function() {
 
         var zip = zipSpy(2, function() {
             var onNext = sinon.spy();
-            model.
+            toObservable(model.
                 withoutDataSource().
-                get(videos0, videos1).
+                get(videos0, videos1)).
                 doAction(onNext, noOp, function() {
                     expect(zip.calledOnce).to.be.ok;
                     expect(strip(onNext.getCall(0).args[0])).to.deep.equals({

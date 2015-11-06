@@ -29,10 +29,10 @@ describe('Cache as DataSource and Cache', function() {
                 newValue: '2'
             };
             var next = false;
-            model.
+            toObservable(model.
                 set(
                     {path: ['videos', 1234, 'summary'], value: e1},
-                    {path: ['videos', 766, 'summary'], value: e2}).
+                    {path: ['videos', 766, 'summary'], value: e2})).
                 doAction(function(x) {
                     next = true;
                     testRunner.compare({ json: {
@@ -62,8 +62,8 @@ describe('Cache as DataSource and Cache', function() {
                 newValue: '1'
             };
             var next = false;
-            model.
-                set({path: ['genreList', 0, {to: 1}, 'summary'], value: expected}).
+            toObservable(model.
+                set({path: ['genreList', 0, {to: 1}, 'summary'], value: expected})).
                 doAction(function(x) {
                     next = true;
                     testRunner.compare({ json: {
@@ -112,8 +112,8 @@ describe('Cache as DataSource and Cache', function() {
             }).asDataSource() });
         var called = false;
         var sourceCalled = false;
-        model.
-            set({path: ['genreList', 0, 0, 'summary'], value: 5}).
+        toObservable(model.
+            set({path: ['genreList', 0, 0, 'summary'], value: 5})).
             doAction(function(x) {
                 called = true;
             }, noOp, function() {
@@ -132,9 +132,9 @@ describe('Cache as DataSource and Cache', function() {
                 }
             }).asDataSource() });
         var called = false;
-        model.
+        toObservable(model.
             boxValues().
-            set({path: ['genreList', 0, 0, 'summary'], value: 5}).
+            set({path: ['genreList', 0, 0, 'summary'], value: 5})).
             doAction(function(x) {
                 expect(false, 'onNext should not be called.').to.be.ok;
             }, function(e) {

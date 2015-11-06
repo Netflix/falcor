@@ -20,8 +20,8 @@ describe('DataSource Only', function() {
             var model = new Model({source: dataSource});
             var onNext = sinon.spy();
             var secondOnNext = sinon.spy();
-            model.
-                preload(['videos', 0, 'title']).
+            toObservable(model.
+                preload(['videos', 0, 'title'])).
                 doAction(onNext, noOp, function() {
                     expect(onNext.callCount).to.equal(0);
                 }).
@@ -51,9 +51,9 @@ describe('DataSource Only', function() {
             });
             var onNext = sinon.spy();
             var secondOnNext = sinon.spy();
-            model.
+            toObservable(model.
                 preload(['videos', 0, 'title'],
-                    ['videos', 1, 'art']).
+                    ['videos', 1, 'art'])).
                 doAction(onNext).
                 doAction(noOp, noOp, function() {
                     expect(onNext.callCount).to.equal(0);
@@ -76,8 +76,8 @@ describe('DataSource Only', function() {
         it('should get a value from falcor.', function(done) {
             var model = new Model({source: dataSource});
             var onNext = sinon.spy();
-            model.
-                get(['videos', 0, 'title']).
+            toObservable(model.
+                get(['videos', 0, 'title'])).
                 doAction(onNext, noOp, function() {
                     expect(strip(onNext.getCall(0).args[0])).to.deep.equals({
                         json: {videos: {0: {title: 'Video 0'}}}
@@ -90,9 +90,9 @@ describe('DataSource Only', function() {
         it('should get a value from falcor.', function(done) {
             var model = new Model({source: dataSource});
             var onNext = sinon.spy();
-            model.
+            toObservable(model.
                 get(['videos', 0, 'title']).
-                _toJSONG().
+                _toJSONG()).
                 doAction(onNext, noOp, function() {
                     expect(strip(onNext.getCall(0).args[0])).to.deep.equals({
                         jsonGraph: {
@@ -112,8 +112,8 @@ describe('DataSource Only', function() {
         var model = new Model({
             source: new ErrorDataSource(500, 'Oops!')
         });
-        model.
-            get(['videos', 0, 'title']).
+        toObservable(model.
+            get(['videos', 0, 'title'])).
             doAction(noOp, function(err) {
                 expect(err).to.deep.equals([{
                     path: ['videos', 0, 'title'],
@@ -173,8 +173,8 @@ describe('DataSource Only', function() {
 
 
         var onNext = sinon.spy();
-        model.
-            get("lolomo.summary", "lolomo[0..2].summary").
+        toObservable(model.
+            get("lolomo.summary", "lolomo[0..2].summary")).
             doAction(onNext, noOp, function() {
                 var data = onNext.getCall(0).args[0];
                 var json = data.json;
@@ -195,8 +195,8 @@ describe('DataSource Only', function() {
         });
         var model = new Model({source: source}).batch();
         var onNext = sinon.spy();
-        var disposable = model.
-            get(['videos', 0, 'title']).
+        var disposable = toObservable(model.
+            get(['videos', 0, 'title'])).
             doAction(onNext, noOp, function() {
                 throw new Error('Should not of completed.  It was disposed.');
             }).
@@ -222,15 +222,15 @@ describe('DataSource Only', function() {
         });
         var model = new Model({source: source}).batch();
         var onNext = sinon.spy();
-        var disposable = model.
-            get(['videos', 0, 'title']).
+        var disposable = toObservable(model.
+            get(['videos', 0, 'title'])).
             doAction(onNext, noOp, function() {
                 throw new Error('Should not of completed.  It was disposed.');
             }).
             subscribe(noOp, done);
         var onNext2 = sinon.spy();
-        model.
-            get(['videos', 0, 'title']).
+        toObservable(model.
+            get(['videos', 0, 'title'])).
             doAction(onNext2).
             subscribe(noOp, done);
 
@@ -258,8 +258,8 @@ describe('DataSource Only', function() {
     });
     it('should throw a MaxRetryExceededError.', function(done) {
         var model = new Model({ source: new LocalDataSource({}) });
-        model.
-            get(['videos', 0, 'title']).
+        toObservable(model.
+            get(['videos', 0, 'title'])).
             doAction(noOp, function(e) {
                 expect(MaxRetryExceededError.is(e), 'MaxRetryExceededError expected.').to.be.ok;
             }).

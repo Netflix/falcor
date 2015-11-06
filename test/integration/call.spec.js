@@ -37,8 +37,8 @@ describe('call', function() {
         });
         var args = [falcor.Model.ref('titlesById[1]')];
         var onNext = sinon.spy();
-        model.
-            call("genreList[0].titles.push", args, ['name']).
+        toObservable(model.
+            call("genreList[0].titles.push", args, ['name'])).
             doAction(onNext, noOp, function() {
                 expect(onNext.calledOnce).to.be.ok;
                 expect(strip(onNext.getCall(0).args[0])).to.deep.equals({
@@ -77,8 +77,8 @@ describe('call', function() {
         });
         var args = [falcor.Model.ref('titlesById[1]')];
         var onNext = sinon.spy();
-        model.
-            call("genreList[0].titles.push", args, ['name']).
+        toObservable(model.
+            call("genreList[0].titles.push", args, ['name'])).
             doAction(onNext, noOp, function() {
                 expect(onNext.callCount).to.equal(0);
             }).

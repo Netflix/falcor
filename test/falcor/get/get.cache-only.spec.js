@@ -16,8 +16,8 @@ describe('Cache Only', function() {
                 cache: cacheGenerator(0, 1)
             });
             var onNext = sinon.spy();
-            model.
-                get(['videos', 0, 'title']).
+            toObservable(model.
+                get(['videos', 0, 'title'])).
                 doAction(onNext, noOp, function() {
                     expect(onNext.callCount).to.equal(1);
                     expect(clean(onNext.getCall(0).args[0])).to.deep.equals({
@@ -37,8 +37,8 @@ describe('Cache Only', function() {
                 cache: cacheGenerator(0, 1)
             });
             var onNext = sinon.spy();
-            model.
-                get(['videos', [], 'title']).
+            toObservable(model.
+                get(['videos', [], 'title'])).
                 doAction(onNext, noOp, function() {
                     expect(onNext.callCount).to.equal(0);
                 }).
@@ -56,7 +56,7 @@ describe('Cache Only', function() {
                 then(onNext, onError).
                 then(function() {
                     if (onError.callCount) {
-                        return done(onError.getCall(0).args[0]);
+                        throw onError.getCall(0).args[0];
                     }
 
                     expect(onNext.callCount).to.equal(1);
@@ -80,9 +80,9 @@ describe('Cache Only', function() {
                 cache: cacheGenerator(0, 30)
             });
             var onNext = sinon.spy();
-            model.
+            toObservable(model.
                 get(['lolomo', 0, 0, 'item', 'title']).
-                _toJSONG().
+                _toJSONG()).
                 doAction(onNext, noOp, function() {
                     var out = clean(onNext.getCall(0).args[0]);
                     var expected = clean({
