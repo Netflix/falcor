@@ -1,6 +1,7 @@
 # 0.x to 1.x
 No More Rx
 -------
+[Documentation on ModelResponse is found here](http://netflix.github.io/falcor/doc/ModelResponse.html)
 
 In 0.x `ModelResponse`'s prototype inherited from `Rx.Observable` in the
 following way.
@@ -111,6 +112,8 @@ output format.
 
 Deref
 -------------
+[Documentation on deref is found here](http://netflix.github.io/falcor/doc/Model.html#deref)
+
 `deref` has changed to use the output from a `ModelResponse` instead of
 specifying the destination via path and leaves.
 
