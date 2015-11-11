@@ -68,16 +68,17 @@ body {
   & .site-footer-item {
     height: @site-footer-height;
     display: flex;
-    align-items: center;    
-  }
-  
-  & .footer-links {
+    align-items: center;
     color: @site-footer-text-color;
-    justify-content: flex-end;
-    
+
     & a {
       color: @site-footer-link-color;
     }
+  }
+
+  & .site-footer-branding {
+    
+    justify-content: flex-end;
     
     .copyright-notice {
       font-size: 0.75em;
@@ -88,6 +89,12 @@ body {
       
       .copyright-notice {
         font-size: 0.6em;
+      }
+    }
+
+    .netflix-oss-logo {
+      &:hover, &:focus {
+        text-decoration: none;
       }
     }
   }
