@@ -3,7 +3,7 @@ var ref = jsonGraph.ref;
 var atom = jsonGraph.atom;
 var VIDEO_COUNT_PER_LIST = 10;
 var __key = require('./../lib/internal/key');
-var __path = require('./../lib/internal/path');
+var __refReference = require('./../lib/internal/refRef');
 var __parent = require('./../lib/internal/parent');
 
 module.exports = {
@@ -35,7 +35,7 @@ module.exports = {
     lolomoGenerator: function(lists, items, fields) {
         fields = fields || ['title'];
         var lolomo = {};
-        lolomo[__path] = ['lolomos', 1234];
+        lolomo[__refReference] = ['lolomos', 1234];
         var json = {
             json: {
                 lolomo: lolomo
@@ -44,7 +44,7 @@ module.exports = {
 
         lists.forEach(function(listIndex) {
             var list = {};
-            list[__path] = getListRef(listIndex);
+            list[__refReference] = getListRef(listIndex);
             lolomo[listIndex] = list;
 
             items.forEach(function(itemIndex) {
@@ -73,7 +73,7 @@ function getListRef(listIndex) {
 function getItemObject(listIndex, itemIndex, fields) {
     var videoIdx = listIndex * VIDEO_COUNT_PER_LIST + itemIndex;
     var item = {};
-    item[__path] = ['videos', videoIdx];
+    item[__refReference] = ['videos', videoIdx];
 
     fields.forEach(function(f) {
         item[f] = 'Video ' + videoIdx;
