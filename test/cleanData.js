@@ -1,13 +1,15 @@
 var __key = require('./../lib/internal/key');
 var __path = require('./../lib/internal/path');
 var __parent = require('./../lib/internal/parent');
-
-var internalKeys = [__parent, __path, __key, '__version'];
+var __refReference = require('./../lib/internal/refRef.js');
+var util = require('util');
+var internalKeys = [__refReference, __parent, __path, __key, '__version'];
 
 module.exports = {
     clean: clean,
     strip: strip,
     internalKeys: internalKeys,
+    convert: convert,
     stripDerefAndVersionKeys: function(item) {
         strip.apply(null, [item, '$size'].concat(internalKeys));
         return item;
@@ -20,12 +22,29 @@ function clean(item, options) {
         strip: ['$size'].concat(internalKeys)
     };
 
-    strip.apply(null, [item, __key].concat(options.strip));
+    strip.apply(null, [item].concat(options.strip));
     traverseAndConvert(item);
 
     return item;
 }
 
+function convert(obj, config) {
+    if (obj != null && typeof obj === "object") {
+        Object.keys(config).forEach(function(key) {
+            // Converts the object.
+            if (obj[key]) {
+                obj[key] = config[key](obj[key]);
+            }
+        });
+
+        Object.keys(obj).forEach(function(k) {
+            if (typeof obj[k] === "object" && !Array.isArray(obj[k])) {
+                convert(obj[k], config);
+            }
+        });
+    }
+    return obj;
+}
 
 function traverseAndConvert(obj) {
     if (Array.isArray(obj)) {

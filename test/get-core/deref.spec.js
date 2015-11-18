@@ -11,8 +11,8 @@ var BoundJSONGraphModelError = require('./../../lib/errors/BoundJSONGraphModelEr
 var sinon = require('sinon');
 var noOp = function() {};
 var __key = require('./../../lib/internal/key');
-var __path = require('./../../lib/internal/path');
 var __parent = require('./../../lib/internal/parent');
+var __refReference = require('./../../lib/internal/refRef');
 
 describe('Deref', function() {
     // PathMap ----------------------------------------
@@ -30,7 +30,11 @@ describe('Deref', function() {
     });
     it('should get multiple arguments out of the cache.', function() {
         var output = outputGenerator.lolomoGenerator([0], [0, 1]).json.lolomo[0];
-        delete output[__path];
+
+        // This is intentional since we are "cheating" in how we are developing our output.
+        // __refReference would never exist at this level since we are derefenced to
+        // this location already, but generating test output from root.
+        delete output[__refReference];
         getCoreRunner({
             input: [
                 [0, 'item', 'title'],
@@ -95,25 +99,25 @@ describe('Deref', function() {
 
                 // Top level
                 expect(json[__parent]).to.be.not.ok;
-                expect(json[__path]).to.be.not.ok;
+                expect(json[__refReference]).to.be.not.ok;
                 expect(json[__key]).to.be.not.ok;
 
                 // a
                 var a = json.a;
                 expect(a[__parent]).to.equals(null);
-                expect(a[__path]).to.be.not.ok;
+                expect(a[__refReference]).to.be.not.ok;
                 expect(a[__key]).to.equals('a');
 
                 // b
                 var b = a.b;
                 expect(b[__parent][__key]).to.equals('a');
-                expect(b[__path]).to.be.not.ok;
+                expect(b[__refReference]).to.be.not.ok;
                 expect(b[__key]).to.equals('b');
 
                 // e
                 var e = b.e;
                 expect(e[__parent]).to.be.not.ok;
-                expect(e[__path]).to.be.not.ok;
+                expect(e[__refReference]).to.be.not.ok;
                 expect(e[__key]).to.be.not.ok;
                 expect(e).to.equals('&');
             }).

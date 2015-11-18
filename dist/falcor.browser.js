@@ -845,7 +845,6 @@ function InvalidModelError(boundPath, shortedPath) {
 // instanceof will be an error, but stack will be correct because its defined in the constructor.
 InvalidModelError.prototype = new Error();
 InvalidModelError.prototype.name = NAME;
-InvalidModelError.name = NAME;
 InvalidModelError.message = MESSAGE;
 
 module.exports = InvalidModelError;
@@ -869,7 +868,6 @@ function InvalidSourceError(error) {
 // in the constructor.
 InvalidSourceError.prototype = new Error();
 InvalidSourceError.prototype.name = NAME;
-InvalidSourceError.name = NAME;
 InvalidSourceError.is = function(e) {
     return e && e.name === NAME;
 };
@@ -893,7 +891,6 @@ function MaxRetryExceededError() {
 // in the constructor.
 MaxRetryExceededError.prototype = new Error();
 MaxRetryExceededError.prototype.name = NAME;
-MaxRetryExceededError.name = NAME;
 MaxRetryExceededError.is = function(e) {
     return e && e.name === NAME;
 };
@@ -4966,7 +4963,7 @@ module.exports = function arrayFlatMap(array, selector) {
     var index = -1;
     var i = -1;
     var n = array.length;
-    var array2 = new Array(n);
+    var array2 = [];
     while (++i < n) {
         var array3 = selector(array[i], i, array);
         var j = -1;
@@ -6446,46 +6443,44 @@ function onXhrError(observer, xhr, status, e) {
 module.exports = request;
 
 },{"128":128,"129":129}],131:[function(require,module,exports){
-var pathSyntax = require(135);
-
 function sentinel(type, value, props) {
     var copy = Object.create(null);
     if (props != null) {
         for(var key in props) {
             copy[key] = props[key];
         }
-        
+
         copy["$type"] = type;
         copy.value = value;
         return copy;
     }
     else {
         return { $type: type, value: value };
-    }    
+    }
 }
 
 module.exports = {
     ref: function ref(path, props) {
-        return sentinel("ref", pathSyntax.fromPath(path), props);
+        return sentinel("ref", path, props);
     },
     atom: function atom(value, props) {
-        return sentinel("atom", value, props);        
+        return sentinel("atom", value, props);
     },
     undefined: function() {
         return sentinel("atom");
-    },    
+    },
     error: function error(errorValue, props) {
-        return sentinel("error", errorValue, props);        
+        return sentinel("error", errorValue, props);
     },
     pathValue: function pathValue(path, value) {
-        return { path: pathSyntax.fromPath(path), value: value };
+        return { path: path, value: value };
     },
     pathInvalidation: function pathInvalidation(path) {
-        return { path: pathSyntax.fromPath(path), invalidated: true };
-    }    
+        return { path: path, invalidated: true };
+    }
 };
 
-},{"135":135}],132:[function(require,module,exports){
+},{}],132:[function(require,module,exports){
 module.exports = {
     integers: 'integers',
     ranges: 'ranges',
