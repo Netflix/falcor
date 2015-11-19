@@ -6,11 +6,13 @@ var _ = require('lodash');
 var get = require('./../../lib/get');
 var getWithPathsAsJSONGraph = get.getWithPathsAsJSONGraph;
 var getWithPathsAsPathMap = get.getWithPathsAsPathMap;
+var cacheGenerator = require('./../CacheGenerator');
 
 var __head = require("./../../lib/internal/head");
 var __tail = require("./../../lib/internal/tail");
 var __next = require("./../../lib/internal/next");
 var __prev = require("./../../lib/internal/prev");
+var __key = require("./../../lib/internal/key");
 
 describe('Get', function () {
     describe('getPaths', function () {
@@ -82,5 +84,49 @@ describe('Multiple Gets', function () {
         current = current[__prev];
         expect(current.value).to.equal('I am 1');
         expect(current[__prev]).to.equal(undefined);
+    });
+
+    it('should promote references on a get.', function() {
+        var model = new Model({
+            cache: cacheGenerator(0, 1)
+        });
+
+        var root = model._root;
+        var curr = root[__head];
+        expect(curr[__key]).to.equals('title');
+        expect(curr.value).to.deep.equals('Video 0');
+
+        curr = curr[__next];
+        expect(curr[__key]).to.equals('item');
+        expect(curr.value).to.deep.equals(['videos', '0']);
+
+        curr = curr[__next];
+        expect(curr[__key]).to.equals('0');
+        expect(curr.value).to.deep.equals(['lists', 'A']);
+
+        curr = curr[__next];
+        expect(curr[__key]).to.equals('lolomo');
+        expect(curr.value).to.deep.equals(['lolomos', '1234']);
+        expect(curr[__next]).to.be.not.ok;
+
+        model.get(['lolomo', 0]).subscribe();
+
+        // new order to the list
+        curr = root[__head];
+        expect(curr[__key]).to.equals('0');
+        expect(curr.value).to.deep.equals(['lists', 'A']);
+
+        curr = curr[__next];
+        expect(curr[__key]).to.equals('lolomo');
+        expect(curr.value).to.deep.equals(['lolomos', '1234']);
+
+        curr = curr[__next];
+        expect(curr[__key]).to.equals('title');
+        expect(curr.value).to.deep.equals('Video 0');
+
+        curr = curr[__next];
+        expect(curr[__key]).to.equals('item');
+        expect(curr.value).to.deep.equals(['videos', '0']);
+        expect(curr[__next]).to.be.not.ok;
     });
 });

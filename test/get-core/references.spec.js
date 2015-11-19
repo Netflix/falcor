@@ -5,7 +5,7 @@ var atom = jsonGraph.atom;
 var ref = jsonGraph.ref;
 var _ = require('lodash');
 var __key = require('./../../lib/internal/key');
-var __path = require('./../../lib/internal/path');
+var __refReference = require('./../../lib/internal/refRef');
 var __parent = require('./../../lib/internal/parent');
 
 describe('References', function() {
@@ -15,8 +15,11 @@ describe('References', function() {
             short: ref(['toShort', 'next']),
             circular: ref(['circular', 'next']),
             to: {
-                reference: ref(['to']),
-                toValue: ref(['to', 'title']),
+                reference: ref(['too']),
+                toValue: ref(['too', 'title']),
+                title: 'Title'
+            },
+            too: {
                 title: 'Title'
             },
             toShort: 'Short'
@@ -27,9 +30,10 @@ describe('References', function() {
         var toReference = {
             title: 'Title'
         };
+        toReference[__refReference] = ['too'];
+
         // Should be the second references reference not
         // toReferences reference.
-        toReference[__path] = ['to'];
         getCoreRunner({
             input: [['toReference', 'title']],
             output: {
@@ -73,7 +77,9 @@ describe('References', function() {
             toValue: 'Title'
         };
         to[__key] = 'to';
-        to.reference[__path] = ['to'];
+        to[__parent] = null;
+        to.reference[__refReference] = ['too'];
+
         getCoreRunner({
             input: [
                 ['to', ['reference', 'toValue'], 'title'],

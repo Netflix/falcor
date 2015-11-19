@@ -5,7 +5,6 @@ var jsonGraph = require('falcor-json-graph');
 var atom = jsonGraph.atom;
 var _ = require('lodash');
 var __key = require('./../../lib/internal/key');
-var __path = require('./../../lib/internal/path');
 var __parent = require('./../../lib/internal/parent');
 
 describe('Values', function() {
@@ -40,7 +39,9 @@ describe('Values', function() {
             length: 1,
             0: lolomo0
         };
+        lolomo0[__parent] = lolomo;
         lolomo[__key] = 'lolomo';
+        lolomo[__parent] = null;
         var output = {
             json: {
                 lolomo: lolomo
