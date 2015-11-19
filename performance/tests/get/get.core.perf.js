@@ -9,17 +9,15 @@ var cache = cacheGenerator(0, 50);
 var model = new Model({
     cache: cache
 });
+var getWithPathsAsPathMap = require('./../../../lib/get').getWithPathsAsPathMap;
 
 model.get(complex[0]).subscribe(function(data) { });
 
-var getWithPathsAsPathMap = require('./../../../lib/get').getWithPathsAsPathMap;
-var out = {};
-for (var i = 0; i < 5; ++i) {
-    out['rowTest ' + i] = rowTest;
-}
-
+module.exports = function(out, count) {
+    for (var i = 0; i < count; ++i) {
+        out['rowTest ' + i] = rowTest;
+    }
+};
 function rowTest() {
     getWithPathsAsPathMap(model, row, [{}]);
 }
-
-module.exports = out;
