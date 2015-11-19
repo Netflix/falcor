@@ -25,7 +25,7 @@ describe('Spec', function() {
             subscribe(noOp, done, done);
     });
 
-    it.only('should deref on a __key to __path cache response.', function(done) {
+    it('should deref on a __key to __path cache response.', function(done) {
         var model = new Model({
             cache: cacheGenerator(0, 1)
         });
