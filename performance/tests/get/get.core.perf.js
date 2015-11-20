@@ -11,13 +11,19 @@ var model = new Model({
 });
 var getWithPathsAsPathMap = require('./../../../lib/get').getWithPathsAsPathMap;
 
-model.get(complex[0]).subscribe(function(data) { });
+module.exports = function setJSONGraphTests(out, count) {
+    count = count || 5;
+    out = out || {};
 
-module.exports = function(out, count) {
     for (var i = 0; i < count; ++i) {
-        out['rowTest ' + i] = rowTest;
+        out['get.core.row' + i] = rowTest;
     }
+
+    return out;
 };
+
+rowTest();
+
 function rowTest() {
     getWithPathsAsPathMap(model, row, [{}]);
 }
