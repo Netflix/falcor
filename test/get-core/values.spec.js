@@ -4,7 +4,6 @@ var outputGenerator = require('./../outputGenerator');
 var jsonGraph = require('falcor-json-graph');
 var atom = jsonGraph.atom;
 var _ = require('lodash');
-var __path = require('./../../lib/internal/path');
 
 describe('Values', function() {
     // PathMap ----------------------------------------
@@ -33,12 +32,12 @@ describe('Values', function() {
         var lolomo0 = {
             length: 1337
         };
-        lolomo0[__path] = ['lolomo', '0'];
+        lolomo0.$__path = ['lolomo', '0'];
         var lolomo = {
             length: 1,
             0: lolomo0
         };
-        lolomo[__path] = ['lolomo'];
+        lolomo.$__path = ['lolomo'];
         var output = {
             json: {
                 lolomo: lolomo

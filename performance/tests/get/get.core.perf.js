@@ -10,6 +10,7 @@ var model = new Model({
     cache: cache
 });
 var getWithPathsAsPathMap = require('./../../../lib/get').getWithPathsAsPathMap;
+model._allowEnumerableMetadata = true;
 
 module.exports = function getRowTests(out, count) {
     count = count || 5;
@@ -27,5 +28,4 @@ rowTest();
 function rowTest() {
     var seed = [{}];
     getWithPathsAsPathMap(model, row, seed);
-    debugger
 }

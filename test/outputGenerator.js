@@ -1,14 +1,13 @@
 var jsonGraph = require('falcor-json-graph');
 var ref = jsonGraph.ref;
 var atom = jsonGraph.atom;
-var __path = require('./../lib/internal/path');
 var VIDEO_COUNT_PER_LIST = 10;
 
 module.exports = {
     videoGenerator: function(ids, fields) {
         fields = fields || ['title'];
         var videos = {};
-        videos[__path] = ['videos'];
+        videos.$__path = ['videos'];
         var json = {
             json: {
                 videos: videos
@@ -17,7 +16,7 @@ module.exports = {
 
         ids.forEach(function(id) {
             var video = {};
-            video[__path] = ['videos', id];
+            video.$__path = ['videos', id];
 
             fields.forEach(function(field) {
                 video[field] = 'Video ' + id;
@@ -31,7 +30,7 @@ module.exports = {
     lolomoGenerator: function(lists, items, fields) {
         fields = fields || ['title'];
         var lolomo = {};
-        lolomo[__path] = ['lolomos', 1234];
+        lolomo.$__path = ['lolomos', 1234];
         var json = {
             json: {
                 lolomo: lolomo
@@ -40,12 +39,12 @@ module.exports = {
 
         lists.forEach(function(listIndex) {
             var list = {};
-            list[__path] = getListRef(listIndex);
+            list.$__path = getListRef(listIndex);
             lolomo[listIndex] = list;
 
             items.forEach(function(itemIndex) {
                 var ro = list[itemIndex] = {};
-                ro[__path] = getListRef(listIndex).concat(itemIndex);
+                ro.$__path = getListRef(listIndex).concat(itemIndex);
                 ro.item = getItemObject(listIndex, itemIndex, fields);
             });
         });
@@ -68,7 +67,7 @@ function getListRef(listIndex) {
 function getItemObject(listIndex, itemIndex, fields) {
     var videoIdx = listIndex * VIDEO_COUNT_PER_LIST + itemIndex;
     var item = {};
-    item[__path] = ['videos', videoIdx];
+    item.$__path = ['videos', videoIdx];
 
     fields.forEach(function(f) {
         item[f] = 'Video ' + videoIdx;

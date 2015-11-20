@@ -10,7 +10,6 @@ var Model = require('./../../lib').Model;
 var BoundJSONGraphModelError = require('./../../lib/errors/BoundJSONGraphModelError');
 var sinon = require('sinon');
 var noOp = function() {};
-var __path = require('./../../lib/internal/path');
 
 describe('Deref', function() {
     // PathMap ----------------------------------------
@@ -31,7 +30,7 @@ describe('Deref', function() {
 
         // Cheating in how we are creating the output.  'path' key should not exist
         // at the top level of output.
-        delete output[__path];
+        delete output.$__path;
         getCoreRunner({
             input: [
                 [0, 'item', 'title'],
@@ -95,15 +94,15 @@ describe('Deref', function() {
                 var json = onNext.getCall(0).args[0].json;
 
                 // Top level
-                expect(json[__path]).to.be.not.ok;
+                expect(json.$__path).to.be.not.ok;
 
                 // a
                 var a = json.a;
-                expect(a[__path]).to.deep.equals(['a']);
+                expect(a.$__path).to.deep.equals(['a']);
 
                 // b
                 var b = a.b;
-                expect(b[__path]).to.deep.equals(['a', 'b']);
+                expect(b.$__path).to.deep.equals(['a', 'b']);
 
                 // e
                 var e = b.e;
