@@ -1,6 +1,7 @@
 var testMerge = require('./testMerge');
 var standardTest = {
-    './set/set.json-graph.perf': 5
+    './get/get.core.perf.js': 5,
+    //'./set/set.json-graph.perf': 5
 };
 
 module.exports = function(name) {
