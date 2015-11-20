@@ -7,9 +7,7 @@ var ref = jsonGraph.ref;
 var $ref = require('./../../lib/types/ref');
 var $atom = require('./../../lib/types/atom');
 var _ = require('lodash');
-var __key = require('./../../lib/internal/key');
-var __parent = require('./../../lib/internal/parent');
-var __refReference = require('./../../lib/internal/refRef');
+var __path = require('./../../lib/internal/path');
 
 describe('Edges', function() {
     // PathMap ----------------------------------------
@@ -62,10 +60,8 @@ describe('Edges', function() {
                 }
             }
         };
-        output.videos[__key] = 'videos';
-        output.videos[__parent] = null;
-        output.videos[1234][__key] = 1234;
-        output.videos[1234][__parent] = output.videos;
+        output.videos[__path] = ['videos']
+        output.videos[1234][__path] = ['videos', 1234];
 
         getCoreRunner({
             input: [['videos', 1234, 'title']],

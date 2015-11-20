@@ -4,9 +4,7 @@ var jsonGraph = require('falcor-json-graph');
 var atom = jsonGraph.atom;
 var ref = jsonGraph.ref;
 var _ = require('lodash');
-var __key = require('./../../lib/internal/key');
-var __refReference = require('./../../lib/internal/refRef');
-var __parent = require('./../../lib/internal/parent');
+var __path = require('./../../lib/internal/path');
 
 describe('References', function() {
     var referenceCache = function() {
@@ -30,7 +28,7 @@ describe('References', function() {
         var toReference = {
             title: 'Title'
         };
-        toReference[__refReference] = ['too'];
+        toReference[__path] = ['too'];
 
         // Should be the second references reference not
         // toReferences reference.
@@ -76,9 +74,8 @@ describe('References', function() {
             },
             toValue: 'Title'
         };
-        to[__key] = 'to';
-        to[__parent] = null;
-        to.reference[__refReference] = ['too'];
+        to[__path] = ['to'];
+        to.reference[__path] = ['too'];
 
         getCoreRunner({
             input: [

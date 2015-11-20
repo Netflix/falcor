@@ -4,17 +4,33 @@ var __parent = require('./../lib/internal/parent');
 var __refReference = require('./../lib/internal/refRef.js');
 var util = require('util');
 var internalKeys = [__refReference, __parent, __path, __key, '__version'];
+var $modelCreated = require('./../lib/internal/model-created.js');
 
 module.exports = {
     clean: clean,
     strip: strip,
     internalKeys: internalKeys,
-    convert: convert,
+    convertKey: convert,
+    convertModelCreatedAtoms: convertModelCreatedAtoms,
+    convertNodes: function convertNodesHeader(obj, transform) {
+        return convertNodes(null, null, obj, transform);
+    },
     stripDerefAndVersionKeys: function(item) {
         strip.apply(null, [item, '$size'].concat(internalKeys));
         return item;
     },
     traverseAndConvert: traverseAndConvert
+};
+
+function convertModelCreatedAtoms(cache) {
+    convertNodes(null, null, cache, function transform(sentinel) {
+        if (sentinel.$type === 'atom' && sentinel[$modelCreated] &&
+            typeof sentinel.value !== 'object') {
+
+            return sentinel.value;
+        }
+        return sentinel;
+    });
 };
 
 function clean(item, options) {
@@ -26,6 +42,21 @@ function clean(item, options) {
     traverseAndConvert(item);
 
     return item;
+}
+
+function convertNodes(parent, fromKey, obj, transform) {
+    if (obj != null && typeof obj === "object") {
+        if (obj.$type) {
+            parent[fromKey] = transform(obj);
+        }
+
+        Object.keys(obj).forEach(function(k) {
+            if (typeof obj[k] === "object" && !Array.isArray(obj[k])) {
+                convertNodes(obj, k, obj[k], transform);
+            }
+        });
+    }
+    return obj;
 }
 
 function convert(obj, config) {

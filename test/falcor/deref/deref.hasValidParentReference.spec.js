@@ -8,7 +8,7 @@ var __head = require('./../../../lib/internal/head');
 var __next = require('./../../../lib/internal/next');
 var __key = require('./../../../lib/internal/key');
 
-describe('hasValidParentReference', function() {
+xdescribe('hasValidParentReference', function() {
     it('should have a valid parent reference when derefd.', function() {
         var cache = cacheGenerator(0, 30);
         var model = new Model({

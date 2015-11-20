@@ -10,9 +10,7 @@ var Model = require('./../../lib').Model;
 var BoundJSONGraphModelError = require('./../../lib/errors/BoundJSONGraphModelError');
 var sinon = require('sinon');
 var noOp = function() {};
-var __key = require('./../../lib/internal/key');
-var __parent = require('./../../lib/internal/parent');
-var __refReference = require('./../../lib/internal/refRef');
+var __path = require('./../../lib/internal/path');
 
 describe('Deref', function() {
     // PathMap ----------------------------------------
@@ -31,10 +29,9 @@ describe('Deref', function() {
     it('should get multiple arguments out of the cache.', function() {
         var output = outputGenerator.lolomoGenerator([0], [0, 1]).json.lolomo[0];
 
-        // This is intentional since we are "cheating" in how we are developing our output.
-        // __refReference would never exist at this level since we are derefenced to
-        // this location already, but generating test output from root.
-        delete output[__refReference];
+        // Cheating in how we are creating the output.  'path' key should not exist
+        // at the top level of output.
+        delete output[__path];
         getCoreRunner({
             input: [
                 [0, 'item', 'title'],
@@ -98,27 +95,18 @@ describe('Deref', function() {
                 var json = onNext.getCall(0).args[0].json;
 
                 // Top level
-                expect(json[__parent]).to.be.not.ok;
-                expect(json[__refReference]).to.be.not.ok;
-                expect(json[__key]).to.be.not.ok;
+                expect(json[__path]).to.be.not.ok;
 
                 // a
                 var a = json.a;
-                expect(a[__parent]).to.equals(null);
-                expect(a[__refReference]).to.be.not.ok;
-                expect(a[__key]).to.equals('a');
+                expect(a[__path]).to.deep.equals(['a']);
 
                 // b
                 var b = a.b;
-                expect(b[__parent][__key]).to.equals('a');
-                expect(b[__refReference]).to.be.not.ok;
-                expect(b[__key]).to.equals('b');
+                expect(b[__path]).to.deep.equals(['a', 'b']);
 
                 // e
                 var e = b.e;
-                expect(e[__parent]).to.be.not.ok;
-                expect(e[__refReference]).to.be.not.ok;
-                expect(e[__key]).to.be.not.ok;
                 expect(e).to.equals('&');
             }).
             subscribe(noOp, done, done);

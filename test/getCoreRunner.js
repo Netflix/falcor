@@ -7,21 +7,6 @@ var __parent = require('./../lib/internal/parent');
 var __key = require('./../lib/internal/key');
 var __refReference = require('./../lib/internal/refRef');
 
-var convertConfig = {};
-convertConfig[__parent] = function parentConverter(value) {
-    if (value) {
-        return value[__key];
-    }
-    return null;
-};
-convertConfig[__refReference] = function referenceConverter(value) {
-    // its been converted already by some other mechanism.
-    if (Array.isArray(value)) {
-        return value;
-    }
-    return value.value;
-};
-
 module.exports = function(testConfig) {
     var isJSONG = testConfig.isJSONG;
 
@@ -83,8 +68,6 @@ module.exports = function(testConfig) {
     // $size is stripped out of basic core tests.
     // We have to strip out parent as well from the output since it will produce
     // infinite recursion.
-    convert(seed[0], convertConfig);
-    convert(expectedOutput, convertConfig);
     clean(seed[0], {strip: ['$size']});
     clean(expectedOutput, {strip: ['$size']});
 
