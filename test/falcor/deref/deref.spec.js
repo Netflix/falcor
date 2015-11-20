@@ -37,6 +37,7 @@ describe('Spec', function() {
                 expect(onNext.calledOnce).to.be.ok;
 
                 var json = onNext.getCall(0).args[0].json;
+                debugger
                 var lolomoModel = model.deref(json.lolomo[0][0]);
 
                 expect(lolomoModel._path).to.deep.equals(['lists', 'A', 0]);

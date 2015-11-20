@@ -2,7 +2,25 @@ var get = require('./../lib/get');
 var Model = require('./../lib');
 var expect = require('chai').expect;
 var clean = require('./cleanData').clean;
+var convert = require('./cleanData').convert;
 var __parent = require('./../lib/internal/parent');
+var __key = require('./../lib/internal/key');
+var __refReference = require('./../lib/internal/refRef');
+
+var convertConfig = {};
+convertConfig[__parent] = function parentConverter(value) {
+    if (value) {
+        return value[__key];
+    }
+    return null;
+};
+convertConfig[__refReference] = function referenceConverter(value) {
+    // its been converted already by some other mechanism.
+    if (Array.isArray(value)) {
+        return value;
+    }
+    return value.value;
+};
 
 module.exports = function(testConfig) {
     var isJSONG = testConfig.isJSONG;
@@ -65,8 +83,10 @@ module.exports = function(testConfig) {
     // $size is stripped out of basic core tests.
     // We have to strip out parent as well from the output since it will produce
     // infinite recursion.
-    clean(seed[0], {strip: ['$size', __parent]});
-    clean(expectedOutput, {strip: ['$size', __parent]});
+    convert(seed[0], convertConfig);
+    convert(expectedOutput, convertConfig);
+    clean(seed[0], {strip: ['$size']});
+    clean(expectedOutput, {strip: ['$size']});
 
     if (expectedOutput) {
         expect(seed[0]).to.deep.equals(expectedOutput);

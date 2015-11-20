@@ -38,7 +38,7 @@
         "valid-typeof": [ 2 ],
 
         // best practices
-        "block-scoped-var": [ 1 ],
+        "block-scoped-var": [ 2 ],
         // warning for now until we get them fixed
         "consistent-return": [ 2 ],
         "curly": [ 2 ],

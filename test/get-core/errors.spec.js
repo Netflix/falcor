@@ -6,7 +6,7 @@ var ref = jsonGraph.ref;
 var error = jsonGraph.error;
 var _ = require('lodash');
 var __key = require('./../../lib/internal/key');
-var __path = require('./../../lib/internal/path');
+var __refReference = require('./../../lib/internal/refRef');
 var __parent = require('./../../lib/internal/parent');
 
 describe('Errors', function() {
@@ -55,6 +55,7 @@ describe('Errors', function() {
             error: 'Oops!'
         };
         to[__key] = 'to';
+        to[__parent] = null;
         getCoreRunner({
             input: [['to', 'error']],
             output: {
@@ -71,6 +72,7 @@ describe('Errors', function() {
             error: error('Oops!')
         };
         to[__key] = 'to';
+        to[__parent] = null;
         getCoreRunner({
             input: [['to', 'error']],
             output: {
@@ -101,7 +103,8 @@ describe('Errors', function() {
             }
         };
         list[__key] = 'list';
-        list[0][__path] = ['to'];
+        list[__parent] = null;
+        list[0][__refReference] = ['to'];
         getCoreRunner({
             input: [
                 ['list', {to: 1}, 'title']
