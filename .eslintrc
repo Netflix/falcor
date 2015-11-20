@@ -111,7 +111,7 @@
         "generator-star-spacing": [ 2, "after" ],
 
         // stylistic
-        "camelcase": [ 2, { "properties": "always" } ],
+        "camelcase": [ 1, { "properties": "always" } ],
         "eol-last": [ 2 ],
         "key-spacing": [ 0 ],
         "no-lonely-if": [ 2 ],
