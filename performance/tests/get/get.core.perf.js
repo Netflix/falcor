@@ -11,7 +11,7 @@ var model = new Model({
 });
 var getWithPathsAsPathMap = require('./../../../lib/get').getWithPathsAsPathMap;
 
-module.exports = function setJSONGraphTests(out, count) {
+module.exports = function getRowTests(out, count) {
     count = count || 5;
     out = out || {};
 
@@ -25,5 +25,7 @@ module.exports = function setJSONGraphTests(out, count) {
 rowTest();
 
 function rowTest() {
-    getWithPathsAsPathMap(model, row, [{}]);
+    var seed = [{}];
+    getWithPathsAsPathMap(model, row, seed);
+    debugger
 }
