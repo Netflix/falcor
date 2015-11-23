@@ -3,9 +3,8 @@ var Model = require('./../lib');
 var expect = require('chai').expect;
 var clean = require('./cleanData').clean;
 var convert = require('./cleanData').convert;
-var __parent = require('./../lib/internal/parent');
-var __key = require('./../lib/internal/key');
-var __refReference = require('./../lib/internal/refRef');
+var internalKeys = require('./../lib/internal');
+var getCachePosition = require('./../lib/get/getCachePosition');
 
 module.exports = function(testConfig) {
     var isJSONG = testConfig.isJSONG;
@@ -45,6 +44,12 @@ module.exports = function(testConfig) {
     // TODO: This is cheating, but its intentional for testing
     if (testConfig.deref) {
         model._path = testConfig.deref;
+
+        // add the reference container to the model as well if there is one.
+        if (testConfig.referenceContainer) {
+            model._referenceContainer =
+                getCachePosition(model, testConfig.referenceContainer);
+        }
     }
 
     if (testConfig.materialize) {

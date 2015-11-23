@@ -99,6 +99,8 @@ describe('Errors', function() {
         };
         list.$__path = ['list'];
         list[0].$__path = ['to'];
+        list[0].$__refPath = ['to'];
+        list[0].$__toReference = ['list', 0];
         getCoreRunner({
             input: [
                 ['list', {to: 1}, 'title']

@@ -22,6 +22,7 @@ describe('Deref', function() {
                 }
             },
             deref: ['videos', 0],
+            referenceContainer: ['lists', 'A', 0, 'item'],
             cache: cacheGenerator(0, 1)
         });
     });
@@ -31,6 +32,9 @@ describe('Deref', function() {
         // Cheating in how we are creating the output.  'path' key should not exist
         // at the top level of output.
         delete output.$__path;
+        delete output.$__refPath;
+        delete output.$__toReference;
+
         getCoreRunner({
             input: [
                 [0, 'item', 'title'],
@@ -40,6 +44,7 @@ describe('Deref', function() {
                 json: output
             },
             deref: ['lists', 'A'],
+            referenceContainer: ['lolomos', 1234, 0],
             cache: cacheGenerator(0, 2)
         });
     });

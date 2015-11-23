@@ -1,9 +1,6 @@
-var __key = require('./../lib/internal/key');
-var __path = require('./../lib/internal/path');
-var __parent = require('./../lib/internal/parent');
-var __refReference = require('./../lib/internal/refRef.js');
 var util = require('util');
-var internalKeys = [__refReference, __parent, __path, __key, '__version', '$__path'];
+var internalKeyMap = require('./../lib/internal');
+var internalKeys = Object.keys(internalKeyMap);
 var $modelCreated = require('./../lib/internal/model-created.js');
 
 module.exports = {

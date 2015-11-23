@@ -8,7 +8,7 @@ var __head = require('./../../../lib/internal/head');
 var __next = require('./../../../lib/internal/next');
 var __key = require('./../../../lib/internal/key');
 
-xdescribe('hasValidParentReference', function() {
+describe('hasValidParentReference', function() {
     it('should have a valid parent reference when derefd.', function() {
         var cache = cacheGenerator(0, 30);
         var model = new Model({
@@ -22,10 +22,11 @@ xdescribe('hasValidParentReference', function() {
             get(['lolomo', 0, 0, 'item', 'title']).
             subscribe(function(x) {
                 var lolomo = x.json.lolomo;
+                debugger
                 lolomoModel = model.deref(lolomo);
             });
 
-        expect(lolomoModel.hasValidParentReference()).to.be.ok;
+        expect(lolomoModel._hasValidParentReference()).to.be.ok;
     });
     it('should invalidate the derefs reference and maintain correct deref and hasValidParentReference becomes false.', function() {
         var cache = cacheGenerator(0, 30);
@@ -44,7 +45,7 @@ xdescribe('hasValidParentReference', function() {
             });
         model.invalidate(['lolomo']);
 
-        expect(lolomoModel.hasValidParentReference()).to.not.be.ok;
+        expect(lolomoModel._hasValidParentReference()).to.not.be.ok;
     });
 
     it('should allow for set overwrite to signal derefs become invalid, but maintain derefd reference.', function() {
@@ -69,7 +70,7 @@ xdescribe('hasValidParentReference', function() {
             }).
             subscribe();
 
-        expect(lolomoModel.hasValidParentReference()).to.not.be.ok;
+        expect(lolomoModel._hasValidParentReference()).to.not.be.ok;
     });
 
     it('should set and exceed maxSize and maintain correct deref and hasValidParentReference becomes false.', function() {
@@ -139,7 +140,7 @@ xdescribe('hasValidParentReference', function() {
         expect(foundB, 'List B does not exist').to.be.ok;
         expect(foundC, 'List C does not exist').to.be.ok;
 
-        expect(lolomoModel.hasValidParentReference()).to.not.be.ok;
+        expect(lolomoModel._hasValidParentReference()).to.not.be.ok;
     });
 });
 
