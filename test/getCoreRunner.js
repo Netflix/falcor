@@ -33,6 +33,17 @@ module.exports = function(testConfig) {
         source: source
     });
 
+    // It only make sense to have one of these on at a time. but
+    // you can have both on, fromWhenceYouCame will always win.
+    if (testConfig.fromWhenceYouCame) {
+        model = model._fromWhenceYouCame(true);
+    }
+
+    if (testConfig.enumerateMetadata ||
+        testConfig.enumerateMetadata === undefined) {
+        model = model._enumerateMetadata(true);
+    }
+
     if (testConfig.treatErrorsAsValues) {
         model = model.treatErrorsAsValues();
     }

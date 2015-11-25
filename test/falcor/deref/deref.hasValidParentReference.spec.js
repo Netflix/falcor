@@ -9,7 +9,7 @@ var __next = require('./../../../lib/internal/next');
 var __key = require('./../../../lib/internal/key');
 
 describe('hasValidParentReference', function() {
-    it('should have a valid parent reference when derefd.', function() {
+    it('should have an invalid parent reference when derefd and fromWhenceYouCame is false.', function() {
         var cache = cacheGenerator(0, 30);
         var model = new Model({
             cache: cache
@@ -22,11 +22,28 @@ describe('hasValidParentReference', function() {
             get(['lolomo', 0, 0, 'item', 'title']).
             subscribe(function(x) {
                 var lolomo = x.json.lolomo;
-                debugger
                 lolomoModel = model.deref(lolomo);
             });
 
-        expect(lolomoModel._hasValidParentReference()).to.be.ok;
+        expect(lolomoModel._hasValidParentReference()).to.not.be.ok;
+    });
+    it('should have an valid parent reference when derefd and fromWhenceYouCame is true.', function() {
+        var cache = cacheGenerator(0, 30);
+        var model = new Model({
+            cache: cache
+        })._fromWhenceYouCame();
+
+        var lolomoModel;
+
+        // this is sync, no dataSource
+        model.
+            get(['lolomo', 0, 0, 'item', 'title']).
+            subscribe(function(x) {
+                var lolomo = x.json.lolomo;
+                lolomoModel = model.deref(lolomo);
+            });
+
+        expect(lolomoModel._hasValidParentReference()).to.not.be.ok;
     });
     it('should invalidate the derefs reference and maintain correct deref and hasValidParentReference becomes false.', function() {
         var cache = cacheGenerator(0, 30);

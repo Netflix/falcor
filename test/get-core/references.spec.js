@@ -28,8 +28,6 @@ describe('References', function() {
             title: 'Title'
         };
         toReference.$__path = ['too'];
-        toReference.$__refPath= ['too'];
-        toReference.$__toReference = ['to', 'reference'];
 
         // Should be the second references reference not
         // toReferences reference.
@@ -77,8 +75,6 @@ describe('References', function() {
         };
         to.$__path = ['to'];
         to.reference.$__path = ['too'];
-        to.reference.$__refPath= ['too'];
-        to.reference.$__toReference = ['to', 'reference'];
 
         getCoreRunner({
             input: [
