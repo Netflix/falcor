@@ -49,7 +49,7 @@ describe('hasValidParentReference', function() {
         var cache = cacheGenerator(0, 30);
         var model = new Model({
             cache: cache
-        });
+        })._fromWhenceYouCame();
 
         var lolomoModel;
 
@@ -69,7 +69,7 @@ describe('hasValidParentReference', function() {
         var cache = cacheGenerator(0, 30);
         var model = new Model({
             cache: cache
-        });
+        })._fromWhenceYouCame();
 
         var lolomoModel;
 
@@ -98,7 +98,7 @@ describe('hasValidParentReference', function() {
 
             // Only clean up 5% of the cache
             collectRatio: 0.95
-        });
+        })._fromWhenceYouCame();
 
         var lolomoModel;
         var listModel;

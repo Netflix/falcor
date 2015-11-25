@@ -21,7 +21,7 @@ gulp.task("lint", function() {
             useEslintrc: true
         })).
         pipe(eslint.format()).
-        pipe(eslint.failOnError()); // dz: change back after finishing to failAfterError
+        pipe(eslint.failAfterError()); // dz: change back after finishing to failAfterError
 });
 
 gulp.task("doc", ["clean.doc", "doc-d"]);
