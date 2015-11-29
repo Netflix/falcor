@@ -89,7 +89,7 @@ describe('References', function() {
         });
     });
 
-    it.only('should validate that _fromWhenceYouCame does correctly pluck the paths for references.', function() {
+    it('should validate that _fromWhenceYouCame does correctly pluck the paths for references.', function() {
         getCoreRunner({
             input: [
                 ['lolomo', 0, 0, 'item', 'title'],
