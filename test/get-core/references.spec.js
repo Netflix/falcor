@@ -89,6 +89,39 @@ describe('References', function() {
         });
     });
 
-
+    it.only('should validate that _fromWhenceYouCame does correctly pluck the paths for references.', function() {
+        getCoreRunner({
+            input: [
+                ['lolomo', 0, 0, 'item', 'title'],
+            ],
+            fromWhenceYouCame: true,
+            output: {
+                json: {
+                    lolomo: {
+                        $__path: ['lolomos', 1234],
+                        $__refPath: ['lolomos', 1234],
+                        $__toReference: ['lolomo'],
+                        0: {
+                            $__path: ['lists', 'A'],
+                            $__refPath: ['lists', 'A'],
+                            $__toReference: ['lolomos', 1234, 0],
+                            0: {
+                                $__path: ['lists', 'A', 0],
+                                $__refPath: ['lists', 'A'],
+                                $__toReference: ['lolomos', 1234, 0],
+                                item: {
+                                    $__path: ['videos', 0],
+                                    $__refPath: ['videos', 0],
+                                    $__toReference: ['lists', 'A', 0, 'item'],
+                                    title: 'Video 0'
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            cache: cacheGenerator(0, 1)
+        });
+    });
 });
 

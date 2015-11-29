@@ -39,11 +39,6 @@ module.exports = function(testConfig) {
         model = model._fromWhenceYouCame(true);
     }
 
-    if (testConfig.enumerateMetadata ||
-        testConfig.enumerateMetadata === undefined) {
-        model = model._enumerateMetadata(true);
-    }
-
     if (testConfig.treatErrorsAsValues) {
         model = model.treatErrorsAsValues();
     }
