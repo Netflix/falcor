@@ -10,14 +10,14 @@ var model = new Model({
     cache: cache
 });
 var getWithPathsAsPathMap = require('./../../../lib/get').getWithPathsAsPathMap;
-model._allowEnumerableMetadata = true;
 
-module.exports = function getRowTests(out, count) {
+module.exports = function getRowTests(out, count, allowEnum) {
+    model._allowEnumerableMetadata = allowEnum;
     count = count || 5;
     out = out || {};
 
     for (var i = 0; i < count; ++i) {
-        out['get.core.row' + i] = rowTest;
+        out['deref.row' + i] = rowTest;
     }
 
     return out;
@@ -28,4 +28,8 @@ rowTest();
 function rowTest() {
     var seed = [{}];
     getWithPathsAsPathMap(model, row, seed);
+
+    var json = seed[0].json;
+    var lolomoModel = model.deref(json.lolomo);
+    var listsModel = model.deref(json.lolomo[0]);
 }

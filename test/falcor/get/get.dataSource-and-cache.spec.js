@@ -9,10 +9,10 @@ var expect = require('chai').expect;
 var strip = require('./../../cleanData').stripDerefAndVersionKeys;
 var cacheGenerator = require('./../../CacheGenerator');
 
-var M = function() {
+var M = function(m) {
     return cacheGenerator(0, 1);
 };
-var Cache = function() {
+var Cache = function(c) {
     return cacheGenerator(0, 40);
 };
 

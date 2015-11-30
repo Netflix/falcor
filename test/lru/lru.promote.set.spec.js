@@ -8,6 +8,8 @@ var __head = require("./../../lib/internal/head");
 var __tail = require("./../../lib/internal/tail");
 var __next = require("./../../lib/internal/next");
 var __prev = require("./../../lib/internal/prev");
+var __key = require("./../../lib/internal/key");
+var cacheGenerator = require('./../CacheGenerator');
 
 describe('Set', function() {
     it('should set with pathValues.', function() {
@@ -177,6 +179,55 @@ describe('Set', function() {
         }).subscribe();
 
         tripleItem(model);
+    });
+
+    it('should promote references on a set.', function() {
+        var model = new Model({
+            cache: cacheGenerator(0, 1)
+        });
+
+        var root = model._root;
+        var curr = root[__head];
+        expect(curr[__key]).to.equals('title');
+        expect(curr.value).to.deep.equals('Video 0');
+
+        curr = curr[__next];
+        expect(curr[__key]).to.equals('item');
+        expect(curr.value).to.deep.equals(['videos', '0']);
+
+        curr = curr[__next];
+        expect(curr[__key]).to.equals('0');
+        expect(curr.value).to.deep.equals(['lists', 'A']);
+
+        curr = curr[__next];
+        expect(curr[__key]).to.equals('lolomo');
+        expect(curr.value).to.deep.equals(['lolomos', '1234']);
+        expect(curr[__next]).to.be.not.ok;
+
+        model.
+            set({
+                path: ['lolomo', '0'],
+                value: 'foo'
+            }).
+            subscribe();
+
+        // new order to the list
+        curr = root[__head];
+        expect(curr[__key]).to.equals('0');
+        expect(curr.value).to.deep.equals('foo');
+
+        curr = curr[__next];
+        expect(curr[__key]).to.equals('lolomo');
+        expect(curr.value).to.deep.equals(['lolomos', '1234']);
+
+        curr = curr[__next];
+        expect(curr[__key]).to.equals('title');
+        expect(curr.value).to.deep.equals('Video 0');
+
+        curr = curr[__next];
+        expect(curr[__key]).to.equals('item');
+        expect(curr.value).to.deep.equals(['videos', '0']);
+        expect(curr[__next]).to.be.not.ok;
     });
 });
 function getModel() {

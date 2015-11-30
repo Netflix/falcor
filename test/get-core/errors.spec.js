@@ -5,9 +5,6 @@ var jsonGraph = require('falcor-json-graph');
 var ref = jsonGraph.ref;
 var error = jsonGraph.error;
 var _ = require('lodash');
-var __key = require('./../../lib/internal/key');
-var __path = require('./../../lib/internal/path');
-var __parent = require('./../../lib/internal/parent');
 
 describe('Errors', function() {
     var expired = error('expired');
@@ -54,7 +51,7 @@ describe('Errors', function() {
         var to = {
             error: 'Oops!'
         };
-        to[__key] = 'to';
+        to.$__path = ['to'];
         getCoreRunner({
             input: [['to', 'error']],
             output: {
@@ -70,7 +67,7 @@ describe('Errors', function() {
         var to = {
             error: error('Oops!')
         };
-        to[__key] = 'to';
+        to.$__path = ['to'];
         getCoreRunner({
             input: [['to', 'error']],
             output: {
@@ -100,8 +97,8 @@ describe('Errors', function() {
                 title: 'Hello World'
             }
         };
-        list[__key] = 'list';
-        list[0][__path] = ['to'];
+        list.$__path = ['list'];
+        list[0].$__path = ['to'];
         getCoreRunner({
             input: [
                 ['list', {to: 1}, 'title']

@@ -13,7 +13,7 @@ var MaxRetryExceededError = require('./../../../lib/errors/MaxRetryExceededError
 var strip = require('./../../cleanData').stripDerefAndVersionKeys;
 
 describe('DataSource Only', function() {
-    var dataSource = new LocalDataSource(cacheGenerator(0, 2, ['title', 'art']));
+    var dataSource = new LocalDataSource(cacheGenerator(0, 2, ['title', 'art'], false));
 
     describe('Preload Functions', function() {
         it('should get a value from falcor.', function(done) {

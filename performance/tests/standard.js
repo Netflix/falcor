@@ -1,9 +1,20 @@
 var testMerge = require('./testMerge');
+var get = require('./get/get.core.perf');
+var set = require('./set/set.json-graph.perf');
+var clone = require('./clone/clone.perf');
+
+var standardTest = [get, 5];
 
 module.exports = function(name) {
     // Creates the test suites
     var suite = require('./testSuite')(name);
-    testMerge(suite, require('./get/get.perf'));
+
+    // merges tests
+    for (var i = 0; i < standardTest.length; i += 2) {
+        var test = standardTest[i];
+        var count = standardTest[i + 1];
+        test(suite.tests, count);
+    }
 
     return suite;
 };
