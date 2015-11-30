@@ -1,16 +1,19 @@
 var testMerge = require('./testMerge');
-var standardTest = {
-    './get/get.core.perf.js': 5,
-    //'./set/set.json-graph.perf': 5
-};
+var get = require('./get/get.core.perf');
+var set = require('./set/set.json-graph.perf');
+var clone = require('./clone/clone.perf');
+
+var standardTest = [get, 5];
 
 module.exports = function(name) {
     // Creates the test suites
     var suite = require('./testSuite')(name);
 
     // merges tests
-    for (var k in standardTest) {
-        require(k)(suite.tests, standardTest[k]);
+    for (var i = 0; i < standardTest.length; i += 2) {
+        var test = standardTest[i];
+        var count = standardTest[i + 1];
+        test(suite.tests, count);
     }
 
     return suite;

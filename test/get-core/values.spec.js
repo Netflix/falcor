@@ -32,10 +32,12 @@ describe('Values', function() {
         var lolomo0 = {
             length: 1337
         };
+        lolomo0.$__path = ['lolomo', '0'];
         var lolomo = {
             length: 1,
             0: lolomo0
         };
+        lolomo.$__path = ['lolomo'];
         var output = {
             json: {
                 lolomo: lolomo
@@ -99,7 +101,24 @@ describe('Values', function() {
     });
 
     // JSONGraph ----------------------------------------
-    it('should get JSONGraph for a single value out', function() {
+    it('should get JSONGraph for a single value out, modelCreated', function() {
+        getCoreRunner({
+            input: [['videos', 0, 'title']],
+            isJSONG: true,
+            output: {
+                jsonGraph: {
+                    videos: {
+                        0: {
+                            title: 'Video 0'
+                        }
+                    }
+                },
+                paths: [['videos', 0, 'title']]
+            },
+            cache: cacheGenerator(0, 1, undefined, true)
+        });
+    });
+    it('should get JSONGraph for a single value out, !modelCreated', function() {
         getCoreRunner({
             input: [['videos', 0, 'title']],
             isJSONG: true,
@@ -163,7 +182,7 @@ describe('Values', function() {
             input: [['lolomo', {to: 1}, {to: 1}, 'item', 'title']],
             isJSONG: true,
             output: {
-                jsonGraph: _.merge(cacheGenerator(0, 2), cacheGenerator(10, 2)),
+                jsonGraph: _.merge(cacheGenerator(0, 2), cacheGenerator(10, 2, undefined, false)),
                 paths: [
                     ['lolomo', 0, 0, 'item', 'title'],
                     ['lolomo', 0, 1, 'item', 'title'],

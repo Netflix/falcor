@@ -3,22 +3,27 @@ var ref = jsonGraph.ref;
 var atom = jsonGraph.atom;
 var VIDEO_COUNT_PER_LIST = 10;
 var AthroughZ = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+var $modelCreated = require("./../lib/internal/model-created");
+var modelCreated = {};
+modelCreated[$modelCreated] = true;
 
-module.exports = function cacheGenerator(videoStartIdx, videoCount, fields) {
+module.exports = function cacheGenerator(videoStartIdx, videoCount,
+                                         fields, setModelCreated) {
+    setModelCreated = setModelCreated === undefined ? false : setModelCreated;
     fields = fields || ['title'];
     var listStartIndex = Math.floor(videoStartIdx / VIDEO_COUNT_PER_LIST);
     var startIdx = videoStartIdx % VIDEO_COUNT_PER_LIST;
     return {
         lolomo: ref(['lolomos', '1234']),
         lolomos: {
-            1234: makeLolomos(listStartIndex, videoCount)
+            1234: makeLolomos(listStartIndex, videoCount, setModelCreated)
         },
-        lists: makeLists(listStartIndex, startIdx, videoCount),
-        videos: makeVideos(videoStartIdx, videoCount, fields)
+        lists: makeLists(listStartIndex, startIdx, videoCount, setModelCreated),
+        videos: makeVideos(videoStartIdx, videoCount, fields, setModelCreated)
     };
 };
 
-function makeLolomos(startIdx, count) {
+function makeLolomos(startIdx, count, setModelCreated) {
     var listCount = Math.ceil(count / VIDEO_COUNT_PER_LIST);
     var lists = {};
     for (var i = startIdx; i < startIdx + listCount; ++i) {
@@ -28,19 +33,19 @@ function makeLolomos(startIdx, count) {
     return lists;
 }
 
-function makeVideos(startIdx, count, fields) {
+function makeVideos(startIdx, count, fields, setModelCreated) {
     var videos = {};
     for (var i = startIdx; i < startIdx + count; ++i) {
         videos[i] = {};
 
         fields.forEach(function(f) {
-            videos[i][f] = atom('Video ' + i);
+            videos[i][f] = atom('Video ' + i, setModelCreated && modelCreated || {});
         });
     }
     return videos;
 }
 
-function makeLists(listStartIdx, videoStartIdx, count) {
+function makeLists(listStartIdx, videoStartIdx, count, setModelCreated) {
     var lists = {};
     var videoIdx = listStartIdx * VIDEO_COUNT_PER_LIST + videoStartIdx;
     var end = videoIdx + count;
@@ -60,7 +65,7 @@ function makeLists(listStartIdx, videoStartIdx, count) {
         }
 
         var listItemIdx = videoIdx % VIDEO_COUNT_PER_LIST;
-        list[listItemIdx] = makeItem(videoIdx);
+        list[listItemIdx] = makeItem(videoIdx, setModelCreated);
 
         first = false;
     }
@@ -68,7 +73,7 @@ function makeLists(listStartIdx, videoStartIdx, count) {
     return lists;
 }
 
-function makeItem(idx) {
+function makeItem(idx, setModelCreated) {
     return {
         item: ref(['videos', '' + idx])
     };

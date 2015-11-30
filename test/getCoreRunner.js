@@ -2,7 +2,9 @@ var get = require('./../lib/get');
 var Model = require('./../lib');
 var expect = require('chai').expect;
 var clean = require('./cleanData').clean;
-var __parent = require('./../lib/internal/parent');
+var convert = require('./cleanData').convert;
+var internalKeys = require('./../lib/internal');
+var getCachePosition = require('./../lib/get/getCachePosition');
 
 module.exports = function(testConfig) {
     var isJSONG = testConfig.isJSONG;
@@ -31,6 +33,12 @@ module.exports = function(testConfig) {
         source: source
     });
 
+    // It only make sense to have one of these on at a time. but
+    // you can have both on, fromWhenceYouCame will always win.
+    if (testConfig.fromWhenceYouCame) {
+        model = model._fromWhenceYouCame(true);
+    }
+
     if (testConfig.treatErrorsAsValues) {
         model = model.treatErrorsAsValues();
     }
@@ -42,6 +50,12 @@ module.exports = function(testConfig) {
     // TODO: This is cheating, but its intentional for testing
     if (testConfig.deref) {
         model._path = testConfig.deref;
+
+        // add the reference container to the model as well if there is one.
+        if (testConfig.referenceContainer) {
+            model._referenceContainer =
+                getCachePosition(model, testConfig.referenceContainer);
+        }
     }
 
     if (testConfig.materialize) {
@@ -65,8 +79,8 @@ module.exports = function(testConfig) {
     // $size is stripped out of basic core tests.
     // We have to strip out parent as well from the output since it will produce
     // infinite recursion.
-    clean(seed[0], {strip: ['$size', __parent]});
-    clean(expectedOutput, {strip: ['$size', __parent]});
+    clean(seed[0], {strip: ['$size']});
+    clean(expectedOutput, {strip: ['$size']});
 
     if (expectedOutput) {
         expect(seed[0]).to.deep.equals(expectedOutput);
