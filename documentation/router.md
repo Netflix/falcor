@@ -401,7 +401,7 @@ router.
 
 ~~~js
 {
-    jsongGraph: {
+    jsonGraph: {
         "user": {
             "name": "Steve",
             "surname": "McAdams"
@@ -601,8 +601,8 @@ var router = new Router([{
 
 router.get([
     ["tasksById", [234, 122], "name"]
-]).subscribe(function(jsongGraphEnvelope) {
-    console.log(JSON.stringify(jsongGraphEnvelope, null, 4));
+]).subscribe(function(jsonGraphEnvelope) {
+    console.log(JSON.stringify(jsonGraphEnvelope, null, 4));
 });
 ~~~
  
@@ -666,8 +666,8 @@ var router = new Router([{
 
 router.get([
     ["genreList", [0,1,5,6,7,9], "name"]
-]).subscribe(function(jsongGraphEnvelope) {
-    console.log(JSON.stringify(jsongGraphEnvelope, null, 4));
+]).subscribe(function(jsonGraphEnvelope) {
+    console.log(JSON.stringify(jsonGraphEnvelope, null, 4));
 });
 ~~~
  
@@ -738,8 +738,8 @@ var router = new Router([{
 
 router.get([
     ["tasksById", ["a32e8912f34", "51f2928f34"], "name"]
-]).subscribe(function(jsongGraphEnvelope) {
-    console.log(JSON.stringify(jsongGraphEnvelope, null, 4));
+]).subscribe(function(jsonGraphEnvelope) {
+    console.log(JSON.stringify(jsonGraphEnvelope, null, 4));
 });
 ~~~
 
