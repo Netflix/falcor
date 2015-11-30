@@ -1822,6 +1822,7 @@ var onValueType = require(25);
 var isExpired = require(29);
 var iterateKeySet = require(143).iterateKeySet;
 var $ref = require(120);
+var promote = require(31).promote;
 
 module.exports = function walkPath(model, root, curr, path, depth, seed,
                                    outerResults, requestedPath,
@@ -1893,6 +1894,10 @@ module.exports = function walkPath(model, root, curr, path, depth, seed,
                                 outerResults, null, optimizedPath,
                                 nextOptimizedLength, isJSONG, fromReference);
                 }
+
+                // promote the reference so that it will not be cleaned out of
+                // the cache when its heavily used.
+                promote(model, next);
                 var ref = followReference(model, root, root, next,
                                           value, seed, isJSONG);
                 fromReference = true;
@@ -1919,7 +1924,7 @@ module.exports = function walkPath(model, root, curr, path, depth, seed,
     } while (iteratorNote && !iteratorNote.done);
 };
 
-},{"120":120,"13":13,"143":143,"25":25,"29":29}],34:[function(require,module,exports){
+},{"120":120,"13":13,"143":143,"25":25,"29":29,"31":31}],34:[function(require,module,exports){
 "use strict";
 
 function falcor(opts) {
