@@ -131,7 +131,7 @@ var dataSource =
     }).asDataSource();
 ~~~
 
-Here is an example which requests sets the status of the both prerequisites of the first task in a TODO list to "done."
+Here is an example which sets the status of both prerequisites of the first task in a TODO list to "done."
 
 ~~~js
 var response = dataSource.set({
@@ -168,8 +168,8 @@ response.subscribe(jsonGraphEnvelope => JSON.stringify(jsonGraphEnvelope, null, 
 //                     { $type: "ref", value: ['todosById', 97] }
 //                 ]
 //             },
-//             "54": { name: 'withdraw money from ATM', done: false },
-//             "97": { name: 'pick car up from shop', done: false }
+//             "54": { name: 'withdraw money from ATM', done: true },
+//             "97": { name: 'pick car up from shop', done: true }
 //         }
 //     }
 // }
