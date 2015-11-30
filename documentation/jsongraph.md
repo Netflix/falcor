@@ -395,7 +395,7 @@ Once we create an optimized [Path](http://netflix.github.io/falcor/documentation
 }
 ~~~
 
-Now we evaluate the “todosById” key, which yields an object. Next, we convert the number 44 into a string using the JSON stringify algorithm. Then we look up the resulting string “44” which yields another object. Finally we look up the key “name” and we find a primitive value type ”withdraw money from ATM”. This value is added to the JSON Graph subset and returned as the result of the abstract get operation. 
+Now we evaluate the “todosById” key, which yields an object. Next, we convert the number 44 into a string using the JSON stringify algorithm. Then we look up the resulting string “44” which yields another object. Finally we look up the key “name” and we find a primitive value type ”get milk from corner store”. This value is added to the JSON Graph subset and returned as the result of the abstract get operation. 
 
 ~~~js
 // JSON Graph Envelope response
