@@ -8,7 +8,7 @@ var __head = require('./../../../lib/internal/head');
 var __next = require('./../../../lib/internal/next');
 var __key = require('./../../../lib/internal/key');
 
-describe('hasValidParentReference', function() {
+describe('fromWhenceYouCame', function() {
     it('should have an invalid parent reference when derefd and fromWhenceYouCame is false.', function() {
         var cache = cacheGenerator(0, 30);
         var model = new Model({
@@ -25,7 +25,7 @@ describe('hasValidParentReference', function() {
                 lolomoModel = model.deref(lolomo);
             });
 
-        expect(lolomoModel._hasValidParentReference()).to.not.be.ok;
+        expect(lolomoModel._hasValidParentReference()).to.be.ok;
     });
     it('should have an valid parent reference when derefd and fromWhenceYouCame is true.', function() {
         var cache = cacheGenerator(0, 30);
@@ -43,7 +43,31 @@ describe('hasValidParentReference', function() {
                 lolomoModel = model.deref(lolomo);
             });
 
-        expect(lolomoModel._hasValidParentReference()).to.not.be.ok;
+        expect(lolomoModel._hasValidParentReference()).to.be.ok;
+    });
+    it('should have an valid parent reference when derefd and fromWhenceYouCame is true with non reference keys.', function() {
+        var cache = cacheGenerator(0, 30);
+        var model = new Model({
+            cache: {
+                a: {
+                    b: {
+                        c: 'hello world'
+                    }
+                }
+            }
+        })._fromWhenceYouCame();
+
+        var aModel;
+
+        // this is sync, no dataSource
+        model.
+            get(['a', 'b', 'c']).
+            subscribe(function(x) {
+                var a = x.json.a;
+                aModel = model.deref(a);
+            });
+
+        expect(aModel._hasValidParentReference()).to.be.ok;
     });
     it('should invalidate the derefs reference and maintain correct deref and hasValidParentReference becomes false.', function() {
         var cache = cacheGenerator(0, 30);
