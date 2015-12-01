@@ -17,7 +17,7 @@ id: api
     <article>
         <pre class="prettyprint source linenums"><code>var $modelCreated = require("./../internal/model-created");
 var clone = require("./util/clone");
-var prefix = require("./../internal/prefix");
+var isInternalKey = require("./../support/isInternalKey");
 
 /**
  * decends and copies the cache.
@@ -35,7 +35,7 @@ function _copyCache(node, out, fromKey) {
     Object.
         keys(node).
         filter(function(k) {
-            return k[0] !== prefix &amp;&amp; k !== "$size";
+            return !isInternalKey(k);
         }).
         forEach(function(key) {
             var cacheNext = node[key];
