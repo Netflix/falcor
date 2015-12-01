@@ -3,6 +3,7 @@ var cacheGenerator = require('./../CacheGenerator');
 var outputGenerator = require('./../outputGenerator');
 var jsonGraph = require('falcor-json-graph');
 var atom = jsonGraph.atom;
+var ref = jsonGraph.ref;
 var _ = require('lodash');
 
 describe('Values', function() {
@@ -19,6 +20,39 @@ describe('Values', function() {
             input: [['lolomo', 0, 0, 'item', 'title']],
             output: outputGenerator.lolomoGenerator([0], [0]),
             cache: cacheGenerator(0, 1)
+        });
+    });
+    it('should get a value of type atom when in materialized mode.', function() {
+        getCoreRunner({
+            input: [['videos', {to:1}, 'title']],
+            materialize: true,
+            output: {
+                json: {
+                    videos: {
+                        0: {
+                            title: {$type: 'atom'}
+                        },
+                        1: {
+                            title: {$type: 'atom'}
+                        }
+                    }
+                }
+            },
+            cache: {
+                jsonGraph: {
+                    videos: {
+                        0: {
+                            title: {$type: 'atom'}
+                        },
+                        1: {
+                            title: {$type: 'atom'}
+                        }
+                    }
+                },
+                paths: [
+                    ['videos', {to: 1}, 'title']
+                ]
+            }
         });
     });
     it('should get a value through references with complex pathSet.', function() {
