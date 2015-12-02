@@ -687,11 +687,14 @@ function ModelRoot(o) {
 ModelRoot.prototype.errorSelector = function errorSelector(x, y) {
     return y;
 };
-ModelRoot.prototype.comparator = function comparator(a, b) {
-    if (hasOwn(a, "value") && hasOwn(b, "value")) {
-        return a.value === b.value;
+ModelRoot.prototype.comparator = function comparator(cacheNode, messageNode) {
+    if (hasOwn(cacheNode, "value") && hasOwn(messageNode, "value")) {
+        // They are the same only if the following fields are the same.
+        return cacheNode.value === messageNode.value &&
+            cacheNode.$type === messageNode.$type &&
+            cacheNode.$expires === messageNode.$expires;
     }
-    return a === b;
+    return cacheNode === messageNode;
 };
 
 module.exports = ModelRoot;
