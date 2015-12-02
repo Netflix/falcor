@@ -4,7 +4,7 @@ var jsonGraphUtil = require('falcor-json-graph');
 var atom = jsonGraphUtil.atom;
 var error = jsonGraphUtil.error;
 var expect = require('chai').expect;
-describe.only('ModelRoot#comparator', function() {
+describe('ModelRoot#comparator', function() {
     it('should validate that two equal values are true', function() {
         expect(comparator(5, 5)).to.be.ok;
     });
