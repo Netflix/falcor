@@ -1621,7 +1621,7 @@ module.exports = function onValueType(
         }
 
         if (!requiresMaterializedToReport ||
-            requiresMaterializedToReport && isMaterialized(model)) {
+            requiresMaterializedToReport && model._materialized) {
 
             onValue(model, node, seed, depth, outerResults, requestedPath,
                     optimizedPath, optimizedLength, isJSONG, fromReference);
