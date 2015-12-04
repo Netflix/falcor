@@ -5,7 +5,6 @@ describe('Get', function() {
     require('./get.dataSource-and-bind.spec');
     require('./get.cacheAsDataSource.spec');
     require('./get.pathSyntax.spec');
-    require('./get.getCache.spec');
     require('./get.clone.spec');
     require('./get.gen.spec');
 });

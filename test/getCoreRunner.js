@@ -25,10 +25,16 @@ module.exports = function(testConfig) {
         cache = cache();
     }
     var source = testConfig.source;
-    var model = new Model({
-        cache: cache,
-        source: source
-    });
+    var model;
+    if (testConfig.model) {
+        model = testConfig.model;
+    }
+    else {
+        model = new Model({
+            cache: cache,
+            source: source
+        });
+    }
 
     if (testConfig.treatErrorsAsValues) {
         model = model.treatErrorsAsValues();
