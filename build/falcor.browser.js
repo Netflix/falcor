@@ -1121,7 +1121,13 @@ function _copyCache(node, out, fromKey) {
     Object.
         keys(node).
         filter(function(k) {
-            return !isInternalKey(k);
+            // Its not an internal key and the node has a value.  In the cache
+            // there are 3 possibilities for values.
+            // 1: A branch node.
+            // 2: A $type-value node.
+            // 3: undefined
+            // We will strip out 3
+            return !isInternalKey(k) && node[k];
         }).
         forEach(function(key) {
             var cacheNext = node[key];
@@ -1252,9 +1258,10 @@ module.exports = function getValueSync(model, simplePath, noClone) {
 
         type = next.$type;
 
-        // Up to the last key we follow references
+        // Up to the last key we follow references, ensure that they are not
+        // expired either.
         if (depth < len) {
-            if (type === $ref) {
+            if (type === $ref && !isExpired(next)) {
                 ref = followReference(model, root, root, next, next.value);
                 refNode = ref[0];
 
