@@ -73,7 +73,7 @@ describe('Deref', function() {
             subscribe(noOp, done, done);
     });
 
-    it.only('should not be able to get an item out of the core that is expired, but previously hard-linked.', function() {
+    it('should not be able to get an item out of the core that is expired, but previously hard-linked.', function() {
         // hardlinks
         var model = new Model({
             cache: {
