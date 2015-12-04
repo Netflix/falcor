@@ -612,8 +612,8 @@ The {ranges} pattern will match any integers in a KeySet whether specified in a 
 
 For example...
 
-~~~
-genreList[0,1,5..7,9,"name"]
+~~~js
+['genreList', [0, 1, 5, 6, 7, 9], 'name']
 ~~~
 
 ...matched against...
@@ -624,7 +624,7 @@ genreList[{ranges}].name
 
 ...will produce the following [Path Sets](http://netflix.github.io/falcor/documentation/paths.html#pathsets) to be passed to the route handler:
 
-~~~
+~~~js
 ["genreList", [{from:0,to:1}, {from:5,to:7}, {from:9,to:9}], "name"]
 ~~~
 
