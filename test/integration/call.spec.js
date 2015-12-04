@@ -84,5 +84,38 @@ describe('call', function() {
             }).
             subscribe(noOp, done, done);
     });
+
+    it('Response with invalidations and no paths should not explode.', function(done) {
+        var router = new R([{
+            route: 'genreList[{integers:titles}].titles.push',
+            call: function(callPath, args) {
+
+                var invalidatedPath = callPath.slice(0, callPath.length-1);
+                // [genreList, [0], titles, length]
+                invalidatedPath.push('length');
+
+                return {
+                    path: invalidatedPath,
+                    invalidated: true
+                };
+            }
+        }]);
+
+        var model = new falcor.Model({
+            source: router
+        });
+
+        var args = [falcor.Model.ref('titlesById[1]')];
+
+        var onNext = sinon.spy();
+
+        model.
+            call("genreList[0].titles.push", args).
+            doAction(onNext, noOp, noOp).
+            subscribe(noOp, done, function() {
+                expect(onNext.callCount).to.equal(0);
+                done();
+            });
+    });
 });
 
