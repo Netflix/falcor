@@ -28,10 +28,16 @@ module.exports = function(testConfig) {
         cache = cache();
     }
     var source = testConfig.source;
-    var model = new Model({
-        cache: cache,
-        source: source
-    });
+    var model;
+    if (testConfig.model) {
+        model = testConfig.model;
+    }
+    else {
+        model = new Model({
+            cache: cache,
+            source: source
+        });
+    }
 
     // It only make sense to have one of these on at a time. but
     // you can have both on, fromWhenceYouCame will always win.

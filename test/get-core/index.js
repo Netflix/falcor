@@ -6,4 +6,5 @@ describe('Get Core', function() {
     require('./deref.spec');
     require('./edges.spec');
     require('./null.spec');
+    require('./get.cache.spec');
 });
