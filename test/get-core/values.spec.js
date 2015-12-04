@@ -29,10 +29,13 @@ describe('Values', function() {
             output: {
                 json: {
                     videos: {
+                        $__path: ['videos'],
                         0: {
+                            $__path: ['videos', 0],
                             title: {$type: 'atom'}
                         },
                         1: {
+                            $__path: ['videos', 1],
                             title: {$type: 'atom'}
                         }
                     }

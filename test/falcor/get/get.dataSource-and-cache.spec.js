@@ -146,7 +146,7 @@ describe('DataSource and Partial Cache', function() {
                 subscribe(noOp, done, done);
         });
 
-        it('should get a complex argument into a single arg and collect to max cache size.', function(done) {
+        it.only('should get a complex argument into a single arg and collect to max cache size.', function(done) {
             var model = new Model({
                 cache: M(),
                 source: new LocalDataSource(Cache()),
@@ -154,6 +154,7 @@ describe('DataSource and Partial Cache', function() {
             });
             var cache = model._root.cache;
             var onNext = sinon.spy();
+            debugger
             toObservable(model.
                 get(['lolomo', 0, {to: 1}, 'item', 'title'])).
                 doAction(onNext, noOp, function() {
