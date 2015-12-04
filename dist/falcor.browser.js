@@ -905,7 +905,6 @@ function InvalidModelError(boundPath, shortedPath) {
 // instanceof will be an error, but stack will be correct because its defined in the constructor.
 InvalidModelError.prototype = new Error();
 InvalidModelError.prototype.name = NAME;
-InvalidModelError.name = NAME;
 InvalidModelError.message = MESSAGE;
 
 module.exports = InvalidModelError;
@@ -929,7 +928,6 @@ function InvalidSourceError(error) {
 // in the constructor.
 InvalidSourceError.prototype = new Error();
 InvalidSourceError.prototype.name = NAME;
-InvalidSourceError.name = NAME;
 InvalidSourceError.is = function(e) {
     return e && e.name === NAME;
 };
@@ -953,7 +951,6 @@ function MaxRetryExceededError() {
 // in the constructor.
 MaxRetryExceededError.prototype = new Error();
 MaxRetryExceededError.prototype.name = NAME;
-MaxRetryExceededError.name = NAME;
 MaxRetryExceededError.is = function(e) {
     return e && e.name === NAME;
 };
@@ -1208,7 +1205,13 @@ function _copyCache(node, out, fromKey) {
     Object.
         keys(node).
         filter(function(k) {
-            return !isInternalKey(k);
+            // Its not an internal key and the node has a value.  In the cache
+            // there are 3 possibilities for values.
+            // 1: A branch node.
+            // 2: A $type-value node.
+            // 3: undefined
+            // We will strip out 3
+            return !isInternalKey(k) && node[k];
         }).
         forEach(function(key) {
             var cacheNext = node[key];
@@ -1334,9 +1337,10 @@ module.exports = function getValueSync(model, simplePath, noClone) {
 
         type = next.$type;
 
-        // Up to the last key we follow references
+        // Up to the last key we follow references, ensure that they are not
+        // expired either.
         if (depth < len) {
-            if (type === $ref) {
+            if (type === $ref && !isExpired(next)) {
                 ref = followReference(model, root, root, next, next.value);
                 refNode = ref[0];
 
@@ -1900,6 +1904,7 @@ module.exports = function walkPath(model, root, curr, path, depth, seed,
                     onValue(model, next, seed, nextDepth, outerResults, null,
                             null, optimizedPath, nextOptimizedLength, isJSONG);
                 }
+
                 var ref = followReference(model, root, root, next,
                                           value, seed, isJSONG);
                 fromReference = true;
@@ -4981,7 +4986,7 @@ module.exports = function arrayFlatMap(array, selector) {
     var index = -1;
     var i = -1;
     var n = array.length;
-    var array2 = new Array(n);
+    var array2 = [];
     while (++i < n) {
         var array3 = selector(array[i], i, array);
         var j = -1;
@@ -6613,7 +6618,7 @@ parser.fromPathsOrPathValues = function(paths, ext) {
     }
 
     var out = [];
-    for (i = 0, len = paths.length; i < len; i++) {
+    for (var i = 0, len = paths.length; i < len; i++) {
 
         // Is the path a string
         if (typeof paths[i] === 'string') {
@@ -7130,6 +7135,8 @@ function getNext(string, idx, ext) {
     var token = '';
     var specialChars = ext ?
         EXT_SPECIAL_CHARACTERS : SPECIAL_CHARACTERS;
+    var done;
+
     do {
 
         done = idx + 1 >= string.length;
