@@ -7,6 +7,7 @@ var ref = jsonGraph.ref;
 var $ref = require('./../../lib/types/ref');
 var $atom = require('./../../lib/types/atom');
 var _ = require('lodash');
+var Model = require('./../../lib').Model;
 
 describe('Edges', function() {
     // PathMap ----------------------------------------

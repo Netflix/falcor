@@ -9,6 +9,8 @@ var Bound = Expected.Bound;
 var noOp = function() {};
 var chai = require("chai");
 var expect = chai.expect;
+var ref = Model.ref;
+var atom = Model.atom;
 
 describe('Deref', function() {
     it('should deref to a branch node.', function(done) {
@@ -69,6 +71,26 @@ describe('Deref', function() {
                 expect(called.every(function(x) { return x; })).to.be.ok;
             }).
             subscribe(noOp, done, done);
+    });
+
+    it('should not be able to get an item out of the core that is expired, but previously hard-linked.', function() {
+        // hardlinks
+        var model = new Model({
+            cache: {
+                lolomo: ref(['lolomos', 'abc'], {$expires: Date.now() + 1000}),
+                lolomos: {
+                    abc: {
+                        0: atom('foo')
+                    }
+                }
+            }
+        });
+
+        // expires the hardlinked item.
+        model._root.cache.lolomo.$expires = Date.now() - 10;
+        var out = model._getValueSync(model, ['lolomo', 0]);
+
+        expect(out.value).to.equals(undefined);
     });
 });
 
