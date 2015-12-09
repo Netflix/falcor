@@ -809,10 +809,9 @@ module.exports = function deref(boundJSONArg) {
 };
 
 },{"10":10,"123":123,"19":19}],8:[function(require,module,exports){
-var $error = require(122);
 var pathSyntax = require(137);
 var getBoundValue = require(17);
-var getType = require(94);
+var InvalidModelError = require(11);
 
 module.exports = function derefSync(boundPathArg) {
 
@@ -822,7 +821,7 @@ module.exports = function derefSync(boundPathArg) {
         throw new Error("Model#derefSync must be called with an Array path.");
     }
 
-    var boundValue = getBoundValue(this, this._path.concat(boundPath));
+    var boundValue = getBoundValue(this, this._path.concat(boundPath), false);
 
     var path = boundValue.path;
     var node = boundValue.value;
@@ -832,23 +831,14 @@ module.exports = function derefSync(boundPathArg) {
         return void 0;
     }
 
-    var type = getType(node);
-
-    if (Boolean(node) && Boolean(type)) {
-        if (type === $error) {
-            if (this._boxed) {
-                throw node;
-            }
-            throw node.value;
-        } else if (node.value === void 0) {
-            return void 0;
-        }
+    if (node.$type) {
+        throw new InvalidModelError();
     }
 
     return this._clone({ _path: path });
 };
 
-},{"122":122,"137":137,"17":17,"94":94}],9:[function(require,module,exports){
+},{"11":11,"137":137,"17":17}],9:[function(require,module,exports){
 /**
  * When a bound model attempts to retrieve JSONGraph it should throw an
  * error.
@@ -1149,12 +1139,11 @@ module.exports = function get(walk, isJSONG) {
 var getValueSync = require(21);
 var InvalidModelError = require(11);
 
-module.exports = function getBoundValue(model, pathArg) {
+module.exports = function getBoundValue(model, pathArg, materialized) {
 
     var path = pathArg;
     var boundPath = pathArg;
-    var boxed, materialized,
-        treatErrorsAsValues,
+    var boxed, treatErrorsAsValues,
         value, shorted, found;
 
     boxed = model._boxed;
@@ -1162,7 +1151,7 @@ module.exports = function getBoundValue(model, pathArg) {
     treatErrorsAsValues = model._treatErrorsAsValues;
 
     model._boxed = true;
-    model._materialized = true;
+    model._materialized = materialized === undefined || materialized;
     model._treatErrorsAsValues = true;
 
     value = getValueSync(model, path.concat(null), true);
@@ -1358,6 +1347,7 @@ module.exports = function getValueSync(model, simplePath, noClone) {
                 if (!refNode) {
                     out = void 0;
                     next = void 0;
+                    found = false;
                     break;
                 }
                 type = refNode.$type;
@@ -1393,7 +1383,9 @@ module.exports = function getValueSync(model, simplePath, noClone) {
         }
 
         for (i = depth; i < len; ++i) {
-            optimizedPath[optimizedPath.length] = simplePath[i];
+            if (simplePath[i] !== null) {
+                optimizedPath[optimizedPath.length] = simplePath[i];
+            }
         }
     }
 
