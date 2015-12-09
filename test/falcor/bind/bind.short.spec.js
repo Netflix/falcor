@@ -19,53 +19,12 @@ var $ref = require("./../../../lib/types/ref");
 var sinon = require('sinon');
 var ModelResponse = require('./../../../lib/response/ModelResponse');
 var atom = Model.atom;
+var doneOnError = require('./../../doneOnError');
+var errorOnCompleted = require('./../../errorOnCompleted');
+var errorOnNext = require('./../../errorOnNext');
 
 describe("Deref-Short", function() {
-    describe('Sync', function() {
-        it("bound to a path that short-circuits in a branch key position on error.", function() {
-
-            var dataModel = new Model({cache: {
-                genreList: {
-                    0: {
-                        $type: $error,
-                        value: {
-                            message: "The humans are dead."
-                        }
-                    }
-                }
-            }});
-
-            var throwError = false;
-            try {
-                dataModel._derefSync(["genreList", 0, 0]);
-            } catch (e) {
-                throwError = true;
-                expect(e.name).to.equals(InvalidModelError.prototype.name);
-            }
-            expect(throwError).to.be.ok;
-        });
-
-        it("bound to a path that short-circuits in a branch key position on value.", function() {
-            var dataModel = new Model({cache: {
-                genreList: {
-                    0: {
-                        $type: $atom,
-                        message: "The humans are dead."
-                    }
-                }
-            }});
-
-            var throwError = false;
-            try {
-                dataModel._derefSync(["genreList", 0, 0]);
-            } catch (e) {
-                throwError = true;
-                expect(e.name).to.equals(InvalidModelError.prototype.name);
-            }
-            expect(throwError).to.be.ok;
-        });
-    });
-    describe('Async', function() {
+    describe('get', function() {
         it('should properly forward on invalid sources.', function(done) {
             var source = {
                 get: function() {
@@ -93,57 +52,39 @@ describe("Deref-Short", function() {
                 }
             });
 
-            var onNext = sinon.spy();
-            var noThrow = false;
             model._path = ['a', 'b'];
             model.
                 get(['a', 'b', 'd']).
-                doAction(onNext, function(err) {
-                    expect(err.name).to.equal(InvalidModelError.name);
-                    expect(err.message).to.equal(InvalidModelError.message);
-                    noThrow = true;
+                doAction(done, function(err) {
+                    expect(err instanceof InvalidModelError).to.be.ok;
                 }).
                 subscribe(
-                    done.bind(null, 'onNext should not happen.'),
-                    function(e) {
-                        if (noThrow) {
-                            return done();
-                        }
-                        done(e);
-                    },
-                    done.bind(null, 'onCompleted should not happen.'));
+                    errorOnNext(done),
+                    doneOnError(done),
+                    errorOnCompleted(done));
         });
-        it("bound to a path that short-circuits in a branch key position on error.", function(done) {
-            var dataModel = new Model({cache: {
-                genreList: {
-                    0: {
-                        $type: $error,
-                        value: {
-                            message: "The humans are dead."
-                        }
-                    }
+        it('should error on initial get if shorted.', function(done) {
+            var model = new Model({
+                cache: {
+                    a: atom('value')
                 }
-            }});
+            });
 
-            var throwError = false;
-            dataModel.
-                deref(["genreList", 0, 0], ['summary']).
-                doAction(
-                    function() { throw 'onNext should not happen.'; },
-                    function(e) {
-                        expect(e.name).to.equals(InvalidModelError.prototype.name);
-                        throwError = true;
-                    },
-                    function() { throw 'onCompleted should not happen.'; }).
-                subscribe(noOp, function(e) {
-                    if (throwError) {
-                        return done();
-                    }
-                    done(e);
-                }, done);
+            model._path = ['a', 'b'];
+            model.
+                get(['d']).
+                doAction(done, function(err) {
+                    expect(err instanceof InvalidModelError).to.be.ok;
+                }).
+                subscribe(
+                    errorOnNext(done),
+                    doneOnError(done),
+                    errorOnCompleted(done));
         });
+    });
+    describe('Sync', function() {
+        it("bound to a path that short-circuits in a branch key position on error.", function() {
 
-        it("bound to a path that short-circuits in a branch key position on value.", function(done) {
             var dataModel = new Model({cache: {
                 genreList: {
                     0: {
@@ -156,68 +97,63 @@ describe("Deref-Short", function() {
             }});
 
             var throwError = false;
-            dataModel.
-                deref(["genreList", 0, 0], ['summary']).
-                doAction(
-                    function() { throw 'onNext should not happen.'; },
-                    function(e) {
-                        expect(e.name).to.equals(InvalidModelError.prototype.name);
-                        throwError = true;
-                    },
-                    function() { throw 'onCompleted should not happen.'; }).
-                subscribe(noOp, function(e) {
-                    if (throwError) {
-                        return done();
-                    }
-                    done(e);
-                }, done);
+            try {
+                dataModel._derefSync(["genreList", 0, 0]);
+            } catch (e) {
+                throwError = true;
+                expect(e instanceof InvalidModelError).to.be.ok;
+            }
+            expect(throwError).to.be.ok;
         });
+        it("bound to a path that short-circuits leaf position on error.", function() {
 
-        it('should ensure that deref correctly makes a request to the dataStore.', function(done) {
-            var onGet = sinon.spy();
-            var onNext = sinon.spy();
-
-            var dataModel = new Model({
-                cache: {
-                    genreList: {
-                        '0':  { '$type': $ref, 'value': ['lists', 'abcd'] },
-
-                    },
-                    'lists': {
-                        'abcd': {
-                            '0':  { '$type': $ref, 'value': ['videos', 1234] }
+            var dataModel = new Model({cache: {
+                genreList: {
+                    0: {
+                        0: {
+                            $type: $atom,
+                            value: {
+                                message: "The humans are dead."
+                            }
                         }
                     }
-                },
-                source: new LocalDataSource(Cache(), {
-                    onGet: onGet
-                })
-            });
+                }
+            }});
 
             var throwError = false;
-            dataModel.
-                deref(['genreList', 0, 0], ['summary']).
-                subscribe(onNext, done, function() {
-                    var error = false;
-                    try {
-                        expect(onGet.called).to.be.ok;
-                        expect(onGet.getCall(0).args[1]).to.deep.equals([
-                            ['videos', 1234, 'summary']
-                        ]);
-                        expect(onNext.called).to.be.ok;
-                        expect(onNext.getCall(0).args[0]._path).to.deep.equals([
-                            'videos', 1234
-                        ]);
-                    } catch (e) {
-                        error = e;
-                    }
-
-                    if (error) {
-                        return done(error);
-                    }
-                    return done();
-                });
+            try {
+                dataModel._derefSync(["genreList", 0, 0]);
+            } catch (e) {
+                throwError = true;
+                expect(e instanceof InvalidModelError).to.be.ok;
+            }
+            expect(throwError).to.be.ok;
         });
+    });
+    describe('Async', function() {
+        it("bound to a path that short-circuits in a branch key position on error.", function(done) {
+            var dataModel = new Model({cache: {
+                genreList: {
+                    0: {
+                        $type: $atom,
+                        value: {
+                            message: "The humans are dead."
+                        }
+                    }
+                }
+            }});
+
+            dataModel.
+                deref(["genreList", 0, 0], ['summary']).
+                doAction(done, function(err) {
+                    expect(err instanceof InvalidModelError).to.be.ok;
+                }).
+                subscribe(
+                    errorOnNext(done),
+                    doneOnError(done),
+                    errorOnCompleted(done));
+        });
+
     });
 });
 

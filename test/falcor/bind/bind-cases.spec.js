@@ -11,8 +11,47 @@ var chai = require("chai");
 var expect = chai.expect;
 var ref = Model.ref;
 var atom = Model.atom;
+var sinon = require('sinon');
+var $ref = require("./../../../lib/types/ref");
 
 describe('Deref', function() {
+    it('should ensure that deref correctly makes a request to the dataStore.', function(done) {
+        var onGet = sinon.spy();
+        var onNext = sinon.spy();
+
+        var dataModel = new Model({
+            cache: {
+                genreList: {
+                    '0':  { '$type': $ref, 'value': ['lists', 'abcd'] },
+
+                },
+                'lists': {
+                    'abcd': {
+                        '0':  { '$type': $ref, 'value': ['videos', 1234] }
+                    }
+                }
+            },
+            source: new LocalDataSource(Cache(), {
+                onGet: onGet
+            })
+        });
+
+        var throwError = false;
+        dataModel.
+            deref(['genreList', 0, 0], ['summary']).
+            doAction(onNext, noOp, function() {
+                expect(onGet.called).to.be.ok;
+                expect(onGet.getCall(0).args[1]).to.deep.equals([
+                    ['videos', 1234, 'summary']
+                ]);
+                expect(onNext.called).to.be.ok;
+                expect(onNext.getCall(0).args[0]._path).to.deep.equals([
+                    'videos', 1234
+                ]);
+            }).
+            subscribe(noOp, done, done);
+    });
+
     it('should deref to a branch node.', function(done) {
         var model = new Model({source: new LocalDataSource(Cache())});
         var count = 0;
