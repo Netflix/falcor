@@ -15,7 +15,7 @@ var sinon = require('sinon');
 var $ref = require("./../../../lib/types/ref");
 
 describe('Deref', function() {
-    it.only('should ensure that deref correctly makes a request to the dataStore.', function(done) {
+    it('should ensure that deref correctly makes a request to the dataStore.', function(done) {
         var onGet = sinon.spy();
         var onNext = sinon.spy();
 
