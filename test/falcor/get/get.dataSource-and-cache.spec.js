@@ -8,6 +8,7 @@ var sinon = require('sinon');
 var expect = require('chai').expect;
 var clean = require('./../../cleanData').clean;
 var cacheGenerator = require('./../../CacheGenerator');
+var jsonGraph = require('falcor-json-graph');
 
 var M = function() {
     return cacheGenerator(0, 1);
@@ -318,6 +319,171 @@ describe('DataSource and Partial Cache', function() {
                     expect(count).to.equals(2);
                 }).
                 subscribe(noOp, done, done);
+        });
+    });
+    describe('Error Selector (during merge)', function() {
+
+        function generateErrorSelectorSpy(expectedPath) {
+            return sinon.spy(function(path, atom) {
+
+                // Needs to be asserted before mutation.
+                expect(atom.$type).to.equal('error');
+                expect(atom.value).to.deep.equals({message:'errormsg'});
+
+                atom.$custom = 'custom';
+                atom.value.customtype = 'customtype';
+
+                return atom;
+            });
+        }
+
+        function assertExpectedErrorPayload(e, expectedPath) {
+            var path = e.path;
+            var value = e.value;
+
+            // To avoid hardcoding/scrubbing $size, and other internals
+            expect(path).to.deep.equals(expectedPath);
+
+            expect(value.$type).to.equal('error');
+            expect(value.$custom).to.equal('custom');
+            expect(value.value).to.deep.equals({
+                message: 'errormsg',
+                customtype: 'customtype'
+            });
+        }
+
+        it('should get invoked with the right arguments for branches in cache', function(done) {
+
+            // Cache has [lolomo,0,0,item]
+            var testPath = ['lolomo',0,0,'item','errorPath'];
+
+            var modelCache = M();
+            var dataSourceCache = Cache();
+            // [lolomo,0,0,item]->[videos,0]
+            dataSourceCache.videos[0].errorPath = jsonGraph.error({message:'errormsg'});
+
+            var onNextSpy = sinon.spy();
+            var onErrorSpy = sinon.spy();
+            var errorSelectorSpy = generateErrorSelectorSpy(testPath);
+
+            var model = new Model({
+                cache: modelCache,
+                source: new LocalDataSource(dataSourceCache),
+                errorSelector: errorSelectorSpy
+            });
+
+            model.
+                boxValues().
+                get(testPath).
+                doAction(onNextSpy, onErrorSpy, noOp).
+                subscribe(
+                    noOp,
+                    function(e) {
+                        expect(errorSelectorSpy.callCount).to.equal(1);
+                        expect(errorSelectorSpy.getCall(0).args[0]).to.deep.equals(testPath);
+
+                        expect(onErrorSpy.callCount).to.equal(1);
+
+                        expect(e.length).to.equal(1);
+                        assertExpectedErrorPayload(e[0], testPath);
+
+                        done();
+                    },
+                    function() {
+                        expect(onNextSpy.callCount).to.equal(0);
+                        expect(onErrorSpy.callCount).to.equal(1);
+                        done();
+                    });
+        });
+
+        it('should get invoked with the right arguments for branches not in cache', function(done) {
+
+            // Cache doesn't have [lolomo,1,0,item]
+            var testPath = ['lolomo',1,0,'item','errorPath'];
+
+            var modelCache = M();
+            var dataSourceCache = Cache();
+
+            // [lolomo,1,0,item]->[videos,10]
+            dataSourceCache.videos[10].errorPath = jsonGraph.error({message:'errormsg'});
+
+            var onNextSpy = sinon.spy();
+            var onErrorSpy = sinon.spy();
+            var errorSelectorSpy = generateErrorSelectorSpy(testPath);
+
+            var model = new Model({
+                cache: modelCache,
+                source: new LocalDataSource(dataSourceCache),
+                errorSelector: errorSelectorSpy
+            });
+
+            model.
+                boxValues().
+                get(testPath).
+                doAction(onNextSpy, onErrorSpy, noOp).
+                subscribe(
+                    noOp,
+                    function(e) {
+                        expect(errorSelectorSpy.callCount).to.equal(1);
+                        expect(errorSelectorSpy.getCall(0).args[0]).to.deep.equals(testPath);
+
+                        expect(onErrorSpy.callCount).to.equal(1);
+
+                        expect(e.length).to.equal(1);
+                        assertExpectedErrorPayload(e[0], testPath);
+
+                        done();
+                    },
+                    function() {
+                        expect(onNextSpy.callCount).to.equal(0);
+                        expect(onErrorSpy.callCount).to.equal(1);
+                        done();
+                    });
+        });
+
+        it('should get invoked with the correct error paths for a keyset', function(done) {
+            var testPath = ['lolomo',[0,1],0,'item','errorPath'];
+
+            var modelCache = M();
+            var dataSourceCache = Cache();
+
+            dataSourceCache.videos[0].errorPath = jsonGraph.error({message:'errormsg'});
+            dataSourceCache.videos[10].errorPath = jsonGraph.error({message:'errormsg'});
+
+            var onNextSpy = sinon.spy();
+            var onErrorSpy = sinon.spy();
+            var errorSelectorSpy = generateErrorSelectorSpy(testPath);
+
+            var model = new Model({
+                cache: modelCache,
+                source: new LocalDataSource(dataSourceCache),
+                errorSelector: errorSelectorSpy
+            });
+
+            model.
+                boxValues().
+                get(testPath).
+                doAction(onNextSpy, onErrorSpy, noOp).
+                subscribe(
+                    noOp,
+                    function(e) {
+                        expect(onErrorSpy.callCount).to.equal(1);
+
+                        expect(errorSelectorSpy.callCount).to.equal(2);
+                        expect(errorSelectorSpy.getCall(0).args[0]).to.deep.equals(['lolomo',0,0,'item','errorPath']);
+                        expect(errorSelectorSpy.getCall(1).args[0]).to.deep.equals(['lolomo',1,0,'item','errorPath']);
+
+                        expect(e.length).to.equal(2);
+                        assertExpectedErrorPayload(e[0], ['lolomo',0,0,'item','errorPath']);
+                        assertExpectedErrorPayload(e[1], ['lolomo',1,0,'item','errorPath']);
+
+                        done();
+                    },
+                    function() {
+                        expect(onNextSpy.callCount).to.equal(0);
+                        expect(onErrorSpy.callCount).to.equal(1);
+                        done();
+                    });
         });
     });
 });
