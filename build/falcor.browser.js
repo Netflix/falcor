@@ -773,8 +773,10 @@ module.exports = function derefSync(boundPathArg) {
     var node = boundValue.value;
     var found = boundValue.found;
 
-    if (!found) {
-        return void 0;
+    // If the node is not found or the node is found but undefined is returned,
+    // this happens when a reference is expired.
+    if (!found || node === undefined) {
+        return undefined;
     }
 
     if (node.$type) {
@@ -1215,6 +1217,7 @@ module.exports = function getValueSync(model, simplePath, noClone) {
     var depth = 0;
     var key, i, next = root, curr = root, out = root, type, ref, refNode;
     var found = true;
+    var expired = false;
 
     while (next && depth < len) {
         key = simplePath[depth++];
@@ -1235,7 +1238,16 @@ module.exports = function getValueSync(model, simplePath, noClone) {
         // Up to the last key we follow references, ensure that they are not
         // expired either.
         if (depth < len) {
-            if (type === $ref && !isExpired(next)) {
+            if (type === $ref) {
+
+                // If the reference is expired then we need to set expired to
+                // true.
+                if (isExpired(next)) {
+                    expired = true;
+                    out = undefined;
+                    break;
+                }
+
                 ref = followReference(model, root, root, next, next.value);
                 refNode = ref[0];
 
@@ -1264,7 +1276,7 @@ module.exports = function getValueSync(model, simplePath, noClone) {
         curr = next;
     }
 
-    if (depth < len) {
+    if (depth < len && !expired) {
         // Unfortunately, if all that follows are nulls, then we have not shorted.
         for (i = depth; i < len; ++i) {
             if (simplePath[depth] !== null) {
