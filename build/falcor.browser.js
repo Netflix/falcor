@@ -1227,13 +1227,21 @@ module.exports = function getValueSync(model, simplePath, noClone) {
         }
 
         if (!next) {
-            out = void 0;
+            out = undefined;
             shorted = true;
             found = false;
             break;
         }
 
         type = next.$type;
+
+        // A materialized item.  There is nothing to deref to.
+        if (type === $atom && next.value === undefined) {
+            out = undefined;
+            found = false;
+            shorted = depth < len;
+            break;
+        }
 
         // Up to the last key we follow references, ensure that they are not
         // expired either.
