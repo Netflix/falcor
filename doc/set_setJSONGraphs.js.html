@@ -105,11 +105,15 @@ function setJSONGraphPathSet(
     var optimizedIndex = optimizedPath.index;
 
     do {
+
+        requestedPath.depth = depth;
+
         var results = setNode(
             root, parent, node, messageRoot, messageParent, message,
             key, branch, false, requestedPath, optimizedPath,
             version, expired, lru, comparator, errorSelector
         );
+
         requestedPath[depth] = key;
         requestedPath.index = depth;
         optimizedPath[optimizedPath.index++] = key;
