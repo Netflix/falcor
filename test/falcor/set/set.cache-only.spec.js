@@ -9,6 +9,7 @@ var noOp = function() {};
 var expect = require('chai').expect;
 var sinon = require('sinon');
 var toValue = function(x) { return {value: x}; };
+var jsonGraph = require('falcor-json-graph');
 
 describe('Cache Only', function() {
     describe('toJSON', function() {
@@ -95,4 +96,122 @@ describe('Cache Only', function() {
                 subscribe(noOp, done, done);
         });
     });
+
+    describe('Error Selector (during set)', function() {
+
+        function generateErrorSelectorSpy(expectedPath) {
+            return sinon.spy(function(path, atom) {
+                expect(atom.$type).to.equal('error');
+                expect(atom.value.message).to.equal('errormsg');
+
+                var o = {
+                    $type: atom.$type,
+                    $custom: 'custom',
+                    value: {
+                        message: atom.value.message,
+                        customtype: 'customtype'
+                    }
+                };
+
+                return o;
+            });
+        }
+
+        function assertExpectedErrorPayload(e, expectedPath) {
+            var path = e.path;
+            var value = e.value;
+
+            // To avoid hardcoding/scrubbing $size, and other internals
+            expect(path).to.deep.equals(expectedPath);
+
+            expect(value.$type).to.equal('error');
+            expect(value.$custom).to.equal('custom');
+            expect(value.value).to.deep.equals({
+                message: 'errormsg',
+                customtype: 'customtype'
+            });
+        }
+
+        it('should get invoked with the right arguments for simple paths', function(done) {
+
+            var testPath = ['genreList', 0, 0, 'errorPath'];
+
+            var modelCache = Cache();
+
+            var onNextSpy = sinon.spy();
+            var onErrorSpy = sinon.spy();
+            var errorSelectorSpy = generateErrorSelectorSpy(testPath);
+
+            var model = new Model({
+                cache : modelCache,
+                errorSelector : errorSelectorSpy
+            });
+
+            model.
+                boxValues().
+                setValue(testPath, jsonGraph.error({message:'errormsg'})).
+                doAction(onNextSpy, onErrorSpy, noOp).
+                subscribe(
+                    noOp,
+                    function(e) {
+                        expect(errorSelectorSpy.callCount).to.equal(1);
+                        expect(errorSelectorSpy.getCall(0).args[0]).to.deep.equals(testPath);
+
+                        expect(onErrorSpy.callCount).to.equal(1);
+
+                        expect(e.length).to.equal(1);
+                        assertExpectedErrorPayload(e[0], testPath);
+
+                        done();
+                    },
+                    function() {
+                        expect(onNextSpy.callCount).to.equal(0);
+                        expect(onErrorSpy.callCount).to.equal(1);
+                        done();
+                    });
+        });
+
+        it('should get invoked with the correct error paths for a keyset', function(done) {
+            var testPath = ['genreList',[0,1],0,'errorPath'];
+
+            var modelCache = Cache();
+
+            var onNextSpy = sinon.spy();
+            var onErrorSpy = sinon.spy();
+            var errorSelectorSpy = generateErrorSelectorSpy(testPath);
+
+            var model = new Model({
+                cache: modelCache,
+                errorSelector: errorSelectorSpy
+            });
+
+            model.
+                boxValues().
+                set({
+                    path: testPath,
+                    value: jsonGraph.error({message:'errormsg'})
+                }).
+                doAction(onNextSpy, onErrorSpy, noOp).
+                subscribe(
+                    noOp,
+                    function(e) {
+                        expect(errorSelectorSpy.callCount).to.equal(2);
+                        expect(errorSelectorSpy.getCall(0).args[0]).to.deep.equals(['genreList',0,0,'errorPath']);
+                        expect(errorSelectorSpy.getCall(1).args[0]).to.deep.equals(['genreList',1,0,'errorPath']);
+
+                        expect(e.length).to.equal(2);
+                        assertExpectedErrorPayload(e[0], ['genreList',0,0,'errorPath']);
+                        assertExpectedErrorPayload(e[1], ['genreList',1,0,'errorPath']);
+
+                        done();
+                    },
+                    function() {
+                        expect(onNextSpy.callCount).to.equal(0);
+                        expect(onErrorSpy.callCount).to.equal(1);
+                        done();
+                    });
+        });
+
+    });
+
 });
