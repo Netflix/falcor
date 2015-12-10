@@ -15,6 +15,39 @@ var sinon = require('sinon');
 var $ref = require("./../../../lib/types/ref");
 
 describe('Deref', function() {
+    it.only('should not be able to deref to lolomo because of expired, then get the correct data from source, then bind.', function(done) {
+        var model = new Model({
+            cache: {
+                lolomo: Model.ref(['lolomos', 'abcd'], {$expires: Date.now() - 1000})
+            },
+            source: {
+                get: function(paths) {
+                    return Rx.Observable.create(function(obs) {
+                        obs.onNext({
+                            jsonGraph: {
+                                lolomo: Model.ref(['lolomos', 'def'], {$expires: Date.now() + 10000}),
+                                lolomos: {
+                                    def: {
+                                        summary: 5
+                                    }
+                                }
+                            }
+                        });
+                        obs.onCompleted();
+                    });
+                }
+            }
+        });
+
+        var onNext = sinon.spy();
+        model.
+            deref(['lolomo'], ['summary']).
+            doAction(onNext, noOp, function() {
+                expect(onNext.calledOnce).to.be.ok;
+                expect(onNext.getCall(0).args[0]._path).to.deep.equals(['lolomos', 'def']);
+            }).
+            subscribe(noOp, done, done);
+    });
     it('should ensure that deref correctly makes a request to the dataStore.', function(done) {
         var onGet = sinon.spy();
         var onNext = sinon.spy();
