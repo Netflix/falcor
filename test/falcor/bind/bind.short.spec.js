@@ -105,6 +105,17 @@ describe("Deref-Short", function() {
             }
             expect(throwError).to.be.ok;
         });
+
+        it("bound path should short-circuit on an expired reference.", function() {
+
+            var dataModel = new Model({cache: {
+                genreList: Model.ref(['genreLists', 'ABC'], {$expires: Date.now() - 1000})
+            }});
+
+            var out = dataModel._derefSync(["genreList", 0, 0]);
+            expect(out).to.be.not.ok;
+        });
+
         it("bound to a path that short-circuits leaf position on error.", function() {
 
             var dataModel = new Model({cache: {
