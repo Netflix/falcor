@@ -83,6 +83,30 @@ describe("Deref-Short", function() {
         });
     });
     describe('Sync', function() {
+        it('should deref to a materialized value and return null.', function() {
+            var dataModel = new Model({cache: {
+                genreList: {
+                    0: {
+                        $type: $atom,
+                    }
+                }
+            }});
+
+            var out = dataModel._derefSync(["genreList", 0]);
+            expect(out).to.equals(undefined);
+        });
+        it('should deref to a materialized value and return null.', function() {
+            var dataModel = new Model({cache: {
+                genreList: {
+                    0: {
+                        $type: $atom,
+                    }
+                }
+            }});
+
+            var out = dataModel._derefSync(["genreList", 0, 0]);
+            expect(out).to.equals(undefined);
+        });
         it("bound to a path that short-circuits in a branch key position on error.", function() {
 
             var dataModel = new Model({cache: {
@@ -156,7 +180,7 @@ describe("Deref-Short", function() {
 
             dataModel.
                 deref(["genreList", 0, 0], ['summary']).
-                doAction(done, function(err) {
+                doAction(noOp, function(err) {
                     expect(err instanceof InvalidModelError).to.be.ok;
                 }).
                 subscribe(
@@ -165,6 +189,41 @@ describe("Deref-Short", function() {
                     errorOnCompleted(done));
         });
 
+        it('should deref to a materialized value and return null.', function(done) {
+            var dataModel = new Model({cache: {
+                genreList: {
+                    0: {
+                        $type: $atom,
+                    }
+                }
+            }});
+
+            var onNext = sinon.spy();
+            dataModel.
+                deref(["genreList", 0], ['summary']).
+                doAction(onNext, noOp, function() {
+                    expect(onNext.callCount).to.equals(0);
+                }).
+                subscribe(errorOnNext(done), done, done);
+        });
+
+        it('should deref to a materialized value beyond where the deref happens.', function(done) {
+            var dataModel = new Model({cache: {
+                genreList: {
+                    0: {
+                        $type: $atom,
+                    }
+                }
+            }});
+
+            var onNext = sinon.spy();
+            dataModel.
+                deref(["genreList", 0, 0], ['summary']).
+                doAction(onNext, noOp, function() {
+                    expect(onNext.callCount).to.equals(0);
+                }).
+                subscribe(errorOnNext(done), done, done);
+        });
     });
 });
 
