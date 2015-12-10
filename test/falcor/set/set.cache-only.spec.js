@@ -105,7 +105,6 @@ describe('Cache Only', function() {
                 expect(atom.value.message).to.equal('errormsg');
 
                 var o = {
-                    $size: atom.$size,
                     $type: atom.$type,
                     $custom: 'custom',
                     value: {
