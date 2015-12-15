@@ -166,6 +166,56 @@ describe('Deref', function() {
 
         expect(out.value).to.equals(undefined);
     });
+
+    it('should deliver successfully bound model if preload path errors', function(done) {
+
+        var modelCache = getCache();
+        var model = new Model({ cache: modelCache });
+
+        var onNext = sinon.spy();
+        var onError = sinon.spy(function() {
+            assert.fail(0, 1, "Did not expect error handler to be invoked");
+        });
+
+        model.
+            deref(['lolomo', 0], [1, 'item', 'info']).
+            doAction(onNext, onError, function() {
+                var boundModel = onNext.getCall(0).args[0];
+
+                expect(onNext.callCount).to.equal(1);
+                expect(boundModel).to.not.equal(model);
+                expect(boundModel._path).to.deep.equal(
+                    ['lists', 'c595efe8-4de0-4226-8d4a-ebe89d236e2f_fcce4c47-7b36-456b-89ac-bde430a24ca8']
+                );
+
+            }).
+            subscribe(noOp, done, done);
+    });
+
+    it('should deliver successfully bound model if one preload path succeeds, and one preload path errors', function(done) {
+
+        var modelCache = getCache();
+        var model = new Model({ cache: modelCache });
+
+        var onNext = sinon.spy();
+        var onError = sinon.spy(function() {
+            assert.fail(0, 1, "Did not expect error handler to be invoked");
+        });
+
+        model.
+            deref(['lolomo', 0], [[0,1], 'item', 'info']).
+            doAction(onNext, onError, function() {
+                var boundModel = onNext.getCall(0).args[0];
+
+                expect(onNext.callCount).to.equal(1);
+                expect(boundModel).to.not.equal(model);
+                expect(boundModel._path).to.deep.equal(
+                    ['lists', 'c595efe8-4de0-4226-8d4a-ebe89d236e2f_fcce4c47-7b36-456b-89ac-bde430a24ca8']
+                );
+
+            }).
+            subscribe(noOp, done, done);
+    });
 });
 
 function getCache() {
@@ -213,9 +263,23 @@ function getCache() {
                         "$type": "atom",
                     }
                 },
+                "1":{
+                    "item": {
+                        "$type": "ref",
+                        "value": ["videos", "err"],
+                    }
+                }
             },
         },
         "videos": {
+            "err": {
+                "info": {
+                    "$type": "error",
+                    "value": {
+                        "message": "errormsg"
+                    }
+                }
+            },
             "80041601": {
                 "info": {
                     "value": {
