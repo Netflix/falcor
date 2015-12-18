@@ -16,7 +16,6 @@ id: api
 <section>
     <article>
         <pre class="prettyprint source linenums"><code>var $modelCreated = require("./../internal/model-created");
-var clone = require("./util/clone");
 var isInternalKey = require("./../support/isInternalKey");
 
 /**
@@ -28,6 +27,25 @@ module.exports = function getCache(cache) {
 
     return out;
 };
+
+function cloneBoxedValue(boxedValue) {
+    var clonedValue = {};
+
+    var keys = Object.keys(boxedValue);
+    var key;
+    var i;
+    var l;
+
+    for (i = 0, l = keys.length; i &lt; l; i++) {
+        key = keys[i];
+
+        if (!isInternalKey(key)) {
+            clonedValue[key] = boxedValue[key];
+        }
+    }
+
+    return clonedValue;
+}
 
 function _copyCache(node, out, fromKey) {
     // copy and return
@@ -57,7 +75,7 @@ function _copyCache(node, out, fromKey) {
                 var isUserCreatedcacheNext = !node[$modelCreated];
                 var value;
                 if (isObject || isUserCreatedcacheNext) {
-                    value = clone(cacheNext);
+                    value = cloneBoxedValue(cacheNext);
                 } else {
                     value = cacheNext.value;
                 }
