@@ -216,6 +216,48 @@ describe('Deref', function() {
             }).
             subscribe(noOp, done, done);
     });
+
+    it('should fix issue https://github.com/Netflix/falcor/issues/669', function(done) {
+        var model = new falcor.Model({
+            cache: {
+                videos: {
+                    0: { summary: 'Some summary' },
+                    1: Model.atom(),
+                    2: Model.atom(),
+                    3: Model.atom()
+                }
+            },
+            source: {
+                get: function() {
+                    return Rx.Observable.create(function(obs) {
+                        obs.onNext({
+                            jsonGraph: {
+                                videos: {
+                                    4: Model.atom(),
+                                    5: Model.atom(),
+                                    6: Model.atom(),
+                                    7: Model.atom()
+                                }
+                            }
+                        });
+                        obs.onCompleted();
+                    });
+                }
+            }
+        });
+
+        var onNext = sinon.spy();
+        model.
+            deref(['videos'], [{to:7}, 'summary']).
+            doAction(onNext, noOp, function() {
+                expect(onNext.calledOnce).to.be.ok;
+                expect(onNext.getCall(0).args[0].toJSON()).to.deep.equals({
+                    $type: $ref,
+                    value: ['videos']
+                });
+            }).
+            subscribe(noOp, done, done);
+    });
 });
 
 function getCache() {
