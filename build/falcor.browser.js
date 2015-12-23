@@ -732,14 +732,13 @@ module.exports = function deref(boundPathArg) {
     flatMap(function(boundModel) {
         if (Boolean(boundModel)) {
             if (pathsCount > 0) {
+                var ofBoundModel = Rx.Observable.of(boundModel);
 
                 return boundModel.get.
                     apply(boundModel, paths).
-                    map(function() {
-                        return boundModel;
-                    }).
-                    catch(Rx.Observable.of(boundModel)).
-                    take(1);
+                    catch(ofBoundModel).
+                    concat(ofBoundModel).
+                    last();
 
             }
             return Rx.Observable.return(boundModel);
