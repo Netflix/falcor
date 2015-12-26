@@ -12,7 +12,7 @@ var cleanData = require('./cleanData');
 var clean = cleanData.clean;
 var strip = cleanData.strip;
 var traverseAndConvert = cleanData.traverseAndConvert;
-var __key = require("../lib/internal/key");
+var __key = require("../lib/internal").key;
 
 module.exports = {
     validateData: validateData,

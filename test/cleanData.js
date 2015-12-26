@@ -1,19 +1,23 @@
 var util = require('util');
-var internalKeyMap = require('./../lib/internal');
-var internalKeys = Object.keys(internalKeyMap);
-var $modelCreated = require('./../lib/internal/model-created.js');
+var internalKeys = require('./../lib/internal');
+var derefAndVersionKeys = [
+    internalKeys.path,
+    internalKeys.refPath,
+    internalKeys.toReference
+];
+var $modelCreated = require('./../lib/internal').modelCreated;
 
 module.exports = {
     clean: clean,
     strip: strip,
-    internalKeys: internalKeys,
     convertKey: convert,
+    derefAndVersionKeys: derefAndVersionKeys,
     convertModelCreatedAtoms: convertModelCreatedAtoms,
     convertNodes: function convertNodesHeader(obj, transform) {
         return convertNodes(null, null, obj, transform);
     },
     stripDerefAndVersionKeys: function(item) {
-        strip.apply(null, [item, '$size'].concat(internalKeys));
+        strip.apply(null, [item, '$size'].concat(derefAndVersionKeys));
         return item;
     },
     traverseAndConvert: traverseAndConvert
@@ -32,10 +36,14 @@ function convertModelCreatedAtoms(cache) {
 
 function clean(item, options) {
     options = options || {
-        strip: ['$size'].concat(internalKeys)
+        strip: ['$size'].concat(derefAndVersionKeys),
+        remap: []
     };
 
     strip.apply(null, [item].concat(options.strip));
+    if (options.remap && options.remap.length) {
+        remap.apply(null, [item].concat(options.remap));
+    }
     traverseAndConvert(item);
 
     return item;
@@ -108,6 +116,28 @@ function strip(obj, key) {
                 delete obj[k];
             } else if ((args[0] = obj[k]) != null && typeof obj[k] === "object") {
                 strip.apply(null, args);
+            }
+        });
+    }
+}
+
+function remap(obj) {
+    var pairs = Array.prototype.slice.call(arguments, 1);
+    var args  = [0].concat(pairs);
+    if (obj != null && typeof obj === "object") {
+        Object.keys(obj).forEach(function(key) {
+            var index = -1;
+            var count = pairs.length;
+            while (++index < count) {
+                var pair = pairs[index];
+                if (key === pair[0]) {
+                    obj[pair[1]] = obj[key];
+                    delete obj[key];
+                    return;
+                }
+            }
+            if ((args[0] = obj[key]) != null && typeof obj[key] === "object") {
+                remap.apply(null, args);
             }
         });
     }

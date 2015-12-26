@@ -3,7 +3,7 @@ var ref = jsonGraph.ref;
 var atom = jsonGraph.atom;
 var VIDEO_COUNT_PER_LIST = 10;
 var AthroughZ = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-var $modelCreated = require("./../lib/internal/model-created");
+var $modelCreated = require("./../lib/internal").modelCreated;
 var modelCreated = {};
 modelCreated[$modelCreated] = true;
 

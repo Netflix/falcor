@@ -4,10 +4,10 @@ var chai = require("chai");
 var expect = chai.expect;
 var noOp = function() {};
 
-var __head = require("./../../lib/internal/head");
-var __tail = require("./../../lib/internal/tail");
-var __next = require("./../../lib/internal/next");
-var __prev = require("./../../lib/internal/prev");
+var __head = require("./../../lib/internal").head;
+var __tail = require("./../../lib/internal").tail;
+var __next = require("./../../lib/internal").next;
+var __prev = require("./../../lib/internal").prev;
 
 describe('Overwrite', function() {
     it('should overwrite the cache and update the lru as PathValue', function() {
