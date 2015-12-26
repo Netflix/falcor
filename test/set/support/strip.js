@@ -1,6 +1,6 @@
 var isArray = Array.isArray;
 var slice = Array.prototype.slice;
-var __prefix = require("../../../lib/internal/prefix");
+var __prefix = require("../../../lib/internal").prefix;
 
 module.exports = function strip(cache, allowedKeys) {
     if (cache == null || typeof cache !== "object") {

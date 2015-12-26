@@ -6,10 +6,10 @@ var expect = chai.expect;
 var noOp = function() {};
 var sinon = require('sinon');
 
-var __head = require("./../../lib/internal/head");
-var __tail = require("./../../lib/internal/tail");
-var __next = require("./../../lib/internal/next");
-var __prev = require("./../../lib/internal/prev");
+var __head = require("./../../lib/internal").head;
+var __tail = require("./../../lib/internal").tail;
+var __next = require("./../../lib/internal").next;
+var __prev = require("./../../lib/internal").prev;
 
 describe('Expired', function() {
     it('should ensure that get avoids expired items', function(done) {
