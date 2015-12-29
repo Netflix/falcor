@@ -6,5 +6,6 @@ describe('Set', function() {
     require('./set.cacheAsDataSource-and-cache.spec');
     require('./set.pathSyntax.spec');
     require('./set.change-handler.spec');
+    require('./set.changes-completed-handler.spec');
     require('./set.setCache.spec');
 });
