@@ -740,14 +740,13 @@ module.exports = function deref(boundPathArg) {
     flatMap(function(boundModel) {
         if (Boolean(boundModel)) {
             if (pathsCount > 0) {
+                var ofBoundModel = Rx.Observable.of(boundModel);
 
                 return boundModel.get.
                     apply(boundModel, paths).
-                    map(function() {
-                        return boundModel;
-                    }).
-                    catch(Rx.Observable.of(boundModel)).
-                    take(1);
+                    catch(ofBoundModel).
+                    concat(ofBoundModel).
+                    last();
 
             }
             return Rx.Observable.return(boundModel);
@@ -1094,7 +1093,6 @@ module.exports = function getBoundValue(model, pathArg, materialized) {
 
 },{"18":18,"9":9}],15:[function(require,module,exports){
 var $modelCreated = require(38);
-var clone = require(26);
 var isInternalKey = require(98);
 
 /**
@@ -1106,6 +1104,25 @@ module.exports = function getCache(cache) {
 
     return out;
 };
+
+function cloneBoxedValue(boxedValue) {
+    var clonedValue = {};
+
+    var keys = Object.keys(boxedValue);
+    var key;
+    var i;
+    var l;
+
+    for (i = 0, l = keys.length; i < l; i++) {
+        key = keys[i];
+
+        if (!isInternalKey(key)) {
+            clonedValue[key] = boxedValue[key];
+        }
+    }
+
+    return clonedValue;
+}
 
 function _copyCache(node, out, fromKey) {
     // copy and return
@@ -1135,7 +1152,7 @@ function _copyCache(node, out, fromKey) {
                 var isUserCreatedcacheNext = !node[$modelCreated];
                 var value;
                 if (isObject || isUserCreatedcacheNext) {
-                    value = clone(cacheNext);
+                    value = cloneBoxedValue(cacheNext);
                 } else {
                     value = cacheNext.value;
                 }
@@ -1148,7 +1165,7 @@ function _copyCache(node, out, fromKey) {
         });
 }
 
-},{"26":26,"38":38,"98":98}],16:[function(require,module,exports){
+},{"38":38,"98":98}],16:[function(require,module,exports){
 /**
  * getCachePosition makes a fast walk to the bound value since all bound
  * paths are the most possible optimized path.
@@ -5593,30 +5610,20 @@ module.exports = function isFunction(func) {
 };
 
 },{}],98:[function(require,module,exports){
-var __parent = require(40);
-var __key = require(37);
-var __version = require(47);
-var __prev = require(42);
-var __next = require(39);
+var prefix = require(41);
 
 /**
- * If the key passed in is an internal key.  We will use a simple checking to
- * prevent infinite recursion on some machines.
+ * Determined if the key passed in is an internal key.
  *
- * @param {String} x -
+ * @param {String} x The key
  * @private
  * @returns {Boolean}
  */
 module.exports = function isInternalKey(x) {
-    return x === __parent ||
-        x === __key ||
-        x === __version ||
-        x === __prev ||
-        x === __next ||
-        x === "$size";
+    return (x === "$size") || (x && (x.charAt(0) === prefix));
 };
 
-},{"37":37,"39":39,"40":40,"42":42,"47":47}],99:[function(require,module,exports){
+},{"41":41}],99:[function(require,module,exports){
 var isObject = require(101);
 
 module.exports = function isJSONEnvelope(envelope) {
