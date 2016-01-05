@@ -4669,7 +4669,6 @@ var $ref = require(123);
 
 var getBoundValue = require(17);
 
-var promote = require(54);
 var isExpired = require(99);
 var isFunction = require(100);
 var isPrimitive = require(106);
@@ -4763,7 +4762,6 @@ function setPathSet(
                     version, expired, lru, comparator, errorSelector
                 );
             } else {
-                promote(lru, nextNode);
                 requestedPaths.push(requestedPath.slice(0, requestedPath.index + 1));
                 optimizedPaths.push(optimizedPath.slice(0, optimizedPath.index));
             }
@@ -4790,8 +4788,6 @@ function setReference(
         expireNode(node, expired, lru);
         return [undefined, root];
     }
-
-    promote(lru, node);
 
     var container = node;
     var parent = root;
@@ -4888,7 +4884,7 @@ function setNode(
     return [node, parent];
 }
 
-},{"100":100,"106":106,"108":108,"123":123,"14":14,"146":146,"17":17,"37":37,"40":40,"43":43,"46":46,"47":47,"48":48,"50":50,"54":54,"90":90,"96":96,"99":99}],83:[function(require,module,exports){
+},{"100":100,"106":106,"108":108,"123":123,"14":14,"146":146,"17":17,"37":37,"40":40,"43":43,"46":46,"47":47,"48":48,"50":50,"90":90,"96":96,"99":99}],83:[function(require,module,exports){
 var jsong = require(133);
 var ModelResponse = require(65);
 var isPathValue = require(105);
@@ -5242,7 +5238,6 @@ var isObject = require(104);
 var isExpired = require(99);
 var isFunction = require(100);
 
-var promote = require(54);
 var wrapNode = require(120);
 var insertNode = require(97);
 var expireNode = require(90);
@@ -5275,7 +5270,6 @@ module.exports = function mergeJSONGraphNode(
             node = wrapNode(message, undefined, message);
             parent = updateNodeAncestors(parent, -node.$size, lru, version);
             node = insertNode(node, parent, key, undefined, optimizedPath);
-            promote(lru, node);
             return node;
         }
 
@@ -5423,8 +5417,6 @@ module.exports = function mergeJSONGraphNode(
         // Promote the message edge in the LRU.
         if (isExpired(node)) {
             expireNode(node, expired, lru);
-        } else {
-            promote(lru, node);
         }
     }
     else if (node == null) {
@@ -5434,7 +5426,7 @@ module.exports = function mergeJSONGraphNode(
     return node;
 };
 
-},{"100":100,"104":104,"113":113,"118":118,"120":120,"122":122,"123":123,"43":43,"54":54,"90":90,"92":92,"93":93,"97":97,"99":99}],108:[function(require,module,exports){
+},{"100":100,"104":104,"113":113,"118":118,"120":120,"122":122,"123":123,"43":43,"90":90,"92":92,"93":93,"97":97,"99":99}],108:[function(require,module,exports){
 var $ref = require(123);
 var $error = require(122);
 var getType = require(94);
