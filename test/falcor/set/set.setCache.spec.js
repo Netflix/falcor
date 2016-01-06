@@ -85,25 +85,60 @@ describe('Cache Only', function() {
     });
     it("should be fine when you hydrate from an existing cache", function(done) {
         var model = new Model({
-            cache: { a: {
-                b: $ref("a"),
-                c: "foo" } },
+            cache: {
+                a: {
+                    b: $ref("a"),
+                    c: "foo"
+                }
+            },
             source: new LocalDataSource({
-                a: { b: $ref("d") },
-                d: { c: "foo" }
+                a: {
+                    b: $ref("d")
+                },
+                d: {
+                    c: "foo"
+                }
             })});
+
         var cache = model.getCache();
         model.setCache({});
+
         model.get("a.b.c").subscribe(function(x) {
             expect(clean(x)).to.deep.equal({
                 json: { a: { b: { c: "foo" } }}
             });
         });
+
         model.setCache(cache);
         model.get("a.b.c").subscribe(function(x) {
             expect(clean(x)).to.deep.equal({
                 json: { a: { b: { c: "foo" } }}
             });
         }, done, done);
+    });
+
+    it("should re-establish atoms and references when you hydrate from an existing cache into a completely new model instance", function(done) {
+        var modelOrig = new Model({
+            cache: {
+                a: {
+                    b: $ref("d")
+                },
+                d: {
+                    c: "foo"
+                }
+            }
+        });
+
+        var cache = modelOrig.getCache();
+        var modelNew = new Model();
+
+        modelNew.setCache(cache);
+        modelNew.get("a.b.c").subscribe(function(x) {
+
+            expect(clean(x)).to.deep.equal({
+                json: { a: { b: { c: "foo" } }}
+            });
+        }, done, done);
+
     });
 });
