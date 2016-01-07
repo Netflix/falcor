@@ -4,8 +4,8 @@ var sinon = require('sinon');
 var expect = require('chai').expect;
 var cacheGenerator = require('./../../CacheGenerator');
 var noOp = function() {};
-var __head = require('./../../../lib/internal/head');
-var __next = require('./../../../lib/internal/next');
+var __head = require("./../../../lib/internal/head");
+var __next = require("./../../../lib/internal/next");
 var __key = require('./../../../lib/internal/key');
 
 describe('fromWhenceYouCame', function() {
