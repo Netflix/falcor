@@ -389,12 +389,18 @@ Model.prototype.setCache = function modelSetCache(cacheOrJSONGraphEnvelope) {
         if (typeof cache !== "undefined") {
             collectLru(modelRoot, modelRoot.expired, getSize(cache), 0);
         }
+        var out;
         if (isJSONGraphEnvelope(cacheOrJSONGraphEnvelope)) {
-            setJSONGraphs(this, [cacheOrJSONGraphEnvelope]);
+            out = setJSONGraphs(this, [cacheOrJSONGraphEnvelope])[0];
         } else if (isJSONEnvelope(cacheOrJSONGraphEnvelope)) {
-            setCache(this, [cacheOrJSONGraphEnvelope]);
+            out = setCache(this, [cacheOrJSONGraphEnvelope])[0];
         } else if (isObject(cacheOrJSONGraphEnvelope)) {
-            setCache(this, [{ json: cacheOrJSONGraphEnvelope }]);
+            out = setCache(this, [{ json: cacheOrJSONGraphEnvelope }])[0];
+        }
+
+        // performs promotion without producing output.
+        if (out) {
+            get.getWithPathsAsPathMap(this, out, []);
         }
         this._path = boundPath;
     } else if (typeof cache === "undefined") {
@@ -1546,6 +1552,11 @@ var $modelCreated = require(40);
 module.exports = function onValue(model, node, seed, depth, outerResults,
                                   branchInfo, requestedPath, optimizedPath,
                                   optimizedLength, isJSONG) {
+    // Promote first.  Even if no output is produced we should still promote.
+    if (node) {
+        promote(model._root, node);
+    }
+
     // Preload
     if (!seed) {
         return;
@@ -1553,10 +1564,6 @@ module.exports = function onValue(model, node, seed, depth, outerResults,
 
     var i, len, k, key, curr, prev = null, prevK;
     var materialized = false, valueNode;
-
-    if (node) {
-        promote(model._root, node);
-    }
 
     if (!node || node.value === undefined) {
         materialized = model._materialized;
@@ -4209,7 +4216,6 @@ var __refsLength = require(47);
 
 var $ref = require(123);
 
-var promote = require(53);
 var isExpired = require(97);
 var isFunction = require(99);
 var isPrimitive = require(105);
@@ -4314,7 +4320,6 @@ function setJSONGraphPathSet(
                     version, expired, lru, comparator, errorSelector
                 );
             } else {
-                promote(lru, nextNode);
                 requestedPaths.push(requestedPath.slice(0, requestedPath.index + 1));
                 optimizedPaths.push(optimizedPath.slice(0, optimizedPath.index));
             }
@@ -4341,8 +4346,6 @@ function setReference(
         expireNode(node, expired, lru);
         return [undefined, root, message, messageRoot];
     }
-
-    promote(lru, node);
 
     var index = 0;
     var container = node;
@@ -4434,7 +4437,7 @@ function setNode(
     return [node, parent, message, messageParent];
 }
 
-},{"105":105,"106":106,"123":123,"13":13,"146":146,"36":36,"39":39,"45":45,"46":46,"47":47,"49":49,"53":53,"89":89,"95":95,"97":97,"99":99}],80:[function(require,module,exports){
+},{"105":105,"106":106,"123":123,"13":13,"146":146,"36":36,"39":39,"45":45,"46":46,"47":47,"49":49,"89":89,"95":95,"97":97,"99":99}],80:[function(require,module,exports){
 var __key = require(39);
 var __ref = require(46);
 var __prefix = require(43);
@@ -4449,7 +4452,6 @@ var $ref = require(123);
 var getBoundValue = require(16);
 
 var isArray = Array.isArray;
-var promote = require(53);
 var hasOwn = require(94);
 var isObject = require(103);
 var isExpired = require(98);
@@ -4552,7 +4554,6 @@ function setPathMap(
                         version, expired, lru, comparator, errorSelector
                     );
                 } else {
-                    promote(lru, nextNode);
                     requestedPaths.push(requestedPath.slice(0, requestedPath.index + 1));
                     optimizedPaths.push(optimizedPath.slice(0, optimizedPath.index));
                 }
@@ -4579,8 +4580,6 @@ function setReference(
         expireNode(node, expired, lru);
         return [undefined, root];
     }
-
-    promote(lru, node);
 
     var container = node;
     var parent = root;
@@ -4695,7 +4694,7 @@ function getKeys(pathMap) {
     return void 0;
 }
 
-},{"103":103,"105":105,"107":107,"123":123,"13":13,"16":16,"36":36,"39":39,"42":42,"43":43,"45":45,"46":46,"47":47,"49":49,"53":53,"89":89,"94":94,"95":95,"98":98,"99":99}],81:[function(require,module,exports){
+},{"103":103,"105":105,"107":107,"123":123,"13":13,"16":16,"36":36,"39":39,"42":42,"43":43,"45":45,"46":46,"47":47,"49":49,"89":89,"94":94,"95":95,"98":98,"99":99}],81:[function(require,module,exports){
 var __key = require(39);
 var __ref = require(46);
 var __parent = require(42);
@@ -4708,7 +4707,6 @@ var $ref = require(123);
 
 var getBoundValue = require(16);
 
-var promote = require(53);
 var isExpired = require(98);
 var isFunction = require(99);
 var isPrimitive = require(105);
@@ -4805,7 +4803,6 @@ function setPathSet(
                     version, expired, lru, comparator, errorSelector
                 );
             } else {
-                promote(lru, nextNode);
                 requestedPaths.push(requestedPath.slice(0, requestedPath.index + 1));
                 optimizedPaths.push(optimizedPath.slice(0, optimizedPath.index));
             }
@@ -4832,8 +4829,6 @@ function setReference(
         expireNode(node, expired, lru);
         return [undefined, root];
     }
-
-    promote(lru, node);
 
     var container = node;
     var parent = root;
@@ -4930,7 +4925,7 @@ function setNode(
     return [node, parent];
 }
 
-},{"105":105,"107":107,"123":123,"13":13,"146":146,"16":16,"36":36,"39":39,"42":42,"45":45,"46":46,"47":47,"49":49,"53":53,"89":89,"95":95,"98":98,"99":99}],82:[function(require,module,exports){
+},{"105":105,"107":107,"123":123,"13":13,"146":146,"16":16,"36":36,"39":39,"42":42,"45":45,"46":46,"47":47,"49":49,"89":89,"95":95,"98":98,"99":99}],82:[function(require,module,exports){
 var jsong = require(133);
 var ModelResponse = require(64);
 var isPathValue = require(104);
@@ -5274,7 +5269,6 @@ var isObject = require(103);
 var isExpired = require(98);
 var isFunction = require(99);
 
-var promote = require(53);
 var wrapNode = require(120);
 var insertNode = require(96);
 var expireNode = require(89);
@@ -5308,7 +5302,6 @@ module.exports = function mergeJSONGraphNode(
             node = wrapNode(message, undefined, message);
             parent = updateNodeAncestors(parent, -node.$size, lru, version);
             node = insertNode(node, parent, key, undefined, optimizedPath);
-            promote(lru, node);
             return node;
         }
 
@@ -5456,8 +5449,6 @@ module.exports = function mergeJSONGraphNode(
         // Promote the message edge in the LRU.
         if (isExpired(node)) {
             expireNode(node, expired, lru);
-        } else {
-            promote(lru, node);
         }
     }
     else if (node == null) {
@@ -5467,7 +5458,7 @@ module.exports = function mergeJSONGraphNode(
     return node;
 };
 
-},{"103":103,"110":110,"113":113,"118":118,"120":120,"122":122,"123":123,"42":42,"53":53,"89":89,"91":91,"92":92,"96":96,"98":98,"99":99}],107:[function(require,module,exports){
+},{"103":103,"110":110,"113":113,"118":118,"120":120,"122":122,"123":123,"42":42,"89":89,"91":91,"92":92,"96":96,"98":98,"99":99}],107:[function(require,module,exports){
 var $ref = require(123);
 var $error = require(122);
 var getType = require(93);
@@ -5694,7 +5685,7 @@ module.exports = function updateBackReferenceVersions(nodeArg, version) {
     var stack = [nodeArg];
     var count = 0;
     do {
-        var node = stack[count--];
+        var node = stack[count];
         if (node && node[__version] !== version) {
             node[__version] = version;
             stack[count++] = node[__parent];
@@ -5704,7 +5695,7 @@ module.exports = function updateBackReferenceVersions(nodeArg, version) {
                 stack[count++] = node[__ref + i];
             }
         }
-    } while (count > -1);
+    } while (--count > -1);
     return nodeArg;
 };
 
