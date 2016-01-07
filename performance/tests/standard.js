@@ -1,5 +1,6 @@
 var testMerge = require('./testMerge');
-var get = require('./get/get.core.perf');
+var get = require('./get/get.perf');
+var getCore = require('./get/get.core.perf');
 var set = require('./set/set.json-graph.perf');
 var clone = require('./clone/clone.perf');
 
