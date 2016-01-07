@@ -703,7 +703,7 @@ var router = new Router([{
     route: 'tasksById[{keys:ids}][{keys:props}]',
     get: function(pathSet) {
         // pathSet.ids is ["a32e8912f34","51f2928f34"]
-        // pathSet.keys is ["name"]
+        // pathSet.props is ["name"]
         return todoService.
             get(pathSet.ids).
             then(function(taskMap) {
@@ -725,8 +725,8 @@ var router = new Router([{
                     }
                     else {
                         task = tasksById[id] = {};
-                        pathSet.keys.forEach(function(key) {
-                            task[key] = jsong.atom(taskRecord[key]);
+                        pathSet.props.forEach(function(prop) {
+                            task[prop] = jsong.atom(taskRecord[prop]);
                         });
                     }
                 });
