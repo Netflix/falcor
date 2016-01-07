@@ -69,9 +69,14 @@ function batchingRequests() {
         triggerSource.trigger();
 }
 
-var out = module.exports = {};
+module.exports = function get(out, count) {
+    count = count || 5;
+    out = out || {};
 
-for (var i = 0; i < 5; ++i) {
-    out['primedCache ' + i] = primedCache;
-}
+    for (var i = 0; i < count; ++i) {
+        out['get.toDataSource' + i] = toDataSource;
+    }
+
+    return out;
+};
 

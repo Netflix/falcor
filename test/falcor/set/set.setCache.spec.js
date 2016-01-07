@@ -7,7 +7,7 @@ var LocalDataSource = require('../../data/LocalDataSource');
 var clean = require('../../cleanData').stripDerefAndVersionKeys;
 var $ref = Model.ref;
 
-describe('Cache Only', function() {
+describe('Set Cache', function() {
     it("should be fine when you set an empty cache", function(done) {
         var model = new Model({source: new LocalDataSource({
             a: { b: $ref("a"),
@@ -25,6 +25,7 @@ describe('Cache Only', function() {
             a: { b: $ref("a"),
                  c: "foo" }
         })});
+        debugger
         model.setCache(undefined);
         model.get("a.b.c").subscribe(function(x) {
             expect(clean(x)).to.deep.equal({
