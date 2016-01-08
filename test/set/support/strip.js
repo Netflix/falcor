@@ -1,6 +1,5 @@
 var isArray = Array.isArray;
 var slice = Array.prototype.slice;
-var __prefix = require("../../../lib/internal/prefix");
 var __unicodePrefix = require("../../../lib/internal/unicodePrefix");
 
 module.exports = function strip(cache, allowedKeys) {
@@ -17,7 +16,6 @@ module.exports = function strip(cache, allowedKeys) {
                 if (val === void 0) {
                     return obj;
                 } else if (
-                    key[0] !== __prefix &&
                     key[0] !== __unicodePrefix &&
                     key[0] !== "$"      ||
                     ~allowedKeys.indexOf(key)) {
