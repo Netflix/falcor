@@ -74,7 +74,7 @@ module.exports = function get(out, count) {
     out = out || {};
 
     for (var i = 0; i < count; ++i) {
-        out['get.toDataSource' + i] = toDataSource;
+        out['get.primedCache' + i] = primedCache;
     }
 
     return out;

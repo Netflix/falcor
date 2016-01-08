@@ -58,7 +58,7 @@ describe('getCache', function() {
         var cache = model.getCache();
         clean(cache);
         expect(cache).to.deep.equals({
-            test: atom('foo', {$modelCreated: true})
+            test: 'foo'
         });
     });
 });
