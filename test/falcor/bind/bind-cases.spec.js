@@ -20,7 +20,7 @@ describe('Deref', function() {
             return Rx.Observable.create(function(obs) {
                 obs.onNext({
                     jsonGraph: {
-                        lolomo: Model.ref(['lolomos', 'def'], {$expires: Date.now() + 10000}),
+                        lolomo: Model.ref(['lolomos', 'def'], {$expires: Date.now() + 100000}),
                         lolomos: {
                             def: {
                                 summary: 5
