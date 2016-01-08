@@ -32,4 +32,5 @@ function rowTest() {
     var json = seed[0].json;
     var lolomoModel = model.deref(json.lolomo);
     var listsModel = model.deref(json.lolomo[0]);
+    var videoModel = model.deref(json.lolomo[0][0].item);
 }
