@@ -202,7 +202,6 @@ describe("Deref-Short", function() {
             dataModel.
                 deref(["genreList", 0], ['summary']).
                 doAction(onNext, noOp, function() {
-                    debugger
                     expect(onNext.callCount).to.equals(0);
                 }).
                 subscribe(errorOnNext(done), done, done);
