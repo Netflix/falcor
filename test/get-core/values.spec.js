@@ -169,7 +169,7 @@ describe('Values', function() {
                 },
                 paths: [['videos', 0, 'title']]
             },
-            cache: cacheGenerator(0, 1)
+            cache: cacheGenerator(0, 1, undefined, false)
         });
     });
     it('should allow for multiple arguments with different length paths as JSONGraph.', function() {

@@ -39,7 +39,13 @@ function makeVideos(startIdx, count, fields, setModelCreated) {
         videos[i] = {};
 
         fields.forEach(function(f) {
-            videos[i][f] = atom('Video ' + i, setModelCreated && modelCreated || {});
+            var out;
+            if (setModelCreated) {
+                out = atom('Video ' + i, modelCreated);
+            } else {
+                out = atom('Video ' + i);
+            }
+            videos[i][f] = out;
         });
     }
     return videos;
