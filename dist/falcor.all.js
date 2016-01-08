@@ -704,7 +704,6 @@ var Rx = require(220);
 var pathSyntax = require(135);
 
 module.exports = function deref(boundPathArg) {
-
     var model = this;
     var modelRoot = model._root;
     var pathsIndex = -1;
@@ -717,58 +716,51 @@ module.exports = function deref(boundPathArg) {
         paths[pathsIndex] = pathSyntax.fromPath(arguments[pathsIndex + 1]);
     }
 
+    var fullPaths = paths.map(function(x) {
+        return boundPath.concat(x);
+    });
+
     if (modelRoot.syncRefCount <= 0 && pathsCount === 0) {
         throw new Error("Model#deref requires at least one value path.");
     }
 
-    return Rx.Observable.defer(function() {
-        var value;
-        var errorHappened = false;
-        try {
-            ++modelRoot.syncRefCount;
-            value = model._derefSync(boundPath);
-        } catch (e) {
-            value = e;
-            errorHappened = true;
-        } finally {
-            --modelRoot.syncRefCount;
-        }
-        return errorHappened ?
-            Rx.Observable.throw(value) :
-            Rx.Observable.return(value);
-    }).
-    flatMap(function(boundModel) {
-        if (Boolean(boundModel)) {
-            if (pathsCount > 0) {
-
-                return boundModel.get.
-                    apply(boundModel, paths).
-                    map(function() {
-                        return boundModel;
-                    }).
-                    catch(Rx.Observable.of(boundModel)).
-                    take(1);
-
-            }
-            return Rx.Observable.return(boundModel);
-        } else if (pathsCount > 0) {
-            return model.
-                get.apply(model, paths.map(function(path) {
-                    return boundPath.concat(path);
-                })).
-                map(function() {
-                    return model.deref(boundPath);
-                }).
-                mergeAll();
-        }
-        return Rx.Observable.empty();
-    });
+    // First prefetch all the data then makes the
+    return model.
+        get.apply(model, fullPaths).
+        catch(Rx.Observable.empty()).
+        concat(Rx.Observable.defer(function() {
+            return derefSync(model, boundPath);
+        })).
+        takeLast(1).
+        filter(function(x) {
+            return x !== undefined;
+        });
 };
+
+function derefSync(model, derefPath) {
+    var value;
+    var errorHappened = false;
+    try {
+        ++model._root.syncRefCount;
+        value = model._derefSync(derefPath);
+    } catch (e) {
+        value = e;
+        errorHappened = true;
+    } finally {
+        --model._root.syncRefCount;
+    }
+
+    if (errorHappened) {
+        return Rx.Observable.throw(value);
+    }
+    return Rx.Observable.return(value);
+}
 
 },{"135":135,"220":220}],7:[function(require,module,exports){
 var pathSyntax = require(135);
 var getBoundValue = require(14);
 var InvalidModelError = require(9);
+var $atom = require(119);
 
 module.exports = function derefSync(boundPathArg) {
 
@@ -786,7 +778,8 @@ module.exports = function derefSync(boundPathArg) {
 
     // If the node is not found or the node is found but undefined is returned,
     // this happens when a reference is expired.
-    if (!found || node === undefined) {
+    if (!found || node === undefined ||
+        node.$type === $atom && node.value === undefined) {
         return undefined;
     }
 
@@ -797,7 +790,7 @@ module.exports = function derefSync(boundPathArg) {
     return this._clone({ _path: path });
 };
 
-},{"135":135,"14":14,"9":9}],8:[function(require,module,exports){
+},{"119":119,"135":135,"14":14,"9":9}],8:[function(require,module,exports){
 /**
  * When a bound model attempts to retrieve JSONGraph it should throw an
  * error.
