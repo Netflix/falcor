@@ -9,12 +9,114 @@ var Bound = Expected.Bound;
 var noOp = function() {};
 var chai = require("chai");
 var expect = chai.expect;
+var assert = chai.assert;
 var ref = Model.ref;
 var atom = Model.atom;
 var sinon = require('sinon');
 var $ref = require("./../../../lib/types/ref");
+var errorOnCompleted = require('./../../errorOnCompleted');
+var errorOnNext = require('./../../errorOnNext');
+var doneOnError = require('./../../doneOnError');
 
 describe('Deref', function() {
+    it('should be able to forward on errors from a model.', function(done) {
+        var onGet = sinon.spy(function() {
+            return Rx.Observable.create(function(obs) {
+                obs.onError(new Error('Not Authorized'));
+            });
+        });
+        var model = new Model({
+            cache: { },
+            source: {
+                get: onGet
+            }
+        });
+        model.
+            deref(['lolomo'], ['summary']).
+            doAction(noOp, function(e) {
+                expect(e).to.deep.equals([{
+                    path: ['lolomo', 'summary'],
+                    value: {
+                        message: 'Not Authorized'
+                    }
+                }]);
+            }).
+            subscribe(
+                errorOnNext(done),
+                doneOnError(done),
+                errorOnCompleted(done));
+    });
+
+    it('should be ok when all data is {$type: atom}, no cache, derefing.', function(done) {
+        var onGet = sinon.spy(function() {
+            return Rx.Observable.create(function(obs) {
+                obs.onNext({
+                    jsonGraph: {
+                        lolomo: {
+                            summary: {$type: 'atom'},
+                            length: {$type: 'atom'}
+                        }
+                    }
+                });
+                obs.onCompleted();
+            });
+        });
+        var model = new Model({
+            cache: { },
+            source: {
+                get: onGet
+            }
+        });
+        var onNext = sinon.spy();
+        model.
+            deref(['lolomo'], [['summary', 'length']]).
+            doAction(onNext, noOp, function() {
+                expect(onNext.calledOnce).to.be.ok;
+                expect(onGet.calledOnce).to.be.ok;
+                expect(onNext.getCall(0).args[0]._path).to.deep.equals(['lolomo']);
+            }).
+            subscribe(noOp, done, done);
+    });
+
+    it('should be ok when requesting all {$type: atom}s for derefing.', function(done) {
+        var onGet = sinon.spy(function() {
+            return Rx.Observable.create(function(obs) {
+                obs.onNext({
+                    jsonGraph: {
+                        lolomos: {
+                            123: {
+                                summary: {$type: 'atom'}
+                            }
+                        }
+                    }
+                });
+                obs.onCompleted();
+            });
+        });
+        var model = new Model({
+            cache: {
+                lolomo: Model.ref(['lolomos', 123]),
+                lolomos: {
+                    123: {
+                        length: 5
+                    }
+                }
+            },
+            source: {
+                get: onGet
+            }
+        });
+        var onNext = sinon.spy();
+        model.
+            deref(['lolomo'], ['summary', 'length']).
+            doAction(onNext, noOp, function() {
+                expect(onNext.calledOnce).to.be.ok;
+                expect(onGet.calledOnce).to.be.ok;
+                expect(onNext.getCall(0).args[0]._path).to.deep.equals(['lolomos', 123]);
+            }).
+            subscribe(noOp, done, done);
+    });
+
     it('should not be able to deref to lolomo because of expired, then get the correct data from source, then bind.', function(done) {
         var onGet = sinon.spy(function() {
             return Rx.Observable.create(function(obs) {
@@ -50,6 +152,7 @@ describe('Deref', function() {
             }).
             subscribe(noOp, done, done);
     });
+
     it('should ensure that deref correctly makes a request to the dataStore.', function(done) {
         var onGet = sinon.spy();
         var onNext = sinon.spy();
