@@ -17,8 +17,117 @@ var $ref = require("./../../../lib/types/ref");
 var errorOnCompleted = require('./../../errorOnCompleted');
 var errorOnNext = require('./../../errorOnNext');
 var doneOnError = require('./../../doneOnError');
+var InvalidModelError = require('./../../../lib/errors/InvalidModelError');
 
 describe('Deref', function() {
+    it('should allow gets to mutate the cache that would make the initial deref break (short).', function(done) {
+        var onGet = sinon.spy(function() {
+            return Rx.Observable.create(function(obs) {
+                obs.onNext({
+                    jsonGraph: {
+                        lolomo: ref(['lolomos', 123]),
+                        lolomos: {
+                            123: Model.error({
+                                message: 'Not Authorized'
+                            })
+                        }
+                    }
+                });
+                obs.onCompleted();
+            });
+        });
+        var model = new Model({
+            cache: {
+                lolomo: {
+                    summary: atom(42, {$expires: Date.now() - 1000})
+                }
+            },
+            source: {
+                get: onGet
+            }
+        });
+
+        var onNext = sinon.spy();
+        model.
+            deref(['lolomo'], ['summary']).
+            doAction(onNext, function(e) {
+                expect(onNext.callCount).to.equals(0);
+                expect(e instanceof InvalidModelError).to.be.ok;
+            }).
+            subscribe(
+                errorOnNext(done),
+                doneOnError(done),
+                errorOnCompleted(done));
+    });
+    it('should allow gets to mutate the cache that would make the initial deref break (undefined).', function(done) {
+        var onGet = sinon.spy(function() {
+            return Rx.Observable.create(function(obs) {
+                obs.onNext({
+                    jsonGraph: {
+                        lolomo: ref(['lolomos', 123]),
+                        lolomos: {
+                            123: atom(undefined)
+                        }
+                    }
+                });
+                obs.onCompleted();
+            });
+        });
+        var model = new Model({
+            cache: {
+                lolomo: {
+                    summary: atom(42, {$expires: Date.now() - 1000})
+                }
+            },
+            source: {
+                get: onGet
+            }
+        });
+
+        var onNext = sinon.spy();
+        model.
+            deref(['lolomo'], ['summary']).
+            doAction(onNext, noOp, function() {
+                expect(onNext.callCount).to.equals(0);
+            }).
+            subscribe(noOp, done, done);
+    });
+    it('should allow gets to mutate the cache that would make the initial deref break.', function(done) {
+        var onGet = sinon.spy(function() {
+            return Rx.Observable.create(function(obs) {
+                obs.onNext({
+                    jsonGraph: {
+                        lolomo: ref(['lolomos', 123]),
+                        lolomos: {
+                            123: {
+                                summary: atom(42)
+                            }
+                        }
+                    }
+                });
+                obs.onCompleted();
+            });
+        });
+        var model = new Model({
+            cache: {
+                lolomo: {
+                    summary: atom(42, {$expires: Date.now() - 1000})
+                }
+            },
+            source: {
+                get: onGet
+            }
+        });
+
+        var onNext = sinon.spy();
+        model.
+            deref(['lolomo'], ['summary']).
+            doAction(onNext, noOp, function() {
+                expect(onNext.calledOnce).to.be.ok;
+                expect(onNext.getCall(0).args[0]._path).to.deep.equals(['lolomos', 123]);
+            }).
+            subscribe(noOp, done, done);
+    });
     it('should be able to forward on errors from a model.', function(done) {
         var onGet = sinon.spy(function() {
             return Rx.Observable.create(function(obs) {
