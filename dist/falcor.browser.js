@@ -720,11 +720,33 @@ module.exports = function deref(boundPathArg) {
             if (pathsCount > 0) {
                 var ofBoundModel = Rx.Observable.of(boundModel);
 
+                // Ensures that all the leaves are in the cache.
                 return boundModel.get.
                     apply(boundModel, paths).
-                    catch(ofBoundModel).
+
+                    // Ensures that if only errors occur, then the concat
+                    // will still run.
+                    catch(Rx.Observable.empty()).
+
+                    // Ensures that the last thing returned by this operation is
+                    // the bound model.
                     concat(ofBoundModel).
-                    last();
+
+                    // Plucks the last value from this stream, which should be
+                    // the bound model.
+                    last().
+
+                    // Chooses the new deref or passes on the invalid model
+                    // error.
+                    flatMap(function getNextBoundModel() {
+
+                        // TODO: Should we onError the error from derefSync?
+                        return derefSync(model, boundPath);
+                    }).
+
+                    // The previous operation can undefine the cache, so we need
+                    // to ensure that we don't return and undefined model.
+                    filter(function(x) { return x; });
             }
             return Rx.Observable.return(boundModel);
         } else if (pathsCount > 0) {
