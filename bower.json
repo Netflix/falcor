@@ -1,10 +1,9 @@
+
 {
   "name": "falcor",
-  "version": "1.4.2-build.4091+sha.fe0af2c",
+  "version": "0.1.15",
   "main": "./dist/falcor.browser.js",
   "ignore": [],
-  "dependencies": {},
-  "homepage": "http://netflix.github.io/falcor/",
-  "_source": "https://github.com/Netflix/falcor",
-  "_originalSource": "falcor"
+  "dependencies": {
+  }
 }
