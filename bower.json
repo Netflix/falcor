@@ -2,7 +2,7 @@
 {
   "name": "falcor",
   "main": "./dist/falcor.browser.js",
-  "ignore": ["build", "lib", "examples", "performance", "test"],
+  "ignore": ["MIGRATIONS.md"],
   "dependencies": {
   }
 }
