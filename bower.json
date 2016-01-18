@@ -1,7 +1,6 @@
 
 {
   "name": "falcor",
-  "version": "0.1.15",
   "main": "./dist/falcor.browser.js",
   "ignore": ["build", "lib", "examples", "performance", "test"],
   "dependencies": {
