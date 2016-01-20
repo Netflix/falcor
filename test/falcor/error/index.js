@@ -125,7 +125,6 @@ describe("Error", function() {
                 expect(onNext.callCount).to.equal(0);
                 expect(onError.calledOnce).to.be.ok;
                 expect(onError.getCall(0).args[0].name).to.equals(InvalidSourceError.name);
-                correct = true;
             }).
             subscribe(noOp, function(e) {
                 if (isAssertionError(e)) {
@@ -166,15 +165,12 @@ describe("Error", function() {
         };
         var model = new falcor.Model({ source: routes });
         var onNext = sinon.spy();
-        var onError = sinon.spy();
         model.
             call(['videos', 1234, 'rating'], 5).
-            doAction(onNext, onError).
-            doAction(noOp, function() {
+            doAction(onNext).
+            doAction(noOp, function(err) {
                 expect(onNext.callCount).to.equal(0);
-                expect(onError.calledOnce).to.be.ok;
-                expect(onError.getCall(0).args[0].name).to.equals(InvalidSourceError.name);
-                correct = true;
+                expect(err.name).to.equals(InvalidSourceError.name);
             }).
             subscribe(noOp, function(e) {
                 if (isAssertionError(e)) {
