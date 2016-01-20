@@ -13,7 +13,7 @@ var LocalSource = module.exports = function(cache, options) {
         wait: false
     }, options);
     this._missCount = 0;
-    this.model = new falcor.Model({cache: cache});
+    this.model = new falcor.Model({cache: cache})._materialize();
 };
 
 LocalSource.prototype = {
