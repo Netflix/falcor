@@ -10,10 +10,15 @@ var LocalSource = module.exports = function(cache, options) {
         onGet: noOp,
         onSet: noOp,
         onResults: noOp,
-        wait: false
+        wait: false,
+        materialize: false
     }, options);
     this._missCount = 0;
-    this.model = new falcor.Model({cache: cache})._materialize();
+    this.model = new falcor.Model({cache: cache});
+
+    if (this._options.materialize) {
+        this.model = this.model._materialize();
+    }
 };
 
 LocalSource.prototype = {

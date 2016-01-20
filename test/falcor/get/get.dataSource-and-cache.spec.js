@@ -199,7 +199,7 @@ describe('DataSource and Partial Cache', function() {
                         2: Model.atom(undefined),
                         3: Model.atom(undefined)
                     }
-                })
+                }, {materialize: true})
             });
 
             var onNext = sinon.spy();
