@@ -4404,6 +4404,7 @@ module.exports = function checkCacheAndReport(model, requestedPaths, observer,
     // have a dataSource to continue on fetching from.
     var hasValues = results.hasValue;
     var completed = !results.requestedMissingPaths || !model._source;
+    var hasValueOverall = seed[0].json || seed[0].jsonGraph;
 
     // Copy the errors into the total errors array.
     if (results.errors) {
@@ -4416,7 +4417,7 @@ module.exports = function checkCacheAndReport(model, requestedPaths, observer,
 
     // If there are values to report, then report.
 
-    if (hasValues && (progressive || completed)) {
+    if (hasValues && progressive || hasValueOverall && completed) {
         // TODO: Remove the sync counter
         try {
             ++model._root.syncRefCount;
