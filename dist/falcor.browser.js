@@ -3542,6 +3542,7 @@ module.exports = function checkCacheAndReport(model, requestedPaths, observer,
     // have a dataSource to continue on fetching from.
     var hasValues = results.hasValue;
     var completed = !results.requestedMissingPaths || !model._source;
+    var hasValueOverall = Boolean(seed[0].json || seed[0].jsonGraph);
 
     // Copy the errors into the total errors array.
     if (results.errors) {
@@ -3553,16 +3554,17 @@ module.exports = function checkCacheAndReport(model, requestedPaths, observer,
     }
 
     // If there are values to report, then report.
-
-    if (hasValues && (progressive || completed)) {
-        // TODO: Remove the sync counter
+    // Which are under two conditions:
+    // 1.  This request for data yielded at least one value (hasValue) and  the
+    // request is progressive
+    //
+    // 2.  The request if finished and the json key off
+    // the seed has a value.
+    if (hasValues && progressive || hasValueOverall && completed) {
         try {
-            ++model._root.syncRefCount;
             observer.onNext(seed[0]);
         } catch(e) {
             throw e;
-        } finally {
-            --model._root.syncRefCount;
         }
     }
 
