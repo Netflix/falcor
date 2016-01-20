@@ -184,6 +184,40 @@ describe('DataSource and Partial Cache', function() {
                 }).
                 subscribe(noOp, done, noOp);
         });
+
+        it('should ensure that a response where only materialized atoms come ' +
+           'through still onNexts a value if one is present in cache.', function(done) {
+            var model = new Model({
+                cache: {
+                    paths: {
+                        0: 'test',
+                        1: 'test'
+                    }
+                },
+                source: new LocalDataSource({
+                    paths: {
+                        2: Model.atom(undefined),
+                        3: Model.atom(undefined)
+                    }
+                }, {materialize: true})
+            });
+
+            var onNext = sinon.spy();
+            toObservable(model.
+                get(['paths', {to:3}])).
+                doAction(onNext, noOp, function() {
+                    expect(onNext.calledOnce, 'onNext called').to.be.ok;
+                    expect(strip(onNext.getCall(0).args[0])).to.deep.equals({
+                        json: {
+                            paths: {
+                                0: 'test',
+                                1: 'test'
+                            }
+                        }
+                    });
+                }).
+                subscribe(noOp, done, done);
+        });
     });
     describe('_toJSONG', function() {
         it('should get multiple arguments into a single _toJSONG response.', function(done) {
