@@ -7,6 +7,8 @@ var expect = chai.expect;
 var sinon = require('sinon');
 var noOp = function() {};
 var InvalidSourceError = require('../../../lib/errors/InvalidSourceError');
+var errorOnCompleted = require('./../../errorOnCompleted');
+var doneOnError = require('./../../doneOnError');
 
 describe("Error", function() {
     it("should get a hard error from the DataSource.", function(done) {
@@ -59,20 +61,22 @@ describe("Error", function() {
                 }
             }
         });
-        var count = 0;
+        var onNext = sinon.spy();
         toObservable(model.
             get(["test", {to: 5}, "summary"])).
-            doAction(function(x) {
-                var expected = {
+            doAction(onNext, function(err) {
+
+                // Ensure onNext is called correctly
+                expect(onNext.calledOnce, 'onNext called').to.be.ok;
+                expect(clean(onNext.getCall(0).args[0]), 'json from onNext').to.deep.equals({
                     json: {
                         test: {
                             0: {summary: "in cache"},
                             5: {summary: "in cache"}
                         }
                     }
-                };
-                expect(x).to.deep.equals(expected);
-            }, function(err) {
+                });
+
                 expect(err.length).to.equal(4);
                 // not in boxValue mode
                 var expected = {
@@ -87,17 +91,7 @@ describe("Error", function() {
                     expect(e).to.deep.equals(expected);
                 });
             }).
-            subscribe(noOp,
-            function(e) {
-                if (isAssertionError(e)) {
-                    done(e);
-                } else {
-                    done();
-                }
-            },
-            function() {
-                done('Should not onComplete');
-            });
+            subscribe(noOp, doneOnError(done), errorOnCompleted(done));
     });
 
     it('should allow for dataSources to immediately throw an error (set)', function(done) {
