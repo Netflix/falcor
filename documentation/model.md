@@ -1463,7 +1463,7 @@ var model = new falcor.Model({cache:{
 The following [paths](http://netflix.github.io/falcor/documentation/paths.html) are legal to retrieve because atoms, errors, and references are considered value types in [JSON Graph](http://netflix.github.io/falcor/documentation/jsongraph.html):
 
 ~~~js
-model.getValue("todos[0].customer").then(log); 
+model.getValue("todos[1].customer").then(log); 
 // prints {name: "Jim Hobart", address:"123 pacifica ave., CA, US"} because the value of an Atom is considered a value
 ~~~
 
