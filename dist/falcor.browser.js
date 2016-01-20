@@ -2533,39 +2533,48 @@ GetRequestV2.prototype = {
         if (!self.scheduled) {
             self.scheduled = true;
 
-            self._disposable = self._scheduler.schedule(function() {
-                flushGetRequest(self, oPaths, function(err, data) {
-                    var i, fn, len;
-                    self.requestQueue.removeRequest(self);
-                    self._disposed = true;
+            var flushedDisposable;
+            var scheduleDisposable = self._scheduler.schedule(function() {
+                flushedDisposable =
+                    flushGetRequest(self, oPaths, function(err, data) {
+                        var i, fn, len;
+                        self.requestQueue.removeRequest(self);
+                        self._disposed = true;
 
-                    if (err instanceof InvalidSourceError) {
-                        for (i = 0, len = callbacks.length; i < len; ++i) {
-                            fn = callbacks[i];
-                            if (fn) {
-                                fn(err);
+                        if (err instanceof InvalidSourceError) {
+                            for (i = 0, len = callbacks.length; i < len; ++i) {
+                                fn = callbacks[i];
+                                if (fn) {
+                                    fn(err);
+                                }
+                            }
+                            return;
+                        }
+
+                        // If there is at least one callback remaining, then
+                        // callback the callbacks.
+                        if (self._count) {
+                            self._merge(rPaths, err, data);
+
+                            // Call the callbacks.  The first one inserts all
+                            // the data so that the rest do not have consider
+                            // if their data is present or not.
+                            for (i = 0, len = callbacks.length; i < len; ++i) {
+                                fn = callbacks[i];
+                                if (fn) {
+                                    fn(err, data);
+                                }
                             }
                         }
-                        return;
-                    }
-
-                    // If there is at least one callback remaining, then
-                    // callback the callbacks.
-                    if (self._count) {
-                        self._merge(rPaths, err, data);
-
-                        // Call the callbacks.  The first one inserts all the
-                        // data so that the rest do not have consider if their
-                        // data is present or not.
-                        for (i = 0, len = callbacks.length; i < len; ++i) {
-                            fn = callbacks[i];
-                            if (fn) {
-                                fn(err, data);
-                            }
-                        }
-                    }
-                });
+                    });
             });
+
+            // There is a race condition here. If the scheduler is sync then it
+            // exposes a condition where the flush request cannot be disposed.
+            // To correct this issue, if there is no flushedDisposable, then the
+            // scheduler is async and should use scheduler disposable, else use
+            // the flushedDisposable.
+            self._disposable = flushedDisposable || scheduleDisposable;
         }
 
         // Disposes this batched request.  This does not mean that the
@@ -2690,7 +2699,7 @@ function createDisposable(request, idx) {
 
         // If there are no more requests, then dispose all of the request.
         var count = --request._count;
-        if (count === 0 && !request.sent) {
+        if (count === 0) {
             request._disposable.dispose();
             request.requestQueue.removeRequest(request);
         }
@@ -2939,7 +2948,7 @@ var InvalidSourceError = require(11);
 module.exports = function flushGetRequest(request, listOfPaths, callback) {
     if (request._count === 0) {
         request.requestQueue.removeRequest(request);
-        return;
+        return null;
     }
 
     request.sent = true;
@@ -2997,10 +3006,11 @@ module.exports = function flushGetRequest(request, listOfPaths, callback) {
             get(collapsedPaths);
     } catch (e) {
         callback(new InvalidSourceError());
-        return;
+        return null;
     }
 
-    getRequest.
+    // Ensures that the disposable is available for the outside to cancel.
+    var disposable = getRequest.
         subscribe(function(data) {
             jsonGraphData = data;
         }, function(err) {
@@ -3008,6 +3018,8 @@ module.exports = function flushGetRequest(request, listOfPaths, callback) {
         }, function() {
             callback(null, jsonGraphData);
         });
+
+    return disposable;
 };
 
 
