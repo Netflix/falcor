@@ -307,7 +307,7 @@ Model.prototype.deref = require(6);
 
 /**
  * A dereferenced model can become invalid when the reference from which it was
- * build has been removed/collected/expired/etc etc.  To fix the issue, a from
+ * built has been removed/collected/expired/etc etc.  To fix the issue, a from
  * the parent request should be made (no parent, then from the root) for a valid
  * path and re-dereference performed to update what the model is bound too.
  *
