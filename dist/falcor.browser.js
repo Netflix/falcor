@@ -307,7 +307,7 @@ Model.prototype.deref = require(7);
 
 /**
  * A dereferenced model can become invalid when the reference from which it was
- * build has been removed/collected/expired/etc etc.  To fix the issue, a from
+ * built has been removed/collected/expired/etc etc.  To fix the issue, a from
  * the parent request should be made (no parent, then from the root) for a valid
  * path and re-dereference performed to update what the model is bound too.
  *
@@ -2595,39 +2595,48 @@ GetRequestV2.prototype = {
         if (!self.scheduled) {
             self.scheduled = true;
 
-            self._disposable = self._scheduler.schedule(function() {
-                flushGetRequest(self, oPaths, function(err, data) {
-                    var i, fn, len;
-                    self.requestQueue.removeRequest(self);
-                    self._disposed = true;
+            var flushedDisposable;
+            var scheduleDisposable = self._scheduler.schedule(function() {
+                flushedDisposable =
+                    flushGetRequest(self, oPaths, function(err, data) {
+                        var i, fn, len;
+                        self.requestQueue.removeRequest(self);
+                        self._disposed = true;
 
-                    if (err instanceof InvalidSourceError) {
-                        for (i = 0, len = callbacks.length; i < len; ++i) {
-                            fn = callbacks[i];
-                            if (fn) {
-                                fn(err);
+                        if (err instanceof InvalidSourceError) {
+                            for (i = 0, len = callbacks.length; i < len; ++i) {
+                                fn = callbacks[i];
+                                if (fn) {
+                                    fn(err);
+                                }
+                            }
+                            return;
+                        }
+
+                        // If there is at least one callback remaining, then
+                        // callback the callbacks.
+                        if (self._count) {
+                            self._merge(rPaths, err, data);
+
+                            // Call the callbacks.  The first one inserts all
+                            // the data so that the rest do not have consider
+                            // if their data is present or not.
+                            for (i = 0, len = callbacks.length; i < len; ++i) {
+                                fn = callbacks[i];
+                                if (fn) {
+                                    fn(err, data);
+                                }
                             }
                         }
-                        return;
-                    }
-
-                    // If there is at least one callback remaining, then
-                    // callback the callbacks.
-                    if (self._count) {
-                        self._merge(rPaths, err, data);
-
-                        // Call the callbacks.  The first one inserts all the
-                        // data so that the rest do not have consider if their
-                        // data is present or not.
-                        for (i = 0, len = callbacks.length; i < len; ++i) {
-                            fn = callbacks[i];
-                            if (fn) {
-                                fn(err, data);
-                            }
-                        }
-                    }
-                });
+                    });
             });
+
+            // There is a race condition here. If the scheduler is sync then it
+            // exposes a condition where the flush request cannot be disposed.
+            // To correct this issue, if there is no flushedDisposable, then the
+            // scheduler is async and should use scheduler disposable, else use
+            // the flushedDisposable.
+            self._disposable = flushedDisposable || scheduleDisposable;
         }
 
         // Disposes this batched request.  This does not mean that the
@@ -2752,7 +2761,7 @@ function createDisposable(request, idx) {
 
         // If there are no more requests, then dispose all of the request.
         var count = --request._count;
-        if (count === 0 && !request.sent) {
+        if (count === 0) {
             request._disposable.dispose();
             request.requestQueue.removeRequest(request);
         }
@@ -3001,7 +3010,7 @@ var InvalidSourceError = require(12);
 module.exports = function flushGetRequest(request, listOfPaths, callback) {
     if (request._count === 0) {
         request.requestQueue.removeRequest(request);
-        return;
+        return null;
     }
 
     request.sent = true;
@@ -3059,10 +3068,11 @@ module.exports = function flushGetRequest(request, listOfPaths, callback) {
             get(collapsedPaths);
     } catch (e) {
         callback(new InvalidSourceError());
-        return;
+        return null;
     }
 
-    getRequest.
+    // Ensures that the disposable is available for the outside to cancel.
+    var disposable = getRequest.
         subscribe(function(data) {
             jsonGraphData = data;
         }, function(err) {
@@ -3070,6 +3080,8 @@ module.exports = function flushGetRequest(request, listOfPaths, callback) {
         }, function() {
             callback(null, jsonGraphData);
         });
+
+    return disposable;
 };
 
 
@@ -3610,6 +3622,7 @@ module.exports = function checkCacheAndReport(model, requestedPaths, observer,
     // have a dataSource to continue on fetching from.
     var hasValues = results.hasValue;
     var completed = !results.requestedMissingPaths || !model._source;
+    var hasValueOverall = Boolean(seed[0].json || seed[0].jsonGraph);
 
     // Copy the errors into the total errors array.
     if (results.errors) {
@@ -3621,16 +3634,17 @@ module.exports = function checkCacheAndReport(model, requestedPaths, observer,
     }
 
     // If there are values to report, then report.
-
-    if (hasValues && (progressive || completed)) {
-        // TODO: Remove the sync counter
+    // Which are under two conditions:
+    // 1.  This request for data yielded at least one value (hasValue) and  the
+    // request is progressive
+    //
+    // 2.  The request if finished and the json key off
+    // the seed has a value.
+    if (hasValues && progressive || hasValueOverall && completed) {
         try {
-            ++model._root.syncRefCount;
             observer.onNext(seed[0]);
         } catch(e) {
             throw e;
-        } finally {
-            --model._root.syncRefCount;
         }
     }
 
@@ -5808,7 +5822,6 @@ ToEsSubscriptionAdapter.prototype.unsubscribe = function unsubscribe() {
 function toEsObservable(_self) {
     return {
         subscribe: function subscribe(observer) {
-            debugger;
             return new ToEsSubscriptionAdapter(_self.subscribe(new FromEsObserverAdapter(observer)));
         }
     };
