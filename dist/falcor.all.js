@@ -6165,7 +6165,7 @@ module.exports = function buildQueryObject(url, method, queryData) {
     keys = Object.keys(queryData);
     keys.forEach(function (k) {
       var value = (typeof queryData[k] === 'object') ? JSON.stringify(queryData[k]) : queryData[k];
-      qData.push(k + '=' + value);
+      qData.push(k + '=' + encodeURIComponent(value));
     });
   }
 
