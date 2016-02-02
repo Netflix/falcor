@@ -189,83 +189,125 @@ One of the hazards of invoking functions is that they may change any number of v
 
 ~~~js
 interface DataSource {
-  call(callPath, args, pathSuffixes, paths): Observable<JSONGraphEnvelope>
+  call(callPath: Path, args: Array, refPaths: Array<PathSet>, thisPaths: Array<PathSet>): Observable<JSONGraphEnvelope>
 }
 ~~~
 
 
-The `callPath` parameter is a [Path Array](http://netflix.github.io/falcor/documentation/paths.html#path) that refers to the location of the function within the [JSON Graph](http://netflix.github.io/falcor/documentation/jsongraph.html) object. The "arguments" parameter are the arguments passed to the function. The "pathSuffixes" parameter
+Note that one invocation of call can only run a single function. The callPath argument is the path to the function within the DataSource’s JSON Graph object. The args parameter is the array of arguments to be passed to the function being called.
+
+The refPaths argument is the array of PathSets to retrieve from the JSON Graph References within the function response. The dataSource appends these pathSets to any JSON Graph References that appear within the function response, and adds the values to the JSONGraphEnvelope. Typically, refPaths are used when the function creates a new object and returns a reference to that object. The refPaths can be passed to the call method in order to allow fields to be retrieved from the newly-generated object without the need for a subsequent get operation.
+
+A function is not obligated to return all of the changes that it makes to its “this” object. On the contrary, functions typically return as little data as possible by default. The thisPaths argument is the array of PathSets to retrieve from the function's "this" object after the function has completed execution. The DataSource adds these values to the JSONGraphEnvelope before returning the function's response. 
 
 
-To demonstrate the `call()` method in action, we'll create a DataSource by adapting a [Model](http://netflix.github.io/falcor/documentation/model.html) with an in-memory cache to the DataSource interface using the `asDataSource()` method.
+
+Instead of forcing functions to return all of the changes they make to the JSON Graph object, DataSources allow callers to define exactly which values they would like to refresh after successful function execution. To this end, callers can provide refPaths and thisPaths to the DataSource’s call method along with the function path. After the DataSource runs the function, it retrieves the refPaths and thisPaths and adds them to the JSON Graph response.
+
+After the refPaths have been evaluated against any JSON Graph References returned by the function and added to the JSONGraphEnvelope Response, each PathSet in the thisPaths array is evaluated on the function’s “this” object. The resulting values are added to the JSON Graph Response returned by the DataSource’s call method.
+
+To demonstrate the `call()` method in action, we'll create a [Router](http://netflix.github.io/falcor/documentation/router.html) DataSource that allows titles to be pushed into a Netflix member's list.  
+
+We can invoke the "myList.push" function on the Router like so:
 
 ~~~js
-var dataSource =
-    new falcor.Model({
-        cache: {
-            todos: [
-                { $type: "ref", value: ['todosById', 44] },
-                { $type: "ref", value: ['todosById', 54] },
-                { $type: "ref", value: ['todosById', 97] }
-            ],
-            todosById: {
-                "44": {
-                    name: 'get milk from corner store',
-                    done: false,
-                    prerequisites: [
-                        { $type: "ref", value: ['todosById', 54] },
-                        { $type: "ref", value: ['todosById', 97] }
-                    ]
-                },
-                "54": { name: 'withdraw money from ATM', done: false },
-                "97": { name: 'pick car up from shop', done: false }
-            }
-        }
-    }).asDataSource();
+router.
+  call(
+    // the callPath
+    ["myList", "push"], 
+    // the args array containing the reference to the title to add to the list
+    [{ $type: "ref", value: ["titlesById", 4792] }],
+    // retrieve the name of the newly-added title using a refPath
+    [
+      ["name"]
+    ],
+    // retrieve the length of the list after the function has completed
+    [
+      ["length"]
+    ]).
+  subscribe(function(jsonGraphEnvelope) {
+    console.log(JSON.stringify(jsonGraphEnvelope, null, 2);
+  });
 ~~~
 
-Here is an example which requests sets the status of the both prerequisites of the first task in a TODO list to "done."
+Here is the definition of the "list.push" function in our Router DataSource:
 
 ~~~js
-var response = dataSource.set({
-  paths: [
-    ["todos", 0, "prerequisities", { to:1 }, "done"]
-  ],
-  jsonGraph: {
-    todos: {
-      0: {
-        prerequisites: {
-          0: {
-            done: true
-          },
-          1: {
-            done: true
-          }
-        }
-      }
-    }
-  }
-});
+var dataSource = new Router([
+ {
+        route: 'list.push',
+        call: function(callPath, args) {
 
-response.subscribe(jsonGraphEnvelope => JSON.stringify(jsonGraphEnvelope, null, 4); });
-// eventually prints...
-// {
-//     jsonGraph: {
-//         todos: {
-//             0: { $type: "ref", value: ["todosById", 44] },
-//         },
-//         todosById: {
-//             44: {
-//                 prerequisites: [
-//                     { $type: "ref", value: ['todosById', 54] },
-//                     { $type: "ref", value: ['todosById', 97] }
-//                 ]
-//             },
-//             "54": { name: 'withdraw money from ATM', done: true },
-//             "97": { name: 'pick car up from shop', done: true }
-//         }
-//     }
-// }
+            // retrieving the title id from the reference path:            
+            titleId = titleRef.value[1];
+            if (parseInt(titleId, 10).toString() !== titleId.toString())
+                throw new Error("invalid input");
+
+            return myListService.
+                addTitle(titleId).
+                then(function(length) {
+                    return [
+                        {
+                            path: ['myList', length - 1],
+                            value: titleRef
+                        },
+                        {
+                            path: ['myList', 'length'],
+                            value: length
+                        }
+                    ];
+                });
+        }
+    }
+]);
+~~~
+
+The Router handler converts the array of PathValues returned by the function into the following JSONGraphEnvelope:
+
+~~~js
+{
+  jsonGraph: {
+    myList: {
+      7: { $type: "ref", value: ["titlesById", 4792] }
+    }
+  },
+  paths: [ ["myList", 7] ]
+}
+~~~
+
+When we called the function, we used the refPaths argument to specify that we wanted to retrieve ["name"] from all of the JSONGraph References in the function response. Therefore, the Router DataSource evaluates the ["myList", 7, "name"] and adds the value to the JSONGraphEnvelope:
+
+~~~js
+{
+  jsonGraph: {
+    myList: {
+      7: { $type: "ref", value: ["titlesById", 4792] }
+    },
+    titlesById: {
+      4792: {
+        name: "House of Cards"
+      }
+  },
+  paths: [ ["myList", 7, "name"] ]
+}
+~~~
+
+Finally, the Router looks up ["length"] on the list object and adds the value to the JSONGraphEnvelope.
+
+~~~js
+{
+  jsonGraph: {
+    myList: {
+      7: { $type: "ref", value: ["titlesById", 4792] },
+      length: 8
+    },
+    titlesById: {
+      4792: {
+        name: "House of Cards"
+      }
+  },
+  paths: [ ["myList", 7, "name"], ["myList", 7, "length"] ]
+}
 ~~~
 
 ## Why Implement a DataSource?
