@@ -131,7 +131,7 @@ var response =
 var response = model.get("todos[0..2]['name','done']");
 ~~~
 
-PathSets are a superset of the Path grammer because in addition to Keys, PathSets can contain KeySets. A KeySet can be any of the following values:
+PathSets are a superset of the Path grammar because in addition to Keys, PathSets can contain KeySets. A KeySet can be any of the following values:
 
 * Key
 * Range
@@ -146,7 +146,7 @@ Two Paths can be collapsed into a PathSet if they are identical save for one Key
 
 ### PathSet Syntax String
 
-PathSet Syntax Strings expand on the Path Syntax Grammer, adding ranges, and the ability to specify multiple keys or ranges in indexers. PathSet Syntax Strings are immediately parsed into PathSet Arrays, which has a run-time cost. Any [Model](http://netflix.github.io/falcor/documentation/model.html) which can accept multiple Paths can also accept PathSets.
+PathSet Syntax Strings expand on the Path Syntax Grammar, adding ranges, and the ability to specify multiple keys or ranges in indexers. PathSet Syntax Strings are immediately parsed into PathSet Arrays, which has a run-time cost. Any [Model](http://netflix.github.io/falcor/documentation/model.html) which can accept multiple Paths can also accept PathSets.
 
 The following PathSet Strings are valid:
 
@@ -158,9 +158,9 @@ The following PathSet Strings are valid:
 
 ### PathSet Array
 
-PathSet Syntax Strings expand on the Path Syntax Grammer, adding ranges, and the ability to specify multiple keys or ranges in indexers. PathSet Syntax Strings are immediately parsed into PathSet Arrays, which has a run-time cost. Any [Model](http://netflix.github.io/falcor/documentation/model.html) which can accept multiple Paths can also accept PathSets.
+In addition to PathSet Syntax Strings, [Models](http://netflix.github.io/falcor/documentation/model.html) can also be passed an Arrays of KeySets, simply referred to as a PathSet. Here are a few examples of valid PathSets:
 
-The following PathSet Strings are valid:
+The following PathSet Arrays are valid:
 
 * ["todos", { from: 0, to: 2 }, "name"] is equivalent to ["todos", 0, "name"], ["todos", 1, "name"], and ["todos", 2, "name"]
 * ["todos", { from: 0, length: 2 }, "name"] is equivalent to ["todos", 0, "name"], and ["todos", 1, "name"]
