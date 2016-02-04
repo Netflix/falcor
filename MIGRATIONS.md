@@ -115,7 +115,10 @@ Deref
 [Documentation on deref is found here](http://netflix.github.io/falcor/doc/Model.html#deref)
 
 `deref` has changed to use the output from a `ModelResponse` instead of
-specifying the destination via path and leaves.
+specifying the destination via path and leaves.  This means that there will be
+problems if you rely on `Object.keys` to iterate over your `json`.  Instead,
+use `falcor.keys`.  It will strip out the `$__path` from the `ModelResponse's`
+`json`.
 
 Lets create a model with some initial cache.
 ```javascript
