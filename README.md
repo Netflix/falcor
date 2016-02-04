@@ -6,6 +6,10 @@
 
 ## Developer Preview
 
+**1.x** does not mean we are out of _developer_ preview mode.  Simply means we
+are breaking the contract and we would like to respect `^` within peoples NPM
+dependencies.  1.x does contain breaking changes that can be reviewed [here](https://github.com/Netflix/falcor/blob/master/MIGRATIONS.md)
+
 **This release is a developer preview.** We are looking for community help to track down and fix bugs. We are also looking for help integrating with existing MVC frameworks, as well as ports to other platforms.
 
 * *master* currently reflects work in progress, and contains backward incompatible changes which will become the next major version bump.
