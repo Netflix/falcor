@@ -270,10 +270,9 @@ Model.prototype.invalidate = function invalidate() {
  * - Optimize for executing multiple operations and path looksup at/below the
  *   same location in the {@link JSONGraph}
  * @method
- * @param {Path} derefPath - the path to the object that the new Model should
- * refer to
- * @return {Model} - the dereferenced {@link Model}, or an empty stream if
- * nothing is found at the path
+ * @param {Object} responseObject - an object previously retrieved from the
+ * Model
+ * @return {Model} - the dereferenced {@link Model}
  * @example
 var Model = falcor.Model;
 var model = new Model({
