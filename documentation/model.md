@@ -796,6 +796,109 @@ The [DataSource](http://netflix.github.io/falcor/documentation/datasources.html)
 
 Notice that the value of the "todos.length" is now in the [JSON Graph](http://netflix.github.io/falcor/documentation/jsongraph.html) object.
 
+## Dereferencing a Model (Version 1+)
+
+When dealing with shared mutable data, it is important to avoid race conditions. For example, what if two different users are modifying objects in a list at the same time? How do we ensure that operations are applied to the right objects, even though objects may shift around in the list between being displayed to the user and being modified by the user?
+
+Falcor provides the *deref* method to allow you to refer to objects by their identity rather than their location in the graph. When you dereference a Falcor Model against an object you previously retrieved from the Model, you create a new Model bound to that object. All future operations performed on this Model will be performed on the dereferenced object in the graph, whether it be get, set, or call operations.
+
+To understand how the deref method is used, let's take a look at an example. Imagine you are building an application that displays a list of video titles, and presents a Detail view when one of the titles is selected by the user. Let's assume we are using the following JSON Graph representation of the list:
+
+~~~js
+  {
+    list: [
+      { $type: “ref”, value: [“titlesById”, 53] },
+      { $type: “ref”, value: [“titlesById”, 67] }
+    ],
+    titlesById: {
+      53: {
+        name: “House of Cards”,
+        rating: 5.0
+      },
+      67: {
+        name: “Daredevil”,
+        rating: 5.0
+      } 
+    }
+  }
+~~~
+
+Note that the graph contains a titlesById identity map which organizes each title by its unique ID.
+
+To display the information, we can create a list view which accepts a Model and displays a list of summarized information about each title. When the user clicks on a title within the list, we will open the detail view and display additional information about the title. This begs the question of how the List view will send the selected title to the detail view.
+
+When an item is selected, the List view could pass the Model to the Detail view, along with the path to the selected item.
+
+~~~js
+new DetailView(model, [“list”, selectedIndex]);
+~~~
+
+This is an anti-pattern because the path contains the index in the list where the title is located, and this item may shift in the list between the time the object is displayed and the user drills down and selects it. 
+
+Instead of passing paths around, the List view can pass a Model dereferenced to a specific object in the graph. 
+
+~~~js
+function item_selected(selectedIndex) {
+  // response was previous retrieved using model.get(“list[0..1].name”)
+  if (response.json.list && response.json.list[selectedIndex]) {
+    new DetailView(model.deref(json.list[selectedIndex]));
+  }
+}
+~~~
+
+In this example, when a user clicks on a title we dereference a Model against the title object we retrieved earlier. We pass the dereferenced Model to the Detail view which can use it to retrieve more information from the title.
+
+~~~js
+function DetailView(titleModel) {
+  titleModel.getValue(“rating”).then(function(rating) {
+    // display rating
+  });
+}
+~~~
+
+Operations performed on the dereferenced Model will always be applied to the same object, no matter where the object is moved within the graph. Furthermore code can interact with the object without any knowledge of its location within the graph.
+
+Deref uses metadata that the get operation inserts information about the references it encounters into JSON responses. For example, retrieving “list[0].name” will yield the following JSON response.
+
+~~~js
+{
+  json: {
+    list: {
+     0: {
+       $__: [“titlesById”, 53],
+       name: “House of Cards”
+      }
+    }
+  }
+}
+~~~
+
+Note the “$__path” added to the JSON response. When you dereference an object within a Falcor response, the new Model internally stores this path. Note that you should not use these metadata properties directly, as the specific property name may change over time and is an implementation detail. Rather you should use the public deref method instead.
+
+### Passing Dereferenced Models to Call
+
+Dereferenced models can be passed as the argument to a function invoked with call. This approach allows you to pass an object to a function by identity, rather than a path to a volatile location within the graph.
+
+~~~js
+var model = new falcor.Model(new HttpDataSource(“/model.json”));
+model.get(“list[0]”).then(response => {
+  var titleModel = model.deref(response.json.list[0]);
+  return model.
+    call(“myList.push”, [titleModel], [], [“length”]).
+    then(response => console.log(response.json.myList.length));
+});
+~~~  
+
+The code above works because JSON stringifying a dereferenced Model produces a JSON Graph reference that points to the object in the Graph. 
+
+~~~js
+var model = new falcor.Model(new HttpDataSource(“/model.json”));
+model.get(“list[0]”).then(response => {
+  var titleModel = model.deref(response.json.list[0]);
+  console.log(JSON.stringify(titleModel)); 
+  // prints { $type: “ref”, value: [“titlesById”, 53] }
+});
+~~~
 
 # Working with JSON Graph Data using a Model
 
