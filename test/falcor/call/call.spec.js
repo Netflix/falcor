@@ -124,4 +124,27 @@ describe("Call", function() {
             }).
             subscribe(noOp, done, done);
     });
+
+    it("does not re-execute a call on multiple thens", function(done) {
+        var call = sinon.spy(function() {
+            return new ModelResponse(function(observer) {
+                observer.onNext({
+                    jsonGraph: { a: 'test' },
+                    paths: [['a']],
+                    invalidated: []
+                });
+                observer.onCompleted();
+            });
+        });
+        var model = new Model({
+            source: { call: call }
+        });
+
+        var response = model.call(["add"], [], [], [[0, "summary"]]);
+        response.then();
+        response.then(function() {
+          expect(call.calledOnce).to.be.ok;
+          done();
+        }).catch(done);
+    });
 });
