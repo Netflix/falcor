@@ -87,7 +87,7 @@ describe("Model", function() {
         testRunner.compare({$type: $atom, value: 1337}, out);
     });
 
-    it.only('unsubscribing should cancel DataSource request.', function(done) {
+    it('unsubscribing should cancel DataSource request.', function(done) {
         var onNextCalled = 0,
             onErrorCalled = 0,
             onCompletedCalled = 0,
