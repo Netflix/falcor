@@ -159,7 +159,7 @@ describe("Model", function() {
         }
     });
 
-    it.only('Supports RxJS 5.', function(done) {
+    it('Supports RxJS 5.', function(done) {
         var onNextCalled = 0,
             onErrorCalled = 0,
             onCompletedCalled = 0,
