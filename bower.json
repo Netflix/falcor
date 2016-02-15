@@ -1,0 +1,27 @@
+
+{
+  "name": "falcor",
+  "main": "./dist/falcor.browser.js",
+  "ignore": [
+    "build", 
+    "examples", 
+    "lib", 
+    "performance", 
+    "test",
+    ".bithoundrc",
+    ".eslintrc",
+    ".gitignore",
+    ".travis.yml",
+    "all.js",
+    "browser.js",
+    "conf.json",
+    "gulpfile.js",
+    "MIGRATIONS.md",
+    "OSSMETADATA",
+    "package.json",
+    "server.js",
+    "webpack.conf.js"
+    ],
+  "dependencies": {
+  }
+}

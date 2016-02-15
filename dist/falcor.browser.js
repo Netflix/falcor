@@ -270,10 +270,9 @@ Model.prototype.invalidate = function invalidate() {
  * - Optimize for executing multiple operations and path looksup at/below the
  *   same location in the {@link JSONGraph}
  * @method
- * @param {Path} derefPath - the path to the object that the new Model should
- * refer to
- * @return {Model} - the dereferenced {@link Model}, or an empty stream if
- * nothing is found at the path
+ * @param {Object} responseObject - an object previously retrieved from the
+ * Model
+ * @return {Model} - the dereferenced {@link Model}
  * @example
 var Model = falcor.Model;
 var model = new Model({
@@ -2033,6 +2032,28 @@ function falcor(opts) {
     return new falcor.Model(opts);
 }
 
+/**
+ * A filtering method for keys from a falcor json response.  The only gotcha
+ * to this method is when the incoming json is undefined, then undefined will
+ * be returned.
+ *
+ * @public
+ * @param {Object} json - The json response from a falcor model.
+ * @returns {Array} - the keys that are in the model response minus the deref
+ * _private_ meta data.
+ */
+falcor.keys = function getJSONKeys(json) {
+    if (!json) {
+        return undefined;
+    }
+
+    return Object.
+        keys(json).
+        filter(function(key) {
+            return key !== "$__path";
+        });
+};
+
 if (typeof Promise === "function") {
     falcor.Promise = Promise;
 } else {
@@ -3469,29 +3490,32 @@ ModelResponse.prototype.forEach = function subscribe(a, b, c) {
 
 ModelResponse.prototype.then = function then(onNext, onError) {
     var self = this;
-    return new falcor.Promise(function(resolve, reject) {
-        var rejected = false;
-        var values = [];
-        self.subscribe(
-            function(value) {
-                values[values.length] = value;
-            },
-            function(errors) {
-                rejected = true;
-                reject(errors);
-            },
-            function() {
-                var value = values;
-                if (values.length <= 1) {
-                    value = values[0];
-                }
+    if (!self._promise) {
+        self._promise = new falcor.Promise(function(resolve, reject) {
+            var rejected = false;
+            var values = [];
+            self.subscribe(
+                function(value) {
+                    values[values.length] = value;
+                },
+                function(errors) {
+                    rejected = true;
+                    reject(errors);
+                },
+                function() {
+                    var value = values;
+                    if (values.length <= 1) {
+                        value = values[0];
+                    }
 
-                if (rejected === false) {
-                    resolve(value);
+                    if (rejected === false) {
+                        resolve(value);
+                    }
                 }
-            }
-        );
-    }).then(onNext, onError);
+            );
+        });
+    }
+    return self._promise.then(onNext, onError);
 };
 
 module.exports = ModelResponse;
@@ -6253,7 +6277,7 @@ module.exports = function buildQueryObject(url, method, queryData) {
     keys = Object.keys(queryData);
     keys.forEach(function (k) {
       var value = (typeof queryData[k] === 'object') ? JSON.stringify(queryData[k]) : queryData[k];
-      qData.push(k + '=' + value);
+      qData.push(k + '=' + encodeURIComponent(value));
     });
   }
 

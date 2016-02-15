@@ -1,6 +1,6 @@
 {
   "name": "falcor",
-  "version": "0.1.15",
+  "version": "0.1.16",
   "description": "A JavaScript library for efficient data fetching.",
   "main": "./lib/index.js",
   "homepage": "https://github.com/Netflix/falcor",
@@ -50,7 +50,7 @@
     "del": "^1.2.1",
     "express": "^4.13.3",
     "falcor-express": "^0.1.2",
-    "falcor-http-datasource": "^0.1.2",
+    "falcor-http-datasource": "0.1.3",
     "falcor-router": "^0.2.9",
     "falcor-router-demo": "^1.0.3",
     "grunt": "^0.4.5",

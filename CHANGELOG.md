@@ -2,6 +2,8 @@
 -------------------
 
 ## Features
+- [Falcor.keys](https://github.com/Netflix/falcor/issues/708)
+  - Adds a function to the namespace of `falcor` for ease of json key iteration.
 - [Remove Rx From Core](https://github.com/Netflix/falcor/issues/465)
   - [Remove Rx From Get](https://github.com/Netflix/falcor/issues/506)
   - [Remove Rx From Set](https://github.com/Netflix/falcor/issues/604)
