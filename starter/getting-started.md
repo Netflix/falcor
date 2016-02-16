@@ -11,7 +11,7 @@ In this barebones tutorial we will use the falcor Router to create a Virtual JSO
 
 ## Creating a Virtual JSON Resource
 
-In this example we will use the falcor Router to build a Virtual JSON resource on an app server. The and host it at /model.json. The JSON resource will contain the following contents:
+In this example we will use the falcor Router to build a Virtual JSON resource on an app server. We'll host it at /model.json. The JSON resource will contain the following contents:
 
 ~~~js
 {
@@ -19,7 +19,7 @@ In this example we will use the falcor Router to build a Virtual JSON resource o
 }
 ~~~
 
-Normally Routers retrieve the data for their Virtual JSON resource from backend datastores or other web services on-demand. However in this simple tutorial the Router will simply return static data for a single key.
+Normally Routers retrieve the data for their Virtual JSON resource from backend datastores or other web services on-demand. However, in this simple tutorial, the Router will simply return static data for a single key.
 
 First we create a folder for our application server.
 

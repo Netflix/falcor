@@ -10,7 +10,7 @@ lang: en
 
 # The Falcor Router
 
-A Falcor Router is an implementation of the [DataSource](http://netflix.github.io/falcor/documentation/datasources.html) interface. Falcor [Model](http://netflix.github.io/falcor/documentation/model.html) objects use [DataSource](http://netflix.github.io/falcor/documentation/datasources.html)s to retrieve [JSON Graph](http://netflix.github.io/falcor/documentation/jsongraph.html) data. However [Model](http://netflix.github.io/falcor/documentation/model.html)s typically run on the client and Routers typically run on the Application server. As a result communication between a [Model](http://netflix.github.io/falcor/documentation/model.html) and the Router is typically remoted across the network using an HttpDataSource.
+A Falcor Router is an implementation of the [DataSource](http://netflix.github.io/falcor/documentation/datasources.html) interface. Falcor [Model](http://netflix.github.io/falcor/documentation/model.html) objects use [DataSource](http://netflix.github.io/falcor/documentation/datasources.html)s to retrieve [JSON Graph](http://netflix.github.io/falcor/documentation/jsongraph.html) data. However [Model](http://netflix.github.io/falcor/documentation/model.html)s typically run on the client and Routers typically run on the Application server. As a result, communication between a [Model](http://netflix.github.io/falcor/documentation/model.html) and the Router is typically remoted across the network using an HttpDataSource.
 
 ![Falcor End to End](../images/falcor-end-to-end.png)
 
@@ -20,9 +20,9 @@ In order to create the requested subset of the [JSON Graph](http://netflix.githu
 
 ## When to use a Router
 
-The Router is appropriate as an abstraction over a service layer or REST API. Using a Router over these types of APIs provides just enough flexibility to avoid client round-trips without introducing heavy-weight abstractions. Service-oriented architectures are common in systems that are designed for scalability. These systems typically store data in different data sources and expose them through a variety of different services. For example Netflix uses a Router in front of its [Microservice architecture](http://techblog.netflix.com/2015/02/a-microscope-on-microservices.html). 
+The Router is appropriate as an abstraction over a service layer or REST API. Using a Router over these types of APIs provides just enough flexibility to avoid client round-trips without introducing heavy-weight abstractions. Service-oriented architectures are common in systems that are designed for scalability. These systems typically store data in different data sources and expose them through a variety of different services. For example, Netflix uses a Router in front of its [Microservice architecture](http://techblog.netflix.com/2015/02/a-microscope-on-microservices.html). 
 
-**It is rarely ideal to use a Router to directly access a single SQL Database**. Application's that use a single SQL store often attempt to build one SQL Query for every server request. Routers work by splitting up requests for different sections of the [JSON Graph](http://netflix.github.io/falcor/documentation/jsongraph.html) into separate handlers and sending individual requests to services to retrieve the requested data. As a consequence, invidual Router handlers rarely have sufficient context to produce a single optimized SQL query. We are currently exploring different options for supporting this type of data access pattern with Falcor in future.
+**It is rarely ideal to use a Router to directly access a single SQL Database**. Applications that use a single SQL store often attempt to build one SQL Query for every server request. Routers work by splitting up requests for different sections of the [JSON Graph](http://netflix.github.io/falcor/documentation/jsongraph.html) into separate handlers and sending individual requests to services to retrieve the requested data. As a consequence, individual Router handlers rarely have sufficient context to produce a single optimized SQL query. We are currently exploring different options for supporting this type of data access pattern with Falcor in future.
 
 ## Contrasting a REST Router with a Falcor Router 
 
@@ -66,7 +66,7 @@ var router = new Router([
 
 ### 2. A Single Falcor Route Can Match Multiple Paths
 
-Traditional App server Routers only need to match the URL path, because HTTP requests are designed to retrieve a single resource. In contrast a single HTTP request to a Falcor application server may contain multiple [paths](http://netflix.github.io/falcor/documentation/paths.html) in the query string. As a result a single Falcor route can match multiple [paths](http://netflix.github.io/falcor/documentation/paths.html) at once. Matching multiple [paths](http://netflix.github.io/falcor/documentation/paths.html) in a single route can be more efficient in the event they can be retrieved with a single backend request.
+Traditional App server Routers only need to match the URL path, because HTTP requests are designed to retrieve a single resource. In contrast, a single HTTP request to a Falcor application server may contain multiple [paths](http://netflix.github.io/falcor/documentation/paths.html) in the query string. As a result, a single Falcor route can match multiple [paths](http://netflix.github.io/falcor/documentation/paths.html) at once. Matching multiple [paths](http://netflix.github.io/falcor/documentation/paths.html) in a single route can be more efficient in the event they can be retrieved with a single backend request.
 
 The following request attempts to retrieve the name and length of the todos list:
 
@@ -120,7 +120,7 @@ The Router accepts all of these path/value pairs, adds them to a single JSON obj
 
 In addition to allowing multiple values to be retrieved in a single request, Falcor routers can also traverse entity relationships and retrieve related values within the same request.
 
-REST APIs often expose different kinds of resources at different end points. These resources often contain hyperlinks to related resources. For example the following endpoint /todos returns a JSON array of hyperlinks to task resources:
+REST APIs often expose different kinds of resources at different endpoints. These resources often contain hyperlinks to related resources. For example the following endpoint /todos returns a JSON array of hyperlinks to task resources:
 
 ~~~js
 [
@@ -217,7 +217,7 @@ var TODORouter = function(userId){
 TODORouter.prototype = Object.create(BaseRouter.prototype);
 ~~~
 
-The next version of JavaScript (ES2015) has native support for classes. If you are using a version of node that supports classes, or you are using a transpiler, you can write this code instead of the code seen above:
+The next version of JavaScript (ES2015) has native support for classes. If you are using a version of Node that supports classes, or you are using a transpiler, you can write this code instead of the code seen above:
 
 ~~~js
 var Router = require("falcor-router");
@@ -557,7 +557,7 @@ titlesById[{integers}].name
 ["titlesById", [234,223,555,111,112,113],"name"]
 ~~~
 
-This pattern is most often when matching entities by an integer ID. For example, the following route builds a map of all tasks by ID.
+This pattern is used most often when matching entities by an integer ID. For example, the following route builds a map of all tasks by ID.
 
 ~~~js
 var jsong = require('falcor-json-graph');
@@ -628,7 +628,7 @@ genreList[{ranges}].name
 ["genreList", [{from:0,to:1}, {from:5,to:7}, {from:9,to:9}], "name"]
 ~~~
 
-The {ranges} pattern is most often when matching indices in a list. It is ideal when the underlying service API supports paging. For example the following route retrieves the names of Netflix genre lists:
+The {ranges} pattern is used most often when matching indices in a list. It is ideal when the underlying service API supports paging. For example the following route retrieves the names of Netflix genre lists:
 
 ~~~js
 var jsong = require('falcor-json-graph');
@@ -693,7 +693,7 @@ genreList[{keys}]
 ["genreList", [0, 2, 3, 4, "length"]]
 ~~~
 
-This pattern is most often when matching entities by a GUID. For example, the following route builds a map of all titles by GUID.
+This pattern is used most often when matching entities by a GUID. For example, the following route builds a map of all titles by GUID.
 
 ~~~js
 var jsong = require('falcor-json-graph');
@@ -753,7 +753,7 @@ Netflix is an online streaming video service with millions of subscribers.  When
 
 ![Netflix Homepage](http://netflix.github.io/falcor/images/netflix-screenshot.png)
 
-In this exercise we will build a Router for an application similar to Netflix, which merchandises titles to members based on their preferences, and allows them to provide user ratings for each title. This exercise is purely a demonstration of how to build a Router for a web application that displays a catalog of information to a user. This is **not** intended to demonstrate how to Netflix actually works, and any similarities to the actual Netflix Router's implementation are superficial. The entire source for this guide is [online](https://github.com/netflix/falcor-router-demo).
+In this exercise, we will build a Router for an application similar to Netflix, which merchandises titles to members based on their preferences, and allows them to provide user ratings for each title. This exercise is purely a demonstration of how to build a Router for a web application that displays a catalog of information to a user. This is **not** intended to demonstrate how to Netflix actually works, and any similarities to the actual Netflix Router's implementation are superficial. The entire source for this guide is [online](https://github.com/netflix/falcor-router-demo).
 
 Our goal is to define a [JSON Graph](http://netflix.github.io/falcor/documentation/jsongraph.html) resource on the Application server that exposes all of the data that our Netflix clone needs. The [JSON Graph](http://netflix.github.io/falcor/documentation/jsongraph.html) schema should be designed in such a way that the application can retrieve all of the data it needs for any given application scenario in a single network request.
 
@@ -931,7 +931,7 @@ Given the advantages of matching multiple [paths](http://netflix.github.io/falco
 "genrelist[{integers}].titles[{integers}]"
 ~~~
 
-However it doesn't always make sense to create routes that match as many [paths](http://netflix.github.io/falcor/documentation/paths.html) as possible. Note that the title's "rating" and "userRating" keys are retrieved from the RatingService, while all of the other title keys are retrieved from the TitleService. As a result creating a single route which matches both the "name" and "rating" of a title wouldn't be useful, because serving each individual key would require a request to an entirely different service. Furthermore the code to create each of these values would be very different. Under the circumstances there is little to be gained by handling both these [paths](http://netflix.github.io/falcor/documentation/paths.html) in a single route.
+However it doesn't always make sense to create routes that match as many [paths](http://netflix.github.io/falcor/documentation/paths.html) as possible. Note that the title's "rating" and "userRating" keys are retrieved from the RatingService, while all of the other title keys are retrieved from the TitleService. As a result, creating a single route which matches both the "name" and "rating" of a title wouldn't be useful, because serving each individual key would require a request to an entirely different service. Furthermore the code to create each of these values would be very different. Under the circumstances there is little to be gained by handling both these [paths](http://netflix.github.io/falcor/documentation/paths.html) in a single route.
 
 A better strategy than creating routes which match as many [paths](http://netflix.github.io/falcor/documentation/paths.html) as possible is to create routes that match [paths](http://netflix.github.io/falcor/documentation/paths.html) that are retrieved from the same service. The code to retrieve values stored in the same service is likely to be similar, and more importantly it may provide us with opportunities to make a single service call to retrieve multiple values.
 
@@ -950,7 +950,7 @@ Note that although the genre list routes all retrieve their data from the recomm
 
 ## Handling Authorization
 
-Now that we have chosen our routes we need to consider whether our route handlers have sufficient information to handle requests. Note that _many of the routes in the [JSON Graph](http://netflix.github.io/falcor/documentation/jsongraph.html) object are personalized for the current user_. For example, two different Netflix users will likely see completely different personalized recommendations in their "genrelist" arrays. The "rating" and "userRating" fields are also specific to the current user. The "rating" field is the algorithmically-predicted rating for the user based on the user's previous viewing history and user-specified ratings. The "userRating" field is the user–specified rating for the title, and it should not be possible to set this value if a user is not logged in.
+Now that we have chosen our routes, we need to consider whether our route handlers have sufficient information to handle requests. Note that _many of the routes in the [JSON Graph](http://netflix.github.io/falcor/documentation/jsongraph.html) object are personalized for the current user_. For example, two different Netflix users will likely see completely different personalized recommendations in their "genrelist" arrays. The "rating" and "userRating" fields are also specific to the current user. The "rating" field is the algorithmically-predicted rating for the user based on the user's previous viewing history and user-specified ratings. The "userRating" field is the user–specified rating for the title, and it should not be possible to set this value if a user is not logged in.
 
 While a login is clearly required to change data or receive personalized recommendations, we would like to be able to use to allow users to browse the catalog without logging in. That's why both the recommendations service and rating service fallback to providing generic recommendations and ratings in the absence of a user ID.
 
@@ -1020,7 +1020,7 @@ We will create this map using two different routes:
 "titlesById[{integers}]['rating', 'userRating']
 ~~~
 
-The first route will retrieve it's information from the title service, which is a repository of non-personalized title metadata. The second route will retrieve its information from the rating service, which provides personalized ratings based on the users past preferences.
+The first route will retrieve its information from the title service, which is a repository of non-personalized title metadata. The second route will retrieve its information from the rating service, which provides personalized ratings based on the users past preferences.
 
 Let's start with the first route, because it does not require any user authentication:
 
@@ -1388,7 +1388,7 @@ Now that we understand how the rating service works, let's create a route that m
     }
 ~~~
 
-Each one of the Routers route handlers runs with the Router instance as it's "this" object. That means that our route handler has access to the Router's userId member. The handler passes the Router's userId to the recommendation service, which retrieves a personalized genre list for the current user. If the current user is not authenticated, the Router's userId will be undefined. If an undefined userId is passed to the rating service, the service simply returns a record with a generic "rating" and no "userRating" key.
+Each one of the Routers route handlers runs with the Router instance as its "this" object. That means that our route handler has access to the Router's userId member. The handler passes the Router's userId to the recommendation service, which retrieves a personalized genre list for the current user. If the current user is not authenticated, the Router's userId will be undefined. If an undefined userId is passed to the rating service, the service simply returns a record with a generic "rating" and no "userRating" key.
 
 Now we should be able to retrieve any title field by ID.
 
@@ -1418,7 +1418,7 @@ The request above matches both routes we have created. The Router adds the resul
 
 Note how the router presents the consumer with what appears to be a single title object, but sources the data for the title from multiple services. The result is a simple API for the consumer without compromising any flexibility about where data is stored on the backend.
 
-Now we have the ability to retrieve information about any title in the catalog using that ID. However in practice our users will not be navigating titles by ID. When a user starts the application, they will be presented with a list of genres, each of which contains a list of recommended titles. Users will navigate through these titles positionally, scrolling vertically and horizontally. As a consequence the application needs to be able to retrieve titles by position within the user's personalized recommendations list. To accommodate this requirement, we will add the users genre list to the Router's virtual [JSON Graph](http://netflix.github.io/falcor/documentation/jsongraph.html) object.
+Now we have the ability to retrieve information about any title in the catalog using that ID. However in practice our users will not be navigating titles by ID. When a user starts the application, they will be presented with a list of genres, each of which contains a list of recommended titles. Users will navigate through these titles positionally, scrolling vertically and horizontally. As a consequence, the application needs to be able to retrieve titles by position within the user's personalized recommendations list. To accommodate this requirement, we will add the user's genre list to the Router's virtual [JSON Graph](http://netflix.github.io/falcor/documentation/jsongraph.html) object.
 
 ### Creating the Genre List Routes
 
@@ -1632,7 +1632,7 @@ Now let's tackle the most challenging of all of the genre list routes...
 
 #### The "genrelist[{integers}].titles[{integers}]" Route
 
-This route builds the [JSON Graph](http://netflix.github.io/falcor/documentation/jsongraph.html) references in the titles array within each genre. In other words this route will create this portion of the [JSON Graph](http://netflix.github.io/falcor/documentation/jsongraph.html) object:
+This route builds the [JSON Graph](http://netflix.github.io/falcor/documentation/jsongraph.html) references in the titles array within each genre. In other words, this route will create this portion of the [JSON Graph](http://netflix.github.io/falcor/documentation/jsongraph.html) object:
 
 ~~~js
 {

@@ -73,7 +73,7 @@ In addition to Path Syntax Strings, [Models](http://netflix.github.io/falcor/doc
 * ["todos", 5, true]
 * ["todos", 9, null]
 
-Using a Path Array is more efficient than the Path Syntax, because under the hood a [Model](http://netflix.github.io/falcor/documentation/model.html) immediately parses Path Syntax Strings into Path Arrays. Furthermore a Path Array is often preferable when you have to build Paths programmatically, because string concatenation can be avoided.
+Using a Path Array is more efficient than the Path Syntax, because under the hood a [Model](http://netflix.github.io/falcor/documentation/model.html) immediately parses Path Syntax Strings into Path Arrays. Furthermore, a Path Array is often preferable when you have to build Paths programmatically, because string concatenation can be avoided.
 
 ~~~js
 // Path Syntax String
@@ -110,7 +110,7 @@ model.
 
 ## PathSets
 
-A PathSet is a human-readable short-hand for a set of Paths. Any [Models](http://netflix.github.io/falcor/documentation/model.html) method which can accept multiple Paths, can also accept multiple PathSets.
+A PathSet is a human-readable shorthand for a set of Paths. Any [Model](http://netflix.github.io/falcor/documentation/model.html) method which can accept multiple Paths, can also accept multiple PathSets.
 
 In other words of writing this...
 
@@ -154,7 +154,7 @@ The following PathSet Strings are valid:
 * "todos[0...2].name" is equivalent to "todos[0].name", and "todos[1].name"
 * "todos[0..1]['name','done']" is equivalent to "todos[0].name", "todos[0].done", "todos[1].name", and "todos[1].done"
 * 'todos[0..1]["name","done"]' is equivalent to "todos[0].name", "todos[0].done", "todos[1].name", and "todos[1].done"
-* "todos[0..1, "length"] is equivalent to "todos[0]", "todos[1]", and "todos.length"
+* "todos[0..1, 'length']" is equivalent to "todos[0]", "todos[1]", and "todos.length"
 
 ### PathSet Array
 

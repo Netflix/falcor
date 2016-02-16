@@ -11,11 +11,11 @@ The Falcor Model transparently handles all network communication with the server
 
 ## Caching
 
-Falcor maintains a fast in–memory cache that contains all of the values previously retrieved from the application server's JSON object. If a request is made for information that is already available in the cache, the data will be retrieved from the cache and sent to the consumers callback as soon as possible.
+Falcor maintains a fast in–memory cache that contains all of the values previously retrieved from the application server's JSON object. If a request is made for information that is already available in the cache, the data will be retrieved from the cache and sent to the consumer's callback as soon as possible.
 
 ![Model caching](../images/model-caching.png)
 
-To avoid allowing the cache to grow larger than the available memory on the device, developers can configure a maximum size for the cache. When the cache grows beyond the maximum size, the least-recently-used values are purged. This makes it possible to run the same application on an inexpensive mobile device or a powerful desktop machine.
+To prevent the cache growing larger than the available memory on the device, developers can configure a maximum size for the cache. When the cache grows beyond the maximum size, the least-recently-used values are purged. This makes it possible to run the same application on an inexpensive mobile device or a powerful desktop machine.
 
 ## Batching
 

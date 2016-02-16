@@ -17,7 +17,7 @@ Your application can use [Data Sources](http://netflix.github.io/falcor/document
 3. In response to user navigation (ex. scrolling through a list), views may need to repeatedly access small quantities of fine-grained data in rapid succession. [Data Sources](http://netflix.github.io/falcor/documentation/datasources.html) typically access the network, therefore fine-grained requests are often inefficient because of the overhead required to issue a request.
 4. Navigating information hierarchically rather than retrieving information using id's can lead to inefficent back-end requests.
 
-For these reasons views retrieve their data from Model objects, which act as intermediaries between the view and the [Data Source](http://netflix.github.io/falcor/documentation/datasources.html). Models abstract over [Data Sources](http://netflix.github.io/falcor/documentation/datasources.html) and provide several important services:
+For these reasons, views retrieve their data from Model objects, which act as intermediaries between the view and the [Data Source](http://netflix.github.io/falcor/documentation/datasources.html). Models abstract over [Data Sources](http://netflix.github.io/falcor/documentation/datasources.html) and provide several important services:
 
 * Models convert [JSON Graph](http://netflix.github.io/falcor/documentation/jsongraph.html) information retrieved from the [Data Source](http://netflix.github.io/falcor/documentation/datasources.html) into JSON.
 * Models reduce latency by caching data previously retrieved from the [Data Source](http://netflix.github.io/falcor/documentation/datasources.html) in an in-memory cache.
@@ -89,9 +89,9 @@ There is one very important difference between working with a JSON object direct
 
 ### "Why can't I request Objects or Arrays from a Model?"
 
-_Falcor is optimized for displaying data catered to your views._ Both Arrays and Objects can contain an unbounded amount of data. Requesting an Array or Object in its entirety is equivalent to your view requesting 'SELECT *' without a 'WHERE' clause in the SQL world. An Array that contains 5 items today, can grow to contain 10,000 items later on. This means that requests which are initially served quickly and fit the view's requirements can become slower over time as more data is added to backend data stores.
+_Falcor is optimized for displaying data catered to your views._ Both Arrays and Objects can contain an unbounded amount of data. Requesting an Array or Object in its entirety is equivalent to your view requesting `SELECT *` without a `WHERE` clause in the SQL world. An Array that contains 5 items today, can grow to contain 10,000 items later on. This means that requests which are initially served quickly and fit the view's requirements can become slower over time as more data is added to backend data stores.
 
-Models force developers to be explicit about which value types they would like to retrieve in order to maximize the likelihood that server requests will have **stable performance** over time. Rather than allow you to retrieve an entire Object, Models force you to _be explicit_ and retrieve only those values needed in a given scenario. Similarly when displaying an Array of items, Models do not allow you to retrieve the entire Array upfront. Instead you must request the first visible page of an Array, and follow up with additional page requests as the user scrolls. This allows your client code to control performance boundaries, based on the amount of data actually used in the view, as opposed to being susceptible to unexpected increases in the total amount of data available.
+Models force developers to be explicit about which value types they would like to retrieve in order to maximize the likelihood that server requests will have **stable performance** over time. Rather than allow you to retrieve an entire Object, Models force you to _be explicit_ and retrieve only those values needed in a given scenario. Similarly, when displaying an Array of items, Models do not allow you to retrieve the entire Array upfront. Instead you must request the first visible page of an Array, and follow up with additional page requests as the user scrolls. This allows your client code to control performance boundaries, based on the amount of data actually used in the view, as opposed to being susceptible to unexpected increases in the total amount of data available.
 
 In the following example we page through a list of TODOs, selecting the "name" and "done" properties of all the TODOs in the current page.
 
@@ -807,16 +807,16 @@ To understand how the deref method is used, let's take a look at an example. Ima
 ~~~js
   {
     list: [
-      { $type: “ref”, value: [“titlesById”, 53] },
-      { $type: “ref”, value: [“titlesById”, 67] }
+      { $type: "ref", value: ["titlesById", 53] },
+      { $type: "ref", value: ["titlesById", 67] }
     ],
     titlesById: {
       53: {
-        name: “House of Cards”,
+        name: "House of Cards",
         rating: 5.0
       },
       67: {
-        name: “Daredevil”,
+        name: "Daredevil",
         rating: 5.0
       } 
     }
@@ -830,7 +830,7 @@ To display the information, we can create a list view which accepts a Model and 
 When an item is selected, the List view could pass the Model to the Detail view, along with the path to the selected item.
 
 ~~~js
-new DetailView(model, [“list”, selectedIndex]);
+new DetailView(model, ["list", selectedIndex]);
 ~~~
 
 This is an anti-pattern because the path contains the index in the list where the title is located, and this item may shift in the list between the time the object is displayed and the user drills down and selects it. 
@@ -839,18 +839,18 @@ Instead of passing paths around, the List view can pass a Model dereferenced to 
 
 ~~~js
 function item_selected(selectedIndex) {
-  // response was previous retrieved using model.get(“list[0..1].name”)
+  // response was previous retrieved using model.get("list[0..1].name")
   if (response.json.list && response.json.list[selectedIndex]) {
     new DetailView(model.deref(json.list[selectedIndex]));
   }
 }
 ~~~
 
-In this example, when a user clicks on a title we dereference a Model against the title object we retrieved earlier. We pass the dereferenced Model to the Detail view which can use it to retrieve more information from the title.
+In this example, when a user clicks on a title, we dereference a Model against the title object we retrieved earlier. We pass the dereferenced Model to the Detail view which can use it to retrieve more information from the title.
 
 ~~~js
 function DetailView(titleModel) {
-  titleModel.getValue(“rating”).then(function(rating) {
+  titleModel.getValue("rating").then(function(rating) {
     // display rating
   });
 }
@@ -858,33 +858,33 @@ function DetailView(titleModel) {
 
 Operations performed on the dereferenced Model will always be applied to the same object, no matter where the object is moved within the graph. Furthermore code can interact with the object without any knowledge of its location within the graph.
 
-Deref uses metadata that the get operation inserts information about the references it encounters into JSON responses. For example, retrieving “list[0].name” will yield the following JSON response.
+Deref uses metadata that the get operation inserts information about the references it encounters into JSON responses. For example, retrieving "list[0].name" will yield the following JSON response.
 
 ~~~js
 {
   json: {
     list: {
      0: {
-       $__: [“titlesById”, 53],
-       name: “House of Cards”
+       $__: ["titlesById", 53],
+       name: "House of Cards"
       }
     }
   }
 }
 ~~~
 
-Note the “$__path” added to the JSON response. When you dereference an object within a Falcor response, the new Model internally stores this path. Note that you should not use these metadata properties directly, as the specific property name may change over time and is an implementation detail. Rather you should use the public deref method instead.
+Note the "$__path" added to the JSON response. When you dereference an object within a Falcor response, the new Model internally stores this path. Note that you should not use these metadata properties directly, as the specific property name may change over time and is an implementation detail. Rather you should use the public deref method instead.
 
 ### Passing Dereferenced Models to Call
 
 Dereferenced models can be passed as the argument to a function invoked with call. This approach allows you to pass an object to a function by identity, rather than a path to a volatile location within the graph.
 
 ~~~js
-var model = new falcor.Model(new HttpDataSource(“/model.json”));
-model.get(“list[0]”).then(response => {
+var model = new falcor.Model(new HttpDataSource("/model.json"));
+model.get("list[0]").then(response => {
   var titleModel = model.deref(response.json.list[0]);
   return model.
-    call(“myList.push”, [titleModel], [], [“length”]).
+    call("myList.push", [titleModel], [], ["length"]).
     then(response => console.log(response.json.myList.length));
 });
 ~~~  
@@ -892,11 +892,11 @@ model.get(“list[0]”).then(response => {
 The code above works because JSON stringifying a dereferenced Model produces a JSON Graph reference that points to the object in the Graph. 
 
 ~~~js
-var model = new falcor.Model(new HttpDataSource(“/model.json”));
-model.get(“list[0]”).then(response => {
+var model = new falcor.Model(new HttpDataSource("/model.json"));
+model.get("list[0]").then(response => {
   var titleModel = model.deref(response.json.list[0]);
   console.log(JSON.stringify(titleModel)); 
-  // prints { $type: “ref”, value: [“titlesById”, 53] }
+  // prints { $type: "ref", value: ["titlesById", 53] }
 });
 ~~~
 
