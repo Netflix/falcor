@@ -1,7 +1,7 @@
 #!/bin/bash
 
 if [ "$TRAVIS_PULL_REQUEST" == "false" ]; then
-  echo -e "Building and committing dist...\n"
+  echo -e "Building and committing dist and docs...\n"
 
   TEMP_DIR=$HOME/tmp
   FALCOR_DOCS_DIR=$TEMP_DIR/falcordocs
@@ -36,7 +36,8 @@ if [ "$TRAVIS_PULL_REQUEST" == "false" ]; then
   npm run dist
 
   git add dist/.
-  git commit -m "Travis build $TRAVIS_BUILD_NUMBER committed dist/"
+  git add doc/.
+  git commit -m "Travis build $TRAVIS_BUILD_NUMBER committed dist/ and doc/"
   git push deployable $TRAVIS_BRANCH
 
   if [ "$TRAVIS_BRANCH" == "$CURRENT_RELEASE" ]; then
