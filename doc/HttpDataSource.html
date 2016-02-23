@@ -1,0 +1,1160 @@
+---
+layout: api-page
+title: "Class: HttpDataSource"
+id: api
+---
+
+<main class="api-documentation-page">
+  
+
+  
+  
+
+  <section>
+
+  <header>
+      
+      
+      
+          
+            <h2>
+            HttpDataSource
+            </h2>
+          
+          
+      
+  </header>
+
+  <article>
+      <div class="container-overview">
+      
+          
+<section class="method-section">
+    
+        
+
+        <h4 class="name section-header function-name" id="HttpDataSource"><span class="type-signature"></span>new HttpDataSource<span class="signature">(jsonGraphUrl)</span><span class="type-signature return-signature"></span></h4>
+
+        
+    
+
+        
+        <div class="description">
+            <p>A HttpDataSource object is a <a href="DataSource.html">DataSource</a> can be used to retrieve data from a remote JSONGraph object using the browser's XMLHttpRequest.</p>
+        </div>
+        
+
+    
+
+    
+
+    
+
+    
+        <h5>Parameters:</h5>
+        
+
+<div class="parameters-section">
+    <table class="params">
+        <thead>
+        <tr>
+            
+            <th class="header-name-and-attributes">
+              Name
+              
+            </th>
+            
+
+            <th class="header-type">Type</th>
+
+            
+
+            <th class="last header-description">Description</th>
+        </tr>
+        </thead>
+
+        <tbody>
+        
+
+            <tr>
+                
+                    <td>
+                        <span class="name">jsonGraphUrl</span>
+                        
+                    </td>
+                
+
+                <td class="type">
+                
+                </td>
+
+                
+
+                <td class="description last"><p>the URL of the JSONGraph model.</p></td>
+            </tr>
+
+        
+        </tbody>
+    </table>
+</div>
+
+    
+
+    
+
+
+
+
+  <dl class="details">
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+      <dt class="tag-source">Source:</dt>
+      <dd class="tag-source">
+          <a href="HttpDataSource.js.html">HttpDataSource.js</a>, <a href="HttpDataSource.js.html#line2">line 2</a>
+      </dd>
+      
+
+      
+
+      
+
+      
+  </dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+        <h5>Example</h5>
+        
+    <pre class="prettyprint"><code>var model = new falcor.Model({source: new falcor.HttpDataSource("http://netflix.com/user.json")});
+var movieNames = model.get('genreLists[0...10][0...10].name').toPathValues();</code></pre>
+
+    
+</section>
+      
+      </div>
+
+      
+          <h3 class="subsection-title">Extends</h3>
+
+          
+
+
+    <ul>
+        <li><a href="DataSource.html">DataSource</a></li>
+    </ul>
+
+
+      
+
+      
+
+      
+
+       
+
+      
+
+      
+
+      
+          <h3 class="subsection-title">Methods</h3>
+
+          
+              
+<section class="method-section">
+    
+        
+
+        <h4 class="name section-header function-name" id="call"><span class="type-signature"></span>call<span class="signature">(functionPath, args, refSuffixes, thisPaths)</span><span class="type-signature return-signature"> &rarr; {<a href="Observable.html">Observable</a>.&lt;<a href="global.html#JSONGraphEnvelope">JSONGraphEnvelope</a>>}</span></h4>
+
+        
+    
+
+        
+        <div class="description">
+            <p>Invokes a function in the DataSource's JSONGraph object.</p>
+        </div>
+        
+
+    
+
+    
+
+    
+
+    
+        <h5>Parameters:</h5>
+        
+
+<div class="parameters-section">
+    <table class="params">
+        <thead>
+        <tr>
+            
+            <th class="header-name-and-attributes">
+              Name
+              
+            </th>
+            
+
+            <th class="header-type">Type</th>
+
+            
+
+            <th class="last header-description">Description</th>
+        </tr>
+        </thead>
+
+        <tbody>
+        
+
+            <tr>
+                
+                    <td>
+                        <span class="name">functionPath</span>
+                        
+                    </td>
+                
+
+                <td class="type">
+                
+                    
+<span class="param-type"><a href="global.html#Path">Path</a></span>
+
+
+                
+                </td>
+
+                
+
+                <td class="description last"><p>the path to the function to invoke</p></td>
+            </tr>
+
+        
+
+            <tr>
+                
+                    <td>
+                        <span class="name">args</span>
+                        
+                    </td>
+                
+
+                <td class="type">
+                
+                    
+<span class="param-type">Array.&lt;Object></span>
+
+
+                
+                </td>
+
+                
+
+                <td class="description last"><p>the arguments to pass to the function</p></td>
+            </tr>
+
+        
+
+            <tr>
+                
+                    <td>
+                        <span class="name">refSuffixes</span>
+                        
+                    </td>
+                
+
+                <td class="type">
+                
+                    
+<span class="param-type">Array.&lt;<a href="global.html#PathSet">PathSet</a>></span>
+
+
+                
+                </td>
+
+                
+
+                <td class="description last"><p>paths to retrieve from the targets of JSONGraph References in the function's response.</p></td>
+            </tr>
+
+        
+
+            <tr>
+                
+                    <td>
+                        <span class="name">thisPaths</span>
+                        
+                    </td>
+                
+
+                <td class="type">
+                
+                    
+<span class="param-type">Array.&lt;<a href="global.html#PathSet">PathSet</a>></span>
+
+
+                
+                </td>
+
+                
+
+                <td class="description last"><p>paths to retrieve from function's this object after successful function execution</p></td>
+            </tr>
+
+        
+        </tbody>
+    </table>
+</div>
+
+    
+
+    
+
+
+
+
+  <dl class="details">
+
+      
+
+      
+
+      
+      <dt class="inherited-from">Inherited From:</dt>
+      <dd class="inherited-from">
+          <a href="DataSource.html#call">DataSource#call</a>
+      </dd>
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+      <dt class="tag-source">Source:</dt>
+      <dd class="tag-source">
+          <a href="typedefs_DataSource.js.html">typedefs/DataSource.js</a>, <a href="typedefs_DataSource.js.html#line26">line 26</a>
+      </dd>
+      
+
+      
+
+      
+
+      
+  </dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    
+        <h5>Returns:</h5>
+    
+    
+            
+<div class="param-desc">
+    <p>jsonGraphEnvelope the response returned from the server.</p>
+</div>
+
+
+
+<dl class="return-type">
+    <dt>
+        Return Type: 
+    </dt>
+    <dd>
+        
+<span class="param-type"><a href="Observable.html">Observable</a>.&lt;<a href="global.html#JSONGraphEnvelope">JSONGraphEnvelope</a>></span>
+
+
+    </dd>
+</dl>
+
+        
+
+    
+</section>
+          
+              
+<section class="method-section">
+    
+        
+
+        <h4 class="name section-header function-name" id="get"><span class="type-signature"></span>get<span class="signature">(pathSets)</span><span class="type-signature return-signature"> &rarr; {<a href="Observable.html">Observable</a>.&lt;<a href="global.html#JSONGraphEnvelope">JSONGraphEnvelope</a>>}</span></h4>
+
+        
+    
+
+        
+        <div class="description">
+            <p>The get method retrieves values from the DataSource's associated JSONGraph object.</p>
+        </div>
+        
+
+    
+
+    
+
+    
+
+    
+        <h5>Parameters:</h5>
+        
+
+<div class="parameters-section">
+    <table class="params">
+        <thead>
+        <tr>
+            
+            <th class="header-name-and-attributes">
+              Name
+              
+            </th>
+            
+
+            <th class="header-type">Type</th>
+
+            
+
+            <th class="last header-description">Description</th>
+        </tr>
+        </thead>
+
+        <tbody>
+        
+
+            <tr>
+                
+                    <td>
+                        <span class="name">pathSets</span>
+                        
+                    </td>
+                
+
+                <td class="type">
+                
+                    
+<span class="param-type">Array.&lt;<a href="global.html#PathSet">PathSet</a>></span>
+
+
+                
+                </td>
+
+                
+
+                <td class="description last"><p>the path(s) to retrieve</p></td>
+            </tr>
+
+        
+        </tbody>
+    </table>
+</div>
+
+    
+
+    
+
+
+
+
+  <dl class="details">
+
+      
+
+      
+
+      
+      <dt class="inherited-from">Inherited From:</dt>
+      <dd class="inherited-from">
+          <a href="DataSource.html#get">DataSource#get</a>
+      </dd>
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+      <dt class="tag-source">Source:</dt>
+      <dd class="tag-source">
+          <a href="typedefs_DataSource.js.html">typedefs/DataSource.js</a>, <a href="typedefs_DataSource.js.html#line8">line 8</a>
+      </dd>
+      
+
+      
+
+      
+
+      
+  </dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    
+        <h5>Returns:</h5>
+    
+    
+            
+<div class="param-desc">
+    <p>jsonGraphEnvelope the response returned from the server.</p>
+</div>
+
+
+
+<dl class="return-type">
+    <dt>
+        Return Type: 
+    </dt>
+    <dd>
+        
+<span class="param-type"><a href="Observable.html">Observable</a>.&lt;<a href="global.html#JSONGraphEnvelope">JSONGraphEnvelope</a>></span>
+
+
+    </dd>
+</dl>
+
+        
+
+    
+</section>
+          
+              
+<section class="method-section">
+    
+        
+
+        <h4 class="name section-header function-name" id="set"><span class="type-signature"></span>set<span class="signature">(jsonGraphEnvelope)</span><span class="type-signature return-signature"> &rarr; {<a href="Observable.html">Observable</a>.&lt;<a href="global.html#JSONGraphEnvelope">JSONGraphEnvelope</a>>}</span></h4>
+
+        
+    
+
+        
+        <div class="description">
+            <p>The set method accepts values to set in the DataSource's associated JSONGraph object.</p>
+        </div>
+        
+
+    
+
+    
+
+    
+
+    
+        <h5>Parameters:</h5>
+        
+
+<div class="parameters-section">
+    <table class="params">
+        <thead>
+        <tr>
+            
+            <th class="header-name-and-attributes">
+              Name
+              
+            </th>
+            
+
+            <th class="header-type">Type</th>
+
+            
+
+            <th class="last header-description">Description</th>
+        </tr>
+        </thead>
+
+        <tbody>
+        
+
+            <tr>
+                
+                    <td>
+                        <span class="name">jsonGraphEnvelope</span>
+                        
+                    </td>
+                
+
+                <td class="type">
+                
+                    
+<span class="param-type"><a href="global.html#JSONGraphEnvelope">JSONGraphEnvelope</a></span>
+
+
+                
+                </td>
+
+                
+
+                <td class="description last"><p>a JSONGraphEnvelope containing values to set in the DataSource's associated JSONGraph object.</p></td>
+            </tr>
+
+        
+        </tbody>
+    </table>
+</div>
+
+    
+
+    
+
+
+
+
+  <dl class="details">
+
+      
+
+      
+
+      
+      <dt class="inherited-from">Inherited From:</dt>
+      <dd class="inherited-from">
+          <a href="DataSource.html#set">DataSource#set</a>
+      </dd>
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+      <dt class="tag-source">Source:</dt>
+      <dd class="tag-source">
+          <a href="typedefs_DataSource.js.html">typedefs/DataSource.js</a>, <a href="typedefs_DataSource.js.html#line17">line 17</a>
+      </dd>
+      
+
+      
+
+      
+
+      
+  </dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    
+        <h5>Returns:</h5>
+    
+    
+            
+<div class="param-desc">
+    <p>a JSONGraphEnvelope containing all of the requested values after the set operation.</p>
+</div>
+
+
+
+<dl class="return-type">
+    <dt>
+        Return Type: 
+    </dt>
+    <dd>
+        
+<span class="param-type"><a href="Observable.html">Observable</a>.&lt;<a href="global.html#JSONGraphEnvelope">JSONGraphEnvelope</a>></span>
+
+
+    </dd>
+</dl>
+
+        
+
+    
+</section>
+          
+      
+
+      
+
+      
+  </article>
+
+  </section>
+  
+
+  
+</main>
+
+
+
+        
+        <!--
+          In case someone comes along later and sees the active item on the
+          toc acting weirdly, hopefully they'll see this comment. This page, unlike
+          any seen during development, has multiple 'docs' passed to container.tmpl.
+          To debug it and enhance the page as needed, I would suggest looking there first.
+        -->
+        
+
+        <!-- Generate the table of contents -->
+        <nav class="table-of-contents api-doc-toc">
+            <ul class="nav">
+                <li>
+                    <a href="DataSource.html">Classes</a>
+                    <ul class="toc-api-classes">
+                        
+                            <li class="toc-api-class ">
+                                <a href="DataSource.html" data-target="#DataSource">DataSource</a>
+                                
+                                
+
+    <ul class="toc-api-subgroup toc-api-subgroup-methods">
+        <li>
+            <span class="toc-api-subgroup-title">Methods</span>
+        </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="DataSource.html#call" data-target="#call">call</a>
+            </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="DataSource.html#get" data-target="#get">get</a>
+            </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="DataSource.html#set" data-target="#set">set</a>
+            </li>
+         
+    </ul>
+
+
+                                
+
+
+                                
+
+
+                            </li>
+                        
+                            <li class="toc-api-class ">
+                                <a href="FromEsObserverAdapter.html" data-target="#FromEsObserverAdapter">FromEsObserverAdapter</a>
+                                
+                                
+
+
+                                
+
+
+                                
+
+
+                            </li>
+                        
+                            <li class="toc-api-class current-page">
+                                <a href="HttpDataSource.html" data-target="#HttpDataSource">HttpDataSource</a>
+                                
+                                
+
+    <ul class="toc-api-subgroup toc-api-subgroup-methods">
+        <li>
+            <span class="toc-api-subgroup-title">Methods</span>
+        </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="HttpDataSource.html#call" data-target="#call">call</a>
+            </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="HttpDataSource.html#get" data-target="#get">get</a>
+            </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="HttpDataSource.html#set" data-target="#set">set</a>
+            </li>
+         
+    </ul>
+
+
+                                
+
+
+                                
+
+
+                            </li>
+                        
+                            <li class="toc-api-class ">
+                                <a href="Model.html" data-target="#Model">Model</a>
+                                
+                                
+
+    <ul class="toc-api-subgroup toc-api-subgroup-methods">
+        <li>
+            <span class="toc-api-subgroup-title">Methods</span>
+        </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="Model.html#asDataSource" data-target="#asDataSource">asDataSource</a>
+            </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="Model.html#batch" data-target="#batch">batch</a>
+            </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="Model.html#boxValues" data-target="#boxValues">boxValues</a>
+            </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="Model.html#call" data-target="#call">call</a>
+            </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="Model.html#deref" data-target="#deref">deref</a>
+            </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="Model.html#get" data-target="#get">get</a>
+            </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="Model.html#getCache" data-target="#getCache">getCache</a>
+            </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="Model.html#getPath" data-target="#getPath">getPath</a>
+            </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="Model.html#getVersion" data-target="#getVersion">getVersion</a>
+            </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="Model.html#invalidate" data-target="#invalidate">invalidate</a>
+            </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="Model.html#preload" data-target="#preload">preload</a>
+            </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="Model.html#set" data-target="#set">set</a>
+            </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="Model.html#setCache" data-target="#setCache">setCache</a>
+            </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="Model.html#treatErrorsAsValues" data-target="#treatErrorsAsValues">treatErrorsAsValues</a>
+            </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="Model.html#unbatch" data-target="#unbatch">unbatch</a>
+            </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="Model.html#unboxValues" data-target="#unboxValues">unboxValues</a>
+            </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="Model.html#withoutDataSource" data-target="#withoutDataSource">withoutDataSource</a>
+            </li>
+         
+    </ul>
+
+
+                                
+
+    <ul class="toc-api-subgroup toc-api-subgroup-types">
+        <li>
+            <span class="toc-api-subgroup-title">Types</span>
+        </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="Model.html#~comparator" data-target="#\~comparator">comparator</a>
+            </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="Model.html#~errorSelector" data-target="#\~errorSelector">errorSelector</a>
+            </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="Model.html#~onChange" data-target="#\~onChange">onChange</a>
+            </li>
+         
+    </ul>
+
+
+                                
+
+
+                            </li>
+                        
+                            <li class="toc-api-class ">
+                                <a href="ModelResponse.html" data-target="#ModelResponse">ModelResponse</a>
+                                
+                                
+
+    <ul class="toc-api-subgroup toc-api-subgroup-methods">
+        <li>
+            <span class="toc-api-subgroup-title">Methods</span>
+        </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="ModelResponse.html#forEach" data-target="#forEach">forEach</a>
+            </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="ModelResponse.html#progressively" data-target="#progressively">progressively</a>
+            </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="ModelResponse.html#subscribe" data-target="#subscribe">subscribe</a>
+            </li>
+         
+    </ul>
+
+
+                                
+
+
+                                
+
+
+                            </li>
+                        
+                            <li class="toc-api-class ">
+                                <a href="Observable.html" data-target="#Observable">Observable</a>
+                                
+                                
+
+    <ul class="toc-api-subgroup toc-api-subgroup-methods">
+        <li>
+            <span class="toc-api-subgroup-title">Methods</span>
+        </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="Observable.html#forEach" data-target="#forEach">forEach</a>
+            </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="Observable.html#subscribe" data-target="#subscribe">subscribe</a>
+            </li>
+         
+    </ul>
+
+
+                                
+
+    <ul class="toc-api-subgroup toc-api-subgroup-types">
+        <li>
+            <span class="toc-api-subgroup-title">Types</span>
+        </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="Observable.html#~onCompletedCallback" data-target="#\~onCompletedCallback">onCompletedCallback</a>
+            </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="Observable.html#~onErrorCallback" data-target="#\~onErrorCallback">onErrorCallback</a>
+            </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="Observable.html#~onNextCallback" data-target="#\~onNextCallback">onNextCallback</a>
+            </li>
+         
+    </ul>
+
+
+                                
+
+
+                            </li>
+                        
+                            <li class="toc-api-class ">
+                                <a href="Subscription.html" data-target="#Subscription">Subscription</a>
+                                
+                                
+
+    <ul class="toc-api-subgroup toc-api-subgroup-methods">
+        <li>
+            <span class="toc-api-subgroup-title">Methods</span>
+        </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="Subscription.html#dispose" data-target="#dispose">dispose</a>
+            </li>
+         
+    </ul>
+
+
+                                
+
+
+                                
+
+
+                            </li>
+                        
+                            <li class="toc-api-class ">
+                                <a href="ToEsSubscriptionAdapter.html" data-target="#ToEsSubscriptionAdapter">ToEsSubscriptionAdapter</a>
+                                
+                                
+
+
+                                
+
+
+                                
+
+
+                            </li>
+                        
+                    </ul>
+                </li>
+                <li class="toc-api-type-list ">
+                    <a href="global.html">Global Types</a>
+                    <ul class="toc-api-types">
+                        
+                            <li class="toc-api-type">
+                                <a href="global.html#Atom" data-target="#Atom">Atom</a>
+                            </li>
+                        
+                            <li class="toc-api-type">
+                                <a href="global.html#JSONEnvelope" data-target="#JSONEnvelope">JSONEnvelope</a>
+                            </li>
+                        
+                            <li class="toc-api-type">
+                                <a href="global.html#JSONGraph" data-target="#JSONGraph">JSONGraph</a>
+                            </li>
+                        
+                            <li class="toc-api-type">
+                                <a href="global.html#JSONGraphEnvelope" data-target="#JSONGraphEnvelope">JSONGraphEnvelope</a>
+                            </li>
+                        
+                            <li class="toc-api-type">
+                                <a href="global.html#Key" data-target="#Key">Key</a>
+                            </li>
+                        
+                            <li class="toc-api-type">
+                                <a href="global.html#KeySet" data-target="#KeySet">KeySet</a>
+                            </li>
+                        
+                            <li class="toc-api-type">
+                                <a href="global.html#Path" data-target="#Path">Path</a>
+                            </li>
+                        
+                            <li class="toc-api-type">
+                                <a href="global.html#PathSet" data-target="#PathSet">PathSet</a>
+                            </li>
+                        
+                            <li class="toc-api-type">
+                                <a href="global.html#PathValue" data-target="#PathValue">PathValue</a>
+                            </li>
+                        
+                            <li class="toc-api-type">
+                                <a href="global.html#Range" data-target="#Range">Range</a>
+                            </li>
+                        
+                    </ul>
+                </li>
+            </ul>
+        </nav>

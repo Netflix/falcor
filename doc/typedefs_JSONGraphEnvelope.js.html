@@ -1,0 +1,455 @@
+---
+layout: api-page
+title: "typedefs/JSONGraphEnvelope.js"
+id: api
+---
+
+<main class="api-documentation-page">
+  
+
+  
+  
+      
+<h2>
+    typedefs/JSONGraphEnvelope.js
+</h2>
+<section>
+    <article>
+        <pre class="prettyprint source linenums"><code>/**
+ * An envelope that wraps a {@link JSONGraph} fragment.
+ * @typedef {Object} JSONGraphEnvelope
+ * @property {JSONGraph} jsonGraph - a {@link JSONGraph} fragment
+ * @property {?Array.&lt;PathSet>} paths - the paths to the values in the {@link JSONGraph} fragment
+ * @property {?Array.&lt;PathSet>} invalidated - the paths to invalidate in the {@link Model}
+ * @example
+var $ref = falcor.ref;
+var model = new falcor.Model();
+model.set({
+  paths: [
+    ["todos", [0,1], ["name","done"]]
+  ],
+  jsonGraph: {
+    todos: [
+      $ref("todosById[12]"),
+      $ref("todosById[15]")
+    ],
+    todosById: {
+      12: {
+        name: "go to the ATM",
+        done: false
+      },
+      15: {
+        name: "buy milk",
+        done: false
+      }
+    }
+  },
+}).then(function(jsonEnvelope) {
+  console.log(JSON.stringify(jsonEnvelope, null, 4));
+});
+
+// prints...
+// {
+//   json: {
+//     todos: {
+//       0: {
+//         name: "go to the ATM",
+//         done: false
+//       },
+//       1: {
+//         name: "buy milk",
+//         done: false
+//       }
+//     }
+//   }
+// }
+ */
+</code></pre>
+    </article>
+</section>
+  
+
+  
+</main>
+
+
+
+        
+        <!--
+          In case someone comes along later and sees the active item on the
+          toc acting weirdly, hopefully they'll see this comment. This page, unlike
+          any seen during development, has multiple 'docs' passed to container.tmpl.
+          To debug it and enhance the page as needed, I would suggest looking there first.
+        -->
+        
+
+        <!-- Generate the table of contents -->
+        <nav class="table-of-contents api-doc-toc">
+            <ul class="nav">
+                <li>
+                    <a href="DataSource.html">Classes</a>
+                    <ul class="toc-api-classes">
+                        
+                            <li class="toc-api-class ">
+                                <a href="DataSource.html" data-target="#DataSource">DataSource</a>
+                                
+                                
+
+    <ul class="toc-api-subgroup toc-api-subgroup-methods">
+        <li>
+            <span class="toc-api-subgroup-title">Methods</span>
+        </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="DataSource.html#call" data-target="#call">call</a>
+            </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="DataSource.html#get" data-target="#get">get</a>
+            </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="DataSource.html#set" data-target="#set">set</a>
+            </li>
+         
+    </ul>
+
+
+                                
+
+
+                                
+
+
+                            </li>
+                        
+                            <li class="toc-api-class ">
+                                <a href="FromEsObserverAdapter.html" data-target="#FromEsObserverAdapter">FromEsObserverAdapter</a>
+                                
+                                
+
+
+                                
+
+
+                                
+
+
+                            </li>
+                        
+                            <li class="toc-api-class ">
+                                <a href="HttpDataSource.html" data-target="#HttpDataSource">HttpDataSource</a>
+                                
+                                
+
+    <ul class="toc-api-subgroup toc-api-subgroup-methods">
+        <li>
+            <span class="toc-api-subgroup-title">Methods</span>
+        </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="HttpDataSource.html#call" data-target="#call">call</a>
+            </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="HttpDataSource.html#get" data-target="#get">get</a>
+            </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="HttpDataSource.html#set" data-target="#set">set</a>
+            </li>
+         
+    </ul>
+
+
+                                
+
+
+                                
+
+
+                            </li>
+                        
+                            <li class="toc-api-class ">
+                                <a href="Model.html" data-target="#Model">Model</a>
+                                
+                                
+
+    <ul class="toc-api-subgroup toc-api-subgroup-methods">
+        <li>
+            <span class="toc-api-subgroup-title">Methods</span>
+        </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="Model.html#asDataSource" data-target="#asDataSource">asDataSource</a>
+            </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="Model.html#batch" data-target="#batch">batch</a>
+            </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="Model.html#boxValues" data-target="#boxValues">boxValues</a>
+            </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="Model.html#call" data-target="#call">call</a>
+            </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="Model.html#deref" data-target="#deref">deref</a>
+            </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="Model.html#get" data-target="#get">get</a>
+            </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="Model.html#getCache" data-target="#getCache">getCache</a>
+            </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="Model.html#getPath" data-target="#getPath">getPath</a>
+            </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="Model.html#getVersion" data-target="#getVersion">getVersion</a>
+            </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="Model.html#invalidate" data-target="#invalidate">invalidate</a>
+            </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="Model.html#preload" data-target="#preload">preload</a>
+            </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="Model.html#set" data-target="#set">set</a>
+            </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="Model.html#setCache" data-target="#setCache">setCache</a>
+            </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="Model.html#treatErrorsAsValues" data-target="#treatErrorsAsValues">treatErrorsAsValues</a>
+            </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="Model.html#unbatch" data-target="#unbatch">unbatch</a>
+            </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="Model.html#unboxValues" data-target="#unboxValues">unboxValues</a>
+            </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="Model.html#withoutDataSource" data-target="#withoutDataSource">withoutDataSource</a>
+            </li>
+         
+    </ul>
+
+
+                                
+
+    <ul class="toc-api-subgroup toc-api-subgroup-types">
+        <li>
+            <span class="toc-api-subgroup-title">Types</span>
+        </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="Model.html#~comparator" data-target="#\~comparator">comparator</a>
+            </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="Model.html#~errorSelector" data-target="#\~errorSelector">errorSelector</a>
+            </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="Model.html#~onChange" data-target="#\~onChange">onChange</a>
+            </li>
+         
+    </ul>
+
+
+                                
+
+
+                            </li>
+                        
+                            <li class="toc-api-class ">
+                                <a href="ModelResponse.html" data-target="#ModelResponse">ModelResponse</a>
+                                
+                                
+
+    <ul class="toc-api-subgroup toc-api-subgroup-methods">
+        <li>
+            <span class="toc-api-subgroup-title">Methods</span>
+        </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="ModelResponse.html#forEach" data-target="#forEach">forEach</a>
+            </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="ModelResponse.html#progressively" data-target="#progressively">progressively</a>
+            </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="ModelResponse.html#subscribe" data-target="#subscribe">subscribe</a>
+            </li>
+         
+    </ul>
+
+
+                                
+
+
+                                
+
+
+                            </li>
+                        
+                            <li class="toc-api-class ">
+                                <a href="Observable.html" data-target="#Observable">Observable</a>
+                                
+                                
+
+    <ul class="toc-api-subgroup toc-api-subgroup-methods">
+        <li>
+            <span class="toc-api-subgroup-title">Methods</span>
+        </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="Observable.html#forEach" data-target="#forEach">forEach</a>
+            </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="Observable.html#subscribe" data-target="#subscribe">subscribe</a>
+            </li>
+         
+    </ul>
+
+
+                                
+
+    <ul class="toc-api-subgroup toc-api-subgroup-types">
+        <li>
+            <span class="toc-api-subgroup-title">Types</span>
+        </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="Observable.html#~onCompletedCallback" data-target="#\~onCompletedCallback">onCompletedCallback</a>
+            </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="Observable.html#~onErrorCallback" data-target="#\~onErrorCallback">onErrorCallback</a>
+            </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="Observable.html#~onNextCallback" data-target="#\~onNextCallback">onNextCallback</a>
+            </li>
+         
+    </ul>
+
+
+                                
+
+
+                            </li>
+                        
+                            <li class="toc-api-class ">
+                                <a href="Subscription.html" data-target="#Subscription">Subscription</a>
+                                
+                                
+
+    <ul class="toc-api-subgroup toc-api-subgroup-methods">
+        <li>
+            <span class="toc-api-subgroup-title">Methods</span>
+        </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="Subscription.html#dispose" data-target="#dispose">dispose</a>
+            </li>
+         
+    </ul>
+
+
+                                
+
+
+                                
+
+
+                            </li>
+                        
+                            <li class="toc-api-class ">
+                                <a href="ToEsSubscriptionAdapter.html" data-target="#ToEsSubscriptionAdapter">ToEsSubscriptionAdapter</a>
+                                
+                                
+
+
+                                
+
+
+                                
+
+
+                            </li>
+                        
+                    </ul>
+                </li>
+                <li class="toc-api-type-list ">
+                    <a href="global.html">Global Types</a>
+                    <ul class="toc-api-types">
+                        
+                            <li class="toc-api-type">
+                                <a href="global.html#Atom" data-target="#Atom">Atom</a>
+                            </li>
+                        
+                            <li class="toc-api-type">
+                                <a href="global.html#JSONEnvelope" data-target="#JSONEnvelope">JSONEnvelope</a>
+                            </li>
+                        
+                            <li class="toc-api-type">
+                                <a href="global.html#JSONGraph" data-target="#JSONGraph">JSONGraph</a>
+                            </li>
+                        
+                            <li class="toc-api-type">
+                                <a href="global.html#JSONGraphEnvelope" data-target="#JSONGraphEnvelope">JSONGraphEnvelope</a>
+                            </li>
+                        
+                            <li class="toc-api-type">
+                                <a href="global.html#Key" data-target="#Key">Key</a>
+                            </li>
+                        
+                            <li class="toc-api-type">
+                                <a href="global.html#KeySet" data-target="#KeySet">KeySet</a>
+                            </li>
+                        
+                            <li class="toc-api-type">
+                                <a href="global.html#Path" data-target="#Path">Path</a>
+                            </li>
+                        
+                            <li class="toc-api-type">
+                                <a href="global.html#PathSet" data-target="#PathSet">PathSet</a>
+                            </li>
+                        
+                            <li class="toc-api-type">
+                                <a href="global.html#PathValue" data-target="#PathValue">PathValue</a>
+                            </li>
+                        
+                            <li class="toc-api-type">
+                                <a href="global.html#Range" data-target="#Range">Range</a>
+                            </li>
+                        
+                    </ul>
+                </li>
+            </ul>
+        </nav>
+
+
+
+
+

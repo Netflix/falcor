@@ -1,0 +1,3921 @@
+---
+layout: api-page
+title: "Class: Model"
+id: api
+---
+
+<main class="api-documentation-page">
+  
+
+  
+  
+
+  <section>
+
+  <header>
+      
+      
+      
+          
+            <h2>
+            Model
+            </h2>
+          
+          
+      
+  </header>
+
+  <article>
+      <div class="container-overview">
+      
+          
+<section class="method-section">
+    
+        
+
+        <h4 class="name section-header function-name" id="Model"><span class="type-signature"></span>new Model<span class="signature">(options<span class="signature-attributes">nullable</span>)</span><span class="type-signature return-signature"></span></h4>
+
+        
+    
+
+        
+        <div class="description">
+            <p>A Model object is used to execute commands against a <a href="global.html#JSONGraph">JSONGraph</a> object. <a href="Model.html">Model</a>s can work with a local JSONGraph cache, or it can work with a remote <a href="global.html#JSONGraph">JSONGraph</a> object through a <a href="DataSource.html">DataSource</a>.</p>
+        </div>
+        
+
+    
+
+    
+
+    
+
+    
+        <h5>Parameters:</h5>
+        
+
+<div class="parameters-section">
+    <table class="params">
+        <thead>
+        <tr>
+            
+            <th class="header-name-and-attributes">
+              Name
+              
+                &amp; Attributes
+              
+            </th>
+            
+
+            <th class="header-type">Type</th>
+
+            
+
+            <th class="last header-description">Description</th>
+        </tr>
+        </thead>
+
+        <tbody>
+        
+
+            <tr>
+                
+                    <td>
+                        <span class="name">options</span>
+                        
+                            
+                        
+                            
+                                <br>
+                                <span class="attribute">nullable</span>
+                            
+                        
+                            
+                        
+                    </td>
+                
+
+                <td class="type">
+                
+                    
+<span class="param-type">Object</span>
+
+
+                
+                </td>
+
+                
+
+                <td class="description last"><p>a set of options to customize behavior</p>
+                    <h6>Properties</h6>
+                    
+
+<div class="parameters-section">
+    <table class="params">
+        <thead>
+        <tr>
+            
+            <th class="header-name-and-attributes">
+              Name
+              
+                &amp; Attributes
+              
+            </th>
+            
+
+            <th class="header-type">Type</th>
+
+            
+
+            <th class="last header-description">Description</th>
+        </tr>
+        </thead>
+
+        <tbody>
+        
+
+            <tr>
+                
+                    <td>
+                        <span class="name">source</span>
+                        
+                            
+                        
+                            
+                                <br>
+                                <span class="attribute">nullable</span>
+                            
+                        
+                            
+                        
+                    </td>
+                
+
+                <td class="type">
+                
+                    
+<span class="param-type"><a href="DataSource.html">DataSource</a></span>
+
+
+                
+                </td>
+
+                
+
+                <td class="description last"><p>a data source to retrieve and manage the <a href="global.html#JSONGraph">JSONGraph</a></p></td>
+            </tr>
+
+        
+
+            <tr>
+                
+                    <td>
+                        <span class="name">cache</span>
+                        
+                            
+                        
+                            
+                                <br>
+                                <span class="attribute">nullable</span>
+                            
+                        
+                            
+                        
+                    </td>
+                
+
+                <td class="type">
+                
+                    
+<span class="param-type"><a href="global.html#JSONGraph">JSONGraph</a></span>
+
+
+                
+                </td>
+
+                
+
+                <td class="description last"><p>initial state of the <a href="global.html#JSONGraph">JSONGraph</a></p></td>
+            </tr>
+
+        
+
+            <tr>
+                
+                    <td>
+                        <span class="name">maxSize</span>
+                        
+                            
+                        
+                            
+                                <br>
+                                <span class="attribute">nullable</span>
+                            
+                        
+                            
+                        
+                    </td>
+                
+
+                <td class="type">
+                
+                    
+<span class="param-type">number</span>
+
+
+                
+                </td>
+
+                
+
+                <td class="description last"><p>the maximum size of the cache</p></td>
+            </tr>
+
+        
+
+            <tr>
+                
+                    <td>
+                        <span class="name">collectRatio</span>
+                        
+                            
+                        
+                            
+                                <br>
+                                <span class="attribute">nullable</span>
+                            
+                        
+                            
+                        
+                    </td>
+                
+
+                <td class="type">
+                
+                    
+<span class="param-type">number</span>
+
+
+                
+                </td>
+
+                
+
+                <td class="description last"><p>the ratio of the maximum size to collect when the maxSize is exceeded</p></td>
+            </tr>
+
+        
+
+            <tr>
+                
+                    <td>
+                        <span class="name">errorSelector</span>
+                        
+                            
+                        
+                            
+                                <br>
+                                <span class="attribute">nullable</span>
+                            
+                        
+                            
+                        
+                    </td>
+                
+
+                <td class="type">
+                
+                    
+<span class="param-type"><a href="Model.html#~errorSelector">Model~errorSelector</a></span>
+
+
+                
+                </td>
+
+                
+
+                <td class="description last"><p>a function used to translate errors before they are returned</p></td>
+            </tr>
+
+        
+
+            <tr>
+                
+                    <td>
+                        <span class="name">onChange</span>
+                        
+                            
+                        
+                            
+                                <br>
+                                <span class="attribute">nullable</span>
+                            
+                        
+                            
+                        
+                    </td>
+                
+
+                <td class="type">
+                
+                    
+<span class="param-type"><a href="Model.html#~onChange">Model~onChange</a></span>
+
+
+                
+                </td>
+
+                
+
+                <td class="description last"><p>a function called whenever the Model's cache is changed</p></td>
+            </tr>
+
+        
+
+            <tr>
+                
+                    <td>
+                        <span class="name">comparator</span>
+                        
+                            
+                        
+                            
+                                <br>
+                                <span class="attribute">nullable</span>
+                            
+                        
+                            
+                        
+                    </td>
+                
+
+                <td class="type">
+                
+                    
+<span class="param-type"><a href="Model.html#~comparator">Model~comparator</a></span>
+
+
+                
+                </td>
+
+                
+
+                <td class="description last"><p>a function called whenever a value in the Model's cache is about to be replaced with a new value.</p></td>
+            </tr>
+
+        
+        </tbody>
+    </table>
+</div>
+
+                </td>
+            </tr>
+
+        
+        </tbody>
+    </table>
+</div>
+
+    
+
+    
+
+
+
+
+  <dl class="details">
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+      <dt class="tag-source">Source:</dt>
+      <dd class="tag-source">
+          <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line73">line 73</a>
+      </dd>
+      
+
+      
+
+      
+
+      
+  </dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</section>
+      
+      </div>
+
+      
+
+      
+
+      
+
+       
+
+      
+
+      
+          <h3 class="subsection-title">Members</h3>
+
+          
+              
+<section class="member-section">
+    <h4 class="name section-header members-header" id="getValue"><span class="type-signature"></span>getValue<span class="type-signature"></span></h4>
+
+    
+
+    
+    <div class="description">
+        <p>Get data for a single <a href="global.html#Path">Path</a>.</p>
+    </div>
+    
+
+    
+
+    
+
+
+
+
+  <dl class="details">
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+      <dt class="tag-source">Source:</dt>
+      <dd class="tag-source">
+          <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line306">line 306</a>
+      </dd>
+      
+
+      
+
+      
+
+      
+  </dl>
+
+
+    
+
+    
+        <h5>Example</h5>
+        
+    <pre class="prettyprint"><code>var model = new falcor.Model({source: new falcor.HttpDataSource("/model.json") });
+
+ model.
+     getValue('user.name').
+     subscribe(function(name) {
+         console.log(name);
+     });
+
+ // The code above prints "Jim" to the console.</code></pre>
+
+    
+</section>
+
+          
+              
+<section class="member-section">
+    <h4 class="name section-header members-header" id="setValue"><span class="type-signature"></span>setValue<span class="type-signature"></span></h4>
+
+    
+
+    
+    <div class="description">
+        <p>Set value for a single <a href="global.html#Path">Path</a>.</p>
+    </div>
+    
+
+    
+
+    
+
+
+
+
+  <dl class="details">
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+      <dt class="tag-source">Source:</dt>
+      <dd class="tag-source">
+          <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line324">line 324</a>
+      </dd>
+      
+
+      
+
+      
+
+      
+  </dl>
+
+
+    
+
+    
+        <h5>Example</h5>
+        
+    <pre class="prettyprint"><code>var model = new falcor.Model({source: new falcor.HttpDataSource("/model.json") });
+
+ model.
+     setValue('user.name', 'Jim').
+     subscribe(function(name) {
+         console.log(name);
+     });
+
+ // The code above prints "Jim" to the console.</code></pre>
+
+    
+</section>
+
+          
+      
+
+      
+          <h3 class="subsection-title">Methods</h3>
+
+          
+              
+<section class="method-section">
+    
+        
+
+        <h4 class="name section-header function-name" id="asDataSource"><span class="type-signature"></span>asDataSource<span class="signature">()</span><span class="type-signature return-signature"> &rarr; {<a href="DataSource.html">DataSource</a>}</span></h4>
+
+        
+    
+
+        
+        <div class="description">
+            <p>Adapts a Model to the <a href="DataSource.html">DataSource</a> interface.</p>
+        </div>
+        
+
+    
+
+    
+
+    
+
+    
+
+    
+
+
+
+
+  <dl class="details">
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+      <dt class="tag-source">Source:</dt>
+      <dd class="tag-source">
+          <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line504">line 504</a>
+      </dd>
+      
+
+      
+
+      
+
+      
+  </dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    
+    
+            
+
+
+<dl class="return-type">
+    <dt>
+        Return Type: 
+    </dt>
+    <dd>
+        
+<span class="param-type"><a href="DataSource.html">DataSource</a></span>
+
+
+    </dd>
+</dl>
+
+        
+
+    
+        <h5>Example</h5>
+        
+    <pre class="prettyprint"><code>var model =
+    new falcor.Model({
+        cache: {
+            user: {
+                name: "Steve",
+                surname: "McGuire"
+            }
+        }
+    }),
+    proxyModel = new falcor.Model({ source: model.asDataSource() });
+
+// Prints "Steve"
+proxyModel.getValue("user.name").
+    then(function(name) {
+        console.log(name);
+    });</code></pre>
+
+    
+</section>
+          
+              
+<section class="method-section">
+    
+        
+
+        <h4 class="name section-header function-name" id="batch"><span class="type-signature"></span>batch<span class="signature">(schedulerOrDelay)</span><span class="type-signature return-signature"> &rarr; {<a href="Model.html">Model</a>}</span></h4>
+
+        
+    
+
+        
+        <div class="description">
+            <p>Returns a clone of the <a href="Model.html">Model</a> that enables batching. Within the configured time period, paths for get operations are collected and sent to the <a href="DataSource.html">DataSource</a> in a batch. Batching can be more efficient if the <a href="DataSource.html">DataSource</a> access the network, potentially reducing the number of HTTP requests to the server.</p>
+        </div>
+        
+
+    
+
+    
+
+    
+
+    
+        <h5>Parameters:</h5>
+        
+
+<div class="parameters-section">
+    <table class="params">
+        <thead>
+        <tr>
+            
+            <th class="header-name-and-attributes">
+              Name
+              
+            </th>
+            
+
+            <th class="header-type">Type</th>
+
+            
+
+            <th class="last header-description">Description</th>
+        </tr>
+        </thead>
+
+        <tbody>
+        
+
+            <tr>
+                
+                    <td>
+                        <span class="name">schedulerOrDelay</span>
+                        
+                    </td>
+                
+
+                <td class="type">
+                
+                    
+<span class="param-type">Scheduler</span>
+or
+
+<span class="param-type">number</span>
+
+
+                
+                </td>
+
+                
+
+                <td class="description last"><p>Either a Scheduler that determines when to send a batch to the <a href="DataSource.html">DataSource</a>, or the number in milliseconds to collect a batch before sending to the <a href="DataSource.html">DataSource</a>. If this parameter is omitted, then batch collection ends at the end of the next tick.</p></td>
+            </tr>
+
+        
+        </tbody>
+    </table>
+</div>
+
+    
+
+    
+
+
+
+
+  <dl class="details">
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+      <dt class="tag-source">Source:</dt>
+      <dd class="tag-source">
+          <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line447">line 447</a>
+      </dd>
+      
+
+      
+
+      
+
+      
+  </dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    
+        <h5>Returns:</h5>
+    
+    
+            
+<div class="param-desc">
+    <p>a Model which schedules a batch of get requests to the DataSource.</p>
+</div>
+
+
+
+<dl class="return-type">
+    <dt>
+        Return Type: 
+    </dt>
+    <dd>
+        
+<span class="param-type"><a href="Model.html">Model</a></span>
+
+
+    </dd>
+</dl>
+
+        
+
+    
+</section>
+          
+              
+<section class="method-section">
+    
+        
+
+        <h4 class="name section-header function-name" id="boxValues"><span class="type-signature"></span>boxValues<span class="signature">()</span><span class="type-signature return-signature"> &rarr; {<a href="Model.html">Model</a>}</span></h4>
+
+        
+    
+
+        
+        <div class="description">
+            <p>Returns a clone of the <a href="Model.html">Model</a> that boxes values returning the wrapper (<a href="global.html#Atom">Atom</a>, Reference, or Error), rather than the value inside it. This allows any metadata attached to the wrapper to be inspected.</p>
+        </div>
+        
+
+    
+
+    
+
+    
+
+    
+
+    
+
+
+
+
+  <dl class="details">
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+      <dt class="tag-source">Source:</dt>
+      <dd class="tag-source">
+          <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line524">line 524</a>
+      </dd>
+      
+
+      
+
+      
+
+      
+  </dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    
+    
+            
+
+
+<dl class="return-type">
+    <dt>
+        Return Type: 
+    </dt>
+    <dd>
+        
+<span class="param-type"><a href="Model.html">Model</a></span>
+
+
+    </dd>
+</dl>
+
+        
+
+    
+</section>
+          
+              
+<section class="method-section">
+    
+        
+
+        <h4 class="name section-header function-name" id="call"><span class="type-signature"></span>call<span class="signature">(functionPath, args, refPaths, thisPaths)</span><span class="type-signature return-signature"></span></h4>
+
+        
+    
+
+        
+        <div class="description">
+            <p>Invokes a function in the JSON Graph.</p>
+        </div>
+        
+
+    
+
+    
+
+    
+
+    
+        <h5>Parameters:</h5>
+        
+
+<div class="parameters-section">
+    <table class="params">
+        <thead>
+        <tr>
+            
+            <th class="header-name-and-attributes">
+              Name
+              
+            </th>
+            
+
+            <th class="header-type">Type</th>
+
+            
+
+            <th class="last header-description">Description</th>
+        </tr>
+        </thead>
+
+        <tbody>
+        
+
+            <tr>
+                
+                    <td>
+                        <span class="name">functionPath</span>
+                        
+                    </td>
+                
+
+                <td class="type">
+                
+                    
+<span class="param-type"><a href="global.html#Path">Path</a></span>
+
+
+                
+                </td>
+
+                
+
+                <td class="description last"><p>the path to the function to invoke</p></td>
+            </tr>
+
+        
+
+            <tr>
+                
+                    <td>
+                        <span class="name">args</span>
+                        
+                    </td>
+                
+
+                <td class="type">
+                
+                    
+<span class="param-type">Array.&lt;Object></span>
+
+
+                
+                </td>
+
+                
+
+                <td class="description last"><p>the arguments to pass to the function</p></td>
+            </tr>
+
+        
+
+            <tr>
+                
+                    <td>
+                        <span class="name">refPaths</span>
+                        
+                    </td>
+                
+
+                <td class="type">
+                
+                    
+<span class="param-type">Array.&lt;<a href="global.html#PathSet">PathSet</a>></span>
+
+
+                
+                </td>
+
+                
+
+                <td class="description last"><p>the paths to retrieve from the JSON Graph References in the message returned from the function</p></td>
+            </tr>
+
+        
+
+            <tr>
+                
+                    <td>
+                        <span class="name">thisPaths</span>
+                        
+                    </td>
+                
+
+                <td class="type">
+                
+                    
+<span class="param-type">Array.&lt;<a href="global.html#PathSet">PathSet</a>></span>
+
+
+                
+                </td>
+
+                
+
+                <td class="description last"><p>the paths to retrieve from function's this object after successful function execution</p></td>
+            </tr>
+
+        
+        </tbody>
+    </table>
+</div>
+
+    
+
+    
+
+
+
+
+  <dl class="details">
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+      <dt class="tag-source">Source:</dt>
+      <dd class="tag-source">
+          <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line184">line 184</a>
+      </dd>
+      
+
+      
+
+      
+
+      
+  </dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    
+        <h5>Returns:</h5>
+    
+    
+            
+<div class="param-desc">
+    <p>{ModelResponse.<JSONEnvelope> - a JSONEnvelope contains the values returned from the function</p>
+</div>
+
+
+
+        
+
+    
+</section>
+          
+              
+<section class="method-section">
+    
+        
+
+        <h4 class="name section-header function-name" id="deref"><span class="type-signature"></span>deref<span class="signature">(responseObject)</span><span class="type-signature return-signature"> &rarr; {<a href="Model.html">Model</a>}</span></h4>
+
+        
+    
+
+        
+        <div class="description">
+            <p>Returns a new <a href="Model.html">Model</a> bound to a location within the <a href="global.html#JSONGraph">JSONGraph</a>. The bound location is never a Reference: any References encountered while resolving the bound <a href="global.html#Path">Path</a> are always
+replaced with the References target value. For subsequent operations
+on the <a href="Model.html">Model</a>, all paths will be evaluated relative to the bound
+path. Deref allows you to:</p>
+<ul>
+<li>Expose only a fragment of the <a href="global.html#JSONGraph">JSONGraph</a> to components, rather than
+the entire graph</li>
+<li>Hide the location of a <a href="global.html#JSONGraph">JSONGraph</a> fragment from components</li>
+<li>Optimize for executing multiple operations and path looksup at/below the
+same location in the <a href="global.html#JSONGraph">JSONGraph</a></li>
+</ul>
+        </div>
+        
+
+    
+
+    
+
+    
+
+    
+        <h5>Parameters:</h5>
+        
+
+<div class="parameters-section">
+    <table class="params">
+        <thead>
+        <tr>
+            
+            <th class="header-name-and-attributes">
+              Name
+              
+            </th>
+            
+
+            <th class="header-type">Type</th>
+
+            
+
+            <th class="last header-description">Description</th>
+        </tr>
+        </thead>
+
+        <tbody>
+        
+
+            <tr>
+                
+                    <td>
+                        <span class="name">responseObject</span>
+                        
+                    </td>
+                
+
+                <td class="type">
+                
+                    
+<span class="param-type">Object</span>
+
+
+                
+                </td>
+
+                
+
+                <td class="description last"><p>an object previously retrieved from the
+Model</p></td>
+            </tr>
+
+        
+        </tbody>
+    </table>
+</div>
+
+    
+
+    
+
+
+
+
+  <dl class="details">
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+      <dt class="tag-source">Source:</dt>
+      <dd class="tag-source">
+          <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line276">line 276</a>
+      </dd>
+      
+
+      
+
+      
+
+      
+  </dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    
+        <h5>Returns:</h5>
+    
+    
+            
+<div class="param-desc">
+    <ul>
+<li>the dereferenced <a href="Model.html">Model</a></li>
+</ul>
+</div>
+
+
+
+<dl class="return-type">
+    <dt>
+        Return Type: 
+    </dt>
+    <dd>
+        
+<span class="param-type"><a href="Model.html">Model</a></span>
+
+
+    </dd>
+</dl>
+
+        
+
+    
+        <h5>Example</h5>
+        
+    <pre class="prettyprint"><code>var Model = falcor.Model;
+var model = new Model({
+  cache: {
+    users: [
+      Model.ref(["usersById", 32])
+    ],
+    usersById: {
+      32: {
+        name: "Steve",
+        surname: "McGuire"
+      }
+    }
+  }
+});
+
+model.
+    get(['users', 0, 'name']).
+    subscribe(function(jsonEnv) {
+        var userModel = model.deref(jsonEnv.json.users[0]);
+        console.log(model.getPath());
+        console.log(userModel.getPath());
+   });
+});
+
+// prints the following:
+// []
+// ["usersById", 32] - because userModel refers to target of reference at ["users", 0]</code></pre>
+
+    
+</section>
+          
+              
+<section class="method-section">
+    
+        
+
+        <h4 class="name section-header function-name" id="get"><span class="type-signature"></span>get<span class="signature">(&hellip;path)</span><span class="type-signature return-signature"> &rarr; {<a href="ModelResponse.html">ModelResponse</a>.&lt;<a href="global.html#JSONEnvelope">JSONEnvelope</a>>}</span></h4>
+
+        
+    
+
+        
+        <div class="description">
+            <p>The get method retrieves several <a href="global.html#Path">Path</a>s or <a href="global.html#PathSet">PathSet</a>s from a <a href="Model.html">Model</a>. The get method loads each value into a JSON object and returns in a ModelResponse.</p>
+        </div>
+        
+
+    
+
+    
+
+    
+
+    
+        <h5>Parameters:</h5>
+        
+
+<div class="parameters-section">
+    <table class="params">
+        <thead>
+        <tr>
+            
+            <th class="header-name-and-attributes">
+              Name
+              
+                &amp; Attributes
+              
+            </th>
+            
+
+            <th class="header-type">Type</th>
+
+            
+
+            <th class="last header-description">Description</th>
+        </tr>
+        </thead>
+
+        <tbody>
+        
+
+            <tr>
+                
+                    <td>
+                        <span class="name">path</span>
+                        
+                            
+                        
+                            
+                        
+                            
+                                <br>
+                                <span class="attribute">repeatable</span>
+                            
+                        
+                    </td>
+                
+
+                <td class="type">
+                
+                    
+<span class="param-type"><a href="global.html#PathSet">PathSet</a></span>
+
+
+                
+                </td>
+
+                
+
+                <td class="description last"><p>the path(s) to retrieve</p></td>
+            </tr>
+
+        
+        </tbody>
+    </table>
+</div>
+
+    
+
+    
+
+
+
+
+  <dl class="details">
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+      <dt class="tag-source">Source:</dt>
+      <dd class="tag-source">
+          <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line132">line 132</a>
+      </dd>
+      
+
+      
+
+      
+
+      
+  </dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    
+        <h5>Returns:</h5>
+    
+    
+            
+<div class="param-desc">
+    <ul>
+<li>the requested data as JSON</li>
+</ul>
+</div>
+
+
+
+<dl class="return-type">
+    <dt>
+        Return Type: 
+    </dt>
+    <dd>
+        
+<span class="param-type"><a href="ModelResponse.html">ModelResponse</a>.&lt;<a href="global.html#JSONEnvelope">JSONEnvelope</a>></span>
+
+
+    </dd>
+</dl>
+
+        
+
+    
+</section>
+          
+              
+<section class="method-section">
+    
+        
+
+        <h4 class="name section-header function-name" id="getCache"><span class="type-signature"></span>getCache<span class="signature">(&hellip;pathSets<span class="signature-attributes">optional</span>)</span><span class="type-signature return-signature"> &rarr; {<a href="global.html#JSONGraph">JSONGraph</a>}</span></h4>
+
+        
+    
+
+        
+        <div class="description">
+            <p>Get the local <a href="global.html#JSONGraph">JSONGraph</a> cache. This method can be a useful to store the state of the cache.</p>
+        </div>
+        
+
+    
+
+    
+
+    
+
+    
+        <h5>Parameters:</h5>
+        
+
+<div class="parameters-section">
+    <table class="params">
+        <thead>
+        <tr>
+            
+            <th class="header-name-and-attributes">
+              Name
+              
+                &amp; Attributes
+              
+            </th>
+            
+
+            <th class="header-type">Type</th>
+
+            
+
+            <th class="last header-description">Description</th>
+        </tr>
+        </thead>
+
+        <tbody>
+        
+
+            <tr>
+                
+                    <td>
+                        <span class="name">pathSets</span>
+                        
+                            
+                                <br>
+                                <span class="attribute">optional</span>
+                            
+                        
+                            
+                        
+                            
+                                <br>
+                                <span class="attribute">repeatable</span>
+                            
+                        
+                    </td>
+                
+
+                <td class="type">
+                
+                    
+<span class="param-type">Array.&lt;<a href="global.html#PathSet">PathSet</a>></span>
+
+
+                
+                </td>
+
+                
+
+                <td class="description last"><p>The path(s) to retrieve. If no paths are specified, the entire <a href="global.html#JSONGraph">JSONGraph</a> is returned.</p></td>
+            </tr>
+
+        
+        </tbody>
+    </table>
+</div>
+
+    
+
+    
+
+
+
+
+  <dl class="details">
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+      <dt class="tag-source">Source:</dt>
+      <dd class="tag-source">
+          <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line390">line 390</a>
+      </dd>
+      
+
+      
+
+      
+
+      
+  </dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    
+        <h5>Returns:</h5>
+    
+    
+            
+<div class="param-desc">
+    <p>all of the <a href="global.html#JSONGraph">JSONGraph</a> data in the <a href="Model.html">Model</a> cache.</p>
+</div>
+
+
+
+<dl class="return-type">
+    <dt>
+        Return Type: 
+    </dt>
+    <dd>
+        
+<span class="param-type"><a href="global.html#JSONGraph">JSONGraph</a></span>
+
+
+    </dd>
+</dl>
+
+        
+
+    
+        <h5>Example</h5>
+        
+    <pre class="prettyprint"><code>// Storing the boxshot of the first 10 titles in the first 10 genreLists to local storage.
+ localStorage.setItem('cache', JSON.stringify(model.getCache("genreLists[0...10][0...10].boxshot")));</code></pre>
+
+    
+</section>
+          
+              
+<section class="method-section">
+    
+        
+
+        <h4 class="name section-header function-name" id="getPath"><span class="type-signature"></span>getPath<span class="signature">()</span><span class="type-signature return-signature"> &rarr; {<a href="global.html#Path">Path</a>}</span></h4>
+
+        
+    
+
+        
+        <div class="description">
+            <p>Returns the <a href="global.html#Path">Path</a> to the object within the JSON Graph that this Model references.</p>
+        </div>
+        
+
+    
+
+    
+
+    
+
+    
+
+    
+
+
+
+
+  <dl class="details">
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+      <dt class="tag-source">Source:</dt>
+      <dd class="tag-source">
+          <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line589">line 589</a>
+      </dd>
+      
+
+      
+
+      
+
+      
+  </dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    
+    
+            
+
+
+<dl class="return-type">
+    <dt>
+        Return Type: 
+    </dt>
+    <dd>
+        
+<span class="param-type"><a href="global.html#Path">Path</a></span>
+
+
+    </dd>
+</dl>
+
+        
+
+    
+        <h5>Example</h5>
+        
+    <pre class="prettyprint"><code>var Model = falcor.Model;
+var model = new Model({
+  cache: {
+    users: [
+      Model.ref(["usersById", 32])
+    ],
+    usersById: {
+      32: {
+        name: "Steve",
+        surname: "McGuire"
+      }
+    }
+  }
+});
+
+model.
+    get(['users', 0, 'name']).
+    subscribe(function(jsonEnv) {
+        var userModel = model.deref(jsonEnv.json.users[0]);
+        console.log(model.getPath());
+        console.log(userModel.getPath());
+   });
+});
+
+// prints the following:
+// []
+// ["usersById", 32] - because userModel refers to target of reference at ["users", 0]</code></pre>
+
+    
+</section>
+          
+              
+<section class="method-section">
+    
+        
+
+        <h4 class="name section-header function-name" id="getVersion"><span class="type-signature"></span>getVersion<span class="signature">(path<span class="signature-attributes">nullable</span>)</span><span class="type-signature return-signature"> &rarr; {Number}</span></h4>
+
+        
+    
+
+        
+        <div class="description">
+            <p>Retrieves a number which is incremented every single time a value is changed underneath the Model or the object at an optionally-provided Path beneath the Model.</p>
+        </div>
+        
+
+    
+
+    
+
+    
+
+    
+        <h5>Parameters:</h5>
+        
+
+<div class="parameters-section">
+    <table class="params">
+        <thead>
+        <tr>
+            
+            <th class="header-name-and-attributes">
+              Name
+              
+                &amp; Attributes
+              
+            </th>
+            
+
+            <th class="header-type">Type</th>
+
+            
+
+            <th class="last header-description">Description</th>
+        </tr>
+        </thead>
+
+        <tbody>
+        
+
+            <tr>
+                
+                    <td>
+                        <span class="name">path</span>
+                        
+                            
+                        
+                            
+                                <br>
+                                <span class="attribute">nullable</span>
+                            
+                        
+                            
+                        
+                    </td>
+                
+
+                <td class="type">
+                
+                    
+<span class="param-type"><a href="global.html#Path">Path</a></span>
+
+
+                
+                </td>
+
+                
+
+                <td class="description last"><p>a path at which to retrieve the version number</p></td>
+            </tr>
+
+        
+        </tbody>
+    </table>
+</div>
+
+    
+
+    
+
+
+
+
+  <dl class="details">
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+      <dt class="tag-source">Source:</dt>
+      <dd class="tag-source">
+          <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line408">line 408</a>
+      </dd>
+      
+
+      
+
+      
+
+      
+  </dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    
+        <h5>Returns:</h5>
+    
+    
+            
+<div class="param-desc">
+    <p>a version number which changes whenever a value is changed underneath the Model or provided Path</p>
+</div>
+
+
+
+<dl class="return-type">
+    <dt>
+        Return Type: 
+    </dt>
+    <dd>
+        
+<span class="param-type">Number</span>
+
+
+    </dd>
+</dl>
+
+        
+
+    
+</section>
+          
+              
+<section class="method-section">
+    
+        
+
+        <h4 class="name section-header function-name" id="invalidate"><span class="type-signature"></span>invalidate<span class="signature">(&hellip;path)</span><span class="type-signature return-signature"></span></h4>
+
+        
+    
+
+        
+        <div class="description">
+            <p>The invalidate method synchronously removes several <a href="global.html#Path">Path</a>s or <a href="global.html#PathSet">PathSet</a>s from a <a href="Model.html">Model</a> cache.</p>
+        </div>
+        
+
+    
+
+    
+
+    
+
+    
+        <h5>Parameters:</h5>
+        
+
+<div class="parameters-section">
+    <table class="params">
+        <thead>
+        <tr>
+            
+            <th class="header-name-and-attributes">
+              Name
+              
+                &amp; Attributes
+              
+            </th>
+            
+
+            <th class="header-type">Type</th>
+
+            
+
+            <th class="last header-description">Description</th>
+        </tr>
+        </thead>
+
+        <tbody>
+        
+
+            <tr>
+                
+                    <td>
+                        <span class="name">path</span>
+                        
+                            
+                        
+                            
+                        
+                            
+                                <br>
+                                <span class="attribute">repeatable</span>
+                            
+                        
+                    </td>
+                
+
+                <td class="type">
+                
+                    
+<span class="param-type"><a href="global.html#PathSet">PathSet</a></span>
+
+
+                
+                </td>
+
+                
+
+                <td class="description last"><p>the  paths to remove from the <a href="Model.html">Model</a>'s cache.</p></td>
+            </tr>
+
+        
+        </tbody>
+    </table>
+</div>
+
+    
+
+    
+
+
+
+
+  <dl class="details">
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+      <dt class="tag-source">Source:</dt>
+      <dd class="tag-source">
+          <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line212">line 212</a>
+      </dd>
+      
+
+      
+
+      
+
+      
+  </dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</section>
+          
+              
+<section class="method-section">
+    
+        
+
+        <h4 class="name section-header function-name" id="preload"><span class="type-signature"></span>preload<span class="signature">(&hellip;path)</span><span class="type-signature return-signature"> &rarr; {<a href="ModelResponse.html">ModelResponse</a>.&lt;<a href="global.html#JSONEnvelope">JSONEnvelope</a>>}</span></h4>
+
+        
+    
+
+        
+        <div class="description">
+            <p>The preload method retrieves several <a href="global.html#Path">Path</a>s or <a href="global.html#PathSet">PathSet</a>s from a <a href="Model.html">Model</a> and loads them into the Model cache.</p>
+        </div>
+        
+
+    
+
+    
+
+    
+
+    
+        <h5>Parameters:</h5>
+        
+
+<div class="parameters-section">
+    <table class="params">
+        <thead>
+        <tr>
+            
+            <th class="header-name-and-attributes">
+              Name
+              
+                &amp; Attributes
+              
+            </th>
+            
+
+            <th class="header-type">Type</th>
+
+            
+
+            <th class="last header-description">Description</th>
+        </tr>
+        </thead>
+
+        <tbody>
+        
+
+            <tr>
+                
+                    <td>
+                        <span class="name">path</span>
+                        
+                            
+                        
+                            
+                        
+                            
+                                <br>
+                                <span class="attribute">repeatable</span>
+                            
+                        
+                    </td>
+                
+
+                <td class="type">
+                
+                    
+<span class="param-type"><a href="global.html#PathSet">PathSet</a></span>
+
+
+                
+                </td>
+
+                
+
+                <td class="description last"><p>the path(s) to retrieve</p></td>
+            </tr>
+
+        
+        </tbody>
+    </table>
+</div>
+
+    
+
+    
+
+
+
+
+  <dl class="details">
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+      <dt class="tag-source">Source:</dt>
+      <dd class="tag-source">
+          <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line156">line 156</a>
+      </dd>
+      
+
+      
+
+      
+
+      
+  </dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    
+        <h5>Returns:</h5>
+    
+    
+            
+<div class="param-desc">
+    <ul>
+<li>a ModelResponse that completes when the data has been loaded into the cache.</li>
+</ul>
+</div>
+
+
+
+<dl class="return-type">
+    <dt>
+        Return Type: 
+    </dt>
+    <dd>
+        
+<span class="param-type"><a href="ModelResponse.html">ModelResponse</a>.&lt;<a href="global.html#JSONEnvelope">JSONEnvelope</a>></span>
+
+
+    </dd>
+</dl>
+
+        
+
+    
+</section>
+          
+              
+<section class="method-section">
+    
+        
+
+        <h4 class="name section-header function-name" id="set"><span class="type-signature"></span>set<span class="signature">()</span><span class="type-signature return-signature"> &rarr; {<a href="ModelResponse.html">ModelResponse</a>.&lt;<a href="global.html#JSONEnvelope">JSONEnvelope</a>>}</span></h4>
+
+        
+    
+
+        
+        <div class="description">
+            <p>Sets the value at one or more places in the JSONGraph model. The set method accepts one or more <a href="global.html#PathValue">PathValue</a>s, each of which is a combination of a location in the document and the value to place there.  In addition to accepting  <a href="global.html#PathValue">PathValue</a>s, the set method also returns the values after the set operation is complete.</p>
+        </div>
+        
+
+    
+
+    
+
+    
+
+    
+
+    
+
+
+
+
+  <dl class="details">
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+      <dt class="tag-source">Source:</dt>
+      <dd class="tag-source">
+          <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line148">line 148</a>
+      </dd>
+      
+
+      
+
+      
+
+      
+  </dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    
+        <h5>Returns:</h5>
+    
+    
+            
+<div class="param-desc">
+    <ul>
+<li>an <a href="Observable.html">Observable</a> stream containing the values in the JSONGraph model after the set was attempted</li>
+</ul>
+</div>
+
+
+
+<dl class="return-type">
+    <dt>
+        Return Type: 
+    </dt>
+    <dd>
+        
+<span class="param-type"><a href="ModelResponse.html">ModelResponse</a>.&lt;<a href="global.html#JSONEnvelope">JSONEnvelope</a>></span>
+
+
+    </dd>
+</dl>
+
+        
+
+    
+</section>
+          
+              
+<section class="method-section">
+    
+        
+
+        <h4 class="name section-header function-name" id="setCache"><span class="type-signature"></span>setCache<span class="signature">(jsonGraph)</span><span class="type-signature return-signature"></span></h4>
+
+        
+    
+
+        
+        <div class="description">
+            <p>Set the local cache to a <a href="global.html#JSONGraph">JSONGraph</a> fragment. This method can be a useful way of mocking a remote document, or restoring the local cache from a previously stored state.</p>
+        </div>
+        
+
+    
+
+    
+
+    
+
+    
+        <h5>Parameters:</h5>
+        
+
+<div class="parameters-section">
+    <table class="params">
+        <thead>
+        <tr>
+            
+            <th class="header-name-and-attributes">
+              Name
+              
+            </th>
+            
+
+            <th class="header-type">Type</th>
+
+            
+
+            <th class="last header-description">Description</th>
+        </tr>
+        </thead>
+
+        <tbody>
+        
+
+            <tr>
+                
+                    <td>
+                        <span class="name">jsonGraph</span>
+                        
+                    </td>
+                
+
+                <td class="type">
+                
+                    
+<span class="param-type"><a href="global.html#JSONGraph">JSONGraph</a></span>
+
+
+                
+                </td>
+
+                
+
+                <td class="description last"><p>the <a href="global.html#JSONGraph">JSONGraph</a> fragment to use as the local cache</p></td>
+            </tr>
+
+        
+        </tbody>
+    </table>
+</div>
+
+    
+
+    
+
+
+
+
+  <dl class="details">
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+      <dt class="tag-source">Source:</dt>
+      <dd class="tag-source">
+          <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line352">line 352</a>
+      </dd>
+      
+
+      
+
+      
+
+      
+  </dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</section>
+          
+              
+<section class="method-section">
+    
+        
+
+        <h4 class="name section-header function-name" id="treatErrorsAsValues"><span class="type-signature"></span>treatErrorsAsValues<span class="signature">()</span><span class="type-signature return-signature"> &rarr; {<a href="Model.html">Model</a>}</span></h4>
+
+        
+    
+
+        
+        <div class="description">
+            <p>Returns a clone of the <a href="Model.html">Model</a> that treats errors as values. Errors will be reported in the same callback used to report data. Errors will appear as objects in responses, rather than being sent to the <a href="Observable.html#~onErrorCallback">Observable~onErrorCallback</a> callback of the <a href="ModelResponse.html">ModelResponse</a>.</p>
+        </div>
+        
+
+    
+
+    
+
+    
+
+    
+
+    
+
+
+
+
+  <dl class="details">
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+      <dt class="tag-source">Source:</dt>
+      <dd class="tag-source">
+          <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line477">line 477</a>
+      </dd>
+      
+
+      
+
+      
+
+      
+  </dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    
+    
+            
+
+
+<dl class="return-type">
+    <dt>
+        Return Type: 
+    </dt>
+    <dd>
+        
+<span class="param-type"><a href="Model.html">Model</a></span>
+
+
+    </dd>
+</dl>
+
+        
+
+    
+</section>
+          
+              
+<section class="method-section">
+    
+        
+
+        <h4 class="name section-header function-name" id="unbatch"><span class="type-signature"></span>unbatch<span class="signature">()</span><span class="type-signature return-signature"> &rarr; {<a href="Model.html">Model</a>}</span></h4>
+
+        
+    
+
+        
+        <div class="description">
+            <p>Returns a clone of the <a href="Model.html">Model</a> that disables batching. This is the default mode. Each get operation will be executed on the <a href="DataSource.html">DataSource</a> separately.</p>
+        </div>
+        
+
+    
+
+    
+
+    
+
+    
+
+    
+
+
+
+
+  <dl class="details">
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+      <dt class="tag-source">Source:</dt>
+      <dd class="tag-source">
+          <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line460">line 460</a>
+      </dd>
+      
+
+      
+
+      
+
+      
+  </dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    
+        <h5>Returns:</h5>
+    
+    
+            
+<div class="param-desc">
+    <p>a <a href="Model.html">Model</a> that batches requests of the same type and sends them to the data source together</p>
+</div>
+
+
+
+<dl class="return-type">
+    <dt>
+        Return Type: 
+    </dt>
+    <dd>
+        
+<span class="param-type"><a href="Model.html">Model</a></span>
+
+
+    </dd>
+</dl>
+
+        
+
+    
+</section>
+          
+              
+<section class="method-section">
+    
+        
+
+        <h4 class="name section-header function-name" id="unboxValues"><span class="type-signature"></span>unboxValues<span class="signature">()</span><span class="type-signature return-signature"> &rarr; {<a href="Model.html">Model</a>}</span></h4>
+
+        
+    
+
+        
+        <div class="description">
+            <p>Returns a clone of the <a href="Model.html">Model</a> that unboxes values, returning the value inside of the wrapper (<a href="global.html#Atom">Atom</a>, Reference, or Error), rather than the wrapper itself. This is the default mode.</p>
+        </div>
+        
+
+    
+
+    
+
+    
+
+    
+
+    
+
+
+
+
+  <dl class="details">
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+      <dt class="tag-source">Source:</dt>
+      <dd class="tag-source">
+          <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line534">line 534</a>
+      </dd>
+      
+
+      
+
+      
+
+      
+  </dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    
+    
+            
+
+
+<dl class="return-type">
+    <dt>
+        Return Type: 
+    </dt>
+    <dd>
+        
+<span class="param-type"><a href="Model.html">Model</a></span>
+
+
+    </dd>
+</dl>
+
+        
+
+    
+</section>
+          
+              
+<section class="method-section">
+    
+        
+
+        <h4 class="name section-header function-name" id="withoutDataSource"><span class="type-signature"></span>withoutDataSource<span class="signature">()</span><span class="type-signature return-signature"> &rarr; {<a href="Model.html">Model</a>}</span></h4>
+
+        
+    
+
+        
+        <div class="description">
+            <p>Returns a clone of the <a href="Model.html">Model</a> that only uses the local <a href="global.html#JSONGraph">JSONGraph</a> and never uses a <a href="DataSource.html">DataSource</a> to retrieve missing paths.</p>
+        </div>
+        
+
+    
+
+    
+
+    
+
+    
+
+    
+
+
+
+
+  <dl class="details">
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+      <dt class="tag-source">Source:</dt>
+      <dd class="tag-source">
+          <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line544">line 544</a>
+      </dd>
+      
+
+      
+
+      
+
+      
+  </dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    
+    
+            
+
+
+<dl class="return-type">
+    <dt>
+        Return Type: 
+    </dt>
+    <dd>
+        
+<span class="param-type"><a href="Model.html">Model</a></span>
+
+
+    </dd>
+</dl>
+
+        
+
+    
+</section>
+          
+      
+
+      
+          <h3 class="subsection-title">Type Definitions</h3>
+
+          
+                  
+<section class="method-section">
+    
+        
+
+        <h4 class="name section-header function-name" id="~comparator"><span class="type-signature"></span>comparator<span class="signature">(existingValue, newValue)</span><span class="type-signature return-signature"> &rarr; {Boolean}</span></h4>
+
+        
+    
+
+        
+        <div class="description">
+            <p>This function is invoked every time a value in the Model cache is about to be replaced with a new value. If the function returns true, the existing value is replaced with a new value and the version flag on all of the value's ancestors in the tree are incremented.</p>
+        </div>
+        
+
+    
+
+    
+
+    
+
+    
+        <h5>Parameters:</h5>
+        
+
+<div class="parameters-section">
+    <table class="params">
+        <thead>
+        <tr>
+            
+            <th class="header-name-and-attributes">
+              Name
+              
+            </th>
+            
+
+            <th class="header-type">Type</th>
+
+            
+
+            <th class="last header-description">Description</th>
+        </tr>
+        </thead>
+
+        <tbody>
+        
+
+            <tr>
+                
+                    <td>
+                        <span class="name">existingValue</span>
+                        
+                    </td>
+                
+
+                <td class="type">
+                
+                    
+<span class="param-type">Object</span>
+
+
+                
+                </td>
+
+                
+
+                <td class="description last"><p>the current value in the Model cache.</p></td>
+            </tr>
+
+        
+
+            <tr>
+                
+                    <td>
+                        <span class="name">newValue</span>
+                        
+                    </td>
+                
+
+                <td class="type">
+                
+                    
+<span class="param-type">Object</span>
+
+
+                
+                </td>
+
+                
+
+                <td class="description last"><p>the value about to be set into the Model cache.</p></td>
+            </tr>
+
+        
+        </tbody>
+    </table>
+</div>
+
+    
+
+    
+
+
+
+
+  <dl class="details">
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+      <dt class="tag-source">Source:</dt>
+      <dd class="tag-source">
+          <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line53">line 53</a>
+      </dd>
+      
+
+      
+
+      
+
+      
+  </dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    
+        <h5>Returns:</h5>
+    
+    
+            
+<div class="param-desc">
+    <p>the Boolean value indicating whether the new value and the existing value are equal.</p>
+</div>
+
+
+
+<dl class="return-type">
+    <dt>
+        Return Type: 
+    </dt>
+    <dd>
+        
+<span class="param-type">Boolean</span>
+
+
+    </dd>
+</dl>
+
+        
+
+    
+</section>
+              
+                  
+<section class="method-section">
+    
+        
+
+        <h4 class="name section-header function-name" id="~errorSelector"><span class="type-signature"></span>errorSelector<span class="signature">(jsonGraphError)</span><span class="type-signature return-signature"> &rarr; {Object}</span></h4>
+
+        
+    
+
+        
+        <div class="description">
+            <p>This function is invoked on every JSONGraph Error retrieved from the DataSource. This function allows Error objects to be transformed before being stored in the Model's cache.</p>
+        </div>
+        
+
+    
+
+    
+
+    
+
+    
+        <h5>Parameters:</h5>
+        
+
+<div class="parameters-section">
+    <table class="params">
+        <thead>
+        <tr>
+            
+            <th class="header-name-and-attributes">
+              Name
+              
+            </th>
+            
+
+            <th class="header-type">Type</th>
+
+            
+
+            <th class="last header-description">Description</th>
+        </tr>
+        </thead>
+
+        <tbody>
+        
+
+            <tr>
+                
+                    <td>
+                        <span class="name">jsonGraphError</span>
+                        
+                    </td>
+                
+
+                <td class="type">
+                
+                    
+<span class="param-type">Object</span>
+
+
+                
+                </td>
+
+                
+
+                <td class="description last"><p>the JSONGraph Error object to transform before it is stored in the Model's cache.</p></td>
+            </tr>
+
+        
+        </tbody>
+    </table>
+</div>
+
+    
+
+    
+
+
+
+
+  <dl class="details">
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+      <dt class="tag-source">Source:</dt>
+      <dd class="tag-source">
+          <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line46">line 46</a>
+      </dd>
+      
+
+      
+
+      
+
+      
+  </dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    
+        <h5>Returns:</h5>
+    
+    
+            
+<div class="param-desc">
+    <p>the JSONGraph Error object to store in the Model cache.</p>
+</div>
+
+
+
+<dl class="return-type">
+    <dt>
+        Return Type: 
+    </dt>
+    <dd>
+        
+<span class="param-type">Object</span>
+
+
+    </dd>
+</dl>
+
+        
+
+    
+</section>
+              
+                  
+<section class="method-section">
+    
+        
+
+        <h4 class="name section-header function-name" id="~onChange"><span class="type-signature"></span>onChange<span class="signature">()</span><span class="type-signature return-signature"></span></h4>
+
+        
+    
+
+        
+        <div class="description">
+            <p>This callback is invoked when the Model's cache is changed.</p>
+        </div>
+        
+
+    
+
+    
+
+    
+
+    
+
+    
+
+
+
+
+  <dl class="details">
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+      <dt class="tag-source">Source:</dt>
+      <dd class="tag-source">
+          <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line41">line 41</a>
+      </dd>
+      
+
+      
+
+      
+
+      
+  </dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</section>
+              
+      
+
+      
+  </article>
+
+  </section>
+  
+
+  
+</main>
+
+
+
+        
+        <!--
+          In case someone comes along later and sees the active item on the
+          toc acting weirdly, hopefully they'll see this comment. This page, unlike
+          any seen during development, has multiple 'docs' passed to container.tmpl.
+          To debug it and enhance the page as needed, I would suggest looking there first.
+        -->
+        
+
+        <!-- Generate the table of contents -->
+        <nav class="table-of-contents api-doc-toc">
+            <ul class="nav">
+                <li>
+                    <a href="DataSource.html">Classes</a>
+                    <ul class="toc-api-classes">
+                        
+                            <li class="toc-api-class ">
+                                <a href="DataSource.html" data-target="#DataSource">DataSource</a>
+                                
+                                
+
+    <ul class="toc-api-subgroup toc-api-subgroup-methods">
+        <li>
+            <span class="toc-api-subgroup-title">Methods</span>
+        </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="DataSource.html#call" data-target="#call">call</a>
+            </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="DataSource.html#get" data-target="#get">get</a>
+            </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="DataSource.html#set" data-target="#set">set</a>
+            </li>
+         
+    </ul>
+
+
+                                
+
+
+                                
+
+
+                            </li>
+                        
+                            <li class="toc-api-class ">
+                                <a href="FromEsObserverAdapter.html" data-target="#FromEsObserverAdapter">FromEsObserverAdapter</a>
+                                
+                                
+
+
+                                
+
+
+                                
+
+
+                            </li>
+                        
+                            <li class="toc-api-class ">
+                                <a href="HttpDataSource.html" data-target="#HttpDataSource">HttpDataSource</a>
+                                
+                                
+
+    <ul class="toc-api-subgroup toc-api-subgroup-methods">
+        <li>
+            <span class="toc-api-subgroup-title">Methods</span>
+        </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="HttpDataSource.html#call" data-target="#call">call</a>
+            </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="HttpDataSource.html#get" data-target="#get">get</a>
+            </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="HttpDataSource.html#set" data-target="#set">set</a>
+            </li>
+         
+    </ul>
+
+
+                                
+
+
+                                
+
+
+                            </li>
+                        
+                            <li class="toc-api-class current-page">
+                                <a href="Model.html" data-target="#Model">Model</a>
+                                
+                                
+
+    <ul class="toc-api-subgroup toc-api-subgroup-methods">
+        <li>
+            <span class="toc-api-subgroup-title">Methods</span>
+        </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="Model.html#asDataSource" data-target="#asDataSource">asDataSource</a>
+            </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="Model.html#batch" data-target="#batch">batch</a>
+            </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="Model.html#boxValues" data-target="#boxValues">boxValues</a>
+            </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="Model.html#call" data-target="#call">call</a>
+            </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="Model.html#deref" data-target="#deref">deref</a>
+            </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="Model.html#get" data-target="#get">get</a>
+            </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="Model.html#getCache" data-target="#getCache">getCache</a>
+            </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="Model.html#getPath" data-target="#getPath">getPath</a>
+            </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="Model.html#getVersion" data-target="#getVersion">getVersion</a>
+            </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="Model.html#invalidate" data-target="#invalidate">invalidate</a>
+            </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="Model.html#preload" data-target="#preload">preload</a>
+            </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="Model.html#set" data-target="#set">set</a>
+            </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="Model.html#setCache" data-target="#setCache">setCache</a>
+            </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="Model.html#treatErrorsAsValues" data-target="#treatErrorsAsValues">treatErrorsAsValues</a>
+            </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="Model.html#unbatch" data-target="#unbatch">unbatch</a>
+            </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="Model.html#unboxValues" data-target="#unboxValues">unboxValues</a>
+            </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="Model.html#withoutDataSource" data-target="#withoutDataSource">withoutDataSource</a>
+            </li>
+         
+    </ul>
+
+
+                                
+
+    <ul class="toc-api-subgroup toc-api-subgroup-types">
+        <li>
+            <span class="toc-api-subgroup-title">Types</span>
+        </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="Model.html#~comparator" data-target="#\~comparator">comparator</a>
+            </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="Model.html#~errorSelector" data-target="#\~errorSelector">errorSelector</a>
+            </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="Model.html#~onChange" data-target="#\~onChange">onChange</a>
+            </li>
+         
+    </ul>
+
+
+                                
+
+
+                            </li>
+                        
+                            <li class="toc-api-class ">
+                                <a href="ModelResponse.html" data-target="#ModelResponse">ModelResponse</a>
+                                
+                                
+
+    <ul class="toc-api-subgroup toc-api-subgroup-methods">
+        <li>
+            <span class="toc-api-subgroup-title">Methods</span>
+        </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="ModelResponse.html#forEach" data-target="#forEach">forEach</a>
+            </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="ModelResponse.html#progressively" data-target="#progressively">progressively</a>
+            </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="ModelResponse.html#subscribe" data-target="#subscribe">subscribe</a>
+            </li>
+         
+    </ul>
+
+
+                                
+
+
+                                
+
+
+                            </li>
+                        
+                            <li class="toc-api-class ">
+                                <a href="Observable.html" data-target="#Observable">Observable</a>
+                                
+                                
+
+    <ul class="toc-api-subgroup toc-api-subgroup-methods">
+        <li>
+            <span class="toc-api-subgroup-title">Methods</span>
+        </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="Observable.html#forEach" data-target="#forEach">forEach</a>
+            </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="Observable.html#subscribe" data-target="#subscribe">subscribe</a>
+            </li>
+         
+    </ul>
+
+
+                                
+
+    <ul class="toc-api-subgroup toc-api-subgroup-types">
+        <li>
+            <span class="toc-api-subgroup-title">Types</span>
+        </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="Observable.html#~onCompletedCallback" data-target="#\~onCompletedCallback">onCompletedCallback</a>
+            </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="Observable.html#~onErrorCallback" data-target="#\~onErrorCallback">onErrorCallback</a>
+            </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="Observable.html#~onNextCallback" data-target="#\~onNextCallback">onNextCallback</a>
+            </li>
+         
+    </ul>
+
+
+                                
+
+
+                            </li>
+                        
+                            <li class="toc-api-class ">
+                                <a href="Subscription.html" data-target="#Subscription">Subscription</a>
+                                
+                                
+
+    <ul class="toc-api-subgroup toc-api-subgroup-methods">
+        <li>
+            <span class="toc-api-subgroup-title">Methods</span>
+        </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="Subscription.html#dispose" data-target="#dispose">dispose</a>
+            </li>
+         
+    </ul>
+
+
+                                
+
+
+                                
+
+
+                            </li>
+                        
+                            <li class="toc-api-class ">
+                                <a href="ToEsSubscriptionAdapter.html" data-target="#ToEsSubscriptionAdapter">ToEsSubscriptionAdapter</a>
+                                
+                                
+
+
+                                
+
+
+                                
+
+
+                            </li>
+                        
+                    </ul>
+                </li>
+                <li class="toc-api-type-list ">
+                    <a href="global.html">Global Types</a>
+                    <ul class="toc-api-types">
+                        
+                            <li class="toc-api-type">
+                                <a href="global.html#Atom" data-target="#Atom">Atom</a>
+                            </li>
+                        
+                            <li class="toc-api-type">
+                                <a href="global.html#JSONEnvelope" data-target="#JSONEnvelope">JSONEnvelope</a>
+                            </li>
+                        
+                            <li class="toc-api-type">
+                                <a href="global.html#JSONGraph" data-target="#JSONGraph">JSONGraph</a>
+                            </li>
+                        
+                            <li class="toc-api-type">
+                                <a href="global.html#JSONGraphEnvelope" data-target="#JSONGraphEnvelope">JSONGraphEnvelope</a>
+                            </li>
+                        
+                            <li class="toc-api-type">
+                                <a href="global.html#Key" data-target="#Key">Key</a>
+                            </li>
+                        
+                            <li class="toc-api-type">
+                                <a href="global.html#KeySet" data-target="#KeySet">KeySet</a>
+                            </li>
+                        
+                            <li class="toc-api-type">
+                                <a href="global.html#Path" data-target="#Path">Path</a>
+                            </li>
+                        
+                            <li class="toc-api-type">
+                                <a href="global.html#PathSet" data-target="#PathSet">PathSet</a>
+                            </li>
+                        
+                            <li class="toc-api-type">
+                                <a href="global.html#PathValue" data-target="#PathValue">PathValue</a>
+                            </li>
+                        
+                            <li class="toc-api-type">
+                                <a href="global.html#Range" data-target="#Range">Range</a>
+                            </li>
+                        
+                    </ul>
+                </li>
+            </ul>
+        </nav>

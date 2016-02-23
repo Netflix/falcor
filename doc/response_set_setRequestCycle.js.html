@@ -1,0 +1,513 @@
+---
+layout: api-page
+title: "response/set/setRequestCycle.js"
+id: api
+---
+
+<main class="api-documentation-page">
+  
+
+  
+  
+      
+<h2>
+    response/set/setRequestCycle.js
+</h2>
+<section>
+    <article>
+        <pre class="prettyprint source linenums"><code>var emptyArray = [];
+var AssignableDisposable = require("./../AssignableDisposable");
+var GetResponse = require("./../get/GetResponse");
+var setGroupsIntoCache = require("./setGroupsIntoCache");
+var getWithPathsAsPathMap = require("./../../get").getWithPathsAsPathMap;
+var InvalidSourceError = require("./../../errors/InvalidSourceError");
+var MaxRetryExceededError = require("./../../errors/MaxRetryExceededError");
+
+/**
+ * The request cycle for set.  This is responsible for requesting to dataSource
+ * and allowing disposing inflight requests.
+ */
+module.exports = function setRequestCycle(model, observer, groups,
+                                          isJSONGraph, isProgressive, count) {
+    // we have exceeded the maximum retry limit.
+    if (count === 10) {
+        throw new MaxRetryExceededError();
+    }
+
+    var requestedAndOptimizedPaths = setGroupsIntoCache(model, groups);
+    var optimizedPaths = requestedAndOptimizedPaths.optimizedPaths;
+    var requestedPaths = requestedAndOptimizedPaths.requestedPaths;
+    var isMaster = model._source === undefined;
+
+    // Local set only.  We perform a follow up get.  If performance is ever
+    // a requirement simply requiring in checkCacheAndReport and use get request
+    // internals.  Figured this is more "pure".
+    if (isMaster) {
+        return subscribeToFollowupGet(model, observer, requestedPaths,
+                              isJSONGraph, isProgressive);
+    }
+
+
+    // Progressively output the data from the first set.
+    if (isProgressive) {
+        var json = {};
+        getWithPathsAsPathMap(model, requestedPaths, [json]);
+        observer.onNext(json);
+    }
+
+    var currentJSONGraph = getJSONGraph(model, optimizedPaths);
+    var disposable = new AssignableDisposable();
+
+    // Sends out the setRequest.  The Queue will call the callback with the
+    // JSONGraph envelope / error.
+    var requestDisposable = model._request.
+        // TODO: There is error handling that has not been addressed yet.
+
+        // If disposed before this point then the sendSetRequest will not
+        // further any callbacks.  Therefore, if we are at this spot, we are
+        // not disposed yet.
+        set(currentJSONGraph, function(error, jsonGraphEnv) {
+            if (typeof error === InvalidSourceError) {
+                return observer.onError(error);
+            }
+
+            // TODO: This seems like there are errors with this approach, but
+            // for sanity sake I am going to keep this logic in here until a
+            // rethink can be done.
+            var isCompleted = false;
+            if (error || optimizedPaths.length === jsonGraphEnv.paths.length) {
+                isCompleted = true;
+            }
+
+            // Happy case.  One request to the dataSource will fulfill the
+            // required paths.
+            if (isCompleted) {
+                disposable.currentDisposable =
+                    subscribeToFollowupGet(model, observer, requestedPaths,
+                                          isJSONGraph, isProgressive);
+            }
+
+            // TODO: The unhappy case.  I am unsure how this can even be
+            // achieved.
+            else {
+                // We need to restart the setRequestCycle.
+                setRequestCycle(model, observer, groups, isJSONGraph,
+                                isProgressive, count + 1);
+            }
+        });
+
+    // Sets the current disposable as the requestDisposable.
+    disposable.currentDisposable = requestDisposable;
+
+    return disposable;
+};
+
+function getJSONGraph(model, optimizedPaths) {
+    var boundPath = model._path;
+    var envelope = {};
+    model._path = emptyArray;
+    model._getPathValuesAsJSONG(model._materialize().withoutDataSource(), optimizedPaths, [envelope]);
+    model._path = boundPath;
+
+    return envelope;
+}
+
+function subscribeToFollowupGet(model, observer, requestedPaths, isJSONGraph,
+                               isProgressive) {
+
+    // Creates a new response and subscribes to it with the original observer.
+    // Also sets forceCollect to true, incase the operation is synchronous and
+    // exceeds the cache limit size
+    var response = new GetResponse(model, requestedPaths, isJSONGraph,
+                                   isProgressive, true);
+    return response.subscribe(observer);
+}
+</code></pre>
+    </article>
+</section>
+  
+
+  
+</main>
+
+
+
+        
+        <!--
+          In case someone comes along later and sees the active item on the
+          toc acting weirdly, hopefully they'll see this comment. This page, unlike
+          any seen during development, has multiple 'docs' passed to container.tmpl.
+          To debug it and enhance the page as needed, I would suggest looking there first.
+        -->
+        
+
+        <!-- Generate the table of contents -->
+        <nav class="table-of-contents api-doc-toc">
+            <ul class="nav">
+                <li>
+                    <a href="DataSource.html">Classes</a>
+                    <ul class="toc-api-classes">
+                        
+                            <li class="toc-api-class ">
+                                <a href="DataSource.html" data-target="#DataSource">DataSource</a>
+                                
+                                
+
+    <ul class="toc-api-subgroup toc-api-subgroup-methods">
+        <li>
+            <span class="toc-api-subgroup-title">Methods</span>
+        </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="DataSource.html#call" data-target="#call">call</a>
+            </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="DataSource.html#get" data-target="#get">get</a>
+            </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="DataSource.html#set" data-target="#set">set</a>
+            </li>
+         
+    </ul>
+
+
+                                
+
+
+                                
+
+
+                            </li>
+                        
+                            <li class="toc-api-class ">
+                                <a href="FromEsObserverAdapter.html" data-target="#FromEsObserverAdapter">FromEsObserverAdapter</a>
+                                
+                                
+
+
+                                
+
+
+                                
+
+
+                            </li>
+                        
+                            <li class="toc-api-class ">
+                                <a href="HttpDataSource.html" data-target="#HttpDataSource">HttpDataSource</a>
+                                
+                                
+
+    <ul class="toc-api-subgroup toc-api-subgroup-methods">
+        <li>
+            <span class="toc-api-subgroup-title">Methods</span>
+        </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="HttpDataSource.html#call" data-target="#call">call</a>
+            </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="HttpDataSource.html#get" data-target="#get">get</a>
+            </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="HttpDataSource.html#set" data-target="#set">set</a>
+            </li>
+         
+    </ul>
+
+
+                                
+
+
+                                
+
+
+                            </li>
+                        
+                            <li class="toc-api-class ">
+                                <a href="Model.html" data-target="#Model">Model</a>
+                                
+                                
+
+    <ul class="toc-api-subgroup toc-api-subgroup-methods">
+        <li>
+            <span class="toc-api-subgroup-title">Methods</span>
+        </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="Model.html#asDataSource" data-target="#asDataSource">asDataSource</a>
+            </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="Model.html#batch" data-target="#batch">batch</a>
+            </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="Model.html#boxValues" data-target="#boxValues">boxValues</a>
+            </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="Model.html#call" data-target="#call">call</a>
+            </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="Model.html#deref" data-target="#deref">deref</a>
+            </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="Model.html#get" data-target="#get">get</a>
+            </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="Model.html#getCache" data-target="#getCache">getCache</a>
+            </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="Model.html#getPath" data-target="#getPath">getPath</a>
+            </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="Model.html#getVersion" data-target="#getVersion">getVersion</a>
+            </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="Model.html#invalidate" data-target="#invalidate">invalidate</a>
+            </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="Model.html#preload" data-target="#preload">preload</a>
+            </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="Model.html#set" data-target="#set">set</a>
+            </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="Model.html#setCache" data-target="#setCache">setCache</a>
+            </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="Model.html#treatErrorsAsValues" data-target="#treatErrorsAsValues">treatErrorsAsValues</a>
+            </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="Model.html#unbatch" data-target="#unbatch">unbatch</a>
+            </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="Model.html#unboxValues" data-target="#unboxValues">unboxValues</a>
+            </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="Model.html#withoutDataSource" data-target="#withoutDataSource">withoutDataSource</a>
+            </li>
+         
+    </ul>
+
+
+                                
+
+    <ul class="toc-api-subgroup toc-api-subgroup-types">
+        <li>
+            <span class="toc-api-subgroup-title">Types</span>
+        </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="Model.html#~comparator" data-target="#\~comparator">comparator</a>
+            </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="Model.html#~errorSelector" data-target="#\~errorSelector">errorSelector</a>
+            </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="Model.html#~onChange" data-target="#\~onChange">onChange</a>
+            </li>
+         
+    </ul>
+
+
+                                
+
+
+                            </li>
+                        
+                            <li class="toc-api-class ">
+                                <a href="ModelResponse.html" data-target="#ModelResponse">ModelResponse</a>
+                                
+                                
+
+    <ul class="toc-api-subgroup toc-api-subgroup-methods">
+        <li>
+            <span class="toc-api-subgroup-title">Methods</span>
+        </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="ModelResponse.html#forEach" data-target="#forEach">forEach</a>
+            </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="ModelResponse.html#progressively" data-target="#progressively">progressively</a>
+            </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="ModelResponse.html#subscribe" data-target="#subscribe">subscribe</a>
+            </li>
+         
+    </ul>
+
+
+                                
+
+
+                                
+
+
+                            </li>
+                        
+                            <li class="toc-api-class ">
+                                <a href="Observable.html" data-target="#Observable">Observable</a>
+                                
+                                
+
+    <ul class="toc-api-subgroup toc-api-subgroup-methods">
+        <li>
+            <span class="toc-api-subgroup-title">Methods</span>
+        </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="Observable.html#forEach" data-target="#forEach">forEach</a>
+            </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="Observable.html#subscribe" data-target="#subscribe">subscribe</a>
+            </li>
+         
+    </ul>
+
+
+                                
+
+    <ul class="toc-api-subgroup toc-api-subgroup-types">
+        <li>
+            <span class="toc-api-subgroup-title">Types</span>
+        </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="Observable.html#~onCompletedCallback" data-target="#\~onCompletedCallback">onCompletedCallback</a>
+            </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="Observable.html#~onErrorCallback" data-target="#\~onErrorCallback">onErrorCallback</a>
+            </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="Observable.html#~onNextCallback" data-target="#\~onNextCallback">onNextCallback</a>
+            </li>
+         
+    </ul>
+
+
+                                
+
+
+                            </li>
+                        
+                            <li class="toc-api-class ">
+                                <a href="Subscription.html" data-target="#Subscription">Subscription</a>
+                                
+                                
+
+    <ul class="toc-api-subgroup toc-api-subgroup-methods">
+        <li>
+            <span class="toc-api-subgroup-title">Methods</span>
+        </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="Subscription.html#dispose" data-target="#dispose">dispose</a>
+            </li>
+         
+    </ul>
+
+
+                                
+
+
+                                
+
+
+                            </li>
+                        
+                            <li class="toc-api-class ">
+                                <a href="ToEsSubscriptionAdapter.html" data-target="#ToEsSubscriptionAdapter">ToEsSubscriptionAdapter</a>
+                                
+                                
+
+
+                                
+
+
+                                
+
+
+                            </li>
+                        
+                    </ul>
+                </li>
+                <li class="toc-api-type-list ">
+                    <a href="global.html">Global Types</a>
+                    <ul class="toc-api-types">
+                        
+                            <li class="toc-api-type">
+                                <a href="global.html#Atom" data-target="#Atom">Atom</a>
+                            </li>
+                        
+                            <li class="toc-api-type">
+                                <a href="global.html#JSONEnvelope" data-target="#JSONEnvelope">JSONEnvelope</a>
+                            </li>
+                        
+                            <li class="toc-api-type">
+                                <a href="global.html#JSONGraph" data-target="#JSONGraph">JSONGraph</a>
+                            </li>
+                        
+                            <li class="toc-api-type">
+                                <a href="global.html#JSONGraphEnvelope" data-target="#JSONGraphEnvelope">JSONGraphEnvelope</a>
+                            </li>
+                        
+                            <li class="toc-api-type">
+                                <a href="global.html#Key" data-target="#Key">Key</a>
+                            </li>
+                        
+                            <li class="toc-api-type">
+                                <a href="global.html#KeySet" data-target="#KeySet">KeySet</a>
+                            </li>
+                        
+                            <li class="toc-api-type">
+                                <a href="global.html#Path" data-target="#Path">Path</a>
+                            </li>
+                        
+                            <li class="toc-api-type">
+                                <a href="global.html#PathSet" data-target="#PathSet">PathSet</a>
+                            </li>
+                        
+                            <li class="toc-api-type">
+                                <a href="global.html#PathValue" data-target="#PathValue">PathValue</a>
+                            </li>
+                        
+                            <li class="toc-api-type">
+                                <a href="global.html#Range" data-target="#Range">Range</a>
+                            </li>
+                        
+                    </ul>
+                </li>
+            </ul>
+        </nav>
+
+
+
+
+

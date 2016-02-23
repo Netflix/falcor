@@ -1,0 +1,2321 @@
+---
+layout: api-page
+title: "Global"
+id: api
+---
+
+<main class="api-documentation-page">
+  
+
+  
+  
+
+  <section>
+
+  <header>
+      
+        <h2>Global</h2>
+      
+      
+      
+          
+          
+      
+  </header>
+
+  <article>
+      <div class="container-overview">
+      
+          
+
+          
+
+
+
+
+          
+      
+      </div>
+
+      
+
+      
+
+      
+
+       
+
+      
+
+      
+
+      
+          <h3 class="subsection-title">Methods</h3>
+
+          
+              
+<section class="method-section">
+    
+        
+
+        <h4 class="name section-header function-name" id="GetRequestV2"><span class="type-signature"></span>GetRequestV2<span class="signature">(scheduler, requestQueue)</span><span class="type-signature return-signature"></span></h4>
+
+        
+    
+
+        
+        <div class="description">
+            <p>Creates a new GetRequest.  This GetRequest takes a scheduler and
+the request queue.  Once the scheduler fires, all batched requests
+will be sent to the server.  Upon request completion, the data is
+merged back into the cache and all callbacks are notified.</p>
+        </div>
+        
+
+    
+
+    
+
+    
+
+    
+        <h5>Parameters:</h5>
+        
+
+<div class="parameters-section">
+    <table class="params">
+        <thead>
+        <tr>
+            
+            <th class="header-name-and-attributes">
+              Name
+              
+            </th>
+            
+
+            <th class="header-type">Type</th>
+
+            
+
+            <th class="last header-description">Description</th>
+        </tr>
+        </thead>
+
+        <tbody>
+        
+
+            <tr>
+                
+                    <td>
+                        <span class="name">scheduler</span>
+                        
+                    </td>
+                
+
+                <td class="type">
+                
+                    
+<span class="param-type">Scheduler</span>
+
+
+                
+                </td>
+
+                
+
+                <td class="description last"><p>-</p></td>
+            </tr>
+
+        
+
+            <tr>
+                
+                    <td>
+                        <span class="name">requestQueue</span>
+                        
+                    </td>
+                
+
+                <td class="type">
+                
+                    
+<span class="param-type"><a href="global.html#RequestQueueV2">RequestQueueV2</a></span>
+
+
+                
+                </td>
+
+                
+
+                <td class="description last"><p>-</p></td>
+            </tr>
+
+        
+        </tbody>
+    </table>
+</div>
+
+    
+
+    
+
+
+
+
+  <dl class="details">
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+      <dt class="tag-source">Source:</dt>
+      <dd class="tag-source">
+          <a href="request_GetRequestV2.js.html">request/GetRequestV2.js</a>, <a href="request_GetRequestV2.js.html#line20">line 20</a>
+      </dd>
+      
+
+      
+
+      
+
+      
+  </dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</section>
+          
+              
+<section class="method-section">
+    
+        
+
+        <h4 class="name section-header function-name" id="NullInPathError"><span class="type-signature"></span>NullInPathError<span class="signature">()</span><span class="type-signature return-signature"></span></h4>
+
+        
+    
+
+        
+        <div class="description">
+            <p>Does not allow null in path</p>
+        </div>
+        
+
+    
+
+    
+
+    
+
+    
+
+    
+
+
+
+
+  <dl class="details">
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+      <dt class="tag-source">Source:</dt>
+      <dd class="tag-source">
+          <a href="errors_NullInPathError.js.html">errors/NullInPathError.js</a>, <a href="errors_NullInPathError.js.html#line7">line 7</a>
+      </dd>
+      
+
+      
+
+      
+
+      
+  </dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</section>
+          
+              
+<section class="method-section">
+    
+        
+
+        <h4 class="name section-header function-name" id="RequestQueueV2"><span class="type-signature"></span>RequestQueueV2<span class="signature">(model, scheduler)</span><span class="type-signature return-signature"></span></h4>
+
+        
+    
+
+        
+        <div class="description">
+            <p>The request queue is responsible for queuing the operations to
+the model&quot;s dataSource.</p>
+        </div>
+        
+
+    
+
+    
+
+    
+
+    
+        <h5>Parameters:</h5>
+        
+
+<div class="parameters-section">
+    <table class="params">
+        <thead>
+        <tr>
+            
+            <th class="header-name-and-attributes">
+              Name
+              
+            </th>
+            
+
+            <th class="header-type">Type</th>
+
+            
+
+            <th class="last header-description">Description</th>
+        </tr>
+        </thead>
+
+        <tbody>
+        
+
+            <tr>
+                
+                    <td>
+                        <span class="name">model</span>
+                        
+                    </td>
+                
+
+                <td class="type">
+                
+                    
+<span class="param-type"><a href="Model.html">Model</a></span>
+
+
+                
+                </td>
+
+                
+
+                <td class="description last"><p>-</p></td>
+            </tr>
+
+        
+
+            <tr>
+                
+                    <td>
+                        <span class="name">scheduler</span>
+                        
+                    </td>
+                
+
+                <td class="type">
+                
+                    
+<span class="param-type">Scheduler</span>
+
+
+                
+                </td>
+
+                
+
+                <td class="description last"><p>-</p></td>
+            </tr>
+
+        
+        </tbody>
+    </table>
+</div>
+
+    
+
+    
+
+
+
+
+  <dl class="details">
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+      <dt class="tag-source">Source:</dt>
+      <dd class="tag-source">
+          <a href="request_RequestQueueV2.js.html">request/RequestQueueV2.js</a>, <a href="request_RequestQueueV2.js.html#line13">line 13</a>
+      </dd>
+      
+
+      
+
+      
+
+      
+  </dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</section>
+          
+      
+
+      
+          <h3 class="subsection-title">Type Definitions</h3>
+
+          
+                  
+<section class="member-section">
+    <h4 class="name section-header members-header" id="Atom">Atom</h4>
+
+    
+
+    
+    <div class="description">
+        <p>An atom allows you to treat a JSON value as atomic regardless of its type, ensuring that a JSON object or array is always returned in its entirety. The JSON value must be treated as immutable. Atoms can also be used to associate metadata with a JSON value. This metadata can be used to influence the way values are handled.</p>
+    </div>
+    
+
+    
+        <dl class="member-type">
+            <dt><span class="h5">Type:</span></dt>
+            <dd>
+<span class="param-type">Object</span>
+
+</dd>
+        </dl>
+    
+
+    
+
+
+    <h5 class="subsection-title">Properties</h5>
+
+    
+
+<table class="props">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name">
+                    $type
+                </td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">String</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>the $type must be &quot;atom&quot;</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name">
+                    value
+                </td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">*</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>the immutable JSON value</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name">
+                    $expires
+                </td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>the time to expire in milliseconds</p>
+<ul>
+<li>positive number: expires in milliseconds since epoch</li>
+<li>negative number: expires relative to when the Atom is merged into the JSONGraph</li>
+<li>number 1: never expires</li>
+</ul></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+  <dl class="details">
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+      <dt class="tag-source">Source:</dt>
+      <dd class="tag-source">
+          <a href="typedefs_Atom.js.html">typedefs/Atom.js</a>, <a href="typedefs_Atom.js.html#line1">line 1</a>
+      </dd>
+      
+
+      
+
+      
+
+      
+  </dl>
+
+
+    
+
+    
+        <h5>Example</h5>
+        
+    <pre class="prettyprint"><code>// Atom with number value, expiring in 2 seconds
+ {
+    $type: "atom",
+    value: 5
+    $expires: -2000
+ }
+ // Atom with Object value that never expires
+ {
+    $type: "atom",
+    value: {
+        foo: 5,
+        bar: "baz"
+    },
+    $expires: 1
+ }</code></pre>
+
+    
+</section>
+
+              
+                  
+<section class="member-section">
+    <h4 class="name section-header members-header" id="JSONEnvelope">JSONEnvelope</h4>
+
+    
+
+    
+    <div class="description">
+        <p>An envelope that wraps a JSON object.</p>
+    </div>
+    
+
+    
+        <dl class="member-type">
+            <dt><span class="h5">Type:</span></dt>
+            <dd>
+<span class="param-type">Object</span>
+
+</dd>
+        </dl>
+    
+
+    
+
+
+    <h5 class="subsection-title">Properties</h5>
+
+    
+
+<table class="props">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name">
+                    json
+                </td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">JSON</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>a JSON object</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+  <dl class="details">
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+      <dt class="tag-source">Source:</dt>
+      <dd class="tag-source">
+          <a href="typedefs_JSONEnvelope.js.html">typedefs/JSONEnvelope.js</a>, <a href="typedefs_JSONEnvelope.js.html#line1">line 1</a>
+      </dd>
+      
+
+      
+
+      
+
+      
+  </dl>
+
+
+    
+
+    
+        <h5>Example</h5>
+        
+    <pre class="prettyprint"><code>var model = new falcor.Model();
+ model.set({
+    json: {
+      name: "Steve",
+      surname: "McGuire"
+    }
+ }).then(function(jsonEnvelope) {
+    console.log(jsonEnvelope);
+ });</code></pre>
+
+    
+</section>
+
+              
+                  
+<section class="member-section">
+    <h4 class="name section-header members-header" id="JSONGraph">JSONGraph</h4>
+
+    
+
+    
+    <div class="description">
+        <p>JavaScript Object Notation Graph (JSONGraph) is a notation for expressing graphs in JSON. For more information, see the <a href="http://netflix.github.io/falcor/documentation/jsongraph.html">JSONGraph Guide</a>.</p>
+    </div>
+    
+
+    
+        <dl class="member-type">
+            <dt><span class="h5">Type:</span></dt>
+            <dd>
+<span class="param-type">Object</span>
+
+</dd>
+        </dl>
+    
+
+    
+
+
+
+
+  <dl class="details">
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+      <dt class="tag-source">Source:</dt>
+      <dd class="tag-source">
+          <a href="typedefs_JSONGraph.js.html">typedefs/JSONGraph.js</a>, <a href="typedefs_JSONGraph.js.html#line1">line 1</a>
+      </dd>
+      
+
+      
+
+      
+
+      
+  </dl>
+
+
+    
+
+    
+        <h5>Example</h5>
+        
+    <pre class="prettyprint"><code>var $ref = falcor.ref;
+ // JSONGraph model modeling a list of film genres, each of which contains the same title.
+ {
+    // list of user's genres, modeled as a map with ordinal keys
+    "genreLists": {
+        "0": $ref('genresById[123]'),
+        "1": $ref('genresById[522]'),
+        "length": 2
+    },
+    // map of all genres, organized by ID
+    "genresById": {
+        // genre list modeled as map with ordinal keys
+        "123": {
+            "name": "Drama",
+            "0": $ref('titlesById[23]'),
+            "1": $ref('titlesById[99]'),
+            "length": 2
+        },
+        // genre list modeled as map with ordinal keys
+        "522": {
+            "name": "Comedy",
+            "0": $ref('titlesById[23]'),
+            "1": $ref('titlesById[44]'),
+            "length": 2
+        }
+    },
+    // map of all titles, organized by ID
+    "titlesById": {
+       "99": {
+            "name": "House of Cards",
+            "rating": 5
+        },
+        "23": {
+            "name": "Orange is the New Black",
+            "rating": 5
+        },
+        "44": {
+            "name": "Arrested Development",
+            "rating": 5
+        }
+    }
+}</code></pre>
+
+    
+</section>
+
+              
+                  
+<section class="member-section">
+    <h4 class="name section-header members-header" id="JSONGraphEnvelope">JSONGraphEnvelope</h4>
+
+    
+
+    
+    <div class="description">
+        <p>An envelope that wraps a <a href="global.html#JSONGraph">JSONGraph</a> fragment.</p>
+    </div>
+    
+
+    
+        <dl class="member-type">
+            <dt><span class="h5">Type:</span></dt>
+            <dd>
+<span class="param-type">Object</span>
+
+</dd>
+        </dl>
+    
+
+    
+
+
+    <h5 class="subsection-title">Properties</h5>
+
+    
+
+<table class="props">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name">
+                    jsonGraph
+                </td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="global.html#JSONGraph">JSONGraph</a></span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>a <a href="global.html#JSONGraph">JSONGraph</a> fragment</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name">
+                    paths
+                </td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Array.&lt;<a href="global.html#PathSet">PathSet</a>></span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+                    &lt;nullable><br>
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>the paths to the values in the <a href="global.html#JSONGraph">JSONGraph</a> fragment</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name">
+                    invalidated
+                </td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Array.&lt;<a href="global.html#PathSet">PathSet</a>></span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+                    &lt;nullable><br>
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>the paths to invalidate in the <a href="Model.html">Model</a></p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+  <dl class="details">
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+      <dt class="tag-source">Source:</dt>
+      <dd class="tag-source">
+          <a href="typedefs_JSONGraphEnvelope.js.html">typedefs/JSONGraphEnvelope.js</a>, <a href="typedefs_JSONGraphEnvelope.js.html#line1">line 1</a>
+      </dd>
+      
+
+      
+
+      
+
+      
+  </dl>
+
+
+    
+
+    
+        <h5>Example</h5>
+        
+    <pre class="prettyprint"><code>var $ref = falcor.ref;
+var model = new falcor.Model();
+model.set({
+  paths: [
+    ["todos", [0,1], ["name","done"]]
+  ],
+  jsonGraph: {
+    todos: [
+      $ref("todosById[12]"),
+      $ref("todosById[15]")
+    ],
+    todosById: {
+      12: {
+        name: "go to the ATM",
+        done: false
+      },
+      15: {
+        name: "buy milk",
+        done: false
+      }
+    }
+  },
+}).then(function(jsonEnvelope) {
+  console.log(JSON.stringify(jsonEnvelope, null, 4));
+});
+
+// prints...
+// {
+//   json: {
+//     todos: {
+//       0: {
+//         name: "go to the ATM",
+//         done: false
+//       },
+//       1: {
+//         name: "buy milk",
+//         done: false
+//       }
+//     }
+//   }
+// }</code></pre>
+
+    
+</section>
+
+              
+                  
+<section class="member-section">
+    <h4 class="name section-header members-header" id="Key">Key</h4>
+
+    
+
+    
+    <div class="description">
+        <p>A part of a <a href="global.html#Path">Path</a> that can be any JSON value type. All types are coerced to string, except null. This makes the number 1 and the string &quot;1&quot; equivalent.</p>
+    </div>
+    
+
+    
+        <dl class="member-type">
+            <dt><span class="h5">Type:</span></dt>
+            <dd>
+<span class="param-type">string</span>
+or
+
+<span class="param-type">number</span>
+or
+
+<span class="param-type">boolean</span>
+or
+
+<span class="param-type">null</span>
+
+</dd>
+        </dl>
+    
+
+    
+
+
+
+
+  <dl class="details">
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+      <dt class="tag-source">Source:</dt>
+      <dd class="tag-source">
+          <a href="typedefs_Key.js.html">typedefs/Key.js</a>, <a href="typedefs_Key.js.html#line1">line 1</a>
+      </dd>
+      
+
+      
+
+      
+
+      
+  </dl>
+
+
+    
+
+    
+</section>
+
+              
+                  
+<section class="member-section">
+    <h4 class="name section-header members-header" id="KeySet">KeySet</h4>
+
+    
+
+    
+    <div class="description">
+        <p>A part of a <a href="global.html#PathSet">PathSet</a> that can be either a <a href="global.html#Key">Key</a>, <a href="global.html#Range">Range</a>, or Array of either.</p>
+    </div>
+    
+
+    
+        <dl class="member-type">
+            <dt><span class="h5">Type:</span></dt>
+            <dd>
+<span class="param-type"><a href="global.html#Key">Key</a></span>
+or
+
+<span class="param-type"><a href="global.html#Range">Range</a></span>
+or
+
+<span class="param-type">Array.&lt;(<a href="global.html#Key">Key</a>|<a href="global.html#Range">Range</a>)></span>
+
+</dd>
+        </dl>
+    
+
+    
+
+
+
+
+  <dl class="details">
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+      <dt class="tag-source">Source:</dt>
+      <dd class="tag-source">
+          <a href="typedefs_KeySet.js.html">typedefs/KeySet.js</a>, <a href="typedefs_KeySet.js.html#line1">line 1</a>
+      </dd>
+      
+
+      
+
+      
+
+      
+  </dl>
+
+
+    
+
+    
+</section>
+
+              
+                  
+<section class="member-section">
+    <h4 class="name section-header members-header" id="Path">Path</h4>
+
+    
+
+    
+    <div class="description">
+        <p>An ordered list of <a href="global.html#Key">Key</a>s that point to a value in a <a href="global.html#JSONGraph">JSONGraph</a>.</p>
+    </div>
+    
+
+    
+        <dl class="member-type">
+            <dt><span class="h5">Type:</span></dt>
+            <dd>
+<span class="param-type">Array.&lt;<a href="global.html#Key">Key</a>></span>
+
+</dd>
+        </dl>
+    
+
+    
+
+
+
+
+  <dl class="details">
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+      <dt class="tag-source">Source:</dt>
+      <dd class="tag-source">
+          <a href="typedefs_Path.js.html">typedefs/Path.js</a>, <a href="typedefs_Path.js.html#line1">line 1</a>
+      </dd>
+      
+
+      
+
+      
+
+      
+  </dl>
+
+
+    
+
+    
+        <h5>Example</h5>
+        
+    <pre class="prettyprint"><code>// Points to the name of product 1234
+ ["productsById", "1234", "name"]</code></pre>
+
+    
+</section>
+
+              
+                  
+<section class="member-section">
+    <h4 class="name section-header members-header" id="PathSet">PathSet</h4>
+
+    
+
+    
+    <div class="description">
+        <p>An ordered list of <a href="global.html#KeySet">KeySet</a>s that point to location(s) in the <a href="global.html#JSONGraph">JSONGraph</a>. It enables pointing to multiple locations in a more terse format than a set of <a href="global.html#Path">Path</a>s and is generally more efficient to evaluate.</p>
+    </div>
+    
+
+    
+        <dl class="member-type">
+            <dt><span class="h5">Type:</span></dt>
+            <dd>
+<span class="param-type">Array.&lt;<a href="global.html#KeySet">KeySet</a>></span>
+
+</dd>
+        </dl>
+    
+
+    
+
+
+
+
+  <dl class="details">
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+      <dt class="tag-source">Source:</dt>
+      <dd class="tag-source">
+          <a href="typedefs_PathSet.js.html">typedefs/PathSet.js</a>, <a href="typedefs_PathSet.js.html#line1">line 1</a>
+      </dd>
+      
+
+      
+
+      
+
+      
+  </dl>
+
+
+    
+
+    
+        <h5>Example</h5>
+        
+    <pre class="prettyprint"><code>// Points to the name and price of products 1234 and 5678
+ ["productsById", ["1234", "5678"], ["name", "price"]]</code></pre>
+
+    
+</section>
+
+              
+                  
+<section class="member-section">
+    <h4 class="name section-header members-header" id="PathValue">PathValue</h4>
+
+    
+
+    
+    <div class="description">
+        <p>A wrapper around a path and its value.</p>
+    </div>
+    
+
+    
+        <dl class="member-type">
+            <dt><span class="h5">Type:</span></dt>
+            <dd>
+<span class="param-type">Object</span>
+
+</dd>
+        </dl>
+    
+
+    
+
+
+    <h5 class="subsection-title">Properties</h5>
+
+    
+
+<table class="props">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name">
+                    path
+                </td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="global.html#PathSet">PathSet</a></span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>the path to a location in the <a href="global.html#JSONGraph">JSONGraph</a></p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name">
+                    value
+                </td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">*</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+                    &lt;nullable><br>
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>the value of that path</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+  <dl class="details">
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+      <dt class="tag-source">Source:</dt>
+      <dd class="tag-source">
+          <a href="typedefs_PathValue.js.html">typedefs/PathValue.js</a>, <a href="typedefs_PathValue.js.html#line1">line 1</a>
+      </dd>
+      
+
+      
+
+      
+
+      
+  </dl>
+
+
+    
+
+    
+        <h5>Example</h5>
+        
+    <pre class="prettyprint"><code>{
+	path: ["productsById", "1234", "name"],
+	value: "ABC"
+ }</code></pre>
+
+    
+</section>
+
+              
+                  
+<section class="member-section">
+    <h4 class="name section-header members-header" id="Range">Range</h4>
+
+    
+
+    
+    <div class="description">
+        <p>Describe a range of integers. Must contain either a &quot;to&quot; or &quot;length&quot; property.</p>
+    </div>
+    
+
+    
+        <dl class="member-type">
+            <dt><span class="h5">Type:</span></dt>
+            <dd>
+<span class="param-type">Object</span>
+
+</dd>
+        </dl>
+    
+
+    
+
+
+    <h5 class="subsection-title">Properties</h5>
+
+    
+
+<table class="props">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
+        
+        <th>Default</th>
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name">
+                    from
+                </td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    0
+                
+                </td>
+            
+
+            <td class="description last"><p>the lower bound of the range (inclusive)</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name">
+                    to
+                </td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+                    &lt;nullable><br>
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last"><p>the upper bound of the range (inclusive). Must be &gt;= to the &quot;from&quot; value</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name">
+                    length
+                </td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+                    &lt;nullable><br>
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last"><p>the length of the range. Must be &gt;= 0</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+  <dl class="details">
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+      <dt class="tag-source">Source:</dt>
+      <dd class="tag-source">
+          <a href="typedefs_Range.js.html">typedefs/Range.js</a>, <a href="typedefs_Range.js.html#line1">line 1</a>
+      </dd>
+      
+
+      
+
+      
+
+      
+  </dl>
+
+
+    
+
+    
+        <h5>Example</h5>
+        
+    <pre class="prettyprint"><code>// The following range specifies the numbers 0, 1, and 2
+ {from: 0, to: 2}
+ // The following range specifies the numbers 1 and 2
+ {from: 1, length: 2}</code></pre>
+
+    
+</section>
+
+              
+      
+
+      
+  </article>
+
+  </section>
+  
+
+  
+</main>
+
+
+
+        
+        <!--
+          In case someone comes along later and sees the active item on the
+          toc acting weirdly, hopefully they'll see this comment. This page, unlike
+          any seen during development, has multiple 'docs' passed to container.tmpl.
+          To debug it and enhance the page as needed, I would suggest looking there first.
+        -->
+        
+
+        <!-- Generate the table of contents -->
+        <nav class="table-of-contents api-doc-toc">
+            <ul class="nav">
+                <li>
+                    <a href="DataSource.html">Classes</a>
+                    <ul class="toc-api-classes">
+                        
+                            <li class="toc-api-class ">
+                                <a href="DataSource.html" data-target="#DataSource">DataSource</a>
+                                
+                                
+
+    <ul class="toc-api-subgroup toc-api-subgroup-methods">
+        <li>
+            <span class="toc-api-subgroup-title">Methods</span>
+        </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="DataSource.html#call" data-target="#call">call</a>
+            </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="DataSource.html#get" data-target="#get">get</a>
+            </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="DataSource.html#set" data-target="#set">set</a>
+            </li>
+         
+    </ul>
+
+
+                                
+
+
+                                
+
+
+                            </li>
+                        
+                            <li class="toc-api-class ">
+                                <a href="FromEsObserverAdapter.html" data-target="#FromEsObserverAdapter">FromEsObserverAdapter</a>
+                                
+                                
+
+
+                                
+
+
+                                
+
+
+                            </li>
+                        
+                            <li class="toc-api-class ">
+                                <a href="HttpDataSource.html" data-target="#HttpDataSource">HttpDataSource</a>
+                                
+                                
+
+    <ul class="toc-api-subgroup toc-api-subgroup-methods">
+        <li>
+            <span class="toc-api-subgroup-title">Methods</span>
+        </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="HttpDataSource.html#call" data-target="#call">call</a>
+            </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="HttpDataSource.html#get" data-target="#get">get</a>
+            </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="HttpDataSource.html#set" data-target="#set">set</a>
+            </li>
+         
+    </ul>
+
+
+                                
+
+
+                                
+
+
+                            </li>
+                        
+                            <li class="toc-api-class ">
+                                <a href="Model.html" data-target="#Model">Model</a>
+                                
+                                
+
+    <ul class="toc-api-subgroup toc-api-subgroup-methods">
+        <li>
+            <span class="toc-api-subgroup-title">Methods</span>
+        </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="Model.html#asDataSource" data-target="#asDataSource">asDataSource</a>
+            </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="Model.html#batch" data-target="#batch">batch</a>
+            </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="Model.html#boxValues" data-target="#boxValues">boxValues</a>
+            </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="Model.html#call" data-target="#call">call</a>
+            </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="Model.html#deref" data-target="#deref">deref</a>
+            </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="Model.html#get" data-target="#get">get</a>
+            </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="Model.html#getCache" data-target="#getCache">getCache</a>
+            </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="Model.html#getPath" data-target="#getPath">getPath</a>
+            </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="Model.html#getVersion" data-target="#getVersion">getVersion</a>
+            </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="Model.html#invalidate" data-target="#invalidate">invalidate</a>
+            </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="Model.html#preload" data-target="#preload">preload</a>
+            </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="Model.html#set" data-target="#set">set</a>
+            </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="Model.html#setCache" data-target="#setCache">setCache</a>
+            </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="Model.html#treatErrorsAsValues" data-target="#treatErrorsAsValues">treatErrorsAsValues</a>
+            </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="Model.html#unbatch" data-target="#unbatch">unbatch</a>
+            </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="Model.html#unboxValues" data-target="#unboxValues">unboxValues</a>
+            </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="Model.html#withoutDataSource" data-target="#withoutDataSource">withoutDataSource</a>
+            </li>
+         
+    </ul>
+
+
+                                
+
+    <ul class="toc-api-subgroup toc-api-subgroup-types">
+        <li>
+            <span class="toc-api-subgroup-title">Types</span>
+        </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="Model.html#~comparator" data-target="#\~comparator">comparator</a>
+            </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="Model.html#~errorSelector" data-target="#\~errorSelector">errorSelector</a>
+            </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="Model.html#~onChange" data-target="#\~onChange">onChange</a>
+            </li>
+         
+    </ul>
+
+
+                                
+
+
+                            </li>
+                        
+                            <li class="toc-api-class ">
+                                <a href="ModelResponse.html" data-target="#ModelResponse">ModelResponse</a>
+                                
+                                
+
+    <ul class="toc-api-subgroup toc-api-subgroup-methods">
+        <li>
+            <span class="toc-api-subgroup-title">Methods</span>
+        </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="ModelResponse.html#forEach" data-target="#forEach">forEach</a>
+            </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="ModelResponse.html#progressively" data-target="#progressively">progressively</a>
+            </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="ModelResponse.html#subscribe" data-target="#subscribe">subscribe</a>
+            </li>
+         
+    </ul>
+
+
+                                
+
+
+                                
+
+
+                            </li>
+                        
+                            <li class="toc-api-class ">
+                                <a href="Observable.html" data-target="#Observable">Observable</a>
+                                
+                                
+
+    <ul class="toc-api-subgroup toc-api-subgroup-methods">
+        <li>
+            <span class="toc-api-subgroup-title">Methods</span>
+        </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="Observable.html#forEach" data-target="#forEach">forEach</a>
+            </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="Observable.html#subscribe" data-target="#subscribe">subscribe</a>
+            </li>
+         
+    </ul>
+
+
+                                
+
+    <ul class="toc-api-subgroup toc-api-subgroup-types">
+        <li>
+            <span class="toc-api-subgroup-title">Types</span>
+        </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="Observable.html#~onCompletedCallback" data-target="#\~onCompletedCallback">onCompletedCallback</a>
+            </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="Observable.html#~onErrorCallback" data-target="#\~onErrorCallback">onErrorCallback</a>
+            </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="Observable.html#~onNextCallback" data-target="#\~onNextCallback">onNextCallback</a>
+            </li>
+         
+    </ul>
+
+
+                                
+
+
+                            </li>
+                        
+                            <li class="toc-api-class ">
+                                <a href="Subscription.html" data-target="#Subscription">Subscription</a>
+                                
+                                
+
+    <ul class="toc-api-subgroup toc-api-subgroup-methods">
+        <li>
+            <span class="toc-api-subgroup-title">Methods</span>
+        </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="Subscription.html#dispose" data-target="#dispose">dispose</a>
+            </li>
+         
+    </ul>
+
+
+                                
+
+
+                                
+
+
+                            </li>
+                        
+                            <li class="toc-api-class ">
+                                <a href="ToEsSubscriptionAdapter.html" data-target="#ToEsSubscriptionAdapter">ToEsSubscriptionAdapter</a>
+                                
+                                
+
+
+                                
+
+
+                                
+
+
+                            </li>
+                        
+                    </ul>
+                </li>
+                <li class="toc-api-type-list current-page">
+                    <a href="global.html">Global Types</a>
+                    <ul class="toc-api-types">
+                        
+                            <li class="toc-api-type">
+                                <a href="global.html#Atom" data-target="#Atom">Atom</a>
+                            </li>
+                        
+                            <li class="toc-api-type">
+                                <a href="global.html#JSONEnvelope" data-target="#JSONEnvelope">JSONEnvelope</a>
+                            </li>
+                        
+                            <li class="toc-api-type">
+                                <a href="global.html#JSONGraph" data-target="#JSONGraph">JSONGraph</a>
+                            </li>
+                        
+                            <li class="toc-api-type">
+                                <a href="global.html#JSONGraphEnvelope" data-target="#JSONGraphEnvelope">JSONGraphEnvelope</a>
+                            </li>
+                        
+                            <li class="toc-api-type">
+                                <a href="global.html#Key" data-target="#Key">Key</a>
+                            </li>
+                        
+                            <li class="toc-api-type">
+                                <a href="global.html#KeySet" data-target="#KeySet">KeySet</a>
+                            </li>
+                        
+                            <li class="toc-api-type">
+                                <a href="global.html#Path" data-target="#Path">Path</a>
+                            </li>
+                        
+                            <li class="toc-api-type">
+                                <a href="global.html#PathSet" data-target="#PathSet">PathSet</a>
+                            </li>
+                        
+                            <li class="toc-api-type">
+                                <a href="global.html#PathValue" data-target="#PathValue">PathValue</a>
+                            </li>
+                        
+                            <li class="toc-api-type">
+                                <a href="global.html#Range" data-target="#Range">Range</a>
+                            </li>
+                        
+                    </ul>
+                </li>
+            </ul>
+        </nav>
