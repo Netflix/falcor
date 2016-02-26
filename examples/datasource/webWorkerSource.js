@@ -1,8 +1,13 @@
- // In this example we demonstrate the communication between a model source and a server over a web worker
+// In this example we demonstrate the communication between a model source and a server over a web worker
 
- // Here is the worker code (worker.js):
+// Below you will find both the code to be run in a worker and the code to include in the html in a
+// <script> or to be broken out into its own JS file which would then be included
 
-importScripts('./Falcor.js');  
+/*
+ * CODE FOR WORKER.JS
+ */
+// Point this to wherever your falcor installation is
+importScripts('./Falcor.js');
 
 function WorkerServer(dataSource) {
     this.dataSource = dataSource;
@@ -10,46 +15,44 @@ function WorkerServer(dataSource) {
 
 // Deserializes a message from the client and executes the appropriate action on the model
 WorkerServer.prototype.onmessage = function(action) {
-  var method = action[0],
-    jsonGraphEnvelope,
-    callPath,
-    pathSuffixes,
-    paths;
+    var method = action[0],
+        jsonGraphEnvelope,
+        callPath,
+        pathSuffixes,
+        paths;
 
-    switch(method) {
-        case "get": {
+    switch (method) {
+        case "get":
             paths = action[1];
 
             return this.dataSource.get(paths);
-        }
-        case "set": {
+        case "set":
             jsonGraphEnvelope = action[1];
 
             return this.dataSource.set(jsonGraphEnvelope);
-        }
-        case "call": {
+        case "call":
             callPath = action[1];
             args = action[2];
             pathSuffixes = action[3];
             paths = action[4];
 
             return this.dataSource.call(callPath, args, pathSuffixes, paths);
-        }
     }
 }
 
 // create a server model
-var dataSource = 
-    new falcor.
-        Model({
-            cache: {
-                user: {
-                    name: "Jim",
-                    location: {$type: "error", value: "Something broke!"}
+var dataSource =
+    new falcor.Model({
+        cache: {
+            user: {
+                name: "Jim",
+                location: {
+                    $type: "error",
+                    value: "Something broke!"
                 }
             }
-        }).
-        asDataSource();
+        }
+    }).asDataSource();
 
 // Create a worker server that translates requests into commands on the model
 var workerServer = new WorkerServer(dataSource);
@@ -61,9 +64,9 @@ onmessage = function(e) {
 
     workerServer.
         onmessage(data.slice(1)).
-        // Convert the output format of the ModelResponse to JSON Graph, because that is what the 
+        // Convert the output format of the ModelResponse to JSON Graph, because that is what the
         // DataSource expects.
-        toJSONG().
+        _toJSONG().
         subscribe(
             function(result) {
                 // send back the response with the request id
@@ -72,14 +75,15 @@ onmessage = function(e) {
             function(error) {
                 // send back the response with the request id
                 postMessage([id, error]);
-            });
+            }
+        );
 }
 
-// END OF WORKER CODE
-// START WEB PAGE CODE
-
+/*
+ * CODE FOR HTML <SCRIPT> OR SEPARATE JS FILE
+ */
 // Define a web worker model source. A proxy model will use this source to retrieve information from a Model running on another web worker.
-function WebWorkerSource(worker){
+function WebWorkerSource(worker) {
     this._worker = worker;
 }
 
@@ -91,52 +95,51 @@ WebWorkerSource.prototype = {
         return this._getResponse(['get', paths]);
     },
     // Sets information on a model running on a worker
-    set: function(jsonGraphEnvelope) {   
+    set: function(jsonGraphEnvelope) {
         return this._getResponse(['set', jsonGraphEnvelope]);
     },
     // Call a function in a model running on a worker
     call: function(callPath, arguments, pathSuffixes, paths) {
         return this._getResponse(['call', callPath, arguments, pathSuffixes, paths]);
     },
-    // Creates an observable stream that will send a request 
+    // Creates an observable stream that will send a request
     // to a Model server, and retrieve the response.
-    // The request and response are correlated using a unique 
-    // identifier which the client sends with the request and 
+    // The request and response are correlated using a unique
+    // identifier which the client sends with the request and
     // the server echoes back along with the response.
     _getResponse: function(action) {
         var self = this;
 
         // The subscribe function runs when the Observable is observed.
-        return falcor.Observable.create(function subscribe(observer) {
+        return Rx.Observable.create(function subscribe(observer) {
             var id = self.id++,
 
-            handler = function(e) {
-                var response = e.data,
-                    error,
-                    value;
+                handler = function(e) {
+                    var response = e.data,
+                        error,
+                        value;
 
-                // The response is an array like this [id, error, data]
-                if (response[0] === id) {
-                    error = response[1];
-                    if (error) {
-                        observer.onError(error);
+                    // The response is an array like this [id, error, data]
+                    if (response[0] === id) {
+                        error = response[1];
+                        if (error) {
+                            observer.onError(error);
+                        } else {
+                            value = response[2];
+                            observer.onNext(value);
+                            observer.onCompleted();
+                        }
                     }
-                    else {
-                        value = response[2];
-                        observer.onNext(value);
-                        observer.onCompleted();
-                    }
-                }
-            };
+                };
 
             // Add the identifier to the front of the message
             action.unshift(id);
-            
+
             self._worker.postMessage(action);
             self._worker.addEventListener('message', handler);
 
             // This is the action to perform if the consumer unsubscribes from the observable
-            return function(){
+            return function() {
                 self._worker.removeEventListener('message', handler);
             };
         });
@@ -147,26 +150,28 @@ WebWorkerSource.prototype = {
 var worker = new Worker('worker.js');
 
 // Create the web worker model source and pass it the worker we have created
-var model = new falcor.Model({ source: new WebWorkerSource(worker) });
+var model = new falcor.Model({
+    source: new WebWorkerSource(worker)
+});
 
-model.
-    get('user["name", "age", "location"]').
-    subscribe(
+model
+    .get('user["name", "age", "location"]')
+    .subscribe(
         function(json) {
             console.log(JSON.stringify(json, null, 4));
         },
         function(errors) {
             console.error('ERRORS:', JSON.stringify(errors));
-        });
+        }
+    );
 
-//The following is printed to the console:
-//{
-//    json: {
-//        "user": {           
-//            "name": "Jim"
-//            // age not included because it is undefined
-//            // location not included in message because it resulted in error
-//        }
-//    }
-//}
-
+/* The following is printed to the console:
+{
+    json: {
+        "user": {
+            "name": "Jim"
+        }
+    }
+}
+ERRORS: [{"path":["user","location"],"value":"Something broke!"}]
+*/
