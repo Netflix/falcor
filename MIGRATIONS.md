@@ -72,7 +72,7 @@ function convertToRx(model, method, args) {
 
 ##### Pros
 * This upgrade only has to be done once and required once for the whole
-application to recieve the benefits.
+application to receive the benefits.
 
 ##### Cons
 * In the same vein, the whole application is forced into using the Rx based
@@ -186,4 +186,4 @@ model.
 ##### Pros
 * Simpler to grok/use
 * Promotes better application architecture.
-* Always syncronous.
+* Always synchronous.
