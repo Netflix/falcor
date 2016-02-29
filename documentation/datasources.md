@@ -179,7 +179,7 @@ response.subscribe(jsonGraphEnvelope => JSON.stringify(jsonGraphEnvelope, null, 
 
 The `call` method on the DataSource interface executes the abstract [JSON Graph](http://netflix.github.io/falcor/documentation/jsongraph.html) call operation on the DataSource's associated [JSON Graph](http://netflix.github.io/falcor/documentation/jsongraph.html) object. The `call` method invokes a single function located inside of the [JSON Graph](http://netflix.github.io/falcor/documentation/jsongraph.html) object.
 
-Functions are useful for non-idempotent operations which cannot be performed using `get` or `set` (ex. like adding to a list). Using a Function is appropriate when the application is performing a transactional operation that cannot be represented as a series of set operation.
+Functions are useful for non-idempotent operations which cannot be performed using `get` or `set` (ex. like adding to a list). Using a Function is appropriate when the application is performing a transactional operation that cannot be represented as a series of set operations.
 
 [JSON Graph](http://netflix.github.io/falcor/documentation/jsongraph.html) Functions can _not_ return transient data (ex. 2 + 2 = 4). A [JSON Graph](http://netflix.github.io/falcor/documentation/jsongraph.html) function can only return a JSONGraphEnvelope containing a subset of the data in its "this" object (the object which contains the function as a member).
 
@@ -194,17 +194,17 @@ interface DataSource {
 ~~~
 
 
-Note that one invocation of call can only run a single function. The callPath argument is the path to the function within the DataSource’s JSON Graph object. The args parameter is the array of arguments to be passed to the function being called.
+Note that one invocation of call can only run a single function. The callPath argument is the path to the function within the DataSource's JSON Graph object. The args parameter is the array of arguments to be passed to the function being called.
 
 The refPaths argument is the array of PathSets to retrieve from the JSON Graph References within the function response. The dataSource appends these pathSets to any JSON Graph References that appear within the function response, and adds the values to the JSONGraphEnvelope. Typically, refPaths are used when the function creates a new object and returns a reference to that object. The refPaths can be passed to the call method in order to allow fields to be retrieved from the newly-generated object without the need for a subsequent get operation.
 
-A function is not obligated to return all of the changes that it makes to its “this” object. On the contrary, functions typically return as little data as possible by default. The thisPaths argument is the array of PathSets to retrieve from the function's "this" object after the function has completed execution. The DataSource adds these values to the JSONGraphEnvelope before returning the function's response. 
+A function is not obligated to return all of the changes that it makes to its "this" object. On the contrary, functions typically return as little data as possible by default. The thisPaths argument is the array of PathSets to retrieve from the function's "this" object after the function has completed execution. The DataSource adds these values to the JSONGraphEnvelope before returning the function's response. 
 
 
 
-Instead of forcing functions to return all of the changes they make to the JSON Graph object, DataSources allow callers to define exactly which values they would like to refresh after successful function execution. To this end, callers can provide refPaths and thisPaths to the DataSource’s call method along with the function path. After the DataSource runs the function, it retrieves the refPaths and thisPaths and adds them to the JSON Graph response.
+Instead of forcing functions to return all of the changes they make to the JSON Graph object, DataSources allow callers to define exactly which values they would like to refresh after successful function execution. To this end, callers can provide refPaths and thisPaths to the DataSource's call method along with the function path. After the DataSource runs the function, it retrieves the refPaths and thisPaths and adds them to the JSON Graph response.
 
-After the refPaths have been evaluated against any JSON Graph References returned by the function and added to the JSONGraphEnvelope Response, each PathSet in the thisPaths array is evaluated on the function’s “this” object. The resulting values are added to the JSON Graph Response returned by the DataSource’s call method.
+After the refPaths have been evaluated against any JSON Graph References returned by the function and added to the JSONGraphEnvelope Response, each PathSet in the thisPaths array is evaluated on the function's "this" object. The resulting values are added to the JSON Graph Response returned by the DataSource's call method.
 
 To demonstrate the `call()` method in action, we'll create a [Router](http://netflix.github.io/falcor/documentation/router.html) DataSource that allows titles to be pushed into a Netflix member's list.  
 
