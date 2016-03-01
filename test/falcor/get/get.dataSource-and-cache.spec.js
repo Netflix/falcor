@@ -89,6 +89,53 @@ describe('DataSource and Partial Cache', function() {
         });
     });
     describe('PathMap', function() {
+        it('should ensure empty paths do not cause dataSource requests {from:1, to:0}', function(done) {
+            var onGet = sinon.spy();
+            var model = new Model({
+                cache: {
+                    a: Model.ref(['c']),
+                    c: {
+                        0: Model.atom('hello')
+                    }
+                },
+                source: {
+                    get: onGet
+                }
+            });
+
+            var modelGet = model.get(['b', {to:0, from:1}]);
+            var onNext = sinon.spy();
+            toObservable(modelGet).
+                doAction(onNext, noOp, function() {
+                    expect(onGet.callCount).to.equals(0);
+                    expect(onNext.callCount).to.equals(0);
+                }).
+                subscribe(noOp, done, done);
+        });
+        it('should ensure empty paths do not cause dataSource requests [].', function(done) {
+            var onGet = sinon.spy();
+            var model = new Model({
+                cache: {
+                    a: Model.ref(['c']),
+                    c: {
+                        0: Model.atom('hello')
+                    }
+                },
+                source: {
+                    get: onGet
+                }
+            });
+
+            var modelGet = model.get(['b', []]);
+            var onNext = sinon.spy();
+            toObservable(modelGet).
+                doAction(onNext, noOp, function() {
+                    expect(onGet.callCount).to.equals(0);
+                    expect(onNext.callCount).to.equals(0);
+                }).
+                subscribe(noOp, done, done);
+        });
+
         it('should get multiple arguments into a single toJSON response.', function(done) {
             var model = new Model({cache: M(), source: new LocalDataSource(Cache())});
             var onNext = sinon.spy();
