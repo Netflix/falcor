@@ -1573,6 +1573,15 @@ module.exports = function onMissing(model, path, depth,
     }
 
     if (depth < path.length) {
+        // If part of path has not been traversed, we need to ensure that there
+        // are no empty paths (range(1, 0) or empyt array)
+        var isEmpty = false;
+        for (var i = depth; i < path.length && !isEmpty; ++i) {
+            if (isEmptyAtom(path[i])) {
+                return;
+            }
+        }
+
         pathSlice = fastCopy(path, depth);
     } else {
         pathSlice = [];
@@ -1593,6 +1602,31 @@ function concatAndInsertMissing(model, remainingPath, depth, requestedPath,
 
     results.optimizedMissingPaths.push(
         optimizedPath.slice(0, optimizedLength).concat(remainingPath));
+}
+
+function isEmptyAtom(atom) {
+    var type = typeof atom;
+    if (type !== "object") {
+        return false;
+    }
+
+    var isArray = Array.isArray(atom);
+    if (isArray && atom.length) {
+        return false;
+    }
+
+    // Empty array
+    else if (isArray) {
+        return true;
+    }
+
+    var from = atom.from;
+    var to = atom.to;
+    if (from === undefined || from <= to) {
+        return false;
+    }
+
+    return true;
 }
 
 },{"32":32}],26:[function(require,module,exports){
@@ -3645,7 +3679,9 @@ module.exports = function checkCacheAndReport(model, requestedPaths, observer,
     // We are done when there are no missing paths or the model does not
     // have a dataSource to continue on fetching from.
     var hasValues = results.hasValue;
-    var completed = !results.requestedMissingPaths || !model._source;
+    var completed = !results.requestedMissingPaths ||
+                    !results.requestedMissingPaths.length ||
+                    !model._source;
     var hasValueOverall = Boolean(seed[0].json || seed[0].jsonGraph);
 
     // Copy the errors into the total errors array.
