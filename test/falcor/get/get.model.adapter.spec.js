@@ -5,6 +5,7 @@ var sinon = require('sinon');
 var chai = require('chai');
 var expect = chai.expect;
 var noOp = function() {};
+var toObs = require('./../../toObs');
 
 describe('ModelDataSourceAdapter', function() {
     it('ensure atoms remain as strings if model created.', function(done) {
@@ -15,9 +16,9 @@ describe('ModelDataSourceAdapter', function() {
         });
 
         var onNext = sinon.spy();
-        model.
+        toObs(model.
             asDataSource().
-            get([['hello']]).
+            get([['hello']])).
             doAction(onNext, noOp, function() {
                 expect(onNext.callCount).to.equals(1);
                 expect(onNext.getCall(0).args[0]).to.deep.equals({
