@@ -7,4 +7,5 @@ describe('Get', function() {
     require('./get.pathSyntax.spec');
     require('./get.clone.spec');
     require('./get.gen.spec');
+    require('./get.model.adapter.spec');
 });
