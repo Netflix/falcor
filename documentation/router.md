@@ -747,6 +747,100 @@ The {keys} can also be used to expose any key on a server object to the client.
 
 Each pattern will produce an array of results, even when matched against a single value.
 
+## Limiting the number of paths returned by the Router
+
+Requesting a large set of values can pin the CPU of a server running the Falcor Router. Consider the following example in which the name of huge number of genrelists is requested from the Router:
+
+```js
+var Router = require('falcor-router');
+var router = new Router(
+  [
+    {
+      route: "genrelists[{integers}].name",
+      get: function(pathSet) {
+        // code to return the names of each of the requested genre lists
+      }
+    }
+  ], { maxPaths: Number.MAX_SAFE_INTEGER });
+
+// pins CPU!
+router.
+  get(["genrelists", {from:0, to: Number.MAX_SAFE_INTEGER}, "name"]).
+  subscribe({ 
+    onNext: function(jsonGraphEnvelope) { console.log(JSON.stringify(jsonGraphEnvelope)); },
+    onError: function(error) { console.error(error); },
+    onCompleted: function() { console.log("done"); })
+```
+
+To mitigate this issue, the Falcor Router allows developers to limit the number of values that can be retrieved in two ways:
+
+1. A global `maxPaths` option (default 9000).
+2. The ability to throw a MaxPathsExceededError in individual routes in the event that too many of a particular value is requested.
+
+### The `maxPaths` option
+
+The DOS vulnerability has been mitigated in v0.4.0 by adding a `maxPaths` value to the options object accepted by the Router constructor. This value specifies the maximum number of paths which can be returned by a Falcor Router operation (either get, set, or call). The `maxPaths` value has a somewhat arbitrary default of 9000, which should provide some basic protection against a DOS.
+
+```js
+var Router = require('falcor-router');
+var MaxPathsExceeded = require('falcor-router/src/errors/MaxPathsExceeded');
+var router = new Router(
+  [
+    {
+      route: "genrelists[{integers}].name",
+      get: function(pathSet) {
+        // code to return the names of each of the requested genre lists
+      }
+    }
+  ], { maxPaths: 500 });
+
+// prints "You asked for too many paths."
+router.
+  get(["genrelists", {from:0, to: Number.MAX_SAFE_INTEGER}, "name"]).
+  subscribe({ 
+    onNext: function(jsonGraphEnvelope) { console.log(JSON.stringify(jsonGraphEnvelope)); },
+    onError: function(error) { 
+      if (error instanceof MaxPathsExceeded) {
+        console.error("You asked for too many paths."); 
+      }
+    },
+    onCompleted: function() { console.log("done"); })
+```
+
+### Setting maximum path limits for individual routes
+
+The `maxPaths` value allows you to set a global limit on the number of paths returned by a Router operation. However developers may want to set different maximums for different routes. For example you may want to allow no more than 10 titles and no more than 100 people to be retrieved in a single operation. To accomplish this, developers can test for the size of requested paths manually within a route handler and throw the `MaxPathsExceeded` error if too many paths are requested.
+
+```js
+var Router = require('falcor-router');
+var MaxPathsExceeded = require('falcor-router/src/errors/MaxPathsExceeded');
+var router = new Router(
+  [
+    {
+      route: "genrelists[{integers}].name",
+      get: function(pathSet) {
+        // limit the number of requested genrelists to 200
+        if (pathSet[1].length > 200) {
+          throw new MaxPathsExceededError("You exceeded the maximum number of genre lists that can be requested in a single operation.");
+        }
+        // code to return the names of each of the requested genre lists
+      }
+    }
+  ], { maxPaths: 500 });
+
+// prints "You exceeded the maximum number of genre lists that can be requested in a single operation."
+router.
+  get(["genrelists", {from:0, to: Number.MAX_SAFE_INTEGER}, "name"]).
+  subscribe({ 
+    onNext: function(jsonGraphEnvelope) { console.log(JSON.stringify(jsonGraphEnvelope)); },
+    onError: function(error) { 
+      if (error instanceof MaxPathsExceeded) {
+        console.error(error.message); 
+      }
+    },
+    onCompleted: function() { console.log("done"); })
+```
+
 ## Walkthrough: Building a Router for Netflix-like Application
 
 Netflix is an online streaming video service with millions of subscribers.  When a member logs on to the Netflix service, they are presented with a list of genres, each of which contains a list of titles which they can stream.
