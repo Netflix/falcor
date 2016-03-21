@@ -747,7 +747,7 @@ The {keys} can also be used to expose any key on a server object to the client.
 
 Each pattern will produce an array of results, even when matched against a single value.
 
-## Limiting the number of paths returned by the Router
+## Limiting the number of values returned by the Router (v0.4.0+)
 
 Requesting a large set of values can pin the CPU of a server running the Falcor Router. Consider the following example in which the name of huge number of genrelists is requested from the Router:
 
@@ -775,15 +775,15 @@ router.
 To mitigate this issue, the Falcor Router allows developers to limit the number of values that can be retrieved in two ways:
 
 1. A global `maxPaths` option (default 9000).
-2. The ability to throw a MaxPathsExceededError in individual routes in the event that too many of a particular value is requested.
+2. The ability to throw an error in a route if too many values are requested.
 
 ### The `maxPaths` option
 
-The DOS vulnerability has been mitigated in v0.4.0 by adding a `maxPaths` value to the options object accepted by the Router constructor. This value specifies the maximum number of paths which can be returned by a Falcor Router operation (either get, set, or call). The `maxPaths` value has a somewhat arbitrary default of 9000, which should provide some basic protection against a DOS.
+The Router constructor accepts a `maxPaths` options value which limits the number of paths that can be processed by a Router operation (either get, set, or call). The `maxPaths` value has an arbitrary default of 9000, which provides some basic out-of-the-box protection against a DOS attack.
 
 ```js
 var Router = require('falcor-router');
-var MaxPathsExceeded = require('falcor-router/src/errors/MaxPathsExceeded');
+var MaxPathsExceededError = require('falcor-router/src/errors/MaxPathsExceededError');
 var router = new Router(
   [
     {
@@ -800,7 +800,7 @@ router.
   subscribe({ 
     onNext: function(jsonGraphEnvelope) { console.log(JSON.stringify(jsonGraphEnvelope)); },
     onError: function(error) { 
-      if (error instanceof MaxPathsExceeded) {
+      if (error instanceof MaxPathsExceededError) {
         console.error("You asked for too many paths."); 
       }
     },
@@ -809,11 +809,11 @@ router.
 
 ### Setting maximum path limits for individual routes
 
-The `maxPaths` value allows you to set a global limit on the number of paths returned by a Router operation. However developers may want to set different maximums for different routes. For example you may want to allow no more than 10 titles and no more than 100 people to be retrieved in a single operation. To accomplish this, developers can test for the size of requested paths manually within a route handler and throw the `MaxPathsExceeded` error if too many paths are requested.
+The `maxPaths` value allows you to set a global limit on the number of paths returned by a Router operation. However developers may want to set different maximums for different routes. For example you may want to allow no more than 10 titles and no more than 100 people to be retrieved in a single operation. To accomplish this, developers can test for the size of requested paths manually within a route handler and throw the `MaxPathsExceededError` error if too many paths are requested.
 
 ```js
 var Router = require('falcor-router');
-var MaxPathsExceeded = require('falcor-router/src/errors/MaxPathsExceeded');
+var MaxPathsExceededError = require('falcor-router/src/errors/MaxPathsExceededError');
 var router = new Router(
   [
     {
@@ -834,7 +834,7 @@ router.
   subscribe({ 
     onNext: function(jsonGraphEnvelope) { console.log(JSON.stringify(jsonGraphEnvelope)); },
     onError: function(error) { 
-      if (error instanceof MaxPathsExceeded) {
+      if (error instanceof MaxPathsExceededError) {
         console.error(error.message); 
       }
     },
