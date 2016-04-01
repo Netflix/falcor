@@ -1,3 +1,17 @@
+0.1.17
+-------------------
+
+- [Removed boxed values for asDataSource() because its incorrect behavior](https://github.com/Netflix/falcor/pull/747)
+- [Fix for the materialized undefined issue.  If the cache contains values but the requests yields only empty values, then the overall operation will simply complete](https://github.com/Netflix/falcor/pull/715)
+- [Fixed potential for the deref get to wipe out cache](https://github.com/Netflix/falcor/pull/702)
+- [Fixed deref not working when the extra paths are atoms of undefined](https://github.com/Netflix/falcor/pull/674)
+- [Fix getCache to strip ALL internal keys](https://github.com/Netflix/falcor/pull/671)
+
+0.1.16 (do not use)
+-------------------
+
+- We inadvertently published this release from master, instead of the 0.x branch, resulting in backwards incompatible changes (see CHANGELOG.md and MIGRATION.md on master).
+
 0.1.15
 -------------------
 
