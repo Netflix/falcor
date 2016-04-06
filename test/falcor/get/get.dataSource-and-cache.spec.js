@@ -401,6 +401,25 @@ describe('DataSource and Partial Cache', function() {
                 }).
                 subscribe(noOp, done, done);
         });
+
+        it('should get different response objects with multiple trips to the dataSource.', function(done) {
+            var model = new Model({cache: M(), source: new LocalDataSource(Cache())});
+            var revisions = [];
+            toObservable(model.
+                get(['lolomo', 0, 0, 'item', 'title'], ['lolomo', 0, 1, 'item', 'title']).
+                progressively()).
+                doAction(function(x) {
+                    revisions.push(x);
+                }, noOp, function() {
+                    expect(revisions.length).to.equals(2);
+                    expect(revisions[1]).to.not.equal(revisions[0]);
+                    expect(revisions[1].json.lolomo[0]).to.not.equal(revisions[0].json.lolomo[0]);
+                    expect(revisions[1].json.lolomo[0][0]).to.equal(revisions[0].json.lolomo[0][0]);
+
+                }).
+                subscribe(noOp, done, done);
+        });
+
     });
     describe('Error Selector (during merge)', function() {
 

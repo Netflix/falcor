@@ -81,15 +81,16 @@ module.exports = function(testConfig) {
         });
     }
 
+    var valueNode = out.values && out.values[0];
 
     // $size is stripped out of basic core tests.
     // We have to strip out parent as well from the output since it will produce
     // infinite recursion.
-    clean(seed[0], {strip: ['$size']});
+    clean(valueNode, {strip: ['$size']});
     clean(expectedOutput, {strip: ['$size']});
 
     if (expectedOutput) {
-        expect(seed[0]).to.deep.equals(expectedOutput);
+        expect(valueNode).to.deep.equals(expectedOutput);
     }
     if (requestedMissingPaths) {
         expect(out.requestedMissingPaths).to.deep.equals(requestedMissingPaths);
