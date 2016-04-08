@@ -1,0 +1,608 @@
+---
+layout: api-page
+title: "set/setJSONGraphs.js"
+id: api
+---
+
+<main class="api-documentation-page">
+  
+
+  
+  
+      
+<h2>
+    set/setJSONGraphs.js
+</h2>
+<section>
+    <article>
+        <pre class="prettyprint source linenums"><code>var __key = require("./../internal/key");
+var __ref = require("./../internal/ref");
+var __context = require("./../internal/context");
+var __version = require("./../internal/version");
+var __refIndex = require("./../internal/ref-index");
+var __refsLength = require("./../internal/refs-length");
+
+var $ref = require("./../types/ref");
+
+var promote = require("./../lru/promote");
+var isExpired = require("./../support/isAlreadyExpired");
+var isFunction = require("./../support/isFunction");
+var isPrimitive = require("./../support/isPrimitive");
+var expireNode = require("./../support/expireNode");
+var iterateKeySet = require("falcor-path-utils").iterateKeySet;
+var incrementVersion = require("./../support/incrementVersion");
+var mergeJSONGraphNode = require("./../support/mergeJSONGraphNode");
+
+/**
+ * Merges a list of JSON Graph Envelopes into a cache JSON Graph.
+ * @function
+ * @param {Object} model - the Model for which to insert the PathValues.
+ * @param {Array.&lt;PathValue>} jsonGraphEnvelopes - the PathValues to set.
+ * @return {Array.&lt;Path>} - a list of optimized paths for the successfully set values.
+ */
+
+module.exports = function setJSONGraphs(model, jsonGraphEnvelopes, x, errorSelector, comparator) {
+
+    var modelRoot = model._root;
+    var lru = modelRoot;
+    var expired = modelRoot.expired;
+    var version = incrementVersion();
+    var cache = modelRoot.cache;
+    var initialVersion = cache[__version];
+
+    var requestedPath = [];
+    var optimizedPath = [];
+    var requestedPaths = [];
+    var optimizedPaths = [];
+    var jsonGraphEnvelopeIndex = -1;
+    var jsonGraphEnvelopeCount = jsonGraphEnvelopes.length;
+
+    while (++jsonGraphEnvelopeIndex &lt; jsonGraphEnvelopeCount) {
+
+        var jsonGraphEnvelope = jsonGraphEnvelopes[jsonGraphEnvelopeIndex];
+        var paths = jsonGraphEnvelope.paths;
+        var jsonGraph = jsonGraphEnvelope.jsonGraph;
+
+        var pathIndex = -1;
+        var pathCount = paths.length;
+
+        while (++pathIndex &lt; pathCount) {
+
+            var path = paths[pathIndex];
+            optimizedPath.index = 0;
+
+            setJSONGraphPathSet(
+                path, 0,
+                cache, cache, cache,
+                jsonGraph, jsonGraph, jsonGraph,
+                requestedPaths, optimizedPaths, requestedPath, optimizedPath,
+                version, expired, lru, comparator, errorSelector
+            );
+        }
+    }
+
+    var newVersion = cache[__version];
+    var rootChangeHandler = modelRoot.onChange;
+
+    if (isFunction(rootChangeHandler) &amp;&amp; initialVersion !== newVersion) {
+        rootChangeHandler();
+    }
+
+    return [requestedPaths, optimizedPaths];
+};
+
+/* eslint-disable no-constant-condition */
+function setJSONGraphPathSet(
+    path, depth, root, parent, node,
+    messageRoot, messageParent, message,
+    requestedPaths, optimizedPaths, requestedPath, optimizedPath,
+    version, expired, lru, comparator, errorSelector) {
+
+    var note = {};
+    var branch = depth &lt; path.length - 1;
+    var keySet = path[depth];
+    var key = iterateKeySet(keySet, note);
+    var optimizedIndex = optimizedPath.index;
+
+    do {
+
+        requestedPath.depth = depth;
+
+        var results = setNode(
+            root, parent, node, messageRoot, messageParent, message,
+            key, branch, false, requestedPath, optimizedPath,
+            version, expired, lru, comparator, errorSelector
+        );
+
+        requestedPath[depth] = key;
+        requestedPath.index = depth;
+        optimizedPath[optimizedPath.index++] = key;
+        var nextNode = results[0];
+        var nextParent = results[1];
+        if (nextNode) {
+            if (branch) {
+                setJSONGraphPathSet(
+                    path, depth + 1, root, nextParent, nextNode,
+                    messageRoot, results[3], results[2],
+                    requestedPaths, optimizedPaths, requestedPath, optimizedPath,
+                    version, expired, lru, comparator, errorSelector
+                );
+            } else {
+                promote(lru, nextNode);
+                requestedPaths.push(requestedPath.slice(0, requestedPath.index + 1));
+                optimizedPaths.push(optimizedPath.slice(0, optimizedPath.index));
+            }
+        }
+        key = iterateKeySet(keySet, note);
+        if (note.done) {
+            break;
+        }
+        optimizedPath.index = optimizedIndex;
+    } while (true);
+}
+/* eslint-enable */
+
+function setReference(
+    root, node, messageRoot, message, requestedPath, optimizedPath,
+    version, expired, lru, comparator, errorSelector) {
+
+    var reference = node.value;
+    optimizedPath.splice(0, optimizedPath.length);
+    optimizedPath.push.apply(optimizedPath, reference);
+
+    if (isExpired(node)) {
+        optimizedPath.index = reference.length;
+        expireNode(node, expired, lru);
+        return [undefined, root, message, messageRoot];
+    }
+
+    promote(lru, node);
+
+    var index = 0;
+    var container = node;
+    var count = reference.length - 1;
+    var parent = node = root;
+    var messageParent = message = messageRoot;
+
+    do {
+        var key = reference[index];
+        var branch = index &lt; count;
+        var results = setNode(
+            root, parent, node, messageRoot, messageParent, message,
+            key, branch, true, requestedPath, optimizedPath,
+            version, expired, lru, comparator, errorSelector
+        );
+        node = results[0];
+        if (isPrimitive(node)) {
+            optimizedPath.index = index;
+            return results;
+        }
+        parent = results[1];
+        message = results[2];
+        messageParent = results[3];
+    } while (index++ &lt; count);
+
+    optimizedPath.index = index;
+
+    if (container[__context] !== node) {
+        var backRefs = node[__refsLength] || 0;
+        node[__refsLength] = backRefs + 1;
+        node[__ref + backRefs] = container;
+        container[__context] = node;
+        container[__refIndex] = backRefs;
+    }
+
+    return [node, parent, message, messageParent];
+}
+
+function setNode(
+    root, parent, node, messageRoot, messageParent, message,
+    key, branch, reference, requestedPath, optimizedPath,
+    version, expired, lru, comparator, errorSelector) {
+
+    var type = node.$type;
+
+    while (type === $ref) {
+
+        var results = setReference(
+            root, node, messageRoot, message, requestedPath, optimizedPath,
+            version, expired, lru, comparator, errorSelector
+        );
+
+        node = results[0];
+
+        if (isPrimitive(node)) {
+            return results;
+        }
+
+        parent = results[1];
+        message = results[2];
+        messageParent = results[3];
+        type = node.$type;
+    }
+
+    if (type !== void 0) {
+        return [node, parent, message, messageParent];
+    }
+
+    if (key == null) {
+        if (branch) {
+            throw new Error("`null` is not allowed in branch key positions.");
+        } else if (node) {
+            key = node[__key];
+        }
+    } else {
+        parent = node;
+        messageParent = message;
+        node = parent[key];
+        message = messageParent &amp;&amp; messageParent[key];
+    }
+
+    node = mergeJSONGraphNode(
+        parent, node, message, key, requestedPath, optimizedPath,
+        version, expired, lru, comparator, errorSelector
+    );
+
+    return [node, parent, message, messageParent];
+}
+</code></pre>
+    </article>
+</section>
+  
+
+  
+</main>
+
+
+
+        
+        <!--
+          In case someone comes along later and sees the active item on the
+          toc acting weirdly, hopefully they'll see this comment. This page, unlike
+          any seen during development, has multiple 'docs' passed to container.tmpl.
+          To debug it and enhance the page as needed, I would suggest looking there first.
+        -->
+        
+
+        <!-- Generate the table of contents -->
+        <nav class="table-of-contents api-doc-toc">
+            <ul class="nav">
+                <li>
+                    <a href="DataSource.html">Classes</a>
+                    <ul class="toc-api-classes">
+                        
+                            <li class="toc-api-class ">
+                                <a href="DataSource.html" data-target="#DataSource">DataSource</a>
+                                
+                                
+
+    <ul class="toc-api-subgroup toc-api-subgroup-methods">
+        <li>
+            <span class="toc-api-subgroup-title">Methods</span>
+        </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="DataSource.html#call" data-target="#call">call</a>
+            </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="DataSource.html#get" data-target="#get">get</a>
+            </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="DataSource.html#set" data-target="#set">set</a>
+            </li>
+         
+    </ul>
+
+
+                                
+
+
+                                
+
+
+                            </li>
+                        
+                            <li class="toc-api-class ">
+                                <a href="HttpDataSource.html" data-target="#HttpDataSource">HttpDataSource</a>
+                                
+                                
+
+    <ul class="toc-api-subgroup toc-api-subgroup-methods">
+        <li>
+            <span class="toc-api-subgroup-title">Methods</span>
+        </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="HttpDataSource.html#call" data-target="#call">call</a>
+            </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="HttpDataSource.html#get" data-target="#get">get</a>
+            </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="HttpDataSource.html#set" data-target="#set">set</a>
+            </li>
+         
+    </ul>
+
+
+                                
+
+
+                                
+
+
+                            </li>
+                        
+                            <li class="toc-api-class ">
+                                <a href="Model.html" data-target="#Model">Model</a>
+                                
+                                
+
+    <ul class="toc-api-subgroup toc-api-subgroup-methods">
+        <li>
+            <span class="toc-api-subgroup-title">Methods</span>
+        </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="Model.html#asDataSource" data-target="#asDataSource">asDataSource</a>
+            </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="Model.html#batch" data-target="#batch">batch</a>
+            </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="Model.html#boxValues" data-target="#boxValues">boxValues</a>
+            </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="Model.html#call" data-target="#call">call</a>
+            </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="Model.html#deref" data-target="#deref">deref</a>
+            </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="Model.html#get" data-target="#get">get</a>
+            </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="Model.html#getCache" data-target="#getCache">getCache</a>
+            </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="Model.html#getPath" data-target="#getPath">getPath</a>
+            </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="Model.html#getVersion" data-target="#getVersion">getVersion</a>
+            </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="Model.html#invalidate" data-target="#invalidate">invalidate</a>
+            </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="Model.html#preload" data-target="#preload">preload</a>
+            </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="Model.html#set" data-target="#set">set</a>
+            </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="Model.html#setCache" data-target="#setCache">setCache</a>
+            </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="Model.html#treatErrorsAsValues" data-target="#treatErrorsAsValues">treatErrorsAsValues</a>
+            </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="Model.html#unbatch" data-target="#unbatch">unbatch</a>
+            </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="Model.html#unboxValues" data-target="#unboxValues">unboxValues</a>
+            </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="Model.html#withoutDataSource" data-target="#withoutDataSource">withoutDataSource</a>
+            </li>
+         
+    </ul>
+
+
+                                
+
+    <ul class="toc-api-subgroup toc-api-subgroup-types">
+        <li>
+            <span class="toc-api-subgroup-title">Types</span>
+        </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="Model.html#~comparator" data-target="#\~comparator">comparator</a>
+            </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="Model.html#~errorSelector" data-target="#\~errorSelector">errorSelector</a>
+            </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="Model.html#~onChange" data-target="#\~onChange">onChange</a>
+            </li>
+         
+    </ul>
+
+
+                                
+
+
+                            </li>
+                        
+                            <li class="toc-api-class ">
+                                <a href="ModelResponse.html" data-target="#ModelResponse">ModelResponse</a>
+                                
+                                
+
+    <ul class="toc-api-subgroup toc-api-subgroup-methods">
+        <li>
+            <span class="toc-api-subgroup-title">Methods</span>
+        </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="ModelResponse.html#forEach" data-target="#forEach">forEach</a>
+            </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="ModelResponse.html#progressively" data-target="#progressively">progressively</a>
+            </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="ModelResponse.html#toPathValues" data-target="#toPathValues">toPathValues</a>
+            </li>
+         
+    </ul>
+
+
+                                
+
+
+                                
+
+
+                            </li>
+                        
+                            <li class="toc-api-class ">
+                                <a href="Observable.html" data-target="#Observable">Observable</a>
+                                
+                                
+
+    <ul class="toc-api-subgroup toc-api-subgroup-methods">
+        <li>
+            <span class="toc-api-subgroup-title">Methods</span>
+        </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="Observable.html#forEach" data-target="#forEach">forEach</a>
+            </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="Observable.html#forEach" data-target="#forEach">forEach</a>
+            </li>
+         
+    </ul>
+
+
+                                
+
+    <ul class="toc-api-subgroup toc-api-subgroup-types">
+        <li>
+            <span class="toc-api-subgroup-title">Types</span>
+        </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="Observable.html#~onCompletedCallback" data-target="#\~onCompletedCallback">onCompletedCallback</a>
+            </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="Observable.html#~onErrorCallback" data-target="#\~onErrorCallback">onErrorCallback</a>
+            </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="Observable.html#~onNextCallback" data-target="#\~onNextCallback">onNextCallback</a>
+            </li>
+         
+    </ul>
+
+
+                                
+
+
+                            </li>
+                        
+                            <li class="toc-api-class ">
+                                <a href="Subscription.html" data-target="#Subscription">Subscription</a>
+                                
+                                
+
+    <ul class="toc-api-subgroup toc-api-subgroup-methods">
+        <li>
+            <span class="toc-api-subgroup-title">Methods</span>
+        </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="Subscription.html#dispose" data-target="#dispose">dispose</a>
+            </li>
+         
+    </ul>
+
+
+                                
+
+
+                                
+
+
+                            </li>
+                        
+                    </ul>
+                </li>
+                <li class="toc-api-type-list ">
+                    <a href="global.html">Global Types</a>
+                    <ul class="toc-api-types">
+                        
+                            <li class="toc-api-type">
+                                <a href="global.html#Atom" data-target="#Atom">Atom</a>
+                            </li>
+                        
+                            <li class="toc-api-type">
+                                <a href="global.html#JSONEnvelope" data-target="#JSONEnvelope">JSONEnvelope</a>
+                            </li>
+                        
+                            <li class="toc-api-type">
+                                <a href="global.html#JSONGraph" data-target="#JSONGraph">JSONGraph</a>
+                            </li>
+                        
+                            <li class="toc-api-type">
+                                <a href="global.html#JSONGraphEnvelope" data-target="#JSONGraphEnvelope">JSONGraphEnvelope</a>
+                            </li>
+                        
+                            <li class="toc-api-type">
+                                <a href="global.html#Key" data-target="#Key">Key</a>
+                            </li>
+                        
+                            <li class="toc-api-type">
+                                <a href="global.html#KeySet" data-target="#KeySet">KeySet</a>
+                            </li>
+                        
+                            <li class="toc-api-type">
+                                <a href="global.html#Path" data-target="#Path">Path</a>
+                            </li>
+                        
+                            <li class="toc-api-type">
+                                <a href="global.html#PathSet" data-target="#PathSet">PathSet</a>
+                            </li>
+                        
+                            <li class="toc-api-type">
+                                <a href="global.html#PathValue" data-target="#PathValue">PathValue</a>
+                            </li>
+                        
+                            <li class="toc-api-type">
+                                <a href="global.html#Range" data-target="#Range">Range</a>
+                            </li>
+                        
+                    </ul>
+                </li>
+            </ul>
+        </nav>
+
+
+
+
+
