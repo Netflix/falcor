@@ -72,4 +72,16 @@ describe('Error cases', function() {
             });
     });
 
+    it('should not error on an invalidated deref path set.', function() {
+        var model = new Model({cache: {titlesById: {32: {name: "House of Cards"}}}});
+        return model.get(["titlesById", 32, "name"]).
+            then(function(response) {
+                var titleModel = model.deref(response.json.titlesById[32]);
+                model.invalidate(["titlesById", 32]);
+                return titleModel.set({json: {name: "Something Else"}}).
+                    then(function(derefedResponse) {
+                        expect(response.json.name).to.be("Something Else");
+                    });
+            });
+    });
 });
