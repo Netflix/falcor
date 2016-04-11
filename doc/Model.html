@@ -228,7 +228,7 @@ id: api
 
                 
 
-                <td class="description last"><p>the maximum size of the cache</p></td>
+                <td class="description last"><p>the maximum size of the cache. This value roughly correlates to item count (where itemCount = maxSize / 50). Each item by default is given a metadata <code>$size</code> of 50 (or its length when it's an array or string). You can get better control of falcor's memory usage by tweaking <code>$size</code></p></td>
             </tr>
 
         
