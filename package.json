@@ -12,12 +12,7 @@
     "type": "git",
     "url": "https://github.com/Netflix/falcor.git"
   },
-  "licenses": [
-    {
-      "type": "Apache License, Version 2.0",
-      "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
-    }
-  ],
+  "license": "Apache-2.0",
   "scripts": {
     "test": "gulp test-coverage",
     "dist": "gulp all",
