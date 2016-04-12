@@ -1139,11 +1139,34 @@ var getCachePosition = require(20);
 var InvalidModelError = require(12);
 var BoundJSONGraphModelError = require(10);
 
+function mergeInto(target, obj) {
+    /*eslint guard-for-in: 0*/
+    if (target === obj) {
+        return;
+    }
+    if (target === null || typeof target !== "object" || target.$type) {
+        return;
+    }
+    if (obj === null || typeof obj !== "object" || obj.$type) {
+        return;
+    }
+    for (var key in obj) {
+        var targetValue = target[key];
+        if (targetValue === undefined) {
+            target[key] = obj[key];
+        } else {
+            mergeInto(targetValue, obj[key]);
+        }
+    }
+}
+
 module.exports = function get(walk, isJSONG) {
     return function innerGet(model, paths, seed) {
-        var valueNode = seed[0];
+        // Result valueNode not immutable for isJSONG.
+        var nextSeed = isJSONG ? seed : [{}];
+        var valueNode = nextSeed[0];
         var results = {
-            values: seed,
+            values: nextSeed,
             optimizedPaths: []
         };
         var cache = model._root.cache;
@@ -1195,6 +1218,9 @@ module.exports = function get(walk, isJSONG) {
                  valueNode, results, derefInfo, requestedPath, optimizedPath,
                  optimizedLength, isJSONG, false, referenceContainer);
         }
+
+        // Merge in existing results.
+        mergeInto(valueNode, seed[0]);
 
         return results;
     };
@@ -3642,7 +3668,7 @@ GetResponse.prototype._subscribe = function _subscribe(observer) {
 
     // Starts the async request cycle.
     return getRequestCycle(this, model, results,
-                           observer, seed, errors, 1);
+                           observer, errors, 1);
 };
 
 },{"40":40,"52":52,"54":54,"55":55,"80":80}],54:[function(require,module,exports){
@@ -3686,11 +3712,12 @@ module.exports = function checkCacheAndReport(model, requestedPaths, observer,
 
     // We are done when there are no missing paths or the model does not
     // have a dataSource to continue on fetching from.
+    var valueNode = results.values[0];
     var hasValues = results.hasValue;
     var completed = !results.requestedMissingPaths ||
                     !results.requestedMissingPaths.length ||
                     !model._source;
-    var hasValueOverall = Boolean(seed[0].json || seed[0].jsonGraph);
+    var hasValueOverall = Boolean(valueNode.json || valueNode.jsonGraph);
 
     // Copy the errors into the total errors array.
     if (results.errors) {
@@ -3707,10 +3734,10 @@ module.exports = function checkCacheAndReport(model, requestedPaths, observer,
     // request is progressive
     //
     // 2.  The request if finished and the json key off
-    // the seed has a value.
+    // the valueNode has a value.
     if (hasValues && progressive || hasValueOverall && completed) {
         try {
-            observer.onNext(seed[0]);
+            observer.onNext(valueNode);
         } catch(e) {
             throw e;
         }
@@ -3751,11 +3778,10 @@ var InvalidSourceError = require(13);
  * @param {Function} onNext -
  * @param {Function} onError -
  * @param {Function} onCompleted -
- * @param {Object} seedArg - The state of the output
  * @private
  */
 module.exports = function getRequestCycle(getResponse, model, results, observer,
-                                          seed, errors, count) {
+                                          errors, count) {
     // we have exceeded the maximum retry limit.
     if (count === 10) {
         throw new MaxRetryExceededError();
@@ -3796,7 +3822,7 @@ module.exports = function getRequestCycle(getResponse, model, results, observer,
                                                   observer,
                                                   getResponse.isProgressive,
                                                   getResponse.isJSONGraph,
-                                                  seed, errors);
+                                                  results.values, errors);
 
             // If there are missing paths coming back form checkCacheAndReport
             // the its reported from the core cache check method.
@@ -3805,7 +3831,7 @@ module.exports = function getRequestCycle(getResponse, model, results, observer,
                 // update the which disposable to use.
                 disposable.currentDisposable =
                     getRequestCycle(getResponse, model, nextResults, observer,
-                                    seed, errors, count + 1);
+                                    errors, count + 1);
             }
 
             // We have finished.  Since we went to the dataSource, we must
@@ -4093,9 +4119,12 @@ module.exports = function setRequestCycle(model, observer, groups,
 
     // Progressively output the data from the first set.
     if (isProgressive) {
-        var json = {};
-        getWithPathsAsPathMap(model, requestedPaths, [json]);
-        observer.onNext(json);
+        var results = getWithPathsAsPathMap(model, requestedPaths, [{}]);
+        if (results.criticalError) {
+            observer.onError(results.criticalError);
+            return null;
+        }
+        observer.onNext(results.values[0]);
     }
 
     var currentJSONGraph = getJSONGraph(model, optimizedPaths);
