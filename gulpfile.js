@@ -12,14 +12,7 @@ var srcDir = "lib";
 
 gulp.task("lint", function() {
     return gulp.src(["*.js", srcDir + "/**/*.js"]).
-        pipe(eslint({
-            globals: {
-                "require": false,
-                "module": false
-            },
-            reset: true, // dz: remove me after linting is finished, else i can"t do one at the time
-            useEslintrc: true
-        })).
+        pipe(eslint()).
         pipe(eslint.format()).
         pipe(eslint.failAfterError()); // dz: change back after finishing to failAfterError
 });
