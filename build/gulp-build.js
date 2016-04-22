@@ -17,11 +17,20 @@ gulp.task('dist', ['dist.browser', 'dist.all']);
 gulp.task('all', ['build.browser', 'dist.browser', 'build.all', 'dist.all', 'lint']);
 gulp.task('build-with-lint', ['build.browser', 'dist.browser', 'lint']);
 
+var browserifyOptions = {
+    standalone: 'falcor',
+    insertGlobalVars: {
+        Promise: function (file, basedir) {
+            return 'typeof Promise === "function" ? Promise : require("promise")';
+        }
+    }
+};
+
 gulp.task('dist.browser', ['clean.dist'], function(cb) {
     build({
         file: ['./browser.js'],
         outName: "falcor.browser",
-        browserifyOptions: { standalone: 'falcor' },
+        browserifyOptions: browserifyOptions,
         debug: false
     }, cb);
 });
@@ -30,7 +39,7 @@ gulp.task('build.browser', ['clean.dist'], function(cb) {
     return build({
         file: ['./browser.js'],
         outName: "falcor.browser",
-        browserifyOptions: { standalone: 'falcor' }
+        browserifyOptions: browserifyOptions
     }, cb);
 });
 
@@ -38,7 +47,7 @@ gulp.task('dist.all', ['clean.dist'], function(cb) {
     build({
         file: ['./all.js'],
         outName: "falcor.all",
-        browserifyOptions: { standalone: 'falcor' },
+        browserifyOptions: browserifyOptions,
         debug: false
     }, cb);
 });
@@ -47,7 +56,7 @@ gulp.task('build.all', ['clean.dist'], function(cb) {
     return build({
         file: ['./all.js'],
         outName: "falcor.all",
-        browserifyOptions: { standalone: 'falcor' }
+        browserifyOptions: browserifyOptions
     }, cb);
 });
 

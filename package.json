@@ -68,6 +68,7 @@
     "lodash": "^2.4.1",
     "minimist": "^1.1.0",
     "mkdirp": "^0.5.1",
+    "promise": "7.0.4",
     "rxjs": "^5.0.0-beta.1",
     "sinon": "^1.15.4",
     "through2": "^0.6.1",
@@ -79,7 +80,6 @@
     "falcor-json-graph": "1.1.7",
     "falcor-path-syntax": "0.2.4",
     "falcor-path-utils": "0.3.4",
-    "promise": "7.0.4",
     "rx": "2.5.3"
   }
 }
