@@ -1132,7 +1132,7 @@ var InvalidModelError = require(11);
 var BoundJSONGraphModelError = require(9);
 
 function mergeInto(target, obj) {
-    /*eslint guard-for-in: 0*/
+    /* eslint guard-for-in: 0 */
     if (target === obj) {
         return;
     }
@@ -1518,10 +1518,12 @@ module.exports = function getValueSync(model, simplePath, noClone) {
 
     // if (out && out.$type === $error && !model._treatErrorsAsValues) {
     if (out && type === $error && !model._treatErrorsAsValues) {
+        /* eslint-disable no-throw-literal */
         throw {
             path: depth === len ? simplePath : simplePath.slice(0, depth),
             value: out.value
         };
+        /* eslint-enable no-throw-literal */
     } else if (out && model._boxed) {
         out = Boolean(type) && !noClone ? clone(out) : out;
     } else if (!out && model._materialized) {
@@ -1867,7 +1869,8 @@ module.exports = function getValueSync(pathArg) {
     if (this._path.length) {
         path = this._path.concat(path);
     }
-    return this._syncCheck("getValueSync") && this._getValueSync(this, path).value;
+    this._syncCheck("getValueSync");
+    return this._getValueSync(this, path).value;
 };
 
 },{"126":126}],29:[function(require,module,exports){
@@ -2114,6 +2117,7 @@ falcor.keys = function getJSONKeys(json) {
         });
 };
 
+/* global Promise */
 if (typeof Promise === "function") {
     falcor.Promise = Promise;
 } else {
@@ -2515,7 +2519,7 @@ module.exports = function collect(lru, expired, totalArg, max, ratioArg, version
         total -= size;
         if (shouldUpdate === true) {
             updateNodeAncestors(node, size, lru, version);
-        } else if (parent = node.ツparent) {
+        } else if (parent = node.ツparent) {  // eslint-disable-line no-cond-assign
             removeNode(node, parent, node.ツkey, lru);
         }
         node = expired.pop();
@@ -3325,7 +3329,7 @@ CallResponse.prototype._subscribe = function _subscribe(observer) {
     var boundPath = model._path;
     var boundCallPath = boundPath.concat(callPath);
 
-    /*eslint-disable consistent-return*/
+    /* eslint-disable consistent-return */
     // Precisely the same error as the router when a call function does not
     // exist.
     if (!model._source) {
@@ -3367,7 +3371,7 @@ CallResponse.prototype._subscribe = function _subscribe(observer) {
                     observer.onCompleted();
                 });
         });
-    /*eslint-enable consistent-return*/
+    /* eslint-enable consistent-return */
 };
 
 module.exports = CallResponse;
@@ -3730,7 +3734,7 @@ module.exports = function checkCacheAndReport(model, requestedPaths, observer,
     if (hasValues && progressive || hasValueOverall && completed) {
         try {
             observer.onNext(valueNode);
-        } catch(e) {
+        } catch (e) {
             throw e;
         }
     }
@@ -4132,7 +4136,8 @@ module.exports = function setRequestCycle(model, observer, groups,
         // not disposed yet.
         set(currentJSONGraph, function(error, jsonGraphEnv) {
             if (typeof error === InvalidSourceError) {
-                return observer.onError(error);
+                observer.onError(error);
+                return;
             }
 
             // TODO: This seems like there are errors with this approach, but
@@ -5003,6 +5008,7 @@ module.exports = function setValueSync(pathArg, valueArg, errorSelectorArg, comp
     var path = pathSyntax.fromPath(pathArg);
     var value = valueArg;
     var errorSelector = errorSelectorArg;
+    // XXX comparator is never used.
     var comparator = comparatorArg;
 
     if (isPathValue(path)) {
@@ -5028,10 +5034,9 @@ module.exports = function setValueSync(pathArg, valueArg, errorSelectorArg, comp
         comparator = this._root._comparator;
     }
 
-    if (this._syncCheck("setValueSync")) {
-        setPathValues(this, [value]);
-        return this._getValueSync(this, value.path).value;
-    }
+    this._syncCheck("setValueSync");
+    setPathValues(this, [value]);
+    return this._getValueSync(this, value.path).value;
 };
 
 },{"126":126,"68":68,"92":92}],71:[function(require,module,exports){
@@ -5602,7 +5607,7 @@ var unlinkForwardReference = require(104);
 module.exports = function removeNode(node, parent, key, lru) {
     if (isObject(node)) {
         var type = node.$type;
-        if (Boolean(type)) {
+        if (type) {
             if (type === $ref) {
                 unlinkForwardReference(node);
             }
@@ -5880,17 +5885,17 @@ function FromEsObserverAdapter(esObserver) {
 FromEsObserverAdapter.prototype = {
     onNext: function onNext(value) {
         if (typeof this.esObserver.next === "function") {
-            return this.esObserver.next(value);
+            this.esObserver.next(value);
         }
     },
     onError: function onError(error) {
         if (typeof this.esObserver.error === "function") {
-            return this.esObserver.error(error);
+            this.esObserver.error(error);
         }
     },
     onCompleted: function onCompleted() {
         if (typeof this.esObserver.complete === "function") {
-            return this.esObserver.complete();
+            this.esObserver.complete();
         }
     }
 };
