@@ -101,7 +101,7 @@ Model.pathValue = jsong.pathValue;
  * @param {?Object} options - a set of options to customize behavior
  * @param {?DataSource} options.source - a data source to retrieve and manage the {@link JSONGraph}
  * @param {?JSONGraph} options.cache - initial state of the {@link JSONGraph}
- * @param {?number} options.maxSize - the maximum size of the cache
+ * @param {?number} options.maxSize - the maximum size of the cache. This value roughly correlates to item count (where itemCount = maxSize / 50). Each item by default is given a metadata `$size` of 50 (or its length when it's an array or string). You can get better control of falcor's memory usage by tweaking `$size`
  * @param {?number} options.collectRatio - the ratio of the maximum size to collect when the maxSize is exceeded
  * @param {?Model~errorSelector} options.errorSelector - a function used to translate errors before they are returned
  * @param {?Model~onChange} options.onChange - a function called whenever the Model's cache is changed
