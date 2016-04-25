@@ -15,8 +15,7 @@ id: api
 </h2>
 <section>
     <article>
-        <pre class="prettyprint source linenums"><code>var falcor = require("./../");
-var noop = require("./../support/noop");
+        <pre class="prettyprint source linenums"><code>var noop = require("./../support/noop");
 var Symbol = require("../SymbolShim");
 var toEsObservable = require("../toEsObservable");
 
@@ -120,9 +119,10 @@ ModelResponse.prototype.forEach = function subscribe(a, b, c) {
 };
 
 ModelResponse.prototype.then = function then(onNext, onError) {
+    /* global Promise */
     var self = this;
     if (!self._promise) {
-        self._promise = new falcor.Promise(function(resolve, reject) {
+        self._promise = new Promise(function(resolve, reject) {
             var rejected = false;
             var values = [];
             self.subscribe(

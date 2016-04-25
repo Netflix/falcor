@@ -2117,18 +2117,11 @@ falcor.keys = function getJSONKeys(json) {
         });
 };
 
-/* global Promise */
-if (typeof Promise === "function") {
-    falcor.Promise = Promise;
-} else {
-    falcor.Promise = require(142);
-}
-
 module.exports = falcor;
 
 falcor.Model = require(2);
 
-},{"142":142,"2":2}],35:[function(require,module,exports){
+},{"2":2}],35:[function(require,module,exports){
 module.exports = require(36) + "ref";
 
 },{"36":36}],36:[function(require,module,exports){
@@ -3448,7 +3441,7 @@ InvalidateResponse.prototype._subscribe = function _subscribe(observer) {
 module.exports = InvalidateResponse;
 
 },{"51":51,"89":89,"92":92}],51:[function(require,module,exports){
-var falcor = require(34);
+(function (Promise){
 var noop = require(96);
 var Symbol = require(5);
 var toEsObservable = require(109);
@@ -3553,9 +3546,10 @@ ModelResponse.prototype.forEach = function subscribe(a, b, c) {
 };
 
 ModelResponse.prototype.then = function then(onNext, onError) {
+    /* global Promise */
     var self = this;
     if (!self._promise) {
-        self._promise = new falcor.Promise(function(resolve, reject) {
+        self._promise = new Promise(function(resolve, reject) {
             var rejected = false;
             var values = [];
             self.subscribe(
@@ -3584,7 +3578,8 @@ ModelResponse.prototype.then = function then(onNext, onError) {
 
 module.exports = ModelResponse;
 
-},{"109":109,"34":34,"5":5,"96":96}],52:[function(require,module,exports){
+}).call(this,typeof Promise === "function" ? Promise : require(142))
+},{"109":109,"142":142,"5":5,"96":96}],52:[function(require,module,exports){
 var ModelResponse = require(51);
 var checkCacheAndReport = require(53);
 var getRequestCycle = require(54);
