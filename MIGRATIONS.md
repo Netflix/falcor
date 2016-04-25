@@ -187,3 +187,47 @@ model.
 * Simpler to grok/use
 * Promotes better application architecture.
 * Always synchronous.
+
+Promise shimming
+----------------
+
+In 0.x we depend on the 'promise' npm package to supply a Promise
+implementation on platforms missing the Promise builtin. In 1.x the choice of
+Promise shim is made at bundle build time. The supplied bundles are built with
+the same 'promise' npm package.
+
+To replicate this in your own Browserify build use the `insertGlobalVars`
+browserify option to use the Promise shim of your choice:
+
+```javascript
+browserify(filename, {
+    insertGlobalVars: {
+        Promise: function (file, basedir) {
+            return 'typeof Promise === "function" ? Promise : require("promise")';
+        }
+    }
+}
+```
+
+With Webpack we can use `ProvidePlugin` to the same effect:
+
+```javascript
+var path = require("path");
+var webpack = require("webpack");
+module.exports = {
+    plugins: [
+        new webpack.ProvidePlugin({
+            Promise: path.join(__dirname, "promise-implementation"),
+        })
+    ]
+};
+```
+
+Where promise-implementation.js is:
+```javascript
+module.exports = global.Promise || require("promise");
+```
+
+For those not using Falcor's Promise functionality (i.e. `model.get().then(...)`)
+or deploying only to modern browsers, omitting the 'promise' package from your
+build will save ~1KB page weight from your build after gzipping and minification.
