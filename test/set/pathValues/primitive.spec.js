@@ -152,6 +152,25 @@ describe("a primitive value", function() {
         }));
     });
 
+    it("through a reference that lands on an atom with a null last key", function() {
+
+        var cache = {};
+        var version = 0;
+        setPathValues(
+            getModel({ cache: cache, version: version++ }), [
+                $pathValue("foo.value", $ref("bar.value")),
+                $pathValue("bar.value", $atom("bar-value")),
+                $pathValue(["foo", "value", null], "foo-value-1"),
+                $pathValue(["foo", "value", null], "foo-value-2")
+            ]
+        );
+
+        expect(strip(cache)).to.deep.equal(strip({
+            foo: { value: $ref("bar.value") },
+            bar: { value: $atom("foo-value-2") }
+        }));
+    });
+
     describe("in multiple places", function() {
         describe("via keyset", function() {
             it("directly", function() {
