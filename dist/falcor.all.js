@@ -748,13 +748,15 @@ function ensureSymbol(root) {
 }
 
 function ensureObservable(Symbol) {
+    /* eslint-disable dot-notation */
     if (!Symbol.observable) {
         if (typeof Symbol.for === "function") {
-            Symbol.observable = Symbol.for("observable");
+            Symbol["observable"] = Symbol.for("observable");
         } else {
-            Symbol.observable = "@@observable";
+            Symbol["observable"] = "@@observable";
         }
     }
+    /* eslint-disable dot-notation */
 }
 
 function symbolForPolyfill(key) {
@@ -762,9 +764,11 @@ function symbolForPolyfill(key) {
 }
 
 function ensureFor(Symbol) {
+    /* eslint-disable dot-notation */
     if (!Symbol.for) {
-        Symbol.for = symbolForPolyfill;
+        Symbol["for"] = symbolForPolyfill;
     }
+    /* eslint-enable dot-notation */
 }
 
 
@@ -10686,6 +10690,9 @@ var currentQueue;
 var queueIndex = -1;
 
 function cleanUpNextTick() {
+    if (!draining || !currentQueue) {
+        return;
+    }
     draining = false;
     if (currentQueue.length) {
         queue = currentQueue.concat(queue);
