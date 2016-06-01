@@ -4943,7 +4943,7 @@ function setNode(
         type = node.$type;
     }
 
-    if (type !== void 0) {
+    if (branch && type !== void 0) {
         return [node, parent];
     }
 
