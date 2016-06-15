@@ -20,11 +20,11 @@ In order to create the requested subset of the [JSON Graph](http://netflix.githu
 
 ## When to use a Router
 
-The Router is appropriate as an abstraction over a service layer or REST API. Using a Router over these types of APIs provides just enough flexibility to avoid client round-trips without introducing heavy-weight abstractions. Service-oriented architectures are common in systems that are designed for scalability. These systems typically store data in different data sources and expose them through a variety of different services. For example, Netflix uses a Router in front of its [Microservice architecture](http://techblog.netflix.com/2015/02/a-microscope-on-microservices.html). 
+The Router is appropriate as an abstraction over a service layer or REST API. Using a Router over these types of APIs provides just enough flexibility to avoid client round-trips without introducing heavy-weight abstractions. Service-oriented architectures are common in systems that are designed for scalability. These systems typically store data in different data sources and expose them through a variety of different services. For example, Netflix uses a Router in front of its [Microservice architecture](http://techblog.netflix.com/2015/02/a-microscope-on-microservices.html).
 
 **It is rarely ideal to use a Router to directly access a single SQL Database**. Applications that use a single SQL store often attempt to build one SQL Query for every server request. Routers work by splitting up requests for different sections of the [JSON Graph](http://netflix.github.io/falcor/documentation/jsongraph.html) into separate handlers and sending individual requests to services to retrieve the requested data. As a consequence, individual Router handlers rarely have sufficient context to produce a single optimized SQL query. We are currently exploring different options for supporting this type of data access pattern with Falcor in future.
 
-## Contrasting a REST Router with a Falcor Router 
+## Contrasting a REST Router with a Falcor Router
 
 Falcor Routers serve the same purpose as Routers for RESTful endpoints: they allow app servers to remain stateless by retrieving requested data from persistent data stores on-demand. However a Falcor Router differs from the Router used by RESTful application servers in a few ways in order to accommodate the unique way in which Falcor app servers expose their data.
 
@@ -113,7 +113,7 @@ The Router accepts all of these path/value pairs, adds them to a single JSON obj
             "length": 10
         }
     }
-} 
+}
 ~~~
 
 ### 3. Falcor Routers can Retrieve Related Resources Without a Roundtrip
@@ -130,15 +130,15 @@ REST APIs often expose different kinds of resources at different endpoints. Thes
 ]
 ~~~
 
-RESTful clients traverse entity relationships by making follow-up requests for the resources at these hyperlinks. 
+RESTful clients traverse entity relationships by making follow-up requests for the resources at these hyperlinks.
 
 ![Server Roundtrips](../images/server-roundtrips.png)
 
-Unlike RESTful servers, Falcor Application servers expose all of an application's domain data as a single [JSON Graph](http://netflix.github.io/falcor/documentation/jsongraph.html) resource. Within a the [JSON Graph](http://netflix.github.io/falcor/documentation/jsongraph.html) resource, entity relationships are expressed as references to other entities in the same resource rather than hyperlinks to different resources. 
+Unlike RESTful servers, Falcor Application servers expose all of an application's domain data as a single [JSON Graph](http://netflix.github.io/falcor/documentation/jsongraph.html) resource. Within a the [JSON Graph](http://netflix.github.io/falcor/documentation/jsongraph.html) resource, entity relationships are expressed as references to other entities in the same resource rather than hyperlinks to different resources.
 
 When Falcor clients request [paths](http://netflix.github.io/falcor/documentation/paths.html) to values within the [JSON Graph](http://netflix.github.io/falcor/documentation/jsongraph.html) resource, Falcor Routers follow the Path Evaluation Algorithm and automatically traverse any references encountered along the path provided by the client.
 
-For example the following path retrieves a reference to the first task object in a [JSON Graph](http://netflix.github.io/falcor/documentation/jsongraph.html) resource, much the same way as the RESTful /todos resource contains hyperlinks to task resources. 
+For example the following path retrieves a reference to the first task object in a [JSON Graph](http://netflix.github.io/falcor/documentation/jsongraph.html) resource, much the same way as the RESTful /todos resource contains hyperlinks to task resources.
 
 ~~~js
 http://.../model.json?paths=[["todos",0]]
@@ -153,7 +153,7 @@ The server responds with the following JSONGraphEnvelope:
             "0": { $type: "ref", value: ["todosById", 8964] }
         }
     }
-} 
+}
 ~~~
 
 However if the path is altered to retrieve keys from the entity located at the reference, the Falcor Router traverses the reference on the server and retrieves the values from the entity located at the reference path. The result is a fragment of the [JSON Graph](http://netflix.github.io/falcor/documentation/jsongraph.html) object which contains all of the references encountered during path evaluation as well as the requested value.
@@ -176,13 +176,13 @@ The server responds with the following JSONGraphEnvelope:
             }
         }
     }
-} 
+}
 ~~~
 
 ## Creating a Router Class
- 
+
 A Router Class is created by invoking the Router.createClass method. This Class factory method accepts an Array of Route objects. Each Route object contains a path pattern, and an optional series of handlers for the various [DataSource](http://netflix.github.io/falcor/documentation/datasources.html) methods: get, set, and call.
- 
+
 ~~~js
 var Router = require("falcor-router");
 
@@ -194,15 +194,15 @@ var BaseRouter = Router.createClass([
         get: function(pathSet) {
             if (this.userId == null) {
                 throw new Error("not authorized");
-            }  
+            }
             // Route implementation snipped
         },
         set: function(jsonGraph) {
             if (this.userId == null) {
                 throw new Error("not authorized");
-            }  
+            }
             // Route implementation snipped
-        }        
+        }
     }
 ]);
 
@@ -232,7 +232,7 @@ class TODORouter extends
             get: function(pathSet) {
                 if (this.userId == null) {
                     throw new Error("not authorized");
-                } 
+                }
                 // Route implementation snipped
             },
             set: function(jsonGraph) {
@@ -240,10 +240,10 @@ class TODORouter extends
                     throw new Error("not authorized");
                 }
                 // Route implementation snipped
-            }      
+            }
         }
     ]) {
-    
+
     constructor(userId) {
         super();
         this.userId = userId;
@@ -252,7 +252,7 @@ class TODORouter extends
 ~~~
 
 ### Why Create a Router Class Instead of a Router Instance?
- 
+
 When an Array of routes is passed to the createClass method, an internal Route Map is generated. The Route Map is a stateless data structure designed to improve the speed of pattern matching. Ideally the process of creating the Route Map should only be performed once when your Web server starts up. However Router instances often require access to request information (ex. authorization information included in the cookies). Creating a Router Base class generates the route map once, and allows the route map to be shared with every new instance of the Router class. This allows us to create new instances of Routers inexpensively and throw them away at the end of each request.
 
 ~~~js
@@ -269,12 +269,12 @@ class TODORouter extends
                 // Therefore the userId member must be set by the constructor.
                 if (this.userId == null) {
                     throw new Error("not authorized");
-                } 
+                }
                 // Route implementation snipped
             }
         }
     ]) {
-    
+
     constructor(userId) {
         super();
         this.userId = userId;
@@ -285,7 +285,7 @@ module.exports = TODORouter;
 ~~~
 
 These derived Router class instances can be instantiated at connection time, and passed request information via their constructor. All route handler functions are applied to the concrete Router instance, which means that Routes can access request information passed to the Router via the "this" pointer.
- 
+
 Typically one instance of the derived Router class is created is created per request and then thrown away.
 
 ~~~js
@@ -309,11 +309,11 @@ var server = app.listen(80);
 ~~~
 
 ### Route Objects
- 
+
 Each Route object passed to the Router constructor contains a pattern that can be used to match [Path Sets](http://netflix.github.io/falcor/documentation/paths.html#pathsets), as well as three optional handlers that correspond to each of the [DataSource](http://netflix.github.io/falcor/documentation/datasources.html) interface's methods.
- 
+
 When one of the [DataSource](http://netflix.github.io/falcor/documentation/datasources.html) methods is invoked on the Router object, the Router attempts to match the [paths](http://netflix.github.io/falcor/documentation/paths.html) against the patterns in each route.  If a Route's pattern is matched, the corresponding route handler method is invoked.  The Route handler is expected to perform the corresponding action and generate the subset of the [JSON Graph](http://netflix.github.io/falcor/documentation/jsongraph.html) containing the requested path.
- 
+
 For an example, take the following Router:
 
 ~~~js
@@ -324,7 +324,7 @@ var BaseRouter = Router.createClass([
             // pathSet is ["user", ["name"]] or ["user", ["surname"]] or ["user", ["name", "surname"]]
             if (this.userId == null) {
                 throw new Error("not authorized");
-            } 
+            }
             return userService.
                 get(this.userId).
                 then(function(user) {
@@ -345,25 +345,25 @@ var AppRouter = function(userId){
 };
 
 // Creating a derived class using JavaScript's classical inheritance pattern
-AppRouter.prototype = Object.create(BaseRouter);    
+AppRouter.prototype = Object.create(BaseRouter.prototype);
 ~~~
- 
+
 Let's say the following request is made for the "name" and "surname" of the user:
 
-~~~js 
+~~~js
 routerInstance.get([["user", ["name", "surname"]]])
 ~~~
- 
+
 Once the Router determines that a route's pattern matches a subset of the requested Path Set, the Router will invoke the matching route's get handler with a [PathSet](http://netflix.github.io/falcor/documentation/paths.html#pathsets) containing the set of [paths](http://netflix.github.io/falcor/documentation/paths.html) that matched the route pattern:
- 
+
 ~~~js
 matchingRoute.get.call(routerInstance, ["user",["name","surname"]])
 ~~~
 
-Note that each Route handler is applied to the Router instance, meaning it can access Router properties using the "this" object.  Note as well that the matching path is passed to the handler using the [Path Array](http://netflix.github.io/falcor/documentation/paths.html#path) syntax. 
- 
+Note that each Route handler is applied to the Router instance, meaning it can access Router properties using the "this" object.  Note as well that the matching path is passed to the handler using the [Path Array](http://netflix.github.io/falcor/documentation/paths.html#path) syntax.
+
 Each route is responsible for creating a subset of the [JSON Graph](http://netflix.github.io/falcor/documentation/jsongraph.html) object that contains the requested values.
- 
+
 ~~~js
 {
     route: 'user.["name", "surname"]',
@@ -371,7 +371,7 @@ Each route is responsible for creating a subset of the [JSON Graph](http://netfl
         // pathSet is ["user", ["name"]] or ["user", ["surname"]] or ["user", ["name", "surname"]]
         if (this.userId == null) {
             throw new Error("not authorized");
-        } 
+        }
         return userService.
             get(this.userId).
             then(function(user) {
@@ -382,7 +382,7 @@ Each route is responsible for creating a subset of the [JSON Graph](http://netfl
             });
     }
 }
-~~~ 
+~~~
 
 The Router combines the values retrieved from each route handler into a single [JSON Graph](http://netflix.github.io/falcor/documentation/jsongraph.html) object, and returns it to the caller in an envelope. For example the code below...
 
@@ -411,9 +411,9 @@ router.
 ~~~
 
 #### Route Handlers
- 
+
 Each route handler for get or set operations is responsible for creating a PathValue for every [path](http://netflix.github.io/falcor/documentation/paths.html) it matches. A PathValue is an object with a [path](http://netflix.github.io/falcor/documentation/paths.html) and value key.
- 
+
 ~~~js
 {
     route: 'user.["name", "surname"]',
@@ -421,7 +421,7 @@ Each route handler for get or set operations is responsible for creating a PathV
         // pathSet is ["user", ["name"]] or ["user", ["surname"]] or ["user", ["name", "surname"]]
         if (this.userId == null) {
             throw new Error("not authorized");
-        } 
+        }
 
         return userService.
             get(this.userId).
@@ -433,10 +433,10 @@ Each route handler for get or set operations is responsible for creating a PathV
             });
     }
 }
-~~~ 
+~~~
 
 This route returns two PathValue objects containing the name and surname of a user respectively. When a Router receives a series of PathValues, it creates the [JSON Graph](http://netflix.github.io/falcor/documentation/jsongraph.html) envelope by writing each PathValue's value into an object at the PathValue's [path](http://netflix.github.io/falcor/documentation/paths.html).
- 
+
 ~~~js
 [
     { path: ["user","name"], value: "Anupa" },
@@ -454,19 +454,19 @@ This route returns two PathValue objects containing the name and surname of a us
         ["user", ["name", "surname"]]
     ]
 }
-~~~ 
+~~~
 
 Once all of the routes have finished, the Router responds with a [JSON Graph](http://netflix.github.io/falcor/documentation/jsongraph.html) object containing all of the values returned from each individual route.
- 
+
 #### Route Handler Concurrency
- 
+
 In addition to returning either [JSON Graph](http://netflix.github.io/falcor/documentation/jsongraph.html) envelopes or PathValues synchronously, Router handlers can also return their data asynchronously by delivering their output data in either of the following containers:
 
 * Promise
 * Observable
- 
+
 In the following example a Route handler retrieves the name and surname of a user from a persistent DataStore, and returns the results in an ES6 Promise:
- 
+
 ~~~js
 {
     route: 'user.["name", "surname"]',
@@ -474,7 +474,7 @@ In the following example a Route handler retrieves the name and surname of a use
         // pathSet is ["user", ["name"]] or ["user", ["surname"]] or ["user", ["name", "surname"]]
         if (this.userId == null) {
             throw new Error("not authorized");
-        } 
+        }
         return userService.
             get(this.userId).
             then(function(user) {
@@ -485,12 +485,12 @@ In the following example a Route handler retrieves the name and surname of a use
             });
     }
 }
-~~~ 
+~~~
 
 For more information on Promises, see this [article](https://www.promisejs.org/)
- 
+
 Alternately a Router Handler can return the PathValue results progressively using an Observable:
- 
+
 ~~~js
 var Rx = require("rx");
 var Observable = Rx.Observable;
@@ -502,7 +502,7 @@ var Observable = Rx.Observable;
         // pathSet is ["user", ["name"]] or ["user", ["surname"]] or ["user", ["name", "surname"]]
         if (this.userId == null) {
             throw new Error("not authorized");
-        } 
+        }
         return Observable.
             fromPromise(userService.get(this.userId)).
             flatMap(function(user) {
@@ -518,15 +518,15 @@ var Observable = Rx.Observable;
 ~~~
 
 An Observable is similar to a Promise, with the principal difference being that an Observable can send multiple values over time. The main advantage of using an Observable over a Promise is the ability to progressively return PathValues to the Router as soon as they are returned from the underlying [DataSource](http://netflix.github.io/falcor/documentation/datasources.html).  In contrast, when delivering values in a Promise, all values must be collected together in a [JSON Graph](http://netflix.github.io/falcor/documentation/jsongraph.html) envelope or an Array of PathValues and returned to the Router at the same time.
- 
+
 Using an Observable can improve throughput, because Routers may make additional requests to backend services in the event references are discovered in a Route Handler's [JSON Graph](http://netflix.github.io/falcor/documentation/jsongraph.html) output.
 
 When a Router discovers a reference before a [path](http://netflix.github.io/falcor/documentation/paths.html) has been fully evaluated, it optimizes the Path and matches the newly optimized [path](http://netflix.github.io/falcor/documentation/paths.html) against the Routes. When a [path](http://netflix.github.io/falcor/documentation/paths.html) is optimized it is matched against the Router's Routes again. This may in turn trigger subsequent backend requests, which means that getting the references within a Route response back to the Router earlier can sometimes improve throughput.
- 
+
 For an overview on Observable, see this [video](https://www.youtube.com/watch?v=XRYN2xt11Ek).
- 
+
 #### Route Pattern Matching
- 
+
 Route patterns support a superset of the PathSet syntax, which means they can match any PathSet. In addition to allowing matching explicit Ranges and KeySets in indexers, Route patterns may contain any of the following three special tokens:
 
 ~~~
@@ -578,7 +578,7 @@ var router = new Router([{
                 var jsonGraph = {},
                     tasksById = jsonGraph.tasksById = {},
                     task;
-                
+
                 pathSet.ids.forEach(function(id) {
                     var taskRecord = taskMap[id];
                     // if a Task does not exist, we explicitly insert an empty value
@@ -593,7 +593,7 @@ var router = new Router([{
                         });
                     }
                 });
-                
+
                 return { jsonGraph: jsonGraph };
             });
     }
@@ -605,7 +605,7 @@ router.get([
     console.log(JSON.stringify(jsonGraphEnvelope, null, 4));
 });
 ~~~
- 
+
 ##### The {ranges} Pattern
 
 The {ranges} pattern will match any integers in a KeySet whether specified in a Range, a string, or simply as a number. All matched keys are normalized into an Array of ranges.
@@ -637,12 +637,12 @@ var Router = require('falcor-router');
 var router = new Router([{
     route: 'genrelist[{ranges:indexRanges}].name',
     get: function(pathSet) {
-        // pathSet.indexRanges is [{from:0,to:1}, {from:5,to:7}, {from:9,to:9}] 
+        // pathSet.indexRanges is [{from:0,to:1}, {from:5,to:7}, {from:9,to:9}]
         return genreListService.
             getGenreListsByRanges(pathSet.indexRanges).
             then(function(listItems) {
                 // listItems is...
-                // [ 
+                // [
                 //    { index: 0, value: { name: "Horror", titles: [ ... ] },
                 //    { index: 1, value: { name: "Drama", titles: [ ... ] },
                 //    { index: 5, value: { name: "New Releases", titles: [ ... ] },
@@ -670,7 +670,7 @@ router.get([
     console.log(JSON.stringify(jsonGraphEnvelope, null, 4));
 });
 ~~~
- 
+
 ##### The {keys} Pattern
 
 The {keys} pattern will match any valid key (string, number, boolean), or KeySet (an array of ranges or keys) and normalize the matching set of keys into an Array of keys.
@@ -715,7 +715,7 @@ var router = new Router([{
                 var jsonGraph = {},
                     tasksById = jsonGraph.tasksById = {},
                     task;
-                
+
                 pathSet.ids.forEach(function(id) {
                     var taskRecord = taskMap[id];
                     // if a Task does not exist, we explicitly insert an empty value
@@ -730,7 +730,7 @@ var router = new Router([{
                         });
                     }
                 });
-                
+
                 return { jsonGraph: jsonGraph };
             });
     }
@@ -743,7 +743,7 @@ router.get([
 });
 ~~~
 
-The {keys} can also be used to expose any key on a server object to the client. 
+The {keys} can also be used to expose any key on a server object to the client.
 
 Each pattern will produce an array of results, even when matched against a single value.
 
@@ -766,7 +766,7 @@ var router = new Router(
 // pins CPU!
 router.
   get(["genrelists", {from:0, to: Number.MAX_SAFE_INTEGER}, "name"]).
-  subscribe({ 
+  subscribe({
     onNext: function(jsonGraphEnvelope) { console.log(JSON.stringify(jsonGraphEnvelope)); },
     onError: function(error) { console.error(error); },
     onCompleted: function() { console.log("done"); })
@@ -797,11 +797,11 @@ var router = new Router(
 // prints "You asked for too many paths."
 router.
   get(["genrelists", {from:0, to: Number.MAX_SAFE_INTEGER}, "name"]).
-  subscribe({ 
+  subscribe({
     onNext: function(jsonGraphEnvelope) { console.log(JSON.stringify(jsonGraphEnvelope)); },
-    onError: function(error) { 
+    onError: function(error) {
       if (error instanceof MaxPathsExceededError) {
-        console.error("You asked for too many paths."); 
+        console.error("You asked for too many paths.");
       }
     },
     onCompleted: function() { console.log("done"); })
@@ -831,11 +831,11 @@ var router = new Router(
 // prints "You exceeded the maximum number of genre lists that can be requested in a single operation."
 router.
   get(["genrelists", {from:0, to: Number.MAX_SAFE_INTEGER}, "name"]).
-  subscribe({ 
+  subscribe({
     onNext: function(jsonGraphEnvelope) { console.log(JSON.stringify(jsonGraphEnvelope)); },
-    onError: function(error) { 
+    onError: function(error) {
       if (error instanceof MaxPathsExceededError) {
-        console.error(error.message); 
+        console.error(error.message);
       }
     },
     onCompleted: function() { console.log("done"); })
@@ -894,7 +894,7 @@ var model = new falcor.Model({ source: new falcor.HttpDataSource("/model.json") 
 // name and boxshot of the first five titles within each genre list
 model.
     get(
-        "genrelists[0..3].name", 
+        "genrelists[0..3].name",
         "genrelists[0..3].titles[0..4]['name','boxshot']").
     then(function(jsonResponse) {
         console.log(JSON.stringify(jsonResponse, null, 4);
@@ -1149,7 +1149,7 @@ titleService.getTitles([1, 2]).then(function(titles) { console.log(JSON.stringif
          "_rev": "1-3ec6bbb698af163a7946825844e9fddf"
       }
    }
-}     
+}
 ~~~
 
 Note that the output of the title service is a map of record objects organized by each title ID. A record object is an object with a "doc" key containing the requested title. If an error occurs while attempting to retrieve a particular title, the record object will contain an error" key instead.
@@ -1162,7 +1162,7 @@ Note that the output of the title service is a map of record objects organized b
    "2": {
       "error": "something went wrong."
    }
-}     
+}
 
 ~~~
 
@@ -1207,7 +1207,7 @@ The route handler's responsibility is to create a PathValue object for each [pat
 ["titlesById", 528, "year"]
 ~~~
 
-Inside the route handler we can get access to the array of integers produced by the {integers} pattern positionally. 
+Inside the route handler we can get access to the array of integers produced by the {integers} pattern positionally.
 
 ~~~js
 {
@@ -1245,7 +1245,7 @@ Once we have access to the ids of the requested titles, we can make a call to th
 }
 ~~~
 
-Now we will use two nested forEach calls to create a PathValue object for every title id and title key combination.  
+Now we will use two nested forEach calls to create a PathValue object for every title id and title key combination.
 
 ~~~js
 {
@@ -1255,7 +1255,7 @@ Now we will use two nested forEach calls to create a PathValue object for every 
             then(function(titles) {
 
                 var results = [];
-                
+
                 pathSet.titleIds.forEach(function(titleId) {
                     pathSet[2].forEach(function(key) {
                         var titleRecord = titles[titleId];
@@ -1267,19 +1267,19 @@ Now we will use two nested forEach calls to create a PathValue object for every 
                             });
                         } else {
                             results.push({
-                                path: ['titlesById', titleId, key], 
+                                path: ['titlesById', titleId, key],
                                 value: titleRecord.doc[key]
                             });
                         }
                     });
                 });
-                
+
                 return results;
             });
     }
 }
-~~~        
-                                    
+~~~
+
 Now we should be able to retrieve title keys by ID from the Router:
 
 ~~~js
@@ -1307,7 +1307,7 @@ The router collects up all of the PathValue objects returned from route handlers
 }
 ~~~
 
-What do you think will happen if we attempt to retrieve keys from a title that does not exist? Let's try to retrieve the name of a title that does not exist (id = -1), and a title that does exist (id=7). 
+What do you think will happen if we attempt to retrieve keys from a title that does not exist? Let's try to retrieve the name of a title that does not exist (id = -1), and a title that does exist (id=7).
 
 ~~~js
 router.get([["titlesById", [-1, 7], "name"]]).subscribe(function(jsonGraph) {
@@ -1331,11 +1331,11 @@ router.get([["titlesById", [-1, 7], "name"]]).subscribe(function(jsonGraph) {
 }
 ~~~
 
-Note that the output is a [JSON Graph](http://netflix.github.io/falcor/documentation/jsongraph.html) error object at each individual [path](http://netflix.github.io/falcor/documentation/paths.html). Why did this happen? 
+Note that the output is a [JSON Graph](http://netflix.github.io/falcor/documentation/jsongraph.html) error object at each individual [path](http://netflix.github.io/falcor/documentation/paths.html). Why did this happen?
 
 We did not guard against the possibility that the title doesn't exist in our route handler. As a result our route threw an "undefined is not an object" error when it attempted to look up "name" on an undefined value. When the router catches an error thrown from a route handler, it creates a [JSON Graph](http://netflix.github.io/falcor/documentation/jsongraph.html) error object at every [path](http://netflix.github.io/falcor/documentation/paths.html) passed to that route handler. That means we don't get any data back - not even the name of the title that does exist.
 
-Clearly we have to be defensive when coding our route handlers, but this begs the question: "what should a route handler return when a title doesn't exist"? 
+Clearly we have to be defensive when coding our route handlers, but this begs the question: "what should a route handler return when a title doesn't exist"?
 
 If there is a null or undefined value at "titleById[-1]" the route should return a PathValue indicating as much. Note the additional check added to the route below.
 
@@ -1347,7 +1347,7 @@ If there is a null or undefined value at "titleById[-1]" the route should return
             then(function(titles) {
 
                 var results = [];
-                
+
                 pathSet.titleIds.forEach(function(titleId) {
                     pathSet[2].forEach(function(key) {
                         var titleRecord = titles[titleId];
@@ -1359,7 +1359,7 @@ If there is a null or undefined value at "titleById[-1]" the route should return
                             });
                         } else if (titleRecord.doc) {
                             results.push({
-                                path: ['titlesById', titleId, key], 
+                                path: ['titlesById', titleId, key],
                                 value: titleRecord.doc[key]
                             });
                         } else {
@@ -1370,11 +1370,11 @@ If there is a null or undefined value at "titleById[-1]" the route should return
                         }
                     });
                 });
-                
+
                 return results;
             });
     }
-}                    
+}
 ~~~
 
 Now let's see what gets printed to the console if we repeat the same request as last time:
@@ -1430,7 +1430,7 @@ ratingService.getRatings([1,2], "1").
          "userRating": 1
       }
    }
-} 
+}
 ~~~
 
 Note that like the title service, the output of the rating service is a map of record objects organized by each title ID. Each record object contains a "doc" field with an object that contains two fields:
@@ -1451,7 +1451,7 @@ Now that we understand how the rating service works, let's create a route that m
             return ratingService.getRatings(pathSet.titleIds, userId).
                 then(function(ratings) {
                     var results = [];
-                    
+
                     pathSet.titleIds.forEach(function(titleId) {
                         pathSet[2].forEach(function(key) {
                             var ratingRecord = ratings[titleId];
@@ -1463,7 +1463,7 @@ Now that we understand how the rating service works, let's create a route that m
                                 });
                             } else if (ratingRecord.doc) {
                                 results.push({
-                                    path: ['titlesById', titleId, key], 
+                                    path: ['titlesById', titleId, key],
                                     value: ratingRecord.doc[key]
                                 });
                             } else {
@@ -1472,10 +1472,10 @@ Now that we understand how the rating service works, let's create a route that m
                                     value: undefined
                                 });
                             }
-                             
+
                         });
                     });
-                    
+
                     return results;
                 });
         }
@@ -1555,13 +1555,13 @@ The code above prints the following (abbreviated) output to the console:
 }
 ~~~
 
-The getGenreList method can also be called without a user ID. If no user ID is provided the service will fallback to a non-personalized list of recommendations containing the highest rated titles in the catalog. 
+The getGenreList method can also be called without a user ID. If no user ID is provided the service will fallback to a non-personalized list of recommendations containing the highest rated titles in the catalog.
 
 Now that we understand how the service works, let's use it to create the routes for the current user's genre list.
 
 #### The "genrelist.length" route
 
-The job of the "genrelist.length" route's get handler is simple: retrieve the user's genre list from the recommendation service and return its length. 
+The job of the "genrelist.length" route's get handler is simple: retrieve the user's genre list from the recommendation service and return its length.
 
 ~~~js
 var routes = [
@@ -1569,7 +1569,7 @@ var routes = [
         route: 'genrelist.length',
         get: function(pathSet) {
             return recommendationService.getGenreList(this.userId)
-                .then(function(genrelist) {             
+                .then(function(genrelist) {
                     return {
                         path: ['genrelist', 'length'],
                         value: genrelist.length
@@ -1616,7 +1616,7 @@ var routes = [
         route: 'genrelist[{integers:indices}].name',
         get: function(pathSet) {
             return recommendationService.getGenreList(this.userId)
-                .then(function(genrelist) {             
+                .then(function(genrelist) {
                     // to be continued…
                 });
         }
@@ -1638,7 +1638,7 @@ No matter what the input, the {integers} range will normalize the incoming KeySe
 genrelist[0..1, 2].name -> route.get.call(routerInstance, ["genrelist", [0, 1, 2], "name"]])
 ~~~
 
-Once inside the route, we can get access to the array of integers produced by the {integers} pattern positionally. 
+Once inside the route, we can get access to the array of integers produced by the {integers} pattern positionally.
 
 ~~~js
     {
@@ -1698,7 +1698,7 @@ Once we retrieve the genre list from the recommendations service, we can use the
     }
 ~~~
 
-Note that we have been careful to use branch guarding, and check for the existence of each individual list before attempting to retrieve the name. 
+Note that we have been careful to use branch guarding, and check for the existence of each individual list before attempting to retrieve the name.
 
 Now we can retrieve the name of a user's genre lists from the Router.
 
@@ -1756,7 +1756,7 @@ Each reference in the titles array points to a title in the "titlesById" map. Th
                     var pathValues = [];
                     pathSet.indices.forEach(function (index) {
                         var genre = genrelist[index];
-                        
+
                         if (genre == null) {
                             pathValues.push({
                                 path: ['genrelist', index],
