@@ -586,5 +586,62 @@ describe('DataSource and Partial Cache', function() {
                     });
         });
     });
+    describe("Cached data with timestamp", function() {
+        var t0 = Date.parse('2000/01/01');
+        var t1 = t0 + 1;
+
+        function remoteData() {
+            return {
+                videos: {
+                    1: {
+                        bookmark: Model.atom('remote value', {$timestamp: t0})
+                    },
+                    2: {
+                        previous: Model.ref(['videos', 1])
+                    }
+                }
+            };
+        }
+
+        it("should not be replaced by data with an older timestamp", function(done) {
+            var cache = {
+                videos: {
+                    1: {
+                        bookmark: Model.atom('cached value', {$timestamp: t1})
+                    }
+                }
+            };
+            var source = new LocalDataSource(remoteData());
+            var model = new Model({cache: cache, source: source});
+            model.getValue(['videos', 2, 'previous', 'bookmark']).
+                then(function(value) {
+                    expect(value).to.equal('cached value');
+                    done();
+                }).
+                catch(function(e) {
+                    done(e);
+                });
+        });
+
+        it("when expired should be replaced by data with an older timestamp", function(done) {
+            var cache = {
+                videos: {
+                    1: {
+                        bookmark: Model.atom('cached value', {$timestamp: t1, $expires: t1})
+                    }
+                }
+            };
+            var source = new LocalDataSource(remoteData());
+            var model = new Model({cache: cache, source: source});
+            model.getValue(['videos', 2, 'previous', 'bookmark']).
+                then(function(value) {
+                    expect(value).to.equal('remote value');
+                    done();
+                }).
+                catch(function(e) {
+                    done(e);
+                });
+        });
+    });
 });
 
