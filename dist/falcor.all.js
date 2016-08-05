@@ -5465,15 +5465,15 @@ module.exports = function mergeJSONGraphNode(
                 node = insertNode(node, parent, key, version, optimizedPath);
             }
         }
-        // If the cache and message are different, or the message is a
-        // primitive, replace the cache with the message value. If the message
-        // is a sentinel, clone and maintain its type. If the message is a
-        // primitive value, wrap it in an atom.
+        // If the cache and message are different, the cache value is expired,
+        // or the message is a primitive, replace the cache with the message value.
+        // If the message is a sentinel, clone and maintain its type.
+        // If the message is a primitive value, wrap it in an atom.
         else {
             var isDistinct = true;
             // If the cache is a branch, but the message is a leaf, replace the
             // cache branch with the message leaf.
-            if (cType || !cIsObject) {
+            if ((cType && !isExpired(node)) || !cIsObject) {
                 // Compare the current cache value with the new value. If either of
                 // them don't have a timestamp, or the message's timestamp is newer,
                 // replace the cache value with the message value. If a comparator
@@ -5482,7 +5482,7 @@ module.exports = function mergeJSONGraphNode(
                 // Comparing either Number or undefined to undefined always results in false.
                 isDistinct = (getTimestamp(message) < getTimestamp(node)) === false;
                 // If at least one of the cache/message are sentinels, compare them.
-                if ((cType || mType) && isFunction(comparator)) {
+                if (isDistinct && (cType || mType) && isFunction(comparator)) {
                     isDistinct = !comparator(node, message, optimizedPath.slice(0, optimizedPath.index));
                 }
             }
@@ -10682,8 +10682,46 @@ module.exports = {
 
 },{}],202:[function(require,module,exports){
 // shim for using process in browser
-
 var process = module.exports = {};
+
+// cached from whatever global is present so that test runners that stub it
+// don't break things.  But we need to wrap it in a try catch in case it is
+// wrapped in strict mode code which doesn't define any globals.  It's inside a
+// function because try/catches deoptimize in certain engines.
+
+var cachedSetTimeout;
+var cachedClearTimeout;
+
+(function () {
+    try {
+        cachedSetTimeout = setTimeout;
+    } catch (e) {
+        cachedSetTimeout = function () {
+            throw new Error('setTimeout is not defined');
+        }
+    }
+    try {
+        cachedClearTimeout = clearTimeout;
+    } catch (e) {
+        cachedClearTimeout = function () {
+            throw new Error('clearTimeout is not defined');
+        }
+    }
+} ())
+function runTimeout(fun) {
+    if (cachedSetTimeout === setTimeout) {
+        return setTimeout(fun, 0);
+    } else {
+        return cachedSetTimeout.call(null, fun, 0);
+    }
+}
+function runClearTimeout(marker) {
+    if (cachedClearTimeout === clearTimeout) {
+        clearTimeout(marker);
+    } else {
+        cachedClearTimeout.call(null, marker);
+    }
+}
 var queue = [];
 var draining = false;
 var currentQueue;
@@ -10708,7 +10746,7 @@ function drainQueue() {
     if (draining) {
         return;
     }
-    var timeout = setTimeout(cleanUpNextTick);
+    var timeout = runTimeout(cleanUpNextTick);
     draining = true;
 
     var len = queue.length;
@@ -10725,7 +10763,7 @@ function drainQueue() {
     }
     currentQueue = null;
     draining = false;
-    clearTimeout(timeout);
+    runClearTimeout(timeout);
 }
 
 process.nextTick = function (fun) {
@@ -10737,7 +10775,7 @@ process.nextTick = function (fun) {
     }
     queue.push(new Item(fun, args));
     if (queue.length === 1 && !draining) {
-        setTimeout(drainQueue, 0);
+        runTimeout(drainQueue);
     }
 };
 

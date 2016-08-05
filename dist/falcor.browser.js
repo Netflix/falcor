@@ -5457,15 +5457,15 @@ module.exports = function mergeJSONGraphNode(
                 node = insertNode(node, parent, key, version, optimizedPath);
             }
         }
-        // If the cache and message are different, or the message is a
-        // primitive, replace the cache with the message value. If the message
-        // is a sentinel, clone and maintain its type. If the message is a
-        // primitive value, wrap it in an atom.
+        // If the cache and message are different, the cache value is expired,
+        // or the message is a primitive, replace the cache with the message value.
+        // If the message is a sentinel, clone and maintain its type.
+        // If the message is a primitive value, wrap it in an atom.
         else {
             var isDistinct = true;
             // If the cache is a branch, but the message is a leaf, replace the
             // cache branch with the message leaf.
-            if (cType || !cIsObject) {
+            if ((cType && !isExpired(node)) || !cIsObject) {
                 // Compare the current cache value with the new value. If either of
                 // them don't have a timestamp, or the message's timestamp is newer,
                 // replace the cache value with the message value. If a comparator
@@ -5474,7 +5474,7 @@ module.exports = function mergeJSONGraphNode(
                 // Comparing either Number or undefined to undefined always results in false.
                 isDistinct = (getTimestamp(message) < getTimestamp(node)) === false;
                 // If at least one of the cache/message are sentinels, compare them.
-                if ((cType || mType) && isFunction(comparator)) {
+                if (isDistinct && (cType || mType) && isFunction(comparator)) {
                     isDistinct = !comparator(node, message, optimizedPath.slice(0, optimizedPath.index));
                 }
             }
