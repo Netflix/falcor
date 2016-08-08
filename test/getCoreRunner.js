@@ -35,7 +35,8 @@ module.exports = function(testConfig) {
     else {
         model = new Model({
             cache: cache,
-            source: source
+            source: source,
+            branchSelector: testConfig.branchSelector
         });
     }
 

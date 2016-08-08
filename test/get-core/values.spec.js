@@ -136,6 +136,39 @@ describe('Values', function() {
             cache: cacheGenerator(0, 1)
         });
     });
+    it('should use the branchSelector to build JSON branches if provided', function() {
+        getCoreRunner({
+            input: [['videos', 0, 'title']],
+            cache: cacheGenerator(0, 1),
+            branchSelector: function(json, node, key, depth, isRoot, isLeaf, referenceContainer) {
+                if (!json) {
+                    json = { $__userGenerated: true };
+                    if (isRoot === false) {
+                        json.$__path = node.ツabsolutePath;
+                    }
+                    if (referenceContainer) {
+                        json.$__refPath = referenceContainer.value;
+                        json.$__toReference = referenceContainer.ツabsolutePath;
+                    }
+                }
+                return json;
+            },
+            output: {
+                json: {
+                    $__userGenerated: true,
+                    videos: {
+                        $__path: ['videos'],
+                        $__userGenerated: true,
+                        0: {
+                            $__path: ['videos', 0],
+                            $__userGenerated: true,
+                            title: 'Video 0'
+                        }
+                    }
+                }
+            }
+        });
+    });
 
     // JSONGraph ----------------------------------------
     it('should get JSONGraph for a single value out, modelCreated', function() {
