@@ -60,7 +60,7 @@ module.exports = function(testConfig) {
         // add the reference container to the model as well if there is one.
         if (testConfig.referenceContainer) {
             model._referenceContainer =
-                getCachePosition(model, testConfig.referenceContainer);
+                getCachePosition(model._root.cache, testConfig.referenceContainer);
         }
     }
 
