@@ -11,9 +11,57 @@ var Model = require('./../../lib').Model;
 
 describe('Edges', function() {
     // PathMap ----------------------------------------
-    it('should report nothing on empty path.', function() {
+    it('should report nothing on empty keyset.', function() {
         getCoreRunner({
             input: [['videos', [], 'title']],
+            output: { },
+            cache: cacheGenerator(0, 1)
+        });
+    });
+    it('should report nothing on empty range.', function() {
+        getCoreRunner({
+            input: [['videos', {from: 0, to: -1}, 'title']],
+            output: { },
+            cache: cacheGenerator(0, 1)
+        });
+        getCoreRunner({
+            input: [['videos', {from: 10, length: 0}, 'title']],
+            output: { },
+            cache: cacheGenerator(0, 1)
+        });
+        getCoreRunner({
+            isJSONG: true,
+            input: [['videos', {from: 0, to: -1}, 'title']],
+            output: { },
+            cache: cacheGenerator(0, 1)
+        });
+        getCoreRunner({
+            isJSONG: true,
+            input: [['videos', {from: 10, length: 0}, 'title']],
+            output: { },
+            cache: cacheGenerator(0, 1)
+        });
+    });
+    it('should report nothing on empty range inside a keyset.', function() {
+        getCoreRunner({
+            input: [['videos', [{from: 0, to: -1}], 'title']],
+            output: { },
+            cache: cacheGenerator(0, 1)
+        });
+        getCoreRunner({
+            input: [['videos', [{from: 10, length: 0}], 'title']],
+            output: { },
+            cache: cacheGenerator(0, 1)
+        });
+        getCoreRunner({
+            isJSONG: true,
+            input: [['videos', [{from: 0, to: -1}], 'title']],
+            output: { },
+            cache: cacheGenerator(0, 1)
+        });
+        getCoreRunner({
+            isJSONG: true,
+            input: [['videos', [{from: 10, length: 0}], 'title']],
             output: { },
             cache: cacheGenerator(0, 1)
         });
