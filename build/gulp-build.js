@@ -84,7 +84,16 @@ function build(options, cb) {
             var destAndName = path.join(options.dest, name);
             gulp.
                 src(destAndName).
-                pipe(uglify()).
+                pipe(uglify({
+                    compress: {
+                        unused: true,
+                        dead_code: true,
+                        drop_debugger: true,
+                        global_defs: {
+                            DEBUG: options.debug
+                        }
+                    }
+                })).
                 pipe(gulp.dest(options.dest)).
                 on('finish', function() {
                     return cb();
