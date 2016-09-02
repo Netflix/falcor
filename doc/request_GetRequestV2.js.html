@@ -1,0 +1,607 @@
+---
+layout: api-page
+title: "request/GetRequestV2.js"
+id: api
+---
+
+<main class="api-documentation-page">
+  
+
+  
+  
+      
+<h2>
+    request/GetRequestV2.js
+</h2>
+<section>
+    <article>
+        <pre class="prettyprint source linenums"><code>var complement = require("./complement");
+var flushGetRequest = require("./flushGetRequest");
+var REQUEST_ID = 0;
+var GetRequestType = require("./RequestTypes").GetRequest;
+var setJSONGraphs = require("./../set/setJSONGraphs");
+var setPathValues = require("./../set/setPathValues");
+var $error = require("./../types/error");
+var emptyArray = [];
+
+/**
+ * Creates a new GetRequest.  This GetRequest takes a scheduler and
+ * the request queue.  Once the scheduler fires, all batched requests
+ * will be sent to the server.  Upon request completion, the data is
+ * merged back into the cache and all callbacks are notified.
+ *
+ * @param {Scheduler} scheduler -
+ * @param {RequestQueueV2} requestQueue -
+ */
+var GetRequestV2 = function(scheduler, requestQueue) {
+    this.sent = false;
+    this.scheduled = false;
+    this.requestQueue = requestQueue;
+    this.id = ++REQUEST_ID;
+    this.type = GetRequestType;
+
+    this._scheduler = scheduler;
+    this._pathMap = {};
+    this._optimizedPaths = [];
+    this._requestedPaths = [];
+    this._callbacks = [];
+    this._count = 0;
+    this._disposable = null;
+    this._collapsed = null;
+    this._disposed = false;
+};
+
+GetRequestV2.prototype = {
+    /**
+     * batches the paths that are passed in.  Once the request is complete,
+     * all callbacks will be called and the request will be removed from
+     * parent queue.
+     * @param {Array} requestedPaths -
+     * @param {Array} optimizedPaths -
+     * @param {Function} callback -
+     */
+    batch: function(requestedPaths, optimizedPaths, callback) {
+        var self = this;
+        var oPaths = self._optimizedPaths;
+        var rPaths = self._requestedPaths;
+        var callbacks = self._callbacks;
+        var idx = oPaths.length;
+
+        // If its not sent, simply add it to the requested paths
+        // and callbacks.
+        oPaths[idx] = optimizedPaths;
+        rPaths[idx] = requestedPaths;
+        callbacks[idx] = callback;
+        ++self._count;
+
+        // If it has not been scheduled, then schedule the action
+        if (!self.scheduled) {
+            self.scheduled = true;
+
+            self._disposable = self._scheduler.schedule(function() {
+                flushGetRequest(self, oPaths, function(err, data) {
+                    self.requestQueue.removeRequest(self);
+                    self._disposed = true;
+
+                    // If there is at least one callback remaining, then
+                    // callback the callbacks.
+                    if (self._count) {
+                        self._merge(rPaths, err, data);
+
+                        // Call the callbacks.  The first one inserts all the
+                        // data so that the rest do not have consider if their
+                        // data is present or not.
+                        for (var i = 0, len = callbacks.length; i &lt; len; ++i) {
+                            var fn = callbacks[i];
+                            if (fn) {
+                                fn(err, data);
+                            }
+                        }
+                    }
+                });
+            });
+        }
+
+        // Disposes this batched request.  This does not mean that the
+        // entire request has been disposed, but just the local one, if all
+        // requests are disposed, then the outer disposable will be removed.
+        return createDisposable(self, idx);
+    },
+
+    /**
+     * Attempts to add paths to the outgoing request.  If there are added
+     * paths then the request callback will be added to the callback list.
+     *
+     * @returns {Array} - the remaining paths in the request.
+     */
+    add: function(requested, optimized, callback) {
+        // uses the length tree complement calculator.
+        var self = this;
+        var complementTuple = complement(requested, optimized, self._pathMap);
+        var optimizedComplement;
+        var requestedComplement;
+
+        if (complementTuple) {
+            requestedComplement = complementTuple[2];
+            optimizedComplement = complementTuple[1];
+        } else {
+            requestedComplement = requested;
+            optimizedComplement = optimized;
+        }
+
+        var inserted = false;
+        var disposable = false;
+
+        // If the out paths is less than the passed in paths, then there
+        // has been an intersection and the complement has been returned.
+        // Therefore, this can be deduped across requests.
+        if (optimizedComplement.length &lt; optimized.length) {
+            inserted = true;
+            var idx = self._callbacks.length;
+            self._callbacks[idx] = callback;
+            self._requestedPaths[idx] = complementTuple[0];
+            self._optimizedPaths[idx] = [];
+            ++self._count;
+
+            disposable = createDisposable(self, idx);
+        }
+
+        return [inserted, requestedComplement, optimizedComplement, disposable];
+    },
+
+    /**
+     * merges the response into the model"s cache.
+     */
+    _merge: function(requested, err, data) {
+        var self = this;
+        var model = self.requestQueue.model;
+        var modelRoot = model._root;
+        var errorSelector = modelRoot.errorSelector;
+        var comparator = modelRoot.comparator;
+        var boundPath = model._path;
+
+        model._path = emptyArray;
+
+        // flatten all the requested paths, adds them to the
+        var nextPaths = flattenRequestedPaths(requested);
+
+        // Insert errors in every requested position.
+        if (err) {
+            var error = err;
+
+            // Converts errors to objects, a more friendly storage
+            // of errors.
+            if (error instanceof Error) {
+                error = {
+                    message: error.message
+                };
+            }
+
+            // Not all errors are value $types.
+            if (!error.$type) {
+                error = {
+                    $type: $error,
+                    value: error
+                };
+            }
+
+            var pathValues = nextPaths.map(function(x) {
+                return {
+                    path: x,
+                    value: error
+                };
+            });
+            setPathValues(model, pathValues, null, errorSelector, comparator);
+        }
+
+        // Insert the jsonGraph from the dataSource.
+        else {
+            setJSONGraphs(model, [{
+                paths: nextPaths,
+                jsonGraph: data.jsonGraph
+            }], null, errorSelector, comparator);
+        }
+
+        // return the model"s boundPath
+        model._path = boundPath;
+    }
+};
+
+// Creates a more efficient closure of the things that are
+// needed.  So the request and the idx.  Also prevents code
+// duplication.
+function createDisposable(request, idx) {
+    var disposed = false;
+    return function() {
+        if (disposed || request._disposed) {
+            return;
+        }
+
+        disposed = true;
+        request._callbacks[idx] = null;
+        request._optimizedPaths[idx] = [];
+        request._requestedPaths[idx] = [];
+
+        // If there are no more requests, then dispose all of the request.
+        var count = --request._count;
+        if (count === 0 &amp;&amp; !request.sent) {
+            request._disposable.dispose();
+            request.requestQueue.removeRequest(request);
+        }
+    };
+}
+
+function flattenRequestedPaths(requested) {
+    var out = [];
+    var outLen = -1;
+    for (var i = 0, len = requested.length; i &lt; len; ++i) {
+        var paths = requested[i];
+        for (var j = 0, innerLen = paths.length; j &lt; innerLen; ++j) {
+            out[++outLen] = paths[j];
+        }
+    }
+    return out;
+}
+
+module.exports = GetRequestV2;
+</code></pre>
+    </article>
+</section>
+  
+
+  
+</main>
+
+
+
+        
+        <!--
+          In case someone comes along later and sees the active item on the
+          toc acting weirdly, hopefully they'll see this comment. This page, unlike
+          any seen during development, has multiple 'docs' passed to container.tmpl.
+          To debug it and enhance the page as needed, I would suggest looking there first.
+        -->
+        
+
+        <!-- Generate the table of contents -->
+        <nav class="table-of-contents api-doc-toc">
+            <ul class="nav">
+                <li>
+                    <a href="DataSource.html">Classes</a>
+                    <ul class="toc-api-classes">
+                        
+                            <li class="toc-api-class ">
+                                <a href="DataSource.html" data-target="#DataSource">DataSource</a>
+                                
+                                
+
+    <ul class="toc-api-subgroup toc-api-subgroup-methods">
+        <li>
+            <span class="toc-api-subgroup-title">Methods</span>
+        </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="DataSource.html#call" data-target="#call">call</a>
+            </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="DataSource.html#get" data-target="#get">get</a>
+            </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="DataSource.html#set" data-target="#set">set</a>
+            </li>
+         
+    </ul>
+
+
+                                
+
+
+                                
+
+
+                            </li>
+                        
+                            <li class="toc-api-class ">
+                                <a href="HttpDataSource.html" data-target="#HttpDataSource">HttpDataSource</a>
+                                
+                                
+
+    <ul class="toc-api-subgroup toc-api-subgroup-methods">
+        <li>
+            <span class="toc-api-subgroup-title">Methods</span>
+        </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="HttpDataSource.html#call" data-target="#call">call</a>
+            </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="HttpDataSource.html#get" data-target="#get">get</a>
+            </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="HttpDataSource.html#set" data-target="#set">set</a>
+            </li>
+         
+    </ul>
+
+
+                                
+
+
+                                
+
+
+                            </li>
+                        
+                            <li class="toc-api-class ">
+                                <a href="Model.html" data-target="#Model">Model</a>
+                                
+                                
+
+    <ul class="toc-api-subgroup toc-api-subgroup-methods">
+        <li>
+            <span class="toc-api-subgroup-title">Methods</span>
+        </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="Model.html#asDataSource" data-target="#asDataSource">asDataSource</a>
+            </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="Model.html#batch" data-target="#batch">batch</a>
+            </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="Model.html#boxValues" data-target="#boxValues">boxValues</a>
+            </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="Model.html#call" data-target="#call">call</a>
+            </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="Model.html#deref" data-target="#deref">deref</a>
+            </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="Model.html#get" data-target="#get">get</a>
+            </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="Model.html#getCache" data-target="#getCache">getCache</a>
+            </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="Model.html#getPath" data-target="#getPath">getPath</a>
+            </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="Model.html#getVersion" data-target="#getVersion">getVersion</a>
+            </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="Model.html#invalidate" data-target="#invalidate">invalidate</a>
+            </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="Model.html#preload" data-target="#preload">preload</a>
+            </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="Model.html#set" data-target="#set">set</a>
+            </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="Model.html#setCache" data-target="#setCache">setCache</a>
+            </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="Model.html#treatErrorsAsValues" data-target="#treatErrorsAsValues">treatErrorsAsValues</a>
+            </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="Model.html#unbatch" data-target="#unbatch">unbatch</a>
+            </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="Model.html#unboxValues" data-target="#unboxValues">unboxValues</a>
+            </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="Model.html#withoutDataSource" data-target="#withoutDataSource">withoutDataSource</a>
+            </li>
+         
+    </ul>
+
+
+                                
+
+    <ul class="toc-api-subgroup toc-api-subgroup-types">
+        <li>
+            <span class="toc-api-subgroup-title">Types</span>
+        </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="Model.html#~comparator" data-target="#\~comparator">comparator</a>
+            </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="Model.html#~errorSelector" data-target="#\~errorSelector">errorSelector</a>
+            </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="Model.html#~onChange" data-target="#\~onChange">onChange</a>
+            </li>
+         
+    </ul>
+
+
+                                
+
+
+                            </li>
+                        
+                            <li class="toc-api-class ">
+                                <a href="ModelResponse.html" data-target="#ModelResponse">ModelResponse</a>
+                                
+                                
+
+    <ul class="toc-api-subgroup toc-api-subgroup-methods">
+        <li>
+            <span class="toc-api-subgroup-title">Methods</span>
+        </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="ModelResponse.html#forEach" data-target="#forEach">forEach</a>
+            </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="ModelResponse.html#progressively" data-target="#progressively">progressively</a>
+            </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="ModelResponse.html#toPathValues" data-target="#toPathValues">toPathValues</a>
+            </li>
+         
+    </ul>
+
+
+                                
+
+
+                                
+
+
+                            </li>
+                        
+                            <li class="toc-api-class ">
+                                <a href="Observable.html" data-target="#Observable">Observable</a>
+                                
+                                
+
+    <ul class="toc-api-subgroup toc-api-subgroup-methods">
+        <li>
+            <span class="toc-api-subgroup-title">Methods</span>
+        </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="Observable.html#forEach" data-target="#forEach">forEach</a>
+            </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="Observable.html#forEach" data-target="#forEach">forEach</a>
+            </li>
+         
+    </ul>
+
+
+                                
+
+    <ul class="toc-api-subgroup toc-api-subgroup-types">
+        <li>
+            <span class="toc-api-subgroup-title">Types</span>
+        </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="Observable.html#~onCompletedCallback" data-target="#\~onCompletedCallback">onCompletedCallback</a>
+            </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="Observable.html#~onErrorCallback" data-target="#\~onErrorCallback">onErrorCallback</a>
+            </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="Observable.html#~onNextCallback" data-target="#\~onNextCallback">onNextCallback</a>
+            </li>
+         
+    </ul>
+
+
+                                
+
+
+                            </li>
+                        
+                            <li class="toc-api-class ">
+                                <a href="Subscription.html" data-target="#Subscription">Subscription</a>
+                                
+                                
+
+    <ul class="toc-api-subgroup toc-api-subgroup-methods">
+        <li>
+            <span class="toc-api-subgroup-title">Methods</span>
+        </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="Subscription.html#dispose" data-target="#dispose">dispose</a>
+            </li>
+         
+    </ul>
+
+
+                                
+
+
+                                
+
+
+                            </li>
+                        
+                    </ul>
+                </li>
+                <li class="toc-api-type-list ">
+                    <a href="global.html">Global Types</a>
+                    <ul class="toc-api-types">
+                        
+                            <li class="toc-api-type">
+                                <a href="global.html#Atom" data-target="#Atom">Atom</a>
+                            </li>
+                        
+                            <li class="toc-api-type">
+                                <a href="global.html#JSONEnvelope" data-target="#JSONEnvelope">JSONEnvelope</a>
+                            </li>
+                        
+                            <li class="toc-api-type">
+                                <a href="global.html#JSONGraph" data-target="#JSONGraph">JSONGraph</a>
+                            </li>
+                        
+                            <li class="toc-api-type">
+                                <a href="global.html#JSONGraphEnvelope" data-target="#JSONGraphEnvelope">JSONGraphEnvelope</a>
+                            </li>
+                        
+                            <li class="toc-api-type">
+                                <a href="global.html#Key" data-target="#Key">Key</a>
+                            </li>
+                        
+                            <li class="toc-api-type">
+                                <a href="global.html#KeySet" data-target="#KeySet">KeySet</a>
+                            </li>
+                        
+                            <li class="toc-api-type">
+                                <a href="global.html#Path" data-target="#Path">Path</a>
+                            </li>
+                        
+                            <li class="toc-api-type">
+                                <a href="global.html#PathSet" data-target="#PathSet">PathSet</a>
+                            </li>
+                        
+                            <li class="toc-api-type">
+                                <a href="global.html#PathValue" data-target="#PathValue">PathValue</a>
+                            </li>
+                        
+                            <li class="toc-api-type">
+                                <a href="global.html#Range" data-target="#Range">Range</a>
+                            </li>
+                        
+                    </ul>
+                </li>
+            </ul>
+        </nav>
+
+
+
+
+

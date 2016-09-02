@@ -11,6 +11,14 @@
 * *master* currently reflects work in progress, and contains backward incompatible changes which will become the next major version bump.
 * *0.x* reflects the currently published npm version. Bug fixes specific to 0.x can be submitted against this branch.
 
+**falcor 0.1.16 - DO NOT USE**
+
+We inadvertenly published **master** as **0.1.16** on npm by mistake. As a result it has backwards incompatible changes compared to v0.1.15 (MIGRATION.md in master has details about the backwards incompabile changes in master).
+
+We've published falcor v0.1.17 to rectify this.
+
+Even though the semver defintion is looser for 0.x versions, we intend to honor the major version position, and bump 0.x to 1.x for backwards incompatible changes, even while in developer preview, so that the version can be used reliably by build systems.
+
 ## Important Note for Webpack Users
 
 If you're including falcor in your app, via npm and `require('falcor')`, and you're building a browser bundle for your app with Webpack, you'll need to add an alias entry for the 'rx' module in your webpack config, to avoid this RxJS bug: 'https://github.com/Reactive-Extensions/RxJS/issues/832'. You may already have such an entry, if you're using RxJS already. An example is below:

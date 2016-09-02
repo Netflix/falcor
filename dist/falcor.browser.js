@@ -630,7 +630,7 @@ Model.prototype._invalidatePathMapsAsJSON = require(47);
 
 },{"100":100,"102":102,"116":116,"13":13,"130":130,"134":134,"14":14,"16":16,"17":17,"18":18,"19":19,"24":24,"3":3,"4":4,"47":47,"48":48,"49":49,"5":5,"55":55,"6":6,"61":61,"63":63,"64":64,"65":65,"70":70,"71":71,"72":72,"73":73,"74":74,"75":75,"76":76,"77":77,"78":78,"79":79,"80":80,"81":81,"84":84,"88":88,"96":96,"98":98,"99":99}],3:[function(require,module,exports){
 function ModelDataSourceAdapter(model) {
-    this._model = model._materialize().boxValues().treatErrorsAsValues();
+    this._model = model._materialize().treatErrorsAsValues();
 }
 
 ModelDataSourceAdapter.prototype.get = function get(pathSets) {
@@ -6709,7 +6709,7 @@ module.exports = function buildQueryObject(url, method, queryData) {
     keys = Object.keys(queryData);
     keys.forEach(function (k) {
       var value = (typeof queryData[k] === 'object') ? JSON.stringify(queryData[k]) : queryData[k];
-      qData.push(k + '=' + value);
+      qData.push(k + '=' + encodeURIComponent(value));
     });
   }
 

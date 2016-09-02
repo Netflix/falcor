@@ -47,5 +47,36 @@ describe('DataSource and Deref', function() {
             }).
             subscribe(noOp, done, done);
     });
+
+    it('should get a value from from dataSource after cache purge.', function(done) {
+        var model = new Model({cache: M(), source: new LocalDataSource(Cache())});
+        model._root.unsafeMode = true;
+        var onNext = sinon.spy();
+        model.
+            deref(['lolomo', 0], [0, 'item', 'title']).
+            doAction(function() {
+                model.setCache({});
+                console.log("foo");
+            }).
+            flatMap(function(rowModel) {
+                console.log("foo");
+                return rowModel.get([1, 'item', 'title']);
+            }).
+            doAction(onNext).
+            doAction(noOp, noOp, function() {
+                console.log("here");
+                expect(onNext.calledOnce).to.be.ok;
+                expect(onNext.getCall(0).args[0]).to.deep.equals({
+                    json: {
+                        1: {
+                            item: {
+                                title: 'Video 1'
+                            }
+                        }
+                    }
+                });
+            }).
+            subscribe(noOp, done, done);
+    });
 });
 
