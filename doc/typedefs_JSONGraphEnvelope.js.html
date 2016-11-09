@@ -19,8 +19,8 @@ id: api
  * An envelope that wraps a {@link JSONGraph} fragment.
  * @typedef {Object} JSONGraphEnvelope
  * @property {JSONGraph} jsonGraph - a {@link JSONGraph} fragment
- * @property {?Array.&lt;PathSet>} paths - the paths to the values in the {@link JSONGraph} fragment
- * @property {?Array.&lt;PathSet>} invalidated - the paths to invalidate in the {@link Model}
+ * @property {?Array&lt;PathSet>} paths - the paths to the values in the {@link JSONGraph} fragment
+ * @property {?Array&lt;PathSet>} invalidated - the paths to invalidate in the {@link Model}
  * @example
 var $ref = falcor.ref;
 var model = new falcor.Model();

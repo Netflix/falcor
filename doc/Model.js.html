@@ -223,9 +223,9 @@ Model.prototype._set = function _set() {
  * Invokes a function in the JSON Graph.
  * @function
  * @param {Path} functionPath - the path to the function to invoke
- * @param {Array.&lt;Object>} args - the arguments to pass to the function
- * @param {Array.&lt;PathSet>} refPaths - the paths to retrieve from the JSON Graph References in the message returned from the function
- * @param {Array.&lt;PathSet>} thisPaths - the paths to retrieve from function's this object after successful function execution
+ * @param {Array&lt;Object>} args - the arguments to pass to the function
+ * @param {Array&lt;PathSet>} refPaths - the paths to retrieve from the JSON Graph References in the message returned from the function
+ * @param {Array&lt;PathSet>} thisPaths - the paths to retrieve from function's this object after successful function execution
  * @returns {ModelResponse.&lt;JSONEnvelope> - a JSONEnvelope contains the values returned from the function
  */
 Model.prototype.call = function call() {
@@ -389,7 +389,7 @@ Model.prototype.setCache = function modelSetCache(cacheOrJSONGraphEnvelope) {
 
 /**
  * Get the local {@link JSONGraph} cache. This method can be a useful to store the state of the cache.
- * @param {...Array.&lt;PathSet>} [pathSets] - The path(s) to retrieve. If no paths are specified, the entire {@link JSONGraph} is returned.
+ * @param {...Array&lt;PathSet>} [pathSets] - The path(s) to retrieve. If no paths are specified, the entire {@link JSONGraph} is returned.
  * @return {JSONGraph} all of the {@link JSONGraph} data in the {@link Model} cache.
  * @example
  // Storing the boxshot of the first 10 titles in the first 10 genreLists to local storage.
