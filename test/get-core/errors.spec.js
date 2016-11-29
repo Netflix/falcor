@@ -85,6 +85,17 @@ describe('Errors', function() {
             cache: errorCache
         });
     });
+    it('should report error path with null from reference with path ending in null.', function() {
+        getCoreRunner({
+            input: [['reference', null]],
+            output: { },
+            errors: [{
+                path: ['reference', null],
+                value: 'Oops!'
+            }],
+            cache: errorCache
+        });
+    });
     it('should report error with path in treateErrorsAsValues.', function() {
         var to = {
             error: 'Oops!'
@@ -94,6 +105,38 @@ describe('Errors', function() {
             input: [['to', 'error']],
             output: {
                 json: {
+                    to: to
+                }
+            },
+            treatErrorsAsValues: true,
+            cache: errorCache
+        });
+    });
+    it('should report error path with null from reference in treatErrorsAsValues.', function() {
+        getCoreRunner({
+            input: [['reference', 'title']],
+            output: {
+                json: {
+                    reference: 'Oops!'
+                }
+            },
+            treatErrorsAsValues: true,
+            cache: errorCache
+        });
+    });
+    it('should report error with path in treatErrorsAsValues when reusing walk arrays.', function() {
+        var to = {
+            error: 'Oops!'
+        };
+        to.$__path = ['to'];
+        getCoreRunner({
+            input: [
+                ['foo', 'bar', 'baz', 'qux'],
+                ['to', 'error']
+            ],
+            output: {
+                json: {
+                    foo: fooBranch(),
                     to: to
                 }
             },
@@ -111,6 +154,19 @@ describe('Errors', function() {
             output: {
                 json: {
                     to: to
+                }
+            },
+            treatErrorsAsValues: true,
+            boxValues: true,
+            cache: errorCache
+        });
+    });
+    it('should report error path with null from reference in treatErrorsAsValues and boxValues.', function() {
+        getCoreRunner({
+            input: [['reference', 'title']],
+            output: {
+                json: {
+                    reference: error('Oops!')
                 }
             },
             treatErrorsAsValues: true,

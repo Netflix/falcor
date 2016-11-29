@@ -259,5 +259,29 @@ describe('Values', function() {
             }
         });
     });
+    it('should get JSONGraph to get a reference.', function() {
+        getCoreRunner({
+            input: [['reference']],
+            isJSONG: true,
+            output: {
+                jsonGraph: {
+                    "reference": {
+                        "$type": "ref",
+                        "value": ["foo", "bar"]
+                    }
+                },
+                paths: [
+                    ["reference"]
+                ]
+            },
+            cache: {
+                reference: jsonGraph.ref(['foo', 'bar']),
+                foo: {
+                    bar: atom('value')
+                }
+            }
+        });
+    });
+
 });
 
