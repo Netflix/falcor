@@ -94,6 +94,15 @@ describe('Missing', function() {
             }
         });
     });
+    it('should report a missing path ending with null', function() {
+        getCoreRunner({
+            input: [['refMissing', null]],
+            output: { },
+            requestedMissingPaths: [['refMissing', null]],
+            optimizedMissingPaths: [['refMissing', null]],
+            cache: { }
+        });
+    });
 
 });
 

@@ -85,6 +85,30 @@ describe('DataSource Only', function() {
                 }).
                 subscribe(noOp, done, done);
         });
+        it('should get a directly referenced value from falcor.', function(done) {
+            var cache = {
+                reference: {
+                    $type: "ref",
+                    value: ["foo", "bar"]
+                },
+                foo: {
+                    bar: {
+                        $type: "atom",
+                        value: "value"
+                    }
+                }
+            };
+            var model = new Model({source: new LocalDataSource(cache)});
+            var onNext = sinon.spy();
+            toObservable(model.
+                get(['reference', null])).
+                doAction(onNext, noOp, function() {
+                    expect(strip(onNext.getCall(0).args[0])).to.deep.equals({
+                        json: {reference: "value"}
+                    });
+                }).
+                subscribe(noOp, done, done);
+        });
     });
     describe('_toJSONG', function() {
         it('should get a value from falcor.', function(done) {
