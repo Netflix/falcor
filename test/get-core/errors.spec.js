@@ -10,6 +10,19 @@ describe('Errors', function() {
     var expired = error('expired');
     expired.$expires = Date.now() - 1000;
 
+    var fooBranch = function() {
+        return {
+            $__path: ['foo'],
+            bar: {
+                $__path: ['foo', 'bar'],
+                baz: {
+                    $__path: ['foo', 'bar', 'baz'],
+                    qux: 'qux'
+                }
+            }
+        };
+    };
+
     var errorCache = function() {
         return {
             reference: ref(['to', 'error']),
@@ -21,6 +34,13 @@ describe('Errors', function() {
             list: {
                 0: ref(['to']),
                 1: ref(['to', 'error'])
+            },
+            foo: {
+                bar: {
+                    baz: {
+                        qux: 'qux'
+                    }
+                }
             }
         };
     };
@@ -29,6 +49,24 @@ describe('Errors', function() {
         getCoreRunner({
             input: [['to', 'error']],
             output: { },
+            errors: [{
+                path: ['to', 'error'],
+                value: 'Oops!'
+            }],
+            cache: errorCache
+        });
+    });
+    it('should report error with path when reusing walk arrays.', function() {
+        getCoreRunner({
+            input: [
+                ['foo', 'bar', 'baz', 'qux'],
+                ['to', 'error']
+            ],
+            output: {
+                json: {
+                    foo: fooBranch()
+                }
+            },
             errors: [{
                 path: ['to', 'error'],
                 value: 'Oops!'
