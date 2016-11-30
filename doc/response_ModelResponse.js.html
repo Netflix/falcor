@@ -16,7 +16,7 @@ id: api
 <section>
     <article>
         <pre class="prettyprint source linenums"><code>var noop = require("./../support/noop");
-var Symbol = require("../SymbolShim");
+var $$observable = require("symbol-observable").default;
 var toEsObservable = require("../toEsObservable");
 
 /**
@@ -28,7 +28,7 @@ function ModelResponse(subscribe) {
     this._subscribe = subscribe;
 }
 
-ModelResponse.prototype[Symbol.observable] = function SymbolObservable() {
+ModelResponse.prototype[$$observable] = function SymbolObservable() {
     return toEsObservable(this);
 };
 
