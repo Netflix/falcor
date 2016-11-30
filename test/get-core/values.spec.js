@@ -230,5 +230,58 @@ describe('Values', function() {
             cache: cacheGenerator(0, 30)
         });
     });
+    it('should get JSONGraph allow for a null at the end to get a value behind a reference.', function() {
+        getCoreRunner({
+            input: [['reference', null]],
+            isJSONG: true,
+            output: {
+                jsonGraph: {
+                    "reference": {
+                        "$type": "ref",
+                        "value": ["foo", "bar"]
+                    },
+                    "foo": {
+                        "bar": {
+                            "$type": "atom",
+                            "value": "value"
+                        }
+                    }
+                },
+                paths: [
+                    ["reference", null]
+                ]
+            },
+            cache: {
+                reference: jsonGraph.ref(['foo', 'bar']),
+                foo: {
+                    bar: atom('value')
+                }
+            }
+        });
+    });
+    it('should get JSONGraph to get a reference.', function() {
+        getCoreRunner({
+            input: [['reference']],
+            isJSONG: true,
+            output: {
+                jsonGraph: {
+                    "reference": {
+                        "$type": "ref",
+                        "value": ["foo", "bar"]
+                    }
+                },
+                paths: [
+                    ["reference"]
+                ]
+            },
+            cache: {
+                reference: jsonGraph.ref(['foo', 'bar']),
+                foo: {
+                    bar: atom('value')
+                }
+            }
+        });
+    });
+
 });
 

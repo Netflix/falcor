@@ -10,6 +10,19 @@ describe('Errors', function() {
     var expired = error('expired');
     expired.$expires = Date.now() - 1000;
 
+    var fooBranch = function() {
+        return {
+            $__path: ['foo'],
+            bar: {
+                $__path: ['foo', 'bar'],
+                baz: {
+                    $__path: ['foo', 'bar', 'baz'],
+                    qux: 'qux'
+                }
+            }
+        };
+    };
+
     var errorCache = function() {
         return {
             reference: ref(['to', 'error']),
@@ -21,6 +34,13 @@ describe('Errors', function() {
             list: {
                 0: ref(['to']),
                 1: ref(['to', 'error'])
+            },
+            foo: {
+                bar: {
+                    baz: {
+                        qux: 'qux'
+                    }
+                }
             }
         };
     };
@@ -36,9 +56,38 @@ describe('Errors', function() {
             cache: errorCache
         });
     });
+    it('should report error with path when reusing walk arrays.', function() {
+        getCoreRunner({
+            input: [
+                ['foo', 'bar', 'baz', 'qux'],
+                ['to', 'error']
+            ],
+            output: {
+                json: {
+                    foo: fooBranch()
+                }
+            },
+            errors: [{
+                path: ['to', 'error'],
+                value: 'Oops!'
+            }],
+            cache: errorCache
+        });
+    });
     it('should report error path with null from reference.', function() {
         getCoreRunner({
             input: [['reference', 'title']],
+            output: { },
+            errors: [{
+                path: ['reference', null],
+                value: 'Oops!'
+            }],
+            cache: errorCache
+        });
+    });
+    it('should report error path with null from reference with path ending in null.', function() {
+        getCoreRunner({
+            input: [['reference', null]],
             output: { },
             errors: [{
                 path: ['reference', null],
@@ -63,6 +112,38 @@ describe('Errors', function() {
             cache: errorCache
         });
     });
+    it('should report error path with null from reference in treatErrorsAsValues.', function() {
+        getCoreRunner({
+            input: [['reference', 'title']],
+            output: {
+                json: {
+                    reference: 'Oops!'
+                }
+            },
+            treatErrorsAsValues: true,
+            cache: errorCache
+        });
+    });
+    it('should report error with path in treatErrorsAsValues when reusing walk arrays.', function() {
+        var to = {
+            error: 'Oops!'
+        };
+        to.$__path = ['to'];
+        getCoreRunner({
+            input: [
+                ['foo', 'bar', 'baz', 'qux'],
+                ['to', 'error']
+            ],
+            output: {
+                json: {
+                    foo: fooBranch(),
+                    to: to
+                }
+            },
+            treatErrorsAsValues: true,
+            cache: errorCache
+        });
+    });
     it('should report error with path in treateErrorsAsValues and boxValues.', function() {
         var to = {
             error: error('Oops!')
@@ -73,6 +154,19 @@ describe('Errors', function() {
             output: {
                 json: {
                     to: to
+                }
+            },
+            treatErrorsAsValues: true,
+            boxValues: true,
+            cache: errorCache
+        });
+    });
+    it('should report error path with null from reference in treatErrorsAsValues and boxValues.', function() {
+        getCoreRunner({
+            input: [['reference', 'title']],
+            output: {
+                json: {
+                    reference: error('Oops!')
                 }
             },
             treatErrorsAsValues: true,
