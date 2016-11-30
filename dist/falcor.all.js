@@ -1130,7 +1130,7 @@ module.exports = function get(walk, isJSONG) {
 
             // If there was a short, then we 'throw an error' to the outside
             // calling function which will onError the observer.
-            if (currentCachePosition.$type) {
+            if (currentCachePosition && currentCachePosition.$type) {
                 return {
                     criticalError: new InvalidModelError(boundPath, boundPath)
                 };
@@ -1527,7 +1527,7 @@ module.exports = function onError(model, node, depth,
         value = clone(node);
     }
     outerResults.errors.push({
-        path: requestedPath.slice(0, depth + 1),
+        path: requestedPath.slice(0, depth),
         value: value
     });
     promote(model._root, node);
@@ -1579,8 +1579,7 @@ function concatAndInsertMissing(model, remainingPath, depth, requestedPath,
 }
 
 function isEmptyAtom(atom) {
-    var type = typeof atom;
-    if (type !== "object") {
+    if (atom === null || typeof atom !== "object") {
         return false;
     }
 
@@ -1722,6 +1721,8 @@ module.exports = function onValue(model, node, seed, depth, outerResults,
         if (k !== null) {
             curr[k] = valueNode;
         } else {
+            // We are protected from reaching here when depth is 1 and prev is
+            // undefined by the InvalidModelError and NullInPathError checks.
             prev[prevK] = valueNode;
         }
     }
@@ -1778,6 +1779,7 @@ module.exports = function onValueType(
     else if (currType === $error) {
         if (fromReference) {
             requestedPath[depth] = null;
+            depth += 1;
         }
         if (isJSONG || model._treatErrorsAsValues) {
             onValue(model, node, seed, depth, outerResults, branchInfo,
@@ -1792,6 +1794,7 @@ module.exports = function onValueType(
     else {
         if (fromReference) {
             requestedPath[depth] = null;
+            depth += 1;
         }
 
         if (!requiresMaterializedToReport ||
