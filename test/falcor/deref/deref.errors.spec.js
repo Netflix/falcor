@@ -3,6 +3,7 @@ var InvalidModelError = require('./../../../lib/errors/InvalidModelError');
 var InvalidDerefInputError = require('./../../../lib/errors/InvalidDerefInputError');
 var Model = falcor.Model;
 var sinon = require('sinon');
+var assert = require('chai').assert;
 var expect = require('chai').expect;
 var cacheGenerator = require('./../../CacheGenerator');
 var noOp = function() {};
@@ -55,5 +56,32 @@ describe('Error cases', function() {
             return done();
         }
         done(new Error('should of thrown an error.'));
+    });
+
+    it('should throw InvalidModelError on an invalidated deref path.', function() {
+        var model = new Model({cache: {titlesById: {32: {name: "House of Cards"}}}});
+        return model.get(["titlesById", 32, "name"]).
+            then(function(response) {
+                var titleModel = model.deref(response.json.titlesById[32]);
+                model.invalidate(["titlesById"]);
+                return titleModel.get(["name"]).
+                    then(assert.fail).
+                    catch(function(err) {
+                        expect(err.message).to.equals(InvalidModelError.message);
+                    });
+            });
+    });
+
+    it('should not error on an invalidated deref path set.', function() {
+        var model = new Model({cache: {titlesById: {32: {name: "House of Cards"}}}});
+        return model.get(["titlesById", 32, "name"]).
+            then(function(response) {
+                var titleModel = model.deref(response.json.titlesById[32]);
+                model.invalidate(["titlesById", 32]);
+                return titleModel.set({json: {name: "Something Else"}}).
+                    then(function(derefedResponse) {
+                        expect(response.json.name).to.be("Something Else");
+                    });
+            });
     });
 });
