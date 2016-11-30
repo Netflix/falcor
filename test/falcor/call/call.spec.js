@@ -6,7 +6,8 @@ var chai = require("chai");
 var sinon = require("sinon");
 var expect = chai.expect;
 var noOp = function() {};
-var ModelResponse = require('./../../../lib/response/ModelResponse');
+var ModelResponse = require("./../../../lib/response/ModelResponse");
+var Rx5 = require("rxjs");
 
 /**
  * @param newModel
@@ -43,18 +44,18 @@ describe("Call", function() {
                     return new ModelResponse(function(observer) {
                         observer.onNext({
                             jsonGraph: {
-                                a: 'test'
+                                a: "test"
                             },
-                            paths: [['a']],
-                            invalidated: [['b']]
+                            paths: [["a"]],
+                            invalidated: [["b"]]
                         });
                         observer.onCompleted();
                     });
                 }
             },
             cache: {
-                a: 'foo',
-                b: 'test'
+                a: "foo",
+                b: "test"
             }
         });
 
@@ -66,35 +67,35 @@ describe("Call", function() {
                 expect(onNext.calledOnce).to.be.ok;
                 expect(strip(onNext.getCall(0).args[0])).to.deep.equals({
                     json: {
-                        a: 'test'
+                        a: "test"
                     }
                 });
             }).
             flatMap(function() {
                 return model.
                     withoutDataSource().
-                    get(['a'], ['b']);
+                    get(["a"], ["b"]);
             }).
             doAction(onNext2, noOp, function() {
                 expect(onNext2.calledOnce).to.be.ok;
                 expect(strip(onNext2.getCall(0).args[0])).to.deep.equals({
                     json: {
-                        a: 'test'
+                        a: "test"
                     }
                 });
             }).
             subscribe(noOp, done, done);
     });
-    it('should sent parsed arguments to the dataSource.', function(done) {
+    it("should sent parsed arguments to the dataSource.", function(done) {
         var call = sinon.spy(function() {
             return {
                 subscribe: function(onNext, onError, onCompleted) {
                     onNext({jsonGraph: {
                         a: {
-                            b: 'hello'
+                            b: "hello"
                         }
                     }, paths: [
-                        ['a', 'b']
+                        ["a", "b"]
                     ]});
                     onCompleted();
                 }
@@ -106,20 +107,20 @@ describe("Call", function() {
             }
         });
         toObservable(model.
-            call('test.again', [], ['oneSuffix.a', 'twoSuffix.b'], ['onePath.a', 'twoPath.b'])).
+            call("test.again", [], ["oneSuffix.a", "twoSuffix.b"], ["onePath.a", "twoPath.b"])).
             doAction(noOp, noOp, function() {
                 expect(call.calledOnce).to.be.ok;
 
                 var callArgs = call.getCall(0).args;
-                expect(callArgs[0]).to.deep.equals(['test', 'again']);
+                expect(callArgs[0]).to.deep.equals(["test", "again"]);
                 expect(callArgs[1]).to.deep.equals([]);
                 expect(callArgs[2]).to.deep.equals([
-                    ['oneSuffix', 'a'],
-                    ['twoSuffix', 'b']
+                    ["oneSuffix", "a"],
+                    ["twoSuffix", "b"]
                 ]);
                 expect(callArgs[3]).to.deep.equals([
-                    ['onePath', 'a'],
-                    ['twoPath', 'b']
+                    ["onePath", "a"],
+                    ["twoPath", "b"]
                 ]);
             }).
             subscribe(noOp, done, done);
@@ -129,8 +130,8 @@ describe("Call", function() {
         var call = sinon.spy(function() {
             return new ModelResponse(function(observer) {
                 observer.onNext({
-                    jsonGraph: { a: 'test' },
-                    paths: [['a']],
+                    jsonGraph: { a: "test" },
+                    paths: [["a"]],
                     invalidated: []
                 });
                 observer.onCompleted();
@@ -146,5 +147,34 @@ describe("Call", function() {
           expect(call.calledOnce).to.be.ok;
           done();
         }).catch(done);
+    });
+});
+
+describe("ModelResponse", function() {
+    it("should be consumable with RxJS 5", function(done) {
+        var response = new ModelResponse(function(observer) {
+            observer.onNext({
+                jsonGraph: { a: "test" },
+                paths: [["a"]],
+                invalidated: []
+            });
+            observer.onCompleted();
+        });
+
+        var results = [];
+
+        Rx5.Observable.from(response)
+            .subscribe(
+                function(value) { results.push(value); },
+                null,
+                function() {
+                    expect(results).to.deep.equals([{
+                        jsonGraph: { a: "test" },
+                        paths: [["a"]],
+                        invalidated: []
+                    }]);
+                    done();
+                }
+            );
     });
 });
