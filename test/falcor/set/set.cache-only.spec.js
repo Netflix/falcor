@@ -222,6 +222,60 @@ describe('Cache Only', function() {
                     });
         });
 
+        it('should be allowed to change $type', function(done) {
+
+            var testPath = ['genreList', 0, 0, 'errorPath'];
+
+            var modelCache = Cache();
+
+            var onNextSpy = sinon.spy();
+            var onErrorSpy = sinon.spy();
+
+            var model = new Model({
+                cache : modelCache,
+                errorSelector : function(path, atom) {
+                    var o = {
+                        $type: 'atom',
+                        $custom: 'custom',
+                        value: {
+                            message: atom.value.message,
+                            customtype: 'customtype'
+                        }
+                    };
+
+                    return o;
+                }
+            });
+
+            toObservable(model.
+                boxValues().
+                setValue(testPath, jsonGraph.error({message:'errormsg'}))).
+                doAction(onNextSpy, onErrorSpy, noOp).
+                subscribe(
+                    noOp,
+                    function(e) {
+                        expect(onErrorSpy.callCount).to.equal(0);
+                        done();
+                    },
+                    function() {
+
+                        expect(onErrorSpy.callCount).to.equal(0);
+                        expect(onNextSpy.callCount).to.equal(1);
+
+                        expect(onNextSpy.getCall(0).args[0]).to.deep.equals({
+                            $type: 'atom',
+                            $custom: 'custom',
+                            value: {
+                                message: 'errormsg',
+                                customtype: 'customtype'
+                            },
+                            $size:51
+                        });
+
+                        done();
+                    });
+        });
+
     });
 
 });
