@@ -585,6 +585,65 @@ describe('DataSource and Partial Cache', function() {
                         done();
                     });
         });
+
+        it('should be allowed to change $type', function(done) {
+
+            var testPath = ['lolomo',0,0,'item','errorPath'];
+
+            var modelCache = M();
+            var dataSourceCache = Cache();
+            // [lolomo,0,0,item]->[videos,0]
+            dataSourceCache.videos[0].errorPath = jsonGraph.error({message:'errormsg'});
+
+            var onNextSpy = sinon.spy();
+            var onErrorSpy = sinon.spy();
+
+            var model = new Model({
+                cache : modelCache,
+                source: new LocalDataSource(dataSourceCache),
+                errorSelector : function(path, atom) {
+                    var o = {
+                        $type: 'atom',
+                        $custom: 'custom',
+                        value: {
+                            message: atom.value.message,
+                            customtype: 'customtype'
+                        }
+                    };
+
+                    return o;
+                }
+            });
+
+            toObservable(model.
+                boxValues().
+                setValue(testPath, jsonGraph.error({message:'errormsg'}))).
+                doAction(onNextSpy, onErrorSpy, noOp).
+                subscribe(
+                    noOp,
+                    function(e) {
+                        expect(onErrorSpy.callCount).to.equal(0);
+                        done();
+                    },
+                    function() {
+
+                        expect(onErrorSpy.callCount).to.equal(0);
+                        expect(onNextSpy.callCount).to.equal(1);
+
+                        expect(onNextSpy.getCall(0).args[0]).to.deep.equals({
+                            $type: 'atom',
+                            $custom: 'custom',
+                            value: {
+                                message: 'errormsg',
+                                customtype: 'customtype'
+                            },
+                            $size:51
+                        });
+
+                        done();
+                    });
+        });
+
     });
     describe("Cached data with timestamp", function() {
         var t0 = Date.parse('2000/01/01');

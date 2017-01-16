@@ -2,6 +2,7 @@
 -------------------
 
 ## Features
+- [Allow errorSelector to change $type](https://github.com/Netflix/falcor/issues/828)
 - [Falcor.keys](https://github.com/Netflix/falcor/issues/708)
   - Adds a function to the namespace of `falcor` for ease of json key iteration.
 - [Remove Rx From Core](https://github.com/Netflix/falcor/issues/465)
