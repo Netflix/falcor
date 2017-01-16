@@ -5393,11 +5393,12 @@ module.exports = function mergeJSONGraphNode(
 
         if (mType === $error && isFunction(errorSelector)) {
             message = errorSelector(reconstructPath(requestedPath, key), message);
+            mType = message.$type || mType;
         }
 
         if (mType && node === message) {
             if (node.ツparent == null) {
-                node = wrapNode(node, cType, node.value);
+                node = wrapNode(node, mType, node.value);
                 parent = updateNodeAncestors(parent, -node.$size, lru, version);
                 node = insertNode(node, parent, key, version, optimizedPath);
             }
@@ -5498,6 +5499,7 @@ module.exports = function mergeValueOrInsertBranch(
 
             if (mType === $error && isFunction(errorSelector)) {
                 message = errorSelector(reconstructPath(requestedPath, key), message);
+                mType = message.$type || mType;
             }
 
             message = wrapNode(message, mType, mType ? message.value : message);
