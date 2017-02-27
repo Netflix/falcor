@@ -231,6 +231,21 @@ describe("Model", function() {
         }
     });
 
+    it('setMaxSize to a lower value forces a collect', function(done) {
+        var model = new Model({
+            cache: {
+                list: {
+                    0: { name: "test" }
+                }
+            }
+        });
+        var cache = model._root.cache;
+        expect(cache['$size']).to.be.greaterThan(0);
+        model._setMaxSize(0);
+        expect(cache['$size']).to.equal(0);
+        done();
+    });
+
     describe('JSON-Graph Specification', function() {
         require('./get-core');
 
