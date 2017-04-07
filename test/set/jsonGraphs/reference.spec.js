@@ -54,4 +54,29 @@ describe("an old reference over a newer reference", function() {
             }
         }));
     });
+
+    it("should correctly assign ツabsolutePath after setting past references", function() {
+
+        var cache = {};
+        var version = 0;
+
+        setJSONGraphs(
+            getModel({ cache: cache, version: version++ }), [{
+                paths: [["genrelist", [0, 1], "titles", 0, "name"]],
+                jsonGraph: {
+                    genrelist: {
+                        0: { titles: { 0: $ref("titlesById[32]") } },
+                        1: { titles: { 0: $ref("titlesById[87]") } }
+                    }
+                },
+                titlesById: {
+                    32: { name: "Die Hard" },
+                    87: { name: "How to Lose a Guy in Ten Days" }
+                }
+            }]
+        );
+
+        expect(cache.genrelist[0].ツabsolutePath).to.deep.equal(["genrelist", 0]);
+        expect(cache.genrelist[1].ツabsolutePath).to.deep.equal(["genrelist", 1]);
+    });
 });
