@@ -31,9 +31,9 @@ describe('Deref', function() {
 
         // Cheating in how we are creating the output.  'path' key should not exist
         // at the top level of output.
-        delete output.$__path;
-        delete output.$__refPath;
-        delete output.$__toReference;
+        delete output.$_path;
+        delete output.$_refPath;
+        delete output.$_toReference;
 
         getCoreRunner({
             input: [
@@ -99,15 +99,15 @@ describe('Deref', function() {
                 var json = onNext.getCall(0).args[0].json;
 
                 // Top level
-                expect(json.$__path).to.be.not.ok;
+                expect(json.$_path).to.be.not.ok;
 
                 // a
                 var a = json.a;
-                expect(a.$__path).to.deep.equals(['a']);
+                expect(a.$_path).to.deep.equals(['a']);
 
                 // b
                 var b = a.b;
-                expect(b.$__path).to.deep.equals(['a', 'b']);
+                expect(b.$_path).to.deep.equals(['a', 'b']);
 
                 // e
                 var e = b.e;
