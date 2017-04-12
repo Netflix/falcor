@@ -4732,8 +4732,8 @@ module.exports = function setPathValues(model, pathValues, x, errorSelector, com
     var bound = model._path;
     var cache = modelRoot.cache;
     var node = bound.length ? getBoundValue(model, bound).value : cache;
-    var parent = node.$parent || cache;
-    var initialVersion = cache.$version;
+    var parent = node.ツparent || cache;
+    var initialVersion = cache.ツversion;
 
     var requestedPath = [];
     var requestedPaths = [];
@@ -4757,7 +4757,7 @@ module.exports = function setPathValues(model, pathValues, x, errorSelector, com
         );
     }
 
-    var newVersion = cache.$version;
+    var newVersion = cache.ツversion;
     var rootChangeHandler = modelRoot.onChange;
 
     if (isFunction(rootChangeHandler) && initialVersion !== newVersion) {
@@ -4832,10 +4832,10 @@ function setReference(
     var container = node;
     var parent = root;
 
-    node = node.$context;
+    node = node.ツcontext;
 
     if (node != null) {
-        parent = node.$parent || root;
+        parent = node.ツparent || root;
         optimizedPath.index = reference.length;
     } else {
 
@@ -4864,7 +4864,7 @@ function setReference(
 
         optimizedPath.index = index;
 
-        if (container.$context !== node) {
+        if (container.ツcontext !== node) {
             createHardlink(container, node);
         }
     }
@@ -4904,7 +4904,7 @@ function setNode(
         if (branch) {
             throw new NullInPathError();
         } else if (node) {
-            key = node.$key;
+            key = node.ツkey;
         }
     } else {
         parent = node;
