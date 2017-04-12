@@ -48,8 +48,8 @@ module.exports = function invalidatePathSets(model, paths) {
     var bound = model._path;
     var cache = modelRoot.cache;
     var node = bound.length ? getBoundValue(model, bound).value : cache;
-    var parent = node.ツparent || cache;
-    var initialVersion = cache.ツversion;
+    var parent = node.$parent || cache;
+    var initialVersion = cache.$version;
 
     var pathIndex = -1;
     var pathCount = paths.length;
@@ -64,7 +64,7 @@ module.exports = function invalidatePathSets(model, paths) {
         );
     }
 
-    var newVersion = cache.ツversion;
+    var newVersion = cache.$version;
     var rootChangeHandler = modelRoot.onChange;
 
     if (isFunction(rootChangeHandler) &amp;&amp; initialVersion !== newVersion) {
@@ -117,10 +117,10 @@ function invalidateReference(root, node, version, expired, lru) {
     var reference = node.value;
     var parent = root;
 
-    node = node.ツcontext;
+    node = node.$context;
 
     if (node != null) {
-        parent = node.ツparent || root;
+        parent = node.$parent || root;
     } else {
 
         var index = 0;
@@ -143,12 +143,12 @@ function invalidateReference(root, node, version, expired, lru) {
             parent = results[1];
         } while (index++ &lt; count);
 
-        if (container.ツcontext !== node) {
-            var backRefs = node.ツrefsLength || 0;
-            node.ツrefsLength = backRefs + 1;
+        if (container.$context !== node) {
+            var backRefs = node.$refsLength || 0;
+            node.$refsLength = backRefs + 1;
             node[__ref + backRefs] = container;
-            container.ツcontext = node;
-            container.ツrefIndex = backRefs;
+            container.$context = node;
+            container.$refIndex = backRefs;
         }
     }
 
@@ -184,7 +184,7 @@ function invalidateNode(
         if (branch) {
             throw new Error("`null` is not allowed in branch key positions.");
         } else if (node) {
-            key = node.ツkey;
+            key = node.$key;
         }
     } else {
         parent = node;

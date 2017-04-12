@@ -447,7 +447,7 @@ Model.prototype._setMaxSize = function setMaxSize(maxSize) {
     if (maxSize < oldMaxSize) {
         var modelRoot = this._root;
         var modelCache = modelRoot.cache;
-        var currentVersion = modelCache.ツversion;
+        var currentVersion = modelCache.$version;
         collectLru(modelRoot, modelRoot.expired, getSize(modelCache),
                 this._maxSize, this._collectRatio, currentVersion);
     }
@@ -753,12 +753,12 @@ module.exports = function fromWhenceYeCame() {
     }
 
     // Its been disconnected (set over or collected) from the graph.
-    if (reference && reference.ツparent === undefined) {
+    if (reference && reference.$parent === undefined) {
         return false;
     }
 
     // The reference has expired but has not been collected from the graph.
-    if (reference && reference.ツinvalidated) {
+    if (reference && reference.$invalidated) {
         return false;
     }
 
@@ -1013,9 +1013,9 @@ function followReference(model, root, nodeArg, referenceContainerArg,
     var k, next;
 
     while (true) {
-        if (depth === 0 && referenceContainer.ツcontext) {
+        if (depth === 0 && referenceContainer.$context) {
             depth = reference.length;
-            next = referenceContainer.ツcontext;
+            next = referenceContainer.$context;
         } else {
             k = reference[depth++];
             next = node[k];
@@ -1043,7 +1043,7 @@ function followReference(model, root, nodeArg, referenceContainerArg,
                     break;
                 }
 
-                if (!referenceContainer.ツcontext) {
+                if (!referenceContainer.$context) {
                     createHardlink(referenceContainer, next);
                 }
 
@@ -1283,7 +1283,7 @@ function _copyCache(node, out, fromKey) {
             // Paste the node into the out cache.
             if (cacheNext.$type) {
                 var isObject = cacheNext.value && typeof cacheNext.value === "object";
-                var isUserCreatedcacheNext = !cacheNext.ツmodelCreated;
+                var isUserCreatedcacheNext = !cacheNext.$modelCreated;
                 var value;
                 if (isObject || isUserCreatedcacheNext) {
                     value = cloneBoxedValue(cacheNext);
@@ -1510,7 +1510,7 @@ module.exports = function _getVersion(model, path) {
         _root: model._root,
         _treatErrorsAsValues: model._treatErrorsAsValues
     }, path, true).value;
-    var version = gen && gen.ツversion;
+    var version = gen && gen.$version;
     return (version == null) ? -1 : version;
 };
 
@@ -1666,7 +1666,7 @@ module.exports = function onValue(model, node, seed, depth, outerResults,
 
     else if (isJSONG) {
         var isObject = node.value && typeof node.value === "object";
-        var isUserCreatedNode = !node.ツmodelCreated;
+        var isUserCreatedNode = !node.$modelCreated;
         if (isObject || isUserCreatedNode) {
             valueNode = clone(node);
         } else {
@@ -1783,7 +1783,7 @@ module.exports = function onValueType(
 
     // If there are expired value, then report it as missing
     else if (isExpired(node)) {
-        if (!node.ツinvalidated) {
+        if (!node.$invalidated) {
             expireNode(node, model._root.expired, model._root);
         }
         onMissing(model, path, depth,
@@ -2020,9 +2020,9 @@ module.exports = function walkPath(model, root, curr, path, depth, seed,
                 // There was a reference container.
                 if (referenceContainer && allowFromWhenceYouCame) {
                     obj = {
-                        $__path: next.ツabsolutePath,
+                        $__path: next.$absolutePath,
                         $__refPath: referenceContainer.value,
-                        $__toReference: referenceContainer.ツabsolutePath
+                        $__toReference: referenceContainer.$absolutePath
                     };
                 }
 
@@ -2031,7 +2031,7 @@ module.exports = function walkPath(model, root, curr, path, depth, seed,
                 // contain references.
                 else {
                     obj = {
-                        $__path: next.ツabsolutePath
+                        $__path: next.$absolutePath
                     };
                 }
 
@@ -2090,7 +2090,7 @@ falcor.Model = require(3);
 module.exports = require(36) + "ref";
 
 },{"36":36}],36:[function(require,module,exports){
-module.exports = "ツ";
+module.exports = "$";
 
 
 },{}],37:[function(require,module,exports){
@@ -2131,8 +2131,8 @@ module.exports = function invalidatePathMaps(model, pathMapEnvelopes) {
     var bound = model._path;
     var cache = modelRoot.cache;
     var node = bound.length ? getBoundValue(model, bound).value : cache;
-    var parent = node.ツparent || cache;
-    var initialVersion = cache.ツversion;
+    var parent = node.$parent || cache;
+    var initialVersion = cache.$version;
 
     var pathMapIndex = -1;
     var pathMapCount = pathMapEnvelopes.length;
@@ -2147,7 +2147,7 @@ module.exports = function invalidatePathMaps(model, pathMapEnvelopes) {
         );
     }
 
-    var newVersion = cache.ツversion;
+    var newVersion = cache.$version;
     var rootChangeHandler = modelRoot.onChange;
 
     if (isFunction(rootChangeHandler) && initialVersion !== newVersion) {
@@ -2200,10 +2200,10 @@ function invalidateReference(value, root, node, version, expired, lru, comparato
     var reference = node.value;
     var parent = root;
 
-    node = node.ツcontext;
+    node = node.$context;
 
     if (node != null) {
-        parent = node.ツparent || root;
+        parent = node.$parent || root;
     } else {
 
         var index = 0;
@@ -2226,7 +2226,7 @@ function invalidateReference(value, root, node, version, expired, lru, comparato
             parent = results[1];
         } while (index++ < count);
 
-        if (container.ツcontext !== node) {
+        if (container.$context !== node) {
             createHardlink(container, node);
         }
     }
@@ -2263,7 +2263,7 @@ function invalidateNode(
         if (branch) {
             throw new Error("`null` is not allowed in branch key positions.");
         } else if (node) {
-            key = node.ツkey;
+            key = node.$key;
         }
     } else {
         parent = node;
@@ -2307,8 +2307,8 @@ module.exports = function invalidatePathSets(model, paths) {
     var bound = model._path;
     var cache = modelRoot.cache;
     var node = bound.length ? getBoundValue(model, bound).value : cache;
-    var parent = node.ツparent || cache;
-    var initialVersion = cache.ツversion;
+    var parent = node.$parent || cache;
+    var initialVersion = cache.$version;
 
     var pathIndex = -1;
     var pathCount = paths.length;
@@ -2323,7 +2323,7 @@ module.exports = function invalidatePathSets(model, paths) {
         );
     }
 
-    var newVersion = cache.ツversion;
+    var newVersion = cache.$version;
     var rootChangeHandler = modelRoot.onChange;
 
     if (isFunction(rootChangeHandler) && initialVersion !== newVersion) {
@@ -2376,10 +2376,10 @@ function invalidateReference(root, node, version, expired, lru) {
     var reference = node.value;
     var parent = root;
 
-    node = node.ツcontext;
+    node = node.$context;
 
     if (node != null) {
-        parent = node.ツparent || root;
+        parent = node.$parent || root;
     } else {
 
         var index = 0;
@@ -2402,12 +2402,12 @@ function invalidateReference(root, node, version, expired, lru) {
             parent = results[1];
         } while (index++ < count);
 
-        if (container.ツcontext !== node) {
-            var backRefs = node.ツrefsLength || 0;
-            node.ツrefsLength = backRefs + 1;
+        if (container.$context !== node) {
+            var backRefs = node.$refsLength || 0;
+            node.$refsLength = backRefs + 1;
             node[__ref + backRefs] = container;
-            container.ツcontext = node;
-            container.ツrefIndex = backRefs;
+            container.$context = node;
+            container.$refIndex = backRefs;
         }
     }
 
@@ -2443,7 +2443,7 @@ function invalidateNode(
         if (branch) {
             throw new Error("`null` is not allowed in branch key positions.");
         } else if (node) {
-            key = node.ツkey;
+            key = node.$key;
         }
     } else {
         parent = node;
@@ -2477,17 +2477,17 @@ module.exports = function collect(lru, expired, totalArg, max, ratioArg, version
         total -= size;
         if (shouldUpdate === true) {
             updateNodeAncestors(node, size, lru, version);
-        } else if (parent = node.ツparent) {  // eslint-disable-line no-cond-assign
-            removeNode(node, parent, node.ツkey, lru);
+        } else if (parent = node.$parent) {  // eslint-disable-line no-cond-assign
+            removeNode(node, parent, node.$key, lru);
         }
         node = expired.pop();
     }
 
     if (total >= max) {
-        var prev = lru.ツtail;
+        var prev = lru.$tail;
         node = prev;
         while ((total >= targetSize) && node) {
-            prev = prev.ツprev;
+            prev = prev.$prev;
             size = node.$size || 0;
             total -= size;
             if (shouldUpdate === true) {
@@ -2496,11 +2496,11 @@ module.exports = function collect(lru, expired, totalArg, max, ratioArg, version
             node = prev;
         }
 
-        lru.ツtail = lru.ツprev = node;
+        lru.$tail = lru.$prev = node;
         if (node == null) {
-            lru.ツhead = lru.ツnext = undefined;
+            lru.$head = lru.$next = undefined;
         } else {
-            node.ツnext = undefined;
+            node.$next = undefined;
         }
     }
 };
@@ -2516,11 +2516,11 @@ module.exports = function lruPromote(root, object) {
         return;
     }
 
-    var head = root.ツhead;
+    var head = root.$head;
 
     // Nothing is in the cache.
     if (!head) {
-        root.ツhead = root.ツtail = object;
+        root.$head = root.$tail = object;
         return;
     }
 
@@ -2530,24 +2530,24 @@ module.exports = function lruPromote(root, object) {
 
     // The item always exist in the cache since to get anything in the
     // cache it first must go through set.
-    var prev = object.ツprev;
-    var next = object.ツnext;
+    var prev = object.$prev;
+    var next = object.$next;
     if (next) {
-        next.ツprev = prev;
+        next.$prev = prev;
     }
     if (prev) {
-        prev.ツnext = next;
+        prev.$next = next;
     }
-    object.ツprev = undefined;
+    object.$prev = undefined;
 
     // Insert into head position
-    root.ツhead = object;
-    object.ツnext = head;
-    head.ツprev = object;
+    root.$head = object;
+    object.$next = head;
+    head.$prev = object;
 
     // If the item we promoted was the tail, then set prev to tail.
-    if (object === root.ツtail) {
-        root.ツtail = prev;
+    if (object === root.$tail) {
+        root.$tail = prev;
     }
 };
 
@@ -2555,21 +2555,21 @@ module.exports = function lruPromote(root, object) {
 module.exports = function lruSplice(root, object) {
 
     // Its in the cache.  Splice out.
-    var prev = object.ツprev;
-    var next = object.ツnext;
+    var prev = object.$prev;
+    var next = object.$next;
     if (next) {
-        next.ツprev = prev;
+        next.$prev = prev;
     }
     if (prev) {
-        prev.ツnext = next;
+        prev.$next = next;
     }
-    object.ツprev = object.ツnext = undefined;
+    object.$prev = object.$next = undefined;
 
-    if (object === root.ツhead) {
-        root.ツhead = next;
+    if (object === root.$head) {
+        root.$head = next;
     }
-    if (object === root.ツtail) {
-        root.ツtail = prev;
+    if (object === root.$tail) {
+        root.$tail = prev;
     }
 };
 
@@ -3614,7 +3614,7 @@ GetResponse.prototype._subscribe = function _subscribe(observer) {
         if (this.forceCollect) {
             var modelRoot = model._root;
             var modelCache = modelRoot.cache;
-            var currentVersion = modelCache.ツversion;
+            var currentVersion = modelCache.$version;
 
             collectLru(modelRoot, modelRoot.expired, getSize(modelCache),
                     model._maxSize, model._collectRatio, currentVersion);
@@ -3796,7 +3796,7 @@ module.exports = function getRequestCycle(getResponse, model, results, observer,
 
                 var modelRoot = model._root;
                 var modelCache = modelRoot.cache;
-                var currentVersion = modelCache.ツversion;
+                var currentVersion = modelCache.$version;
 
                 collectLru(modelRoot, modelRoot.expired, getSize(modelCache),
                         model._maxSize, model._collectRatio, currentVersion);
@@ -4261,7 +4261,7 @@ module.exports = function setJSONGraphs(model, jsonGraphEnvelopes, x, errorSelec
     var expired = modelRoot.expired;
     var version = incrementVersion();
     var cache = modelRoot.cache;
-    var initialVersion = cache.ツversion;
+    var initialVersion = cache.$version;
 
     var requestedPath = [];
     var optimizedPath = [];
@@ -4294,7 +4294,7 @@ module.exports = function setJSONGraphs(model, jsonGraphEnvelopes, x, errorSelec
         }
     }
 
-    var newVersion = cache.ツversion;
+    var newVersion = cache.$version;
     var rootChangeHandler = modelRoot.onChange;
 
     if (isFunction(rootChangeHandler) && initialVersion !== newVersion) {
@@ -4396,7 +4396,7 @@ function setReference(
 
     optimizedPath.index = index;
 
-    if (container.ツcontext !== node) {
+    if (container.$context !== node) {
         createHardlink(container, node);
     }
 
@@ -4437,7 +4437,7 @@ function setNode(
         if (branch) {
             throw new NullInPathError();
         } else if (node) {
-            key = node.ツkey;
+            key = node.$key;
         }
     } else {
         parent = node;
@@ -4489,8 +4489,8 @@ module.exports = function setPathMaps(model, pathMapEnvelopes, x, errorSelector,
     var bound = model._path;
     var cache = modelRoot.cache;
     var node = bound.length ? getBoundValue(model, bound).value : cache;
-    var parent = node.ツparent || cache;
-    var initialVersion = cache.ツversion;
+    var parent = node.$parent || cache;
+    var initialVersion = cache.$version;
 
     var requestedPath = [];
     var requestedPaths = [];
@@ -4512,7 +4512,7 @@ module.exports = function setPathMaps(model, pathMapEnvelopes, x, errorSelector,
         );
     }
 
-    var newVersion = cache.ツversion;
+    var newVersion = cache.$version;
     var rootChangeHandler = modelRoot.onChange;
 
     if (isFunction(rootChangeHandler) && initialVersion !== newVersion) {
@@ -4594,10 +4594,10 @@ function setReference(
     var container = node;
     var parent = root;
 
-    node = node.ツcontext;
+    node = node.$context;
 
     if (node != null) {
-        parent = node.ツparent || root;
+        parent = node.$parent || root;
         optimizedPath.index = reference.length;
     } else {
 
@@ -4625,7 +4625,7 @@ function setReference(
 
         optimizedPath.index = index;
 
-        if (container.ツcontext !== node) {
+        if (container.$context !== node) {
             createHardlink(container, node);
         }
     }
@@ -4664,7 +4664,7 @@ function setNode(
         if (branch) {
             throw new NullInPathError();
         } else if (node) {
-            key = node.ツkey;
+            key = node.$key;
         }
     } else {
         parent = node;
@@ -4732,8 +4732,8 @@ module.exports = function setPathValues(model, pathValues, x, errorSelector, com
     var bound = model._path;
     var cache = modelRoot.cache;
     var node = bound.length ? getBoundValue(model, bound).value : cache;
-    var parent = node.ツparent || cache;
-    var initialVersion = cache.ツversion;
+    var parent = node.$parent || cache;
+    var initialVersion = cache.$version;
 
     var requestedPath = [];
     var requestedPaths = [];
@@ -4757,7 +4757,7 @@ module.exports = function setPathValues(model, pathValues, x, errorSelector, com
         );
     }
 
-    var newVersion = cache.ツversion;
+    var newVersion = cache.$version;
     var rootChangeHandler = modelRoot.onChange;
 
     if (isFunction(rootChangeHandler) && initialVersion !== newVersion) {
@@ -4832,10 +4832,10 @@ function setReference(
     var container = node;
     var parent = root;
 
-    node = node.ツcontext;
+    node = node.$context;
 
     if (node != null) {
-        parent = node.ツparent || root;
+        parent = node.$parent || root;
         optimizedPath.index = reference.length;
     } else {
 
@@ -4864,7 +4864,7 @@ function setReference(
 
         optimizedPath.index = index;
 
-        if (container.ツcontext !== node) {
+        if (container.$context !== node) {
             createHardlink(container, node);
         }
     }
@@ -4904,7 +4904,7 @@ function setNode(
         if (branch) {
             throw new NullInPathError();
         } else if (node) {
-            key = node.ツkey;
+            key = node.$key;
         }
     } else {
         parent = node;
@@ -5089,21 +5089,21 @@ var __ref = require(35);
 module.exports = function createHardlink(from, to) {
 
     // create a back reference
-    var backRefs = to.ツrefsLength || 0;
+    var backRefs = to.$refsLength || 0;
     to[__ref + backRefs] = from;
-    to.ツrefsLength = backRefs + 1;
+    to.$refsLength = backRefs + 1;
 
     // create a hard reference
-    from.ツrefIndex = backRefs;
-    from.ツcontext = to;
+    from.$refIndex = backRefs;
+    from.$context = to;
 };
 
 },{"35":35}],77:[function(require,module,exports){
 var splice = require(41);
 
 module.exports = function expireNode(node, expired, lru) {
-    if (!node.ツinvalidated) {
-        node.ツinvalidated = true;
+    if (!node.$invalidated) {
+        node.$invalidated = true;
         expired.push(node);
         splice(lru, node);
     }
@@ -5155,14 +5155,14 @@ module.exports = function incrementVersion() {
 
 },{}],84:[function(require,module,exports){
 module.exports = function insertNode(node, parent, key, version, optimizedPath) {
-    node.ツkey = key;
-    node.ツparent = parent;
+    node.$key = key;
+    node.$parent = parent;
 
     if (version !== undefined) {
-        node.ツversion = version;
+        node.$version = version;
     }
-    if (!node.ツabsolutePath) {
-        node.ツabsolutePath = optimizedPath.slice(0, optimizedPath.index).concat(key);
+    if (!node.$absolutePath) {
+        node.$absolutePath = optimizedPath.slice(0, optimizedPath.index).concat(key);
     }
 
     parent[key] = node;
@@ -5320,7 +5320,7 @@ module.exports = function mergeJSONGraphNode(
                 if (cType == null) {
                     // Has the branch been introduced to the cache yet? If not,
                     // give it a parent, key, and absolute path.
-                    if (node.ツparent == null) {
+                    if (node.$parent == null) {
                         insertNode(node, parent, key, version, optimizedPath);
                     }
                     return node;
@@ -5372,7 +5372,7 @@ module.exports = function mergeJSONGraphNode(
                     // grandparents. If we've previously graphed this
                     // reference, break early. Otherwise, continue to
                     // leaf insertion below.
-                    if (node.ツparent != null) {
+                    if (node.$parent != null) {
                         return node;
                     }
                 } else {
@@ -5413,7 +5413,7 @@ module.exports = function mergeJSONGraphNode(
         }
 
         if (mType && node === message) {
-            if (node.ツparent == null) {
+            if (node.$parent == null) {
                 node = wrapNode(node, mType, node.value);
                 parent = updateNodeAncestors(parent, -node.$size, lru, version);
                 node = insertNode(node, parent, key, version, optimizedPath);
@@ -5576,7 +5576,7 @@ module.exports = function removeNode(node, parent, key, lru) {
             splice(lru, node);
         }
         unlinkBackReferences(node);
-        parent[key] = node.ツparent = void 0;
+        parent[key] = node.$parent = void 0;
         return true;
     }
     return false;
@@ -5622,19 +5622,19 @@ module.exports = function replaceNode(node, replacement, parent, key, lru) {
 var __ref = require(35);
 
 module.exports = function transferBackReferences(fromNode, destNode) {
-    var fromNodeRefsLength = fromNode.ツrefsLength || 0,
-        destNodeRefsLength = destNode.ツrefsLength || 0,
+    var fromNodeRefsLength = fromNode.$refsLength || 0,
+        destNodeRefsLength = destNode.$refsLength || 0,
         i = -1;
     while (++i < fromNodeRefsLength) {
         var ref = fromNode[__ref + i];
         if (ref !== void 0) {
-            ref.ツcontext = destNode;
+            ref.$context = destNode;
             destNode[__ref + (destNodeRefsLength + i)] = ref;
             fromNode[__ref + i] = void 0;
         }
     }
-    destNode.ツrefsLength = fromNodeRefsLength + destNodeRefsLength;
-    fromNode.ツrefsLength = void 0;
+    destNode.$refsLength = fromNodeRefsLength + destNodeRefsLength;
+    fromNode.$refsLength = void 0;
     return destNode;
 };
 
@@ -5642,14 +5642,14 @@ module.exports = function transferBackReferences(fromNode, destNode) {
 var __ref = require(35);
 
 module.exports = function unlinkBackReferences(node) {
-    var i = -1, n = node.ツrefsLength || 0;
+    var i = -1, n = node.$refsLength || 0;
     while (++i < n) {
         var ref = node[__ref + i];
         if (ref != null) {
-            ref.ツcontext = ref.ツrefIndex = node[__ref + i] = void 0;
+            ref.$context = ref.$refIndex = node[__ref + i] = void 0;
         }
     }
-    node.ツrefsLength = void 0;
+    node.$refsLength = void 0;
     return node;
 };
 
@@ -5657,15 +5657,15 @@ module.exports = function unlinkBackReferences(node) {
 var __ref = require(35);
 
 module.exports = function unlinkForwardReference(reference) {
-    var destination = reference.ツcontext;
+    var destination = reference.$context;
     if (destination) {
-        var i = (reference.ツrefIndex || 0) - 1,
-            n = (destination.ツrefsLength || 0) - 1;
+        var i = (reference.$refIndex || 0) - 1,
+            n = (destination.$refsLength || 0) - 1;
         while (++i <= n) {
             destination[__ref + i] = destination[__ref + (i + 1)];
         }
-        destination.ツrefsLength = n;
-        reference.ツrefIndex = reference.ツcontext = destination = void 0;
+        destination.$refsLength = n;
+        reference.$refIndex = reference.$context = destination = void 0;
     }
     return reference;
 };
@@ -5678,11 +5678,11 @@ module.exports = function updateBackReferenceVersions(nodeArg, version) {
     var count = 0;
     do {
         var node = stack[count];
-        if (node && node.ツversion !== version) {
-            node.ツversion = version;
-            stack[count++] = node.ツparent;
+        if (node && node.$version !== version) {
+            node.$version = version;
+            stack[count++] = node.$parent;
             var i = -1;
-            var n = node.ツrefsLength || 0;
+            var n = node.$refsLength || 0;
             while (++i < n) {
                 stack[count++] = node[__ref + i];
             }
@@ -5698,11 +5698,11 @@ var updateBackReferenceVersions = require(105);
 module.exports = function updateNodeAncestors(nodeArg, offset, lru, version) {
     var child = nodeArg;
     do {
-        var node = child.ツparent;
+        var node = child.$parent;
         var size = child.$size = (child.$size || 0) - offset;
         if (size <= 0 && node != null) {
-            removeNode(child, node, child.ツkey, lru);
-        } else if (child.ツversion !== version) {
+            removeNode(child, node, child.$key, lru);
+        } else if (child.$version !== version) {
             updateBackReferenceVersions(child, version);
         }
         child = node;
@@ -5787,20 +5787,20 @@ module.exports = function wrapNode(nodeArg, typeArg, value) {
     var type = typeArg;
 
     if (type) {
-        var modelCreated = node.ツmodelCreated;
+        var modelCreated = node.$modelCreated;
         node = clone(node);
         size = getSize(node);
         node.$type = type;
-        node.ツprev = undefined;
-        node.ツnext = undefined;
-        node.ツmodelCreated = modelCreated || false;
+        node.$prev = undefined;
+        node.$next = undefined;
+        node.$modelCreated = modelCreated || false;
     } else {
         node = {
             $type: atomType,
             value: value,
-            ツprev: undefined,
-            ツnext: undefined,
-            ツmodelCreated: true
+            $prev: undefined,
+            $next: undefined,
+            $modelCreated: true
         };
     }
 
