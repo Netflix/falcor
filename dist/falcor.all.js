@@ -2085,9 +2085,9 @@ module.exports = falcor;
 falcor.Model = require(3);
 
 },{"3":3}],35:[function(require,module,exports){
-var unicodePrefix = require(37);
+var reservedPrefix = require(37);
 
-module.exports = unicodePrefix + "_";
+module.exports = reservedPrefix + "_";
 
 },{"37":37}],36:[function(require,module,exports){
 module.exports = require(35) + "ref";
@@ -2501,7 +2501,7 @@ module.exports = function collect(lru, expired, totalArg, max, ratioArg, version
 
         lru.$_tail = lru.$_prev = node;
         if (node == null) {
-            lru.$head = lru.$_next = undefined;
+            lru.$_head = lru.$_next = undefined;
         } else {
             node.$_next = undefined;
         }
@@ -2519,11 +2519,11 @@ module.exports = function lruPromote(root, object) {
         return;
     }
 
-    var head = root.$head;
+    var head = root.$_head;
 
     // Nothing is in the cache.
     if (!head) {
-        root.$head = root.$_tail = object;
+        root.$_head = root.$_tail = object;
         return;
     }
 
@@ -2544,7 +2544,7 @@ module.exports = function lruPromote(root, object) {
     object.$_prev = undefined;
 
     // Insert into head position
-    root.$head = object;
+    root.$_head = object;
     object.$_next = head;
     head.$_prev = object;
 
@@ -2568,8 +2568,8 @@ module.exports = function lruSplice(root, object) {
     }
     object.$_prev = object.$_next = undefined;
 
-    if (object === root.$head) {
-        root.$head = next;
+    if (object === root.$_head) {
+        root.$_head = next;
     }
     if (object === root.$_tail) {
         root.$_tail = prev;
