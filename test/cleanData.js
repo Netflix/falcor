@@ -1,7 +1,7 @@
 var util = require('util');
 var internalKeyMap = require('./../lib/internal');
 var internalKeys = Object.keys(internalKeyMap);
-var $modelCreated = require('./../lib/internal/model-created.js');
+var $_modelCreated = require('./../lib/internal/model-created.js');
 
 module.exports = {
     clean: clean,
@@ -21,7 +21,7 @@ module.exports = {
 
 function convertModelCreatedAtoms(cache) {
     convertNodes(null, null, cache, function transform(sentinel) {
-        if (sentinel.$type === 'atom' && sentinel[$modelCreated] &&
+        if (sentinel.$type === 'atom' && sentinel[$_modelCreated] &&
             typeof sentinel.value !== 'object') {
 
             return sentinel.value;

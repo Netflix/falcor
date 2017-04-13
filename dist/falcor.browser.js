@@ -72,14 +72,14 @@ Model.pathValue = jsong.pathValue;
  * @callback Model~onChange
  */
 
- /**
+/**
  * This function is invoked on every JSONGraph Error retrieved from the DataSource. This function allows Error objects to be transformed before being stored in the Model's cache.
  * @callback Model~errorSelector
  * @param {Object} jsonGraphError - the JSONGraph Error object to transform before it is stored in the Model's cache.
  * @returns {Object} the JSONGraph Error object to store in the Model cache.
  */
 
- /**
+/**
  * This function is invoked every time a value in the Model cache is about to be replaced with a new value. If the function returns true, the existing value is replaced with a new value and the version flag on all of the value's ancestors in the tree are incremented.
  * @callback Model~comparator
  * @param {Object} existingValue - the current value in the Model cache.
@@ -100,13 +100,16 @@ Model.pathValue = jsong.pathValue;
  * @param {?Model~comparator} options.comparator - a function called whenever a value in the Model's cache is about to be replaced with a new value.
  */
 function Model(o) {
-
     var options = o || {};
     this._root = options._root || new ModelRoot(options);
     this._path = options.path || options._path || [];
-    this._scheduler = options.scheduler || options._scheduler || new ImmediateScheduler();
+    this._scheduler = options.scheduler ||
+        options._scheduler ||
+        new ImmediateScheduler();
     this._source = options.source || options._source;
-    this._request = options.request || options._request || new RequestQueue(this, this._scheduler);
+    this._request = options.request ||
+        options._request ||
+        new RequestQueue(this, this._scheduler);
     this._ID = ID++;
 
     if (typeof options.maxSize === "number") {
@@ -118,7 +121,8 @@ function Model(o) {
     if (typeof options.collectRatio === "number") {
         this._collectRatio = options.collectRatio;
     } else {
-        this._collectRatio = options._collectRatio || Model.prototype._collectRatio;
+        this._collectRatio = options._collectRatio ||
+            Model.prototype._collectRatio;
     }
 
     if (options.boxed || options.hasOwnProperty("_boxed")) {
@@ -136,7 +140,8 @@ function Model(o) {
     }
 
     this._allowFromWhenceYouCame = options.allowFromWhenceYouCame ||
-        options._allowFromWhenceYouCame || false;
+        options._allowFromWhenceYouCame ||
+        false;
 
     if (options.cache) {
         this.setCache(options.cache);
@@ -192,8 +197,9 @@ Model.prototype.preload = function preload() {
     var args = Array.prototype.slice.call(arguments);
     var self = this;
     return new ModelResponse(function(obs) {
-        return self.get.apply(self, args).subscribe(function() {
-        }, function(err) {
+        return self.get.apply(self, args).subscribe(function() {}, function(
+            err
+        ) {
             obs.onError(err);
         }, function() {
             obs.onCompleted();
@@ -219,9 +225,11 @@ Model.prototype.call = function call() {
         var arg = arguments[argsIdx];
         args[argsIdx] = arg;
         var argType = typeof arg;
-        if (argsIdx > 1 && !Array.isArray(arg) ||
-            argsIdx === 0 && !Array.isArray(arg) && argType !== "string" ||
-            argsIdx === 1 && !Array.isArray(arg) && !isPrimitive(arg)) {
+        if (
+            argsIdx > 1 && !Array.isArray(arg) ||
+                argsIdx === 0 && !Array.isArray(arg) && argType !== "string" ||
+                argsIdx === 1 && !Array.isArray(arg) && !isPrimitive(arg)
+        ) {
             /* eslint-disable no-loop-func */
             return new ModelResponse(function(o) {
                 o.onError(new Error("Invalid argument"));
@@ -251,10 +259,9 @@ Model.prototype.invalidate = function invalidate() {
     }
 
     // creates the obs, subscribes and will throw the errors if encountered.
-    (new InvalidateResponse(this, args)).
-        subscribe(noOp, function(e) {
-            throw e;
-        });
+    new InvalidateResponse(this, args).subscribe(noOp, function(e) {
+        throw e;
+    });
 };
 
 /**
@@ -439,9 +446,16 @@ Model.prototype._setMaxSize = function setMaxSize(maxSize) {
     if (maxSize < oldMaxSize) {
         var modelRoot = this._root;
         var modelCache = modelRoot.cache;
+        // eslint-disable-next-line camelcase
         var currentVersion = modelCache.$_version;
-        collectLru(modelRoot, modelRoot.expired, getSize(modelCache),
-                this._maxSize, this._collectRatio, currentVersion);
+        collectLru(
+            modelRoot,
+            modelRoot.expired,
+            getSize(modelCache),
+            this._maxSize,
+            this._collectRatio,
+            currentVersion
+        );
     }
 };
 
@@ -462,8 +476,16 @@ Model.prototype.getVersion = function getVersion(pathArg) {
 };
 
 Model.prototype._syncCheck = function syncCheck(name) {
-    if (Boolean(this._source) && this._root.syncRefCount <= 0 && this._root.unsafeMode === false) {
-        throw new Error("Model#" + name + " may only be called within the context of a request selector.");
+    if (
+        Boolean(this._source) &&
+            this._root.syncRefCount <= 0 &&
+            this._root.unsafeMode === false
+    ) {
+        throw new Error(
+            "Model#" +
+                name +
+                " may only be called within the context of a request selector."
+        );
     }
     return true;
 };
@@ -492,7 +514,9 @@ Model.prototype._clone = function cloneModel(opts) {
 Model.prototype.batch = function batch(schedulerOrDelayArg) {
     var schedulerOrDelay = schedulerOrDelayArg;
     if (typeof schedulerOrDelay === "number") {
-        schedulerOrDelay = new TimeoutScheduler(Math.round(Math.abs(schedulerOrDelay)));
+        schedulerOrDelay = new TimeoutScheduler(
+            Math.round(Math.abs(schedulerOrDelay))
+        );
     } else if (!schedulerOrDelay || !schedulerOrDelay.schedule) {
         schedulerOrDelay = new ASAPScheduler();
     }
@@ -745,11 +769,13 @@ module.exports = function fromWhenceYeCame() {
     }
 
     // Its been disconnected (set over or collected) from the graph.
+    // eslint-disable-next-line camelcase
     if (reference && reference.$_parent === undefined) {
         return false;
     }
 
     // The reference has expired but has not been collected from the graph.
+    // eslint-disable-next-line camelcase
     if (reference && reference.$_invalidated) {
         return false;
     }
@@ -1898,21 +1924,43 @@ var $ref = require(112);
 var NullInPathError = require(13);
 var promote = require(40);
 
-module.exports = function walkPath(model, root, curr, path, depth, seed,
-                                   outerResults, branchInfo, requestedPath,
-                                   optimizedPathArg, optimizedLength, isJSONG,
-                                   fromReferenceArg, referenceContainerArg) {
-
+module.exports = function walkPath(
+    model,
+    root,
+    curr,
+    path,
+    depth,
+    seed,
+    outerResults,
+    branchInfo,
+    requestedPath,
+    optimizedPathArg,
+    optimizedLength,
+    isJSONG,
+    fromReferenceArg,
+    referenceContainerArg
+) {
     var fromReference = fromReferenceArg;
     var optimizedPath = optimizedPathArg;
     var referenceContainer = referenceContainerArg;
 
     // If there is not a value in the current cache position or its a
     // value type, then we are at the end of the getWalk.
-    if ((!curr || curr && curr.$type) || depth === path.length) {
-        onValueType(model, curr, path, depth, seed, outerResults, branchInfo,
-                requestedPath, optimizedPath, optimizedLength,
-                isJSONG, fromReference);
+    if (!curr || curr && curr.$type || depth === path.length) {
+        onValueType(
+            model,
+            curr,
+            path,
+            depth,
+            seed,
+            outerResults,
+            branchInfo,
+            requestedPath,
+            optimizedPath,
+            optimizedLength,
+            isJSONG,
+            fromReference
+        );
         return;
     }
 
@@ -1951,16 +1999,12 @@ module.exports = function walkPath(model, root, curr, path, depth, seed,
             // throw an error.
             if (depth < path.length) {
                 throw new NullInPathError();
-            }
-
-            // Else, we are at the end of a path, then just say next is current.
-            else {
+            } else {
+                // Else, we are at the end of a path, then just say next is current.
                 next = curr;
             }
-        }
-
-        // The standard case, do the depth search into the cache.
-        else {
+        } else {
+            // The standard case, do the depth search into the cache.
             next = curr[key];
             optimizedPath[optimizedLength] = key;
             requestedPath[depth] = key;
@@ -1978,19 +2022,39 @@ module.exports = function walkPath(model, root, curr, path, depth, seed,
             // report that value into the seed without passing the requested
             // path.  If a requested path is passed to onValueType then it
             // will add that path to the JSONGraph envelope under `paths`
-            if (nextDepth < path.length && nType &&
-                nType === $ref && !isExpired(next)) {
-
+            if (
+                nextDepth < path.length &&
+                    nType &&
+                    nType === $ref &&
+                    !isExpired(next)
+            ) {
                 // promote the node so that the references don't get cleaned up.
                 promote(model._root, next);
 
                 if (isJSONG) {
-                    onValue(model, next, seed, nextDepth, outerResults, null,
-                            null, optimizedPath, nextOptimizedLength, isJSONG);
+                    onValue(
+                        model,
+                        next,
+                        seed,
+                        nextDepth,
+                        outerResults,
+                        null,
+                        null,
+                        optimizedPath,
+                        nextOptimizedLength,
+                        isJSONG
+                    );
                 }
 
-                var ref = followReference(model, root, root, next,
-                                          value, seed, isJSONG);
+                var ref = followReference(
+                    model,
+                    root,
+                    root,
+                    next,
+                    value,
+                    seed,
+                    isJSONG
+                );
                 fromReference = true;
                 next = ref[0];
                 refPath = ref[1];
@@ -2010,17 +2074,19 @@ module.exports = function walkPath(model, root, curr, path, depth, seed,
                 // There was a reference container.
                 if (referenceContainer && allowFromWhenceYouCame) {
                     obj = {
+                        // eslint-disable-next-line camelcase
                         $_path: next.$_absolutePath,
+                        // eslint-disable-next-line camelcase
                         $_refPath: referenceContainer.value,
+                        // eslint-disable-next-line camelcase
                         $_toReference: referenceContainer.$_absolutePath
                     };
-                }
-
-                // There is no reference container meaning this request was
-                // neither from a model and/or the first n (depth) keys do not
-                // contain references.
-                else {
+                } else {
+                    // There is no reference container meaning this request was
+                    // neither from a model and/or the first n (depth) keys do not
+                    // contain references.
                     obj = {
+                        // eslint-disable-next-line camelcase
                         $_path: next.$_absolutePath
                     };
                 }
@@ -2030,16 +2096,27 @@ module.exports = function walkPath(model, root, curr, path, depth, seed,
         }
 
         // Recurse to the next level.
-        walkPath(model, root, next, path, nextDepth, seed, outerResults,
-                 branchInfo, requestedPath, nextOptimizedPath,
-                 nextOptimizedLength, isJSONG,
-                 fromReference, referenceContainer);
+        walkPath(
+            model,
+            root,
+            next,
+            path,
+            nextDepth,
+            seed,
+            outerResults,
+            branchInfo,
+            requestedPath,
+            nextOptimizedPath,
+            nextOptimizedLength,
+            isJSONG,
+            fromReference,
+            referenceContainer
+        );
 
         // If the iteratorNote is not done, get the next key.
         if (iteratorNote && !iteratorNote.done) {
             key = iterateKeySet(keySet, iteratorNote);
         }
-
     } while (iteratorNote && !iteratorNote.done);
 };
 
@@ -2294,7 +2371,6 @@ var removeNodeAndDescendants = require(100);
  */
 
 module.exports = function invalidatePathSets(model, paths) {
-
     var modelRoot = model._root;
     var lru = modelRoot;
     var expired = modelRoot.expired;
@@ -2302,22 +2378,21 @@ module.exports = function invalidatePathSets(model, paths) {
     var bound = model._path;
     var cache = modelRoot.cache;
     var node = bound.length ? getBoundValue(model, bound).value : cache;
+    // eslint-disable-next-line camelcase
     var parent = node.$_parent || cache;
+    // eslint-disable-next-line camelcase
     var initialVersion = cache.$_version;
 
     var pathIndex = -1;
     var pathCount = paths.length;
 
     while (++pathIndex < pathCount) {
-
         var path = paths[pathIndex];
 
-        invalidatePathSet(
-            path, 0, cache, parent, node,
-            version, expired, lru
-        );
+        invalidatePathSet(path, 0, cache, parent, node, version, expired, lru);
     }
 
+    // eslint-disable-next-line camelcase
     var newVersion = cache.$_version;
     var rootChangeHandler = modelRoot.onChange;
 
@@ -2327,9 +2402,15 @@ module.exports = function invalidatePathSets(model, paths) {
 };
 
 function invalidatePathSet(
-    path, depth, root, parent, node,
-    version, expired, lru) {
-
+    path,
+    depth,
+    root,
+    parent,
+    node,
+    version,
+    expired,
+    lru
+) {
     var note = {};
     var branch = depth < path.length - 1;
     var keySet = path[depth];
@@ -2337,21 +2418,39 @@ function invalidatePathSet(
 
     do {
         var results = invalidateNode(
-            root, parent, node,
-            key, branch, false,
-            version, expired, lru
+            root,
+            parent,
+            node,
+            key,
+            branch,
+            false,
+            version,
+            expired,
+            lru
         );
         var nextNode = results[0];
         var nextParent = results[1];
         if (nextNode) {
             if (branch) {
                 invalidatePathSet(
-                    path, depth + 1,
-                    root, nextParent, nextNode,
-                    version, expired, lru
+                    path,
+                    depth + 1,
+                    root,
+                    nextParent,
+                    nextNode,
+                    version,
+                    expired,
+                    lru
                 );
-            } else if (removeNodeAndDescendants(nextNode, nextParent, key, lru)) {
-                updateNodeAncestors(nextParent, getSize(nextNode), lru, version);
+            } else if (
+                removeNodeAndDescendants(nextNode, nextParent, key, lru)
+            ) {
+                updateNodeAncestors(
+                    nextParent,
+                    getSize(nextNode),
+                    lru,
+                    version
+                );
             }
         }
         key = iterateKeySet(keySet, note);
@@ -2359,7 +2458,6 @@ function invalidatePathSet(
 }
 
 function invalidateReference(root, node, version, expired, lru) {
-
     if (isExpired(node)) {
         expireNode(node, expired, lru);
         return [undefined, root];
@@ -2371,12 +2469,13 @@ function invalidateReference(root, node, version, expired, lru) {
     var reference = node.value;
     var parent = root;
 
+    // eslint-disable-next-line camelcase
     node = node.$_context;
 
     if (node != null) {
+        // eslint-disable-next-line camelcase
         parent = node.$_parent || root;
     } else {
-
         var index = 0;
         var count = reference.length - 1;
 
@@ -2386,9 +2485,15 @@ function invalidateReference(root, node, version, expired, lru) {
             var key = reference[index];
             var branch = index < count;
             var results = invalidateNode(
-                root, parent, node,
-                key, branch, true,
-                version, expired, lru
+                root,
+                parent,
+                node,
+                key,
+                branch,
+                true,
+                version,
+                expired,
+                lru
             );
             node = results[0];
             if (isPrimitive(node)) {
@@ -2397,11 +2502,16 @@ function invalidateReference(root, node, version, expired, lru) {
             parent = results[1];
         } while (index++ < count);
 
+        // eslint-disable-next-line camelcase
         if (container.$_context !== node) {
+            // eslint-disable-next-line camelcase
             var backRefs = node.$_refsLength || 0;
+            // eslint-disable-next-line camelcase
             node.$_refsLength = backRefs + 1;
             node[__ref + backRefs] = container;
+            // eslint-disable-next-line camelcase
             container.$_context = node;
+            // eslint-disable-next-line camelcase
             container.$_refIndex = backRefs;
         }
     }
@@ -2410,14 +2520,19 @@ function invalidateReference(root, node, version, expired, lru) {
 }
 
 function invalidateNode(
-    root, parent, node,
-    key, branch, reference,
-    version, expired, lru) {
-
+    root,
+    parent,
+    node,
+    key,
+    branch,
+    reference,
+    version,
+    expired,
+    lru
+) {
     var type = node.$type;
 
     while (type === $ref) {
-
         var results = invalidateReference(root, node, version, expired, lru);
 
         node = results[0];
@@ -2438,6 +2553,7 @@ function invalidateNode(
         if (branch) {
             throw new Error("`null` is not allowed in branch key positions.");
         } else if (node) {
+            // eslint-disable-next-line camelcase
             key = node.$_key;
         }
     } else {
@@ -2452,8 +2568,14 @@ function invalidateNode(
 var removeNode = require(99);
 var updateNodeAncestors = require(106);
 
-module.exports = function collect(lru, expired, totalArg, max, ratioArg, version) {
-
+module.exports = function collect(
+    lru,
+    expired,
+    totalArg,
+    max,
+    ratioArg,
+    version
+) {
     var total = totalArg;
     var ratio = ratioArg;
 
@@ -2472,16 +2594,21 @@ module.exports = function collect(lru, expired, totalArg, max, ratioArg, version
         total -= size;
         if (shouldUpdate === true) {
             updateNodeAncestors(node, size, lru, version);
-        } else if (parent = node.$_parent) {  // eslint-disable-line no-cond-assign
+            // eslint-disable-next-line camelcase
+            // eslint-disable-next-line no-cond-assign
+        } else if (parent = node.$_parent) {
+            // eslint-disable-next-line camelcase
             removeNode(node, parent, node.$_key, lru);
         }
         node = expired.pop();
     }
 
     if (total >= max) {
+        // eslint-disable-next-line camelcase
         var prev = lru.$_tail;
         node = prev;
-        while ((total >= targetSize) && node) {
+        while (total >= targetSize && node) {
+            // eslint-disable-next-line camelcase
             prev = prev.$_prev;
             size = node.$size || 0;
             total -= size;
@@ -2491,10 +2618,13 @@ module.exports = function collect(lru, expired, totalArg, max, ratioArg, version
             node = prev;
         }
 
+        // eslint-disable-next-line camelcase
         lru.$_tail = lru.$_prev = node;
         if (node == null) {
+            // eslint-disable-next-line camelcase
             lru.$_head = lru.$_next = undefined;
         } else {
+            // eslint-disable-next-line camelcase
             node.$_next = undefined;
         }
     }
@@ -2515,6 +2645,7 @@ module.exports = function lruPromote(root, object) {
 
     // Nothing is in the cache.
     if (!head) {
+        // eslint-disable-next-line camelcase
         root.$_head = root.$_tail = object;
         return;
     }
@@ -2525,45 +2656,63 @@ module.exports = function lruPromote(root, object) {
 
     // The item always exist in the cache since to get anything in the
     // cache it first must go through set.
+    // eslint-disable-next-line camelcase
     var prev = object.$_prev;
+    // eslint-disable-next-line camelcase
     var next = object.$_next;
     if (next) {
+        // eslint-disable-next-line camelcase
         next.$_prev = prev;
     }
     if (prev) {
+        // eslint-disable-next-line camelcase
         prev.$_next = next;
     }
+    // eslint-disable-next-line camelcase
     object.$_prev = undefined;
 
     // Insert into head position
+    // eslint-disable-next-line camelcase
     root.$_head = object;
+    // eslint-disable-next-line camelcase
     object.$_next = head;
+    // eslint-disable-next-line camelcase
     head.$_prev = object;
 
     // If the item we promoted was the tail, then set prev to tail.
+    // eslint-disable-next-line camelcase
     if (object === root.$_tail) {
+        // eslint-disable-next-line camelcase
         root.$_tail = prev;
     }
 };
 
 },{"113":113}],41:[function(require,module,exports){
 module.exports = function lruSplice(root, object) {
-
     // Its in the cache.  Splice out.
+    // eslint-disable-next-line camelcase
     var prev = object.$_prev;
+    // eslint-disable-next-line camelcase
     var next = object.$_next;
     if (next) {
+        // eslint-disable-next-line camelcase
         next.$_prev = prev;
     }
     if (prev) {
+        // eslint-disable-next-line camelcase
         prev.$_next = next;
     }
+    // eslint-disable-next-line camelcase
     object.$_prev = object.$_next = undefined;
 
+    // eslint-disable-next-line camelcase
     if (object === root.$_head) {
+        // eslint-disable-next-line camelcase
         root.$_head = next;
     }
+    // eslint-disable-next-line camelcase
     if (object === root.$_tail) {
+        // eslint-disable-next-line camelcase
         root.$_tail = prev;
     }
 };
@@ -4718,8 +4867,13 @@ var NullInPathError = require(13);
  * @return {Array.<Array.<Path>>} - an Array of Arrays where each inner Array is a list of requested and optimized paths (respectively) for the successfully set values.
  */
 
-module.exports = function setPathValues(model, pathValues, x, errorSelector, comparator) {
-
+module.exports = function setPathValues(
+    model,
+    pathValues,
+    x,
+    errorSelector,
+    comparator
+) {
     var modelRoot = model._root;
     var lru = modelRoot;
     var expired = modelRoot.expired;
@@ -4727,8 +4881,8 @@ module.exports = function setPathValues(model, pathValues, x, errorSelector, com
     var bound = model._path;
     var cache = modelRoot.cache;
     var node = bound.length ? getBoundValue(model, bound).value : cache;
-    var parent = node.ツparent || cache;
-    var initialVersion = cache.ツversion;
+    var parent = node.$_parent || cache;
+    var initialVersion = cache.$_version;
 
     var requestedPath = [];
     var requestedPaths = [];
@@ -4738,7 +4892,6 @@ module.exports = function setPathValues(model, pathValues, x, errorSelector, com
     var pathValueCount = pathValues.length;
 
     while (++pathValueIndex < pathValueCount) {
-
         var pathValue = pathValues[pathValueIndex];
         var path = pathValue.path;
         var value = pathValue.value;
@@ -4746,13 +4899,25 @@ module.exports = function setPathValues(model, pathValues, x, errorSelector, com
         optimizedPath.index = optimizedIndex;
 
         setPathSet(
-            value, path, 0, cache, parent, node,
-            requestedPaths, optimizedPaths, requestedPath, optimizedPath,
-            version, expired, lru, comparator, errorSelector
+            value,
+            path,
+            0,
+            cache,
+            parent,
+            node,
+            requestedPaths,
+            optimizedPaths,
+            requestedPath,
+            optimizedPath,
+            version,
+            expired,
+            lru,
+            comparator,
+            errorSelector
         );
     }
 
-    var newVersion = cache.ツversion;
+    var newVersion = cache.$_version;
     var rootChangeHandler = modelRoot.onChange;
 
     if (isFunction(rootChangeHandler) && initialVersion !== newVersion) {
@@ -4764,10 +4929,22 @@ module.exports = function setPathValues(model, pathValues, x, errorSelector, com
 
 /* eslint-disable no-constant-condition */
 function setPathSet(
-    value, path, depth, root, parent, node,
-    requestedPaths, optimizedPaths, requestedPath, optimizedPath,
-    version, expired, lru, comparator, errorSelector) {
-
+    value,
+    path,
+    depth,
+    root,
+    parent,
+    node,
+    requestedPaths,
+    optimizedPaths,
+    requestedPath,
+    optimizedPath,
+    version,
+    expired,
+    lru,
+    comparator,
+    errorSelector
+) {
     var note = {};
     var branch = depth < path.length - 1;
     var keySet = path[depth];
@@ -4775,13 +4952,23 @@ function setPathSet(
     var optimizedIndex = optimizedPath.index;
 
     do {
-
         requestedPath.depth = depth;
 
         var results = setNode(
-            root, parent, node, key, value,
-            branch, false, requestedPath, optimizedPath,
-            version, expired, lru, comparator, errorSelector
+            root,
+            parent,
+            node,
+            key,
+            value,
+            branch,
+            false,
+            requestedPath,
+            optimizedPath,
+            version,
+            expired,
+            lru,
+            comparator,
+            errorSelector
         );
         requestedPath[depth] = key;
         requestedPath.index = depth;
@@ -4791,14 +4978,29 @@ function setPathSet(
         if (nextNode) {
             if (branch) {
                 setPathSet(
-                    value, path, depth + 1,
-                    root, nextParent, nextNode,
-                    requestedPaths, optimizedPaths, requestedPath, optimizedPath,
-                    version, expired, lru, comparator, errorSelector
+                    value,
+                    path,
+                    depth + 1,
+                    root,
+                    nextParent,
+                    nextNode,
+                    requestedPaths,
+                    optimizedPaths,
+                    requestedPath,
+                    optimizedPath,
+                    version,
+                    expired,
+                    lru,
+                    comparator,
+                    errorSelector
                 );
             } else {
-                requestedPaths.push(requestedPath.slice(0, requestedPath.index + 1));
-                optimizedPaths.push(optimizedPath.slice(0, optimizedPath.index));
+                requestedPaths.push(
+                    requestedPath.slice(0, requestedPath.index + 1)
+                );
+                optimizedPaths.push(
+                    optimizedPath.slice(0, optimizedPath.index)
+                );
             }
         }
         key = iterateKeySet(keySet, note);
@@ -4811,9 +5013,17 @@ function setPathSet(
 /* eslint-enable */
 
 function setReference(
-    value, root, node, requestedPath, optimizedPath,
-    version, expired, lru, comparator, errorSelector) {
-
+    value,
+    root,
+    node,
+    requestedPath,
+    optimizedPath,
+    version,
+    expired,
+    lru,
+    comparator,
+    errorSelector
+) {
     var reference = node.value;
     optimizedPath.splice(0, optimizedPath.length);
     optimizedPath.push.apply(optimizedPath, reference);
@@ -4827,13 +5037,12 @@ function setReference(
     var container = node;
     var parent = root;
 
-    node = node.ツcontext;
+    node = node.$_context;
 
     if (node != null) {
-        parent = node.ツparent || root;
+        parent = node.$_parent || root;
         optimizedPath.index = reference.length;
     } else {
-
         var index = 0;
         var count = reference.length - 1;
 
@@ -4845,9 +5054,20 @@ function setReference(
             optimizedPath.index = index;
 
             var results = setNode(
-                root, parent, node, key, value,
-                branch, true, requestedPath, optimizedPath,
-                version, expired, lru, comparator, errorSelector
+                root,
+                parent,
+                node,
+                key,
+                value,
+                branch,
+                true,
+                requestedPath,
+                optimizedPath,
+                version,
+                expired,
+                lru,
+                comparator,
+                errorSelector
             );
             node = results[0];
             if (isPrimitive(node)) {
@@ -4859,7 +5079,7 @@ function setReference(
 
         optimizedPath.index = index;
 
-        if (container.ツcontext !== node) {
+        if (container.$_context !== node) {
             createHardlink(container, node);
         }
     }
@@ -4868,17 +5088,35 @@ function setReference(
 }
 
 function setNode(
-    root, parent, node, key, value,
-    branch, reference, requestedPath, optimizedPath,
-    version, expired, lru, comparator, errorSelector) {
-
+    root,
+    parent,
+    node,
+    key,
+    value,
+    branch,
+    reference,
+    requestedPath,
+    optimizedPath,
+    version,
+    expired,
+    lru,
+    comparator,
+    errorSelector
+) {
     var type = node.$type;
 
     while (type === $ref) {
-
         var results = setReference(
-            value, root, node, requestedPath, optimizedPath,
-            version, expired, lru, comparator, errorSelector
+            value,
+            root,
+            node,
+            requestedPath,
+            optimizedPath,
+            version,
+            expired,
+            lru,
+            comparator,
+            errorSelector
         );
 
         node = results[0];
@@ -4899,7 +5137,7 @@ function setNode(
         if (branch) {
             throw new NullInPathError();
         } else if (node) {
-            key = node.ツkey;
+            key = node.$_key;
         }
     } else {
         parent = node;
@@ -4907,9 +5145,19 @@ function setNode(
     }
 
     node = mergeValueOrInsertBranch(
-        parent, node, key, value,
-        branch, reference, requestedPath, optimizedPath,
-        version, expired, lru, comparator, errorSelector
+        parent,
+        node,
+        key,
+        value,
+        branch,
+        reference,
+        requestedPath,
+        optimizedPath,
+        version,
+        expired,
+        lru,
+        comparator,
+        errorSelector
     );
 
     return [node, parent];
@@ -5058,7 +5306,7 @@ module.exports = function arraySlice(array, indexArg, endArg) {
 };
 
 },{}],75:[function(require,module,exports){
-var reservedPrefix = require(36);
+var privatePrefix = require(34);
 var hasOwn = require(82);
 var isArray = Array.isArray;
 var isObject = require(91);
@@ -5069,7 +5317,7 @@ module.exports = function clone(value) {
         dest = isArray(value) ? [] : {};
         var src = value;
         for (var key in src) {
-            if (key.charAt(0) === reservedPrefix || !hasOwn(src, key)) {
+            if (key.substr(0, 2) === privatePrefix || !hasOwn(src, key)) {
                 continue;
             }
             dest[key] = src[key];
@@ -5078,18 +5326,21 @@ module.exports = function clone(value) {
     return dest;
 };
 
-},{"36":36,"82":82,"91":91}],76:[function(require,module,exports){
+},{"34":34,"82":82,"91":91}],76:[function(require,module,exports){
 var __ref = require(35);
 
 module.exports = function createHardlink(from, to) {
-
     // create a back reference
+    // eslint-disable-next-line camelcase
     var backRefs = to.$_refsLength || 0;
     to[__ref + backRefs] = from;
+    // eslint-disable-next-line camelcase
     to.$_refsLength = backRefs + 1;
 
     // create a hard reference
+    // eslint-disable-next-line camelcase
     from.$_refIndex = backRefs;
+    // eslint-disable-next-line camelcase
     from.$_context = to;
 };
 
@@ -5097,7 +5348,9 @@ module.exports = function createHardlink(from, to) {
 var splice = require(41);
 
 module.exports = function expireNode(node, expired, lru) {
+    // eslint-disable-next-line camelcase
     if (!node.$_invalidated) {
+        // eslint-disable-next-line camelcase
         node.$_invalidated = true;
         expired.push(node);
         splice(lru, node);
@@ -5149,15 +5402,28 @@ module.exports = function incrementVersion() {
 };
 
 },{}],84:[function(require,module,exports){
-module.exports = function insertNode(node, parent, key, version, optimizedPath) {
+module.exports = function insertNode(
+    node,
+    parent,
+    key,
+    version,
+    optimizedPath
+) {
+    // eslint-disable-next-line camelcase
     node.$_key = key;
+    // eslint-disable-next-line camelcase
     node.$_parent = parent;
 
     if (version !== undefined) {
+        // eslint-disable-next-line camelcase
         node.$_version = version;
     }
+    // eslint-disable-next-line camelcase
     if (!node.$_absolutePath) {
-        node.$_absolutePath = optimizedPath.slice(0, optimizedPath.index).concat(key);
+        // eslint-disable-next-line camelcase
+        node.$_absolutePath = optimizedPath
+            .slice(0, optimizedPath.index)
+            .concat(key);
     }
 
     parent[key] = node;
@@ -5198,7 +5464,7 @@ module.exports = function isFunction(func) {
 };
 
 },{}],88:[function(require,module,exports){
-var reservedPrefix = require(36);
+var privatePrefix = require(34);
 
 /**
  * Determined if the key passed in is an internal key.
@@ -5209,11 +5475,11 @@ var reservedPrefix = require(36);
  */
 module.exports = function isInternalKey(x) {
     return x === "$size" ||
-        x === "$modelCreated" ||
-        x.charAt(0) === reservedPrefix;
+        x === "$_modelCreated" ||
+        x.substr(0, 2) === privatePrefix;
 };
 
-},{"36":36}],89:[function(require,module,exports){
+},{"34":34}],89:[function(require,module,exports){
 var isObject = require(91);
 
 module.exports = function isJSONEnvelope(envelope) {
@@ -5571,6 +5837,7 @@ module.exports = function removeNode(node, parent, key, lru) {
             splice(lru, node);
         }
         unlinkBackReferences(node);
+        // eslint-disable-next-line camelcase
         parent[key] = node.$_parent = void 0;
         return true;
     }
@@ -5579,14 +5846,14 @@ module.exports = function removeNode(node, parent, key, lru) {
 
 },{"103":103,"104":104,"112":112,"41":41,"91":91}],100:[function(require,module,exports){
 var hasOwn = require(82);
-var prefix = require(36);
+var privatePrefix = require(34);
 var removeNode = require(99);
 
 module.exports = function removeNodeAndDescendants(node, parent, key, lru) {
     if (removeNode(node, parent, key, lru)) {
         if (node.$type == null) {
             for (var key2 in node) {
-                if (key2[0] !== prefix && key2[0] !== "$" && hasOwn(node, key2)) {
+                if (key2.substr(0, 2) !== privatePrefix && hasOwn(node, key2)) {
                     removeNodeAndDescendants(node[key2], node, key2, lru);
                 }
             }
@@ -5596,7 +5863,7 @@ module.exports = function removeNodeAndDescendants(node, parent, key, lru) {
     return false;
 };
 
-},{"36":36,"82":82,"99":99}],101:[function(require,module,exports){
+},{"34":34,"82":82,"99":99}],101:[function(require,module,exports){
 var isObject = require(91);
 var transferBackReferences = require(102);
 var removeNodeAndDescendants = require(100);
@@ -5617,18 +5884,23 @@ module.exports = function replaceNode(node, replacement, parent, key, lru) {
 var __ref = require(35);
 
 module.exports = function transferBackReferences(fromNode, destNode) {
+    // eslint-disable-next-line camelcase
     var fromNodeRefsLength = fromNode.$_refsLength || 0,
+        // eslint-disable-next-line camelcase
         destNodeRefsLength = destNode.$_refsLength || 0,
         i = -1;
     while (++i < fromNodeRefsLength) {
         var ref = fromNode[__ref + i];
         if (ref !== void 0) {
+            // eslint-disable-next-line camelcase
             ref.$_context = destNode;
             destNode[__ref + (destNodeRefsLength + i)] = ref;
             fromNode[__ref + i] = void 0;
         }
     }
+    // eslint-disable-next-line camelcase
     destNode.$_refsLength = fromNodeRefsLength + destNodeRefsLength;
+    // eslint-disable-next-line camelcase
     fromNode.$_refsLength = void 0;
     return destNode;
 };
@@ -5637,13 +5909,16 @@ module.exports = function transferBackReferences(fromNode, destNode) {
 var __ref = require(35);
 
 module.exports = function unlinkBackReferences(node) {
+    // eslint-disable-next-line camelcase
     var i = -1, n = node.$_refsLength || 0;
     while (++i < n) {
         var ref = node[__ref + i];
         if (ref != null) {
+            // eslint-disable-next-line camelcase
             ref.$_context = ref.$_refIndex = node[__ref + i] = void 0;
         }
     }
+    // eslint-disable-next-line camelcase
     node.$_refsLength = void 0;
     return node;
 };
@@ -5652,14 +5927,19 @@ module.exports = function unlinkBackReferences(node) {
 var __ref = require(35);
 
 module.exports = function unlinkForwardReference(reference) {
+    // eslint-disable-next-line camelcase
     var destination = reference.$_context;
     if (destination) {
+        // eslint-disable-next-line camelcase
         var i = (reference.$_refIndex || 0) - 1,
+            // eslint-disable-next-line camelcase
             n = (destination.$_refsLength || 0) - 1;
         while (++i <= n) {
             destination[__ref + i] = destination[__ref + (i + 1)];
         }
+        // eslint-disable-next-line camelcase
         destination.$_refsLength = n;
+        // eslint-disable-next-line camelcase
         reference.$_refIndex = reference.$_context = destination = void 0;
     }
     return reference;
@@ -5673,10 +5953,14 @@ module.exports = function updateBackReferenceVersions(nodeArg, version) {
     var count = 0;
     do {
         var node = stack[count];
+        // eslint-disable-next-line camelcase
         if (node && node.$_version !== version) {
+            // eslint-disable-next-line camelcase
             node.$_version = version;
+            // eslint-disable-next-line camelcase
             stack[count++] = node.$_parent;
             var i = -1;
+            // eslint-disable-next-line camelcase
             var n = node.$_refsLength || 0;
             while (++i < n) {
                 stack[count++] = node[__ref + i];
@@ -5776,26 +6060,32 @@ var getExpires = require(78);
 var atomType = require(110);
 
 module.exports = function wrapNode(nodeArg, typeArg, value) {
-
     var size = 0;
     var node = nodeArg;
     var type = typeArg;
 
     if (type) {
+        // eslint-disable-next-line camelcase
         var modelCreated = node.$_modelCreated;
         node = clone(node);
         size = getSize(node);
         node.$type = type;
+        // eslint-disable-next-line camelcase
         node.$_prev = undefined;
+        // eslint-disable-next-line camelcase
         node.$_next = undefined;
+        // eslint-disable-next-line camelcase
         node.$_modelCreated = modelCreated || false;
     } else {
         node = {
             $type: atomType,
             value: value,
-            $prev: undefined,
+            // eslint-disable-next-line camelcase
+            $_prev: undefined,
+            // eslint-disable-next-line camelcase
             $_next: undefined,
-            $modelCreated: true
+            // eslint-disable-next-line camelcase
+            $_modelCreated: true
         };
     }
 
@@ -5822,7 +6112,7 @@ module.exports = function wrapNode(nodeArg, typeArg, value) {
     var expires = getExpires(node);
 
     if (typeof expires === "number" && expires < expiresNow) {
-        node.$expires = now() + (expires * -1);
+        node.$expires = now() + expires * (-1);
     }
 
     node.$size = size;
