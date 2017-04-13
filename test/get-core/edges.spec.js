@@ -60,8 +60,8 @@ describe('Edges', function() {
                 }
             }
         };
-        output.videos.$__path = ['videos']
-        output.videos[1234].$__path = ['videos', 1234];
+        output.videos.$_path = ['videos']
+        output.videos[1234].$_path = ['videos', 1234];
 
         getCoreRunner({
             input: [['videos', 1234, 'title']],

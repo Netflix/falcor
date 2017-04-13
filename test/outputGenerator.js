@@ -7,7 +7,7 @@ module.exports = {
     videoGenerator: function(ids, fields) {
         fields = fields || ['title'];
         var videos = {};
-        videos.$__path = ['videos'];
+        videos.$_path = ['videos'];
         var json = {
             json: {
                 videos: videos
@@ -16,7 +16,7 @@ module.exports = {
 
         ids.forEach(function(id, i) {
             var video = {};
-            video.$__path = ['videos', id];
+            video.$_path = ['videos', id];
 
             fields.forEach(function(field) {
                 video[field] = 'Video ' + id;
@@ -30,7 +30,7 @@ module.exports = {
     lolomoGenerator: function(lists, items, fields) {
         fields = fields || ['title'];
         var lolomo = {
-            $__path: ['lolomos', 1234]
+            $_path: ['lolomos', 1234]
         };
         var json = {
             json: {
@@ -40,14 +40,14 @@ module.exports = {
 
         lists.forEach(function(listIndex) {
             var list = {
-                $__path: getListRef(listIndex)
+                $_path: getListRef(listIndex)
             };
 
             lolomo[listIndex] = list;
 
             items.forEach(function(itemIndex) {
                 var ro = list[itemIndex] = {
-                    $__path: getListRef(listIndex).concat(itemIndex)
+                    $_path: getListRef(listIndex).concat(itemIndex)
                 };
                 ro.item = getItemObject(listIndex, itemIndex, fields);
             });
@@ -73,7 +73,7 @@ function getItemObject(listIndex, itemIndex, fields) {
     var refPath = ['videos', videoIdx];
     var toReference = getListRef(listIndex).concat([itemIndex, 'item']);
     var item = {
-        $__path: ['videos', videoIdx]
+        $_path: ['videos', videoIdx]
     };
 
     fields.forEach(function(f) {

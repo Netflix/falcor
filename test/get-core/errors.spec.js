@@ -12,11 +12,11 @@ describe('Errors', function() {
 
     var fooBranch = function() {
         return {
-            $__path: ['foo'],
+            $_path: ['foo'],
             bar: {
-                $__path: ['foo', 'bar'],
+                $_path: ['foo', 'bar'],
                 baz: {
-                    $__path: ['foo', 'bar', 'baz'],
+                    $_path: ['foo', 'bar', 'baz'],
                     qux: 'qux'
                 }
             }
@@ -100,7 +100,7 @@ describe('Errors', function() {
         var to = {
             error: 'Oops!'
         };
-        to.$__path = ['to'];
+        to.$_path = ['to'];
         getCoreRunner({
             input: [['to', 'error']],
             output: {
@@ -128,7 +128,7 @@ describe('Errors', function() {
         var to = {
             error: 'Oops!'
         };
-        to.$__path = ['to'];
+        to.$_path = ['to'];
         getCoreRunner({
             input: [
                 ['foo', 'bar', 'baz', 'qux'],
@@ -148,7 +148,7 @@ describe('Errors', function() {
         var to = {
             error: error('Oops!')
         };
-        to.$__path = ['to'];
+        to.$_path = ['to'];
         getCoreRunner({
             input: [['to', 'error']],
             output: {
@@ -191,8 +191,8 @@ describe('Errors', function() {
                 title: 'Hello World'
             }
         };
-        list.$__path = ['list'];
-        list[0].$__path = ['to'];
+        list.$_path = ['list'];
+        list[0].$_path = ['to'];
         getCoreRunner({
             input: [
                 ['list', {to: 1}, 'title']

@@ -16,7 +16,7 @@ id: api
 <section>
     <article>
         <pre class="prettyprint source linenums"><code>var createHardlink = require("./../support/createHardlink");
-var __prefix = require("./../internal/unicodePrefix");
+var __prefix = require("./../internal/reservedPrefix");
 var $ref = require("./../types/ref");
 
 var getBoundValue = require("./../get/getBoundValue");
@@ -49,8 +49,8 @@ module.exports = function setPathMaps(model, pathMapEnvelopes, x, errorSelector,
     var bound = model._path;
     var cache = modelRoot.cache;
     var node = bound.length ? getBoundValue(model, bound).value : cache;
-    var parent = node.ツparent || cache;
-    var initialVersion = cache.ツversion;
+    var parent = node.$parent || cache;
+    var initialVersion = cache.$version;
 
     var requestedPath = [];
     var requestedPaths = [];
@@ -72,7 +72,7 @@ module.exports = function setPathMaps(model, pathMapEnvelopes, x, errorSelector,
         );
     }
 
-    var newVersion = cache.ツversion;
+    var newVersion = cache.$version;
     var rootChangeHandler = modelRoot.onChange;
 
     if (isFunction(rootChangeHandler) &amp;&amp; initialVersion !== newVersion) {
@@ -154,10 +154,10 @@ function setReference(
     var container = node;
     var parent = root;
 
-    node = node.ツcontext;
+    node = node.$context;
 
     if (node != null) {
-        parent = node.ツparent || root;
+        parent = node.$parent || root;
         optimizedPath.index = reference.length;
     } else {
 
@@ -185,7 +185,7 @@ function setReference(
 
         optimizedPath.index = index;
 
-        if (container.ツcontext !== node) {
+        if (container.$context !== node) {
             createHardlink(container, node);
         }
     }
@@ -224,7 +224,7 @@ function setNode(
         if (branch) {
             throw new NullInPathError();
         } else if (node) {
-            key = node.ツkey;
+            key = node.$key;
         }
     } else {
         parent = node;

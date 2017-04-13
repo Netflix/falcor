@@ -16,7 +16,7 @@ id: api
 <section>
     <article>
         <pre class="prettyprint source linenums"><code>var createHardlink = require("../support/createHardlink");
-var __prefix = require("./../internal/unicodePrefix");
+var __prefix = require("./../internal/reservedPrefix");
 
 var $ref = require("./../types/ref");
 
@@ -52,8 +52,8 @@ module.exports = function invalidatePathMaps(model, pathMapEnvelopes) {
     var bound = model._path;
     var cache = modelRoot.cache;
     var node = bound.length ? getBoundValue(model, bound).value : cache;
-    var parent = node.ツparent || cache;
-    var initialVersion = cache.ツversion;
+    var parent = node.$parent || cache;
+    var initialVersion = cache.$version;
 
     var pathMapIndex = -1;
     var pathMapCount = pathMapEnvelopes.length;
@@ -68,7 +68,7 @@ module.exports = function invalidatePathMaps(model, pathMapEnvelopes) {
         );
     }
 
-    var newVersion = cache.ツversion;
+    var newVersion = cache.$version;
     var rootChangeHandler = modelRoot.onChange;
 
     if (isFunction(rootChangeHandler) &amp;&amp; initialVersion !== newVersion) {
@@ -121,10 +121,10 @@ function invalidateReference(value, root, node, version, expired, lru, comparato
     var reference = node.value;
     var parent = root;
 
-    node = node.ツcontext;
+    node = node.$context;
 
     if (node != null) {
-        parent = node.ツparent || root;
+        parent = node.$parent || root;
     } else {
 
         var index = 0;
@@ -147,7 +147,7 @@ function invalidateReference(value, root, node, version, expired, lru, comparato
             parent = results[1];
         } while (index++ &lt; count);
 
-        if (container.ツcontext !== node) {
+        if (container.$context !== node) {
             createHardlink(container, node);
         }
     }
@@ -184,7 +184,7 @@ function invalidateNode(
         if (branch) {
             throw new Error("`null` is not allowed in branch key positions.");
         } else if (node) {
-            key = node.ツkey;
+            key = node.$key;
         }
     } else {
         parent = node;

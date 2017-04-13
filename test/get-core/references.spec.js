@@ -27,7 +27,7 @@ describe('References', function() {
         var toReference = {
             title: 'Title'
         };
-        toReference.$__path = ['too'];
+        toReference.$_path = ['too'];
 
         // Should be the second references reference not
         // toReferences reference.
@@ -73,8 +73,8 @@ describe('References', function() {
             },
             toValue: 'Title'
         };
-        to.$__path = ['to'];
-        to.reference.$__path = ['too'];
+        to.$_path = ['to'];
+        to.reference.$_path = ['too'];
 
         getCoreRunner({
             input: [
@@ -98,21 +98,21 @@ describe('References', function() {
             output: {
                 json: {
                     lolomo: {
-                        $__path: ['lolomos', 1234],
-                        $__refPath: ['lolomos', 1234],
-                        $__toReference: ['lolomo'],
+                        $_path: ['lolomos', 1234],
+                        $_refPath: ['lolomos', 1234],
+                        $_toReference: ['lolomo'],
                         0: {
-                            $__path: ['lists', 'A'],
-                            $__refPath: ['lists', 'A'],
-                            $__toReference: ['lolomos', 1234, 0],
+                            $_path: ['lists', 'A'],
+                            $_refPath: ['lists', 'A'],
+                            $_toReference: ['lolomos', 1234, 0],
                             0: {
-                                $__path: ['lists', 'A', 0],
-                                $__refPath: ['lists', 'A'],
-                                $__toReference: ['lolomos', 1234, 0],
+                                $_path: ['lists', 'A', 0],
+                                $_refPath: ['lists', 'A'],
+                                $_toReference: ['lolomos', 1234, 0],
                                 item: {
-                                    $__path: ['videos', 0],
-                                    $__refPath: ['videos', 0],
-                                    $__toReference: ['lists', 'A', 0, 'item'],
+                                    $_path: ['videos', 0],
+                                    $_refPath: ['videos', 0],
+                                    $_toReference: ['lists', 'A', 0, 'item'],
                                     title: 'Video 0'
                                 }
                             }
