@@ -262,5 +262,6 @@ describe("Model", function() {
     require('./hardlink');
     require('./falcor');
     require('./internal');
+    require('./response');
 
 });
