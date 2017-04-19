@@ -1,6 +1,6 @@
 ---
 layout: api-page
-title: "typedefs/JSONGraphEnvelope.js"
+title: "response/ModelResponseObserver.js"
 id: api
 ---
 
@@ -11,59 +11,79 @@ id: api
   
       
 <h2>
-    typedefs/JSONGraphEnvelope.js
+    response/ModelResponseObserver.js
 </h2>
 <section>
     <article>
-        <pre class="prettyprint source linenums"><code>/**
- * An envelope that wraps a {@link JSONGraph} fragment.
- * @typedef {Object} JSONGraphEnvelope
- * @property {JSONGraph} jsonGraph - a {@link JSONGraph} fragment
- * @property {?Array.&lt;PathSet>} paths - the paths to the values in the {@link JSONGraph} fragment
- * @property {?Array.&lt;PathSet>} invalidated - the paths to invalidate in the {@link Model}
- * @example
-var $ref = falcor.ref;
-var model = new falcor.Model();
-model.set({
-  paths: [
-    ["todos", [0,1], ["name","done"]]
-  ],
-  jsonGraph: {
-    todos: [
-      $ref("todosById[12]"),
-      $ref("todosById[15]")
-    ],
-    todosById: {
-      12: {
-        name: "go to the ATM",
-        done: false
-      },
-      15: {
-        name: "buy milk",
-        done: false
-      }
-    }
-  },
-}).then(function(jsonEnvelope) {
-  console.log(JSON.stringify(jsonEnvelope, null, 4));
-});
+        <pre class="prettyprint source linenums"><code>var noop = require("./../support/noop");
 
-// prints...
-// {
-//   json: {
-//     todos: {
-//       0: {
-//         name: "go to the ATM",
-//         done: false
-//       },
-//       1: {
-//         name: "buy milk",
-//         done: false
-//       }
-//     }
-//   }
-// }
- */
+/**
+ * A ModelResponseObserver conform to the Observable's Observer contract. It accepts either an Observer or three optional callbacks which correspond to the Observer methods onNext, onError, and onCompleted.
+ * The ModelResponseObserver wraps an Observer to enforce a variety of different invariants including:
+ * 1. onError callback is only called once.
+ * 2. onCompleted callback is only called once.
+ * @constructor ModelResponseObserver
+*/
+function ModelResponseObserver(
+    onNextOrObserver,
+    onErrorFn,
+    onCompletedFn
+) {
+    // if callbacks are passed, construct an Observer from them. Create a NOOP function for any missing callbacks.
+    if (!onNextOrObserver || typeof onNextOrObserver !== "object") {
+        this._observer = {
+            onNext: (
+                typeof onNextOrObserver === "function"
+                    ? onNextOrObserver
+                    : noop
+            ),
+            onError: (
+                typeof onErrorFn === "function"
+                    ? onErrorFn
+                    : noop
+            ),
+            onCompleted: (
+                typeof onCompletedFn === "function"
+                    ? onCompletedFn
+                    : noop
+            )
+        };
+    }
+    // if an Observer is passed
+    else {
+        this._observer = {
+            onNext: typeof onNextOrObserver.onNext === "function" ? function(value) { onNextOrObserver.onNext(value); } : noop,
+            onError: typeof onNextOrObserver.onError === "function" ? function(error) { onNextOrObserver.onError(error); } : noop,
+            onCompleted: (
+                typeof onNextOrObserver.onCompleted === "function"
+                    ? function() { onNextOrObserver.onCompleted(); }
+                    : noop
+            )
+        };
+    }
+}
+
+ModelResponseObserver.prototype = {
+    onNext: function(v) {
+        if (!this._closed) {
+            this._observer.onNext(v);
+        }
+    },
+    onError: function(e) {
+        if (!this._closed) {
+            this._closed = true;
+            this._observer.onError(e);
+        }
+    },
+    onCompleted: function() {
+        if (!this._closed) {
+            this._closed = true;
+            this._observer.onCompleted();
+        }
+    }
+};
+
+module.exports = ModelResponseObserver;
 </code></pre>
     </article>
 </section>

@@ -1,6 +1,6 @@
 ---
 layout: api-page
-title: "typedefs/JSONGraphEnvelope.js"
+title: "Class: ModelResponseObserver"
 id: api
 ---
 
@@ -9,64 +9,137 @@ id: api
 
   
   
-      
-<h2>
-    typedefs/JSONGraphEnvelope.js
-</h2>
-<section>
-    <article>
-        <pre class="prettyprint source linenums"><code>/**
- * An envelope that wraps a {@link JSONGraph} fragment.
- * @typedef {Object} JSONGraphEnvelope
- * @property {JSONGraph} jsonGraph - a {@link JSONGraph} fragment
- * @property {?Array.&lt;PathSet>} paths - the paths to the values in the {@link JSONGraph} fragment
- * @property {?Array.&lt;PathSet>} invalidated - the paths to invalidate in the {@link Model}
- * @example
-var $ref = falcor.ref;
-var model = new falcor.Model();
-model.set({
-  paths: [
-    ["todos", [0,1], ["name","done"]]
-  ],
-  jsonGraph: {
-    todos: [
-      $ref("todosById[12]"),
-      $ref("todosById[15]")
-    ],
-    todosById: {
-      12: {
-        name: "go to the ATM",
-        done: false
-      },
-      15: {
-        name: "buy milk",
-        done: false
-      }
-    }
-  },
-}).then(function(jsonEnvelope) {
-  console.log(JSON.stringify(jsonEnvelope, null, 4));
-});
 
-// prints...
-// {
-//   json: {
-//     todos: {
-//       0: {
-//         name: "go to the ATM",
-//         done: false
-//       },
-//       1: {
-//         name: "buy milk",
-//         done: false
-//       }
-//     }
-//   }
-// }
- */
-</code></pre>
-    </article>
+  <section>
+
+  <header>
+      
+      
+      
+          
+            <h2>
+            ModelResponseObserver
+            </h2>
+          
+          
+      
+  </header>
+
+  <article>
+      <div class="container-overview">
+      
+          
+<section class="method-section">
+    
+        
+
+        <h4 class="name section-header function-name" id="ModelResponseObserver"><span class="type-signature"></span>new ModelResponseObserver<span class="signature">()</span><span class="type-signature return-signature"></span></h4>
+
+        
+    
+
+        
+        <div class="description">
+            <p>A ModelResponseObserver conform to the Observable's Observer contract. It accepts either an Observer or three optional callbacks which correspond to the Observer methods onNext, onError, and onCompleted.
+The ModelResponseObserver wraps an Observer to enforce a variety of different invariants including:</p>
+<ol>
+<li>onError callback is only called once.</li>
+<li>onCompleted callback is only called once.</li>
+</ol>
+        </div>
+        
+
+    
+
+    
+
+    
+
+    
+
+    
+
+
+
+
+  <dl class="details">
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+      <dt class="tag-source">Source:</dt>
+      <dd class="tag-source">
+          <a href="response_ModelResponseObserver.js.html">response/ModelResponseObserver.js</a>, <a href="response_ModelResponseObserver.js.html#line3">line 3</a>
+      </dd>
+      
+
+      
+
+      
+
+      
+  </dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
 </section>
+      
+      </div>
+
+      
+
+      
+
+      
+
+       
+
+      
+
+      
+
+      
+
+      
+
+      
+  </article>
+
+  </section>
   
 
   
@@ -315,7 +388,7 @@ model.set({
 
                             </li>
                         
-                            <li class="toc-api-class ">
+                            <li class="toc-api-class current-page">
                                 <a href="ModelResponseObserver.html" data-target="#ModelResponseObserver">ModelResponseObserver</a>
                                 
                                 
@@ -466,8 +539,3 @@ model.set({
                 </li>
             </ul>
         </nav>
-
-
-
-
-
