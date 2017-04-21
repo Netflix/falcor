@@ -6416,13 +6416,23 @@ XMLHttpSource.prototype = {
    */
   set: function httpSourceSet(jsongEnv) {
     var method = 'POST';
-    var queryObject = this.buildQueryObject(this._jsongUrl, method, {
-      jsonGraph: jsongEnv,
-      method: 'set'
-    });
-    var config = simpleExtend(queryObject, this._config);
-    config.headers["Content-Type"] = "application/x-www-form-urlencoded";
-    
+    var config, queryObject;
+    if (!this._config.headers || !this._config.headers["Content-Type"] || !this._config.headers["Content-Type"].match(/application\/json/)) {
+      queryObject = this.buildQueryObject(this._jsongUrl, method, {
+        jsonGraph: jsongEnv,
+        method: 'set'
+      });
+      config = simpleExtend(queryObject, this._config);
+      config.headers["Content-Type"] = "application/x-www-form-urlencoded";
+    } else {
+      config = simpleExtend({
+        url: this._jsongUrl,
+        data: JSON.stringify({
+          jsonGraph: JSON.stringify(jsongEnv),
+          method: 'set'
+        })
+      }, this._config);
+    }
     // pass context for onBeforeRequest callback
     var context = this;
     return request(method, config, context);
@@ -6439,17 +6449,29 @@ XMLHttpSource.prototype = {
     paths = paths || [];
 
     var method = 'POST';
-    var queryData = [];
-    queryData.push('method=call');
-    queryData.push('callPath=' + encodeURIComponent(JSON.stringify(callPath)));
-    queryData.push('arguments=' + encodeURIComponent(JSON.stringify(args)));
-    queryData.push('pathSuffixes=' + encodeURIComponent(JSON.stringify(pathSuffix)));
-    queryData.push('paths=' + encodeURIComponent(JSON.stringify(paths)));
+    var config, queryData = [], queryObject;
+    if (!this._config.headers || !this._config.headers["Content-Type"] || !this._config.headers["Content-Type"].match(/application\/json/)) {
+      queryData.push('method=call');
+      queryData.push('callPath=' + encodeURIComponent(JSON.stringify(callPath)));
+      queryData.push('arguments=' + encodeURIComponent(JSON.stringify(args)));
+      queryData.push('pathSuffixes=' + encodeURIComponent(JSON.stringify(pathSuffix)));
+      queryData.push('paths=' + encodeURIComponent(JSON.stringify(paths)));
 
-    var queryObject = this.buildQueryObject(this._jsongUrl, method, queryData.join('&'));
-    var config = simpleExtend(queryObject, this._config);
-    config.headers["Content-Type"] = "application/x-www-form-urlencoded";
-    
+      queryObject = this.buildQueryObject(this._jsongUrl, method, queryData.join('&'));
+      config = simpleExtend(queryObject, this._config);
+      config.headers["Content-Type"] = "application/x-www-form-urlencoded";
+    } else {
+      config = simpleExtend({
+        url: this._jsongUrl,
+        data: JSON.stringify({
+          method: 'call',
+          callPath: JSON.stringify(callPath),
+          arguments: JSON.stringify(args),
+          pathSuffixes: JSON.stringify(pathSuffix),
+          paths: JSON.stringify(paths)
+        })
+      }, this._config);
+    }
     // pass context for onBeforeRequest callback
     var context = this;
     return request(method, config, context);
