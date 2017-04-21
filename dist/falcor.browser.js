@@ -6398,6 +6398,8 @@ XMLHttpSource.prototype = {
       method: 'get'
     });
     var config = simpleExtend(queryObject, this._config);
+    config.headers["Content-Type"] = "application/x-www-form-urlencoded";
+    
     // pass context for onBeforeRequest callback
     var context = this;
     return request(method, config, context);
