@@ -4,6 +4,7 @@ var Rx = require('rx');
 var noOp = function() {};
 var LocalDataSource = require('../../data/LocalDataSource');
 var ErrorDataSource = require('../../data/ErrorDataSource');
+var asyncifyDataSource = require('../../data/asyncifyDataSource')
 var isPathValue = require("./../../../lib/support/isPathValue");
 var expect = require("chai").expect;
 var sinon = require('sinon');
@@ -11,6 +12,7 @@ var cacheGenerator = require('./../../CacheGenerator');
 var atom = require('falcor-json-graph').atom;
 var MaxRetryExceededError = require('./../../../lib/errors/MaxRetryExceededError');
 var strip = require('./../../cleanData').stripDerefAndVersionKeys;
+
 
 describe('DataSource Only', function() {
     var dataSource = new LocalDataSource(cacheGenerator(0, 2, ['title', 'art'], false));
@@ -280,8 +282,23 @@ describe('DataSource Only', function() {
             return done();
         }, 200);
     });
-    it('should throw a MaxRetryExceededError.', function(done) {
+    it('should onError a MaxRetryExceededError when data source is sync.', function(done) {
         var model = new Model({ source: new LocalDataSource({}) });
+        toObservable(model.
+            get(['videos', 0, 'title'])).
+            doAction(noOp, function(e) {
+                expect(MaxRetryExceededError.is(e), 'MaxRetryExceededError expected.').to.be.ok;
+            }).
+            subscribe(noOp, function(e) {
+                if (isAssertionError(e)) {
+                    return done(e);
+                }
+                return done();
+            }, done.bind('should not complete'));
+    });
+
+    it('should onError a MaxRetryExceededError when data source is async.', function(done) {
+        var model = new Model({ source: asyncifyDataSource(new LocalDataSource({})) });
         toObservable(model.
             get(['videos', 0, 'title'])).
             doAction(noOp, function(e) {
