@@ -6392,7 +6392,7 @@ XMLHttpSource.prototype = {
    * @inheritDoc DataSource#get
    */
   get: function httpSourceGet(pathSet) {
-    var method = 'GET';
+    var method = 'POST';
     var queryObject = this.buildQueryObject(this._jsongUrl, method, {
       paths: pathSet,
       method: 'get'
