@@ -102,6 +102,7 @@ Model.pathValue = jsong.pathValue;
  * @param {?DataSource} options.source - a data source to retrieve and manage the {@link JSONGraph}
  * @param {?JSONGraph} options.cache - initial state of the {@link JSONGraph}
  * @param {?number} options.maxSize - the maximum size of the cache. This value roughly correlates to item count (where itemCount = maxSize / 50). Each item by default is given a metadata `$size` of 50 (or its length when it's an array or string). You can get better control of falcor's memory usage by tweaking `$size`
+ * @param {?number} options.maxRetries - the maximum number of times that the Model will attempt to retrieve the value from the server.
  * @param {?number} options.collectRatio - the ratio of the maximum size to collect when the maxSize is exceeded
  * @param {?Model~errorSelector} options.errorSelector - a function used to translate errors before they are returned
  * @param {?Model~onChange} options.onChange - a function called whenever the Model's cache is changed
@@ -121,6 +122,12 @@ function Model(o) {
         this._maxSize = options.maxSize;
     } else {
         this._maxSize = options._maxSize || Model.prototype._maxSize;
+    }
+
+    if (typeof options.maxRetries === "number") {
+        this._maxRetries = options.maxRetries;
+    } else {
+        this._maxRetries = options.maxRetries || Model.prototype._maxRetries;
     }
 
     if (typeof options.collectRatio === "number") {
@@ -158,6 +165,7 @@ Model.prototype._boxed = false;
 Model.prototype._progressive = false;
 Model.prototype._treatErrorsAsValues = false;
 Model.prototype._maxSize = Math.pow(2, 53) - 1;
+Model.prototype._maxRetries = 3;
 Model.prototype._collectRatio = 0.75;
 
 /**
@@ -3873,8 +3881,11 @@ var InvalidSourceError = require(12);
 module.exports = function getRequestCycle(getResponse, model, results, observer,
                                           errors, count) {
     // we have exceeded the maximum retry limit.
-    if (count === 10) {
-        throw new MaxRetryExceededError();
+    if (count === model._maxRetries) {
+        observer.onError(new MaxRetryExceededError());
+        return {
+            dispose: function() {}
+        };
     }
 
     var requestQueue = model._request;
@@ -4189,8 +4200,11 @@ var MaxRetryExceededError = require(13);
 module.exports = function setRequestCycle(model, observer, groups,
                                           isJSONGraph, isProgressive, count) {
     // we have exceeded the maximum retry limit.
-    if (count === 10) {
-        throw new MaxRetryExceededError();
+    if (count === model._maxRetries) {
+        observer.onError(new MaxRetryExceededError());
+        return {
+            dispose: function() {}
+        };
     }
 
     var requestedAndOptimizedPaths = setGroupsIntoCache(model, groups);

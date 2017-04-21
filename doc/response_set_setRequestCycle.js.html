@@ -30,8 +30,11 @@ var MaxRetryExceededError = require("./../../errors/MaxRetryExceededError");
 module.exports = function setRequestCycle(model, observer, groups,
                                           isJSONGraph, isProgressive, count) {
     // we have exceeded the maximum retry limit.
-    if (count === 10) {
-        throw new MaxRetryExceededError();
+    if (count === model._maxRetries) {
+        observer.onError(new MaxRetryExceededError());
+        return {
+            dispose: function() {}
+        };
     }
 
     var requestedAndOptimizedPaths = setGroupsIntoCache(model, groups);
