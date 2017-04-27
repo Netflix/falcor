@@ -1745,12 +1745,14 @@ module.exports = function onValue(model, node, seed, depth, outerResults,
             curr = curr[k];
         }
         k = requestedPath[i];
-        if (k !== null) {
-            curr[k] = valueNode;
-        } else {
-            // We are protected from reaching here when depth is 1 and prev is
-            // undefined by the InvalidModelError and NullInPathError checks.
-            prev[prevK] = valueNode;
+        if (valueNode !== undefined) {
+          if (k !== null) {
+              curr[k] = valueNode;
+          } else {
+              // We are protected from reaching here when depth is 1 and prev is
+              // undefined by the InvalidModelError and NullInPathError checks.
+              prev[prevK] = valueNode;
+          }
         }
     }
 };
@@ -1775,7 +1777,6 @@ module.exports = function onValueType(
     requestedPath, optimizedPath, optimizedLength, isJSONG, fromReference) {
 
     var currType = node && node.$type;
-    var requiresMaterializedToReport = node && node.value === undefined;
 
     // There are is nothing here, ether report value, or report the value
     // that is missing.  If there is no type then report the missing value.
@@ -1823,16 +1824,10 @@ module.exports = function onValueType(
             requestedPath[depth] = null;
             depth += 1;
         }
-
-        if (!requiresMaterializedToReport ||
-            requiresMaterializedToReport && model._materialized) {
-
-            onValue(model, node, seed, depth, outerResults, branchInfo,
-                    requestedPath, optimizedPath, optimizedLength, isJSONG);
-        }
+        onValue(model, node, seed, depth, outerResults, branchInfo,
+                requestedPath, optimizedPath, optimizedLength, isJSONG);
     }
 };
-
 
 },{"113":113,"24":24,"25":25,"26":26,"30":30,"31":31,"79":79}],28:[function(require,module,exports){
 var pathSyntax = require(128);
@@ -24155,6 +24150,10 @@ process.off = noop;
 process.removeListener = noop;
 process.removeAllListeners = noop;
 process.emit = noop;
+process.prependListener = noop;
+process.prependOnceListener = noop;
+
+process.listeners = function (name) { return [] }
 
 process.binding = function (name) {
     throw new Error('process.binding is not supported');

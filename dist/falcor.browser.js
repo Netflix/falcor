@@ -1737,12 +1737,14 @@ module.exports = function onValue(model, node, seed, depth, outerResults,
             curr = curr[k];
         }
         k = requestedPath[i];
-        if (k !== null) {
-            curr[k] = valueNode;
-        } else {
-            // We are protected from reaching here when depth is 1 and prev is
-            // undefined by the InvalidModelError and NullInPathError checks.
-            prev[prevK] = valueNode;
+        if (valueNode !== undefined) {
+          if (k !== null) {
+              curr[k] = valueNode;
+          } else {
+              // We are protected from reaching here when depth is 1 and prev is
+              // undefined by the InvalidModelError and NullInPathError checks.
+              prev[prevK] = valueNode;
+          }
         }
     }
 };
@@ -1767,7 +1769,6 @@ module.exports = function onValueType(
     requestedPath, optimizedPath, optimizedLength, isJSONG, fromReference) {
 
     var currType = node && node.$type;
-    var requiresMaterializedToReport = node && node.value === undefined;
 
     // There are is nothing here, ether report value, or report the value
     // that is missing.  If there is no type then report the missing value.
@@ -1815,16 +1816,10 @@ module.exports = function onValueType(
             requestedPath[depth] = null;
             depth += 1;
         }
-
-        if (!requiresMaterializedToReport ||
-            requiresMaterializedToReport && model._materialized) {
-
-            onValue(model, node, seed, depth, outerResults, branchInfo,
-                    requestedPath, optimizedPath, optimizedLength, isJSONG);
-        }
+        onValue(model, node, seed, depth, outerResults, branchInfo,
+                requestedPath, optimizedPath, optimizedLength, isJSONG);
     }
 };
-
 
 },{"112":112,"23":23,"24":24,"25":25,"29":29,"30":30,"78":78}],27:[function(require,module,exports){
 var pathSyntax = require(127);
