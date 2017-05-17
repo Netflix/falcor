@@ -31,7 +31,6 @@ describe('Expired', function() {
         Rx.Observable.
             timer(100).
             flatMap(function() {
-                debugger
                 return model.get(['expireSoon', 'summary']);
             }).
             doAction(onNext, noOp, function() {
@@ -43,4 +42,3 @@ describe('Expired', function() {
             subscribe(noOp, done, done);
     });
 });
-

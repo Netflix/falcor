@@ -66,6 +66,7 @@ describe('Cache as DataSource', function() {
         });
     });
     it('should report errors from a dataSource.', function(done) {
+        var outputError;
         var model = new Model({
             source: new Model({
                 source: new ErrorDataSource(500, 'Oops!')
@@ -74,17 +75,18 @@ describe('Cache as DataSource', function() {
         toObservable(model.
             get(['videos', 1234, 'summary'])).
             doAction(noOp, function(err) {
-                expect(err).to.deep.equals([{
-                    path: ['videos', 1234, 'summary'],
+                outputError = err;
+                expect(err).to.deep.equals({
+                    $type: "error",
                     value: {
                         message: 'Oops!',
                         status: 500
                     }
-                }]);
+                });
             }).
             subscribe(noOp, function(err) {
                 // ensure its the same error
-                if (Array.isArray(err) && isPathValue(err[0])) {
+                if (outputError === err) {
                     done();
                 } else {
                     done(err);
@@ -149,4 +151,3 @@ describe('Cache as DataSource', function() {
             subscribe(noOp, done, done);
     });
 });
-
