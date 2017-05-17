@@ -18,19 +18,16 @@ describe("Error", function() {
         toObservable(model.
             get(["test", {to: 5}, "summary"])).
             doAction(noOp, function(err) {
-                expect(err.length).to.equal(6);
                 // not in boxValue mode
                 var expected = {
-                    path: [],
+                    $type: "error",
                     value: {
                         status: 503,
                         message: "Timeout"
                     }
                 };
-                err.forEach(function(e, i) {
-                    expected.path = ["test", i, "summary"];
-                    expect(e).to.deep.equals(expected);
-                });
+
+                expect(err).to.deep.equals(expected);
             }).
             subscribe(function() {
                 done('Should not onNext');
@@ -66,8 +63,8 @@ describe("Error", function() {
             get(["test", {to: 5}, "summary"])).
             doAction(onNext, function(err) {
 
-                // Ensure onNext is called correctly
-                expect(onNext.calledOnce, 'onNext called').to.be.ok;
+                // Ensure onNext is not called
+                expect(onNext.callCount, 'onNext called').to.equal(0);
                 expect(clean(onNext.getCall(0).args[0]), 'json from onNext').to.deep.equals({
                     json: {
                         test: {
@@ -77,19 +74,15 @@ describe("Error", function() {
                     }
                 });
 
-                expect(err.length).to.equal(4);
                 // not in boxValue mode
                 var expected = {
-                    path: [],
+                    $type: "error",
                     value: {
                         status: 503,
                         message: "Timeout"
                     }
                 };
-                err.forEach(function(e, i) {
-                    expected.path = ["test", i + 1, "summary"];
-                    expect(e).to.deep.equals(expected);
-                });
+                expect(err).to.deep.equals(expected);
             }).
             subscribe(noOp, doneOnError(done), errorOnCompleted(done));
     });
