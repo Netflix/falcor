@@ -27,4 +27,30 @@ describe("root onChange handler", function () {
         expect(changed, "onChange wasn't called.").to.be.ok;
         expect(calledBeforeEnsure, "onChange wasn't called before the subscription was disposed.").to.be.ok;
     });
+    it("is called in the context of the root Model", function() {
+        var topLevelModel = new Model({
+            onChange: function() {
+                expect(this).to.equal(topLevelModel);
+            }
+        });
+        toObservable(topLevelModel.set({
+            path: ["a", "b", "c"],
+            value: "foo"
+        }))
+        .subscribe();
+    });
+    it("is called in the context of the root Model synchronously when initialized with a cache", function() {
+        var onChangeContext;
+        var onChangeCalledSynchronously = false;
+        var topLevelModel = new Model({
+            onChange: function() {
+                onChangeContext = this;
+                expect(topLevelModel).to.not.be.ok;
+                onChangeCalledSynchronously = true;
+            },
+            cache: { a: { b: { c: "foo" } } }
+        });
+        expect(onChangeContext).to.equal(topLevelModel)
+        expect(onChangeCalledSynchronously).to.be.true;
+    });
 });
