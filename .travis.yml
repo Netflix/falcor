@@ -35,3 +35,9 @@ after_script:
 notifications:
     email:
         falcor@netflix.com
+    webhooks:
+        urls:
+            - https://webhooks.gitter.im/e/73bb75f713e1f5b6e860
+        on_success: change  # options: [always|never|change] default: always
+        on_failure: always  # options: [always|never|change] default: always
+        on_start: never     # options: [always|never|change] default: always
