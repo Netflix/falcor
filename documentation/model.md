@@ -1640,7 +1640,7 @@ One of the limitations of working with JSON data through a Falcor model is that 
 
 ## Sentinel Metadata
 
-Metadata can be attached to value types to control the way the Model handles them once they have been retrieved from the [data source](http://netflix.github.io/falcor/documentation/datasources.html). Metadata can be to any JSON object as a key that starts with the prefix "$". Note that any keys set on JSON value types (string, number, boolean, and null) will not persist when serialized to JSON. 
+Metadata can be attached to value types to control the way the Model handles them once they have been retrieved from the [data source](http://netflix.github.io/falcor/documentation/datasources.html). Metadata can be added to any JSON object as a key that starts with the prefix "$". Note that any keys set on JSON value types (string, number, boolean, and null) will not persist when serialized to JSON. 
 
 ~~~json
 var number = 4;
