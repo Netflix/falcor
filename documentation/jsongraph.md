@@ -319,7 +319,7 @@ Let's evaluate the following [Path](http://netflix.github.io/falcor/documentatio
 ["todos", 0, "name"]
 ~~~
 
-First we evaluate the "todos" key, which yields an array.  There are more keys to be evaluated, so we continue. Then we evaluate the number "0" key, and it is converted into a string using JavaScript's toString algorithm. We attempt to look up the value in the array, and we find a reference:  
+First we evaluate the "todos" key, which yields an array.  There are more keys to be evaluated, so we continue. Then we evaluate the number "0" key, and it is converted into a string using JavaScript's toString method. We attempt to look up the value in the array, and we find a reference:  
 
 ~~~js
 // JSON Graph object
@@ -395,7 +395,7 @@ Once we create an optimized [Path](http://netflix.github.io/falcor/documentation
 }
 ~~~
 
-Now we evaluate the "todosById" key, which yields an object. Next, we convert the number 44 into a string using JavaScript's toString algorithm. Then we look up the resulting string "44" which yields another object. Finally we look up the key "name" and we find a primitive value type "get milk from corner store". This value is added to the JSON Graph subset and returned as the result of the abstract get operation. 
+Now we evaluate the "todosById" key, which yields an object. Next, we convert the number 44 into a string using JavaScript's toString method. Then we look up the resulting string "44" which yields another object. Finally we look up the key "name" and we find a primitive value type "get milk from corner store". This value is added to the JSON Graph subset and returned as the result of the abstract get operation. 
 
 ~~~js
 // JSON Graph Envelope response
@@ -444,7 +444,7 @@ Let's evaluate the following [Path](http://netflix.github.io/falcor/documentatio
 ["todos", 0]
 ~~~
 
-First we evaluate the "todos" key, which yields an array.  There are more keys to be evaluated, so we continue. Then we evaluate the number "0" key, and it is converted into a string using JavaScript's toString algorithm. We attempt to look up the value in the array, and we find a reference:  
+First we evaluate the "todos" key, which yields an array.  There are more keys to be evaluated, so we continue. Then we evaluate the number "0" key, and it is converted into a string using JavaScript's toString method. We attempt to look up the value in the array, and we find a reference:  
 
 ~~~js
 {
@@ -500,7 +500,7 @@ This time we will attempt to retrieve the name of the 9th item from the TODO lis
 ["todos", 9, "name"]
 ~~~
 
-First we evaluate the "todos" key, which yields an array.  There are more keys to be evaluated, so we continue. Then we evaluate the "9" key, and it is converted into a string using JavaScript's toString algorithm. We attempt to look up the value in the array, which yield an undefined value. The undefined value is added to the JSON Graph subset, which is returned as the result of the abstract get operation:
+First we evaluate the "todos" key, which yields an array.  There are more keys to be evaluated, so we continue. Then we evaluate the "9" key, and it is converted into a string using JavaScript's toString method. We attempt to look up the value in the array, which yield an undefined value. The undefined value is added to the JSON Graph subset, which is returned as the result of the abstract get operation:
 
 ~~~js
 // JSON Graph Envelope response
@@ -546,7 +546,7 @@ We will attempt to mark the first task in the TODO list as done using the follow
 { path: ["todos", 0, "done"], value: true }
 ~~~
 
-First we evaluate the "todos" key, which yields an array.  There are more keys to be evaluated, so we continue. Then we evaluate the number "0" key, and it is converted into a string using JavaScrtip's toString algorithm. We attempt to look up the value in the array, and we find a reference:  
+First we evaluate the "todos" key, which yields an array.  There are more keys to be evaluated, so we continue. Then we evaluate the number "0" key, and it is converted into a string using JavaScript's toString method. We attempt to look up the value in the array, and we find a reference:  
 
 ~~~js
 // JSON Graph object
@@ -601,7 +601,7 @@ Once we create an optimized [Path](http://netflix.github.io/falcor/documentation
 }
 ~~~
 
-Now we evaluate the "todosById" key, which yields an object. Next, we convert the number 44 into a string using JavaScript's toString algorithm. Then we look up the resulting string "44" which yields another object. Finally we arrive at the last key: "done". We replace the value at this location with the new value: true. We also insert the value into the JSON Graph subset, and return the JSON Graph subset as the new result of the abstract set operation. 
+Now we evaluate the "todosById" key, which yields an object. Next, we convert the number 44 into a string using JavaScript's toString method. Then we look up the resulting string "44" which yields another object. Finally we arrive at the last key: "done". We replace the value at this location with the new value: true. We also insert the value into the JSON Graph subset, and return the JSON Graph subset as the new result of the abstract set operation. 
 
 ~~~js
 // JSON Graph object
@@ -669,7 +669,7 @@ This time we will attempt to replace the "done" key value with an object that co
 { path: ["todos", 0, "done", "completed"], value: true }
 ~~~
 
-First we evaluate the "todos" key, which yields an array.  There are more keys to be evaluated, so we continue. Then we evaluate the number "0" key, and it is converted into a string using JavaScript's toString algorithm. We attempt to look up the value in the array, and we find a reference:  
+First we evaluate the "todos" key, which yields an array.  There are more keys to be evaluated, so we continue. Then we evaluate the number "0" key, and it is converted into a string using JavaScript's toString method. We attempt to look up the value in the array, and we find a reference:  
 
 ~~~js
 // JSON Graph object
@@ -724,7 +724,7 @@ Once we create an optimized [Path](http://netflix.github.io/falcor/documentation
 }
 ~~~
 
-Now we evaluate the "todosById" key, which yields an object. Next, we convert the number 44 into a string using the JavaScript's toString algorithm. Then we look up the resulting string "44" which yields another object. Now we look up the "done" key and find a primitive value: false. As there are more keys to be evaluated, the object evaluating the abstract set operation attempts to replace the primitive value with an object. 
+Now we evaluate the "todosById" key, which yields an object. Next, we convert the number 44 into a string using the JavaScript's toString method. Then we look up the resulting string "44" which yields another object. Now we look up the "done" key and find a primitive value: false. As there are more keys to be evaluated, the object evaluating the abstract set operation attempts to replace the primitive value with an object. 
 
 ~~~js
 // setting ["todosById", 44, "done", "completed"] to true
