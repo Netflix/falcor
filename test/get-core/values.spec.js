@@ -117,14 +117,65 @@ describe('Values', function() {
         getCoreRunner({
             input: [['lolomo']],
             output: {
-                json: {
-                    lolomo: ['test', 'value']
-                }
+                json: {}
             },
             cache: {
                 lolomo: jsonGraph.ref(['test', 'value']),
                 test: {
                     value: atom('value')
+                }
+            }
+        });
+    });
+    it('should not get references.', function() {
+        getCoreRunner({
+            input: [["lists", 2343, "0"]],
+            output: {
+                json: {
+                    lists: {
+                        2343: {
+                        }
+                    }
+                }
+            },
+            cache: {
+                lists: {
+                    2343: {
+                        0: jsonGraph.ref(["videos", 123])
+                    }
+                },
+                videos: {
+                    123: {
+                        name: atom("House of cards")
+                    }
+                }
+            }
+        });
+    });
+    it('should not clobber values with intersecting paths.', function() {
+        getCoreRunner({
+            input: [['lists', 2343, '0', 'name'], ['lists', 2343, '0']],
+            output: {
+                json: {
+                    lists: {
+                        2343: {
+                            0: {
+                                name: 'House of cards'
+                            }
+                        }
+                    }
+                }
+            },
+            cache: {
+                lists: {
+                    2343: {
+                        0: jsonGraph.ref(["videos", 123])
+                    }
+                },
+                videos: {
+                    123: {
+                        name: atom("House of cards")
+                    }
                 }
             }
         });
