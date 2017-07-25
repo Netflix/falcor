@@ -117,9 +117,7 @@ describe('Values', function() {
         getCoreRunner({
             input: [['lolomo']],
             output: {
-                json: {
-                    lolomo: ['test', 'value']
-                }
+                json: {}
             },
             cache: {
                 lolomo: jsonGraph.ref(['test', 'value']),
@@ -129,6 +127,66 @@ describe('Values', function() {
             }
         });
     });
+    it('should not get references.', function() {
+        getCoreRunner({
+            input: [["lists", 2343, "0"]],
+            output: {
+                json: {
+                    lists: {
+                        2343: {
+                        }
+                    }
+                }
+            },
+            cache: {
+                lists: {
+                    2343: {
+                        0: jsonGraph.ref(["videos", 123])
+                    }
+                },
+                videos: {
+                    123: {
+                        name: atom("House of cards")
+                    }
+                }
+            }
+        });
+    });
+
+    function intersectingTest(paths) {
+        return function() {
+            getCoreRunner({
+                input: paths,
+                output: {
+                    json: {
+                        lists: {
+                            2343: {
+                                0: {
+                                    name: 'House of cards'
+                                }
+                            }
+                        }
+                    }
+                },
+                cache: {
+                    lists: {
+                        2343: {
+                            0: jsonGraph.ref(["videos", 123])
+                        }
+                    },
+                    videos: {
+                        123: {
+                            name: atom("House of cards")
+                        }
+                    }
+                }
+            });
+        };
+    }
+
+    it('should not clobber values with intersecting paths.', intersectingTest([['lists', 2343, '0', 'name'], ['lists', 2343, '0']]));
+    it('should not clobber values with intersecting paths reversed.', intersectingTest([['lists', 2343, '0'], ['lists', 2343, '0', 'name']]));
+
     it('should have no output for empty paths.', function() {
         getCoreRunner({
             input: [['lolomo', 0, [], 'item', 'title']],

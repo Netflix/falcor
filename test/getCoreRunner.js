@@ -86,8 +86,8 @@ module.exports = function(testConfig) {
     // $size is stripped out of basic core tests.
     // We have to strip out parent as well from the output since it will produce
     // infinite recursion.
-    clean(valueNode, {strip: ['$size']});
-    clean(expectedOutput, {strip: ['$size']});
+    clean(valueNode, {strip: ['$size', '$__path']});
+    clean(expectedOutput, {strip: ['$size', '$__path']});
 
     if (expectedOutput) {
         expect(valueNode).to.deep.equals(expectedOutput);
