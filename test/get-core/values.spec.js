@@ -180,6 +180,34 @@ describe('Values', function() {
             }
         });
     });
+    it('should have identical behavior when fetching a missing value or atom of undefined.', function() {
+        getCoreRunner({
+            input: [["lists", 2343, "0", "name"], ["lists", 2343, "1", "rating"]],
+            output: {
+                json: {
+                    lists: {
+                        2343: {
+                            0: {},
+                            1: {}
+                        }
+                    }
+                }
+            },
+            cache: {
+                lists: {
+                    2343: {
+                        0: jsonGraph.ref(["videos", 123]),
+                        1: jsonGraph.ref(["videos", 123])
+                    }
+                },
+                videos: {
+                    123: {
+                        name: atom()
+                    }
+                }
+            }
+        });
+    });
     it('should have no output for empty paths.', function() {
         getCoreRunner({
             input: [['lolomo', 0, [], 'item', 'title']],

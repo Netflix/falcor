@@ -21,7 +21,9 @@ describe('Missing', function() {
     it('should report a missing path.', function() {
         getCoreRunner({
             input: [['missing', 'title']],
-            output: { },
+            output: {
+                json: {}
+            },
             requestedMissingPaths: [['missing', 'title']],
             optimizedMissingPaths: [['toMissing', 'title']],
             cache: missingCache
@@ -30,7 +32,13 @@ describe('Missing', function() {
     it('should report a missing path.', function() {
         getCoreRunner({
             input: [['multi', {to: 1}, 0, 'title']],
-            output: { },
+            output: {
+                json: {
+                    multi: {
+                        1: {}
+                    }
+                }
+            },
             requestedMissingPaths: [
                 ['multi', 0, 0, 'title'],
                 ['multi', 1, 0, 'title']
@@ -57,7 +65,18 @@ describe('Missing', function() {
     it('should report missing paths through many complex keys.', function() {
         getCoreRunner({
             input: [[{to:1}, {to:1}, {to:1}, 'summary']],
-            output: { },
+            output: {
+                json: {
+                    0: {
+                        0: {
+                            0: {},
+                            1: {}
+                        },
+                        1: {}
+                    },
+                    1: {}
+                }
+            },
             optimizedMissingPaths: [
                 [0, 0, 0, 'summary'],
                 [0, 0, 1, 'summary'],
@@ -97,7 +116,9 @@ describe('Missing', function() {
     it('should report a missing path ending with null', function() {
         getCoreRunner({
             input: [['refMissing', null]],
-            output: { },
+            output: {
+                json: {}
+            },
             requestedMissingPaths: [['refMissing', null]],
             optimizedMissingPaths: [['refMissing', null]],
             cache: { }

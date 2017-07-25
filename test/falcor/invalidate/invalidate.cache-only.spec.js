@@ -26,13 +26,10 @@ describe("Cache Only", function() {
         toObservable(model.
             withoutDataSource().
             get(["videos", 0, "title"])).
-            doAction(function(x) {
-                throw inspect(x, {depth: 10}) + " should not be onNext'd";
-            }).
             concat(model.get(["videos", 0, "art"])).
             doAction(onNext, noOp, function() {
                 expect(dataSourceCount.callCount).to.equals(0);
-                expect(strip(onNext.getCall(0).args[0])).to.deep.equals({
+                expect(strip(onNext.getCall(1).args[0])).to.deep.equals({
                     json: {
                         videos: {
                             0: {
@@ -64,14 +61,11 @@ describe("Cache Only", function() {
         toObservable(model.
             withoutDataSource().
             get(summary.slice())).
-            doAction(function(x) {
-                throw inspect(x, {depth: 10}) + " should not be onNext'd";
-            }).
             concat(model.get(art.slice())).
             doAction(onNext, noOp, function() {
                 expect(onGet.calledOnce).to.be.ok;
                 expect(onGet.getCall(0).args[1]).to.deep.equals([art]);
-                expect(strip(onNext.getCall(0).args[0])).to.deep.equals({
+                expect(strip(onNext.getCall(1).args[0])).to.deep.equals({
                     json: {
                         videos: {
                             0: {
@@ -96,12 +90,9 @@ describe("Cache Only", function() {
         toObservable(model.
             withoutDataSource().
             get(summary.slice())).
-            doAction(function(x) {
-                throw inspect(x, {depth: 10}) + " should not be onNext'd";
-            }).
             concat(model.get(["lists", "A", 0, "item", "summary"])).
             doAction(onNext, noOp, function() {
-                expect(strip(onNext.getCall(0).args[0])).to.deep.equals({
+                expect(strip(onNext.getCall(1).args[0])).to.deep.equals({
                     json: {
                         lists: {
                             A: {

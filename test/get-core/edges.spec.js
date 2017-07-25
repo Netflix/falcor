@@ -104,7 +104,11 @@ describe('Edges', function() {
     it('should not get out an expired item through references.', function() {
         getCoreRunner({
             input: [['videos', 1234, 'title']],
-            output: { },
+            output: {
+                json: {
+                    videos: {}
+                }
+            },
             requestedMissingPaths: [['videos', 1234, 'title']],
             cache: {
                 to: {
