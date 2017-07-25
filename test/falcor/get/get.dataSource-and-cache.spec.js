@@ -589,6 +589,9 @@ describe('DataSource and Partial Cache', function() {
                     },
                     function() {
                         expect(onNextSpy.callCount).to.equal(1);
+                        expect(strip(onNextSpy.getCall(0).args[0])).to.deep.equals({
+                            json: {}
+                        });
                         expect(onErrorSpy.callCount).to.equal(1);
                         done();
                     });
