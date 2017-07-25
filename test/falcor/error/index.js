@@ -11,6 +11,43 @@ var errorOnCompleted = require('./../../errorOnCompleted');
 var doneOnError = require('./../../doneOnError');
 
 describe("Error", function() {
+    it("should get a hard error from the DataSource with _treatDataSourceErrorsAsJSONGraphErrors.", function(done) {
+        var model = new Model({
+            source: new ErrorDataSource(503, "Timeout"),
+            _treatDataSourceErrorsAsJSONGraphErrors: true
+        });
+        toObservable(model.
+            get(["test", {to: 5}, "summary"])).
+            doAction(noOp, function(err) {
+                expect(err.length).to.equal(6);
+                // not in boxValue mode
+                var expected = {
+                    path: [],
+                    value: {
+                        status: 503,
+                        message: "Timeout"
+                    }
+                };
+                err.forEach(function(e, i) {
+                    expected.path = ["test", i, "summary"];
+                    expect(e).to.deep.equals(expected);
+                });
+            }).
+            subscribe(function() {
+                done('Should not onNext');
+            },
+            function(e) {
+                if (isAssertionError(e)) {
+                    done(e);
+                } else {
+                    done();
+                }
+            },
+            function() {
+                done('Should not onComplete');
+            });
+    });
+
     it("should get a hard error from the DataSource.", function(done) {
         var model = new Model({
             source: new ErrorDataSource(503, "Timeout")
@@ -42,6 +79,54 @@ describe("Error", function() {
             function() {
                 done('Should not onComplete');
             });
+    });
+
+    it("should get a hard error from the DataSource with some data found in the cache with _treatDataSourceErrorsAsJSONGraphErrors.", function(done) {
+        var model = new Model({
+            _treatDataSourceErrorsAsJSONGraphErrors: true,
+            source: new ErrorDataSource(503, "Timeout"),
+            cache: {
+                test: {
+                    0: {
+                        summary: "in cache"
+                    },
+                    5: {
+                        summary: "in cache"
+                    }
+                }
+            }
+        });
+        var onNext = sinon.spy();
+        toObservable(model.
+            get(["test", {to: 5}, "summary"])).
+            doAction(onNext, function(err) {
+
+                // Ensure onNext is called correctly
+                expect(onNext.calledOnce, 'onNext called').to.be.ok;
+                expect(clean(onNext.getCall(0).args[0]), 'json from onNext').to.deep.equals({
+                    json: {
+                        test: {
+                            0: {summary: "in cache"},
+                            5: {summary: "in cache"}
+                        }
+                    }
+                });
+
+                expect(err.length).to.equal(4);
+                // not in boxValue mode
+                var expected = {
+                    path: [],
+                    value: {
+                        status: 503,
+                        message: "Timeout"
+                    }
+                };
+                err.forEach(function(e, i) {
+                    expected.path = ["test", i + 1, "summary"];
+                    expect(e).to.deep.equals(expected);
+                });
+            }).
+            subscribe(noOp, doneOnError(done), errorOnCompleted(done));
     });
 
     it("should get a hard error from the DataSource with some data found in the cache.", function(done) {
