@@ -36,7 +36,7 @@ describe('Error cases', function() {
                         expect(err.message).to.equals(InvalidModelError.message);
                     }).
                     subscribe(
-                        done.bind(null, new Error('onNext shouldnt be called')),
+                        noOp,
                         function(err) {
                             if (isAssertionError(err)) {
                                 return done(err);
