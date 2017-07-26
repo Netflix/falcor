@@ -219,7 +219,25 @@ describe('Values', function() {
     it('should have no output for empty paths.', function() {
         getCoreRunner({
             input: [['lolomo', 0, [], 'item', 'title']],
-            output: {},
+            output: {
+                json: {
+                    lolomo: {
+                        0: {
+                            
+                        }
+                    }
+                }
+            },
+            cache: cacheGenerator(0, 1)
+        });
+    });
+
+    it('should have no output for empty get.', function() {
+        getCoreRunner({
+            input: [],
+            output: {
+                json: {}
+            },
             cache: cacheGenerator(0, 1)
         });
     });

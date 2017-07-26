@@ -205,9 +205,7 @@ describe('DataSource and Cache', function() {
         toObservable(model.
             boxValues().
             set({path: ['genreList', 0, 0, 'summary'], value: 5})).
-            doAction(function(x) {
-                expect(false, 'onNext should not be called.').to.be.ok;
-            }, function(e) {
+            doAction(noOp, function(e) {
                 called = true;
                 testRunner.compare([{
                     path: ['genreList', 0, 0, 'summary'],

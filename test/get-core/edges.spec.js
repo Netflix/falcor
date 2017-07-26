@@ -14,7 +14,11 @@ describe('Edges', function() {
     it('should report nothing on empty path.', function() {
         getCoreRunner({
             input: [['videos', [], 'title']],
-            output: { },
+            output: {
+                json: {
+                    videos: {}
+                }
+            },
             cache: cacheGenerator(0, 1)
         });
     });
