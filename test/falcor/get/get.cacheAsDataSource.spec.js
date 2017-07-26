@@ -81,6 +81,36 @@ describe('Cache as DataSource', function() {
                 subscribe(noOp, done, done);
         });
     });
+    it('should report errors from a dataSource with _treatDataSourceErrorsAsJSONGraphErrors.', function(done) {
+        var model = new Model({
+            _treatDataSourceErrorsAsJSONGraphErrors: true,
+            source: new Model({
+                source: new ErrorDataSource(500, 'Oops!')
+            }).asDataSource()
+        });
+        toObservable(model.
+            get(['videos', 1234, 'summary'])).
+            doAction(noOp, function(err) {
+                expect(err).to.deep.equals([{
+                    path: ['videos', 1234, 'summary'],
+                    value: {
+                        message: 'Oops!',
+                        status: 500
+                    }
+                }]);
+            }).
+            subscribe(noOp, function(err) {
+                // ensure its the same error
+                if (Array.isArray(err) && isPathValue(err[0])) {
+                    done();
+                } else {
+                    done(err);
+                }
+            }, function() {
+                done('On Completed was called. ' +
+                     'OnError should have been called.');
+            });
+    });
     it('should report errors from a dataSource.', function(done) {
         var outputError;
         var model = new Model({

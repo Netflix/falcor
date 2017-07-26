@@ -134,6 +134,33 @@ describe('DataSource Only', function() {
                 subscribe(noOp, done, done);
         });
     });
+    it('should report errors from a dataSource with _treatDataSourceErrorsAsJSONGraphErrors.', function(done) {
+        var model = new Model({
+            _treatDataSourceErrorsAsJSONGraphErrors: true,
+            source: new ErrorDataSource(500, 'Oops!')
+        });
+        toObservable(model.
+            get(['videos', 0, 'title'])).
+            doAction(noOp, function(err) {
+                expect(err).to.deep.equals([{
+                    path: ['videos', 0, 'title'],
+                    value: {
+                        message: 'Oops!',
+                        status: 500
+                    }
+                }]);
+            }, function() {
+                throw new Error('On Completed was called. ' +
+                     'OnError should have been called.');
+            }).
+            subscribe(noOp, function(err) {
+                // ensure its the same error
+                if (Array.isArray(err) && isPathValue(err[0])) {
+                    return done();
+                }
+                return done(err);
+            });
+    });
     it('should report errors from a dataSource.', function(done) {
         var outputError = null;
         var model = new Model({
