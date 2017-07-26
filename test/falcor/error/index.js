@@ -33,9 +33,7 @@ describe("Error", function() {
                     expect(e).to.deep.equals(expected);
                 });
             }).
-            subscribe(function() {
-                done('Should not onNext');
-            },
+            subscribe(noOp,
             function(e) {
                 if (isAssertionError(e)) {
                     done(e);
