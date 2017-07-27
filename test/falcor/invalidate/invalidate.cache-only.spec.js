@@ -45,7 +45,7 @@ describe("Cache Only", function() {
             subscribe(noOp, done, done);
     });
 
-    it.only("should re-fetch an invalidated value.", function(done) {
+    it("should re-fetch an invalidated value progressively.", function(done) {
         var onGet = sinon.spy();
         var onNext = sinon.spy();
         var model = new Model({
@@ -82,6 +82,47 @@ describe("Cache Only", function() {
                     }
                 });
                 expect(strip(onNext.getCall(2).args[0])).to.deep.equals({
+                    json: {
+                        lolomo: {
+                            0: {
+                                title: 'List title'
+                            }
+                        }
+                    }
+                });
+            }).
+            subscribe(noOp, done, done);
+
+        model.invalidate(['lolomo', 0]);
+    });
+
+    it("should re-fetch an invalidated value.", function(done) {
+        var onGet = sinon.spy();
+        var onNext = sinon.spy();
+        var model = new Model({
+            cache: {
+                lolomo: {
+                    0: ref(['lists', 123])
+                }
+            },
+            source: new LocalDataSource({
+                    lolomo: {
+                        0: ref(['lists', 123])
+                    },
+                    lists: {
+                        123: {
+                            title: atom('List title')
+                        }
+                    }
+                }, {wait: 100, onGet: onGet})
+        });
+
+        toObservable(model.
+            get(["lolomo", 0, "title"])).
+            doAction(onNext, noOp, function() {
+                expect(onGet.callCount).to.equal(2);
+                expect(onNext.callCount).to.equal(1);
+                expect(strip(onNext.getCall(0).args[0])).to.deep.equals({
                     json: {
                         lolomo: {
                             0: {
