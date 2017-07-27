@@ -9,6 +9,9 @@ var noOp = function() {};
 var sinon = require('sinon');
 var cacheGenerator = require('./../../CacheGenerator');
 var strip = require('./../../cleanData').stripDerefAndVersionKeys;
+var jsonGraph = require('falcor-json-graph');
+var ref = jsonGraph.ref;
+var atom = jsonGraph.atom;
 
 describe("Cache Only", function() {
     it("should invalidate a leaf value.", function(done) {
@@ -40,6 +43,57 @@ describe("Cache Only", function() {
                 });
             }).
             subscribe(noOp, done, done);
+    });
+
+    it.only("should re-fetch an invalidated value.", function(done) {
+        var onGet = sinon.spy();
+        var onNext = sinon.spy();
+        var model = new Model({
+            cache: {
+                lolomo: {
+                    0: ref(['lists', 123])
+                }
+            },
+            source: new LocalDataSource({
+                    lolomo: {
+                        0: ref(['lists', 123])
+                    },
+                    lists: {
+                        123: {
+                            title: atom('List title')
+                        }
+                    }
+                }, {wait: 100, onGet: onGet})
+        });
+
+        toObservable(model.
+            get(["lolomo", 0, "title"]).progressively()).
+            doAction(onNext, noOp, function() {
+                expect(onGet.callCount).to.equal(2);
+                expect(onNext.callCount).to.equal(3);
+                expect(strip(onNext.getCall(0).args[0])).to.deep.equals({
+                    json: {
+                        lolomo: {}
+                    }
+                });
+                expect(strip(onNext.getCall(1).args[0])).to.deep.equals({
+                    json: {
+                        lolomo: {}
+                    }
+                });
+                expect(strip(onNext.getCall(2).args[0])).to.deep.equals({
+                    json: {
+                        lolomo: {
+                            0: {
+                                title: 'List title'
+                            }
+                        }
+                    }
+                });
+            }).
+            subscribe(noOp, done, done);
+
+        model.invalidate(['lolomo', 0]);
     });
 
     it("should invalidate a branch value.", function(done) {
