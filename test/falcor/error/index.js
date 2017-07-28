@@ -1,4 +1,5 @@
 var ErrorDataSource = require("../../data/ErrorDataSource");
+var LocalDataSource = require("../../data/ErrorDataSource");
 var clean = require("../../cleanData").clean;
 var falcor = require("./../../../lib/");
 var Model = falcor.Model;
@@ -64,9 +65,7 @@ describe("Error", function() {
 
                 expect(err).to.deep.equals(expected);
             }).
-            subscribe(function() {
-                done('Should not onNext');
-            },
+            subscribe(noOp,
             function(e) {
                 if (isAssertionError(e)) {
                     done(e);
@@ -100,16 +99,7 @@ describe("Error", function() {
             doAction(onNext, function(err) {
 
                 // Ensure onNext is called correctly
-                expect(onNext.calledOnce, 'onNext called').to.be.ok;
-                expect(clean(onNext.getCall(0).args[0]), 'json from onNext').to.deep.equals({
-                    json: {
-                        test: {
-                            0: {summary: "in cache"},
-                            5: {summary: "in cache"}
-                        }
-                    }
-                });
-
+                expect(onNext.callCount).to.equal(1);
                 expect(err.length).to.equal(4);
                 // not in boxValue mode
                 var expected = {
@@ -146,13 +136,16 @@ describe("Error", function() {
             get(["test", {to: 5}, "summary"])).
             doAction(onNext, function(err) {
 
-                // Ensure onNext is not called
-                expect(onNext.callCount, 'onNext called').to.equal(0);
-                expect(clean(onNext.getCall(0).args[0]), 'json from onNext').to.deep.equals({
+                expect(onNext.callCount, 'onNext called').to.equal(1);
+                expect(clean(onNext.getCall(0).args[0])).to.deep.equal({
                     json: {
                         test: {
-                            0: {summary: "in cache"},
-                            5: {summary: "in cache"}
+                            0: {
+                                summary: 'in cache'
+                            },
+                            5: {
+                                summary: 'in cache'
+                            }
                         }
                     }
                 });
@@ -165,6 +158,101 @@ describe("Error", function() {
                         message: "Timeout"
                     }
                 };
+                expect(err).to.deep.equals(expected);
+            }).
+            subscribe(noOp, doneOnError(done), errorOnCompleted(done));
+    });
+
+    it("should not onNext when only receiving errors.", function(done) {
+        var model = new Model({
+            source: new Model({
+                cache: {
+                    test: {
+                        0: {
+                            summary: {
+                                $type: 'error',
+                                value: {
+                                    message: 'Oops!',
+                                    status: 500
+                                }
+                            }
+                        },
+                        1: {
+                            summary: {
+                                $type: 'error',
+                                value: {
+                                    message: 'Oops!',
+                                    status: 500
+                                }
+                            }
+                        }
+                    }
+                }
+            }).asDataSource()
+        });
+        var onNext = sinon.spy();
+        toObservable(model.
+            get(["test", {to: 1}, "summary"])).
+            doAction(onNext, function(err) {
+
+                // Ensure onNext is not called
+                expect(onNext.callCount, 'onNext called').to.equal(0);
+
+                // not in boxValue mode
+                var expected = [
+                    {"path":["test",0,"summary"],"value":{"message":"Oops!","status":500}},
+                    {"path":["test",1,"summary"],"value":{"message":"Oops!","status":500}}
+                ];
+                expect(err).to.deep.equals(expected);
+            }).
+            subscribe(noOp, doneOnError(done), errorOnCompleted(done));
+    });
+
+    it("should onNext when receiving errors and missing paths.", function(done) {
+        var model = new Model({
+            source: new Model({
+                cache: {
+                    test: {
+                        0: {
+                            summary: {
+                                $type: 'error',
+                                value: {
+                                    message: 'Oops!',
+                                    status: 500
+                                }
+                            }
+                        },
+                        5: {
+                            summary: {
+                                $type: 'error',
+                                value: {
+                                    message: 'Oops!',
+                                    status: 500
+                                }
+                            }
+                        }
+                    }
+                }
+            }).asDataSource()
+        });
+        var onNext = sinon.spy();
+        toObservable(model.
+            get(["test", {to: 5}, "summary"])).
+            doAction(onNext, function(err) {
+
+                // Ensure onNext is not called
+                expect(onNext.callCount, 'onNext called').to.equal(1);
+                expect(clean(onNext.getCall(0).args[0]), 'json from onNext').to.deep.equals({
+                    json: {
+                        test: {}
+                    }
+                });
+
+                // not in boxValue mode
+                var expected = [
+                    {"path":["test",0,"summary"],"value":{"message":"Oops!","status":500}},
+                    {"path":["test",5,"summary"],"value":{"message":"Oops!","status":500}}
+                ];
                 expect(err).to.deep.equals(expected);
             }).
             subscribe(noOp, doneOnError(done), errorOnCompleted(done));
