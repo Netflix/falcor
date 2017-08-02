@@ -186,7 +186,7 @@ describe('DataSource and Cache', function() {
                 subscribe(noOp, done, done);
         });
 
-        it.only('should onNext twice in progressive mode if the server response is not identical.', function(done) {
+        it('should onNext twice in progressive mode if the server response is not identical.', function(done) {
             var count = 0;
             var model = new Model({
                 source: new LocalDataSource(Cache(), {
