@@ -163,7 +163,7 @@ describe("Error", function() {
             subscribe(noOp, doneOnError(done), errorOnCompleted(done));
     });
 
-    it("should not onNext when only receiving errors.", function(done) {
+    it("should onNext when only receiving errors.", function(done) {
         var model = new Model({
             source: new Model({
                 cache: {
@@ -196,7 +196,15 @@ describe("Error", function() {
             doAction(onNext, function(err) {
 
                 // Ensure onNext is not called
-                expect(onNext.callCount, 'onNext called').to.equal(0);
+                expect(onNext.callCount, 'onNext called').to.equal(1);
+                expect(clean(onNext.getCall(0).args[0])).to.deep.equal({
+                    json: {
+                        test: {
+                            0: {},
+                            1: {}
+                        }
+                    }
+                });
 
                 // not in boxValue mode
                 var expected = [
@@ -244,7 +252,10 @@ describe("Error", function() {
                 expect(onNext.callCount, 'onNext called').to.equal(1);
                 expect(clean(onNext.getCall(0).args[0]), 'json from onNext').to.deep.equals({
                     json: {
-                        test: {}
+                        test: {
+                            0: {},
+                            5: {}
+                        }
                     }
                 });
 
@@ -304,7 +315,12 @@ describe("Error", function() {
         toObservable(model.
             get(['path', 'to', 'value'])).
             doAction(onNext, function(e) {
-                expect(onNext.callCount).to.equal(0);
+                expect(onNext.callCount).to.equal(1);
+                expect(clean(onNext.getCall(0).args[0])).to.deep.equal({
+                    json: {
+
+                    }
+                })
                 expect(e.name, 'Expect error to be an InvalidSourceError').to.equals(InvalidSourceError.name);
             }).
             subscribe(noOp, function(e) {
