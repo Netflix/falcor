@@ -192,7 +192,7 @@ describe('DataSource and Cache', function() {
                 source: new LocalDataSource(Cache(), {
                     onSet: function(self, model, jsongEnv) {
                         var copy = JSON.parse(JSON.stringify(jsongEnv));
-                        copy.json.genreList[0][0].summary = 7331;
+                        copy.jsonGraph.genreList[0][0].summary = 7331;
                         return copy;
                     }
                 })
@@ -209,6 +209,17 @@ describe('DataSource and Cache', function() {
                                 0: {
                                     0: {
                                         summary: 1337
+                                    }
+                                }
+                            }
+                        }
+                    });
+                    expect(strip(onNext.getCall(1).args[0])).to.deep.equals({
+                        json: {
+                            genreList: {
+                                0: {
+                                    0: {
+                                        summary: 7331
                                     }
                                 }
                             }

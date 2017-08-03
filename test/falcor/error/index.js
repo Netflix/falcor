@@ -17,9 +17,23 @@ describe("Error", function() {
             source: new ErrorDataSource(503, "Timeout"),
             _treatDataSourceErrorsAsJSONGraphErrors: true
         });
+        var onNext = sinon.spy();
         toObservable(model.
             get(["test", {to: 5}, "summary"])).
-            doAction(noOp, function(err) {
+            doAction(onNext, function(err) {
+                expect(onNext.callCount).to.equal(1);
+                expect(clean(onNext.getCall(0).args[0])).to.deep.equal({
+                    json: {
+                        test: {
+                            0: {},
+                            1: {},
+                            2: {},
+                            3: {},
+                            4: {},
+                            5: {}
+                        }
+                    }
+                });
                 expect(err.length).to.equal(6);
                 // not in boxValue mode
                 var expected = {
@@ -195,7 +209,6 @@ describe("Error", function() {
             get(["test", {to: 1}, "summary"])).
             doAction(onNext, function(err) {
 
-                // Ensure onNext is not called
                 expect(onNext.callCount, 'onNext called').to.equal(1);
                 expect(clean(onNext.getCall(0).args[0])).to.deep.equal({
                     json: {
@@ -248,7 +261,6 @@ describe("Error", function() {
             get(["test", {to: 5}, "summary"])).
             doAction(onNext, function(err) {
 
-                // Ensure onNext is not called
                 expect(onNext.callCount, 'onNext called').to.equal(1);
                 expect(clean(onNext.getCall(0).args[0]), 'json from onNext').to.deep.equals({
                     json: {
