@@ -159,6 +159,75 @@ describe('DataSource and Cache', function() {
                 }).
                 subscribe(noOp, done, done);
         });
+
+        it('should onNext once in progressive mode if the server response is identical.', function(done) {
+            var count = 0;
+            var model = new Model({
+                source: new LocalDataSource(Cache())
+            });
+            var onNext = sinon.spy();
+            toObservable(model.
+                set({path: ['genreList', 0, 0, 'summary'], value: 1337}).
+                progressively()).
+                doAction(onNext, noOp, function() {
+                    expect(onNext.callCount).to.be.equal(1);
+                    expect(strip(onNext.getCall(0).args[0])).to.deep.equals({
+                        json: {
+                            genreList: {
+                                0: {
+                                    0: {
+                                        summary: 1337
+                                    }
+                                }
+                            }
+                        }
+                    });
+                }).
+                subscribe(noOp, done, done);
+        });
+
+        it('should onNext twice in progressive mode if the server response is not identical.', function(done) {
+            var count = 0;
+            var model = new Model({
+                source: new LocalDataSource(Cache(), {
+                    onSet: function(self, model, jsongEnv) {
+                        var copy = JSON.parse(JSON.stringify(jsongEnv));
+                        copy.jsonGraph.genreList[0][0].summary = 7331;
+                        return copy;
+                    }
+                })
+            });
+            var onNext = sinon.spy();
+            toObservable(model.
+                set({path: ['genreList', 0, 0, 'summary'], value: 1337}).
+                progressively()).
+                doAction(onNext, noOp, function() {
+                    expect(onNext.callCount).to.be.equal(2);
+                    expect(strip(onNext.getCall(0).args[0])).to.deep.equals({
+                        json: {
+                            genreList: {
+                                0: {
+                                    0: {
+                                        summary: 1337
+                                    }
+                                }
+                            }
+                        }
+                    });
+                    expect(strip(onNext.getCall(1).args[0])).to.deep.equals({
+                        json: {
+                            genreList: {
+                                0: {
+                                    0: {
+                                        summary: 7331
+                                    }
+                                }
+                            }
+                        }
+                    });
+                }).
+                subscribe(noOp, done, done);
+        });
     });
 
     it('should ensure that the jsong sent to server is optimized.', function(done) {
@@ -205,9 +274,7 @@ describe('DataSource and Cache', function() {
         toObservable(model.
             boxValues().
             set({path: ['genreList', 0, 0, 'summary'], value: 5})).
-            doAction(function(x) {
-                expect(false, 'onNext should not be called.').to.be.ok;
-            }, function(e) {
+            doAction(noOp, function(e) {
                 called = true;
                 testRunner.compare([{
                     path: ['genreList', 0, 0, 'summary'],

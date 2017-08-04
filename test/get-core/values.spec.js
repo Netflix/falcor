@@ -187,10 +187,57 @@ describe('Values', function() {
     it('should not clobber values with intersecting paths.', intersectingTest([['lists', 2343, '0', 'name'], ['lists', 2343, '0']]));
     it('should not clobber values with intersecting paths reversed.', intersectingTest([['lists', 2343, '0'], ['lists', 2343, '0', 'name']]));
 
-    it('should have no output for empty paths.', function() {
+    it('should have identical behavior when fetching a missing value or atom of undefined.', function() {
+        getCoreRunner({
+            input: [["lists", 2343, "0", "name"], ["lists", 2343, "1", "rating"]],
+            output: {
+                json: {
+                    lists: {
+                        2343: {
+                            0: {},
+                            1: {}
+                        }
+                    }
+                }
+            },
+            cache: {
+                lists: {
+                    2343: {
+                        0: jsonGraph.ref(["videos", 123]),
+                        1: jsonGraph.ref(["videos", 123])
+                    }
+                },
+                videos: {
+                    123: {
+                        name: atom()
+                    }
+                }
+            }
+        });
+    });
+
+    it('should emit branch structure for empty paths.', function() {
         getCoreRunner({
             input: [['lolomo', 0, [], 'item', 'title']],
-            output: {},
+            output: {
+                json: {
+                    lolomo: {
+                        0: {
+
+                        }
+                    }
+                }
+            },
+            cache: cacheGenerator(0, 1)
+        });
+    });
+
+    it('should emit branch structure for empty get.', function() {
+        getCoreRunner({
+            input: [],
+            output: {
+                json: {}
+            },
             cache: cacheGenerator(0, 1)
         });
     });

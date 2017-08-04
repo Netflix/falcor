@@ -32,7 +32,7 @@ describe('Cache Only', function() {
                 }).
                 subscribe(noOp, done, done);
         });
-        it('should just complete on empty paths.', function(done) {
+        it('should onNext, then complete on empty paths.', function(done) {
             var model = new Model({
                 cache: cacheGenerator(0, 1)
             });
@@ -40,7 +40,12 @@ describe('Cache Only', function() {
             toObservable(model.
                 get(['videos', [], 'title'])).
                 doAction(onNext, noOp, function() {
-                    expect(onNext.callCount).to.equal(0);
+                    expect(clean(onNext.getCall(0).args[0])).to.deep.equals({
+                        json: {
+                            videos: {}
+                        }
+                    });
+                    expect(onNext.callCount).to.equal(1);
                 }).
                 subscribe(noOp, done, done);
         });

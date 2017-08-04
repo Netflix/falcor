@@ -34,8 +34,7 @@ describe('Expired', function() {
                 return model.get(['expireSoon', 'summary']);
             }).
             doAction(onNext, noOp, function() {
-                debugger
-                expect(onNext.callCount).to.equal(0);
+                expect(onNext.callCount).to.equal(1);
                 expect(model._root[__head]).to.be.not.ok;
                 expect(model._root[__tail]).to.be.not.ok;
             }).

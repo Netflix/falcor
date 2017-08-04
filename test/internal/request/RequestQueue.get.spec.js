@@ -221,7 +221,7 @@ describe('#get', function() {
                 get(videos0, videos1)).
                 doAction(onNext, noOp, function() {
                     expect(zip.callCount).to.equal(0);
-                    expect(onNext.callCount).to.equal(0);
+                    expect(onNext.callCount).to.equal(1);
                 }).
                 subscribe(noOp, done, done);
         }, 300);
@@ -291,7 +291,7 @@ describe('#get', function() {
                 get(videos0, videos1)).
                 doAction(onNext, noOp, function() {
                     expect(zip.callCount).to.equal(0);
-                    expect(onNext.callCount).to.equal(0);
+                    expect(onNext.callCount).to.equal(1);
                 }).
                 subscribe(noOp, done, done);
         }, 300);

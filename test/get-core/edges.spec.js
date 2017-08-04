@@ -14,7 +14,11 @@ describe('Edges', function() {
     it('should report nothing on empty path.', function() {
         getCoreRunner({
             input: [['videos', [], 'title']],
-            output: { },
+            output: {
+                json: {
+                    videos: {}
+                }
+            },
             cache: cacheGenerator(0, 1)
         });
     });
@@ -104,7 +108,11 @@ describe('Edges', function() {
     it('should not get out an expired item through references.', function() {
         getCoreRunner({
             input: [['videos', 1234, 'title']],
-            output: { },
+            output: {
+                json: {
+                    videos: {}
+                }
+            },
             requestedMissingPaths: [['videos', 1234, 'title']],
             cache: {
                 to: {
