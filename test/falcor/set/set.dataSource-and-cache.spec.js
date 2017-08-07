@@ -186,13 +186,13 @@ describe('DataSource and Cache', function() {
                 subscribe(noOp, done, done);
         });
 
-        it.only('should onNext twice in progressive mode if the server response is not identical.', function(done) {
+        it('should onNext twice in progressive mode if the server response is not identical.', function(done) {
             var count = 0;
             var model = new Model({
                 source: new LocalDataSource(Cache(), {
                     onSet: function(self, model, jsongEnv) {
                         var copy = JSON.parse(JSON.stringify(jsongEnv));
-                        copy.json.genreList[0][0].summary = 7331;
+                        copy.jsonGraph.genreList[0][0].summary = 7331;
                         return copy;
                     }
                 })
@@ -209,6 +209,17 @@ describe('DataSource and Cache', function() {
                                 0: {
                                     0: {
                                         summary: 1337
+                                    }
+                                }
+                            }
+                        }
+                    });
+                    expect(strip(onNext.getCall(1).args[0])).to.deep.equals({
+                        json: {
+                            genreList: {
+                                0: {
+                                    0: {
+                                        summary: 7331
                                     }
                                 }
                             }

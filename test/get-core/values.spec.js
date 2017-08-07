@@ -216,14 +216,14 @@ describe('Values', function() {
         });
     });
 
-    it('should have no output for empty paths.', function() {
+    it('should emit branch structure for empty paths.', function() {
         getCoreRunner({
             input: [['lolomo', 0, [], 'item', 'title']],
             output: {
                 json: {
                     lolomo: {
                         0: {
-                            
+
                         }
                     }
                 }
@@ -232,7 +232,7 @@ describe('Values', function() {
         });
     });
 
-    it('should have no output for empty get.', function() {
+    it('should emit branch structure for empty get.', function() {
         getCoreRunner({
             input: [],
             output: {

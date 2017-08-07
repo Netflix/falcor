@@ -149,7 +149,7 @@ describe('Cache as DataSource and Cache', function() {
                     }
                 }], e, {strip: ['$size']});
             }, function() {
-                expect(false, 'onNext should not be called.').to.be.ok;
+                expect(false, 'onCompleted should not be called.').to.be.ok;
             }).
             subscribe(noOp, function(e) {
                 if (Array.isArray(e) && e[0].value.$foo === 'bar' && called) {
