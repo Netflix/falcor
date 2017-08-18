@@ -113,12 +113,7 @@ describe('call', function() {
             call("genreList[0].titles.push", args)).
             doAction(onNext, noOp, noOp).
             subscribe(noOp, done, function() {
-                expect(onNext.callCount).to.equal(1);
-                expect(strip(onNext.getCall(0).args[0])).to.deep.equal({
-                    json: {
-
-                    }
-                });
+                expect(onNext.callCount).to.equal(0);
                 done();
             });
     });

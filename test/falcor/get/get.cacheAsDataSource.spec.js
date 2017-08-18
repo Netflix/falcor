@@ -11,22 +11,6 @@ var cacheGenerator = require('./../../CacheGenerator');
 var atom = Model.atom;
 
 describe('Cache as DataSource', function() {
-    it('should return the correct empty envelope.', function(done) {
-        var model = new Model({
-            cache: {foo: 1}
-        }).asDataSource();
-        var onNext = sinon.spy();
-        toObservable(model.
-            get([]).
-            doAction(onNext, noOp, function() {
-                expect(onNext.calledOnce).to.be.ok;
-                expect(clean(onNext.getCall(0).args[0])).to.deep.equals({
-                    jsonGraph: {},
-                    paths: []
-                });
-            }).
-            subscribe(noOp, done, done));
-    });
     describe('toJSON', function() {
         it('should get a value from falcor.', function(done) {
             var model = new Model({
