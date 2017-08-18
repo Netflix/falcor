@@ -54,11 +54,7 @@ describe('Deref', function() {
                 ['b', 'c'],
                 ['b', 'd']
             ],
-            output: {
-                json: {
-                    b: {}
-                }
-            },
+            output: { },
             deref: ['a'],
             optimizedMissingPaths: [
                 ['a', 'b', 'c'],

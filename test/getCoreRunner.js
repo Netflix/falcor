@@ -19,7 +19,7 @@ module.exports = function(testConfig) {
     var optimizedMissingPaths = testConfig.optimizedMissingPaths;
     var errors = testConfig.errors;
     var type = testConfig.input && testConfig.input[0] ||
-        testConfig.inputs && testConfig.inputs[0] && testConfig.inputs[0][0];
+        testConfig.inputs[0][0];
     var isJSONInput = !Array.isArray(type);
     var fnKey = 'getWithPathsAs' + (isJSONG ? 'JSONGraph' : 'PathMap');
     var fn = get[fnKey];

@@ -48,11 +48,7 @@ describe('Errors', function() {
     it('should report error with path.', function() {
         getCoreRunner({
             input: [['to', 'error']],
-            output: {
-                json: {
-                    to: {}
-                }
-            },
+            output: { },
             errors: [{
                 path: ['to', 'error'],
                 value: 'Oops!'
@@ -68,8 +64,7 @@ describe('Errors', function() {
             ],
             output: {
                 json: {
-                    foo: fooBranch(),
-                    to: {}
+                    foo: fooBranch()
                 }
             },
             errors: [{
@@ -82,11 +77,7 @@ describe('Errors', function() {
     it('should report error path with null from reference.', function() {
         getCoreRunner({
             input: [['reference', 'title']],
-            output: {
-                json: {
-                    reference: {}
-                }
-            },
+            output: { },
             errors: [{
                 path: ['reference', null],
                 value: 'Oops!'
@@ -97,11 +88,7 @@ describe('Errors', function() {
     it('should report error path with null from reference with path ending in null.', function() {
         getCoreRunner({
             input: [['reference', null]],
-            output: {
-                json: {
-                    reference: {}
-                }
-            },
+            output: { },
             errors: [{
                 path: ['reference', null],
                 value: 'Oops!'
@@ -202,8 +189,7 @@ describe('Errors', function() {
         var list = {
             0: {
                 title: 'Hello World'
-            },
-            1: {}
+            }
         };
         list.$__path = ['list'];
         list[0].$__path = ['to'];

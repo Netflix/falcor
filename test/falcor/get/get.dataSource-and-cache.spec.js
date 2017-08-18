@@ -148,10 +148,7 @@ describe('DataSource and Partial Cache', function() {
             toObservable(modelGet).
                 doAction(onNext, noOp, function() {
                     expect(onGet.callCount).to.equals(0);
-                    expect(onNext.callCount).to.equals(1);
-                    expect(strip(onNext.getCall(0).args[0])).to.deep.equals({
-                        json: {}
-                    });
+                    expect(onNext.callCount).to.equals(0);
                 }).
                 subscribe(noOp, done, done);
         });
@@ -174,10 +171,7 @@ describe('DataSource and Partial Cache', function() {
             toObservable(modelGet).
                 doAction(onNext, noOp, function() {
                     expect(onGet.callCount).to.equals(0);
-                    expect(onNext.callCount).to.equals(1);
-                    expect(strip(onNext.getCall(0).args[0])).to.deep.equals({
-                        json: {}
-                    });
+                    expect(onNext.callCount).to.equals(0);
                 }).
                 subscribe(noOp, done, done);
         });
@@ -588,10 +582,7 @@ describe('DataSource and Partial Cache', function() {
                         done();
                     },
                     function() {
-                        expect(onNextSpy.callCount).to.equal(1);
-                        expect(strip(onNextSpy.getCall(0).args[0])).to.deep.equals({
-                            json: {}
-                        });
+                        expect(onNextSpy.callCount).to.equal(0);
                         expect(onErrorSpy.callCount).to.equal(1);
                         done();
                     });
