@@ -745,6 +745,59 @@ describe('DataSource and Partial Cache', function() {
                     });
         });
 
+        it('should safely merge references over existing branches', function(done) {
+            var dataSource = new LocalDataSource({"shows": {"80025172": {"seasons": {"current": {"$type": "ref","value": ["seasons","80025272"],"$size": 52}}}},"seasons": {"80025272": {"episodes": {"0": {"$type": "ref","value": ["episodes","80025313"],"$size": 52}}}},"episodes": {"80025313": {"currentUser": {"$type": "ref","value": ["currentUser"],"$size": 51}}},"currentUser": {"localized": {"preferences": {"$type": "atom","value": {"languages": ["en"],"direction": ["ltr"]},"$size": 51}},"stringTable": {"$type": "ref","value": ["stringTables","en"],"$size": 52}},"stringTables": {"en": {"detailsPopup": {"expired": {"$type": "atom","value": "Expired","$size": 57}}}}});
+            var originalGet = dataSource.get;
+            dataSource.get = function() {
+                return Rx.Observable.throw({
+                    $type: 'error',
+                    value: {
+                        status: 404,
+                        "message": "Timed out"
+                    }
+                });
+            };
+
+            var model = new Model({
+                _treatDataSourceErrorsAsJSONGraphErrors: true,
+                source: dataSource,
+                errorSelector : function(path, atom) {
+                    var isError = path.indexOf('stringTable') !== -1;
+                    var o = {
+                        $type: !isError ? 'atom' : 'error',
+                        value: {
+                            message: atom.value.message,
+                            customtype: 'customtype'
+                        }
+                    };
+
+                    return o;
+                }
+            });
+
+            var fetch = toObservable(model.
+                get(
+                    ["shows",80025172,"seasons","current","episodes",0,"currentUser","localized","preferences"],
+                    ["shows",80025172,"seasons","current","episodes",0,"currentUser","stringTable","detailsPopup","expired"]
+                ));
+
+            var onNext = sinon.spy();
+            fetch.
+                delay(1).
+                catch(function(_) {
+                    dataSource.get = originalGet;
+                    model.invalidate(["shows",80025172,"seasons","current","episodes",0,"currentUser","stringTable","detailsPopup","expired"])
+                    return fetch;
+                }).
+                doAction(onNext).
+                subscribe(noOp, done,
+                    function() {
+                        var expected = ['currentUser', 'localized'];
+                        expect(model._root.cache.currentUser.localized.$_absolutePath).to.deep.equals(expected);
+                        expect(onNext.getCall(0).args[0].json.shows[80025172].seasons.current.episodes[0].currentUser.localized.$__path).to.deep.equals(expected);
+                        done();
+                    });
+        });
     });
     describe("Cached data with timestamp", function() {
         var t0 = Date.parse('2000/01/01');
