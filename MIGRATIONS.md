@@ -1,4 +1,51 @@
 # 0.x to 1.x
+
+Refs no longer emitted as json
+-------
+`get` no longer emits references as leaf values.
+
+When starting with the following json graph
+```javascript
+{
+  lists: {
+    2343: {
+      0: { $type: "ref", value: ["videos", 123] }
+    }
+  },
+  videos: {
+    123: {
+      name: "House of cards"
+    }
+  }
+}
+```
+
+Previously the following would emit a ref
+```javascript
+const json = await model.get(["lists", 2343, "0"]);
+
+{
+  lists: {
+    2343: {
+      0: ["videos", 123]
+    }
+  }
+}
+```
+
+Where now, a key with undefined is emitted
+```javascript
+const json = await model.get(["lists", 2343, "0"]);
+
+{
+  lists: {
+    2343: {
+      0: undefined
+    }
+  }
+}
+```
+
 No More Rx
 -------
 [Documentation on ModelResponse is found here](http://netflix.github.io/falcor/doc/ModelResponse.html)
@@ -142,7 +189,7 @@ var model = new Model({
 ```
 
 If we were to use `deref` in the **old** way we would have to perform the
-following to derefernce to [genreLists, 0, 0].
+following to dereference to [genreLists, 0, 0].
 ```javascript
 model.
     // Creates a dataSource (more than likely means a network call) call since
