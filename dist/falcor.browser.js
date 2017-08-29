@@ -145,6 +145,8 @@ function Model(o) {
     this._allowFromWhenceYouCame = options.allowFromWhenceYouCame ||
         options._allowFromWhenceYouCame || false;
 
+    this._treatDataSourceErrorsAsJSONGraphErrors = options._treatDataSourceErrorsAsJSONGraphErrors || false;
+
     if (options.cache) {
         this.setCache(options.cache);
     }
@@ -672,7 +674,7 @@ Model.prototype._invalidatePathMaps = require(37);
 
 },{"108":108,"123":123,"127":127,"16":16,"17":17,"19":19,"20":20,"21":21,"22":22,"27":27,"3":3,"37":37,"38":38,"39":39,"4":4,"43":43,"49":49,"5":5,"50":50,"51":51,"56":56,"57":57,"58":58,"6":6,"60":60,"64":64,"65":65,"66":66,"67":67,"68":68,"69":69,"7":7,"70":70,"71":71,"72":72,"75":75,"80":80,"90":90,"91":91,"92":92,"94":94}],3:[function(require,module,exports){
 function ModelDataSourceAdapter(model) {
-    this._model = model._materialize().boxValues().treatErrorsAsValues();
+    this._model = model._materialize().treatErrorsAsValues();
 }
 
 ModelDataSourceAdapter.prototype.get = function get(pathSets) {
@@ -856,7 +858,7 @@ module.exports = function derefSync(boundPathArg) {
     }
 
     if (node.$type) {
-        throw new InvalidModelError();
+        throw new InvalidModelError(path, path);
     }
 
     return this._clone({ _path: path });
@@ -1107,7 +1109,15 @@ function mergeInto(target, obj) {
     if (obj === null || typeof obj !== "object" || obj.$type) {
         return;
     }
+
     for (var key in obj) {
+        // When merging over a temporary branch structure (for example, as produced by an error selector)
+        // with references, we don't want to mutate the path, particularly because it's also $_absolutePath
+        // on cache nodes
+        if (key === "$__path") {
+            continue;
+        }
+
         var targetValue = target[key];
         if (targetValue === undefined) {
             target[key] = obj[key];
@@ -1115,6 +1125,10 @@ function mergeInto(target, obj) {
             mergeInto(targetValue, obj[key]);
         }
     }
+}
+
+function defaultEnvelope(isJSONG) {
+    return isJSONG ? {jsonGraph: {}, paths: []} : {json: {}};
 }
 
 module.exports = function get(walk, isJSONG) {
@@ -1177,7 +1191,8 @@ module.exports = function get(walk, isJSONG) {
         }
 
         // Merge in existing results.
-        mergeInto(valueNode, seed[0]);
+        // Default to empty envelope if no results were emitted
+        mergeInto(valueNode, paths.length ? seed[0] : defaultEnvelope(isJSONG));
 
         return results;
     };
@@ -1642,7 +1657,7 @@ module.exports = function onValue(model, node, seed, depth, outerResults,
     }
 
     var i, len, k, key, curr, prev = null, prevK;
-    var materialized = false, valueNode;
+    var materialized = false, valueNode, nodeType = node && node.$type, nodeValue = node && node.value;
 
     if (!node || node.value === undefined) {
         materialized = model._materialized;
@@ -1658,36 +1673,40 @@ module.exports = function onValue(model, node, seed, depth, outerResults,
         valueNode = clone(node);
     }
 
+    // We don't want to emit references in json output
+    else if (!isJSONG && nodeType === $ref) {
+        valueNode = undefined;
+    }
+
     // JSONG always clones the node.
-    else if (node.$type === $ref || node.$type === $error) {
+    else if (nodeType === $ref || nodeType === $error) {
         if (isJSONG) {
             valueNode = clone(node);
         } else {
-            valueNode = node.value;
+            valueNode = nodeValue;
         }
     }
 
     else if (isJSONG) {
-        var isObject = node.value && typeof node.value === "object";
-        var isUserCreatedNode = !node.$_modelCreated;
+        var isObject = nodeValue && typeof nodeValue === "object";
+        var isUserCreatedNode = !node || !node.$_modelCreated;
         if (isObject || isUserCreatedNode) {
             valueNode = clone(node);
         } else {
-            valueNode = node.value;
+            valueNode = nodeValue;
         }
     }
 
     else {
-        valueNode = node.value;
+        valueNode = nodeValue;
     }
 
-    if (outerResults) {
-        outerResults.hasValue = true;
-    }
+    var hasValues = false;
 
     if (isJSONG) {
         curr = seed.jsonGraph;
         if (!curr) {
+            hasValues = true;
             curr = seed.jsonGraph = {};
             seed.paths = [];
         }
@@ -1695,6 +1714,7 @@ module.exports = function onValue(model, node, seed, depth, outerResults,
             key = optimizedPath[i];
 
             if (!curr[key]) {
+                hasValues = true;
                 curr[key] = {};
             }
             curr = curr[key];
@@ -1713,6 +1733,7 @@ module.exports = function onValue(model, node, seed, depth, outerResults,
     // The output is pathMap and the depth is 0.  It is just a
     // value report it as the found JSON
     else if (depth === 0) {
+        hasValues = true;
         seed.json = valueNode;
     }
 
@@ -1721,6 +1742,7 @@ module.exports = function onValue(model, node, seed, depth, outerResults,
     else {
         curr = seed.json;
         if (!curr) {
+            hasValues = true;
             curr = seed.json = {};
         }
         for (i = 0; i < depth - 1; i++) {
@@ -1729,6 +1751,7 @@ module.exports = function onValue(model, node, seed, depth, outerResults,
             // The branch info is already generated output from the walk algo
             // with the required __path information on it.
             if (!curr[k]) {
+                hasValues = true;
                 curr[k] = branchInfo[i];
             }
 
@@ -1739,6 +1762,7 @@ module.exports = function onValue(model, node, seed, depth, outerResults,
         k = requestedPath[i];
         if (valueNode !== undefined) {
           if (k !== null) {
+              hasValues = true;
               curr[k] = valueNode;
           } else {
               // We are protected from reaching here when depth is 1 and prev is
@@ -1747,6 +1771,8 @@ module.exports = function onValue(model, node, seed, depth, outerResults,
           }
         }
     }
+
+    outerResults.hasValues = hasValues;
 };
 
 },{"111":111,"112":112,"113":113,"28":28,"40":40}],26:[function(require,module,exports){
@@ -1773,11 +1799,14 @@ module.exports = function onValueType(
     // There are is nothing here, ether report value, or report the value
     // that is missing.  If there is no type then report the missing value.
     if (!node || !currType) {
-        if (isMaterialized(model)) {
+        var materialized = isMaterialized(model);
+        if (materialized || !isJSONG) {
             onValue(model, node, seed, depth, outerResults, branchInfo,
                     requestedPath, optimizedPath, optimizedLength,
                     isJSONG);
-        } else {
+        }
+
+        if (!materialized) {
             onMissing(model, path, depth,
                       outerResults, requestedPath,
                       optimizedPath, optimizedLength);
@@ -1806,6 +1835,9 @@ module.exports = function onValueType(
                     requestedPath, optimizedPath, optimizedLength,
                     isJSONG);
         } else {
+            onValue(model, undefined, seed, depth, outerResults, branchInfo,
+                    requestedPath, optimizedPath, optimizedLength,
+                    isJSONG);
             onError(model, node, depth, requestedPath, outerResults);
         }
     }
@@ -1841,6 +1873,10 @@ module.exports = function getValueSync(pathArg) {
 var privatePrefix = require(34);
 
 module.exports = function clone(node) {
+    if (node === undefined) {
+        return node;
+    }
+
     var outValue, i, len;
     var keys = Object.keys(node);
     outValue = {};
@@ -1923,9 +1959,8 @@ module.exports = function walkPath(model, root, curr, path, depth, seed,
         return;
     }
 
-    var keySet, i;
-    keySet = path[depth];
-
+    var i;
+    var keySet = path[depth];
     var isKeySet = typeof keySet === "object";
     var nextDepth = depth + 1;
     var iteratorNote = false;
@@ -1935,12 +1970,6 @@ module.exports = function walkPath(model, root, curr, path, depth, seed,
     if (isKeySet) {
         iteratorNote = {};
         key = iterateKeySet(keySet, iteratorNote);
-    }
-
-    // The key can be undefined if there is an empty path.  An example of an
-    // empty path is: [lolomo, [], summary].
-    if (key === undefined && iteratorNote.done) {
-        return;
     }
 
     // loop over every key over the keySet
@@ -2363,7 +2392,7 @@ function invalidatePathSet(
                     root, nextParent, nextNode,
                     version, expired, lru
                 );
-            } else if (removeNodeAndDescendants(nextNode, nextParent, key, lru)) {
+            } else if (removeNodeAndDescendants(nextNode, nextParent, key, lru, undefined)) {
                 updateNodeAncestors(nextParent, getSize(nextNode), lru, version);
             }
         }
@@ -2686,10 +2715,11 @@ GetRequestV2.prototype = {
                 flushedDisposable =
                     flushGetRequest(self, oPaths, function(err, data) {
                         var i, fn, len;
+                        var model = self.requestQueue.model;
                         self.requestQueue.removeRequest(self);
                         self._disposed = true;
 
-                        if (err instanceof InvalidSourceError) {
+                        if (model._treatDataSourceErrorsAsJSONGraphErrors ? err instanceof InvalidSourceError : !!err) {
                             for (i = 0, len = callbacks.length; i < len; ++i) {
                                 fn = callbacks[i];
                                 if (fn) {
@@ -2702,15 +2732,15 @@ GetRequestV2.prototype = {
                         // If there is at least one callback remaining, then
                         // callback the callbacks.
                         if (self._count) {
-                            self._merge(rPaths, err, data);
-
+                            var mergeContext = {hasInvalidatedResult : false};
+                            self._merge(rPaths, err, data, mergeContext);
                             // Call the callbacks.  The first one inserts all
                             // the data so that the rest do not have consider
                             // if their data is present or not.
                             for (i = 0, len = callbacks.length; i < len; ++i) {
                                 fn = callbacks[i];
                                 if (fn) {
-                                    fn(err, data);
+                                    fn(err, data, mergeContext.hasInvalidatedResult);
                                 }
                             }
                         }
@@ -2775,7 +2805,7 @@ GetRequestV2.prototype = {
     /**
      * merges the response into the model"s cache.
      */
-    _merge: function(requested, err, data) {
+    _merge: function(requested, err, data, mergeContext) {
         var self = this;
         var model = self.requestQueue.model;
         var modelRoot = model._root;
@@ -2789,7 +2819,7 @@ GetRequestV2.prototype = {
         var nextPaths = flattenRequestedPaths(requested);
 
         // Insert errors in every requested position.
-        if (err) {
+        if (err && model._treatDataSourceErrorsAsJSONGraphErrors) {
             var error = err;
 
             // Converts errors to objects, a more friendly storage
@@ -2814,7 +2844,7 @@ GetRequestV2.prototype = {
                     value: error
                 };
             });
-            setPathValues(model, pathValues, null, errorSelector, comparator);
+            setPathValues(model, pathValues, null, errorSelector, comparator, mergeContext);
         }
 
         // Insert the jsonGraph from the dataSource.
@@ -2822,7 +2852,7 @@ GetRequestV2.prototype = {
             setJSONGraphs(model, [{
                 paths: nextPaths,
                 jsonGraph: data.jsonGraph
-            }], null, errorSelector, comparator);
+            }], null, errorSelector, comparator, mergeContext);
         }
 
         // return the model"s boundPath
@@ -2975,7 +3005,7 @@ RequestQueueV2.prototype = {
         }
 
         // This is a simple refCount callback.
-        function refCountCallback(err) {
+        function refCountCallback(err, data, hasInvalidatedResult) {
             if (disposed) {
                 return;
             }
@@ -2985,7 +3015,7 @@ RequestQueueV2.prototype = {
             // If the count becomes 0, then its time to notify the
             // listener that the request is done.
             if (count === 0) {
-                cb(err);
+                cb(err, data, hasInvalidatedResult);
             }
         }
 
@@ -3780,29 +3810,16 @@ module.exports = function checkCacheAndReport(model, requestedPaths, observer,
                                               errors) {
 
     // checks the cache for the data.
-    var results;
-    if (isJSONG) {
-        results = getWithPathsAsJSONGraph(model, requestedPaths, seed);
-    } else {
-        results = getWithPathsAsPathMap(model, requestedPaths, seed);
-    }
-
-    // We must communicate critical errors from get that are critical
-    // errors such as bound path is broken or this is a JSONGraph request
-    // with a bound path.
-    if (results.criticalError) {
-        observer.onError(results.criticalError);
-        return null;
-    }
+    var results = isJSONG ? getWithPathsAsJSONGraph(model, requestedPaths, seed)
+                          : getWithPathsAsPathMap(model, requestedPaths, seed);
 
     // We are done when there are no missing paths or the model does not
     // have a dataSource to continue on fetching from.
-    var valueNode = results.values[0];
-    var hasValues = results.hasValue;
+    var valueNode = results.values && results.values[0];
+
     var completed = !results.requestedMissingPaths ||
                     !results.requestedMissingPaths.length ||
                     !model._source;
-    var hasValueOverall = Boolean(valueNode.json || valueNode.jsonGraph);
 
     // Copy the errors into the total errors array.
     if (results.errors) {
@@ -3815,17 +3832,24 @@ module.exports = function checkCacheAndReport(model, requestedPaths, observer,
 
     // If there are values to report, then report.
     // Which are under two conditions:
-    // 1.  This request for data yielded at least one value (hasValue) and  the
-    // request is progressive
+    // 1.  This request is progressive
     //
     // 2.  The request if finished and the json key off
     // the valueNode has a value.
-    if (hasValues && progressive || hasValueOverall && completed) {
+    if (progressive || ((progressive && results.hasValues || !progressive) && completed && valueNode !== undefined)) {
         try {
             observer.onNext(valueNode);
         } catch (e) {
             throw e;
         }
+    }
+
+    // We must communicate critical errors from get that are critical
+    // errors such as bound path is broken or this is a JSONGraph request
+    // with a bound path.
+    if (results.criticalError) {
+        observer.onError(results.criticalError);
+        return null;
     }
 
     // if there are missing paths, then lets return them.
@@ -3897,20 +3921,35 @@ module.exports = function getRequestCycle(getResponse, model, results, observer,
     }
 
     var currentRequestDisposable = requestQueue.
-        get(boundRequestedMissingPaths, optimizedMissingPaths, function(err) {
-
-            if (err instanceof InvalidSourceError) {
+        get(boundRequestedMissingPaths, optimizedMissingPaths, function(err, data, hasInvalidatedResult) {
+            if (model._treatDataSourceErrorsAsJSONGraphErrors ? err instanceof InvalidSourceError : !!err) {
+                if (results.hasValues) {
+                    observer.onNext(results.values && results.values[0]);
+                }
                 observer.onError(err);
                 return;
             }
 
-            // Once the request queue finishes, check the cache and bail if
-            // we can.
-            var nextResults = checkCacheAndReport(model, requestedMissingPaths,
+            var nextRequestedMissingPaths;
+            var nextSeed;
+
+            // If merging over an existing branch structure with refs has invalidated our intermediate json,
+            // we want to start over and re-get all requested paths with a fresh seed
+            if (hasInvalidatedResult) {
+                nextRequestedMissingPaths = getResponse.currentRemainingPaths;
+                nextSeed = [{}];
+            } else {
+                nextRequestedMissingPaths = requestedMissingPaths;
+                nextSeed = results.values;
+            }
+
+             // Once the request queue finishes, check the cache and bail if
+             // we can.
+            var nextResults = checkCacheAndReport(model, nextRequestedMissingPaths,
                                                   observer,
                                                   getResponse.isProgressive,
                                                   getResponse.isJSONGraph,
-                                                  results.values, errors);
+                                                  nextSeed, errors);
 
             // If there are missing paths coming back form checkCacheAndReport
             // the its reported from the core cache check method.
@@ -4209,6 +4248,7 @@ module.exports = function setRequestCycle(model, observer, groups,
 
 
     // Progressively output the data from the first set.
+    var prevVersion;
     if (isProgressive) {
         var results = getWithPathsAsPathMap(model, requestedPaths, [{}]);
         if (results.criticalError) {
@@ -4216,6 +4256,8 @@ module.exports = function setRequestCycle(model, observer, groups,
             return null;
         }
         observer.onNext(results.values[0]);
+
+        prevVersion = model._root.cache.$_version;
     }
 
     var currentJSONGraph = getJSONGraph(model, optimizedPaths);
@@ -4241,6 +4283,17 @@ module.exports = function setRequestCycle(model, observer, groups,
             var isCompleted = false;
             if (error || optimizedPaths.length === jsonGraphEnv.paths.length) {
                 isCompleted = true;
+            }
+
+            // If we're in progressive mode and nothing changed in the meantime, we're done
+            if (isProgressive) {
+                var nextVersion = model._root.cache.$_version;
+                var versionChanged = nextVersion !== prevVersion;
+
+                if (!versionChanged) {
+                    observer.onCompleted();
+                    return;
+                }
             }
 
             // Happy case.  One request to the dataSource will fulfill the
@@ -4389,7 +4442,7 @@ var NullInPathError = require(13);
  * @return {Array.<Array.<Path>>} - an Array of Arrays where each inner Array is a list of requested and optimized paths (respectively) for the successfully set values.
  */
 
-module.exports = function setJSONGraphs(model, jsonGraphEnvelopes, x, errorSelector, comparator) {
+module.exports = function setJSONGraphs(model, jsonGraphEnvelopes, x, errorSelector, comparator, replacedPaths) {
 
     var modelRoot = model._root;
     var lru = modelRoot;
@@ -4424,7 +4477,7 @@ module.exports = function setJSONGraphs(model, jsonGraphEnvelopes, x, errorSelec
                 cache, cache, cache,
                 jsonGraph, jsonGraph, jsonGraph,
                 requestedPaths, optimizedPaths, requestedPath, optimizedPath,
-                version, expired, lru, comparator, errorSelector
+                version, expired, lru, comparator, errorSelector, replacedPaths
             );
         }
     }
@@ -4444,7 +4497,7 @@ function setJSONGraphPathSet(
     path, depth, root, parent, node,
     messageRoot, messageParent, message,
     requestedPaths, optimizedPaths, requestedPath, optimizedPath,
-    version, expired, lru, comparator, errorSelector) {
+    version, expired, lru, comparator, errorSelector, replacedPaths) {
 
     var note = {};
     var branch = depth < path.length - 1;
@@ -4459,7 +4512,7 @@ function setJSONGraphPathSet(
         var results = setNode(
             root, parent, node, messageRoot, messageParent, message,
             key, branch, false, requestedPath, optimizedPath,
-            version, expired, lru, comparator, errorSelector
+            version, expired, lru, comparator, errorSelector, replacedPaths
         );
 
         requestedPath[depth] = key;
@@ -4473,7 +4526,7 @@ function setJSONGraphPathSet(
                     path, depth + 1, root, nextParent, nextNode,
                     messageRoot, results[3], results[2],
                     requestedPaths, optimizedPaths, requestedPath, optimizedPath,
-                    version, expired, lru, comparator, errorSelector
+                    version, expired, lru, comparator, errorSelector, replacedPaths
                 );
             } else {
                 requestedPaths.push(requestedPath.slice(0, requestedPath.index + 1));
@@ -4491,7 +4544,7 @@ function setJSONGraphPathSet(
 
 function setReference(
     root, node, messageRoot, message, requestedPath, optimizedPath,
-    version, expired, lru, comparator, errorSelector) {
+    version, expired, lru, comparator, errorSelector, replacedPaths) {
 
     var reference = node.value;
     optimizedPath.splice(0, optimizedPath.length);
@@ -4517,7 +4570,7 @@ function setReference(
         var results = setNode(
             root, parent, node, messageRoot, messageParent, message,
             key, branch, true, requestedPath, optimizedPath,
-            version, expired, lru, comparator, errorSelector
+            version, expired, lru, comparator, errorSelector, replacedPaths
         );
         node = results[0];
         if (isPrimitive(node)) {
@@ -4541,7 +4594,7 @@ function setReference(
 function setNode(
     root, parent, node, messageRoot, messageParent, message,
     key, branch, reference, requestedPath, optimizedPath,
-    version, expired, lru, comparator, errorSelector) {
+    version, expired, lru, comparator, errorSelector, replacedPaths) {
 
     var type = node.$type;
 
@@ -4549,7 +4602,7 @@ function setNode(
 
         var results = setReference(
             root, node, messageRoot, message, requestedPath, optimizedPath,
-            version, expired, lru, comparator, errorSelector
+            version, expired, lru, comparator, errorSelector, replacedPaths
         );
 
         node = results[0];
@@ -4583,7 +4636,7 @@ function setNode(
 
     node = mergeJSONGraphNode(
         parent, node, message, key, requestedPath, optimizedPath,
-        version, expired, lru, comparator, errorSelector
+        version, expired, lru, comparator, errorSelector, replacedPaths
     );
 
     return [node, parent, message, messageParent];
@@ -4906,7 +4959,7 @@ module.exports = function setPathValues(model, pathValues, x, errorSelector, com
 function setPathSet(
     value, path, depth, root, parent, node,
     requestedPaths, optimizedPaths, requestedPath, optimizedPath,
-    version, expired, lru, comparator, errorSelector) {
+    version, expired, lru, comparator, errorSelector, replacedPaths) {
 
     var note = {};
     var branch = depth < path.length - 1;
@@ -4921,7 +4974,7 @@ function setPathSet(
         var results = setNode(
             root, parent, node, key, value,
             branch, false, requestedPath, optimizedPath,
-            version, expired, lru, comparator, errorSelector
+            version, expired, lru, comparator, errorSelector, replacedPaths
         );
         requestedPath[depth] = key;
         requestedPath.index = depth;
@@ -4952,7 +5005,7 @@ function setPathSet(
 
 function setReference(
     value, root, node, requestedPath, optimizedPath,
-    version, expired, lru, comparator, errorSelector) {
+    version, expired, lru, comparator, errorSelector, replacedPaths) {
 
     var reference = node.value;
     optimizedPath.splice(0, optimizedPath.length);
@@ -4987,7 +5040,7 @@ function setReference(
             var results = setNode(
                 root, parent, node, key, value,
                 branch, true, requestedPath, optimizedPath,
-                version, expired, lru, comparator, errorSelector
+                version, expired, lru, comparator, errorSelector, replacedPaths
             );
             node = results[0];
             if (isPrimitive(node)) {
@@ -5010,7 +5063,7 @@ function setReference(
 function setNode(
     root, parent, node, key, value,
     branch, reference, requestedPath, optimizedPath,
-    version, expired, lru, comparator, errorSelector) {
+    version, expired, lru, comparator, errorSelector, replacedPaths) {
 
     var type = node.$type;
 
@@ -5018,7 +5071,7 @@ function setNode(
 
         var results = setReference(
             value, root, node, requestedPath, optimizedPath,
-            version, expired, lru, comparator, errorSelector
+            version, expired, lru, comparator, errorSelector, replacedPaths
         );
 
         node = results[0];
@@ -5049,7 +5102,7 @@ function setNode(
     node = mergeValueOrInsertBranch(
         parent, node, key, value,
         branch, reference, requestedPath, optimizedPath,
-        version, expired, lru, comparator, errorSelector
+        version, expired, lru, comparator, errorSelector, replacedPaths
     );
 
     return [node, parent];
@@ -5425,13 +5478,15 @@ var reconstructPath = require(99);
 
 module.exports = function mergeJSONGraphNode(
     parent, node, message, key, requestedPath, optimizedPath,
-    version, expired, lru, comparator, errorSelector) {
+    version, expired, lru, comparator, errorSelector, replacedPaths) {
 
     var sizeOffset;
 
     var cType, mType,
         cIsObject, mIsObject,
         cTimestamp, mTimestamp;
+
+    var nodeValue = node && node.value !== undefined ? node.value : node;
 
     // If the cache and message are the same, we can probably return early:
     // - If they're both nullsy,
@@ -5441,8 +5496,7 @@ module.exports = function mergeJSONGraphNode(
     //   - If undefined then return null (previous behavior).
     // - If they're both branches, return the branch.
     // - If they're both edges, continue below.
-    if (node === message) {
-
+    if (nodeValue === message) {
         // There should not be undefined values.  Those should always be
         // wrapped in an $atom
         if (message === null) {
@@ -5543,7 +5597,7 @@ module.exports = function mergeJSONGraphNode(
 
     // If the cache is a leaf but the message is a branch, merge the branch over the leaf.
     if (cType && mIsObject && !mType) {
-        return insertNode(replaceNode(node, message, parent, key, lru), parent, key, undefined, optimizedPath);
+        return insertNode(replaceNode(node, message, parent, key, lru, replacedPaths), parent, key, undefined, optimizedPath);
     }
     // If the message is a sentinel or primitive, insert it into the cache.
     else if (mType || !mIsObject) {
@@ -5580,15 +5634,16 @@ module.exports = function mergeJSONGraphNode(
                 //
                 // Comparing either Number or undefined to undefined always results in false.
                 isDistinct = (getTimestamp(message) < getTimestamp(node)) === false;
+
                 // If at least one of the cache/message are sentinels, compare them.
                 if (isDistinct && (cType || mType) && isFunction(comparator)) {
-                    isDistinct = !comparator(node, message, optimizedPath.slice(0, optimizedPath.index));
+                    isDistinct = !comparator(nodeValue, message, optimizedPath.slice(0, optimizedPath.index));
                 }
             }
             if (isDistinct) {
                 message = wrapNode(message, mType, mType ? message.value : message);
                 sizeOffset = getSize(node) - getSize(message);
-                node = replaceNode(node, message, parent, key, lru);
+                node = replaceNode(node, message, parent, key, lru, replacedPaths);
                 parent = updateNodeAncestors(parent, sizeOffset, lru, version);
                 node = insertNode(node, parent, key, version, optimizedPath);
             }
@@ -5628,7 +5683,7 @@ var reconstructPath = require(99);
 module.exports = function mergeValueOrInsertBranch(
     parent, node, key, value,
     branch, reference, requestedPath, optimizedPath,
-    version, expired, lru, comparator, errorSelector) {
+    version, expired, lru, comparator, errorSelector, replacedPaths) {
 
     var type = getType(node, reference);
 
@@ -5638,7 +5693,7 @@ module.exports = function mergeValueOrInsertBranch(
             expireNode(node, expired, lru);
         }
         if ((type && type !== $ref) || isPrimitive(node)) {
-            node = replaceNode(node, {}, parent, key, lru);
+            node = replaceNode(node, {}, parent, key, lru, replacedPaths);
             node = insertNode(node, parent, key, version, optimizedPath);
             node = updateBackReferenceVersions(node, version);
         }
@@ -5667,7 +5722,7 @@ module.exports = function mergeValueOrInsertBranch(
 
             var sizeOffset = getSize(node) - getSize(message);
 
-            node = replaceNode(node, message, parent, key, lru);
+            node = replaceNode(node, message, parent, key, lru, replacedPaths);
             parent = updateNodeAncestors(parent, sizeOffset, lru, version);
             node = insertNode(node, parent, key, version, optimizedPath);
         }
@@ -5733,12 +5788,16 @@ var hasOwn = require(83);
 var prefix = require(36);
 var removeNode = require(100);
 
-module.exports = function removeNodeAndDescendants(node, parent, key, lru) {
+module.exports = function removeNodeAndDescendants(node, parent, key, lru, mergeContext) {
     if (removeNode(node, parent, key, lru)) {
+        if (node.$type !== undefined && mergeContext && node.$_absolutePath) {
+            mergeContext.hasInvalidatedResult = true;
+        }
+
         if (node.$type == null) {
             for (var key2 in node) {
                 if (key2[0] !== prefix && hasOwn(node, key2)) {
-                    removeNodeAndDescendants(node[key2], node, key2, lru);
+                    removeNodeAndDescendants(node[key2], node, key2, lru, mergeContext);
                 }
             }
         }
@@ -5752,12 +5811,12 @@ var isObject = require(92);
 var transferBackReferences = require(103);
 var removeNodeAndDescendants = require(101);
 
-module.exports = function replaceNode(node, replacement, parent, key, lru) {
+module.exports = function replaceNode(node, replacement, parent, key, lru, mergeContext) {
     if (node === replacement) {
         return node;
     } else if (isObject(node)) {
         transferBackReferences(node, replacement);
-        removeNodeAndDescendants(node, parent, key, lru);
+        removeNodeAndDescendants(node, parent, key, lru, mergeContext);
     }
 
     parent[key] = replacement;
