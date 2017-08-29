@@ -1,9 +1,5 @@
 language: node_js
 
-env:
-    global:
-    - secure: "NeBjrpBxfbE9jW4NDgeiMHfI5P4C2BDcR2kchSubntNBOfDENaNav0x9MRUVmH9o531X5uMcTadFBQJWAeGxbQRK7CvZGdHDfPKWyjcf2o7SYHAceDMk18f0jeeay2v+MpH/h0pV6MAn/ypjIHK1TuRwCtjTTJTcVknA3im6Fb7iQASz40aRJ71ZqlzNq8yVFOiMqo00Z6iuZlVwsOeF9qHI87Y/8xmTXCEountLwd/xLyA3btejmAvaFnc2fDC9Zyzz++dQ8RhiO1xkovUxUDvy02mXMXPph64ZeUwte8lmO4OXWcJQTrus399HCXDxt81CohQDa5+AYYQUH8jVRrdTdZcYC1+zhkwJztaAEgqLnwOoOAdoFdN0gBOx6fKXb3/c+fLJOM/zo5OmjVxWD6XgBq031KqI05wMtmcFxMXHWctIeUCQjNCL8PB617Y76+TxQTVtIZ8CStoHkGupYdDOfPgCmpPL+3PWMmIH0eTvUiGgZv7D+gt8TZYMtMBSW4adyMVbo9JxiLMscPve5HdaQvXtNCb8OzpoSdlVi5p391kUcHUmiSEytQYwG0bGncCq32KhsmXZWm2UOK45xoWTpHoij5vO7VMZ1OxIvRxE8f7qA8wrMmfYTK9XCwQf7MbDoYuMCOMR5O4btAqH8ma/OqR5xv6r28qSLTcPVC8="
-
 node_js:
     - "4"
     - "6"
@@ -16,17 +12,18 @@ branches:
 # Run as a docker container
 sudo: false
 
-# Update npm to the latest version
+# Set up keys to allow pushes, and update npm to the latest version
 before_install: npm update -g npm
+
 # travis runs 'npm install' by default, as the 'install' step
 
 before_script: npm run dist;
+
 # travis runs 'npm test' by default, as the 'script' step
 
 # PLACEHOLDER FOR COVERAGE REPORTS ON GITHUB, IF WE WANT THEM.
 # ALSO NEED TO ADD .coveralls.yml, IF WE WANT TO USE IT ON THE PRIVATE
 # REPO.
-
 
 after_script:
     - cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js
