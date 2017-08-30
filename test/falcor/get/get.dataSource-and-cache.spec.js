@@ -18,46 +18,6 @@ var Cache = function(c) {
 };
 
 describe('DataSource and Partial Cache', function() {
-    it('should onNext only once even if a subset of the requested values is found in the cache', function(done) {
-        var model = new Model({
-            cache: {
-                paths: {
-                    0: 'test',
-                    1: 'test'
-                }
-            },
-            source: new LocalDataSource({
-                paths: {
-                    2: Model.atom('test'),
-                    3: Model.atom(undefined)
-                }
-            }, {materialize: true})
-        });
-
-        var onNextCount = 0;
-        toObservable(model.
-            get(['paths', {to:3}])).
-            doAction(function(value) {
-
-                onNextCount++;
-
-                if (onNextCount === 1){
-                    expect(strip(value)).to.deep.equals({
-                        json: {
-                            paths: {
-                                0: 'test',
-                                1: 'test',
-                                2: 'test'
-                            }
-                        }
-                    });
-                }
-            }).subscribe(noOp, done, function(){
-                expect(onNextCount, 'onNext called once').to.equals(1);
-                done();
-            });
-    });
-
     describe('Preload Functions', function() {
         it('should get multiple arguments with multiple selector function args.', function(done) {
             var model = new Model({cache: M(), source: new LocalDataSource(Cache())});
@@ -306,8 +266,6 @@ describe('DataSource and Partial Cache', function() {
                 subscribe(noOp, done, done);
         });
     });
-
-
     describe('_toJSONG', function() {
         it('should get multiple arguments into a single _toJSONG response.', function(done) {
             var model = new Model({cache: M(), source: new LocalDataSource(Cache())});
@@ -348,56 +306,6 @@ describe('DataSource and Partial Cache', function() {
         });
     });
     describe('Progressively', function() {
-        it('should onNext twice if at least one value found in the cache - even if it is an atom of undefined', function(done) {
-            var model = new Model({
-                cache: {
-                    paths: {
-                        0: 'test',
-                        1: 'test'
-                    }
-                },
-                source: new LocalDataSource({
-                    paths: {
-                        2: Model.atom('test'),
-                        3: Model.atom(undefined)
-                    }
-                }, {materialize: true})
-            });
-
-            var onNextCount = 0;
-            toObservable(model.
-                get(['paths', {to:3}]).
-                progressively()).
-                doAction(function(value) {
-
-                    onNextCount++;
-                    if (onNextCount === 1){
-                        expect(strip(value)).to.deep.equals({
-                            json: {
-                                paths: {
-                                    0: 'test',
-                                    1: 'test'
-                                }
-                            }
-                        });
-                    }
-                    else if (onNextCount === 2){
-                        expect(strip(value)).to.deep.equals({
-                            json: {
-                                paths: {
-                                    0: 'test',
-                                    1: 'test',
-                                    2: 'test'
-                                }
-                            }
-                        });
-                    }
-                }).subscribe(noOp, done, function(){
-                    expect(onNextCount, 'onNext called twice').to.equals(2);
-                    done();
-                });
-        });
-
         it('should get multiple arguments with multiple trips to the dataSource into a single toJSON response.', function(done) {
             var model = new Model({cache: M(), source: new LocalDataSource(Cache())});
             var count = 0;
@@ -848,3 +756,4 @@ describe('DataSource and Partial Cache', function() {
         });
     });
 });
+

@@ -18,12 +18,10 @@ describe('Edges', function() {
             cache: cacheGenerator(0, 1)
         });
     });
-    it('should report an atom of undefined in non-progressive mode.', function() {
+    it('should not report an atom of undefined in non-materialize mode.', function() {
         getCoreRunner({
             input: [['videos']],
-            output: {
-                json: {}
-            },
+            output: { },
             cache: {
                 videos: atom(undefined)
             }
@@ -119,3 +117,4 @@ describe('Edges', function() {
         });
     });
 });
+

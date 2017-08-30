@@ -80,7 +80,7 @@ describe('call', function() {
         toObservable(model.
             call("genreList[0].titles.push", args, ['name'])).
             doAction(onNext, noOp, function() {
-                expect(onNext.callCount).to.equal(1);
+                expect(onNext.callCount).to.equal(0);
             }).
             subscribe(noOp, done, done);
     });
@@ -118,3 +118,4 @@ describe('call', function() {
             });
     });
 });
+
