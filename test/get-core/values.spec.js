@@ -117,7 +117,9 @@ describe('Values', function() {
         getCoreRunner({
             input: [['lolomo']],
             output: {
-                json: {}
+                json: {
+                    lolomo: null
+                }
             },
             cache: {
                 lolomo: jsonGraph.ref(['test', 'value']),
@@ -134,6 +136,7 @@ describe('Values', function() {
                 json: {
                     lists: {
                         2343: {
+                            0: null
                         }
                     }
                 }
@@ -162,7 +165,7 @@ describe('Values', function() {
                         lists: {
                             2343: {
                                 0: {
-                                    name: 'House of cards'
+                                    name: "House of cards"
                                 }
                             }
                         }
