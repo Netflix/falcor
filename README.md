@@ -123,8 +123,8 @@ Now create an index.html file with the following contents:
     <script>
       var model = new falcor.Model({source: new falcor.HttpDataSource('/model.json') });
 
+      // retrieve the "greeting" key from the root of the Virtual JSON resource
       model.
-      // retrieve the "greeting" key from the root of the Virtual JSON resource model.
         get("greeting").
         then(function(response) {
           document.write(response.json.greeting);
