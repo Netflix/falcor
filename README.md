@@ -12,23 +12,6 @@ Breaking changes in both versions can be reviewed [here](https://github.com/Netf
 
 * *master* currently reflects work in progress, and contains backward incompatible changes which will become the next major version bump.
 
-## Important Note for Webpack Users
-
-If you're including falcor in your app, via npm and `require('falcor')`, and you're building a browser bundle for your app with Webpack, you'll need to add an alias entry for the 'rx' module in your webpack config, to avoid this RxJS bug: 'https://github.com/Reactive-Extensions/RxJS/issues/832'. You may already have such an entry, if you're using RxJS already. An example is below:
-
-In webpack.config.js:
-
-```js
-module.exports = {
-  resolve: {
-    alias: {
-      // Workaround https://github.com/Reactive-Extensions/RxJS/issues/832, until it's fixed
-      'rx$': <path to rx/dist/rx.js file >
-    }
-  }
-};
-```
-
 ## Getting Started
 
 You can check out a working example server for a Netflix-like application [here](http://github.com/netflix/falcor-express-demo) right now. Alternately you can go through this barebones tutorial in which we use the Falcor Router to create a Virtual JSON resource. In this tutorial we will use Falcor's express middleware to serve the Virtual JSON resource on an application server at the URL /model.json. We will also host a static web page on the same server which retrieves data from the Virtual JSON resource.
