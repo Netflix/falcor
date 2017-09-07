@@ -56,22 +56,22 @@ Each non-null value that is not a string is converted to a string immediately pr
 
 Here are some examples of the valid Path Strings:
 
-* "todos[0].name"
-* 'todos[0]["name"]'
-* 'todos["0"]["name"]'
+* `'todos[0].name'`
+* `'todos[0]["name"]'`
+* `'todos["0"]["name"]'`
 
 _Unlike_ JavaScript's Path syntax it is also possible to use indexers for the first key in the path.
 
-* '["todos"][0]["name"]'
-* '["todos"][0].name'
+* `'["todos"][0]["name"]'`
+* `'["todos"][0].name'`
 
 ### Path
 
 In addition to Path Syntax Strings, [Models](http://netflix.github.io/falcor/documentation/model.html) can also be passed an Arrays of Keys, simply referred to as a Path. Here are a few examples of valid Paths:
 
-* ["todos", 0, "name"]
-* ["todos", 5, true]
-* ["todos", 9, null]
+* `["todos", 0, "name"]`
+* `["todos", 5, true]`
+* `["todos", 9, null]`
 
 Using a Path Array is more efficient than the Path Syntax, because under the hood a [Model](http://netflix.github.io/falcor/documentation/model.html) immediately parses Path Syntax Strings into Path Arrays. Furthermore, a Path Array is often preferable when you have to build Paths programmatically, because string concatenation can be avoided.
 
