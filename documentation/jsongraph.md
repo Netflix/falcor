@@ -105,11 +105,11 @@ In addition to JSON's primitive types, JSON Graph introduces three new primitive
 2. Atom
 3. Error
 
-Each of these types is a JSON Graph object with a "$type" key that differentiates it from regular JSON objects, and describes the type of its "value" key. These three JSON Graph primitive types are always retrieved and replaced in their entirety just like a primitive JSON value.  None of the JSON Graph values can be mutated using any of the available abstract JSON Graph operations.
+Each of these types is a JSON Graph object with a `$type` key that differentiates it from regular JSON objects, and describes the type of its `value` key. These three JSON Graph primitive types are always retrieved and replaced in their entirety just like a primitive JSON value.  None of the JSON Graph values can be mutated using any of the available abstract JSON Graph operations.
 
 ### Reference
 
-A Reference is a JSON object with a "$type" key that has a value of "ref" and a "value" key that has a [Path](http://netflix.github.io/falcor/documentation/paths.html) array as its value.
+A Reference is a JSON object with a `$type` key that has a value of `ref` and a `value` key that has a [Path](http://netflix.github.io/falcor/documentation/paths.html) array as its value.
 
 ~~~js
 { $type: "ref", value: ["todosById", 44] }
@@ -142,7 +142,7 @@ A Reference is like a symbolic link in the UNIX file system. When the [Path](htt
 
 ### Atom
 
-An Atom is a JSON object with a "$type" key that has a value of "atom" and a "value" key that contains a JSON value.
+An Atom is a JSON object with a `$type` key that has a value of `atom` and a `value` key that contains a JSON value.
 
 ~~~js
 { $type: "atom", value: ['en', 'fr'] }
@@ -207,7 +207,7 @@ The result above only includes the value of the Atom because the [Model](http://
 
 ### Error
 
-An Error is a JSON object with a "$type" key that has a value of "error" and a "value" key that contains an error that occured while executing a JSON Graph operation.
+An Error is a JSON object with a `$type` key that has a value of `error` and a `value` key that contains an error that occured while executing a JSON Graph operation.
 
 ~~~js
 { $type: "error", value: "The request timed out." }
@@ -271,20 +271,20 @@ Some examples of objects that are capable of carrying out the abstract JSON Grap
 * [Router](http://netflix.github.io/falcor/documentation/router.html)
 * [Model](http://netflix.github.io/falcor/documentation/model.html)
 
-The result of each operation is a JSON Graph envelope, which contains a subset of the JSON Graph after the operation has completed. A JSON Graph Envelope is a JSON object with a "jsonGraph" key which contains a JSON Graph subset.
+The result of each operation is a JSON Graph envelope, which contains a subset of the JSON Graph after the operation has completed. A JSON Graph Envelope is a JSON object with a `jsonGraph` key which contains a JSON Graph subset.
 
 ~~~js
 // the result of a get operation for the Path ["user", "name"]
 {
     jsonGraph: {
         user: {
-            name: "Anupa"
+            name: "Anup"
         }
     }
 }
 ~~~
 
-When the call operation is invoked, the JSON Graph envelope may also contain a "invalidated" key which contains a list of [Path](http://netflix.github.io/falcor/documentation/paths.html)s to values that the function call changed. This allows clients that are maintaining a cache of the JSON Graph to get rid of stale data. The envelope will also contain a "paths" key which contains a list of [paths](http://netflix.github.io/falcor/documentation/paths.html) to the values within the JSON Graph subset. This is an optimization to allow clients to be able to process the JSON Graph subset without resorting to reflection.
+When the call operation is invoked, the JSON Graph envelope may also contain a `invalidated` key which contains a list of [Path](http://netflix.github.io/falcor/documentation/paths.html)s to values that the function call changed. This allows clients that are maintaining a cache of the JSON Graph to get rid of stale data. The envelope will also contain a `paths` key which contains a list of [paths](http://netflix.github.io/falcor/documentation/paths.html) to the values within the JSON Graph subset. This is an optimization to allow clients to be able to process the JSON Graph subset without resorting to reflection.
 
 ### The Abstract get Operation
 
@@ -319,7 +319,7 @@ Let's evaluate the following [Path](http://netflix.github.io/falcor/documentatio
 ["todos", 0, "name"]
 ~~~
 
-First we evaluate the "todos" key, which yields an array.  There are more keys to be evaluated, so we continue. Then we evaluate the number "0" key, and it is converted into a string using JavaScript's toString algorithm. We attempt to look up the value in the array, and we find a reference:
+First we evaluate the `todos` key, which yields an array.  There are more keys to be evaluated, so we continue. Then we evaluate the number `0` key, and it is converted into a string using JavaScript's toString algorithm. We attempt to look up the value in the array, and we find a reference:
 
 ~~~js
 // JSON Graph object
@@ -395,7 +395,7 @@ Once we create an optimized [Path](http://netflix.github.io/falcor/documentation
 }
 ~~~
 
-Now we evaluate the "todosById" key, which yields an object. Next, we convert the number 44 into a string using JavaScript's toString algorithm. Then we look up the resulting string "44" which yields another object. Finally we look up the key "name" and we find a primitive value type "get milk from corner store". This value is added to the JSON Graph subset and returned as the result of the abstract get operation.
+Now we evaluate the `todosById` key, which yields an object. Next, we convert the number 44 into a string using JavaScript's toString algorithm. Then we look up the resulting string `44` which yields another object. Finally we look up the key `name` and we find a primitive value type "get milk from corner store". This value is added to the JSON Graph subset and returned as the result of the abstract get operation.
 
 ~~~js
 // JSON Graph Envelope response
@@ -444,7 +444,7 @@ Let's evaluate the following [Path](http://netflix.github.io/falcor/documentatio
 ["todos", 0]
 ~~~
 
-First we evaluate the "todos" key, which yields an array.  There are more keys to be evaluated, so we continue. Then we evaluate the number "0" key, and it is converted into a string using JavaScript's toString algorithm. We attempt to look up the value in the array, and we find a reference:
+First we evaluate the `todos` key, which yields an array.  There are more keys to be evaluated, so we continue. Then we evaluate the number `0` key, and it is converted into a string using JavaScript's toString algorithm. We attempt to look up the value in the array, and we find a reference:
 
 ~~~js
 {
@@ -500,7 +500,7 @@ This time we will attempt to retrieve the name of the 9th item from the TODO lis
 ["todos", 9, "name"]
 ~~~
 
-First we evaluate the "todos" key, which yields an array.  There are more keys to be evaluated, so we continue. Then we evaluate the "9" key, and it is converted into a string using JavaScript's toString algorithm. We attempt to look up the value in the array, which yield an undefined value. The undefined value is added to the JSON Graph subset, which is returned as the result of the abstract get operation:
+First we evaluate the `todos` key, which yields an array.  There are more keys to be evaluated, so we continue. Then we evaluate the `9` key, and it is converted into a string using JavaScript's toString algorithm. We attempt to look up the value in the array, which yield an undefined value. The undefined value is added to the JSON Graph subset, which is returned as the result of the abstract get operation:
 
 ~~~js
 // JSON Graph Envelope response
@@ -546,7 +546,7 @@ We will attempt to mark the first task in the TODO list as done using the follow
 { path: ["todos", 0, "done"], value: true }
 ~~~
 
-First we evaluate the "todos" key, which yields an array.  There are more keys to be evaluated, so we continue. Then we evaluate the number "0" key, and it is converted into a string using JavaScript's toString algorithm. We attempt to look up the value in the array, and we find a reference:
+First we evaluate the `todos` key, which yields an array.  There are more keys to be evaluated, so we continue. Then we evaluate the number `0` key, and it is converted into a string using JavaScript's toString algorithm. We attempt to look up the value in the array, and we find a reference:
 
 ~~~js
 // JSON Graph object
@@ -601,7 +601,7 @@ Once we create an optimized [Path](http://netflix.github.io/falcor/documentation
 }
 ~~~
 
-Now we evaluate the "todosById" key, which yields an object. Next, we convert the number 44 into a string using JavaScript's toString algorithm. Then we look up the resulting string "44" which yields another object. Finally we arrive at the last key: "done". We replace the value at this location with the new value: true. We also insert the value into the JSON Graph subset, and return the JSON Graph subset as the new result of the abstract set operation.
+Now we evaluate the `todosById` key, which yields an object. Next, we convert the number 44 into a string using JavaScript's toString algorithm. Then we look up the resulting string `44` which yields another object. Finally we arrive at the last key: `done`. We replace the value at this location with the new value: true. We also insert the value into the JSON Graph subset, and return the JSON Graph subset as the new result of the abstract set operation.
 
 ~~~js
 // JSON Graph object
@@ -669,7 +669,7 @@ This time we will attempt to replace the "done" key value with an object that co
 { path: ["todos", 0, "done", "completed"], value: true }
 ~~~
 
-First we evaluate the "todos" key, which yields an array.  There are more keys to be evaluated, so we continue. Then we evaluate the number "0" key, and it is converted into a string using JavaScript's toString algorithm. We attempt to look up the value in the array, and we find a reference:
+First we evaluate the `todos` key, which yields an array.  There are more keys to be evaluated, so we continue. Then we evaluate the number `0` key, and it is converted into a string using JavaScript's toString algorithm. We attempt to look up the value in the array, and we find a reference:
 
 ~~~js
 // JSON Graph object
@@ -724,7 +724,7 @@ Once we create an optimized [Path](http://netflix.github.io/falcor/documentation
 }
 ~~~
 
-Now we evaluate the "todosById" key, which yields an object. Next, we convert the number 44 into a string using the JavaScript's toString algorithm. Then we look up the resulting string "44" which yields another object. Now we look up the "done" key and find a primitive value: false. As there are more keys to be evaluated, the object evaluating the abstract set operation attempts to replace the primitive value with an object.
+Now we evaluate the `todosById` key, which yields an object. Next, we convert the number 44 into a string using the JavaScript's toString algorithm. Then we look up the resulting string `44` which yields another object. Now we look up the `done` key and find a primitive value: false. As there are more keys to be evaluated, the object evaluating the abstract set operation attempts to replace the primitive value with an object.
 
 ~~~js
 // setting ["todosById", 44, "done", "completed"] to true
@@ -749,7 +749,7 @@ Now we evaluate the "todosById" key, which yields an object. Next, we convert th
 }
 ~~~
 
-Now that we have reached the final key, "completed", we insert the boolean value "true" that key within the object we previously created. The value is also added at the same location within the JSON Graph subset, and returned as the result of the abstract set operation.
+Now that we have reached the final key, `completed`, we insert the boolean value `true` that key within the object we previously created. The value is also added at the same location within the JSON Graph subset, and returned as the result of the abstract set operation.
 
 ~~~js
 // setting ["todosById", 44, "done", "completed"] to true
@@ -801,7 +801,7 @@ Let's attempt to set the user rating of the title to 9, even though the only rat
 { path: ["titlesById", 253, "userRating"], value: 9 }
 ~~~
 
-Firstly evaluate the "titlesById" key. We find an object, so we continue. We evaluate the number "253" key, and convert it into a string using the JSON stringify method. We find another object, so we continue. Finally we attempt to set the "userRating" key to "9", and the object evaluating the abstract set operation instead sets the rating to the upper bound of valid values: "5". The number five is inserted in both the JSON Graph object, as well as the JSON Graph subset. The JSON Graph subset response is returned as the result of the abstract set operation.
+Firstly evaluate the `titlesById` key. We find an object, so we continue. We evaluate the number `253` key, and convert it into a string using the JSON stringify method. We find another object, so we continue. Finally we attempt to set the `userRating` key to `9`, and the object evaluating the abstract set operation instead sets the rating to the upper bound of valid values: `5`. The number five is inserted in both the JSON Graph object, as well as the JSON Graph subset. The JSON Graph subset response is returned as the result of the abstract set operation.
 
 ~~~js
 // JSON Graph object
@@ -862,28 +862,28 @@ var jsonGraphObject = {
 };
 ~~~
 
-The JSON Graph object also provides a function on the "todos" list with the following signature:
+The JSON Graph object also provides a function on the `todos` list with the following signature:
 
 ~~~js
 add(name: String) : JSONGraphEnvelope
 ~~~
 
-The add method creates a new task in the "todosById" object, and then adds a Reference to the task to the end of the "todos" Array.
+The add method creates a new task in the `todosById` object, and then adds a Reference to the task to the end of the `todos` Array.
 
-Let's invoke the "add" function using the abstract call operation. The abstract call operation accepts four parameters:
+Let's invoke the `add` function using the abstract call operation. The abstract call operation accepts four parameters:
 
 1. callPath
 2. arguments
 3. refPaths
 4. thisPaths
 
-The "callPath" is the [Path](http://netflix.github.io/falcor/documentation/paths.html) to the function within the [DataSource](http://netflix.github.io/falcor/documentation/datasources.html)'s JSON Graph object. Note that one invocation of call can only run a single function.
+The `callPath` is the [Path](http://netflix.github.io/falcor/documentation/paths.html) to the function within the [DataSource](http://netflix.github.io/falcor/documentation/datasources.html)'s JSON Graph object. Note that one invocation of call can only run a single function.
 
-The "arguments" parameter is the array of arguments to be passed to the function being called.
+The `arguments` parameter is the array of arguments to be passed to the function being called.
 
-The "refPaths" is an array of [Paths](http://netflix.github.io/falcor/documentation/paths.html) to retrieve from the targets of any references in the JSON Graph Envelope returned by the function.
+The `refPaths` is an array of [Paths](http://netflix.github.io/falcor/documentation/paths.html) to retrieve from the targets of any references in the JSON Graph Envelope returned by the function.
 
-The "thisPaths" is an array of [Paths](http://netflix.github.io/falcor/documentation/paths.html) to retrieve from the object on which the function is called after the function is successfully excecuted.
+The `thisPaths` is an array of [Paths](http://netflix.github.io/falcor/documentation/paths.html) to retrieve from the object on which the function is called after the function is successfully excecuted.
 
 Here is how we invoke the abstract call operation:
 
@@ -903,7 +903,7 @@ call(
     ])
 ~~~
 
-The add method adds a task to the "todos" object, sets the "addedAt" key on the task to the current time, and then adds a Reference to the new task at the end of the "todos" array.
+The add method adds a task to the `todos` object, sets the `addedAt` key on the task to the current time, and then adds a Reference to the new task at the end of the `todos` array.
 
 ~~~js
 // JSON Graph object after executing the ["todos", "add"] function
@@ -954,11 +954,11 @@ The function returns the following JSON Graph Envelope:
 }
 ~~~
 
-Notice that instead of returning the entire contents of the "todos" list, the function has returned only a Reference to the newly-created task. Furthermore, the function has indicated that the "length" key of the "todos" list has changed, and if the caller has cached this value, then the value should be invalidated in the cache. Finally, the response contains a "paths" key with an array of [paths](http://netflix.github.io/falcor/documentation/paths.html) to the values in the JSON Graph subset. Unlike get and set, there is no way of predicting what values a call operation will return in its response. The "paths" array provides easy access to the values within the JSON Graph subset, rather than forcing the caller to resort to reflection.
+Notice that instead of returning the entire contents of the `todos` list, the function has returned only a Reference to the newly-created task. Furthermore, the function has indicated that the `length` key of the `todos` list has changed, and if the caller has cached this value, then the value should be invalidated in the cache. Finally, the response contains a `paths` key with an array of [paths](http://netflix.github.io/falcor/documentation/paths.html) to the values in the JSON Graph subset. Unlike get and set, there is no way of predicting what values a call operation will return in its response. The `paths` array provides easy access to the values within the JSON Graph subset, rather than forcing the caller to resort to reflection.
 
 Every function strives to return the minimum amount of data to ensure that the caller's cache does not contain stale data and the caller can retrieve values from objects newly created by the function. The intention is the give the caller the ability to request precisely the data they need from the JSON Graph object using the refPaths and thisPaths arguments.
 
-Now the object executing the abstract call operation retrieves the refPaths from each Reference in the function response. The response contains only one Reference at ["todos", "2"]. Each [Path](http://netflix.github.io/falcor/documentation/paths.html) in the refPaths array is appended to each [Path](http://netflix.github.io/falcor/documentation/paths.html) at which a reference is found in the function's JSON Graph subset response.
+Now the object executing the abstract call operation retrieves the refPaths from each Reference in the function response. The response contains only one Reference at `["todos", "2"]`. Each [Path](http://netflix.github.io/falcor/documentation/paths.html) in the refPaths array is appended to each [Path](http://netflix.github.io/falcor/documentation/paths.html) at which a reference is found in the function's JSON Graph subset response.
 
 ~~~js
 ["todos", "2"].concat(["addedAt"]) // produces ["todos", "2", "addedAt"]
