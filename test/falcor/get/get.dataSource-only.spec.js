@@ -341,6 +341,22 @@ describe('DataSource Only', function() {
                 return done();
             }, done.bind('should not complete'));
     });
+
+    it('should return missing paths with MaxRetryExceededError', function(done) {
+        var model = new Model({ source: asyncifyDataSource(new LocalDataSource({})) });
+        toObservable(model.
+            get(['videos', 0, 'title'], 'hall[0].ween')).
+            doAction(noOp, function(e) {
+                expect(MaxRetryExceededError.is(e), 'MaxRetryExceededError expected.').to.be.ok;
+                expect(e.missingPaths).to.deep.equals([['videos', 0, 'title'], ['hall', 0, 'ween']]);
+            }).
+            subscribe(noOp, function(e) {
+                if (isAssertionError(e)) {
+                    return done(e);
+                }
+                return done();
+            }, done.bind('should not complete'));
+    });
 });
 
 function isAssertionError(e) {
