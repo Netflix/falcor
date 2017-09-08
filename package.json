@@ -15,6 +15,7 @@
   "license": "Apache-2.0",
   "scripts": {
     "test": "gulp test-coverage",
+    "test:only": "mocha test/index.js",
     "dist": "gulp all",
     "doc": "gulp doc",
     "perf": "gulp perf-run",
