@@ -7,6 +7,7 @@ var LocalDataSource = require('./../../data/LocalDataSource');
 var Cache = require('./../../data/Cache');
 var strip = require('./../../cleanData').stripDerefAndVersionKeys;
 var MaxRetryExceededError = require('./../../../lib/errors/MaxRetryExceededError');
+var isAssertionError = require('./../../isAssertionError');
 
 describe('DataSource.', function() {
     it('should validate args are sent to the dataSource collapsed.', function(done) {
@@ -238,6 +239,3 @@ describe('DataSource.', function() {
     });
 });
 
-function isAssertionError(e) {
-    return e.hasOwnProperty('expected') && e.hasOwnProperty('actual');
-}
