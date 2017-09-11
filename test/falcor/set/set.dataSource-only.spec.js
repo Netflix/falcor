@@ -6,6 +6,8 @@ var sinon = require('sinon');
 var LocalDataSource = require('./../../data/LocalDataSource');
 var Cache = require('./../../data/Cache');
 var strip = require('./../../cleanData').stripDerefAndVersionKeys;
+var MaxRetryExceededError = require('./../../../lib/errors/MaxRetryExceededError');
+var isAssertionError = require('./../../isAssertionError');
 
 describe('DataSource.', function() {
     it('should validate args are sent to the dataSource collapsed.', function(done) {
@@ -194,4 +196,46 @@ describe('DataSource.', function() {
             }).
             subscribe(noOp, done, done);
     });
+
+    it('should return missing optimized paths with a MaxRetryExceededError.', function(done) {
+        var onSet = function(source, tmpGraph, jsonGraphFromSet) {
+            model.invalidate('videos[1234].title');
+            return {
+              jsonGraph: {
+                videos: {
+                  1234: {}
+                }
+              },
+              paths: []
+            };
+        };
+        var dataSource = new LocalDataSource(Cache(), {
+            onSet: onSet
+        });
+        var model = new Model({
+            source: dataSource
+        });
+
+        toObservable(model.
+            set({
+                json: {
+                    videos: {
+                        1234: {
+                            title: 'Nowhere to be found'
+                        }
+                    }
+                }
+            })).
+            doAction(noOp, function(e) {
+              expect(MaxRetryExceededError.is(err), 'MaxRetryExceededError expected').to.be.ok;
+              expect(err.missingOptimizedPaths).to.deep.equal([['videos', '1234', 'title']]);
+            }).
+            subscribe(noOp, function(e) {
+              if (isAssertionError(e)) {
+                return done(e);
+              }
+              return done();
+            }, done.bind(null, new Error('should not complete')));
+    });
 });
+

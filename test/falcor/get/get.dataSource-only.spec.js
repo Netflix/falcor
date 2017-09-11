@@ -1,17 +1,18 @@
-var falcor = require("./../../../lib/");
+var falcor = require('./../../../lib/');
 var Model = falcor.Model;
 var Rx = require('rx');
 var noOp = function() {};
 var LocalDataSource = require('../../data/LocalDataSource');
 var ErrorDataSource = require('../../data/ErrorDataSource');
 var asyncifyDataSource = require('../../data/asyncifyDataSource')
-var isPathValue = require("./../../../lib/support/isPathValue");
-var expect = require("chai").expect;
+var isPathValue = require('./../../../lib/support/isPathValue');
+var expect = require('chai').expect;
 var sinon = require('sinon');
 var cacheGenerator = require('./../../CacheGenerator');
 var atom = require('falcor-json-graph').atom;
 var MaxRetryExceededError = require('./../../../lib/errors/MaxRetryExceededError');
 var strip = require('./../../cleanData').stripDerefAndVersionKeys;
+var isAssertionError = require('./../../isAssertionError');
 
 
 describe('DataSource Only', function() {
@@ -90,13 +91,13 @@ describe('DataSource Only', function() {
         it('should get a directly referenced value from falcor.', function(done) {
             var cache = {
                 reference: {
-                    $type: "ref",
-                    value: ["foo", "bar"]
+                    $type: 'ref',
+                    value: ['foo', 'bar']
                 },
                 foo: {
                     bar: {
-                        $type: "atom",
-                        value: "value"
+                        $type: 'atom',
+                        value: 'value'
                     }
                 }
             };
@@ -106,7 +107,7 @@ describe('DataSource Only', function() {
                 get(['reference', null])).
                 doAction(onNext, noOp, function() {
                     expect(strip(onNext.getCall(0).args[0])).to.deep.equals({
-                        json: {reference: "value"}
+                        json: {reference: 'value'}
                     });
                 }).
                 subscribe(noOp, done, done);
@@ -171,7 +172,7 @@ describe('DataSource Only', function() {
             doAction(noOp, function(err) {
                 outputError = err;
                 expect(err).to.deep.equals({
-                    $type: "error",
+                    $type: 'error',
                     value: {
                         message: 'Oops!',
                         status: 500
@@ -190,31 +191,31 @@ describe('DataSource Only', function() {
                 }
             });
     });
-    it("should get all missing paths in a single request", function(done) {
+    it('should get all missing paths in a single request', function(done) {
         var serviceCalls = 0;
         var cacheModel = new Model({
             cache: {
                 lolomo: {
                     summary: {
-                        $type: "atom",
-                        value: "hello"
+                        $type: 'atom',
+                        value: 'hello'
                     },
                     0: {
                         summary: {
-                            $type: "atom",
-                            value: "hello-0"
+                            $type: 'atom',
+                            value: 'hello-0'
                         }
                     },
                     1: {
                         summary: {
-                            $type: "atom",
-                            value: "hello-1"
+                            $type: 'atom',
+                            value: 'hello-1'
                         }
                     },
                     2: {
                         summary: {
-                            $type: "atom",
-                            value: "hello-2"
+                            $type: 'atom',
+                            value: 'hello-2'
                         }
                     }
                 }
@@ -230,7 +231,7 @@ describe('DataSource Only', function() {
 
         var onNext = sinon.spy();
         toObservable(model.
-            get("lolomo.summary", "lolomo[0..2].summary")).
+            get('lolomo.summary', 'lolomo[0..2].summary')).
             doAction(onNext, noOp, function() {
                 var data = onNext.getCall(0).args[0];
                 var json = data.json;
@@ -341,8 +342,39 @@ describe('DataSource Only', function() {
                 return done();
             }, done.bind('should not complete'));
     });
+
+    it('should return missing optimized paths with MaxRetryExceededError', function(done) {
+        var model = new Model({
+            source: asyncifyDataSource(new LocalDataSource({})),
+                cache: {
+                    lolomo: {
+                        0: {
+                            $type: 'ref',
+                            value: ['videos', 1]
+                        }
+                    },
+                    videos: {
+                        0: {
+                            title: 'Revolutionary Road'
+                        }
+                    }
+                }
+        });
+        toObservable(model.
+            get(['lolomo', 0, 'title'], 'videos[0].title', 'hall[0].ween')).
+            doAction(noOp, function(e) {
+                expect(MaxRetryExceededError.is(e), 'MaxRetryExceededError expected.').to.be.ok;
+                expect(e.missingOptimizedPaths).to.deep.equals([
+                    ['videos', 1, 'title'],
+                    ['hall', 0, 'ween']
+                ]);
+            }).
+            subscribe(noOp, function(e) {
+                if (isAssertionError(e)) {
+                    return done(e);
+                }
+                return done();
+            }, done.bind(null, new Error('should not complete')));
+    });
 });
 
-function isAssertionError(e) {
-    return e.hasOwnProperty('expected') && e.hasOwnProperty('actual');
-}
