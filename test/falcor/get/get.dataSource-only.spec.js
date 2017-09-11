@@ -12,6 +12,7 @@ var cacheGenerator = require('./../../CacheGenerator');
 var atom = require('falcor-json-graph').atom;
 var MaxRetryExceededError = require('./../../../lib/errors/MaxRetryExceededError');
 var strip = require('./../../cleanData').stripDerefAndVersionKeys;
+var isAssertionError = require('./../../isAssertionError');
 
 
 describe('DataSource Only', function() {
@@ -377,6 +378,3 @@ describe('DataSource Only', function() {
     });
 });
 
-function isAssertionError(e) {
-    return e.hasOwnProperty('expected') && e.hasOwnProperty('actual');
-}
