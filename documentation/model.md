@@ -12,7 +12,7 @@ lang: en
 
 Your application can use [Data Sources](http://netflix.github.io/falcor/documentation/datasources.html) to retrieve [JSON Graph](http://netflix.github.io/falcor/documentation/jsongraph.html) data from the network. However it is rarely ideal for your application's views to interact directly with [data sources](http://netflix.github.io/falcor/documentation/datasources.html) for the following reasons:
 
-1. Application views typically navigate information hierarchically in JSON format, and [Data Sources](http://netflix.github.io/falcor/documentation/datasources.html) return data in [JSON Graph](http://netflix.github.io/falcor/documentation/jsongraph.html) format. 
+1. Application views typically navigate information hierarchically in JSON format, and [Data Sources](http://netflix.github.io/falcor/documentation/datasources.html) return data in [JSON Graph](http://netflix.github.io/falcor/documentation/jsongraph.html) format.
 2. Views need to be responsive to user input, but retrieving data from a [Data Source](http://netflix.github.io/falcor/documentation/datasources.html) may introduce considerable latency if the [Data Source](http://netflix.github.io/falcor/documentation/datasources.html) accesses the network.
 3. In response to user navigation (ex. scrolling through a list), views may need to repeatedly access small quantities of fine-grained data in rapid succession. [Data Sources](http://netflix.github.io/falcor/documentation/datasources.html) typically access the network, therefore fine-grained requests are often inefficient because of the overhead required to issue a request.
 4. Navigating information hierarchically rather than retrieving information using id's can lead to inefficent back-end requests.
@@ -26,8 +26,8 @@ For these reasons, views retrieve their data from Model objects, which act as in
 
 ## How the Model Works
 
-Models use a [DataSource](http://netflix.github.io/falcor/documentation/datasources.html) to retrieve data from the JSON object. Falcor ships with HttpDataSource, an implementation of the [DataSource](http://netflix.github.io/falcor/documentation/datasources.html) interface which proxies requests to another [DataSource](http://netflix.github.io/falcor/documentation/datasources.html) running on an HTTP server (usually a falcor Router).
- 
+Models use a [DataSource](http://netflix.github.io/falcor/documentation/datasources.html) to retrieve data from the JSON Graph. Falcor ships with HttpDataSource, an implementation of the [DataSource](http://netflix.github.io/falcor/documentation/datasources.html) interface which proxies requests to another [DataSource](http://netflix.github.io/falcor/documentation/datasources.html) running on an HTTP server (usually a falcor Router).
+
 ![How the Model Works]({{ site.baseurl }}/images/falcor-end-to-end.png)
 
 You can associate a [DataSource](http://netflix.github.io/falcor/documentation/datasources.html) with a Model by passing it to the Model constructor.
@@ -39,7 +39,7 @@ var model = new falcor.Model({source: new falcor.HttpDataSource('/model.json')})
 You can implement the [DataSource](http://netflix.github.io/falcor/documentation/datasources.html) interface to allow a Model to communicate with a remote JSON object over a different transport layer (ex. WebSocket). For more information see [Data Sources](http://netflix.github.io/falcor/documentation/datasources.html).
 
 If a Model does _not_ have a [DataSource](http://netflix.github.io/falcor/documentation/datasources.html), all Model operations will be performed on the Model's local cache. When you initialize the Model, you can prime its cache with a JSON object.
- 
+
 ~~~js
 var log = console.log.bind(console)
 
@@ -67,7 +67,7 @@ model.getValue('todos[0].name').then(log);
 ~~~
 
 It is common practice to begin working against mock data in a Model cache, and then replace it with a [DataSource](http://netflix.github.io/falcor/documentation/datasources.html) that retrieves data from the server later on.
- 
+
 ~~~js
 var log = console.log.bind(console)
 
@@ -85,7 +85,7 @@ When data is retrieved from a [DataSource](http://netflix.github.io/falcor/docum
 model.getValue('todos[0].name').then(log);
 ~~~
 
-There is one very important difference between working with a JSON object directly and working with that same JSON object through a Falcor Model: **you can only retrieve value types from a Model.**  
+There is one very important difference between working with a JSON object directly and working with that same JSON object through a Falcor Model: **you can only retrieve value types from a Model.**
 
 ### "Why can't I request Objects or Arrays from a Model?"
 
@@ -93,7 +93,7 @@ _Falcor is optimized for displaying data catered to your views._ Both Arrays and
 
 Models force developers to be explicit about which value types they would like to retrieve in order to maximize the likelihood that server requests will have **stable performance** over time. Rather than allow you to retrieve an entire Object, Models force you to _be explicit_ and retrieve only those values needed in a given scenario. Similarly, when displaying an Array of items, Models do not allow you to retrieve the entire Array upfront. Instead you must request the first visible page of an Array, and follow up with additional page requests as the user scrolls. This allows your client code to control performance boundaries, based on the amount of data actually used in the view, as opposed to being susceptible to unexpected increases in the total amount of data available.
 
-In the following example we page through a list of TODOs, selecting the "name" and "done" properties of all the TODOs in the current page.
+In the following example we page through a list of TODOs, selecting the `name` and `done` properties of all the TODOs in the current page.
 
 ~~~js
 var model = new falcor.Model({
@@ -167,7 +167,7 @@ In this example, we use an errorSelector function to add a relative expiration t
 
 ~~~js
 var model = new falcor.Model({
-    source: new falcor.HttpDataSource('/model.json'),   
+    source: new falcor.HttpDataSource('/model.json'),
     errorSelector: function(error){
         error.$expires = -1000 * 60 * 2;
     }
@@ -176,7 +176,7 @@ var model = new falcor.Model({
 
 # Working With Data Using a Model
 
-The Falcor Model is intended to be the "M" in your MVC. Rather than interact with JSON data directly, your application's views interact with data _indirectly_ through the Model object. The Model object provides a set of familiar JavaScript APIs for working with JSON data, including get, set, and call. 
+The Falcor Model is intended to be the "M" in your MVC. Rather than interact with JSON data directly, your application's views interact with data _indirectly_ through the Model object. The Model object provides a set of familiar JavaScript APIs for working with JSON data, including get, set, and call.
 
 Here is an example of working with JSON data _directly_:
 
@@ -197,11 +197,11 @@ var model = {
 };
 
 // This outputs the following to the console:
-// get milk from corner store 
+// get milk from corner store
 console.log(model.todos[0].name);
 ~~~
 
-The main difference between working with JSON data directly and working with it indirectly through a Model object, is that the Falcor Model has a _push API_. 
+The main difference between working with JSON data directly and working with it indirectly through a Model object, is that the Falcor Model has a _push API_.
 
 Here is an example of working with a JSON object _indirectly_ using a Falcor Model:
 
@@ -222,15 +222,15 @@ var model = new falcor.Model({cache: {
 }});
 
 // This outputs the following to the console:
-// get milk from corner store 
+// get milk from corner store
 model.getValue('todos[0].name').then(log);
 ~~~
 
 Note that in the example above, the name of the TODO is _pushed_ to a callback.
- 
+
 The main advantage of using a push API is that you can code against JSON data the same way regardless of whether the data is local or remote. This makes it very easy to begin coding your application against mocked data at first, and then work against server data later on without changing client code.
 
-In this example, we retrieve the name of the first TODO from a JSON Object: 
+In this example, we retrieve the name of the first TODO from a JSON Object:
 
 ~~~js
 var log = console.log.bind(console)
@@ -392,9 +392,9 @@ model.setValue(["todos", 0,"done"], true).then(function(done){
 });
 ~~~
 
-### 2. Set Values Using Multiple PathValue Objects 
+### 2. Set Values Using Multiple PathValue Objects
 
-In order to change multiple values using a single [DataSource](http://netflix.github.io/falcor/documentation/datasources.html) request, you can pass multiple PathValue objects to the Model's set method. 
+In order to change multiple values using a single [DataSource](http://netflix.github.io/falcor/documentation/datasources.html) request, you can pass multiple PathValue objects to the Model's set method.
 
 ~~~js
 class Model {
@@ -410,7 +410,7 @@ var pathValue = falcor.pathValue("todos[0].done",true);
 console.log(JSON.stringify(pathValue));
 ~~~
 
-In the following example, we will set the done value of the first two tasks in a TODOs list to "true".
+In the following example, we will set the done value of the first two tasks in a TODOs list to `true`.
 
 ~~~js
 
@@ -469,7 +469,7 @@ model.
 // }
 ~~~
 
-### 3. Set Values Using a JSONEnvelope 
+### 3. Set Values Using a JSONEnvelope
 
 Occasionally, it can be less verbose to set multiple values with a JSON object rather than a series of PathValue objects. That is why set supports the following overload:
 
@@ -479,7 +479,7 @@ class Model {
 }
 ~~~
 
-A JSONEnvelope is just an object that contains a "json" key with a JSON value. It is necessary to wrap JSON values within a JSONEnvelope so that the Model's set method can differentiate between PathValue objects and JSON. 
+A JSONEnvelope is just an object that contains a `json` key with a JSON value. It is necessary to wrap JSON values within a JSONEnvelope so that the Model's set method can differentiate between PathValue objects and JSON.
 
 ~~~js
 var taskCompletionValuesJSONEnvelope = {
@@ -500,7 +500,7 @@ var model = new falcor.Model({
     source: dataSource
 });
 
-// The following code prints a JSONEnvelope to the console: 
+// The following code prints a JSONEnvelope to the console:
 // {
 //     json: {
 //         todos: {
@@ -522,9 +522,9 @@ model.
 
 ## Calling Functions
 
-Retrieving and setting values in a [JSON Graph](http://netflix.github.io/falcor/documentation/jsongraph.html) are both examples of idempotent operations. This means that you can repeat the same set or get operation multiple times without introducing any additional side effects. This is the reason the Model can safely serve subsequent requests for the same value from its cache instead of returning to the [DataSource](http://netflix.github.io/falcor/documentation/datasources.html). Furthermore, the Model can optimistically update its local cache when a value is set because it can make an educated guess about the effect that the set operation will have on the [DataSource](http://netflix.github.io/falcor/documentation/datasources.html)'s [JSON Graph](http://netflix.github.io/falcor/documentation/jsongraph.html) object. Obviously, idempotent operations have nice properties. However, sometimes applications require a series of mutations to be applied transactionally.  In these instances, set and get alone are not adequate. You need to call a **function.** 
+Retrieving and setting values in a [JSON Graph](http://netflix.github.io/falcor/documentation/jsongraph.html) are both examples of idempotent operations. This means that you can repeat the same set or get operation multiple times without introducing any additional side effects. This is the reason the Model can safely serve subsequent requests for the same value from its cache instead of returning to the [DataSource](http://netflix.github.io/falcor/documentation/datasources.html). Furthermore, the Model can optimistically update its local cache when a value is set because it can make an educated guess about the effect that the set operation will have on the [DataSource](http://netflix.github.io/falcor/documentation/datasources.html)'s [JSON Graph](http://netflix.github.io/falcor/documentation/jsongraph.html) object. Obviously, idempotent operations have nice properties. However, sometimes applications require a series of mutations to be applied transactionally.  In these instances, set and get alone are not adequate. You need to call a **function.**
 
-To allow for transactional operations, [JSON Graph](http://netflix.github.io/falcor/documentation/jsongraph.html) objects can contain functions just like JavaScript objects. Functions are considered [JSON Graph](http://netflix.github.io/falcor/documentation/jsongraph.html) objects, which means they cannot be retrieved from, nor set into, a [DataSource](http://netflix.github.io/falcor/documentation/datasources.html). Rather, **functions can only be invoked using the call method.** 
+To allow for transactional operations, [JSON Graph](http://netflix.github.io/falcor/documentation/jsongraph.html) objects can contain functions just like JavaScript objects. Functions are considered [JSON Graph](http://netflix.github.io/falcor/documentation/jsongraph.html) objects, which means they cannot be retrieved from, nor set into, a [DataSource](http://netflix.github.io/falcor/documentation/datasources.html). Rather, **functions can only be invoked using the call method.**
 
 ~~~js
 class Model {
@@ -532,7 +532,7 @@ class Model {
 }
 ~~~
 
-Unlike JavaScript functions, [JSON Graph](http://netflix.github.io/falcor/documentation/jsongraph.html) functions cannot return transient data. Instead [JSON Graph](http://netflix.github.io/falcor/documentation/jsongraph.html) functions may only return a subset of their "this" object, typically after mutating it. The result of a [JSON Graph](http://netflix.github.io/falcor/documentation/jsongraph.html) function is always a JSONGraphEnvelope containing a subset of the function's "this" object.
+Unlike JavaScript functions, [JSON Graph](http://netflix.github.io/falcor/documentation/jsongraph.html) functions cannot return transient data. Instead [JSON Graph](http://netflix.github.io/falcor/documentation/jsongraph.html) functions may only return a subset of their `this` object, typically after mutating it. The result of a [JSON Graph](http://netflix.github.io/falcor/documentation/jsongraph.html) function is always a JSONGraphEnvelope containing a subset of the function's `this` object.
 
 The call method's arguments are explained below:
 
@@ -552,18 +552,18 @@ In the event that any of the values returned from the function are [JSON Graph](
 
 ### The Optional thisPaths Arguments
 
-A function is not obligated to return all of the changes that it makes to its "this" object. On the contrary, functions typically return as little data as possible by default. Instead of forcing functions to return all of the changes they make to the [JSON Graph](http://netflix.github.io/falcor/documentation/jsongraph.html) object, [DataSource](http://netflix.github.io/falcor/documentation/datasources.html)s allow callers to define exactly which values they would like to refresh after successful function execution. To this end, callers can provide refPaths and thisPaths to the [DataSource](http://netflix.github.io/falcor/documentation/datasources.html)'s call method along with the function [path](http://netflix.github.io/falcor/documentation/paths.html). After the [DataSource](http://netflix.github.io/falcor/documentation/datasources.html) runs the function, it retrieves the refPaths and thisPaths and adds them to the [JSON Graph](http://netflix.github.io/falcor/documentation/jsongraph.html) response.
+A function is not obligated to return all of the changes that it makes to its `this` object. On the contrary, functions typically return as little data as possible by default. Instead of forcing functions to return all of the changes they make to the [JSON Graph](http://netflix.github.io/falcor/documentation/jsongraph.html) object, [DataSource](http://netflix.github.io/falcor/documentation/datasources.html)s allow callers to define exactly which values they would like to refresh after successful function execution. To this end, callers can provide refPaths and thisPaths to the [DataSource](http://netflix.github.io/falcor/documentation/datasources.html)'s call method along with the function [path](http://netflix.github.io/falcor/documentation/paths.html). After the [DataSource](http://netflix.github.io/falcor/documentation/datasources.html) runs the function, it retrieves the refPaths and thisPaths and adds them to the [JSON Graph](http://netflix.github.io/falcor/documentation/jsongraph.html) response.
 
-After the refPaths have been evaluated against any [JSON Graph](http://netflix.github.io/falcor/documentation/jsongraph.html) References returned by the function and added to the JSONGraphEnvelope Response, each PathSet in the thisPaths array is evaluated on the function's "this" object. The resulting values are added to the [JSON Graph](http://netflix.github.io/falcor/documentation/jsongraph.html) Response returned by the [DataSource](http://netflix.github.io/falcor/documentation/datasources.html)'s call method.
+After the refPaths have been evaluated against any [JSON Graph](http://netflix.github.io/falcor/documentation/jsongraph.html) References returned by the function and added to the JSONGraphEnvelope Response, each PathSet in the thisPaths array is evaluated on the function's `this` object. The resulting values are added to the [JSON Graph](http://netflix.github.io/falcor/documentation/jsongraph.html) Response returned by the [DataSource](http://netflix.github.io/falcor/documentation/datasources.html)'s call method.
 
 ### How Call Works
 
 When a [JSON Graph](http://netflix.github.io/falcor/documentation/jsongraph.html) function is called using a Model, the following steps are executed in order:
 
 1. The Model immediately forwards the call to its [DataSource](http://netflix.github.io/falcor/documentation/datasources.html).
-2. The [DataSource](http://netflix.github.io/falcor/documentation/datasources.html) executes the abstract [JSON Graph](http://netflix.github.io/falcor/documentation/jsongraph.html) call operation on the function, receiving a JSONGraphEnvelope in response. The function's response contains a subset of the [DataSource](http://netflix.github.io/falcor/documentation/datasources.html)'s [JSON Graph](http://netflix.github.io/falcor/documentation/jsongraph.html) object after the function's successful completion. It also may optionally include an Array of "invalidated" PathSets which may have been changed by the function. 
-3. If the function added any new objects to the [JSON Graph](http://netflix.github.io/falcor/documentation/jsongraph.html), references to these objects are typically included in its response. The function caller can retrieve values from these newly-created objects by specifying refPaths alongside the other arguments to the call method (callPath, arguments, etc). If refPaths have been specified, the [DataSource](http://netflix.github.io/falcor/documentation/datasources.html) attempts to retrieve each of these PathSets from the objects located at the references included in the function's response. Once the [DataSource](http://netflix.github.io/falcor/documentation/datasources.html) has retrieved these values, it adds them to the [JSON Graph](http://netflix.github.io/falcor/documentation/jsongraph.html) subset in the function's response. 
-4. Finally the [DataSource](http://netflix.github.io/falcor/documentation/datasources.html) attempts to retrieve each PathSet in the "thisPaths" argument from the functions "this" object. The resulting subset of the [DataSource](http://netflix.github.io/falcor/documentation/datasources.html)'s [JSON Graph](http://netflix.github.io/falcor/documentation/jsongraph.html) is added to the function's response, and returned to the Model.
+2. The [DataSource](http://netflix.github.io/falcor/documentation/datasources.html) executes the abstract [JSON Graph](http://netflix.github.io/falcor/documentation/jsongraph.html) call operation on the function, receiving a JSONGraphEnvelope in response. The function's response contains a subset of the [DataSource](http://netflix.github.io/falcor/documentation/datasources.html)'s [JSON Graph](http://netflix.github.io/falcor/documentation/jsongraph.html) object after the function's successful completion. It also may optionally include an Array of "invalidated" PathSets which may have been changed by the function.
+3. If the function added any new objects to the [JSON Graph](http://netflix.github.io/falcor/documentation/jsongraph.html), references to these objects are typically included in its response. The function caller can retrieve values from these newly-created objects by specifying refPaths alongside the other arguments to the call method (callPath, arguments, etc). If refPaths have been specified, the [DataSource](http://netflix.github.io/falcor/documentation/datasources.html) attempts to retrieve each of these PathSets from the objects located at the references included in the function's response. Once the [DataSource](http://netflix.github.io/falcor/documentation/datasources.html) has retrieved these values, it adds them to the [JSON Graph](http://netflix.github.io/falcor/documentation/jsongraph.html) subset in the function's response.
+4. Finally the [DataSource](http://netflix.github.io/falcor/documentation/datasources.html) attempts to retrieve each PathSet in the `thisPaths` argument from the functions `this` object. The resulting subset of the [DataSource](http://netflix.github.io/falcor/documentation/datasources.html)'s [JSON Graph](http://netflix.github.io/falcor/documentation/jsongraph.html) is added to the function's response, and returned to the Model.
 5. Upon receiving the response from the [DataSource](http://netflix.github.io/falcor/documentation/datasources.html), The Model removes all of the "invalidated" [paths](http://netflix.github.io/falcor/documentation/paths.html) from the cache, merges the data in the response into its cache, and returns a JSON version of the response to the caller.
 
 ### Call By Example
@@ -606,7 +606,7 @@ dataSource.
         [
             ["name"],
             ["done"]
-        ])      
+        ])
 ~~~
 
 Let's say that the [JSON Graph](http://netflix.github.io/falcor/documentation/jsongraph.html) object managed by the [DataSource](http://netflix.github.io/falcor/documentation/datasources.html) looks like this:
@@ -656,7 +656,7 @@ After the [DataSource](http://netflix.github.io/falcor/documentation/datasources
 }});
 ~~~
 
-After modifying the [JSON Graph](http://netflix.github.io/falcor/documentation/jsongraph.html) object, the function returns a JSONGraphEnvelope response to the [DataSource](http://netflix.github.io/falcor/documentation/datasources.html). 
+After modifying the [JSON Graph](http://netflix.github.io/falcor/documentation/jsongraph.html) object, the function returns a JSONGraphEnvelope response to the [DataSource](http://netflix.github.io/falcor/documentation/datasources.html).
 
 ~~~js
 {
@@ -672,9 +672,9 @@ After modifying the [JSON Graph](http://netflix.github.io/falcor/documentation/j
 }
 ~~~
 
-Let's see if we can try to understand why the function returns the response above. 
+Let's see if we can try to understand why the function returns the response above.
 
-Notice that the function's JSONGraphEnvelope response contains a "paths" array which contains [paths](http://netflix.github.io/falcor/documentation/paths.html) to all of the values in the "jsonGraph" key. 
+Notice that the function's JSONGraphEnvelope response contains a `paths` array which contains [paths](http://netflix.github.io/falcor/documentation/paths.html) to all of the values in the `jsonGraph` key.
 
 ~~~js
 // partial JSONGraphEnvelope Response
@@ -692,11 +692,11 @@ Notice that the function's JSONGraphEnvelope response contains a "paths" array w
 }
 ~~~
 
-Why is this necessary? Unlike get and set operations, there is no way for the Model to predict what values will be returned from a function call. By providing the Model with an array of [paths](http://netflix.github.io/falcor/documentation/paths.html) to the values within the JSONGraph object, the function allows the Model to merge the response into its local cache without resorting to reflection. 
+Why is this necessary? Unlike get and set operations, there is no way for the Model to predict what values will be returned from a function call. By providing the Model with an array of [paths](http://netflix.github.io/falcor/documentation/paths.html) to the values within the JSONGraph object, the function allows the Model to merge the response into its local cache without resorting to reflection.
 
-Notice as well that the function does not include the entire contents of the "todos" list in its response, nor does it include the newly-created task object in the "todosById" map. As a rule, **functions should return the minimum amount of data required to ensure the Model's cache is consistent, as well as enable Models to retrieve data from any objects created by the function.**
+Notice as well that the function does not include the entire contents of the `todos` list in its response, nor does it include the newly-created task object in the `todosById` map. As a rule, **functions should return the minimum amount of data required to ensure the Model's cache is consistent, as well as enable Models to retrieve data from any objects created by the function.**
 
-To allow the Model to retrieve data from the newly-created task object, the JSONGraphEnvelope response contains the reference to the newly-created task object in the "todosById" map. 
+To allow the Model to retrieve data from the newly-created task object, the JSONGraphEnvelope response contains the reference to the newly-created task object in the `todosById` map.
 
 ~~~js
 {
@@ -720,7 +720,7 @@ Instead of returning the task data in the response, including a reference to the
 ]
 ~~~
 
-Once the function has returned a response, the [DataSource](http://netflix.github.io/falcor/documentation/datasources.html) looks for any references inside of the JSONGraphEnvelope and attempts to retrieve the refPaths from the reference [path](http://netflix.github.io/falcor/documentation/paths.html). The function's response included a [JSON Graph](http://netflix.github.io/falcor/documentation/jsongraph.html) Reference { $type: "ref", value: ["todosById", 93] } at the [path](http://netflix.github.io/falcor/documentation/paths.html) ["todos", 2]. Therefore the [DataSource](http://netflix.github.io/falcor/documentation/datasources.html) appends each of the [paths](http://netflix.github.io/falcor/documentation/paths.html) in the refPaths to the [paths](http://netflix.github.io/falcor/documentation/paths.html) at which references are found in the response, yielding the following PathSets:
+Once the function has returned a response, the [DataSource](http://netflix.github.io/falcor/documentation/datasources.html) looks for any references inside of the JSONGraphEnvelope and attempts to retrieve the refPaths from the reference [path](http://netflix.github.io/falcor/documentation/paths.html). The function's response included a [JSON Graph](http://netflix.github.io/falcor/documentation/jsongraph.html) Reference `{ $type: "ref", value: ["todosById", 93] }` at the [path](http://netflix.github.io/falcor/documentation/paths.html) `["todos", 2]`. Therefore the [DataSource](http://netflix.github.io/falcor/documentation/datasources.html) appends each of the [paths](http://netflix.github.io/falcor/documentation/paths.html) in the refPaths to the [paths](http://netflix.github.io/falcor/documentation/paths.html) at which references are found in the response, yielding the following PathSets:
 
 ~~~js
 [
@@ -751,22 +751,22 @@ The [DataSource](http://netflix.github.io/falcor/documentation/datasources.html)
 }
 ~~~
 
-Notice that the response above now contains the "name" and "done" fields of the newly added task object. Using the refPaths argument, we are able to retrieve values from object references returned from the function.
+Notice that the response above now contains the `name` and `done` fields of the newly added task object. Using the refPaths argument, we are able to retrieve values from object references returned from the function.
 
-Now that the function has run successfully, and the values have been retrieved from the references in the response, the "thisPaths" [paths](http://netflix.github.io/falcor/documentation/paths.html) are retrieved from the function's "this" object. Recall that we requested the following [path](http://netflix.github.io/falcor/documentation/paths.html) from the "this" object:
+Now that the function has run successfully, and the values have been retrieved from the references in the response, the `thisPaths` [paths](http://netflix.github.io/falcor/documentation/paths.html) are retrieved from the function's `this` object. Recall that we requested the following [path](http://netflix.github.io/falcor/documentation/paths.html) from the `this` object:
 
 ~~~js
 [
     ["length"]
-]  
+]
 ~~~
 
-The [DataSource](http://netflix.github.io/falcor/documentation/datasources.html) appends each one of the "thisPaths" (there is currently only one) to the function [path](http://netflix.github.io/falcor/documentation/paths.html), yielding the following [path](http://netflix.github.io/falcor/documentation/paths.html):
+The [DataSource](http://netflix.github.io/falcor/documentation/datasources.html) appends each one of the `thisPaths` (there is currently only one) to the function [path](http://netflix.github.io/falcor/documentation/paths.html), yielding the following [path](http://netflix.github.io/falcor/documentation/paths.html):
 
 ~~~js
 [
     ["todos", "length"]
-]  
+]
 ~~~
 
 The [DataSource](http://netflix.github.io/falcor/documentation/datasources.html) then retrieves this [path](http://netflix.github.io/falcor/documentation/paths.html), and adds the resulting [JSON Graph](http://netflix.github.io/falcor/documentation/jsongraph.html) subset to the response, yielding the following JSONGraphEnvelope:
@@ -794,7 +794,7 @@ The [DataSource](http://netflix.github.io/falcor/documentation/datasources.html)
 }
 ~~~
 
-Notice that the value of the "todos.length" is now in the [JSON Graph](http://netflix.github.io/falcor/documentation/jsongraph.html) object.
+Notice that the value of the `todos.length` is now in the [JSON Graph](http://netflix.github.io/falcor/documentation/jsongraph.html) object.
 
 ## Dereferencing a Model (Version 1+)
 
@@ -818,7 +818,7 @@ To understand how the deref method is used, let's take a look at an example. Ima
       67: {
         name: "Daredevil",
         rating: 5.0
-      } 
+      }
     }
   }
 ~~~
@@ -833,9 +833,9 @@ When an item is selected, the List view could pass the Model to the Detail view,
 new DetailView(model, ["list", selectedIndex]);
 ~~~
 
-This is an anti-pattern because the path contains the index in the list where the title is located, and this item may shift in the list between the time the object is displayed and the user drills down and selects it. 
+This is an anti-pattern because the path contains the index in the list where the title is located, and this item may shift in the list between the time the object is displayed and the user drills down and selects it.
 
-Instead of passing paths around, the List view can pass a Model dereferenced to a specific object in the graph. 
+Instead of passing paths around, the List view can pass a Model dereferenced to a specific object in the graph.
 
 ~~~js
 function item_selected(selectedIndex) {
@@ -858,7 +858,7 @@ function DetailView(titleModel) {
 
 Operations performed on the dereferenced Model will always be applied to the same object, no matter where the object is moved within the graph. Furthermore code can interact with the object without any knowledge of its location within the graph.
 
-Deref uses metadata that the get operation inserts information about the references it encounters into JSON responses. For example, retrieving "list[0].name" will yield the following JSON response.
+Deref uses metadata about the references that get operation encounters when getting JSON responses. For example, retrieving `list[0].name` will yield the following JSON response.
 
 ~~~js
 {
@@ -873,7 +873,7 @@ Deref uses metadata that the get operation inserts information about the referen
 }
 ~~~
 
-Note the "$__path" added to the JSON response. When you dereference an object within a Falcor response, the new Model internally stores this path. Note that you should not use these metadata properties directly, as the specific property name may change over time and is an implementation detail. Rather you should use the public deref method instead.
+Note the `$__path` added to the JSON response. When you dereference an object within a Falcor response, the new Model internally stores this path. Note that you should not use these metadata properties directly, as the specific property name may change over time and is an implementation detail. Rather you should use the public deref method instead.
 
 ### Passing Dereferenced Models to Call
 
@@ -887,15 +887,15 @@ model.get("list[0]").then(response => {
     call("myList.push", [titleModel], [], ["length"]).
     then(response => console.log(response.json.myList.length));
 });
-~~~  
+~~~
 
-The code above works because JSON stringifying a dereferenced Model produces a JSON Graph reference that points to the object in the Graph. 
+The code above works because JSON stringifying a dereferenced Model produces a JSON Graph reference that points to the object in the Graph.
 
 ~~~js
 var model = new falcor.Model(new HttpDataSource("/model.json"));
 model.get("list[0]").then(response => {
   var titleModel = model.deref(response.json.list[0]);
-  console.log(JSON.stringify(titleModel)); 
+  console.log(JSON.stringify(titleModel));
   // prints { $type: "ref", value: ["titlesById", 53] }
 });
 ~~~
@@ -918,15 +918,15 @@ var json = {
             prerequisites: [
                 {
                     name: 'withdraw money from ATM',
-                    done: false  
+                    done: false
                 }
             ]
         },
         {
             id: 4291,
             name: 'withdraw money from ATM',
-            done: false  
-        }   
+            done: false
+        }
     ]
 };
 ~~~
@@ -937,7 +937,7 @@ Notice that the TODO "withdraw money from the ATM" appears twice in the JSON obj
 json.todos[1].done = true;
 ~~~
 
-If we examine the JSON object after this change, we will notice that the change has _not_ been propagated to all of the copies of the task. Because the same task also appears in the prerequisites array of task 2692, its "done" value remains false.
+If we examine the JSON object after this change, we will notice that the change has _not_ been propagated to all of the copies of the task. Because the same task also appears in the prerequisites array of task 2692, its `done` value remains false.
 
 ~~~js
 console.log(JSON.stringify(json, null, 4));
@@ -952,14 +952,14 @@ console.log(JSON.stringify(json, null, 4));
                 {
                     id: 4291,
                     name: 'withdraw money from ATM',
-                    done: false  
+                    done: false
                 }
             ]
         },
         {
             id: 4291,
             name: 'withdraw money from ATM',
-            done: true 
+            done: true
         }
     ]
 };
@@ -999,20 +999,20 @@ var json = {
                 {
                     id: 54,
                     name: 'withdraw money from ATM',
-                    done: false  
+                    done: false
                 }
             ]
         },
         {
             id: 54,
             name: 'withdraw money from ATM',
-            done: true 
+            done: true
         }
     ]
 };
 ~~~
 
-Next we replace every other occurrence of each task with a Reference value. A Reference is a JSON object that contains a [path](http://netflix.github.io/falcor/documentation/paths.html) to another location within an object. References can be constructed using the Model.ref factory function. 
+Next we replace every other occurrence of each task with a Reference value. A Reference is a JSON object that contains a [path](http://netflix.github.io/falcor/documentation/paths.html) to another location within an object. References can be constructed using the Model.ref factory function.
 
 ~~~js
 var $ref = falcor.Model.ref;
@@ -1140,7 +1140,7 @@ var model = new falcor.Model({cache: {
 model.getValue('todosById[44].name').then(log);
 
 // This outputs the following to the console:
-// get milk from corner store 
+// get milk from corner store
 ~~~
 
 If a value type is encountered before the [path](http://netflix.github.io/falcor/documentation/paths.html) is fully evaluated, the [path](http://netflix.github.io/falcor/documentation/paths.html) evaluation process is short-circuited and the value discovered is returned.
@@ -1212,9 +1212,9 @@ model.getValue('todos[0].name').then(log);
 // get milk from corner store
 ~~~
 
-First the model evaluates the keys "todo" and "0" and encounters a reference value. However instead of short-circuiting and returning the reference value, the Model resumes evaluation from the location in the JSON referred to in the reference [path](http://netflix.github.io/falcor/documentation/paths.html). This is accomplished by dynamically rewriting the [path](http://netflix.github.io/falcor/documentation/paths.html) from "todos[0].name" to "todosById[44].name" and resuming evaluation from the root of the JSON object. 
+First the model evaluates the keys `todo` and `0` and encounters a reference value. However instead of short-circuiting and returning the reference value, the Model resumes evaluation from the location in the JSON referred to in the reference [path](http://netflix.github.io/falcor/documentation/paths.html). This is accomplished by dynamically rewriting the [path](http://netflix.github.io/falcor/documentation/paths.html) from `todos[0].name` to `todosById[44].name` and resuming evaluation from the root of the JSON object.
 
-Note that **references are only followed if there are more keys in the [path](http://netflix.github.io/falcor/documentation/paths.html) that have not yet been evaluated.** If we shorten the [path](http://netflix.github.io/falcor/documentation/paths.html) to "todos[0]" the model returns the reference path rather than the object it refers to.
+Note that **references are only followed if there are more keys in the [path](http://netflix.github.io/falcor/documentation/paths.html) that have not yet been evaluated.** If we shorten the [path](http://netflix.github.io/falcor/documentation/paths.html) to `todos[0]` the model returns the reference path rather than the object it refers to.
 
 ~~~js
 var log = console.log.bind(console)
@@ -1253,7 +1253,7 @@ The process of rewriting a [path](http://netflix.github.io/falcor/documentation/
 
 In addition to References, [JSON Graph](http://netflix.github.io/falcor/documentation/jsongraph.html) introduces two more new value types: Atoms and Errors. These three special value types are all classified as *Sentinels*.
 
-Sentinels are JSON objects that are treated by the Falcor Model as value types. References, Atoms, and Errors are all JSON objects with a "$type" value of "ref", "atom", and "error" respectively. 
+Sentinels are JSON objects that are treated by the Falcor Model as value types. References, Atoms, and Errors are all JSON objects with a `$type` value of `ref`, `atom`, and `error` respectively.
 
 ~~~js
 var log = console.log.bind(console)
@@ -1287,7 +1287,7 @@ var model = new falcor.Model({cache: {
 }});
 ~~~
 
-Each Sentinel objects also contains a "value" key with its actual value. One way to think about a Sentinel is a *box around a value*  that indicates the type of the value within. Sentinels influence the way that Models interpret their values, allowing them to distinguish a [path](http://netflix.github.io/falcor/documentation/paths.html) from a string or an regular object from an error for example.
+Each Sentinel objects also contains a `value` key with its actual value. One way to think about a Sentinel is a *box around a value*  that indicates the type of the value within. Sentinels influence the way that Models interpret their values, allowing them to distinguish a [path](http://netflix.github.io/falcor/documentation/paths.html) from a string or an regular object from an error for example.
 
 Despite being JSON objects, all Sentinels are considered [JSON Graph](http://netflix.github.io/falcor/documentation/jsongraph.html) value types and therefore can be retrieved from a Model. However when a Sentinel is retrieved from a Model, the Model *unboxes* the value within the Sentinel and returns the value instead of the entire Sentinel object.
 
@@ -1312,7 +1312,7 @@ model.getValue('todosById[44].tags').then(log);
 
 ~~~
 
-You can create a new Model which does not have this unboxing behavior by calling "boxValues." 
+You can create a new Model which does not have this unboxing behavior by calling `boxValues.`
 
 ~~~js
 var $ref = falcor.Model.ref;
@@ -1339,7 +1339,7 @@ model.boxValues().getValue('todosById[44]').
 //         4
 //     ],
 //     "$size": 54
-// } 
+// }
 ~~~
 
 As sentinels are value types, their contents cannot be changed. Like numbers and strings, they must be replaced entirely.
@@ -1382,7 +1382,7 @@ console.log(JSON.stringify(number, null, 4))
 // 4
 ~~~
 
-Atoms "box" value types inside of a JSON object, allowing metadata to be attached to them. 
+Atoms "box" value types inside of a JSON object, allowing metadata to be attached to them.
 
 ~~~js
 var number = {
@@ -1398,14 +1398,14 @@ console.log(JSON.stringify(number, null, 4))
 //     "$type": "atom",
 //     "value": 4,
 //     "$expires": 5000
-// } 
+// }
 ~~~
 
 The value of an Atom is always treated like a value type, meaning it is retrieved and set in its entirety. Mutating an Atom has no effect. Instead you must replace it entirely using the Model's set operation.
 
 In addition to making it possible to attach metadata to JSON values, Atoms can be used to get around the restriction against retrieving JSON Objects and Arrays from a Falcor Model.
 
-Let's say that we have an Array which we are certain will remain small, like a list of video subtitles for example. By boxing the subtitles Array in an Atom, we cause the Falcor model to treat it as a value and return it in its entirety. 
+Let's say that we have an Array which we are certain will remain small, like a list of video subtitles for example. By boxing the subtitles Array in an Atom, we cause the Falcor model to treat it as a value and return it in its entirety.
 
 ~~~js
 var log = console.log.bind(console)
@@ -1433,7 +1433,7 @@ Internally the Model boxes all retrieved values that have been successfully retr
 
 #### JSON Graph Errors
 
-When a Model's [DataSource](http://netflix.github.io/falcor/documentation/datasources.html) encounters an error while attempting to retrieve a value from a JSON object, an Error object is created and placed in the JSON instead of the value that was unable to be retrieved. 
+When a Model's [DataSource](http://netflix.github.io/falcor/documentation/datasources.html) encounters an error while attempting to retrieve a value from a JSON object, an Error object is created and placed in the JSON instead of the value that was unable to be retrieved.
 
 By default a Model delivers Errors differently than other values. If synchronous methods are used to retrieve the data from the Model the error is thrown.  If the data is asynchronously being requested from the model as an Observable or a Promise, the error will be delivered in a special callback.
 
@@ -1463,9 +1463,9 @@ To learn more about the different ways to retrieve information from a Model, see
 
 ##### "What if I don't want a Model to treat errors differently from other values?"
 
-There are many reasons why you might want errors reported the same way as other values. For example you might retrieve several [paths](http://netflix.github.io/falcor/documentation/paths.html) from a model in a single request, and resilient if one of them fails. Furthermore you might want to display errors in a template alongside successfully-retrieved values. 
+There are many reasons why you might want errors reported the same way as other values. For example you might retrieve several [paths](http://netflix.github.io/falcor/documentation/paths.html) from a model in a single request, and resilient if one of them fails. Furthermore you might want to display errors in a template alongside successfully-retrieved values.
 
-The "treatErrorsAsValues" function creates a new Model which reports errors the same way as values. 
+The `treatErrorsAsValues` function creates a new Model which reports errors the same way as values.
 
 ~~~js
 var model = new falcor.Model({cache: {
@@ -1477,32 +1477,30 @@ var model = new falcor.Model({cache: {
     }
 }});
 
-// This outputs the following to the console:
-// {
-//    titlesById: {
-//        "44": {
-//            $type: "error",
-//            value: "failure."
-//        }
-//    }
-//
 model.
     treatErrorsAsValues().
     get('titlesById[44].name').
     then(
         response => {
-            console.log(JSON.stringify(response.json, 4, null);
+            console.log(JSON.stringify(response.json, null, 4));
         },
         pathValue => {
             // not called!
             console.error(JSON.stringify(pathValue));
         });
 
-// This outputs the following to the regular console:
-// failure.
+// This outputs the following to the console:
+//  {
+//      "titlesById": {
+//          "44": "failure.",
+//          "$__path": [
+//              "titlesById"
+//          ]
+//      }
+//  }
 ~~~
 
-Note that using "treatErrorsAsValues" will cause the model to deliver errors as values. However it will not provide you with a way to distinguish errors from values. If you would like to be able to receive errors alongside values, but retain the ability to distinguish between errors and values, you can chain "treatErrorsAsValues" and "boxValues" together. When I model is operating in "boxValues" mode, it always returns the sentinels that box each value and indicate their type. 
+Note that using `treatErrorsAsValues` will cause the model to deliver errors as values. However it will not provide you with a way to distinguish errors from values. If you would like to be able to receive errors alongside values, but retain the ability to distinguish between errors and values, you can chain `treatErrorsAsValues` and `boxValues` together. When a model is operating in `boxValues` mode, it always returns the sentinels that box each value and indicate their type.
 
 ~~~js
 var model = new falcor.Model({cache: {
@@ -1524,13 +1522,13 @@ console.log(JSON.stringify(model.treatErrorsAsValues().boxValues().getValueSync(
 // }
 ~~~
 
-When you receive a Sentinel, you can check the "$type" property of each sentinel to distinguish whether a value is an error ("error") or a successfully-retrieved value ("atom"). For more information see [Boxing and Unboxing](#Boxing-and-Unboxing).
+When you receive a Sentinel, you can check the `$type` property of each sentinel to distinguish whether a value is an error (`error`) or a successfully-retrieved value (`atom`). For more information see [Boxing and Unboxing](#Boxing-and-Unboxing).
 
 <a name="Retrieving-Data-from-a-Model"></a>
 
 ## Retrieving Data from a Model
 
-Errors are cached in the Model just like any other value. As it is possible to retrieve more than one [path](http://netflix.github.io/falcor/documentation/paths.html) at a time from a model,
+Consider the following Model:
 
 ~~~js
 var $ref = falcor.Model.ref;
@@ -1553,7 +1551,7 @@ var model = new falcor.Model({cache:{
                 // this customer object expires in 30 minutes.
                 $expires: -30 * 60 * 1000
             },
-            prerequisites: [$ref('todosById[79]')]      
+            prerequisites: [$ref('todosById[79]')]
         },
         "79": {
             $type: 'error',
@@ -1563,17 +1561,19 @@ var model = new falcor.Model({cache:{
 }});
 ~~~
 
+Note: Errors are cached in the Model just like any other value.
+
 The following [paths](http://netflix.github.io/falcor/documentation/paths.html) are legal to retrieve because atoms, errors, and references are considered value types in [JSON Graph](http://netflix.github.io/falcor/documentation/jsongraph.html):
 
 ~~~js
-model.getValue("todos[1].customer").then(log); 
+model.getValue("todos[1].customer").then(log);
 // prints {name: "Jim Hobart", address:"123 pacifica ave., CA, US"} because the value of an Atom is considered a value
 ~~~
 
-"Why can't I retrieve Arrays or Objects from a Model?"
+*Can I retrieve Arrays or Objects from a Model?*
 
-Instead you must be explicit, and request all of the value types that you need.
-  
+No, instead of requesting entire Arrays or Objects, you must be explicit and request all of the individual values that you need. See [JSON Graph Atoms](#JSON-Graph-Atoms) for a way to include small, immutable collections as values in your JSON Graph.
+
 In addition to the JavaScript path syntax, models can also process [paths](http://netflix.github.io/falcor/documentation/paths.html) with ranges in indexers:
 
 ~~~js
@@ -1615,32 +1615,28 @@ model.get('todos[0..1].name').then(function(x) {
 //     }
 // }
 ~~~
- 
+
 Models allow you to select as many [paths](http://netflix.github.io/falcor/documentation/paths.html) as you want in a single network request.
- 
+
 ~~~js
 model.get('todos[0..1].name', 'todos[0..1].done').then(log);
 ~~~
 
-The [paths](http://netflix.github.io/falcor/documentation/paths.html) in the previous example can be simplified to one [path](http://netflix.github.io/falcor/documentation/paths.html), because in addition to allowing ranges in indexers, Falcor models also allow multiple keys to be passed in a single indexer:
+The [paths](http://netflix.github.io/falcor/documentation/paths.html) in the previous example can be simplified to one path, because in addition to allowing ranges in indexers, Falcor models also allow multiple keys to be passed in a single indexer:
 
 ~~~js
 model.get('todos[0..1]["name", "done"]').then(log);
 ~~~
 
-Do you get method also except optional selector function, which can be used to transform the data retrieved from the server before...
- 
-One of the limitations of working with JSON data through a Falcor model is that you can only retrieve values.
- 
 <a name="Boxing-and-Unboxing"></a>
 
 ## Boxing and Unboxing
- 
+
 <a name="Sentinel-Metadata"></a>
 
 ## Sentinel Metadata
 
-Metadata can be attached to value types to control the way the Model handles them once they have been retrieved from the [data source](http://netflix.github.io/falcor/documentation/datasources.html). Metadata can be added to any JSON object as a key that starts with the prefix "$". Note that any keys set on JSON value types (string, number, boolean, and null) will not persist when serialized to JSON. 
+Metadata can be attached to value types to control the way the Model handles them once they have been retrieved from the [data source](http://netflix.github.io/falcor/documentation/datasources.html). Metadata can be added to any JSON object as a key that starts with the prefix `$`. Note that any keys set on JSON value types (string, number, boolean, and null) will not persist when serialized to JSON.
 
 ~~~json
 var number = 4;
@@ -1675,15 +1671,15 @@ The Model supports a variety of different metadata fields, which can be attached
 
 Every [JSON Graph](http://netflix.github.io/falcor/documentation/jsongraph.html) sentinel has to contain a $type key with one of the following three values:
 
-1. "atom"
-2. "ref"
-3. "error"
+1. `atom`
+2. `ref`
+3. `error`
 
 For more information see [JSON Graph Sentinels](#JSON-Graph-Sentinels).
 
 ### $expires metadata
 
-The $expires metadata dictates how long a value should remain in the Model cache. The value of the "$expires" key must a negative or positive integer. This value is overloaded to allow for two special values, as well as both positive and negative integers. Here are the meanings of these values:
+The $expires metadata dictates how long a value should remain in the Model cache. The value of the `$expires` key must a negative or positive integer. This value is overloaded to allow for two special values, as well as both positive and negative integers. Here are the meanings of these values:
 
 #### Expire Immediately ($expires = 0)
 
@@ -1747,10 +1743,10 @@ The $timestamp metadata eliminates race conditions like this by allowing both th
 
 ![How the Model Works]({{ site.baseurl }}/documentation/withtimestamp.png)
 
-The $timestamp value is the number of milliseconds between midnight of January 1, 1970 and the date on which the value is last modified. In this example we make an attempt to overwrite the rating key with an older value. The Model will ignore our attempt to mutate the value and return the newer value instead. 
+The $timestamp value is the number of milliseconds between midnight of January 1, 1970 and the date on which the value is last modified. In this example we make an attempt to overwrite the rating key with an older value. The Model will ignore our attempt to mutate the value and return the newer value instead.
 
 ~~~js
-var model = new falcor.Model({ 
+var model = new falcor.Model({
     cache: {
          rating: {
              $type: "atom",
@@ -1759,17 +1755,17 @@ var model = new falcor.Model({
          }
     }
  });
- // Attempt to set rating to older value will fail, 
+ // Attempt to set rating to older value will fail,
  // and the newer value "3" will be printed to the console.
  model.setValue(
-     "rating", 
+     "rating",
      {
          $type: "atom",
          $timestamp: 200,
          value: 5
      }).
      then(value => console.log(value));
-~~~ 
+~~~
 
 ### $size metadata
 
@@ -1793,7 +1789,8 @@ var model = new falcor.Model({
 });
 ~~~
 
-For more information on the Model Cache, see Model Cache.
+For more information on the Model Cache, see [Model
+Cache](#The-Model-Cache).
 
 ## Error Handling
 
@@ -1820,11 +1817,11 @@ var model = new falcor.Model({cache: {
 }});
 ~~~
 
-When values are requested from a Model, the Model attempts to retrieve the values from its cache using the [JSON Graph](http://netflix.github.io/falcor/documentation/jsongraph.html) get algorithm. 
+When values are requested from a Model, the Model attempts to retrieve the values from its cache using the [JSON Graph](http://netflix.github.io/falcor/documentation/jsongraph.html) get algorithm.
 
 ![Loading from Cache](./model-to-cache.png)
 
-If a value is not found in the cache, it is requested from the [data source](http://netflix.github.io/falcor/documentation/datasources.html). 
+If a value is not found in the cache, it is requested from the [data source](http://netflix.github.io/falcor/documentation/datasources.html).
 ![Loading from DataSource](./cache-to-datasource.png)
 
 Many applications run on devices with limited memory. As the Model Cache accumulates more and more data over time, there is a risk that the device may run out of memory and the application may crash. To minimize this risk, the Model Cache can be assigned a maximum size. When the size of the Model Cache outgrows the maximum size, the Model schedules a collection.  During the collection phase, the Model removes values from the cache until the cache size is equal to a customizable ratio of the maximum size. The maximum cache size and collect ratio can be set when the model is constructed.
@@ -1833,16 +1830,16 @@ Many applications run on devices with limited memory. As the Model Cache accumul
 var model = new falcor.Model({ maxSize: 15000, collectRatio: 0.75 });
 ~~~
 
-To minimize the risk of purging items from the cache that the application is currently using, the Model collection phase takes the following steps: 
+To minimize the risk of purging items from the cache that the application is currently using, the Model collection phase takes the following steps:
 
 1. The Model removes all of the values from the cache which have expired.
-2. The Model removes items from the cache in order of least recently used until the size of the Model Cache is equal to the collect ratio multiplied by the maximum size. 
+2. The Model removes items from the cache in order of least recently used until the size of the Model Cache is equal to the collect ratio multiplied by the maximum size.
 
 In the unlikely event that a value which the application is currently using is removed from the cache, the value will be reloaded from the [data source](http://netflix.github.io/falcor/documentation/datasources.html) when requested again.
 
 # Batching Outgoing Requests
 
-By default, each request to the Model will map to a single request to the [DataSource](http://netflix.github.io/falcor/documentation/datasources.html). Usually, the [DataSource](http://netflix.github.io/falcor/documentation/datasources.html) forwards the requests to a remote server on the network. Given the high cost of network requests, it can be efficient to batch multiple requests to the Model into a single request to the [DataSource](http://netflix.github.io/falcor/documentation/datasources.html). This can be accomplished using the Model's batch method: 
+By default, each request to the Model will map to a single request to the [DataSource](http://netflix.github.io/falcor/documentation/datasources.html). Usually, the [DataSource](http://netflix.github.io/falcor/documentation/datasources.html) forwards the requests to a remote server on the network. Given the high cost of network requests, it can be efficient to batch multiple requests to the Model into a single request to the [DataSource](http://netflix.github.io/falcor/documentation/datasources.html). This can be accomplished using the Model's batch method:
 
 ~~~js
 var log = console.log.bind(console);
@@ -1867,7 +1864,7 @@ batchModel.getValue("todos[2].name").then(log);
 
 When you request a [path](http://netflix.github.io/falcor/documentation/paths.html) from a Model, the Model first attempts to retrieve the data from an in-memory cache. If the model fails to find the data in its cache, the Model requests the data from its [DataSource](http://netflix.github.io/falcor/documentation/datasources.html).
 
-Typically a [path](http://netflix.github.io/falcor/documentation/paths.html) that has been optimized can be retrieved more efficiently by the Model's [DataSource](http://netflix.github.io/falcor/documentation/datasources.html) because it requires fewer steps through the graph to retrieve the data. 
+Typically a [path](http://netflix.github.io/falcor/documentation/paths.html) that has been optimized can be retrieved more efficiently by the Model's [DataSource](http://netflix.github.io/falcor/documentation/datasources.html) because it requires fewer steps through the graph to retrieve the data.
 
 
 When attempting to retrieve [paths](http://netflix.github.io/falcor/documentation/paths.html) from the cache, Models optimize [paths](http://netflix.github.io/falcor/documentation/paths.html) whenever they encounter references. This means that even if a Model is not able to find the requested data in its local cache, it may be able to request a more optimized [path](http://netflix.github.io/falcor/documentation/paths.html) from the [data source](http://netflix.github.io/falcor/documentation/datasources.html).

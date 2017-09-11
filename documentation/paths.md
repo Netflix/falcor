@@ -56,22 +56,22 @@ Each non-null value that is not a string is converted to a string immediately pr
 
 Here are some examples of the valid Path Strings:
 
-* "todos[0].name"
-* 'todos[0]["name"]'
-* 'todos["0"]["name"]'
+* `'todos[0].name'`
+* `'todos[0]["name"]'`
+* `'todos["0"]["name"]'`
 
 _Unlike_ JavaScript's Path syntax it is also possible to use indexers for the first key in the path.
 
-* '["todos"][0]["name"]'
-* '["todos"][0].name'
+* `'["todos"][0]["name"]'`
+* `'["todos"][0].name'`
 
 ### Path
 
 In addition to Path Syntax Strings, [Models](http://netflix.github.io/falcor/documentation/model.html) can also be passed an Arrays of Keys, simply referred to as a Path. Here are a few examples of valid Paths:
 
-* ["todos", 0, "name"]
-* ["todos", 5, true]
-* ["todos", 9, null]
+* `["todos", 0, "name"]`
+* `["todos", 5, true]`
+* `["todos", 9, null]`
 
 Using a Path Array is more efficient than the Path Syntax, because under the hood a [Model](http://netflix.github.io/falcor/documentation/model.html) immediately parses Path Syntax Strings into Path Arrays. Furthermore, a Path Array is often preferable when you have to build Paths programmatically, because string concatenation can be avoided.
 
@@ -137,7 +137,7 @@ PathSets are a superset of the Path grammar because in addition to Keys, PathSet
 * Range
 * Array of Keys or Ranges
 
-Two Paths can be collapsed into a PathSet if they are identical save for one Key position. In other words ["todos",0,"done"] and ["todos",5,"done"] can be collapsed into ["todos", [0, 5], "done"]. Furthermore where a KeySet contains a sequence of consecutive integers, these keys can be collapsed into a range. In other words ["todos", 1, "done"], ["todos",  2, "done"], and ["todos", 3, "done"] can be collapsed into ["todos", { from: 1, to: 3 }, "done"].
+Two Paths can be collapsed into a PathSet if they are identical save for one Key position. In other words `["todos",0,"done"]` and `["todos",5,"done"]` can be collapsed into `["todos", [0, 5], "done"]`. Furthermore where a KeySet contains a sequence of consecutive integers, these keys can be collapsed into a range. In other words `["todos", 1, "done"]`, `["todos",  2, "done"]`, and `["todos", 3, "done"]` can be collapsed into `["todos", { from: 1, to: 3 }, "done"]`.
 
 [Models](http://netflix.github.io/falcor/documentation/model.html) can accept PathSets in one of two formats:
 
@@ -150,11 +150,11 @@ PathSet Syntax Strings expand on the Path Syntax Grammar, adding ranges, and the
 
 The following PathSet Strings are valid:
 
-* "todos[0..2].name" is equivalent to "todos[0].name", "todos[1].name", and "todos[2].name"
-* "todos[0...2].name" is equivalent to "todos[0].name", and "todos[1].name"
-* "todos[0..1]['name','done']" is equivalent to "todos[0].name", "todos[0].done", "todos[1].name", and "todos[1].done"
-* 'todos[0..1]["name","done"]' is equivalent to "todos[0].name", "todos[0].done", "todos[1].name", and "todos[1].done"
-* "todos[0..1, 'length']" is equivalent to "todos[0]", "todos[1]", and "todos.length"
+* `"todos[0..2].name"` is equivalent to `"todos[0].name"`, `"todos[1].name"`, and `"todos[2].name"`
+* `"todos[0...2].name"` is equivalent to `"todos[0].name"`, and `"todos[1].name"`
+* `"todos[0..1]['name','done']"` is equivalent to `"todos[0].name"`, `"todos[0].done"`, `"todos[1].name"`, and `"todos[1].done"`
+* `'todos[0..1]["name","done"]'` is equivalent to `"todos[0].name"`, `"todos[0].done"`, `"todos[1].name"`, and `"todos[1].done"`
+* `"todos[0..1, 'length']"` is equivalent to `"todos[0]"`, `"todos[1]"`, and `"todos.length"`
 
 ### PathSet Array
 
@@ -162,8 +162,8 @@ In addition to PathSet Syntax Strings, [Models](http://netflix.github.io/falcor/
 
 The following PathSet Arrays are valid:
 
-* ["todos", { from: 0, to: 2 }, "name"] is equivalent to ["todos", 0, "name"], ["todos", 1, "name"], and ["todos", 2, "name"]
-* ["todos", { from: 0, length: 2 }, "name"] is equivalent to ["todos", 0, "name"], and ["todos", 1, "name"]
-* ["todos", { length: 2 }, "name"] is equivalent to ["todos", 0, "name"], and ["todos", 1, "name"]
-* ["todos", { from: 0, to: 1 }, ['name','done']] is equivalent to ["todos", 0, "name"], ["todos", 0, "done"], ["todos", 1, "name"], and ["todos", 1, "done"]
-* ["todos", [{from: 0, to: 1}, "length"]] is equivalent to ["todos", 0], ["todos", 1], and ["todos", "length"]
+* `["todos", { from: 0, to: 2 }, "name"]` is equivalent to `["todos", 0, "name"]`, `["todos", 1, "name"]`, and `["todos", 2, "name"]`
+* `["todos", { from: 0, length: 2 }, "name"]` is equivalent to `["todos", 0, "name"]`, and `["todos", 1, "name"]`
+* `["todos", { length: 2 }, "name"]` is equivalent to `["todos", 0, "name"]`, and `["todos", 1, "name"]`
+* `["todos", { from: 0, to: 1 }, ['name','done']]` is equivalent to `["todos", 0, "name"]`, `["todos", 0, "done"]`, `["todos", 1, "name"]`, and `["todos", 1, "done"]`
+* `["todos", [{from: 0, to: 1}, "length"]]` is equivalent to `["todos", 0]`, `["todos", 1]`, and `["todos", "length"]`
