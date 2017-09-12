@@ -36,7 +36,7 @@ Here's a simple example of a JSON Graph Object that represents a TODO list where
         { $type: "ref", value: ["todosById", 44] },
         { $type: "ref", value: ["todosById", 54] }
     ]
-};
+}
 ```
 
 Note that in the example above the JSON Graph contains references to other locations in the same object. It is this concept of a Reference that allows graphs to be represented in JSON.
