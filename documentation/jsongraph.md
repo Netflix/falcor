@@ -779,9 +779,9 @@ Now that we have reached the final key, `completed`, we insert the boolean value
 }
 ~~~
 
-#### Value Coercion
+The [DataSource](http://netflix.github.io/falcor/documentation/datasources.html) implementing the abstract set operation (often, on the server) must always return either the new data after making the changes asked, or the paths whose value was changed. This is so that client-side cache doesn't get stale.
 
-The object evaluating the abstract set operation may choose to coerce the value being set into a different value. If so, the JSON Graph object, as well as the JSON Graph subset response will contain the coerced value after the abstract set operation completes. Take the following JSON Graph object, which models titles that can be viewed in an online video streaming application.
+For example, given a JSON Graph as follows:
 
 ~~~js
 {
@@ -795,13 +795,13 @@ The object evaluating the abstract set operation may choose to coerce the value 
 }
 ~~~
 
-Let's attempt to set the user rating of the title to 9, even though the only ratings allowed are between 1 and 5.
+When we set `userRating` to 5 with the following set operation:
 
 ~~~js
-{ path: ["titlesById", 253, "userRating"], value: 9 }
+{ path: ["titlesById", 253, "userRating"], value: 5 }
 ~~~
 
-Firstly evaluate the `titlesById` key. We find an object, so we continue. We evaluate the number `253` key, and convert it into a string using the JSON stringify method. We find another object, so we continue. Finally we attempt to set the `userRating` key to `9`, and the object evaluating the abstract set operation instead sets the rating to the upper bound of valid values: `5`. The number five is inserted in both the JSON Graph object, as well as the JSON Graph subset. The JSON Graph subset response is returned as the result of the abstract set operation.
+The final JSON Graph looks like this:
 
 ~~~js
 // JSON Graph object
@@ -814,7 +814,11 @@ Firstly evaluate the `titlesById` key. We find an object, so we continue. We eva
         }
     }
 }
+~~~
 
+And the returned response from server looks as follos:
+
+~~~js
 // JSON Graph Envelope response
 {
     jsonGraph: {

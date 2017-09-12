@@ -87,32 +87,13 @@ function loadTodoStatusByIndex(index) {
 }
 ~~~
 
-[Models](http://netflix.github.io/falcor/documentation/model.html) always emit Paths as Arrays of Keys, because it is easier for consumers to analyze the path. For example:
-
-~~~js
-var model = new falcor.Model({
-  cache: {
-    todos: [
-      { name: 'get milk from corner store', done: false },
-      { name: 'go to ATM', done: false }
-    ]
-  }
-});
-
-// prints the following (notice outgoing Paths are always represented as Arrays):
-// { path: ["todos", 0, "name"], value: 'get milk from corner store' }
-// { path: ["todos", 1, "name"], value: 'go to ATM' }
-model.
-  get("todos[0].name", "todos[1].name").
-  toPathValues().
-  subscribe(pathValue => console.log(JSON.stringify(pathValue)));
-~~~
+[Models](http://netflix.github.io/falcor/documentation/model.html) always emit Paths as Arrays of Keys, because it is easier for consumers to analyze the path.
 
 ## PathSets
 
 A PathSet is a human-readable shorthand for a set of Paths. Any [Model](http://netflix.github.io/falcor/documentation/model.html) method which can accept multiple Paths, can also accept multiple PathSets.
 
-In other words of writing this...
+In other words, instead of writing this...
 
 ~~~js
 var response =
