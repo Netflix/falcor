@@ -18,7 +18,7 @@ JSON Graph is valid JSON and can be parsed by any JSON parser. However JSON Grap
 
 Here's a simple example of a JSON Graph Object that represents a TODO list where each task can be linked to one or more prerequisites.
 
-~~~js
+```js
 {
     todosById: {
         "44": {
@@ -37,7 +37,7 @@ Here's a simple example of a JSON Graph Object that represents a TODO list where
         { $type: "ref", value: ["todosById", 54] }
     ]
 };
-~~~
+```
 
 Note that in the example above the JSON Graph contains references to other locations in the same object. It is this concept of a Reference that allows graphs to be represented in JSON.
 
