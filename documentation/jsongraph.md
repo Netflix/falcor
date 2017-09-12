@@ -878,13 +878,13 @@ The add method creates a new task in the `todosById` object, and then adds a Ref
 Let's invoke the `add` function using the abstract call operation. The abstract call operation accepts four parameters:
 
 1. callPath
-2. arguments
+2. args
 3. refPaths
 4. thisPaths
 
 The `callPath` is the [Path](http://netflix.github.io/falcor/documentation/paths.html) to the function within the [DataSource](http://netflix.github.io/falcor/documentation/datasources.html)'s JSON Graph object. Note that one invocation of call can only run a single function.
 
-The `arguments` parameter is the array of arguments to be passed to the function being called.
+The `args` parameter is the array of arguments to be passed to the function being called.
 
 The `refPaths` is an array of [Paths](http://netflix.github.io/falcor/documentation/paths.html) to retrieve from the targets of any references in the JSON Graph Envelope returned by the function.
 
@@ -896,7 +896,7 @@ Here is how we invoke the abstract call operation:
 call(
     // callPath
     ["todos", "add"],
-    // arguments
+    // args
     ["pick up car from the shop"],
     // refPaths
     [
@@ -961,7 +961,7 @@ The function returns the following JSON Graph Envelope:
 
 Notice that instead of returning the entire contents of the `todos` list, the function has returned only a Reference to the newly-created task. Furthermore, the function has indicated that the `length` key of the `todos` list has changed, and if the caller has cached this value, then the value should be invalidated in the cache. Finally, the response contains a `paths` key with an array of [paths](http://netflix.github.io/falcor/documentation/paths.html) to the values in the JSON Graph subset. Unlike get and set, there is no way of predicting what values a call operation will return in its response. The `paths` array provides easy access to the values within the JSON Graph subset, rather than forcing the caller to resort to reflection.
 
-Every function strives to return the minimum amount of data to ensure that the caller's cache does not contain stale data and the caller can retrieve values from objects newly created by the function. The intention is the give the caller the ability to request precisely the data they need from the JSON Graph object using the refPaths and thisPaths arguments.
+Every function strives to return the minimum amount of data to ensure that the caller's cache does not contain stale data and the caller can retrieve values from objects newly created by the function. The intention is the give the caller the ability to request precisely the data they need from the JSON Graph object using the `refPaths` and `thisPaths` arguments.
 
 Now the object executing the abstract call operation retrieves the refPaths from each Reference in the function response. The response contains only one Reference at `["todos", "2"]`. Each [Path](http://netflix.github.io/falcor/documentation/paths.html) in the refPaths array is appended to each [Path](http://netflix.github.io/falcor/documentation/paths.html) at which a reference is found in the function's JSON Graph subset response.
 
