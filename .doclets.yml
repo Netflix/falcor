@@ -1,0 +1,5 @@
+dir: lib
+articles:
+  - About: README.md
+  - Migrations: MIGRATIONS.md
+  - Changelog: CHANGELOG.md
