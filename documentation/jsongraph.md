@@ -779,7 +779,7 @@ Now that we have reached the final key, `completed`, we insert the boolean value
 }
 ~~~
 
-The [DataSource](http://netflix.github.io/falcor/documentation/datasources.html) implementing the abstract set operation (often, on the server) must always return either the new data after making the changes asked, or the paths whose value was changed. This is so that client-side cache doesn't get stale.
+The [DataSource](http://netflix.github.io/falcor/documentation/datasources.html) implementing the abstract set operation (often, on the server) must always return the new data after making the changes asked, or the paths whose value was changed. This is so that either client cache updates with new data, or it invalidates paths with stale data.
 
 For example, given a JSON Graph as follows:
 
@@ -816,7 +816,7 @@ The final JSON Graph looks like this:
 }
 ~~~
 
-And the returned response from server looks as follos:
+And this is what set operation must return to update the client:
 
 ~~~js
 // JSON Graph Envelope response
@@ -824,12 +824,13 @@ And the returned response from server looks as follos:
     jsonGraph: {
         titlesById: {
             253: {
-                name: "House of Cards",
-                rating: 4.5,
                 userRating: 5
             }
         }
-    }
+    },
+    paths: [
+        [ "titlesById", 253, "userRating" ]
+    ]
 }
 ~~~
 
