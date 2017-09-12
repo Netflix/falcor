@@ -310,6 +310,10 @@ Finally, the Router looks up `["length"]` on the list object and adds the value 
 }
 ~~~
 
+*Note*: Data Source must return either the new altered values as part of
+`jsonGraph` object, or altered paths as part of `paths` array, or both. This is
+so the client-side cache does not get stale.
+
 ## Why Implement a DataSource?
 
 The most common reason for implementing a DataSource is to allow data to be retrieved from the network using a specific transport protocol. The falcor library ships with the HttpDataSource, which only supports retrieving [JSON Graph](http://netflix.github.io/falcor/documentation/jsongraph.html) information from the network using the HTTP/HTTPS protocol.
