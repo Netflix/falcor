@@ -5,9 +5,9 @@ exclude:
   - "gulpfile.js"
   - "package.json"
 markdown: kramdown
-highlighter: rouge
 kramdown:
   toc_levels: 1..2
+  syntax_highlighter: rouge
 # Default sitewide metadata
 meta_defaults:
   description: "A JavaScript library for efficient data fetching."
