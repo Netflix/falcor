@@ -8,7 +8,6 @@ markdown: kramdown
 highlighter: rouge
 kramdown:
   toc_levels: 1..2
-  synta
 # Default sitewide metadata
 meta_defaults:
   description: "A JavaScript library for efficient data fetching."
