@@ -1,15 +1,17 @@
 baseurl: "/falcor"
-exclude: 
+exclude:
   - "less"
   - "node_modules"
   - "gulpfile.js"
   - "package.json"
 markdown: kramdown
+highlighter: rouge
 kramdown:
   toc_levels: 1..2
+  synta
 # Default sitewide metadata
 meta_defaults:
   description: "A JavaScript library for efficient data fetching."
   title: "One Model Everywhere"
   # All titles (including the default) will have this prepended to them
-  title_prefix: "Falcor: "  
+  title_prefix: "Falcor: "
