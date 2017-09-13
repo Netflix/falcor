@@ -84,7 +84,7 @@ Here is a simple example of a JSON Graph object that contains the domain data fo
         { $type: "ref", value: ["todosById", 44] },
         { $type: "ref", value: ["todosById", 54] }
     ]
-};
+}
 ~~~
 
 JSON Graph References are just like symbolic links in the UNIX file system. Symbolic links are just files that contain a path. However if the shell encounters a symbolic link while evaluating a Path, the shell begins evaluating the path within the symbolic link. It is this awareness of symbolic links that allows graphs to be represented in a hierarchical structure. Falcor provides several operations for retrieving and modifying JSON Graph objects. These operations recognize References and automatically traverse them. This allows you to ensure that the graph only contains one instance of every entity, while navigating the graph as if the entity appears in multiple places.
