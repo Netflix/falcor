@@ -325,7 +325,7 @@ describe('DataSource Only', function() {
                     return done(e);
                 }
                 return done();
-            }, done.bind('should not complete'));
+            }, done.bind(null, new Error('should not complete')));
     });
 
     it('should onError a MaxRetryExceededError when data source is async.', function(done) {
@@ -340,7 +340,7 @@ describe('DataSource Only', function() {
                     return done(e);
                 }
                 return done();
-            }, done.bind('should not complete'));
+            }, done.bind(null, new Error('should not complete')));
     });
 
     it('should return missing optimized paths with MaxRetryExceededError', function(done) {
