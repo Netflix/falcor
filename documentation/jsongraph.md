@@ -779,9 +779,9 @@ Now that we have reached the final key, `completed`, we insert the boolean value
 }
 ~~~
 
-#### Value Coercion
+The [DataSource](http://netflix.github.io/falcor/documentation/datasources.html) implementing the abstract set operation (often, on the server) must always return the new data after making the changes asked, or the paths whose value was changed. This is so that either client cache updates with new data, or it invalidates paths with stale data.
 
-The object evaluating the abstract set operation may choose to coerce the value being set into a different value. If so, the JSON Graph object, as well as the JSON Graph subset response will contain the coerced value after the abstract set operation completes. Take the following JSON Graph object, which models titles that can be viewed in an online video streaming application.
+For example, given a JSON Graph as follows:
 
 ~~~js
 {
@@ -795,13 +795,13 @@ The object evaluating the abstract set operation may choose to coerce the value 
 }
 ~~~
 
-Let's attempt to set the user rating of the title to 9, even though the only ratings allowed are between 1 and 5.
+When we set `userRating` to 5 with the following set operation:
 
 ~~~js
-{ path: ["titlesById", 253, "userRating"], value: 9 }
+{ path: ["titlesById", 253, "userRating"], value: 5 }
 ~~~
 
-Firstly evaluate the `titlesById` key. We find an object, so we continue. We evaluate the number `253` key, and convert it into a string using the JSON stringify method. We find another object, so we continue. Finally we attempt to set the `userRating` key to `9`, and the object evaluating the abstract set operation instead sets the rating to the upper bound of valid values: `5`. The number five is inserted in both the JSON Graph object, as well as the JSON Graph subset. The JSON Graph subset response is returned as the result of the abstract set operation.
+The final JSON Graph looks like this:
 
 ~~~js
 // JSON Graph object
@@ -814,18 +814,23 @@ Firstly evaluate the `titlesById` key. We find an object, so we continue. We eva
         }
     }
 }
+~~~
 
+And this is what set operation must return to update the client:
+
+~~~js
 // JSON Graph Envelope response
 {
     jsonGraph: {
         titlesById: {
             253: {
-                name: "House of Cards",
-                rating: 4.5,
                 userRating: 5
             }
         }
-    }
+    },
+    paths: [
+        [ "titlesById", 253, "userRating" ]
+    ]
 }
 ~~~
 
@@ -872,14 +877,14 @@ The add method creates a new task in the `todosById` object, and then adds a Ref
 
 Let's invoke the `add` function using the abstract call operation. The abstract call operation accepts four parameters:
 
-1. callPath
-2. arguments
-3. refPaths
-4. thisPaths
+1. `callPath`
+2. `args`
+3. `refPaths`
+4. `thisPaths`
 
 The `callPath` is the [Path](http://netflix.github.io/falcor/documentation/paths.html) to the function within the [DataSource](http://netflix.github.io/falcor/documentation/datasources.html)'s JSON Graph object. Note that one invocation of call can only run a single function.
 
-The `arguments` parameter is the array of arguments to be passed to the function being called.
+The `args` parameter is the array of arguments to be passed to the function being called.
 
 The `refPaths` is an array of [Paths](http://netflix.github.io/falcor/documentation/paths.html) to retrieve from the targets of any references in the JSON Graph Envelope returned by the function.
 
@@ -891,7 +896,7 @@ Here is how we invoke the abstract call operation:
 call(
     // callPath
     ["todos", "add"],
-    // arguments
+    // args
     ["pick up car from the shop"],
     // refPaths
     [
@@ -956,9 +961,9 @@ The function returns the following JSON Graph Envelope:
 
 Notice that instead of returning the entire contents of the `todos` list, the function has returned only a Reference to the newly-created task. Furthermore, the function has indicated that the `length` key of the `todos` list has changed, and if the caller has cached this value, then the value should be invalidated in the cache. Finally, the response contains a `paths` key with an array of [paths](http://netflix.github.io/falcor/documentation/paths.html) to the values in the JSON Graph subset. Unlike get and set, there is no way of predicting what values a call operation will return in its response. The `paths` array provides easy access to the values within the JSON Graph subset, rather than forcing the caller to resort to reflection.
 
-Every function strives to return the minimum amount of data to ensure that the caller's cache does not contain stale data and the caller can retrieve values from objects newly created by the function. The intention is the give the caller the ability to request precisely the data they need from the JSON Graph object using the refPaths and thisPaths arguments.
+Every function strives to return the minimum amount of data to ensure that the caller's cache does not contain stale data and the caller can retrieve values from objects newly created by the function. The intention is the give the caller the ability to request precisely the data they need from the JSON Graph object using the `refPaths` and `thisPaths` arguments.
 
-Now the object executing the abstract call operation retrieves the refPaths from each Reference in the function response. The response contains only one Reference at `["todos", "2"]`. Each [Path](http://netflix.github.io/falcor/documentation/paths.html) in the refPaths array is appended to each [Path](http://netflix.github.io/falcor/documentation/paths.html) at which a reference is found in the function's JSON Graph subset response.
+Now the object executing the abstract call operation retrieves the `refPaths` from each Reference in the function response. The response contains only one Reference at `["todos", "2"]`. Each [Path](http://netflix.github.io/falcor/documentation/paths.html) in the `refPaths` array is appended to each [Path](http://netflix.github.io/falcor/documentation/paths.html) at which a reference is found in the function's JSON Graph subset response.
 
 ~~~js
 ["todos", "2"].concat(["addedAt"]) // produces ["todos", "2", "addedAt"]
@@ -988,9 +993,9 @@ The object executing the abstract call operation now executes the abstract get o
 }
 ~~~
 
-The refPaths array allows the caller to retrieve values from objects created by the function, without having to know the [Paths](http://netflix.github.io/falcor/documentation/paths.html) to these objects.
+The `refPaths` array allows the caller to retrieve values from objects created by the function, without having to know the [Paths](http://netflix.github.io/falcor/documentation/paths.html) to these objects.
 
-Finally the object executing the abstract get operation retrieves each [Path](http://netflix.github.io/falcor/documentation/paths.html) in the thisPaths array. A new [Path](http://netflix.github.io/falcor/documentation/paths.html) is created by appending each [Path](http://netflix.github.io/falcor/documentation/paths.html) in the array to the function's this object [Path](http://netflix.github.io/falcor/documentation/paths.html).
+Finally the object executing the abstract get operation retrieves each [Path](http://netflix.github.io/falcor/documentation/paths.html) in the `thisPaths` array. A new [Path](http://netflix.github.io/falcor/documentation/paths.html) is created by appending each [Path](http://netflix.github.io/falcor/documentation/paths.html) in the array to the function's this object [Path](http://netflix.github.io/falcor/documentation/paths.html).
 
 ~~~js
 ["todos"].concat(["length"]) // produces ["todos", "length"]

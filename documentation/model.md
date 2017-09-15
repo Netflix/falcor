@@ -157,7 +157,7 @@ The optional source value in the Model constructor options object can be initial
 
 ## The onChange and comparator values
 
-These optional values relate to change detection. For more information on Change Detection, see [Model Change Detection](#Model-Change-Detection).
+These optional values relate to change detection.
 
 ## The errorSelector value
 
@@ -1033,45 +1033,6 @@ var json = {
         $ref('todosById[54]')
     ]
 };
-~~~
-
-Although a Reference is a JSON object, it is treated as a value type by the Model. In other words it is legal to retrieve a reference from a Falcor Model.
-
-~~~js
-var $ref = falcor.Model.ref;
-
-var model = new falcor.Model({cache: {
-    todos: [
-        $ref('todosById[44]'),
-        $ref('todosById[54]')
-    ],
-    todosById: {
-        "44": {
-            name: 'get milk from corner store',
-            done: false,
-            prerequisites: [$ref('todosById[54]')]
-        },
-        "54": {
-            name: 'withdraw money from ATM',
-            done: false
-        }
-    }
-}});
-
-model.get('todos[1]').
-    then(function(x) { console.log(JSON.stringify(x, null, 4)); })
-
-// This outputs the following to the console:
-// {
-//     "json": {
-//         "todos": {
-//             "1": [
-//                 "todosById",
-//                 54
-//             ]
-//         }
-//     }
-// }
 ~~~
 
 Note that in the example above each TODO appears only once. If we use a Model to set a TODO to false we will observe that the new state will be reflected regardless of where in the [JSON Graph](http://netflix.github.io/falcor/documentation/jsongraph.html) we retrieve the TODO's information.

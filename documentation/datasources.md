@@ -168,8 +168,8 @@ response.subscribe(jsonGraphEnvelope => JSON.stringify(jsonGraphEnvelope, null, 
 //                     { $type: "ref", value: ['todosById', 97] }
 //                 ]
 //             },
-//             "54": { name: 'withdraw money from ATM', done: true },
-//             "97": { name: 'pick car up from shop', done: true }
+//             "54": { done: true },
+//             "97": { done: true }
 //         }
 //     }
 // }
@@ -309,6 +309,10 @@ Finally, the Router looks up `["length"]` on the list object and adds the value 
   paths: [ ["myList", 7, "name"], ["myList", 7, "length"] ]
 }
 ~~~
+
+*Note*: Data Source must return either the new altered values as part of
+`jsonGraph` object, or altered paths as part of `paths` array, or both. This is
+so the client-side cache does not get stale.
 
 ## Why Implement a DataSource?
 
