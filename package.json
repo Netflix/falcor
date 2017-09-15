@@ -36,7 +36,7 @@
     "falcorjs"
   ],
   "devDependencies": {
-    "benchmark": "^1.0.0",
+    "benchmark": "^2.1.4",
     "body-parser": "^1.13.3",
     "browserify": "^10.2.0",
     "bundle-collapser": "^1.2.1",
