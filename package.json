@@ -43,7 +43,7 @@
     "chai": "^4.1.2",
     "coveralls": "^2.11.2",
     "csv-parse": "^1.2.2",
-    "del": "^1.2.1",
+    "del": "^3.0.0",
     "express": "^4.13.3",
     "falcor-express": "^0.1.2",
     "falcor-http-datasource": "0.1.3",
