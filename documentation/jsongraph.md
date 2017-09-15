@@ -877,10 +877,10 @@ The add method creates a new task in the `todosById` object, and then adds a Ref
 
 Let's invoke the `add` function using the abstract call operation. The abstract call operation accepts four parameters:
 
-1. callPath
-2. args
-3. refPaths
-4. thisPaths
+1. `callPath`
+2. `args`
+3. `refPaths`
+4. `thisPaths`
 
 The `callPath` is the [Path](http://netflix.github.io/falcor/documentation/paths.html) to the function within the [DataSource](http://netflix.github.io/falcor/documentation/datasources.html)'s JSON Graph object. Note that one invocation of call can only run a single function.
 
@@ -963,7 +963,7 @@ Notice that instead of returning the entire contents of the `todos` list, the fu
 
 Every function strives to return the minimum amount of data to ensure that the caller's cache does not contain stale data and the caller can retrieve values from objects newly created by the function. The intention is the give the caller the ability to request precisely the data they need from the JSON Graph object using the `refPaths` and `thisPaths` arguments.
 
-Now the object executing the abstract call operation retrieves the refPaths from each Reference in the function response. The response contains only one Reference at `["todos", "2"]`. Each [Path](http://netflix.github.io/falcor/documentation/paths.html) in the refPaths array is appended to each [Path](http://netflix.github.io/falcor/documentation/paths.html) at which a reference is found in the function's JSON Graph subset response.
+Now the object executing the abstract call operation retrieves the `refPaths` from each Reference in the function response. The response contains only one Reference at `["todos", "2"]`. Each [Path](http://netflix.github.io/falcor/documentation/paths.html) in the `refPaths` array is appended to each [Path](http://netflix.github.io/falcor/documentation/paths.html) at which a reference is found in the function's JSON Graph subset response.
 
 ~~~js
 ["todos", "2"].concat(["addedAt"]) // produces ["todos", "2", "addedAt"]
@@ -993,9 +993,9 @@ The object executing the abstract call operation now executes the abstract get o
 }
 ~~~
 
-The refPaths array allows the caller to retrieve values from objects created by the function, without having to know the [Paths](http://netflix.github.io/falcor/documentation/paths.html) to these objects.
+The `refPaths` array allows the caller to retrieve values from objects created by the function, without having to know the [Paths](http://netflix.github.io/falcor/documentation/paths.html) to these objects.
 
-Finally the object executing the abstract get operation retrieves each [Path](http://netflix.github.io/falcor/documentation/paths.html) in the thisPaths array. A new [Path](http://netflix.github.io/falcor/documentation/paths.html) is created by appending each [Path](http://netflix.github.io/falcor/documentation/paths.html) in the array to the function's this object [Path](http://netflix.github.io/falcor/documentation/paths.html).
+Finally the object executing the abstract get operation retrieves each [Path](http://netflix.github.io/falcor/documentation/paths.html) in the `thisPaths` array. A new [Path](http://netflix.github.io/falcor/documentation/paths.html) is created by appending each [Path](http://netflix.github.io/falcor/documentation/paths.html) in the array to the function's this object [Path](http://netflix.github.io/falcor/documentation/paths.html).
 
 ~~~js
 ["todos"].concat(["length"]) // produces ["todos", "length"]
