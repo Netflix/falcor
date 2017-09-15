@@ -29,7 +29,7 @@ describe('Missing', function() {
             cache: missingCache
         });
     });
-    it('should report a missing path.', function() {
+    it('should report missing paths.', function() {
         getCoreRunner({
             input: [['multi', {to: 1}, 0, 'title']],
             output: {
