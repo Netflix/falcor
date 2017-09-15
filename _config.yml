@@ -1,5 +1,5 @@
 baseurl: "/falcor"
-exclude: 
+exclude:
   - "less"
   - "node_modules"
   - "gulpfile.js"
@@ -12,4 +12,4 @@ meta_defaults:
   description: "A JavaScript library for efficient data fetching."
   title: "One Model Everywhere"
   # All titles (including the default) will have this prepended to them
-  title_prefix: "Falcor: "  
+  title_prefix: "Falcor: "

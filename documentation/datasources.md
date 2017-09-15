@@ -131,7 +131,7 @@ var dataSource =
     }).asDataSource();
 ~~~
 
-Here is an example which sets the status of both prerequisites of the first task in a TODO list to "done."
+Here is an example which sets the status of both prerequisites of the first task in a TODO list to `done`.
 
 ~~~js
 var response = dataSource.set({
@@ -181,11 +181,11 @@ The `call` method on the DataSource interface executes the abstract [JSON Graph]
 
 Functions are useful for non-idempotent operations which cannot be performed using `get` or `set` (ex. like adding to a list). Using a Function is appropriate when the application is performing a transactional operation that cannot be represented as a series of set operations.
 
-[JSON Graph](http://netflix.github.io/falcor/documentation/jsongraph.html) Functions can _not_ return transient data (ex. 2 + 2 = 4). A [JSON Graph](http://netflix.github.io/falcor/documentation/jsongraph.html) function can only return a JSONGraphEnvelope containing a subset of the data in its "this" object (the object which contains the function as a member).
+[JSON Graph](http://netflix.github.io/falcor/documentation/jsongraph.html) Functions can _not_ return transient data (ex. 2 + 2 = 4). A [JSON Graph](http://netflix.github.io/falcor/documentation/jsongraph.html) function can only return a JSONGraphEnvelope containing a subset of the data in its `this` object (the object which contains the function as a member).
 
-When a Function returns a JSONGraphEnvelope, it *must* include a "paths" key which contains [PathSet Arrays or Path Arrays](http://netflix.github.io/falcor/documentation/paths.html#path) that point to all of the values within the [JSON Graph](http://netflix.github.io/falcor/documentation/jsongraph.html) subset in the "jsonGraph" key. This is necessary, because unlike get in and set, the client has no way of predicting what subset of [JSON Graph](http://netflix.github.io/falcor/documentation/jsongraph.html) data will be sent back to the client from the server.
+When a Function returns a JSONGraphEnvelope, it *must* include a `paths` key which contains [PathSet Arrays or Path Arrays](http://netflix.github.io/falcor/documentation/paths.html#path) that point to all of the values within the [JSON Graph](http://netflix.github.io/falcor/documentation/jsongraph.html) subset in the `jsonGraph` key. This is necessary, because unlike get in and set, the client has no way of predicting what subset of [JSON Graph](http://netflix.github.io/falcor/documentation/jsongraph.html) data will be sent back to the client from the server.
 
-One of the hazards of invoking functions is that they may change any number of values in a client's [Model](http://netflix.github.io/falcor/documentation/model.html) cache. Functions also include an "invalidated" key in their JSONGraphEnvelope result which contains all of the [paths](http://netflix.github.io/falcor/documentation/paths.html) to be invalidated within the [Model](http://netflix.github.io/falcor/documentation/model.html) cache.
+One of the hazards of invoking functions is that they may change any number of values in a client's [Model](http://netflix.github.io/falcor/documentation/model.html) cache. Functions also include an `invalidated` key in their JSONGraphEnvelope result which contains all of the [paths](http://netflix.github.io/falcor/documentation/paths.html) to be invalidated within the [Model](http://netflix.github.io/falcor/documentation/model.html) cache.
 
 ~~~js
 interface DataSource {
@@ -198,23 +198,23 @@ Note that one invocation of call can only run a single function. The callPath ar
 
 The refPaths argument is the array of PathSets to retrieve from the JSON Graph References within the function response. The dataSource appends these pathSets to any JSON Graph References that appear within the function response, and adds the values to the JSONGraphEnvelope. Typically, refPaths are used when the function creates a new object and returns a reference to that object. The refPaths can be passed to the call method in order to allow fields to be retrieved from the newly-generated object without the need for a subsequent get operation.
 
-A function is not obligated to return all of the changes that it makes to its "this" object. On the contrary, functions typically return as little data as possible by default. The thisPaths argument is the array of PathSets to retrieve from the function's "this" object after the function has completed execution. The DataSource adds these values to the JSONGraphEnvelope before returning the function's response. 
+A function is not obligated to return all of the changes that it makes to its `this` object. On the contrary, functions typically return as little data as possible by default. The thisPaths argument is the array of PathSets to retrieve from the function's `this` object after the function has completed execution. The DataSource adds these values to the JSONGraphEnvelope before returning the function's response.
 
 
 
 Instead of forcing functions to return all of the changes they make to the JSON Graph object, DataSources allow callers to define exactly which values they would like to refresh after successful function execution. To this end, callers can provide refPaths and thisPaths to the DataSource's call method along with the function path. After the DataSource runs the function, it retrieves the refPaths and thisPaths and adds them to the JSON Graph response.
 
-After the refPaths have been evaluated against any JSON Graph References returned by the function and added to the JSONGraphEnvelope Response, each PathSet in the thisPaths array is evaluated on the function's "this" object. The resulting values are added to the JSON Graph Response returned by the DataSource's call method.
+After the refPaths have been evaluated against any JSON Graph References returned by the function and added to the JSONGraphEnvelope Response, each PathSet in the thisPaths array is evaluated on the function's `this` object. The resulting values are added to the JSON Graph Response returned by the DataSource's call method.
 
-To demonstrate the `call()` method in action, we'll create a [Router](http://netflix.github.io/falcor/documentation/router.html) DataSource that allows titles to be pushed into a Netflix member's list.  
+To demonstrate the `call()` method in action, we'll create a [Router](http://netflix.github.io/falcor/documentation/router.html) DataSource that allows titles to be pushed into a Netflix member's list.
 
-We can invoke the "myList.push" function on the Router like so:
+We can invoke the `myList.push` function on the Router like so:
 
 ~~~js
 router.
   call(
     // the callPath
-    ["myList", "push"], 
+    ["myList", "push"],
     // the args array containing the reference to the title to add to the list
     [{ $type: "ref", value: ["titlesById", 4792] }],
     // retrieve the name of the newly-added title using a refPath
@@ -230,15 +230,15 @@ router.
   });
 ~~~
 
-Here is the definition of the "list.push" function in our Router DataSource:
+Here is the definition of the `myList.push` function in our Router DataSource:
 
 ~~~js
 var dataSource = new Router([
  {
-        route: 'list.push',
+        route: 'myList.push',
         call: function(callPath, args) {
 
-            // retrieving the title id from the reference path:            
+            // retrieving the title id from the reference path:
             titleId = titleRef.value[1];
             if (parseInt(titleId, 10).toString() !== titleId.toString())
                 throw new Error("invalid input");
@@ -275,7 +275,7 @@ The Router handler converts the array of PathValues returned by the function int
 }
 ~~~
 
-When we called the function, we used the refPaths argument to specify that we wanted to retrieve ["name"] from all of the JSONGraph References in the function response. Therefore, the Router DataSource evaluates the ["myList", 7, "name"] and adds the value to the JSONGraphEnvelope:
+When we called the function, we used the refPaths argument to specify that we wanted to retrieve `["name"]` from all of the JSONGraph References in the function response. Therefore, the Router DataSource evaluates the `["myList", 7, "name"]` and adds the value to the JSONGraphEnvelope:
 
 ~~~js
 {
@@ -292,7 +292,7 @@ When we called the function, we used the refPaths argument to specify that we wa
 }
 ~~~
 
-Finally, the Router looks up ["length"] on the list object and adds the value to the JSONGraphEnvelope.
+Finally, the Router looks up `["length"]` on the list object and adds the value to the JSONGraphEnvelope.
 
 ~~~js
 {
