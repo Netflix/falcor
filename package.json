@@ -38,7 +38,7 @@
   "devDependencies": {
     "benchmark": "^2.1.4",
     "body-parser": "^1.13.3",
-    "browserify": "^10.2.0",
+    "browserify": "^14.4.0",
     "bundle-collapser": "^1.2.1",
     "chai": "^1.9.1",
     "coveralls": "^2.11.2",
