@@ -6,7 +6,7 @@
 
 ## Release Candidates
 
-**1.x** final and **2.x** release candiate are currently available in npm. Both versions are being released concurrently so that Netflix internal teams can incrementally adopt breaking changes in the 2.x release.
+**1.x** final and **2.x** release candidate are currently available in npm. Both versions are being released concurrently so that Netflix internal teams can incrementally adopt breaking changes in the 2.x release.
 
 Breaking changes in both versions can be reviewed [here](https://github.com/Netflix/falcor/blob/master/MIGRATIONS.md).
 
