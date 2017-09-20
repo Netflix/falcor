@@ -1446,12 +1446,14 @@ var model = new falcor.Model({cache: {
         }
     }
 }});
+var result;
 try {
-    var response = await model.getValue('titlesById[44].name');
+    result = await model.getValue('titlesById[44].name');
 } catch (error) {
     console.log('found error:');
-    error
+    result = error;
 }
+return result;
 // This throws the error:
 // [{
 //     path: ["titlesById", 44],
@@ -1479,18 +1481,19 @@ var model = new falcor.Model({cache: {
     }
 }});
 
-var response;
+var result;
 try {
-    response = await model.
+    var response = await model.
         treatErrorsAsValues().
         get('titlesById[44].name');
 } catch (error) {
     console.log('error was thrown');
-    error
+    result = error;
 } finally {
     console.log('error treated like a value:');
-    response;
+    result = response;
 }
+return result;
 
 // This outputs the following and
 // returns error object as a regular value:
