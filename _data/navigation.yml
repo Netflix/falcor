@@ -9,14 +9,14 @@
     - what_is_falcor
     - how_does_falcor_work
     - why_falcor
-- 
+-
   title: Guides
   children:
-    - paths  
-    - json_graph    
-    - data_sources    
-    - router    
     - model
+    - paths
+    - json_graph
+    - data_sources
+    - router
 -
   title: Videos
   children:
@@ -27,8 +27,8 @@
     - json_graph_in_depth
     - retrieving_data_from_the_server
     - path_optimization
-    - batching_requests   
-- 
+    - batching_requests
+-
   # If a first level menu item isn't a dropdown menu, you can give it just an
   # id to link it straight to a page or an id, title and path to link to a relative url
   title: API Reference
