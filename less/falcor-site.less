@@ -10,6 +10,7 @@
 @import "includes/prettify-theme-terminal.less";
 @import "includes/icons.less";
 @import "includes/intrasection-navigation.less";
+
 // Left here in case it becomes useful to try out later
 // @import "includes/prettify-theme-tomorrow-night.less";
 
@@ -27,7 +28,7 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
-  
+
   &.video-page {
     background-color: @video-page-bg;
     color: @video-page-text-color;
@@ -35,7 +36,7 @@ body {
 }
 
 
-// Fixed navbar and sticky footer 
+// Fixed navbar and sticky footer
 //-------------------------------
 
 html {
@@ -45,16 +46,16 @@ html {
 body {
   // Ensure there is room for the sticky footer
   margin-bottom: @site-footer-height;
-  
+
   // Add some standard padding between the navbar and page content
   & > .container, & > .hero-banner > .container {
     padding-top: @navbar-height + @site-content-padding-top;
   }
-  
+
   // Lessen the content padding on mobile
   @media (max-width: @screen-xs-max) {
     & > .container {
-      padding-top: @navbar-height;      
+      padding-top: @navbar-height;
     }
   }
 }
@@ -64,7 +65,7 @@ body {
   bottom: 0;
   width: 100%;
   height: @site-footer-height;
-  
+
   & .site-footer-item {
     height: @site-footer-height;
     display: flex;
@@ -77,16 +78,16 @@ body {
   }
 
   & .site-footer-branding {
-    
+
     justify-content: flex-end;
-    
+
     .copyright-notice {
       font-size: 0.75em;
     }
-    
+
     @media (max-width: @screen-xs-max) {
       line-height: 1;
-      
+
       .copyright-notice {
         font-size: 0.6em;
       }
@@ -98,12 +99,12 @@ body {
       }
     }
   }
-  
+
   & .netflix-logo {
     @logo-height: 0.4 * @site-footer-height;
     height: @logo-height;
   }
-  
+
 }
 
 .standard-page {
@@ -154,11 +155,11 @@ body {
   }
   .video-description {
     margin: 15px 0px 30px 0px;
-  
+
     @media (max-width: @screen-xs-max) {
       margin-top: 0;
     }
-  } 
+  }
 }
 
 img.img-plain {
@@ -203,4 +204,19 @@ hr {
       margin-top: 40px;
     }
   }
+}
+
+// =====================
+// = Try it out button =
+// =====================
+
+.runnable-container {
+    position: relative;
+}
+.try-out {
+    position: absolute;
+    top: 0;
+    right: 0;
+    margin: 7px;
+    font-size: 15px;
 }
