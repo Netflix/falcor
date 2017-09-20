@@ -38,7 +38,10 @@ interface DataSource {
 
 To demonstrate the `get()` method in action, we'll create a DataSource by adapting a [Model](http://netflix.github.io/falcor/documentation/model.html) with an in-memory cache to the DataSource interface using the `asDataSource()` method.
 
+Then we will request the name and status of the first two prerequisites of the first task in a TODO list.
+
 ~~~js
+var falcor = require('falcor');
 var dataSource =
     new falcor.Model({
         cache: {
@@ -61,18 +64,13 @@ var dataSource =
             }
         }
     }).asDataSource();
-~~~
 
-Here is an example which requests the name and status of the first two prerequisites of the first task in a TODO list.
-
-~~~js
-var response = dataSource.get([
+var response = await dataSource.get([
     ["todos", 0, ["name", "done"]],
     ["todos", 0, "prerequisites", { from: 0, to: 1 }, ["name", "done"]]
 ]);
 
-response.subscribe(jsonGraphEnvelope => JSON.stringify(jsonGraphEnvelope, null, 4); });
-// eventually prints...
+// eventually returns...
 // {
 //     jsonGraph: {
 //         todos: {
@@ -93,6 +91,7 @@ response.subscribe(jsonGraphEnvelope => JSON.stringify(jsonGraphEnvelope, null, 
 //     }
 // }
 ~~~
+{: .runnable }
 
 ### The set Method
 
@@ -107,6 +106,7 @@ interface DataSource {
 To demonstrate the `set()` method in action, we'll create a DataSource by adapting a [Model](http://netflix.github.io/falcor/documentation/model.html) with an in-memory cache to the DataSource interface using the `asDataSource()` method.
 
 ~~~js
+var falcor = require('falcor');
 var dataSource =
     new falcor.Model({
         cache: {
@@ -129,14 +129,10 @@ var dataSource =
             }
         }
     }).asDataSource();
-~~~
 
-Here is an example which sets the status of both prerequisites of the first task in a TODO list to `done`.
-
-~~~js
-var response = dataSource.set({
+var response = await dataSource.set({
   paths: [
-    ["todos", 0, "prerequisities", { to:1 }, "done"]
+    ["todos", 0, "prerequisites", { to:1 }, "done"]
   ],
   jsonGraph: {
     todos: {
@@ -154,26 +150,31 @@ var response = dataSource.set({
   }
 });
 
-response.subscribe(jsonGraphEnvelope => JSON.stringify(jsonGraphEnvelope, null, 4); });
-// eventually prints...
+// eventually returns...
 // {
-//     jsonGraph: {
-//         todos: {
-//             0: { $type: "ref", value: ["todosById", 44] },
-//         },
-//         todosById: {
-//             44: {
-//                 prerequisites: [
-//                     { $type: "ref", value: ['todosById', 54] },
-//                     { $type: "ref", value: ['todosById', 97] }
-//                 ]
-//             },
-//             "54": { done: true },
-//             "97": { done: true }
+//     "jsonGraph": {
+//         "todos": {
+//             "0": {
+//                 "prerequisites": {
+//                     "0": {
+//                         "done": {
+//                             "$type": "atom",
+//                             "value": true
+//                         }
+//                     },
+//                     "1": {
+//                         "done": {
+//                             "$type": "atom",
+//                             "value": true
+//                         }
+//                     }
+//                 }
+//             }
 //         }
 //     }
 // }
 ~~~
+{: .runnable }
 
 ### The call Method
 
