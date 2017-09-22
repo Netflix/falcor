@@ -150,44 +150,14 @@ An Atom is a JSON object with a `$type` key that has a value of `atom` and a `va
 
 JSON Graph allows metadata to be attached to values to control how they are handled by clients. For example, metadata can be attached to values to control how long values stay a client cache. For more information see [Sentinel Metadata](http://netflix.github.io/falcor/documentation/model.html#Sentinel-Metadata).
 
-One issue is that JavaScript value types do not preserve any metadata attached to them when they are serialized as JSON:
-
-~~~js
-var number = 4;
-number['$expires'] = 5000;
-
-console.log(JSON.stringify(number, null, 4))
-
-// This outputs the following to the console:
-// 4
-~~~
-
-Atoms "box" value types inside of a JSON object, allowing metadata to be attached to them.
-
-~~~js
-var number = {
-    $type: "atom",
-    value: 4,
-    $expires: 5000
-};
-
-console.log(JSON.stringify(number, null, 4))
-
-// This outputs the following to the console:
-// {
-//     "$type": "atom",
-//     "value": 4,
-//     "$expires": 5000
-// }
-~~~
+One issue is that JavaScript value types do not preserve any metadata attached to them when they are serialized as JSON [JSON Graph Atoms](http://netflix.github.io/falcor/documentation/model.html#JSON-Graph-Atoms)
 
 The value of an Atom is always treated like a value type, meaning it is retrieved and set in its entirety. An Atom cannot be mutated using any of the abstract JSON Graph operations. Instead you must replace Atoms entirely using the abstract set operation.
 
 In addition to making it possible to attach metadata to JSON values, Atoms can be used to get around the restriction against retrieving JSON Objects and Arrays. Let's say that we have an Array which we are certain will remain small, like a list of video subtitles for example. By boxing the subtitles Array in an Atom, we are able to retrieve the entire Array using the abstract get operation. Here is an example using a Falcor Model, which is an object capable of executing the abstract get operation on a JSON Graph.
 
 ~~~js
-var log = console.log.bind(console)
-
+var falcor = require('falcor');
 var model = new falcor.Model({cache: {
     titlesById: {
         "44": {
@@ -197,11 +167,12 @@ var model = new falcor.Model({cache: {
     }
 }});
 
-model.getValue(['titlesById', 44, 'subtitles']).then(log)
+var atom = await model.getValue(['titlesById', 44, 'subtitles']);
 
-// This outputs the following to the console:
+// returns:
 // ['en', 'fr']
 ~~~
+{: .runnable }
 
 The result above only includes the value of the Atom because the [Model](http://netflix.github.io/falcor/documentation/model.html) unboxes Atoms by default.
 

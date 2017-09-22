@@ -13,6 +13,7 @@ lang: en
 A Path is a sequence of Keys, which is evaluated from the root of a JSON object. A path refers to a location within a JSON object. When executing JSON operations, Paths are passed to the [Model](http://netflix.github.io/falcor/documentation/model.html) to specify which values to transform/retrieve in the [Model](http://netflix.github.io/falcor/documentation/model.html)'s associated JSON object.
 
 ~~~js
+var falcor = require('falcor');
 var model = new falcor.Model({
   cache: {
     todos: [
@@ -25,10 +26,9 @@ var model = new falcor.Model({
 });
 
 // prints 'get milk from corner store'
-model.
-  getValue("todos[0].name").
-  then(name => console.log(name));
+var name = await model.getValue("todos[0].name");
 ~~~
+{: .runnable }
 
 [Models](http://netflix.github.io/falcor/documentation/model.html) can accept Paths specified in one of two ways:
 

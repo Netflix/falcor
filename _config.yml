@@ -13,3 +13,4 @@ meta_defaults:
   title: "One Model Everywhere"
   # All titles (including the default) will have this prepended to them
   title_prefix: "Falcor: "
+  falcor_server_url: "https://falcor-server-sample-nvutywuvbl.now.sh"
