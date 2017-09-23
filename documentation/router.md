@@ -217,7 +217,7 @@ var TODORouter = function(userId){
 TODORouter.prototype = Object.create(BaseRouter.prototype);
 ~~~
 
-The next version of JavaScript (ES2015) has native support for classes. If you are using a version of Node that supports classes, or you are using a transpiler, you can write this code instead of the code seen above:
+If you are using a version of Node that supports classes, or you are using a transpiler, you can write this code instead of the code seen above:
 
 ~~~js
 var Router = require("falcor-router");
