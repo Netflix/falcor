@@ -1,0 +1,17 @@
+test/
+
+.DS_Store
+bin/
+bin2
+out/
+tmp/
+performance/bin/
+performance/device/
+!tasks/bin
+coverage
+.idea
+*.iml
+*.tar.gz
+cTestFinal.js
+npm-debug.log
+.vscode
