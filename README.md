@@ -4,13 +4,17 @@
 
 # Falcor [![Build Status](https://travis-ci.org/Netflix/falcor.svg)](https://travis-ci.org/Netflix/falcor) [![Coverage Status](https://coveralls.io/repos/Netflix/falcor/badge.svg?branch=master&service=github)](https://coveralls.io/github/Netflix/falcor?branch=master) [![bitHound Score](https://www.bithound.io/github/Netflix/falcor/badges/score.svg)](https://www.bithound.io/github/Netflix/falcor)
 
-## Release Candidates
+## 1.0.0
 
-**1.x** final and **2.x** release candidate are currently available in npm. Both versions are being released concurrently so that Netflix internal teams can incrementally adopt breaking changes in the 2.x release.
+**1.0.0** is the current stable Falcor release. **0.x** users are welcome to upgrade, with **1.0.0** representing the typical backwards compatibility guarantees of a major semver release.
 
-Breaking changes in both versions can be reviewed [here](https://github.com/Netflix/falcor/blob/master/MIGRATIONS.md).
+Breaking changes from the technical preview can be reviewed [here](https://github.com/Netflix/falcor/blob/v1.0.0/MIGRATIONS.md).
 
-* *master* currently reflects work in progress, and contains backward incompatible changes which will become the next major version bump.
+## 2.x Release Candidate
+
+A **2.x** release candidate is also currently available in npm. This is a fast-follow release after 1.0.0 so that Netflix internal teams can incrementally adopt breaking changes in the 2.x release.
+
+Breaking changes from 1.0.0 can be reviewed [here](https://github.com/Netflix/falcor/blob/v2.0.0/MIGRATIONS.md).
 
 ## Getting Started
 
