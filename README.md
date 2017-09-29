@@ -8,13 +8,13 @@
 
 **1.0.0** is the current stable Falcor release. **0.x** users are welcome to upgrade, with **1.0.0** representing the typical backwards compatibility guarantees of a major semver release.
 
-Breaking changes from the technical preview can be reviewed [here](https://github.com/Netflix/falcor/blob/v1.0.0/MIGRATIONS.md).
+Breaking changes from **0.x** can be reviewed [here](https://github.com/Netflix/falcor/blob/v1.0.0/MIGRATIONS.md).
 
 ## 2.x Release Candidate
 
-A **2.x** release candidate is also currently available in npm. This is a fast-follow release after 1.0.0 so that Netflix internal teams can incrementally adopt breaking changes in the 2.x release.
+A **2.x** release candidate is also currently available in npm. This is a fast-follow release after **1.0.0** so that Netflix internal teams can incrementally adopt breaking changes in the 2.x release.
 
-Breaking changes from 1.0.0 can be reviewed [here](https://github.com/Netflix/falcor/blob/v2.0.0/MIGRATIONS.md).
+Breaking changes from **1.0.0** can be reviewed [here](https://github.com/Netflix/falcor/blob/v2.0.0/MIGRATIONS.md).
 
 ## Getting Started
 
