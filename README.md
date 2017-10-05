@@ -16,6 +16,10 @@ A **2.x** release candidate is also currently available in npm. This is a fast-f
 
 Breaking changes from **1.0.0** can be reviewed [here](https://github.com/Netflix/falcor/blob/v2.0.0/MIGRATIONS.md).
 
+## Roadmap
+
+Issues we're tracking as part of our roadmap are tagged with the [roadmap](https://github.com/Netflix/falcor/issues?q=is%3Aopen+is%3Aissue+label%3Aroadmap) label. They are split into [enhancement](https://github.com/Netflix/falcor/issues?q=is%3Aopen+is%3Aissue+label%3Aroadmap+label%3Aenhancement), [stability](https://github.com/Netflix/falcor/issues?q=is%3Aopen+is%3Aissue+label%3Aroadmap+label%3Astability), [performance](https://github.com/Netflix/falcor/issues?q=is%3Aopen+is%3Aissue+label%3Aroadmap+label%3Aperformance), [tooling](https://github.com/Netflix/falcor/issues?q=is%3Aopen+is%3Aissue+label%3Aroadmap+label%3Atooling), [infrastructure](https://github.com/Netflix/falcor/issues?q=is%3Aopen+is%3Aissue+label%3Aroadmap+label%3Ainfrastructure) and [documentation](https://github.com/Netflix/falcor/issues?q=is%3Aopen+is%3Aissue+label%3Aroadmap+label%3Adocumentation) categories, with near, medium and longer term labels to convey a broader sense of the order in which we plan to approach them.
+
 ## Getting Started
 
 You can check out a working example server for a Netflix-like application [here](http://github.com/netflix/falcor-express-demo) right now. Alternately you can go through this barebones tutorial in which we use the Falcor Router to create a Virtual JSON resource. In this tutorial we will use Falcor's express middleware to serve the Virtual JSON resource on an application server at the URL /model.json. We will also host a static web page on the same server which retrieves data from the Virtual JSON resource.
