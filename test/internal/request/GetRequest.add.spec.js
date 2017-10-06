@@ -57,7 +57,7 @@ describe('#add', function() {
         var disposable1 = request.batch([videos0], [videos0], zip);
         expect(request.sent, 'request should be sent').to.be.ok;
 
-        var results = request.add([videos0, videos1], [videos0, videos1], zip);
+        var results = request.add([videos0, videos1], [videos0, videos1], [0, 0], zip);
     });
 
     it('should send a request and dedupe another when dedupe is in second position.', function(done) {
@@ -102,7 +102,7 @@ describe('#add', function() {
         var disposable1 = request.batch([videos0], [videos0], zip);
         expect(request.sent, 'request should be sent').to.be.ok;
 
-        var results = request.add([videos1, videos0], [videos1, videos0], zip);
+        var results = request.add([videos1, videos0], [videos1, videos0], [0, 0], zip);
     });
 
 
@@ -147,7 +147,7 @@ describe('#add', function() {
         var disposable1 = request.batch([videos0], [videos0], zip);
         expect(request.sent, 'request should be sent').to.be.ok;
 
-        var results = request.add([videos0, videos1], [videos0, videos1], zip);
+        var results = request.add([videos0, videos1], [videos0, videos1], [0, 0], zip);
         zip();
     });
 
@@ -193,7 +193,7 @@ describe('#add', function() {
         var disposable1 = request.batch([videos0], [videos0], zip);
         expect(request.sent, 'request should be sent').to.be.ok;
 
-        var results = request.add([videos0, videos1], [videos0, videos1], zip);
+        var results = request.add([videos0, videos1], [videos0, videos1], [0, 0], zip);
         results[3]();
         zip();
     });

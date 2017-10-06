@@ -78,7 +78,7 @@
         "no-throw-literal": [ 2 ],
         "no-unused-expressions": [ 2 ],
 
-        "no-warning-comments": [ 1 ],
+        "no-warning-comments": [ 0 ],
         "no-with": [ 2 ],
         "radix": [ 2 ],
         "wrap-iife": [ 2 ],

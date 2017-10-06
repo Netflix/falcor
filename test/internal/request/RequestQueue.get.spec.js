@@ -24,7 +24,7 @@ describe('#get', function() {
         var model = new Model({source: source});
         var queue = new RequestQueue(model, scheduler);
         var callback = sinon.spy();
-        var disposable = queue.get([videos0], [videos0], callback);
+        var disposable = queue.get([videos0], [videos0], [0, 0], callback);
 
         expect(callback.calledOnce, 'callback should be called once.').to.be.ok;
         var onNext = sinon.spy();
@@ -76,8 +76,8 @@ describe('#get', function() {
                 }).
                 subscribe(noOp, done, done);
         });
-        var disposable = queue.get([videos0], [videos0], zip);
-        var disposable2 = queue.get([videos1], [videos1], zip);
+        var disposable = queue.get([videos0], [videos0], [0, 0], zip);
+        var disposable2 = queue.get([videos1], [videos1], [0, 0], zip);
 
         expect(queue._requests.length).to.equal(1);
         expect(queue._requests[0].sent).to.equal(false);
@@ -112,11 +112,11 @@ describe('#get', function() {
                 }).
                 subscribe(noOp, done, done);
         });
-        var disposable = queue.get([videos0], [videos0], zip);
+        var disposable = queue.get([videos0], [videos0], [0, 0], zip);
         expect(queue._requests.length).to.equal(1);
         expect(queue._requests[0].sent).to.equal(true);
         expect(queue._requests[0].scheduled).to.equal(false);
-        var disposable2 = queue.get([videos0], [videos0], zip);
+        var disposable2 = queue.get([videos0], [videos0], [0, 0], zip);
         expect(queue._requests.length).to.equal(1);
         expect(queue._requests[0].sent).to.equal(true);
         expect(queue._requests[0].scheduled).to.equal(false);
@@ -153,11 +153,11 @@ describe('#get', function() {
                 subscribe(noOp, done, done);
         }, 300);
 
-        var disposable = queue.get([videos0], [videos0], zip);
+        var disposable = queue.get([videos0], [videos0], [0, 0], zip);
         expect(queue._requests.length).to.equal(1);
         expect(queue._requests[0].sent).to.equal(true);
         expect(queue._requests[0].scheduled).to.equal(false);
-        var disposable2 = queue.get([videos0, videos1], [videos0, videos1], zip);
+        var disposable2 = queue.get([videos0, videos1], [videos0, videos1], [0, 0], zip);
         expect(queue._requests.length).to.equal(2);
         expect(queue._requests[0].sent).to.equal(true);
         expect(queue._requests[1].sent).to.equal(true);
@@ -194,11 +194,11 @@ describe('#get', function() {
                 }).
                 subscribe(noOp, done, done);
         }, 300);
-        var disposable = queue.get([videos0], [videos0], zip);
+        var disposable = queue.get([videos0], [videos0], [0, 0], zip);
         expect(queue._requests.length).to.equal(1);
         expect(queue._requests[0].sent).to.equal(true);
         expect(queue._requests[0].scheduled).to.equal(false);
-        var disposable2 = queue.get([videos0], [videos0], zip);
+        var disposable2 = queue.get([videos0], [videos0], [0, 0], zip);
         expect(queue._requests.length).to.equal(1);
         expect(queue._requests[0].sent).to.equal(true);
         expect(queue._requests[0].scheduled).to.equal(false);
@@ -225,11 +225,11 @@ describe('#get', function() {
                 }).
                 subscribe(noOp, done, done);
         }, 300);
-        var disposable = queue.get([videos0], [videos0], zip);
+        var disposable = queue.get([videos0], [videos0], [0, 0], zip);
         expect(queue._requests.length).to.equal(1);
         expect(queue._requests[0].sent).to.equal(true);
         expect(queue._requests[0].scheduled).to.equal(false);
-        var disposable2 = queue.get([videos0], [videos0], zip);
+        var disposable2 = queue.get([videos0], [videos0], [0, 0], zip);
         expect(queue._requests.length).to.equal(1);
         expect(queue._requests[0].sent).to.equal(true);
         expect(queue._requests[0].scheduled).to.equal(false);
@@ -265,11 +265,11 @@ describe('#get', function() {
                 }).
                 subscribe(noOp, done, done);
         }, 300);
-        var disposable = queue.get([videos0], [videos0], zip);
+        var disposable = queue.get([videos0], [videos0], [0, 0], zip);
         expect(queue._requests.length).to.equal(1);
         expect(queue._requests[0].sent).to.equal(true);
         expect(queue._requests[0].scheduled).to.equal(false);
-        var disposable2 = queue.get([videos0, videos1], [videos0, videos1], zip);
+        var disposable2 = queue.get([videos0, videos1], [videos0, videos1], [0, 0], zip);
         expect(queue._requests.length).to.equal(2);
         expect(queue._requests[1].sent).to.equal(true);
         expect(queue._requests[1].scheduled).to.equal(false);
@@ -296,11 +296,11 @@ describe('#get', function() {
                 subscribe(noOp, done, done);
         }, 300);
 
-        var disposable = queue.get([videos0], [videos0], zip);
+        var disposable = queue.get([videos0], [videos0], [0, 0], zip);
         expect(queue._requests.length).to.equal(1);
         expect(queue._requests[0].sent).to.equal(true);
         expect(queue._requests[0].scheduled).to.equal(false);
-        var disposable2 = queue.get([videos0, videos1], [videos0, videos1], zip);
+        var disposable2 = queue.get([videos0, videos1], [videos0, videos1], [0, 0], zip);
         expect(queue._requests.length).to.equal(2);
         expect(queue._requests[1].sent).to.equal(true);
         expect(queue._requests[1].scheduled).to.equal(false);
