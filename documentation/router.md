@@ -1064,7 +1064,7 @@ var NetflixRouter = function(userId){
 };
 
 // Deriving the NetflixRouter from the BaseRouter using JavaScript's classical inheritance pattern
-NetflixRouter.prototype = Object.create(BaseRouter);
+NetflixRouter.prototype = Object.create(BaseRouter.prototype);
 ~~~
 
 As explained in previous sections, creating a BaseRouter class using createClass will build a route table for rapidly matching [paths](http://netflix.github.io/falcor/documentation/paths.html) once when the application server starts up. This optimized route table will be shared across all new instances of the derived NetflixRouter class. This makes it inexpensive to create a new NetflixRouter object for every incoming server request.
