@@ -33,10 +33,10 @@ module.exports = function(testConfig) {
         model = testConfig.model;
     }
     else {
-        model = new Model({
+        model = new Model(Object.assign({
             cache: cache,
             source: source
-        });
+        }, testConfig.modelParams));
     }
 
     // It only make sense to have one of these on at a time. but

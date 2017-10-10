@@ -129,6 +129,33 @@ describe('Values', function() {
             }
         });
     });
+    it('should get references with _emitReferencesInOutput.', function() {
+        getCoreRunner({
+            modelParams: {_emitReferencesInOutput: true},
+            input: [["lists", 2343, "0"]],
+            output: {
+                json: {
+                    lists: {
+                        2343: {
+                            0: ["videos", 123]
+                        }
+                    }
+                }
+            },
+            cache: {
+                lists: {
+                    2343: {
+                        0: jsonGraph.ref(["videos", 123])
+                    }
+                },
+                videos: {
+                    123: {
+                        name: atom("House of cards")
+                    }
+                }
+            }
+        });
+    });
     it('should not get references.', function() {
         getCoreRunner({
             input: [["lists", 2343, "0"]],
