@@ -197,6 +197,10 @@ describe('#add', function() {
         results[3]();
         zip();
     });
+
+
+    // Tests for partial deduping (https://github.com/Netflix/falcor/issues/779)
+    // are in test/integration/get.spec.js
 });
 function zipSpy(count, cb) {
     return sinon.spy(function() {
