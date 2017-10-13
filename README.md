@@ -4,13 +4,21 @@
 
 # Falcor [![Build Status](https://travis-ci.org/Netflix/falcor.svg)](https://travis-ci.org/Netflix/falcor) [![Coverage Status](https://coveralls.io/repos/Netflix/falcor/badge.svg?branch=master&service=github)](https://coveralls.io/github/Netflix/falcor?branch=master) [![bitHound Score](https://www.bithound.io/github/Netflix/falcor/badges/score.svg)](https://www.bithound.io/github/Netflix/falcor)
 
-## Release Candidates
+## 1.0.0
 
-**1.x** final and **2.x** release candidate are currently available in npm. Both versions are being released concurrently so that Netflix internal teams can incrementally adopt breaking changes in the 2.x release.
+**1.0.0** is the current stable Falcor release. **0.x** users are welcome to upgrade, with **1.0.0** representing the typical backwards compatibility guarantees of a major semver release.
 
-Breaking changes in both versions can be reviewed [here](https://github.com/Netflix/falcor/blob/master/MIGRATIONS.md).
+Breaking changes from **0.x** can be reviewed [here](https://github.com/Netflix/falcor/blob/v1.0.0/MIGRATIONS.md).
 
-* *master* currently reflects work in progress, and contains backward incompatible changes which will become the next major version bump.
+## 2.x Release Candidate
+
+A **2.x** release candidate is also currently available in npm. This is a fast-follow release after **1.0.0** so that Netflix internal teams can incrementally adopt breaking changes in the 2.x release.
+
+Breaking changes from **1.0.0** can be reviewed [here](https://github.com/Netflix/falcor/blob/v2.0.0/MIGRATIONS.md).
+
+## Roadmap
+
+Issues we're tracking as part of our roadmap are tagged with the [roadmap](https://github.com/Netflix/falcor/issues?q=is%3Aopen+is%3Aissue+label%3Aroadmap) label. They are split into [enhancement](https://github.com/Netflix/falcor/issues?q=is%3Aopen+is%3Aissue+label%3Aroadmap+label%3Aenhancement), [stability](https://github.com/Netflix/falcor/issues?q=is%3Aopen+is%3Aissue+label%3Aroadmap+label%3Astability), [performance](https://github.com/Netflix/falcor/issues?q=is%3Aopen+is%3Aissue+label%3Aroadmap+label%3Aperformance), [tooling](https://github.com/Netflix/falcor/issues?q=is%3Aopen+is%3Aissue+label%3Aroadmap+label%3Atooling), [infrastructure](https://github.com/Netflix/falcor/issues?q=is%3Aopen+is%3Aissue+label%3Aroadmap+label%3Ainfrastructure) and [documentation](https://github.com/Netflix/falcor/issues?q=is%3Aopen+is%3Aissue+label%3Aroadmap+label%3Adocumentation) categories, with near, medium and longer term labels to convey a broader sense of the order in which we plan to approach them.
 
 ## Getting Started
 
