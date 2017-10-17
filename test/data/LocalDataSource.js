@@ -10,7 +10,7 @@ var LocalSource = module.exports = function(cache, options) {
         onGet: noOp,
         onSet: noOp,
         onResults: noOp,
-        wait: false,
+        // wait: undefined,
         materialize: false
     }, options);
     this._missCount = 0;
@@ -61,7 +61,7 @@ LocalSource.prototype = {
                 observer.onNext(output);
                 observer.onCompleted();
             }
-            if (wait === false) {
+            if (wait === undefined) {
                 exec();
             } else {
                 setTimeout(exec, wait);
