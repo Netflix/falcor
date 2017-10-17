@@ -133,13 +133,16 @@ GetRequestV2.prototype = {
     /**
      * Attempts to add paths to the outgoing request.  If there are added
      * paths then the request callback will be added to the callback list.
+     * Handles adding partial paths as well
      *
-     * @returns {Array} - the remaining paths in the request.
+     * @returns {Array} - whether new requested paths were inserted in this
+     *                    request, the remaining paths that could not be added,
+     *                    and disposable for the inserted requested paths.
      */
-    add: function(requested, optimized, callback) {
+    add: function(requested, optimized, depthDifferences, callback) {
         // uses the length tree complement calculator.
         var self = this;
-        var complementTuple = complement(requested, optimized, self._pathMap);
+        var complementTuple = complement(requested, optimized, depthDifferences, self._pathMap);
         var optimizedComplement;
         var requestedComplement;
 
@@ -154,10 +157,9 @@ GetRequestV2.prototype = {
         var inserted = false;
         var disposable = false;
 
-        // If the out paths is less than the passed in paths, then there
-        // has been an intersection and the complement has been returned.
-        // Therefore, this can be deduped across requests.
-        if (optimizedComplement.length &lt; optimized.length) {
+        // If we found an intersection, then just add new callback
+        // as one of the dependents of that request
+        if (complementTuple &amp;&amp; complementTuple[0].length) {
             inserted = true;
             var idx = self._callbacks.length;
             self._callbacks[idx] = callback;
