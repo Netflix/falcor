@@ -96,7 +96,7 @@ LocalSource.prototype = {
                 observer.onCompleted();
             }
 
-            if (wait === false) {
+            if (wait === undefined) {
                 exec();
             } else {
                 setTimeout(exec, wait);
