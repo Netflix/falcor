@@ -377,7 +377,7 @@ describe('DataSource Only', function() {
             }, done.bind(null, new Error('should not complete')));
     });
 
-    it.only('should throw MaxRetryExceededError after retrying said times', function(done) {
+    it('should throw MaxRetryExceededError after retrying said times', function(done) {
         var onGet = sinon.spy();
         var model = new Model({
             maxRetries: 5,
