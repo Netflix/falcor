@@ -346,19 +346,19 @@ describe('DataSource Only', function() {
     it('should return missing optimized paths with MaxRetryExceededError', function(done) {
         var model = new Model({
             source: asyncifyDataSource(new LocalDataSource({})),
-                cache: {
-                    lolomo: {
-                        0: {
-                            $type: 'ref',
-                            value: ['videos', 1]
-                        }
-                    },
-                    videos: {
-                        0: {
-                            title: 'Revolutionary Road'
-                        }
+            cache: {
+                lolomo: {
+                    0: {
+                        $type: 'ref',
+                        value: ['videos', 1]
+                    }
+                },
+                videos: {
+                    0: {
+                        title: 'Revolutionary Road'
                     }
                 }
+            }
         });
         toObservable(model.
             get(['lolomo', 0, 'title'], 'videos[0].title', 'hall[0].ween')).
@@ -373,6 +373,26 @@ describe('DataSource Only', function() {
                 if (isAssertionError(e)) {
                     return done(e);
                 }
+                return done();
+            }, done.bind(null, new Error('should not complete')));
+    });
+
+    it.only('should throw MaxRetryExceededError after retrying said times', function(done) {
+        var onGet = sinon.spy();
+        var model = new Model({
+            maxRetries: 5,
+            source: asyncifyDataSource(new LocalDataSource({}, {
+                onGet: onGet
+            }))
+        });
+        toObservable(model.
+            get('some.path')).
+            doAction(noOp, function(e) {
+                expect(MaxRetryExceededError.is(e), 'MaxRetryExceededError expected').to.be.ok;
+                expect(onGet.callCount).to.equal(5);
+            }).
+            subscribe(noOp, function(e) {
+                if (isAssertionError(e)) { return done(e); }
                 return done();
             }, done.bind(null, new Error('should not complete')));
     });
