@@ -281,7 +281,7 @@ describe("Error", function() {
             subscribe(noOp, doneOnError(done), errorOnCompleted(done));
     });
 
-    xit('should allow for dataSources to immediately throw an error (set)', function(done) {
+    it('should allow for dataSources to immediately throw an error (set)', function(done) {
         var routes = {
             set: function() {
                 return thisVarDoesNotExistAndThatsAFact;
