@@ -243,7 +243,7 @@ Model.prototype.invalidate = function invalidate() {
     args = [];
     while (++argsIdx &lt; argsLen) {
         args[argsIdx] = pathSyntax.fromPath(arguments[argsIdx]);
-        if (!Array.isArray(args[argsIdx])) {
+        if (!Array.isArray(args[argsIdx]) || !args[argsIdx].length) {
             throw new Error("Invalid argument");
         }
     }
