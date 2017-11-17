@@ -16,7 +16,10 @@ var isAssertionError = require('./../../isAssertionError');
 
 
 describe('DataSource Only', function() {
-    var dataSource = new LocalDataSource(cacheGenerator(0, 2, ['title', 'art'], false));
+    var dataSource;
+    before(function() {
+        dataSource = new LocalDataSource(cacheGenerator(0, 2, ['title', 'art'], false));
+    });
 
     describe('Preload Functions', function() {
         it('should get a value from falcor.', function(done) {
