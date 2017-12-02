@@ -35,7 +35,7 @@ describe('Error cases', function() {
                     get([0, 0, 'item', 'title'])).
                     doAction(onNext, function(err) {
                         expect(onNext.callCount).to.equal(1);
-                        expect(err.message).to.equals(InvalidModelError.message);
+                        expect(err.message).to.equals("The boundPath of the model is not valid since a value or error was found before the path end.");
                     }).
                     subscribe(
                         noOp,
