@@ -967,8 +967,9 @@ var NAME = "MaxRetryExceededError";
  *
  * @private
  */
-function MaxRetryExceededError() {
+function MaxRetryExceededError(missingOptimizedPaths) {
     this.message = "The allowed number of retries have been exceeded.";
+    this.missingOptimizedPaths = missingOptimizedPaths || [];
     this.stack = (new Error()).stack;
 }
 
@@ -3891,7 +3892,7 @@ module.exports = function getRequestCycle(getResponse, model, results, observer,
                                           errors, count) {
     // we have exceeded the maximum retry limit.
     if (count === model._maxRetries) {
-        observer.onError(new MaxRetryExceededError());
+        observer.onError(new MaxRetryExceededError(results.optimizedMissingPaths));
         return {
             dispose: function() {}
         };
@@ -4220,17 +4221,18 @@ var MaxRetryExceededError = require(12);
  */
 module.exports = function setRequestCycle(model, observer, groups,
                                           isJSONGraph, isProgressive, count) {
+    var requestedAndOptimizedPaths = setGroupsIntoCache(model, groups);
+    var optimizedPaths = requestedAndOptimizedPaths.optimizedPaths;
+    var requestedPaths = requestedAndOptimizedPaths.requestedPaths;
+
     // we have exceeded the maximum retry limit.
     if (count === model._maxRetries) {
-        observer.onError(new MaxRetryExceededError());
+        observer.onError(new MaxRetryExceededError(optimizedPaths));
         return {
             dispose: function() {}
         };
     }
 
-    var requestedAndOptimizedPaths = setGroupsIntoCache(model, groups);
-    var optimizedPaths = requestedAndOptimizedPaths.optimizedPaths;
-    var requestedPaths = requestedAndOptimizedPaths.requestedPaths;
     var isMaster = model._source === undefined;
 
     // Local set only.  We perform a follow up get.  If performance is ever
