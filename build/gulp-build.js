@@ -36,7 +36,7 @@ gulp.task('dist.browser', ['clean.dist'], function(cb) {
 });
 
 gulp.task('build.browser', ['clean.dist'], function(cb) {
-    return build({
+    build({
         file: ['./browser.js'],
         outName: "falcor.browser",
         browserifyOptions: browserifyOptions
@@ -53,7 +53,7 @@ gulp.task('dist.all', ['clean.dist'], function(cb) {
 });
 
 gulp.task('build.all', ['clean.dist'], function(cb) {
-    return build({
+    build({
         file: ['./all.js'],
         outName: "falcor.all",
         browserifyOptions: browserifyOptions
