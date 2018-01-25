@@ -1,5 +1,11 @@
 var gulp = require("gulp");
-var clean = require("del");
+var del = require("del");
+
+function clean(paths, cb) {
+    del(paths).then(function() {
+        cb();
+    });
+}
 
 gulp.task("clean.perf", function(cb) {
     clean(["./performance/bin", "./performance/out"], cb);
