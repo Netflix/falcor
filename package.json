@@ -15,6 +15,7 @@
   "license": "Apache-2.0",
   "scripts": {
     "test": "gulp test-coverage",
+    "prepare": "npm run dist",
     "test:only": "mocha test/index.js",
     "test:only:inspect": "mocha --inspect-brk test/index.js",
     "lint": "gulp lint",
