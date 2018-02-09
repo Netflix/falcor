@@ -659,7 +659,6 @@ Model.prototype._fromWhenceYouCame = function fromWhenceYouCame(allow) {
 
 Model.prototype._getBoundValue = require(16);
 Model.prototype._getVersion = require(21);
-Model.prototype._getValueSync = require(20);
 
 Model.prototype._getPathValuesAsPathMap = get.getWithPathsAsPathMap;
 Model.prototype._getPathValuesAsJSONG = get.getWithPathsAsJSONGraph;
@@ -672,7 +671,7 @@ Model.prototype._setCache = require(68);
 Model.prototype._invalidatePathValues = require(38);
 Model.prototype._invalidatePathMaps = require(37);
 
-},{"110":110,"125":125,"129":129,"16":16,"17":17,"19":19,"20":20,"21":21,"22":22,"27":27,"3":3,"37":37,"38":38,"39":39,"4":4,"43":43,"49":49,"5":5,"50":50,"51":51,"56":56,"57":57,"58":58,"6":6,"60":60,"64":64,"65":65,"66":66,"67":67,"68":68,"69":69,"7":7,"70":70,"71":71,"72":72,"76":76,"82":82,"92":92,"93":93,"94":94,"96":96}],3:[function(require,module,exports){
+},{"110":110,"125":125,"129":129,"16":16,"17":17,"19":19,"21":21,"22":22,"27":27,"3":3,"37":37,"38":38,"39":39,"4":4,"43":43,"49":49,"5":5,"50":50,"51":51,"56":56,"57":57,"58":58,"6":6,"60":60,"64":64,"65":65,"66":66,"67":67,"68":68,"69":69,"7":7,"70":70,"71":71,"72":72,"76":76,"82":82,"92":92,"93":93,"94":94,"96":96}],3:[function(require,module,exports){
 function ModelDataSourceAdapter(model) {
     this._model = model._materialize().treatErrorsAsValues();
 }
@@ -1522,9 +1521,11 @@ module.exports = function getValueSync(model, simplePath, noClone) {
 };
 
 },{"113":113,"114":114,"115":115,"14":14,"28":28,"29":29,"40":40}],21:[function(require,module,exports){
+var getValueSync = require(20);
+
 module.exports = function _getVersion(model, path) {
     // ultra fast clone for boxed values.
-    var gen = model._getValueSync({
+    var gen = getValueSync({
         _boxed: true,
         _root: model._root,
         _treatErrorsAsValues: model._treatErrorsAsValues
@@ -1533,7 +1534,7 @@ module.exports = function _getVersion(model, path) {
     return (version == null) ? -1 : version;
 };
 
-},{}],22:[function(require,module,exports){
+},{"20":20}],22:[function(require,module,exports){
 var get = require(15);
 var walkPath = require(32);
 
@@ -1861,20 +1862,21 @@ module.exports = function onValueType(
 
 },{"114":114,"23":23,"24":24,"25":25,"29":29,"30":30,"79":79,"80":80}],27:[function(require,module,exports){
 var pathSyntax = require(129);
+var getValueSync = require(20);
 
-module.exports = function getValueSync(pathArg) {
+module.exports = function _getValueSync(pathArg) {
     var path = pathSyntax.fromPath(pathArg);
     if (Array.isArray(path) === false) {
-        throw new Error("Model#getValueSync must be called with an Array path.");
+        throw new Error("Model#_getValueSync must be called with an Array path.");
     }
     if (this._path.length) {
         path = this._path.concat(path);
     }
     this._syncCheck("getValueSync");
-    return this._getValueSync(this, path).value;
+    return getValueSync(this, path).value;
 };
 
-},{"129":129}],28:[function(require,module,exports){
+},{"129":129,"20":20}],28:[function(require,module,exports){
 // Copies the node
 var privatePrefix = require(34);
 
