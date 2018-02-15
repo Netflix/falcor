@@ -170,6 +170,10 @@ Model.prototype._collectRatio = 0.75;
  */
 Model.prototype.get = require(57);
 
+Model.prototype._getOptimizedBoundPath = function _getOptimizedBoundPath() {
+    return arrayClone(this._path);
+};
+
 /**
  * The get method retrieves several {@link Path}s or {@link PathSet}s from a {@link Model}. The get method loads each value into a JSON object and returns in a ModelResponse.
  * @function
@@ -1143,14 +1147,14 @@ module.exports = function get(walk, isJSONG) {
         var cache = model._root.cache;
         var boundPath = model._path;
         var currentCachePosition = cache;
-        var optimizedPath, optimizedLength = boundPath.length;
+        var optimizedPath, optimizedLength;
         var i, len;
         var requestedPath = [];
         var derefInfo = [];
         var referenceContainer;
 
         // If the model is bound, then get that cache position.
-        if (optimizedLength) {
+        if (boundPath.length) {
 
             // JSONGraph output cannot ever be bound or else it will
             // throw an error.
@@ -1159,22 +1163,23 @@ module.exports = function get(walk, isJSONG) {
                     criticalError: new BoundJSONGraphModelError()
                 };
             }
-            currentCachePosition = getCachePosition(model, boundPath);
+
+            // using _getOptimizedPath because that's a point of extension
+            // for polyfilling legacy falcor
+            optimizedPath = model._getOptimizedBoundPath();
+            optimizedLength = optimizedPath.length;
+
+            // We need to get the new cache position path.
+            currentCachePosition = getCachePosition(model, optimizedPath);
 
             // If there was a short, then we 'throw an error' to the outside
             // calling function which will onError the observer.
             if (currentCachePosition && currentCachePosition.$type) {
                 return {
-                    criticalError: new InvalidModelError(boundPath, boundPath)
+                    criticalError: new InvalidModelError(boundPath, optimizedPath)
                 };
             }
 
-            // We need to get the new cache position and copy the bound
-            // path.
-            optimizedPath = [];
-            for (i = 0; i < optimizedLength; ++i) {
-                optimizedPath[i] = boundPath[i];
-            }
             referenceContainer = model._referenceContainer;
         }
 

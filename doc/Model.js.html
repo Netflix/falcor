@@ -158,6 +158,10 @@ Model.prototype._collectRatio = 0.75;
  */
 Model.prototype.get = require("./response/get");
 
+Model.prototype._getOptimizedBoundPath = function _getOptimizedBoundPath() {
+    return arrayClone(this._path);
+};
+
 /**
  * The get method retrieves several {@link Path}s or {@link PathSet}s from a {@link Model}. The get method loads each value into a JSON object and returns in a ModelResponse.
  * @function
