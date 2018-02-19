@@ -272,6 +272,89 @@ describe('DataSource Only', function() {
         }, 200);
     });
 
+    it('should ignore response-stuffed paths.', function(done) {
+        var onGet = sinon.spy();
+        var source = new LocalDataSource(cacheGenerator(0, 2), {
+            onGet: onGet,
+            wait: 100
+        });
+        var model = new Model({source: source}).batch(1);
+        var onNext = sinon.spy();
+        var disposable1 = toObservable(model.
+            get(['videos', 0, 'title'])).
+            doAction(onNext, noOp, function() {
+                throw new Error('Should not of completed.  It was disposed.');
+            }).
+            subscribe(noOp, done);
+
+        toObservable(model.
+            get(['videos', 1, 'title'])).
+            subscribe(noOp, done);
+
+        setTimeout(function() {
+            disposable1.dispose();
+        }, 30);
+
+        setTimeout(function() {
+            try {
+                expect(model._root.cache.videos[0]).to.be.undefined;
+            } catch(e) {
+                return done(e);
+            }
+            return done();
+        }, 200);
+    });
+
+    it('should honor response-stuffed paths with _useServerPaths == true.', function(done) {
+        var onGet = sinon.spy();
+        var source = new LocalDataSource(cacheGenerator(0, 2), {
+            onGet: onGet,
+            wait: 100,
+            onResults: function(data) {
+                data.paths = [
+                    ['videos', 0, 'title'],
+                    ['videos', 1, 'title']
+                ];
+            }
+        });
+        var model = new Model({source: source, _useServerPaths: true}).batch(1);
+        var onNext = sinon.spy();
+        var disposable1 = toObservable(model.
+            get(['videos', 0, 'title'])).
+            doAction(onNext, noOp, function() {
+                throw new Error('Should not of completed.  It was disposed.');
+            }).
+            subscribe(noOp, done);
+
+        toObservable(model.
+            get(['videos', 1, 'title'])).
+            subscribe(noOp, done);
+
+        setTimeout(function() {
+            disposable1.dispose();
+        }, 30);
+
+        setTimeout(function() {
+            try {
+                expect(model._root.cache.videos[0].$_absolutePath).to.deep.equal(['videos', 0]);
+            } catch(e) {
+                return done(e);
+            }
+            return done();
+        }, 200);
+    });
+
+    it('should throw when server paths are missing and _useServerPaths == true.', function(done) {
+        var source = new LocalDataSource(cacheGenerator(0, 2));
+        var model = new Model({source: source, _useServerPaths: true}).batch(1);
+        toObservable(model.
+            get(['videos', 0, 'title'])).
+            subscribe(noOp, function(err) {
+                expect(err.message).to.equal("Server responses must include a 'paths' field when Model._useServerPaths === true");
+                done();
+            });
+    });
+
     it('should be able to dispose one of two get requests..', function(done) {
         var onGet = sinon.spy();
         var source = new LocalDataSource(cacheGenerator(0, 2), {
