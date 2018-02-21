@@ -1,3 +1,10 @@
+1.1.0
+-------------------
+
+## Bugs
+- [Fix maxRetries on clone](https://github.com/Netflix/falcor/pull/917)
+- [Disables whole-branch response merging](https://github.com/Netflix/falcor/pull/920)
+
 1.0.0
 -------------------
 
