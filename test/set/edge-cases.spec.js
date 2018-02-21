@@ -42,7 +42,7 @@ describe("Special Cases", function() {
         var edgeCaseCache = {
             jsonGraph: {
                 user: {
-                    name: "Jim",
+                    name: {$type: $atom, value: "Jim"},
                     location: {$type: "error", value: "Something broke!"},
                     age: {$type: $atom}
                 }
