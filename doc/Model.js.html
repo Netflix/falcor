@@ -130,6 +130,8 @@ function Model(o) {
         this._treatErrorsAsValues = options._treatErrorsAsValues;
     }
 
+    this._useServerPaths = options._useServerPaths || false;
+
     this._allowFromWhenceYouCame = options.allowFromWhenceYouCame ||
         options._allowFromWhenceYouCame || false;
 

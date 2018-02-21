@@ -150,6 +150,8 @@ function Model(o) {
         this._treatErrorsAsValues = options._treatErrorsAsValues;
     }
 
+    this._useServerPaths = options._useServerPaths || false;
+
     this._allowFromWhenceYouCame = options.allowFromWhenceYouCame ||
         options._allowFromWhenceYouCame || false;
 
@@ -2777,14 +2779,21 @@ GetRequestV2.prototype = {
                             var currentVersion = incrementVersion.getCurrentVersion();
                             currentCacheVersion.setVersion(currentVersion);
                             var mergeContext = {hasInvalidatedResult : false};
-                            self._merge(rPaths, err, data, mergeContext);
+
+                            var pathsErr = model._useServerPaths && data && data.paths === undefined ?
+                                new Error("Server responses must include a 'paths' field when Model._useServerPaths === true") : undefined;
+
+                            if (!pathsErr) {
+                                self._merge(rPaths, err, data, mergeContext);
+                            }
+
                             // Call the callbacks.  The first one inserts all
                             // the data so that the rest do not have consider
                             // if their data is present or not.
                             for (i = 0, len = callbacks.length; i < len; ++i) {
                                 fn = callbacks[i];
                                 if (fn) {
-                                    fn(err, data, mergeContext.hasInvalidatedResult);
+                                    fn(pathsErr || err, data, mergeContext.hasInvalidatedResult);
                                 }
                             }
                             currentCacheVersion.setVersion(null);
@@ -2863,7 +2872,7 @@ GetRequestV2.prototype = {
         model._path = emptyArray;
 
         // flatten all the requested paths, adds them to the
-        var nextPaths = flattenRequestedPaths(requested);
+        var nextPaths = model._useServerPaths ? data.paths : flattenRequestedPaths(requested);
 
         // Insert errors in every requested position.
         if (err && model._treatDataSourceErrorsAsJSONGraphErrors) {
@@ -5924,7 +5933,7 @@ module.exports = function mergeJSONGraphNode(
         }
     }
     else if (node == null) {
-        node = insertNode(message, parent, key, undefined, optimizedPath);
+        node = insertNode({}, parent, key, undefined, optimizedPath);
     }
 
     return node;
