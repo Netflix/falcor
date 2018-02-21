@@ -170,6 +170,14 @@ Model.prototype._collectRatio = 0.75;
  */
 Model.prototype.get = require(57);
 
+/**
+ * _getOptimizedBoundPath is an extension point for internal users to polyfill
+ * legacy soft-bind behavior, as opposed to deref (hardBind). Current falcor
+ * only supports deref, and assumes _path to be a fully optimized path.
+ * @function
+ * @private
+ * @return {Path} - fully optimized bound path for the model
+ */
 Model.prototype._getOptimizedBoundPath = function _getOptimizedBoundPath() {
     return arrayClone(this._path);
 };
