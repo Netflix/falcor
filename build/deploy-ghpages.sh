@@ -8,7 +8,7 @@ if [ "$TRAVIS_PULL_REQUEST" == "false" ]; then
   FALCOR_BUILD_DIR=$TEMP_DIR/falcorbuild
   GH_PAGES_DIR=$TEMP_DIR/gh-pages
   DEPLOYABLE_REPO=https://${GH_TOKEN}@github.com/Netflix/falcor.git
-  CURRENT_RELEASE=1.0.0
+  CURRENT_RELEASE=test-docs-build
 
   mkdir -p $TEMP_DIR
 
