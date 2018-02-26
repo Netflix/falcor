@@ -9,7 +9,6 @@ branches:
         - master
         - 0.x
         - 1.0.0
-        - test-docs-build
 
 # Run as a docker container
 sudo: false
