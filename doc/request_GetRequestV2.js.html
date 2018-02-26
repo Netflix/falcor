@@ -84,10 +84,11 @@ GetRequestV2.prototype = {
                 flushedDisposable =
                     flushGetRequest(self, oPaths, function(err, data) {
                         var i, fn, len;
+                        var model = self.requestQueue.model;
                         self.requestQueue.removeRequest(self);
                         self._disposed = true;
 
-                        if (err instanceof InvalidSourceError) {
+                        if (model._treatDataSourceErrorsAsJSONGraphErrors ? err instanceof InvalidSourceError : !!err) {
                             for (i = 0, len = callbacks.length; i &lt; len; ++i) {
                                 fn = callbacks[i];
                                 if (fn) {
@@ -100,7 +101,14 @@ GetRequestV2.prototype = {
                         // If there is at least one callback remaining, then
                         // callback the callbacks.
                         if (self._count) {
-                            self._merge(rPaths, err, data);
+                            var mergeContext = {hasInvalidatedResult : false};
+
+                            var pathsErr = model._useServerPaths &amp;&amp; data &amp;&amp; data.paths === undefined ?
+                                new Error("Server responses must include a 'paths' field when Model._useServerPaths === true") : undefined;
+
+                            if (!pathsErr) {
+                                self._merge(rPaths, err, data, mergeContext);
+                            }
 
                             // Call the callbacks.  The first one inserts all
                             // the data so that the rest do not have consider
@@ -108,7 +116,7 @@ GetRequestV2.prototype = {
                             for (i = 0, len = callbacks.length; i &lt; len; ++i) {
                                 fn = callbacks[i];
                                 if (fn) {
-                                    fn(err, data);
+                                    fn(pathsErr || err, data, mergeContext.hasInvalidatedResult);
                                 }
                             }
                         }
@@ -173,7 +181,7 @@ GetRequestV2.prototype = {
     /**
      * merges the response into the model"s cache.
      */
-    _merge: function(requested, err, data) {
+    _merge: function(requested, err, data, mergeContext) {
         var self = this;
         var model = self.requestQueue.model;
         var modelRoot = model._root;
@@ -184,10 +192,10 @@ GetRequestV2.prototype = {
         model._path = emptyArray;
 
         // flatten all the requested paths, adds them to the
-        var nextPaths = flattenRequestedPaths(requested);
+        var nextPaths = model._useServerPaths ? data.paths : flattenRequestedPaths(requested);
 
         // Insert errors in every requested position.
-        if (err) {
+        if (err &amp;&amp; model._treatDataSourceErrorsAsJSONGraphErrors) {
             var error = err;
 
             // Converts errors to objects, a more friendly storage
@@ -212,7 +220,7 @@ GetRequestV2.prototype = {
                     value: error
                 };
             });
-            setPathValues(model, pathValues, null, errorSelector, comparator);
+            setPathValues(model, pathValues, null, errorSelector, comparator, mergeContext);
         }
 
         // Insert the jsonGraph from the dataSource.
@@ -220,7 +228,7 @@ GetRequestV2.prototype = {
             setJSONGraphs(model, [{
                 paths: nextPaths,
                 jsonGraph: data.jsonGraph
-            }], null, errorSelector, comparator);
+            }], null, errorSelector, comparator, mergeContext);
         }
 
         // return the model"s boundPath

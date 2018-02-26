@@ -24630,9 +24630,6 @@ Promise.prototype.nodeify = function (callback, ctx) {
 }
 
 },{"117":117,"216":216}],222:[function(require,module,exports){
-module.exports = require(223);
-
-},{"223":223}],223:[function(require,module,exports){
 (function (global){
 'use strict';
 
@@ -24640,7 +24637,7 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-var _ponyfill = require(224);
+var _ponyfill = require(223);
 
 var _ponyfill2 = _interopRequireDefault(_ponyfill);
 
@@ -24664,7 +24661,7 @@ if (typeof self !== 'undefined') {
 var result = (0, _ponyfill2['default'])(root);
 exports['default'] = result;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"224":224}],224:[function(require,module,exports){
+},{"223":223}],223:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {

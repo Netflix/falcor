@@ -107,7 +107,7 @@ function Model(o) {
     if (typeof options.maxRetries === "number") {
         this._maxRetries = options.maxRetries;
     } else {
-        this._maxRetries = options.maxRetries || Model.prototype._maxRetries;
+        this._maxRetries = options._maxRetries || Model.prototype._maxRetries;
     }
 
     if (typeof options.collectRatio === "number") {
@@ -130,8 +130,13 @@ function Model(o) {
         this._treatErrorsAsValues = options._treatErrorsAsValues;
     }
 
+    this._useServerPaths = options._useServerPaths || false;
+
     this._allowFromWhenceYouCame = options.allowFromWhenceYouCame ||
         options._allowFromWhenceYouCame || false;
+
+    this._treatDataSourceErrorsAsJSONGraphErrors = options._treatDataSourceErrorsAsJSONGraphErrors || false;
+    this._emitReferencesInOutput = options._emitReferencesInOutput || false;
 
     if (options.cache) {
         this.setCache(options.cache);
