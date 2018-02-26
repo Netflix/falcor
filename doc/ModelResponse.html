@@ -86,7 +86,7 @@ id: api
       
       <dt class="tag-source">Source:</dt>
       <dd class="tag-source">
-          <a href="response_ModelResponse.js.html">response/ModelResponse.js</a>, <a href="response_ModelResponse.js.html#line13">line 13</a>
+          <a href="response_ModelResponse.js.html">response/ModelResponse.js</a>, <a href="response_ModelResponse.js.html#line5">line 5</a>
       </dd>
       
 
@@ -439,7 +439,7 @@ The progressively method creates a ModelResponse that immediately returns the re
       
       <dt class="tag-source">Source:</dt>
       <dd class="tag-source">
-          <a href="response_ModelResponse.js.html">response/ModelResponse.js</a>, <a href="response_ModelResponse.js.html#line78">line 78</a>
+          <a href="response_ModelResponse.js.html">response/ModelResponse.js</a>, <a href="response_ModelResponse.js.html#line22">line 22</a>
       </dd>
       
 
@@ -547,14 +547,14 @@ model.
     
         
 
-        <h4 class="name section-header function-name" id="toPathValues"><span class="type-signature"></span>toPathValues<span class="signature">()</span><span class="type-signature return-signature"></span></h4>
+        <h4 class="name section-header function-name" id="subscribe"><span class="type-signature"></span>subscribe<span class="signature">(onNext<span class="signature-attributes">nullable</span>, onError<span class="signature-attributes">nullable</span>, onCompleted<span class="signature-attributes">nullable</span>)</span><span class="type-signature return-signature"> &rarr; {<a href="Subscription.html">Subscription</a>}</span></h4>
 
         
     
 
         
         <div class="description">
-            <p>Converts the data format of the data in a JSONGraph Model response to a stream of path values.</p>
+            <p>The subscribe method is a synonym for Observable.prototype.forEach and triggers the execution of the Observable, causing the values within to be pushed to a callback. An Observable is like a pipe of water that is closed. When forEach is called, we open the valve and the values within are pushed at us.  These values can be received using either callbacks or an Observer object.</p>
         </div>
         
 
@@ -563,6 +563,136 @@ model.
     
 
     
+
+    
+        <h5>Parameters:</h5>
+        
+
+<div class="parameters-section">
+    <table class="params">
+        <thead>
+        <tr>
+            
+            <th class="header-name-and-attributes">
+              Name
+              
+                &amp; Attributes
+              
+            </th>
+            
+
+            <th class="header-type">Type</th>
+
+            
+
+            <th class="last header-description">Description</th>
+        </tr>
+        </thead>
+
+        <tbody>
+        
+
+            <tr>
+                
+                    <td>
+                        <span class="name">onNext</span>
+                        
+                            
+                        
+                            
+                                <br>
+                                <span class="attribute">nullable</span>
+                            
+                        
+                            
+                        
+                    </td>
+                
+
+                <td class="type">
+                
+                    
+<span class="param-type"><a href="Observable.html#~onNextCallback">Observable~onNextCallback</a></span>
+
+
+                
+                </td>
+
+                
+
+                <td class="description last"><p>a callback that accepts the next value in the stream of values</p></td>
+            </tr>
+
+        
+
+            <tr>
+                
+                    <td>
+                        <span class="name">onError</span>
+                        
+                            
+                        
+                            
+                                <br>
+                                <span class="attribute">nullable</span>
+                            
+                        
+                            
+                        
+                    </td>
+                
+
+                <td class="type">
+                
+                    
+<span class="param-type"><a href="Observable.html#~onErrorCallback">Observable~onErrorCallback</a></span>
+
+
+                
+                </td>
+
+                
+
+                <td class="description last"><p>a callback that accepts an error that occurred while evaluating the operation underlying the <a href="Observable.html">Observable</a> stream</p></td>
+            </tr>
+
+        
+
+            <tr>
+                
+                    <td>
+                        <span class="name">onCompleted</span>
+                        
+                            
+                        
+                            
+                                <br>
+                                <span class="attribute">nullable</span>
+                            
+                        
+                            
+                        
+                    </td>
+                
+
+                <td class="type">
+                
+                    
+<span class="param-type"><a href="Observable.html#~onCompletedCallback">Observable~onCompletedCallback</a></span>
+
+
+                
+                </td>
+
+                
+
+                <td class="description last"><p>a callback that is invoked when the <a href="Observable.html">Observable</a> stream has ended, and the <a href="Observable.html#~onNextCallback">Observable~onNextCallback</a> will not receive any more values</p></td>
+            </tr>
+
+        
+        </tbody>
+    </table>
+</div>
 
     
 
@@ -579,6 +709,11 @@ model.
 
       
 
+      
+      <dt class="tag-overrides">Overrides:</dt>
+      <dd class="tag-overrides">
+          <a href="Observable.html#subscribe">Observable#subscribe</a>
+      </dd>
       
 
       
@@ -600,7 +735,7 @@ model.
       
       <dt class="tag-source">Source:</dt>
       <dd class="tag-source">
-          <a href="response_ModelResponse.js.html">response/ModelResponse.js</a>, <a href="response_ModelResponse.js.html#line45">line 45</a>
+          <a href="typedefs_Observable.js.html">typedefs/Observable.js</a>, <a href="typedefs_Observable.js.html#line17">line 17</a>
       </dd>
       
 
@@ -624,41 +759,23 @@ model.
 
     
     
-        <h5>Returns:</h5>
-    
     
             
-<div class="param-desc">
-    <p>ModelResponse.<PathValue></p>
-</div>
 
 
+<dl class="return-type">
+    <dt>
+        Return Type: 
+    </dt>
+    <dd>
+        
+<span class="param-type"><a href="Subscription.html">Subscription</a></span>
+
+
+    </dd>
+</dl>
 
         
-
-    
-        <h5>Example</h5>
-        
-    <pre class="prettyprint"><code>var model = new falcor.Model({
-  cache: {
-    user: {
-      name: "Steve",
-      surname: "McGuire"
-    }
-  }
-});
-
-model.
-  get(["user",["name", "surname"]]).
-  toPathValues().
-  // this method will be called twice, once with the result of ["user", "name"]
-  // and once with the result of ["user", "surname"]
-  subscribe(function(pathValue){
-    console.log(JSON.stringify(pathValue));
-  });
-// prints...
-"{\"path\":[\"user\",\"name\"],\"value\":\"Steve\"}"
-"{\"path\":[\"user\",\"surname\"],\"value\":\"McGuire\"}"</code></pre>
 
     
 </section>
@@ -728,6 +845,20 @@ model.
                             </li>
                         
                             <li class="toc-api-class ">
+                                <a href="FromEsObserverAdapter.html" data-target="#FromEsObserverAdapter">FromEsObserverAdapter</a>
+                                
+                                
+
+
+                                
+
+
+                                
+
+
+                            </li>
+                        
+                            <li class="toc-api-class ">
                                 <a href="HttpDataSource.html" data-target="#HttpDataSource">HttpDataSource</a>
                                 
                                 
@@ -769,6 +900,10 @@ model.
         <li>
             <span class="toc-api-subgroup-title">Methods</span>
         </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="Model.html#_setMaxSize" data-target="#_setMaxSize">_setMaxSize</a>
+            </li>
         
             <li class="toc-api-subgroup-item">
                 <a href="Model.html#asDataSource" data-target="#asDataSource">asDataSource</a>
@@ -887,10 +1022,24 @@ model.
             </li>
         
             <li class="toc-api-subgroup-item">
-                <a href="ModelResponse.html#toPathValues" data-target="#toPathValues">toPathValues</a>
+                <a href="ModelResponse.html#subscribe" data-target="#subscribe">subscribe</a>
             </li>
          
     </ul>
+
+
+                                
+
+
+                                
+
+
+                            </li>
+                        
+                            <li class="toc-api-class ">
+                                <a href="ModelResponseObserver.html" data-target="#ModelResponseObserver">ModelResponseObserver</a>
+                                
+                                
 
 
                                 
@@ -916,7 +1065,7 @@ model.
             </li>
         
             <li class="toc-api-subgroup-item">
-                <a href="Observable.html#forEach" data-target="#forEach">forEach</a>
+                <a href="Observable.html#subscribe" data-target="#subscribe">subscribe</a>
             </li>
          
     </ul>
@@ -964,6 +1113,20 @@ model.
             </li>
          
     </ul>
+
+
+                                
+
+
+                                
+
+
+                            </li>
+                        
+                            <li class="toc-api-class ">
+                                <a href="ToEsSubscriptionAdapter.html" data-target="#ToEsSubscriptionAdapter">ToEsSubscriptionAdapter</a>
+                                
+                                
 
 
                                 

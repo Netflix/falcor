@@ -15,8 +15,7 @@ id: api
 </h2>
 <section>
     <article>
-        <pre class="prettyprint source linenums"><code>var $modelCreated = require("./../internal/model-created");
-var isInternalKey = require("./../support/isInternalKey");
+        <pre class="prettyprint source linenums"><code>var isInternalKey = require("./../support/isInternalKey");
 
 /**
  * decends and copies the cache.
@@ -59,7 +58,7 @@ function _copyCache(node, out, fromKey) {
             // 2: A $type-value node.
             // 3: undefined
             // We will strip out 3
-            return !isInternalKey(k) &amp;&amp; node[k];
+            return !isInternalKey(k) &amp;&amp; node[k] !== undefined;
         }).
         forEach(function(key) {
             var cacheNext = node[key];
@@ -72,7 +71,7 @@ function _copyCache(node, out, fromKey) {
             // Paste the node into the out cache.
             if (cacheNext.$type) {
                 var isObject = cacheNext.value &amp;&amp; typeof cacheNext.value === "object";
-                var isUserCreatedcacheNext = !node[$modelCreated];
+                var isUserCreatedcacheNext = !cacheNext.$_modelCreated;
                 var value;
                 if (isObject || isUserCreatedcacheNext) {
                     value = cloneBoxedValue(cacheNext);
@@ -147,6 +146,20 @@ function _copyCache(node, out, fromKey) {
                             </li>
                         
                             <li class="toc-api-class ">
+                                <a href="FromEsObserverAdapter.html" data-target="#FromEsObserverAdapter">FromEsObserverAdapter</a>
+                                
+                                
+
+
+                                
+
+
+                                
+
+
+                            </li>
+                        
+                            <li class="toc-api-class ">
                                 <a href="HttpDataSource.html" data-target="#HttpDataSource">HttpDataSource</a>
                                 
                                 
@@ -188,6 +201,10 @@ function _copyCache(node, out, fromKey) {
         <li>
             <span class="toc-api-subgroup-title">Methods</span>
         </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="Model.html#_setMaxSize" data-target="#_setMaxSize">_setMaxSize</a>
+            </li>
         
             <li class="toc-api-subgroup-item">
                 <a href="Model.html#asDataSource" data-target="#asDataSource">asDataSource</a>
@@ -306,10 +323,24 @@ function _copyCache(node, out, fromKey) {
             </li>
         
             <li class="toc-api-subgroup-item">
-                <a href="ModelResponse.html#toPathValues" data-target="#toPathValues">toPathValues</a>
+                <a href="ModelResponse.html#subscribe" data-target="#subscribe">subscribe</a>
             </li>
          
     </ul>
+
+
+                                
+
+
+                                
+
+
+                            </li>
+                        
+                            <li class="toc-api-class ">
+                                <a href="ModelResponseObserver.html" data-target="#ModelResponseObserver">ModelResponseObserver</a>
+                                
+                                
 
 
                                 
@@ -335,7 +366,7 @@ function _copyCache(node, out, fromKey) {
             </li>
         
             <li class="toc-api-subgroup-item">
-                <a href="Observable.html#forEach" data-target="#forEach">forEach</a>
+                <a href="Observable.html#subscribe" data-target="#subscribe">subscribe</a>
             </li>
          
     </ul>
@@ -383,6 +414,20 @@ function _copyCache(node, out, fromKey) {
             </li>
          
     </ul>
+
+
+                                
+
+
+                                
+
+
+                            </li>
+                        
+                            <li class="toc-api-class ">
+                                <a href="ToEsSubscriptionAdapter.html" data-target="#ToEsSubscriptionAdapter">ToEsSubscriptionAdapter</a>
+                                
+                                
 
 
                                 

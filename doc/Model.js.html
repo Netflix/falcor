@@ -18,9 +18,8 @@ id: api
         <pre class="prettyprint source linenums"><code>var ModelRoot = require("./ModelRoot");
 var ModelDataSourceAdapter = require("./ModelDataSourceAdapter");
 
-var RequestQueue = require("./request/RequestQueueRx");
+var RequestQueue = require("./request/RequestQueueV2");
 var ModelResponse = require("./response/ModelResponse");
-var SetResponse = require("./response/SetResponse");
 var CallResponse = require("./response/CallResponse");
 var InvalidateResponse = require("./response/InvalidateResponse");
 
@@ -36,7 +35,6 @@ var pathSyntax = require("falcor-path-syntax");
 
 var getSize = require("./support/getSize");
 var isObject = require("./support/isObject");
-var isFunction = require("./support/isFunction");
 var isPrimitive = require("./support/isPrimitive");
 var isJSONEnvelope = require("./support/isJSONEnvelope");
 var isJSONGraphEnvelope = require("./support/isJSONGraphEnvelope");
@@ -49,12 +47,6 @@ var validateInput = require("./support/validateInput");
 var noOp = function() {};
 var getCache = require("./get/getCache");
 var get = require("./get");
-var SET_VALID_INPUT = {
-    pathValue: true,
-    pathSyntax: true,
-    json: true,
-    jsonGraph: true
-};
 var GET_VALID_INPUT = require("./response/get/validInput");
 
 module.exports = Model;
@@ -89,7 +81,8 @@ Model.pathValue = jsong.pathValue;
  * @param {?Object} options - a set of options to customize behavior
  * @param {?DataSource} options.source - a data source to retrieve and manage the {@link JSONGraph}
  * @param {?JSONGraph} options.cache - initial state of the {@link JSONGraph}
- * @param {?number} options.maxSize - the maximum size of the cache
+ * @param {?number} options.maxSize - the maximum size of the cache. This value roughly correlates to item count (where itemCount = maxSize / 50). Each item by default is given a metadata `$size` of 50 (or its length when it's an array or string). You can get better control of falcor's memory usage by tweaking `$size`
+ * @param {?number} options.maxRetries - the maximum number of times that the Model will attempt to retrieve the value from the server.
  * @param {?number} options.collectRatio - the ratio of the maximum size to collect when the maxSize is exceeded
  * @param {?Model~errorSelector} options.errorSelector - a function used to translate errors before they are returned
  * @param {?Model~onChange} options.onChange - a function called whenever the Model's cache is changed
@@ -109,6 +102,12 @@ function Model(o) {
         this._maxSize = options.maxSize;
     } else {
         this._maxSize = options._maxSize || Model.prototype._maxSize;
+    }
+
+    if (typeof options.maxRetries === "number") {
+        this._maxRetries = options.maxRetries;
+    } else {
+        this._maxRetries = options._maxRetries || Model.prototype._maxRetries;
     }
 
     if (typeof options.collectRatio === "number") {
@@ -131,6 +130,14 @@ function Model(o) {
         this._treatErrorsAsValues = options._treatErrorsAsValues;
     }
 
+    this._useServerPaths = options._useServerPaths || false;
+
+    this._allowFromWhenceYouCame = options.allowFromWhenceYouCame ||
+        options._allowFromWhenceYouCame || false;
+
+    this._treatDataSourceErrorsAsJSONGraphErrors = options._treatDataSourceErrorsAsJSONGraphErrors || false;
+    this._emitReferencesInOutput = options._emitReferencesInOutput || false;
+
     if (options.cache) {
         this.setCache(options.cache);
     }
@@ -143,6 +150,7 @@ Model.prototype._boxed = false;
 Model.prototype._progressive = false;
 Model.prototype._treatErrorsAsValues = false;
 Model.prototype._maxSize = Math.pow(2, 53) - 1;
+Model.prototype._maxRetries = 3;
 Model.prototype._collectRatio = 0.75;
 
 /**
@@ -165,23 +173,15 @@ Model.prototype._getWithPaths = require("./response/get/getWithPaths");
 /**
  * Sets the value at one or more places in the JSONGraph model. The set method accepts one or more {@link PathValue}s, each of which is a combination of a location in the document and the value to place there.  In addition to accepting  {@link PathValue}s, the set method also returns the values after the set operation is complete.
  * @function
- * @return {ModelResponse.&lt;JSON>} - an {@link Observable} stream containing the values in the JSONGraph model after the set was attempted
+ * @return {ModelResponse.&lt;JSONEnvelope>} - an {@link Observable} stream containing the values in the JSONGraph model after the set was attempted
  */
-Model.prototype.set = function set() {
-    var out = validateInput(arguments, SET_VALID_INPUT, "set");
-    if (out !== true) {
-        return new ModelResponse(function(o) {
-            o.onError(out);
-        });
-    }
-    return this._set.apply(this, arguments);
-};
+Model.prototype.set = require("./response/set");
 
 /**
  * The preload method retrieves several {@link Path}s or {@link PathSet}s from a {@link Model} and loads them into the Model cache.
  * @function
  * @param {...PathSet} path - the path(s) to retrieve
- * @return {ModelResponse.&lt;Object>} - a ModelResponse that completes when the data has been loaded into the cache.
+ * @return {ModelResponse.&lt;JSONEnvelope>} - a ModelResponse that completes when the data has been loaded into the cache.
  */
 Model.prototype.preload = function preload() {
     var out = validateInput(arguments, GET_VALID_INPUT, "preload");
@@ -202,23 +202,6 @@ Model.prototype.preload = function preload() {
     });
 };
 
-Model.prototype._set = function _set() {
-    var args;
-    var argsIdx = -1;
-    var argsLen = arguments.length;
-    var selector = arguments[argsLen - 1];
-    if (isFunction(selector)) {
-        argsLen = argsLen - 1;
-    } else {
-        selector = void 0;
-    }
-    args = new Array(argsLen);
-    while (++argsIdx &lt; argsLen) {
-        args[argsIdx] = arguments[argsIdx];
-    }
-    return SetResponse.create(this, args, selector);
-};
-
 /**
  * Invokes a function in the JSON Graph.
  * @function
@@ -226,7 +209,7 @@ Model.prototype._set = function _set() {
  * @param {Array.&lt;Object>} args - the arguments to pass to the function
  * @param {Array.&lt;PathSet>} refPaths - the paths to retrieve from the JSON Graph References in the message returned from the function
  * @param {Array.&lt;PathSet>} thisPaths - the paths to retrieve from function's this object after successful function execution
- * @returns {ModelResponse.&lt;JSONEnvelope> - a JSONEnvelope contains the values returned from the function
+ * @return {ModelResponse.&lt;JSONEnvelope> - a JSONEnvelope contains the values returned from the function
  */
 Model.prototype.call = function call() {
     var args;
@@ -248,7 +231,7 @@ Model.prototype.call = function call() {
         }
     }
 
-    return CallResponse.create(this, args);
+    return new CallResponse(this, args[0], args[1], args[2], args[3]);
 };
 
 /**
@@ -260,53 +243,80 @@ Model.prototype.invalidate = function invalidate() {
     var args;
     var argsIdx = -1;
     var argsLen = arguments.length;
-    var selector = arguments[argsLen - 1];
-    args = new Array(argsLen);
+    args = [];
     while (++argsIdx &lt; argsLen) {
         args[argsIdx] = pathSyntax.fromPath(arguments[argsIdx]);
-        if (typeof args[argsIdx] !== "object") {
+        if (!Array.isArray(args[argsIdx])) {
             throw new Error("Invalid argument");
         }
     }
 
     // creates the obs, subscribes and will throw the errors if encountered.
-    InvalidateResponse.
-        create(this, args, selector).
+    (new InvalidateResponse(this, args)).
         subscribe(noOp, function(e) {
             throw e;
         });
 };
 
 /**
- * Returns a new {@link Model} bound to a location within the {@link JSONGraph}. The bound location is never a {@link Reference}: any {@link Reference}s encountered while resolving the bound {@link Path} are always replaced with the {@link Reference}s target value. For subsequent operations on the {@link Model}, all paths will be evaluated relative to the bound path. Deref allows you to:
- * - Expose only a fragment of the {@link JSONGraph} to components, rather than the entire graph
+ * Returns a new {@link Model} bound to a location within the {@link
+ * JSONGraph}. The bound location is never a {@link Reference}: any {@link
+ * Reference}s encountered while resolving the bound {@link Path} are always
+ * replaced with the {@link Reference}s target value. For subsequent operations
+ * on the {@link Model}, all paths will be evaluated relative to the bound
+ * path. Deref allows you to:
+ * - Expose only a fragment of the {@link JSONGraph} to components, rather than
+ *   the entire graph
  * - Hide the location of a {@link JSONGraph} fragment from components
- * - Optimize for executing multiple operations and path looksup at/below the same location in the {@link JSONGraph}
+ * - Optimize for executing multiple operations and path looksup at/below the
+ *   same location in the {@link JSONGraph}
  * @method
- * @param {Path} derefPath - the path to the object that the new Model should refer to
- * @param {...PathSet} relativePathsToPreload - paths (relative to the dereference path) to preload before Model is created
- * @return {Observable.&lt;Model>} - an Observable stream with a single value, the dereferenced {@link Model}, or an empty stream if nothing is found at the path
+ * @param {Object} responseObject - an object previously retrieved from the
+ * Model
+ * @return {Model} - the dereferenced {@link Model}
  * @example
-var model = new falcor.Model({
+var Model = falcor.Model;
+var model = new Model({
   cache: {
     users: [
-      { $type: "ref", value: ["usersById", 32] }
+      Model.ref(["usersById", 32])
     ],
     usersById: {
       32: {
-	name: "Steve",
+        name: "Steve",
         surname: "McGuire"
       }
     }
   }
 });
-model.deref(["users", 0], "name").subscribe(function(userModel){
-  console.log(userModel.getPath());
+
+model.
+    get(['users', 0, 'name']).
+    subscribe(function(jsonEnv) {
+        var userModel = model.deref(jsonEnv.json.users[0]);
+        console.log(model.getPath());
+        console.log(userModel.getPath());
+   });
 });
 
-// prints ["usersById", 32] because userModel refers to target of reference at ["users", 0]
+// prints the following:
+// []
+// ["usersById", 32] - because userModel refers to target of reference at ["users", 0]
  */
 Model.prototype.deref = require("./deref");
+
+/**
+ * A dereferenced model can become invalid when the reference from which it was
+ * built has been removed/collected/expired/etc etc.  To fix the issue, a from
+ * the parent request should be made (no parent, then from the root) for a valid
+ * path and re-dereference performed to update what the model is bound too.
+ *
+ * @method
+ * @private
+ * @return {Boolean} - If the currently deref'd model is still considered a
+ * valid deref.
+ */
+Model.prototype._hasValidParentReference = require("./deref/hasValidParentReference");
 
 /**
  * Get data for a single {@link Path}.
@@ -355,8 +365,14 @@ Model.prototype.setValue = require("./set/setValue");
  */
 Model.prototype._getValueSync = require("./get/sync");
 
+/**
+ * @private
+ */
 Model.prototype._setValueSync = require("./set/sync");
 
+/**
+ * @private
+ */
 Model.prototype._derefSync = require("./deref/sync");
 
 /**
@@ -373,12 +389,18 @@ Model.prototype.setCache = function modelSetCache(cacheOrJSONGraphEnvelope) {
         if (typeof cache !== "undefined") {
             collectLru(modelRoot, modelRoot.expired, getSize(cache), 0);
         }
+        var out;
         if (isJSONGraphEnvelope(cacheOrJSONGraphEnvelope)) {
-            setJSONGraphs(this, [cacheOrJSONGraphEnvelope]);
+            out = setJSONGraphs(this, [cacheOrJSONGraphEnvelope])[0];
         } else if (isJSONEnvelope(cacheOrJSONGraphEnvelope)) {
-            setCache(this, [cacheOrJSONGraphEnvelope]);
+            out = setCache(this, [cacheOrJSONGraphEnvelope])[0];
         } else if (isObject(cacheOrJSONGraphEnvelope)) {
-            setCache(this, [{ json: cacheOrJSONGraphEnvelope }]);
+            out = setCache(this, [{ json: cacheOrJSONGraphEnvelope }])[0];
+        }
+
+        // performs promotion without producing output.
+        if (out) {
+            get.getWithPathsAsPathMap(this, out, []);
         }
         this._path = boundPath;
     } else if (typeof cache === "undefined") {
@@ -406,6 +428,23 @@ Model.prototype.getCache = function _getCache() {
     get.getWithPathsAsJSONGraph(this, paths, result);
     this._path = path;
     return result[0].jsonGraph;
+};
+
+/**
+ * Reset cache maxSize. When the new maxSize is smaller than the old force a collect.
+ * @param {Number} maxSize - the new maximum cache size
+ */
+Model.prototype._setMaxSize = function setMaxSize(maxSize) {
+    var oldMaxSize = this._maxSize;
+    this._maxSize = maxSize;
+    if (maxSize &lt; oldMaxSize) {
+        var modelRoot = this._root;
+        var modelCache = modelRoot.cache;
+        // eslint-disable-next-line no-cond-assign
+        var currentVersion = modelCache.$_version;
+        collectLru(modelRoot, modelRoot.expired, getSize(modelCache),
+                this._maxSize, this._collectRatio, currentVersion);
+    }
 };
 
 /**
@@ -566,27 +605,47 @@ Model.prototype.toJSON = function toJSON() {
  * Returns the {@link Path} to the object within the JSON Graph that this Model references.
  * @return {Path}
  * @example
-var model = new falcor.Model({
+var Model = falcor.Model;
+var model = new Model({
   cache: {
     users: [
-      { $type: "ref", value: ["usersById", 32] }
+      Model.ref(["usersById", 32])
     ],
     usersById: {
       32: {
-	name: "Steve",
+        name: "Steve",
         surname: "McGuire"
       }
     }
   }
 });
-model.deref(["users", 0], "name").subscribe(function(userModel){
-  console.log(userModel.getPath());
+
+model.
+    get(['users', 0, 'name']).
+    subscribe(function(jsonEnv) {
+        var userModel = model.deref(jsonEnv.json.users[0]);
+        console.log(model.getPath());
+        console.log(userModel.getPath());
+   });
 });
 
-// prints ["usersById", 32] because userModel refers to target of reference at ["users", 0]
+// prints the following:
+// []
+// ["usersById", 32] - because userModel refers to target of reference at ["users", 0]
  */
 Model.prototype.getPath = function getPath() {
     return arrayClone(this._path);
+};
+
+/**
+ * This one is actually private.  I would not use this without talking to
+ * jhusain, sdesai, or michaelbpaulson (github).
+ * @private
+ */
+Model.prototype._fromWhenceYouCame = function fromWhenceYouCame(allow) {
+    return this._clone({
+        _allowFromWhenceYouCame: allow === undefined ? true : allow
+    });
 };
 
 Model.prototype._getBoundValue = require("./get/getBoundValue");
@@ -596,25 +655,13 @@ Model.prototype._getValueSync = require("./get/getValueSync");
 Model.prototype._getPathValuesAsPathMap = get.getWithPathsAsPathMap;
 Model.prototype._getPathValuesAsJSONG = get.getWithPathsAsJSONGraph;
 
-Model.prototype._setPathValuesAsJSON = require("./set/setPathValues");
-Model.prototype._setPathValuesAsJSONG = require("./set/setPathValues");
-Model.prototype._setPathValuesAsPathMap = require("./set/setPathValues");
-Model.prototype._setPathValuesAsValues = require("./set/setPathValues");
-
-Model.prototype._setPathMapsAsJSON = require("./set/setPathMaps");
-Model.prototype._setPathMapsAsJSONG = require("./set/setPathMaps");
-Model.prototype._setPathMapsAsPathMap = require("./set/setPathMaps");
-Model.prototype._setPathMapsAsValues = require("./set/setPathMaps");
-
-Model.prototype._setJSONGsAsJSON = require("./set/setJSONGraphs");
-Model.prototype._setJSONGsAsJSONG = require("./set/setJSONGraphs");
-Model.prototype._setJSONGsAsPathMap = require("./set/setJSONGraphs");
-Model.prototype._setJSONGsAsValues = require("./set/setJSONGraphs");
-
+Model.prototype._setPathValues = require("./set/setPathValues");
+Model.prototype._setPathMaps = require("./set/setPathMaps");
+Model.prototype._setJSONGs = require("./set/setJSONGraphs");
 Model.prototype._setCache = require("./set/setPathMaps");
 
-Model.prototype._invalidatePathValuesAsJSON = require("./invalidate/invalidatePathSets");
-Model.prototype._invalidatePathMapsAsJSON = require("./invalidate/invalidatePathMaps");
+Model.prototype._invalidatePathValues = require("./invalidate/invalidatePathSets");
+Model.prototype._invalidatePathMaps = require("./invalidate/invalidatePathMaps");
 </code></pre>
     </article>
 </section>
@@ -675,6 +722,20 @@ Model.prototype._invalidatePathMapsAsJSON = require("./invalidate/invalidatePath
                             </li>
                         
                             <li class="toc-api-class ">
+                                <a href="FromEsObserverAdapter.html" data-target="#FromEsObserverAdapter">FromEsObserverAdapter</a>
+                                
+                                
+
+
+                                
+
+
+                                
+
+
+                            </li>
+                        
+                            <li class="toc-api-class ">
                                 <a href="HttpDataSource.html" data-target="#HttpDataSource">HttpDataSource</a>
                                 
                                 
@@ -716,6 +777,10 @@ Model.prototype._invalidatePathMapsAsJSON = require("./invalidate/invalidatePath
         <li>
             <span class="toc-api-subgroup-title">Methods</span>
         </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="Model.html#_setMaxSize" data-target="#_setMaxSize">_setMaxSize</a>
+            </li>
         
             <li class="toc-api-subgroup-item">
                 <a href="Model.html#asDataSource" data-target="#asDataSource">asDataSource</a>
@@ -834,10 +899,24 @@ Model.prototype._invalidatePathMapsAsJSON = require("./invalidate/invalidatePath
             </li>
         
             <li class="toc-api-subgroup-item">
-                <a href="ModelResponse.html#toPathValues" data-target="#toPathValues">toPathValues</a>
+                <a href="ModelResponse.html#subscribe" data-target="#subscribe">subscribe</a>
             </li>
          
     </ul>
+
+
+                                
+
+
+                                
+
+
+                            </li>
+                        
+                            <li class="toc-api-class ">
+                                <a href="ModelResponseObserver.html" data-target="#ModelResponseObserver">ModelResponseObserver</a>
+                                
+                                
 
 
                                 
@@ -863,7 +942,7 @@ Model.prototype._invalidatePathMapsAsJSON = require("./invalidate/invalidatePath
             </li>
         
             <li class="toc-api-subgroup-item">
-                <a href="Observable.html#forEach" data-target="#forEach">forEach</a>
+                <a href="Observable.html#subscribe" data-target="#subscribe">subscribe</a>
             </li>
          
     </ul>
@@ -911,6 +990,20 @@ Model.prototype._invalidatePathMapsAsJSON = require("./invalidate/invalidatePath
             </li>
          
     </ul>
+
+
+                                
+
+
+                                
+
+
+                            </li>
+                        
+                            <li class="toc-api-class ">
+                                <a href="ToEsSubscriptionAdapter.html" data-target="#ToEsSubscriptionAdapter">ToEsSubscriptionAdapter</a>
+                                
+                                
 
 
                                 

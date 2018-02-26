@@ -228,7 +228,40 @@ id: api
 
                 
 
-                <td class="description last"><p>the maximum size of the cache</p></td>
+                <td class="description last"><p>the maximum size of the cache. This value roughly correlates to item count (where itemCount = maxSize / 50). Each item by default is given a metadata <code>$size</code> of 50 (or its length when it's an array or string). You can get better control of falcor's memory usage by tweaking <code>$size</code></p></td>
+            </tr>
+
+        
+
+            <tr>
+                
+                    <td>
+                        <span class="name">maxRetries</span>
+                        
+                            
+                        
+                            
+                                <br>
+                                <span class="attribute">nullable</span>
+                            
+                        
+                            
+                        
+                    </td>
+                
+
+                <td class="type">
+                
+                    
+<span class="param-type">number</span>
+
+
+                
+                </td>
+
+                
+
+                <td class="description last"><p>the maximum number of times that the Model will attempt to retrieve the value from the server.</p></td>
             </tr>
 
         
@@ -412,7 +445,7 @@ id: api
       
       <dt class="tag-source">Source:</dt>
       <dd class="tag-source">
-          <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line81">line 81</a>
+          <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line74">line 74</a>
       </dd>
       
 
@@ -503,7 +536,7 @@ id: api
       
       <dt class="tag-source">Source:</dt>
       <dd class="tag-source">
-          <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line309">line 309</a>
+          <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line319">line 319</a>
       </dd>
       
 
@@ -582,7 +615,7 @@ id: api
       
       <dt class="tag-source">Source:</dt>
       <dd class="tag-source">
-          <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line327">line 327</a>
+          <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line337">line 337</a>
       </dd>
       
 
@@ -618,6 +651,144 @@ id: api
       
           <h3 class="subsection-title">Methods</h3>
 
+          
+              
+<section class="method-section">
+    
+        
+
+        <h4 class="name section-header function-name" id="_setMaxSize"><span class="type-signature"></span>_setMaxSize<span class="signature">(maxSize)</span><span class="type-signature return-signature"></span></h4>
+
+        
+    
+
+        
+        <div class="description">
+            <p>Reset cache maxSize. When the new maxSize is smaller than the old force a collect.</p>
+        </div>
+        
+
+    
+
+    
+
+    
+
+    
+        <h5>Parameters:</h5>
+        
+
+<div class="parameters-section">
+    <table class="params">
+        <thead>
+        <tr>
+            
+            <th class="header-name-and-attributes">
+              Name
+              
+            </th>
+            
+
+            <th class="header-type">Type</th>
+
+            
+
+            <th class="last header-description">Description</th>
+        </tr>
+        </thead>
+
+        <tbody>
+        
+
+            <tr>
+                
+                    <td>
+                        <span class="name">maxSize</span>
+                        
+                    </td>
+                
+
+                <td class="type">
+                
+                    
+<span class="param-type">Number</span>
+
+
+                
+                </td>
+
+                
+
+                <td class="description last"><p>the new maximum cache size</p></td>
+            </tr>
+
+        
+        </tbody>
+    </table>
+</div>
+
+    
+
+    
+
+
+
+
+  <dl class="details">
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+      <dt class="tag-source">Source:</dt>
+      <dd class="tag-source">
+          <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line420">line 420</a>
+      </dd>
+      
+
+      
+
+      
+
+      
+  </dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</section>
           
               
 <section class="method-section">
@@ -677,7 +848,7 @@ id: api
       
       <dt class="tag-source">Source:</dt>
       <dd class="tag-source">
-          <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line495">line 495</a>
+          <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line534">line 534</a>
       </dd>
       
 
@@ -856,7 +1027,7 @@ or
       
       <dt class="tag-source">Source:</dt>
       <dd class="tag-source">
-          <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line438">line 438</a>
+          <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line477">line 477</a>
       </dd>
       
 
@@ -965,7 +1136,7 @@ or
       
       <dt class="tag-source">Source:</dt>
       <dd class="tag-source">
-          <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line515">line 515</a>
+          <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line554">line 554</a>
       </dd>
       
 
@@ -1193,7 +1364,7 @@ or
       
       <dt class="tag-source">Source:</dt>
       <dd class="tag-source">
-          <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line214">line 214</a>
+          <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line197">line 197</a>
       </dd>
       
 
@@ -1237,18 +1408,23 @@ or
     
         
 
-        <h4 class="name section-header function-name" id="deref"><span class="type-signature"></span>deref<span class="signature">(derefPath, &hellip;relativePathsToPreload)</span><span class="type-signature return-signature"> &rarr; {<a href="Observable.html">Observable</a>.&lt;<a href="Model.html">Model</a>>}</span></h4>
+        <h4 class="name section-header function-name" id="deref"><span class="type-signature"></span>deref<span class="signature">(responseObject)</span><span class="type-signature return-signature"> &rarr; {<a href="Model.html">Model</a>}</span></h4>
 
         
     
 
         
         <div class="description">
-            <p>Returns a new <a href="Model.html">Model</a> bound to a location within the <a href="global.html#JSONGraph">JSONGraph</a>. The bound location is never a Reference: any References encountered while resolving the bound <a href="global.html#Path">Path</a> are always replaced with the References target value. For subsequent operations on the <a href="Model.html">Model</a>, all paths will be evaluated relative to the bound path. Deref allows you to:</p>
+            <p>Returns a new <a href="Model.html">Model</a> bound to a location within the <a href="global.html#JSONGraph">JSONGraph</a>. The bound location is never a Reference: any References encountered while resolving the bound <a href="global.html#Path">Path</a> are always
+replaced with the References target value. For subsequent operations
+on the <a href="Model.html">Model</a>, all paths will be evaluated relative to the bound
+path. Deref allows you to:</p>
 <ul>
-<li>Expose only a fragment of the <a href="global.html#JSONGraph">JSONGraph</a> to components, rather than the entire graph</li>
+<li>Expose only a fragment of the <a href="global.html#JSONGraph">JSONGraph</a> to components, rather than
+the entire graph</li>
 <li>Hide the location of a <a href="global.html#JSONGraph">JSONGraph</a> fragment from components</li>
-<li>Optimize for executing multiple operations and path looksup at/below the same location in the <a href="global.html#JSONGraph">JSONGraph</a></li>
+<li>Optimize for executing multiple operations and path looksup at/below the
+same location in the <a href="global.html#JSONGraph">JSONGraph</a></li>
 </ul>
         </div>
         
@@ -1271,8 +1447,6 @@ or
             <th class="header-name-and-attributes">
               Name
               
-                &amp; Attributes
-              
             </th>
             
 
@@ -1290,13 +1464,7 @@ or
             <tr>
                 
                     <td>
-                        <span class="name">derefPath</span>
-                        
-                            
-                        
-                            
-                        
-                            
+                        <span class="name">responseObject</span>
                         
                     </td>
                 
@@ -1304,7 +1472,7 @@ or
                 <td class="type">
                 
                     
-<span class="param-type"><a href="global.html#Path">Path</a></span>
+<span class="param-type">Object</span>
 
 
                 
@@ -1312,40 +1480,8 @@ or
 
                 
 
-                <td class="description last"><p>the path to the object that the new Model should refer to</p></td>
-            </tr>
-
-        
-
-            <tr>
-                
-                    <td>
-                        <span class="name">relativePathsToPreload</span>
-                        
-                            
-                        
-                            
-                        
-                            
-                                <br>
-                                <span class="attribute">repeatable</span>
-                            
-                        
-                    </td>
-                
-
-                <td class="type">
-                
-                    
-<span class="param-type"><a href="global.html#PathSet">PathSet</a></span>
-
-
-                
-                </td>
-
-                
-
-                <td class="description last"><p>paths (relative to the dereference path) to preload before Model is created</p></td>
+                <td class="description last"><p>an object previously retrieved from the
+Model</p></td>
             </tr>
 
         
@@ -1389,7 +1525,7 @@ or
       
       <dt class="tag-source">Source:</dt>
       <dd class="tag-source">
-          <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line292">line 292</a>
+          <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line289">line 289</a>
       </dd>
       
 
@@ -1419,7 +1555,7 @@ or
             
 <div class="param-desc">
     <ul>
-<li>an Observable stream with a single value, the dereferenced <a href="Model.html">Model</a>, or an empty stream if nothing is found at the path</li>
+<li>the dereferenced <a href="Model.html">Model</a></li>
 </ul>
 </div>
 
@@ -1431,7 +1567,7 @@ or
     </dt>
     <dd>
         
-<span class="param-type"><a href="Observable.html">Observable</a>.&lt;<a href="Model.html">Model</a>></span>
+<span class="param-type"><a href="Model.html">Model</a></span>
 
 
     </dd>
@@ -1442,24 +1578,33 @@ or
     
         <h5>Example</h5>
         
-    <pre class="prettyprint"><code>var model = new falcor.Model({
+    <pre class="prettyprint"><code>var Model = falcor.Model;
+var model = new Model({
   cache: {
     users: [
-      { $type: "ref", value: ["usersById", 32] }
+      Model.ref(["usersById", 32])
     ],
     usersById: {
       32: {
-	name: "Steve",
+        name: "Steve",
         surname: "McGuire"
       }
     }
   }
 });
-model.deref(["users", 0], "name").subscribe(function(userModel){
-  console.log(userModel.getPath());
+
+model.
+    get(['users', 0, 'name']).
+    subscribe(function(jsonEnv) {
+        var userModel = model.deref(jsonEnv.json.users[0]);
+        console.log(model.getPath());
+        console.log(userModel.getPath());
+   });
 });
 
-// prints ["usersById", 32] because userModel refers to target of reference at ["users", 0]</code></pre>
+// prints the following:
+// []
+// ["usersById", 32] - because userModel refers to target of reference at ["users", 0]</code></pre>
 
     
 </section>
@@ -1586,7 +1731,7 @@ model.deref(["users", 0], "name").subscribe(function(userModel){
       
       <dt class="tag-source">Source:</dt>
       <dd class="tag-source">
-          <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line137">line 137</a>
+          <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line145">line 145</a>
       </dd>
       
 
@@ -1764,7 +1909,7 @@ model.deref(["users", 0], "name").subscribe(function(userModel){
       
       <dt class="tag-source">Source:</dt>
       <dd class="tag-source">
-          <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line381">line 381</a>
+          <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line403">line 403</a>
       </dd>
       
 
@@ -1879,7 +2024,7 @@ model.deref(["users", 0], "name").subscribe(function(userModel){
       
       <dt class="tag-source">Source:</dt>
       <dd class="tag-source">
-          <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line571">line 571</a>
+          <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line619">line 619</a>
       </dd>
       
 
@@ -1924,24 +2069,33 @@ model.deref(["users", 0], "name").subscribe(function(userModel){
     
         <h5>Example</h5>
         
-    <pre class="prettyprint"><code>var model = new falcor.Model({
+    <pre class="prettyprint"><code>var Model = falcor.Model;
+var model = new Model({
   cache: {
     users: [
-      { $type: "ref", value: ["usersById", 32] }
+      Model.ref(["usersById", 32])
     ],
     usersById: {
       32: {
-	name: "Steve",
+        name: "Steve",
         surname: "McGuire"
       }
     }
   }
 });
-model.deref(["users", 0], "name").subscribe(function(userModel){
-  console.log(userModel.getPath());
+
+model.
+    get(['users', 0, 'name']).
+    subscribe(function(jsonEnv) {
+        var userModel = model.deref(jsonEnv.json.users[0]);
+        console.log(model.getPath());
+        console.log(userModel.getPath());
+   });
 });
 
-// prints ["usersById", 32] because userModel refers to target of reference at ["users", 0]</code></pre>
+// prints the following:
+// []
+// ["usersById", 32] - because userModel refers to target of reference at ["users", 0]</code></pre>
 
     
 </section>
@@ -2068,7 +2222,7 @@ model.deref(["users", 0], "name").subscribe(function(userModel){
       
       <dt class="tag-source">Source:</dt>
       <dd class="tag-source">
-          <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line399">line 399</a>
+          <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line438">line 438</a>
       </dd>
       
 
@@ -2241,7 +2395,7 @@ model.deref(["users", 0], "name").subscribe(function(userModel){
       
       <dt class="tag-source">Source:</dt>
       <dd class="tag-source">
-          <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line242">line 242</a>
+          <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line225">line 225</a>
       </dd>
       
 
@@ -2273,7 +2427,7 @@ model.deref(["users", 0], "name").subscribe(function(userModel){
     
         
 
-        <h4 class="name section-header function-name" id="preload"><span class="type-signature"></span>preload<span class="signature">(&hellip;path)</span><span class="type-signature return-signature"> &rarr; {<a href="ModelResponse.html">ModelResponse</a>.&lt;Object>}</span></h4>
+        <h4 class="name section-header function-name" id="preload"><span class="type-signature"></span>preload<span class="signature">(&hellip;path)</span><span class="type-signature return-signature"> &rarr; {<a href="ModelResponse.html">ModelResponse</a>.&lt;<a href="global.html#JSONEnvelope">JSONEnvelope</a>>}</span></h4>
 
         
     
@@ -2432,7 +2586,7 @@ model.deref(["users", 0], "name").subscribe(function(userModel){
     </dt>
     <dd>
         
-<span class="param-type"><a href="ModelResponse.html">ModelResponse</a>.&lt;Object></span>
+<span class="param-type"><a href="ModelResponse.html">ModelResponse</a>.&lt;<a href="global.html#JSONEnvelope">JSONEnvelope</a>></span>
 
 
     </dd>
@@ -2448,7 +2602,7 @@ model.deref(["users", 0], "name").subscribe(function(userModel){
     
         
 
-        <h4 class="name section-header function-name" id="set"><span class="type-signature"></span>set<span class="signature">()</span><span class="type-signature return-signature"> &rarr; {<a href="ModelResponse.html">ModelResponse</a>.&lt;JSON>}</span></h4>
+        <h4 class="name section-header function-name" id="set"><span class="type-signature"></span>set<span class="signature">()</span><span class="type-signature return-signature"> &rarr; {<a href="ModelResponse.html">ModelResponse</a>.&lt;<a href="global.html#JSONEnvelope">JSONEnvelope</a>>}</span></h4>
 
         
     
@@ -2501,7 +2655,7 @@ model.deref(["users", 0], "name").subscribe(function(userModel){
       
       <dt class="tag-source">Source:</dt>
       <dd class="tag-source">
-          <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line153">line 153</a>
+          <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line161">line 161</a>
       </dd>
       
 
@@ -2543,7 +2697,7 @@ model.deref(["users", 0], "name").subscribe(function(userModel){
     </dt>
     <dd>
         
-<span class="param-type"><a href="ModelResponse.html">ModelResponse</a>.&lt;JSON></span>
+<span class="param-type"><a href="ModelResponse.html">ModelResponse</a>.&lt;<a href="global.html#JSONEnvelope">JSONEnvelope</a>></span>
 
 
     </dd>
@@ -2665,7 +2819,7 @@ model.deref(["users", 0], "name").subscribe(function(userModel){
       
       <dt class="tag-source">Source:</dt>
       <dd class="tag-source">
-          <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line349">line 349</a>
+          <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line365">line 365</a>
       </dd>
       
 
@@ -2750,7 +2904,7 @@ model.deref(["users", 0], "name").subscribe(function(userModel){
       
       <dt class="tag-source">Source:</dt>
       <dd class="tag-source">
-          <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line468">line 468</a>
+          <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line507">line 507</a>
       </dd>
       
 
@@ -2853,7 +3007,7 @@ model.deref(["users", 0], "name").subscribe(function(userModel){
       
       <dt class="tag-source">Source:</dt>
       <dd class="tag-source">
-          <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line451">line 451</a>
+          <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line490">line 490</a>
       </dd>
       
 
@@ -2962,7 +3116,7 @@ model.deref(["users", 0], "name").subscribe(function(userModel){
       
       <dt class="tag-source">Source:</dt>
       <dd class="tag-source">
-          <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line525">line 525</a>
+          <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line564">line 564</a>
       </dd>
       
 
@@ -3065,7 +3219,7 @@ model.deref(["users", 0], "name").subscribe(function(userModel){
       
       <dt class="tag-source">Source:</dt>
       <dd class="tag-source">
-          <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line535">line 535</a>
+          <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line574">line 574</a>
       </dd>
       
 
@@ -3251,7 +3405,7 @@ model.deref(["users", 0], "name").subscribe(function(userModel){
       
       <dt class="tag-source">Source:</dt>
       <dd class="tag-source">
-          <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line61">line 61</a>
+          <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line53">line 53</a>
       </dd>
       
 
@@ -3413,7 +3567,7 @@ model.deref(["users", 0], "name").subscribe(function(userModel){
       
       <dt class="tag-source">Source:</dt>
       <dd class="tag-source">
-          <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line54">line 54</a>
+          <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line46">line 46</a>
       </dd>
       
 
@@ -3522,7 +3676,7 @@ model.deref(["users", 0], "name").subscribe(function(userModel){
       
       <dt class="tag-source">Source:</dt>
       <dd class="tag-source">
-          <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line49">line 49</a>
+          <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line41">line 41</a>
       </dd>
       
 
@@ -3612,6 +3766,20 @@ model.deref(["users", 0], "name").subscribe(function(userModel){
                             </li>
                         
                             <li class="toc-api-class ">
+                                <a href="FromEsObserverAdapter.html" data-target="#FromEsObserverAdapter">FromEsObserverAdapter</a>
+                                
+                                
+
+
+                                
+
+
+                                
+
+
+                            </li>
+                        
+                            <li class="toc-api-class ">
                                 <a href="HttpDataSource.html" data-target="#HttpDataSource">HttpDataSource</a>
                                 
                                 
@@ -3653,6 +3821,10 @@ model.deref(["users", 0], "name").subscribe(function(userModel){
         <li>
             <span class="toc-api-subgroup-title">Methods</span>
         </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="Model.html#_setMaxSize" data-target="#_setMaxSize">_setMaxSize</a>
+            </li>
         
             <li class="toc-api-subgroup-item">
                 <a href="Model.html#asDataSource" data-target="#asDataSource">asDataSource</a>
@@ -3771,10 +3943,24 @@ model.deref(["users", 0], "name").subscribe(function(userModel){
             </li>
         
             <li class="toc-api-subgroup-item">
-                <a href="ModelResponse.html#toPathValues" data-target="#toPathValues">toPathValues</a>
+                <a href="ModelResponse.html#subscribe" data-target="#subscribe">subscribe</a>
             </li>
          
     </ul>
+
+
+                                
+
+
+                                
+
+
+                            </li>
+                        
+                            <li class="toc-api-class ">
+                                <a href="ModelResponseObserver.html" data-target="#ModelResponseObserver">ModelResponseObserver</a>
+                                
+                                
 
 
                                 
@@ -3800,7 +3986,7 @@ model.deref(["users", 0], "name").subscribe(function(userModel){
             </li>
         
             <li class="toc-api-subgroup-item">
-                <a href="Observable.html#forEach" data-target="#forEach">forEach</a>
+                <a href="Observable.html#subscribe" data-target="#subscribe">subscribe</a>
             </li>
          
     </ul>
@@ -3848,6 +4034,20 @@ model.deref(["users", 0], "name").subscribe(function(userModel){
             </li>
          
     </ul>
+
+
+                                
+
+
+                                
+
+
+                            </li>
+                        
+                            <li class="toc-api-class ">
+                                <a href="ToEsSubscriptionAdapter.html" data-target="#ToEsSubscriptionAdapter">ToEsSubscriptionAdapter</a>
+                                
+                                
 
 
                                 

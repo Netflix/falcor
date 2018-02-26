@@ -16,7 +16,9 @@ id: api
 <section>
     <article>
         <pre class="prettyprint source linenums"><code>var RequestTypes = require("./RequestTypes");
+var sendSetRequest = require("./sendSetRequest");
 var GetRequest = require("./GetRequestV2");
+var falcorPathUtils = require("falcor-path-utils");
 
 /**
  * The request queue is responsible for queuing the operations to
@@ -37,6 +39,18 @@ RequestQueueV2.prototype = {
      */
     setScheduler: function(scheduler) {
         this.scheduler = scheduler;
+    },
+
+    /**
+     * performs a set against the dataSource.  Sets, though are not batched
+     * currently could be batched potentially in the future.  Since no batching
+     * is required the setRequest action is simplified significantly.
+     *
+     * @param {JSONGraphEnvelope) jsonGraph -
+     */
+    set: function(jsonGraph, cb) {
+        jsonGraph.paths = falcorPathUtils.collapse(jsonGraph.paths);
+        return sendSetRequest(jsonGraph, this.model, cb);
     },
 
     /**
@@ -107,7 +121,7 @@ RequestQueueV2.prototype = {
         }
 
         // This is a simple refCount callback.
-        function refCountCallback() {
+        function refCountCallback(err, data, hasInvalidatedResult) {
             if (disposed) {
                 return;
             }
@@ -117,7 +131,7 @@ RequestQueueV2.prototype = {
             // If the count becomes 0, then its time to notify the
             // listener that the request is done.
             if (count === 0) {
-                cb();
+                cb(err, data, hasInvalidatedResult);
             }
         }
 
@@ -212,6 +226,20 @@ module.exports = RequestQueueV2;
                             </li>
                         
                             <li class="toc-api-class ">
+                                <a href="FromEsObserverAdapter.html" data-target="#FromEsObserverAdapter">FromEsObserverAdapter</a>
+                                
+                                
+
+
+                                
+
+
+                                
+
+
+                            </li>
+                        
+                            <li class="toc-api-class ">
                                 <a href="HttpDataSource.html" data-target="#HttpDataSource">HttpDataSource</a>
                                 
                                 
@@ -253,6 +281,10 @@ module.exports = RequestQueueV2;
         <li>
             <span class="toc-api-subgroup-title">Methods</span>
         </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="Model.html#_setMaxSize" data-target="#_setMaxSize">_setMaxSize</a>
+            </li>
         
             <li class="toc-api-subgroup-item">
                 <a href="Model.html#asDataSource" data-target="#asDataSource">asDataSource</a>
@@ -371,10 +403,24 @@ module.exports = RequestQueueV2;
             </li>
         
             <li class="toc-api-subgroup-item">
-                <a href="ModelResponse.html#toPathValues" data-target="#toPathValues">toPathValues</a>
+                <a href="ModelResponse.html#subscribe" data-target="#subscribe">subscribe</a>
             </li>
          
     </ul>
+
+
+                                
+
+
+                                
+
+
+                            </li>
+                        
+                            <li class="toc-api-class ">
+                                <a href="ModelResponseObserver.html" data-target="#ModelResponseObserver">ModelResponseObserver</a>
+                                
+                                
 
 
                                 
@@ -400,7 +446,7 @@ module.exports = RequestQueueV2;
             </li>
         
             <li class="toc-api-subgroup-item">
-                <a href="Observable.html#forEach" data-target="#forEach">forEach</a>
+                <a href="Observable.html#subscribe" data-target="#subscribe">subscribe</a>
             </li>
          
     </ul>
@@ -448,6 +494,20 @@ module.exports = RequestQueueV2;
             </li>
          
     </ul>
+
+
+                                
+
+
+                                
+
+
+                            </li>
+                        
+                            <li class="toc-api-class ">
+                                <a href="ToEsSubscriptionAdapter.html" data-target="#ToEsSubscriptionAdapter">ToEsSubscriptionAdapter</a>
+                                
+                                
 
 
                                 

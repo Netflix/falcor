@@ -15,19 +15,11 @@ id: api
 </h2>
 <section>
     <article>
-        <pre class="prettyprint source linenums"><code>var __key = require("./../internal/key");
-var __ref = require("./../internal/ref");
-var __parent = require("./../internal/parent");
-var __context = require("./../internal/context");
-var __version = require("./../internal/version");
-var __refIndex = require("./../internal/ref-index");
-var __refsLength = require("./../internal/refs-length");
-
+        <pre class="prettyprint source linenums"><code>var createHardlink = require("./../support/createHardlink");
 var $ref = require("./../types/ref");
 
 var getBoundValue = require("./../get/getBoundValue");
 
-var promote = require("./../lru/promote");
 var isExpired = require("./../support/isExpired");
 var isFunction = require("./../support/isFunction");
 var isPrimitive = require("./../support/isPrimitive");
@@ -35,13 +27,14 @@ var expireNode = require("./../support/expireNode");
 var iterateKeySet = require("falcor-path-utils").iterateKeySet;
 var incrementVersion = require("./../support/incrementVersion");
 var mergeValueOrInsertBranch = require("./../support/mergeValueOrInsertBranch");
+var NullInPathError = require("./../errors/NullInPathError");
 
 /**
- * Sets a list of PathValues into a JSON Graph.
+ * Sets a list of {@link PathValue}s into a {@link JSONGraph}.
  * @function
- * @param {Object} model - the Model for which to insert the PathValues.
- * @param {Array.&lt;PathValue>} pathValues - the PathValues to set.
- * @return {Array.&lt;Path>} - a list of optimized paths for the successfully set values.
+ * @param {Object} model - the Model for which to insert the {@link PathValue}s.
+ * @param {Array.&lt;PathValue>} pathValues - the list of {@link PathValue}s to set.
+ * @return {Array.&lt;Array.&lt;Path>>} - an Array of Arrays where each inner Array is a list of requested and optimized paths (respectively) for the successfully set values.
  */
 
 module.exports = function setPathValues(model, pathValues, x, errorSelector, comparator) {
@@ -53,8 +46,8 @@ module.exports = function setPathValues(model, pathValues, x, errorSelector, com
     var bound = model._path;
     var cache = modelRoot.cache;
     var node = bound.length ? getBoundValue(model, bound).value : cache;
-    var parent = node[__parent] || cache;
-    var initialVersion = cache[__version];
+    var parent = node.$_parent || cache;
+    var initialVersion = cache.$_version;
 
     var requestedPath = [];
     var requestedPaths = [];
@@ -78,7 +71,7 @@ module.exports = function setPathValues(model, pathValues, x, errorSelector, com
         );
     }
 
-    var newVersion = cache[__version];
+    var newVersion = cache.$_version;
     var rootChangeHandler = modelRoot.onChange;
 
     if (isFunction(rootChangeHandler) &amp;&amp; initialVersion !== newVersion) {
@@ -92,7 +85,7 @@ module.exports = function setPathValues(model, pathValues, x, errorSelector, com
 function setPathSet(
     value, path, depth, root, parent, node,
     requestedPaths, optimizedPaths, requestedPath, optimizedPath,
-    version, expired, lru, comparator, errorSelector) {
+    version, expired, lru, comparator, errorSelector, replacedPaths) {
 
     var note = {};
     var branch = depth &lt; path.length - 1;
@@ -107,7 +100,7 @@ function setPathSet(
         var results = setNode(
             root, parent, node, key, value,
             branch, false, requestedPath, optimizedPath,
-            version, expired, lru, comparator, errorSelector
+            version, expired, lru, comparator, errorSelector, replacedPaths
         );
         requestedPath[depth] = key;
         requestedPath.index = depth;
@@ -123,7 +116,6 @@ function setPathSet(
                     version, expired, lru, comparator, errorSelector
                 );
             } else {
-                promote(lru, nextNode);
                 requestedPaths.push(requestedPath.slice(0, requestedPath.index + 1));
                 optimizedPaths.push(optimizedPath.slice(0, optimizedPath.index));
             }
@@ -139,7 +131,7 @@ function setPathSet(
 
 function setReference(
     value, root, node, requestedPath, optimizedPath,
-    version, expired, lru, comparator, errorSelector) {
+    version, expired, lru, comparator, errorSelector, replacedPaths) {
 
     var reference = node.value;
     optimizedPath.splice(0, optimizedPath.length);
@@ -151,15 +143,13 @@ function setReference(
         return [undefined, root];
     }
 
-    promote(lru, node);
-
     var container = node;
     var parent = root;
 
-    node = node[__context];
+    node = node.$_context;
 
     if (node != null) {
-        parent = node[__parent] || root;
+        parent = node.$_parent || root;
         optimizedPath.index = reference.length;
     } else {
 
@@ -171,10 +161,12 @@ function setReference(
         do {
             var key = reference[index];
             var branch = index &lt; count;
+            optimizedPath.index = index;
+
             var results = setNode(
                 root, parent, node, key, value,
                 branch, true, requestedPath, optimizedPath,
-                version, expired, lru, comparator, errorSelector
+                version, expired, lru, comparator, errorSelector, replacedPaths
             );
             node = results[0];
             if (isPrimitive(node)) {
@@ -186,12 +178,8 @@ function setReference(
 
         optimizedPath.index = index;
 
-        if (container[__context] !== node) {
-            var backRefs = node[__refsLength] || 0;
-            node[__refsLength] = backRefs + 1;
-            node[__ref + backRefs] = container;
-            container[__context] = node;
-            container[__refIndex] = backRefs;
+        if (container.$_context !== node) {
+            createHardlink(container, node);
         }
     }
 
@@ -201,7 +189,7 @@ function setReference(
 function setNode(
     root, parent, node, key, value,
     branch, reference, requestedPath, optimizedPath,
-    version, expired, lru, comparator, errorSelector) {
+    version, expired, lru, comparator, errorSelector, replacedPaths) {
 
     var type = node.$type;
 
@@ -209,7 +197,7 @@ function setNode(
 
         var results = setReference(
             value, root, node, requestedPath, optimizedPath,
-            version, expired, lru, comparator, errorSelector
+            version, expired, lru, comparator, errorSelector, replacedPaths
         );
 
         node = results[0];
@@ -222,15 +210,15 @@ function setNode(
         type = node.$type;
     }
 
-    if (type !== void 0) {
+    if (branch &amp;&amp; type !== void 0) {
         return [node, parent];
     }
 
     if (key == null) {
         if (branch) {
-            throw new Error("`null` is not allowed in branch key positions.");
+            throw new NullInPathError();
         } else if (node) {
-            key = node[__key];
+            key = node.$_key;
         }
     } else {
         parent = node;
@@ -240,7 +228,7 @@ function setNode(
     node = mergeValueOrInsertBranch(
         parent, node, key, value,
         branch, reference, requestedPath, optimizedPath,
-        version, expired, lru, comparator, errorSelector
+        version, expired, lru, comparator, errorSelector, replacedPaths
     );
 
     return [node, parent];
@@ -305,6 +293,20 @@ function setNode(
                             </li>
                         
                             <li class="toc-api-class ">
+                                <a href="FromEsObserverAdapter.html" data-target="#FromEsObserverAdapter">FromEsObserverAdapter</a>
+                                
+                                
+
+
+                                
+
+
+                                
+
+
+                            </li>
+                        
+                            <li class="toc-api-class ">
                                 <a href="HttpDataSource.html" data-target="#HttpDataSource">HttpDataSource</a>
                                 
                                 
@@ -346,6 +348,10 @@ function setNode(
         <li>
             <span class="toc-api-subgroup-title">Methods</span>
         </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="Model.html#_setMaxSize" data-target="#_setMaxSize">_setMaxSize</a>
+            </li>
         
             <li class="toc-api-subgroup-item">
                 <a href="Model.html#asDataSource" data-target="#asDataSource">asDataSource</a>
@@ -464,10 +470,24 @@ function setNode(
             </li>
         
             <li class="toc-api-subgroup-item">
-                <a href="ModelResponse.html#toPathValues" data-target="#toPathValues">toPathValues</a>
+                <a href="ModelResponse.html#subscribe" data-target="#subscribe">subscribe</a>
             </li>
          
     </ul>
+
+
+                                
+
+
+                                
+
+
+                            </li>
+                        
+                            <li class="toc-api-class ">
+                                <a href="ModelResponseObserver.html" data-target="#ModelResponseObserver">ModelResponseObserver</a>
+                                
+                                
 
 
                                 
@@ -493,7 +513,7 @@ function setNode(
             </li>
         
             <li class="toc-api-subgroup-item">
-                <a href="Observable.html#forEach" data-target="#forEach">forEach</a>
+                <a href="Observable.html#subscribe" data-target="#subscribe">subscribe</a>
             </li>
          
     </ul>
@@ -541,6 +561,20 @@ function setNode(
             </li>
          
     </ul>
+
+
+                                
+
+
+                                
+
+
+                            </li>
+                        
+                            <li class="toc-api-class ">
+                                <a href="ToEsSubscriptionAdapter.html" data-target="#ToEsSubscriptionAdapter">ToEsSubscriptionAdapter</a>
+                                
+                                
 
 
                                 

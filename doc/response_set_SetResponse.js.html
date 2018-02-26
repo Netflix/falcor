@@ -1,6 +1,6 @@
 ---
 layout: api-page
-title: "invalidate/invalidatePathSets.js"
+title: "response/set/SetResponse.js"
 id: api
 ---
 
@@ -11,198 +11,118 @@ id: api
   
       
 <h2>
-    invalidate/invalidatePathSets.js
+    response/set/SetResponse.js
 </h2>
 <section>
     <article>
-        <pre class="prettyprint source linenums"><code>var __ref = require("./../internal/ref");
-
-var $ref = require("./../types/ref");
-
-var getBoundValue = require("./../get/getBoundValue");
-
-var promote = require("./../lru/promote");
-var getSize = require("./../support/getSize");
-var isExpired = require("./../support/isExpired");
-var isFunction = require("./../support/isFunction");
-var isPrimitive = require("./../support/isPrimitive");
-var expireNode = require("./../support/expireNode");
-var iterateKeySet = require("falcor-path-utils").iterateKeySet;
-var incrementVersion = require("./../support/incrementVersion");
-var updateNodeAncestors = require("./../support/updateNodeAncestors");
-var removeNodeAndDescendants = require("./../support/removeNodeAndDescendants");
+        <pre class="prettyprint source linenums"><code>var ModelResponse = require("./../ModelResponse");
+var pathSyntax = require("falcor-path-syntax");
+var isArray = Array.isArray;
+var isPathValue = require("./../../support/isPathValue");
+var isJSONGraphEnvelope = require("./../../support/isJSONGraphEnvelope");
+var isJSONEnvelope = require("./../../support/isJSONEnvelope");
+var setRequestCycle = require("./setRequestCycle");
 
 /**
- * Invalidates a list of Paths in a JSON Graph.
- * @function
- * @param {Object} model - the Model for which to insert the PathValues.
- * @param {Array.&lt;PathValue>} paths - the PathValues to set.
+ *  The set response is responsible for doing the request loop for the set
+ * operation and subscribing to the follow up get.
+ *
+ * The constructors job is to parse out the arguments and put them in their
+ * groups.  The following subscribe will do the actual cache set and dataSource
+ * operation remoting.
+ *
+ * @param {Model} model -
+ * @param {Array} args - The array of arguments that can be JSONGraph, JSON, or
+ * pathValues.
+ * @param {Boolean} isJSONGraph - if the request is a jsonGraph output format.
+ * @param {Boolean} isProgressive - progressive output.
+ * @augments ModelResponse
+ * @private
  */
+var SetResponse = module.exports = function SetResponse(model, args,
+                                                        isJSONGraph,
+                                                        isProgressive) {
 
-module.exports = function invalidatePathSets(model, paths) {
+    // The response properties.
+    this._model = model;
+    this._isJSONGraph = isJSONGraph || false;
+    this._isProgressive = isProgressive || false;
+    this._initialArgs = args;
+    this._value = [{}];
 
-    var modelRoot = model._root;
-    var lru = modelRoot;
-    var expired = modelRoot.expired;
-    var version = incrementVersion();
-    var bound = model._path;
-    var cache = modelRoot.cache;
-    var node = bound.length ? getBoundValue(model, bound).value : cache;
-    // eslint-disable-next-line camelcase
-    var parent = node.$_parent || cache;
-    // eslint-disable-next-line camelcase
-    var initialVersion = cache.$_version;
+    var groups = [];
+    var group, groupType;
+    var argIndex = -1;
+    var argCount = args.length;
 
-    var pathIndex = -1;
-    var pathCount = paths.length;
+    // Validation of arguments have been moved out of this function.
+    while (++argIndex &lt; argCount) {
+        var arg = args[argIndex];
+        var argType;
+        if (isArray(arg) || typeof arg === "string") {
+            arg = pathSyntax.fromPath(arg);
+            argType = "PathValues";
+        } else if (isPathValue(arg)) {
+            arg.path = pathSyntax.fromPath(arg.path);
+            argType = "PathValues";
+        } else if (isJSONGraphEnvelope(arg)) {
+            argType = "JSONGs";
+        } else if (isJSONEnvelope(arg)) {
+            argType = "PathMaps";
+        }
 
-    while (++pathIndex &lt; pathCount) {
+        if (groupType !== argType) {
+            groupType = argType;
+            group = {
+                inputType: argType,
+                arguments: []
+            };
+            groups.push(group);
+        }
 
-        var path = paths[pathIndex];
-
-        invalidatePathSet(
-            path, 0, cache, parent, node,
-            version, expired, lru
-        );
+        group.arguments.push(arg);
     }
 
-    // eslint-disable-next-line camelcase
-    var newVersion = cache.$_version;
-    var rootChangeHandler = modelRoot.onChange;
-
-    if (isFunction(rootChangeHandler) &amp;&amp; initialVersion !== newVersion) {
-        rootChangeHandler();
-    }
+    this._groups = groups;
 };
 
-function invalidatePathSet(
-    path, depth, root, parent, node,
-    version, expired, lru) {
+SetResponse.prototype = Object.create(ModelResponse.prototype);
 
-    var note = {};
-    var branch = depth &lt; path.length - 1;
-    var keySet = path[depth];
-    var key = iterateKeySet(keySet, note);
+/**
+ * The subscribe function will setup the remoting of the operation and cache
+ * setting.
+ *
+ * @private
+ */
+SetResponse.prototype._subscribe = function _subscribe(observer) {
+    var groups = this._groups;
+    var model = this._model;
+    var isJSONGraph = this._isJSONGraph;
+    var isProgressive = this._isProgressive;
 
-    do {
-        var results = invalidateNode(
-            root, parent, node,
-            key, branch, false,
-            version, expired, lru
-        );
-        var nextNode = results[0];
-        var nextParent = results[1];
-        if (nextNode) {
-            if (branch) {
-                invalidatePathSet(
-                    path, depth + 1,
-                    root, nextParent, nextNode,
-                    version, expired, lru
-                );
-            } else if (removeNodeAndDescendants(nextNode, nextParent, key, lru, undefined)) {
-                updateNodeAncestors(nextParent, getSize(nextNode), lru, version);
-            }
-        }
-        key = iterateKeySet(keySet, note);
-    } while (!note.done);
-}
+    // Starts the async request cycle.
+    return setRequestCycle(
+        model, observer, groups, isJSONGraph, isProgressive, 0);
+};
 
-function invalidateReference(root, node, version, expired, lru) {
+/**
+ * Makes the output of a get response JSONGraph instead of json.
+ * @private
+ */
+SetResponse.prototype._toJSONG = function _toJSONGraph() {
+    return new SetResponse(this._model, this._initialArgs,
+                           true, this._isProgressive);
+};
 
-    if (isExpired(node)) {
-        expireNode(node, expired, lru);
-        return [undefined, root];
-    }
-
-    promote(lru, node);
-
-    var container = node;
-    var reference = node.value;
-    var parent = root;
-
-    // eslint-disable-next-line camelcase
-    node = node.$_context;
-
-    if (node != null) {
-        // eslint-disable-next-line camelcase
-        parent = node.$_parent || root;
-    } else {
-
-        var index = 0;
-        var count = reference.length - 1;
-
-        parent = node = root;
-
-        do {
-            var key = reference[index];
-            var branch = index &lt; count;
-            var results = invalidateNode(
-                root, parent, node,
-                key, branch, true,
-                version, expired, lru
-            );
-            node = results[0];
-            if (isPrimitive(node)) {
-                return results;
-            }
-            parent = results[1];
-        } while (index++ &lt; count);
-
-        // eslint-disable-next-line camelcase
-        if (container.$_context !== node) {
-            // eslint-disable-next-line camelcase
-            var backRefs = node.$_refsLength || 0;
-            // eslint-disable-next-line camelcase
-            node.$_refsLength = backRefs + 1;
-            node[__ref + backRefs] = container;
-            // eslint-disable-next-line camelcase
-            container.$_context = node;
-            // eslint-disable-next-line camelcase
-            container.$_refIndex = backRefs;
-        }
-    }
-
-    return [node, parent];
-}
-
-function invalidateNode(
-    root, parent, node,
-    key, branch, reference,
-    version, expired, lru) {
-
-    var type = node.$type;
-
-    while (type === $ref) {
-
-        var results = invalidateReference(root, node, version, expired, lru);
-
-        node = results[0];
-
-        if (isPrimitive(node)) {
-            return results;
-        }
-
-        parent = results[1];
-        type = node.$type;
-    }
-
-    if (type !== void 0) {
-        return [node, parent];
-    }
-
-    if (key == null) {
-        if (branch) {
-            throw new Error("`null` is not allowed in branch key positions.");
-        } else if (node) {
-            key = node.$_key;
-        }
-    } else {
-        parent = node;
-        node = parent[key];
-    }
-
-    return [node, parent];
-}
+/**
+ * Progressively responding to data in the cache instead of once the whole
+ * operation is complete.
+ * @public
+ */
+SetResponse.prototype.progressively = function progressively() {
+    return new SetResponse(this._model, this._initialArgs,
+                           this._isJSONGraph, true);
+};
 </code></pre>
     </article>
 </section>

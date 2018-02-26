@@ -15,21 +15,13 @@ id: api
 </h2>
 <section>
     <article>
-        <pre class="prettyprint source linenums"><code>var __key = require("./../internal/key");
-var __ref = require("./../internal/ref");
-var __prefix = require("./../internal/prefix");
-var __parent = require("./../internal/parent");
-var __context = require("./../internal/context");
-var __version = require("./../internal/version");
-var __refIndex = require("./../internal/ref-index");
-var __refsLength = require("./../internal/refs-length");
-
+        <pre class="prettyprint source linenums"><code>var createHardlink = require("./../support/createHardlink");
+var __prefix = require("./../internal/reservedPrefix");
 var $ref = require("./../types/ref");
 
 var getBoundValue = require("./../get/getBoundValue");
 
 var isArray = Array.isArray;
-var promote = require("./../lru/promote");
 var hasOwn = require("./../support/hasOwn");
 var isObject = require("./../support/isObject");
 var isExpired = require("./../support/isExpired");
@@ -38,13 +30,14 @@ var isPrimitive = require("./../support/isPrimitive");
 var expireNode = require("./../support/expireNode");
 var incrementVersion = require("./../support/incrementVersion");
 var mergeValueOrInsertBranch = require("./../support/mergeValueOrInsertBranch");
+var NullInPathError = require("./../errors/NullInPathError");
 
 /**
- * Sets a list of PathMaps into a JSON Graph.
+ * Sets a list of {@link PathMapEnvelope}s into a {@link JSONGraph}.
  * @function
  * @param {Object} model - the Model for which to insert the PathMaps.
- * @param {Array.&lt;PathMapEnvelope>} pathMapEnvelopes - the a list of @PathMapEnvelopes to set.
- * @return {Array.&lt;Path>} - a list of optimized paths for the successfully set values.
+ * @param {Array.&lt;PathMapEnvelope>} pathMapEnvelopes - the a list of {@link PathMapEnvelope}s to set.
+ * @return {Array.&lt;Array.&lt;Path>>} - an Array of Arrays where each inner Array is a list of requested and optimized paths (respectively) for the successfully set values.
  */
 
 module.exports = function setPathMaps(model, pathMapEnvelopes, x, errorSelector, comparator) {
@@ -56,8 +49,8 @@ module.exports = function setPathMaps(model, pathMapEnvelopes, x, errorSelector,
     var bound = model._path;
     var cache = modelRoot.cache;
     var node = bound.length ? getBoundValue(model, bound).value : cache;
-    var parent = node[__parent] || cache;
-    var initialVersion = cache[__version];
+    var parent = node.$_parent || cache;
+    var initialVersion = cache.$_version;
 
     var requestedPath = [];
     var requestedPaths = [];
@@ -79,7 +72,7 @@ module.exports = function setPathMaps(model, pathMapEnvelopes, x, errorSelector,
         );
     }
 
-    var newVersion = cache[__version];
+    var newVersion = cache.$_version;
     var rootChangeHandler = modelRoot.onChange;
 
     if (isFunction(rootChangeHandler) &amp;&amp; initialVersion !== newVersion) {
@@ -131,7 +124,6 @@ function setPathMap(
                         version, expired, lru, comparator, errorSelector
                     );
                 } else {
-                    promote(lru, nextNode);
                     requestedPaths.push(requestedPath.slice(0, requestedPath.index + 1));
                     optimizedPaths.push(optimizedPath.slice(0, optimizedPath.index));
                 }
@@ -159,20 +151,19 @@ function setReference(
         return [undefined, root];
     }
 
-    promote(lru, node);
-
     var container = node;
     var parent = root;
 
-    node = node[__context];
+    node = node.$_context;
 
     if (node != null) {
-        parent = node[__parent] || root;
+        parent = node.$_parent || root;
         optimizedPath.index = reference.length;
     } else {
 
         var index = 0;
         var count = reference.length - 1;
+        optimizedPath.index = index;
 
         parent = node = root;
 
@@ -194,12 +185,8 @@ function setReference(
 
         optimizedPath.index = index;
 
-        if (container[__context] !== node) {
-            var backRefs = node[__refsLength] || 0;
-            node[__refsLength] = backRefs + 1;
-            node[__ref + backRefs] = container;
-            container[__context] = node;
-            container[__refIndex] = backRefs;
+        if (container.$_context !== node) {
+            createHardlink(container, node);
         }
     }
 
@@ -235,9 +222,9 @@ function setNode(
 
     if (key == null) {
         if (branch) {
-            throw new Error("`null` is not allowed in branch key positions.");
+            throw new NullInPathError();
         } else if (node) {
-            key = node[__key];
+            key = node.$_key;
         }
     } else {
         parent = node;
@@ -262,7 +249,7 @@ function getKeys(pathMap) {
             keys[itr++] = "length";
         }
         for (var key in pathMap) {
-            if (key[0] === __prefix || key[0] === "$" || !hasOwn(pathMap, key)) {
+            if (key[0] === __prefix || !hasOwn(pathMap, key)) {
                 continue;
             }
             keys[itr++] = key;
@@ -332,6 +319,20 @@ function getKeys(pathMap) {
                             </li>
                         
                             <li class="toc-api-class ">
+                                <a href="FromEsObserverAdapter.html" data-target="#FromEsObserverAdapter">FromEsObserverAdapter</a>
+                                
+                                
+
+
+                                
+
+
+                                
+
+
+                            </li>
+                        
+                            <li class="toc-api-class ">
                                 <a href="HttpDataSource.html" data-target="#HttpDataSource">HttpDataSource</a>
                                 
                                 
@@ -373,6 +374,10 @@ function getKeys(pathMap) {
         <li>
             <span class="toc-api-subgroup-title">Methods</span>
         </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="Model.html#_setMaxSize" data-target="#_setMaxSize">_setMaxSize</a>
+            </li>
         
             <li class="toc-api-subgroup-item">
                 <a href="Model.html#asDataSource" data-target="#asDataSource">asDataSource</a>
@@ -491,10 +496,24 @@ function getKeys(pathMap) {
             </li>
         
             <li class="toc-api-subgroup-item">
-                <a href="ModelResponse.html#toPathValues" data-target="#toPathValues">toPathValues</a>
+                <a href="ModelResponse.html#subscribe" data-target="#subscribe">subscribe</a>
             </li>
          
     </ul>
+
+
+                                
+
+
+                                
+
+
+                            </li>
+                        
+                            <li class="toc-api-class ">
+                                <a href="ModelResponseObserver.html" data-target="#ModelResponseObserver">ModelResponseObserver</a>
+                                
+                                
 
 
                                 
@@ -520,7 +539,7 @@ function getKeys(pathMap) {
             </li>
         
             <li class="toc-api-subgroup-item">
-                <a href="Observable.html#forEach" data-target="#forEach">forEach</a>
+                <a href="Observable.html#subscribe" data-target="#subscribe">subscribe</a>
             </li>
          
     </ul>
@@ -568,6 +587,20 @@ function getKeys(pathMap) {
             </li>
          
     </ul>
+
+
+                                
+
+
+                                
+
+
+                            </li>
+                        
+                            <li class="toc-api-class ">
+                                <a href="ToEsSubscriptionAdapter.html" data-target="#ToEsSubscriptionAdapter">ToEsSubscriptionAdapter</a>
+                                
+                                
 
 
                                 

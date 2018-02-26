@@ -15,16 +15,9 @@ id: api
 </h2>
 <section>
     <article>
-        <pre class="prettyprint source linenums"><code>var __key = require("./../internal/key");
-var __ref = require("./../internal/ref");
-var __context = require("./../internal/context");
-var __version = require("./../internal/version");
-var __refIndex = require("./../internal/ref-index");
-var __refsLength = require("./../internal/refs-length");
-
+        <pre class="prettyprint source linenums"><code>var createHardlink = require("./../support/createHardlink");
 var $ref = require("./../types/ref");
 
-var promote = require("./../lru/promote");
 var isExpired = require("./../support/isAlreadyExpired");
 var isFunction = require("./../support/isFunction");
 var isPrimitive = require("./../support/isPrimitive");
@@ -32,23 +25,24 @@ var expireNode = require("./../support/expireNode");
 var iterateKeySet = require("falcor-path-utils").iterateKeySet;
 var incrementVersion = require("./../support/incrementVersion");
 var mergeJSONGraphNode = require("./../support/mergeJSONGraphNode");
+var NullInPathError = require("./../errors/NullInPathError");
 
 /**
- * Merges a list of JSON Graph Envelopes into a cache JSON Graph.
+ * Merges a list of {@link JSONGraphEnvelope}s into a {@link JSONGraph}.
  * @function
- * @param {Object} model - the Model for which to insert the PathValues.
- * @param {Array.&lt;PathValue>} jsonGraphEnvelopes - the PathValues to set.
- * @return {Array.&lt;Path>} - a list of optimized paths for the successfully set values.
+ * @param {Object} model - the Model for which to merge the {@link JSONGraphEnvelope}s.
+ * @param {Array.&lt;PathValue>} jsonGraphEnvelopes - the {@link JSONGraphEnvelope}s to merge.
+ * @return {Array.&lt;Array.&lt;Path>>} - an Array of Arrays where each inner Array is a list of requested and optimized paths (respectively) for the successfully set values.
  */
 
-module.exports = function setJSONGraphs(model, jsonGraphEnvelopes, x, errorSelector, comparator) {
+module.exports = function setJSONGraphs(model, jsonGraphEnvelopes, x, errorSelector, comparator, replacedPaths) {
 
     var modelRoot = model._root;
     var lru = modelRoot;
     var expired = modelRoot.expired;
     var version = incrementVersion();
     var cache = modelRoot.cache;
-    var initialVersion = cache[__version];
+    var initialVersion = cache.$_version;
 
     var requestedPath = [];
     var optimizedPath = [];
@@ -76,12 +70,12 @@ module.exports = function setJSONGraphs(model, jsonGraphEnvelopes, x, errorSelec
                 cache, cache, cache,
                 jsonGraph, jsonGraph, jsonGraph,
                 requestedPaths, optimizedPaths, requestedPath, optimizedPath,
-                version, expired, lru, comparator, errorSelector
+                version, expired, lru, comparator, errorSelector, replacedPaths
             );
         }
     }
 
-    var newVersion = cache[__version];
+    var newVersion = cache.$_version;
     var rootChangeHandler = modelRoot.onChange;
 
     if (isFunction(rootChangeHandler) &amp;&amp; initialVersion !== newVersion) {
@@ -96,7 +90,7 @@ function setJSONGraphPathSet(
     path, depth, root, parent, node,
     messageRoot, messageParent, message,
     requestedPaths, optimizedPaths, requestedPath, optimizedPath,
-    version, expired, lru, comparator, errorSelector) {
+    version, expired, lru, comparator, errorSelector, replacedPaths) {
 
     var note = {};
     var branch = depth &lt; path.length - 1;
@@ -111,7 +105,7 @@ function setJSONGraphPathSet(
         var results = setNode(
             root, parent, node, messageRoot, messageParent, message,
             key, branch, false, requestedPath, optimizedPath,
-            version, expired, lru, comparator, errorSelector
+            version, expired, lru, comparator, errorSelector, replacedPaths
         );
 
         requestedPath[depth] = key;
@@ -125,10 +119,9 @@ function setJSONGraphPathSet(
                     path, depth + 1, root, nextParent, nextNode,
                     messageRoot, results[3], results[2],
                     requestedPaths, optimizedPaths, requestedPath, optimizedPath,
-                    version, expired, lru, comparator, errorSelector
+                    version, expired, lru, comparator, errorSelector, replacedPaths
                 );
             } else {
-                promote(lru, nextNode);
                 requestedPaths.push(requestedPath.slice(0, requestedPath.index + 1));
                 optimizedPaths.push(optimizedPath.slice(0, optimizedPath.index));
             }
@@ -144,7 +137,7 @@ function setJSONGraphPathSet(
 
 function setReference(
     root, node, messageRoot, message, requestedPath, optimizedPath,
-    version, expired, lru, comparator, errorSelector) {
+    version, expired, lru, comparator, errorSelector, replacedPaths) {
 
     var reference = node.value;
     optimizedPath.splice(0, optimizedPath.length);
@@ -156,8 +149,6 @@ function setReference(
         return [undefined, root, message, messageRoot];
     }
 
-    promote(lru, node);
-
     var index = 0;
     var container = node;
     var count = reference.length - 1;
@@ -167,10 +158,12 @@ function setReference(
     do {
         var key = reference[index];
         var branch = index &lt; count;
+        optimizedPath.index = index;
+
         var results = setNode(
             root, parent, node, messageRoot, messageParent, message,
             key, branch, true, requestedPath, optimizedPath,
-            version, expired, lru, comparator, errorSelector
+            version, expired, lru, comparator, errorSelector, replacedPaths
         );
         node = results[0];
         if (isPrimitive(node)) {
@@ -184,12 +177,8 @@ function setReference(
 
     optimizedPath.index = index;
 
-    if (container[__context] !== node) {
-        var backRefs = node[__refsLength] || 0;
-        node[__refsLength] = backRefs + 1;
-        node[__ref + backRefs] = container;
-        container[__context] = node;
-        container[__refIndex] = backRefs;
+    if (container.$_context !== node) {
+        createHardlink(container, node);
     }
 
     return [node, parent, message, messageParent];
@@ -198,7 +187,7 @@ function setReference(
 function setNode(
     root, parent, node, messageRoot, messageParent, message,
     key, branch, reference, requestedPath, optimizedPath,
-    version, expired, lru, comparator, errorSelector) {
+    version, expired, lru, comparator, errorSelector, replacedPaths) {
 
     var type = node.$type;
 
@@ -206,7 +195,7 @@ function setNode(
 
         var results = setReference(
             root, node, messageRoot, message, requestedPath, optimizedPath,
-            version, expired, lru, comparator, errorSelector
+            version, expired, lru, comparator, errorSelector, replacedPaths
         );
 
         node = results[0];
@@ -227,9 +216,9 @@ function setNode(
 
     if (key == null) {
         if (branch) {
-            throw new Error("`null` is not allowed in branch key positions.");
+            throw new NullInPathError();
         } else if (node) {
-            key = node[__key];
+            key = node.$_key;
         }
     } else {
         parent = node;
@@ -240,7 +229,7 @@ function setNode(
 
     node = mergeJSONGraphNode(
         parent, node, message, key, requestedPath, optimizedPath,
-        version, expired, lru, comparator, errorSelector
+        version, expired, lru, comparator, errorSelector, replacedPaths
     );
 
     return [node, parent, message, messageParent];
@@ -305,6 +294,20 @@ function setNode(
                             </li>
                         
                             <li class="toc-api-class ">
+                                <a href="FromEsObserverAdapter.html" data-target="#FromEsObserverAdapter">FromEsObserverAdapter</a>
+                                
+                                
+
+
+                                
+
+
+                                
+
+
+                            </li>
+                        
+                            <li class="toc-api-class ">
                                 <a href="HttpDataSource.html" data-target="#HttpDataSource">HttpDataSource</a>
                                 
                                 
@@ -346,6 +349,10 @@ function setNode(
         <li>
             <span class="toc-api-subgroup-title">Methods</span>
         </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="Model.html#_setMaxSize" data-target="#_setMaxSize">_setMaxSize</a>
+            </li>
         
             <li class="toc-api-subgroup-item">
                 <a href="Model.html#asDataSource" data-target="#asDataSource">asDataSource</a>
@@ -464,10 +471,24 @@ function setNode(
             </li>
         
             <li class="toc-api-subgroup-item">
-                <a href="ModelResponse.html#toPathValues" data-target="#toPathValues">toPathValues</a>
+                <a href="ModelResponse.html#subscribe" data-target="#subscribe">subscribe</a>
             </li>
          
     </ul>
+
+
+                                
+
+
+                                
+
+
+                            </li>
+                        
+                            <li class="toc-api-class ">
+                                <a href="ModelResponseObserver.html" data-target="#ModelResponseObserver">ModelResponseObserver</a>
+                                
+                                
 
 
                                 
@@ -493,7 +514,7 @@ function setNode(
             </li>
         
             <li class="toc-api-subgroup-item">
-                <a href="Observable.html#forEach" data-target="#forEach">forEach</a>
+                <a href="Observable.html#subscribe" data-target="#subscribe">subscribe</a>
             </li>
          
     </ul>
@@ -541,6 +562,20 @@ function setNode(
             </li>
          
     </ul>
+
+
+                                
+
+
+                                
+
+
+                            </li>
+                        
+                            <li class="toc-api-class ">
+                                <a href="ToEsSubscriptionAdapter.html" data-target="#ToEsSubscriptionAdapter">ToEsSubscriptionAdapter</a>
+                                
+                                
 
 
                                 

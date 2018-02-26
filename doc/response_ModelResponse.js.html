@@ -15,17 +15,9 @@ id: api
 </h2>
 <section>
     <article>
-        <pre class="prettyprint source linenums"><code>var falcor = require("./../");
-
-var Rx = require("rx/dist/rx") &amp;&amp; require("rx/dist/rx.aggregates");
-var Observable = Rx.Observable;
-
-var arraySlice = require("./../support/array-slice");
-
-var noop = require("./../support/noop");
-
-var jsongMixin = { outputFormat: { value: "AsJSONG" } };
-var progressiveMixin = { isProgressive: { value: true } };
+        <pre class="prettyprint source linenums"><code>var ModelResponseObserver = require("./ModelResponseObserver");
+var $$observable = require("symbol-observable").default;
+var toEsObservable = require("../toEsObservable");
 
 /**
  * A ModelResponse is a container for the results of a get, set, or call operation performed on a Model. The ModelResponse provides methods which can be used to specify the output format of the data retrieved from a Model, as well as how that data is delivered.
@@ -36,60 +28,12 @@ function ModelResponse(subscribe) {
     this._subscribe = subscribe;
 }
 
-ModelResponse.create = function create(model, args) {
-    var response = new ModelResponse(subscribeToResponse);
-    // TODO: make these private
-    response.args = args;
-    response.type = this;
-    response.model = model;
-    return response;
+ModelResponse.prototype[$$observable] = function SymbolObservable() {
+    return toEsObservable(this);
 };
-
-ModelResponse.prototype = Object.create(Observable.prototype);
-
-ModelResponse.prototype.constructor = ModelResponse;
-
-ModelResponse.prototype._mixin = function mixin() {
-    var self = this;
-    var mixins = arraySlice(arguments);
-    return new self.constructor(function(observer) {
-        return self.subscribe(mixins.reduce(function(proto, mixin2) {
-            return Object.create(proto, mixin2);
-        }, observer));
-    });
-};
-
-/**
- * Converts the data format of the data in a JSONGraph Model response to a stream of path values.
- * @name toPathValues
- * @memberof ModelResponse.prototype
- * @function
- * @return ModelResponse.&lt;PathValue>
- * @example
-var model = new falcor.Model({
-  cache: {
-    user: {
-      name: "Steve",
-      surname: "McGuire"
-    }
-  }
-});
-
-model.
-  get(["user",["name", "surname"]]).
-  toPathValues().
-  // this method will be called twice, once with the result of ["user", "name"]
-  // and once with the result of ["user", "surname"]
-  subscribe(function(pathValue){
-    console.log(JSON.stringify(pathValue));
-  });
-// prints...
-"{\"path\":[\"user\",\"name\"],\"value\":\"Steve\"}"
-"{\"path\":[\"user\",\"surname\"],\"value\":\"McGuire\"}"
- */
 
 ModelResponse.prototype._toJSONG = function toJSONG() {
-    return this._mixin(jsongMixin);
+    return this;
 };
 
 /**
@@ -150,68 +94,75 @@ model.
 // }
 */
 ModelResponse.prototype.progressively = function progressively() {
-    return this._mixin(progressiveMixin);
+    return this;
 };
 
-ModelResponse.prototype.subscribe = function subscribe(a, b, c) {
-    var observer = a;
-    if (!observer || typeof observer !== "object") {
-        observer = { onNext: a || noop, onError: b || noop, onCompleted: c || noop };
-    }
+ModelResponse.prototype.subscribe =
+ModelResponse.prototype.forEach = function subscribe(a, b, c) {
+    var observer = new ModelResponseObserver(a,b,c);
     var subscription = this._subscribe(observer);
     switch (typeof subscription) {
         case "function":
-            return { dispose: subscription };
+            return {
+                dispose: function() {
+                    if (observer._closed) {
+                        return;
+                    }
+                    observer._closed = true;
+                    subscription();
+                }
+             };
         case "object":
-            return subscription || { dispose: noop };
+            return {
+                dispose: function() {
+                    if (observer._closed) {
+                        return;
+                    }
+                    observer._closed = true;
+                    if (subscription !== null) {
+                        subscription.dispose();
+                    }
+                }
+             };
         default:
-            return { dispose: noop };
+            return {
+                dispose: function() {
+                    observer._closed = true;
+                }
+             };
     }
 };
 
 ModelResponse.prototype.then = function then(onNext, onError) {
+    /* global Promise */
     var self = this;
-    return new falcor.Promise(function(resolve, reject) {
-        var value, rejected = false;
-        self.toArray().subscribe(
-            function(values) {
-                if (values.length &lt;= 1) {
-                    value = values[0];
-                } else {
-                    value = values;
+    if (!self._promise) {
+        self._promise = new Promise(function(resolve, reject) {
+            var rejected = false;
+            var values = [];
+            self.subscribe(
+                function(value) {
+                    values[values.length] = value;
+                },
+                function(errors) {
+                    rejected = true;
+                    reject(errors);
+                },
+                function() {
+                    var value = values;
+                    if (values.length &lt;= 1) {
+                        value = values[0];
+                    }
+
+                    if (rejected === false) {
+                        resolve(value);
+                    }
                 }
-            },
-            function(errors) {
-                rejected = true;
-                reject(errors);
-            },
-            function() {
-                if (rejected === false) {
-                    resolve(value);
-                }
-            }
-        );
-    }).then(onNext, onError);
+            );
+        });
+    }
+    return self._promise.then(onNext, onError);
 };
-
-function subscribeToResponse(observer) {
-
-    var model = this.model;
-    var response = new this.type();
-
-    response.model = model;
-    response.args = this.args;
-    response.outputFormat = observer.outputFormat || "AsPathMap";
-    response.isProgressive = observer.isProgressive || false;
-    response.subscribeCount = 0;
-    response.subscribeLimit = observer.retryLimit || 10;
-
-    return (response
-        .initialize()
-        .invokeSourceRequest(model)
-        .ensureCollect(model)
-        .subscribe(observer));
-}
 
 module.exports = ModelResponse;
 </code></pre>
@@ -274,6 +225,20 @@ module.exports = ModelResponse;
                             </li>
                         
                             <li class="toc-api-class ">
+                                <a href="FromEsObserverAdapter.html" data-target="#FromEsObserverAdapter">FromEsObserverAdapter</a>
+                                
+                                
+
+
+                                
+
+
+                                
+
+
+                            </li>
+                        
+                            <li class="toc-api-class ">
                                 <a href="HttpDataSource.html" data-target="#HttpDataSource">HttpDataSource</a>
                                 
                                 
@@ -315,6 +280,10 @@ module.exports = ModelResponse;
         <li>
             <span class="toc-api-subgroup-title">Methods</span>
         </li>
+        
+            <li class="toc-api-subgroup-item">
+                <a href="Model.html#_setMaxSize" data-target="#_setMaxSize">_setMaxSize</a>
+            </li>
         
             <li class="toc-api-subgroup-item">
                 <a href="Model.html#asDataSource" data-target="#asDataSource">asDataSource</a>
@@ -433,10 +402,24 @@ module.exports = ModelResponse;
             </li>
         
             <li class="toc-api-subgroup-item">
-                <a href="ModelResponse.html#toPathValues" data-target="#toPathValues">toPathValues</a>
+                <a href="ModelResponse.html#subscribe" data-target="#subscribe">subscribe</a>
             </li>
          
     </ul>
+
+
+                                
+
+
+                                
+
+
+                            </li>
+                        
+                            <li class="toc-api-class ">
+                                <a href="ModelResponseObserver.html" data-target="#ModelResponseObserver">ModelResponseObserver</a>
+                                
+                                
 
 
                                 
@@ -462,7 +445,7 @@ module.exports = ModelResponse;
             </li>
         
             <li class="toc-api-subgroup-item">
-                <a href="Observable.html#forEach" data-target="#forEach">forEach</a>
+                <a href="Observable.html#subscribe" data-target="#subscribe">subscribe</a>
             </li>
          
     </ul>
@@ -510,6 +493,20 @@ module.exports = ModelResponse;
             </li>
          
     </ul>
+
+
+                                
+
+
+                                
+
+
+                            </li>
+                        
+                            <li class="toc-api-class ">
+                                <a href="ToEsSubscriptionAdapter.html" data-target="#ToEsSubscriptionAdapter">ToEsSubscriptionAdapter</a>
+                                
+                                
 
 
                                 

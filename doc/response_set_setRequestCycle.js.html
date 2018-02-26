@@ -1,6 +1,6 @@
 ---
 layout: api-page
-title: "invalidate/invalidatePathSets.js"
+title: "response/set/setRequestCycle.js"
 id: api
 ---
 
@@ -11,197 +11,124 @@ id: api
   
       
 <h2>
-    invalidate/invalidatePathSets.js
+    response/set/setRequestCycle.js
 </h2>
 <section>
     <article>
-        <pre class="prettyprint source linenums"><code>var __ref = require("./../internal/ref");
-
-var $ref = require("./../types/ref");
-
-var getBoundValue = require("./../get/getBoundValue");
-
-var promote = require("./../lru/promote");
-var getSize = require("./../support/getSize");
-var isExpired = require("./../support/isExpired");
-var isFunction = require("./../support/isFunction");
-var isPrimitive = require("./../support/isPrimitive");
-var expireNode = require("./../support/expireNode");
-var iterateKeySet = require("falcor-path-utils").iterateKeySet;
-var incrementVersion = require("./../support/incrementVersion");
-var updateNodeAncestors = require("./../support/updateNodeAncestors");
-var removeNodeAndDescendants = require("./../support/removeNodeAndDescendants");
+        <pre class="prettyprint source linenums"><code>var emptyArray = [];
+var AssignableDisposable = require("./../AssignableDisposable");
+var GetResponse = require("./../get/GetResponse");
+var setGroupsIntoCache = require("./setGroupsIntoCache");
+var getWithPathsAsPathMap = require("./../../get").getWithPathsAsPathMap;
+var InvalidSourceError = require("./../../errors/InvalidSourceError");
+var MaxRetryExceededError = require("./../../errors/MaxRetryExceededError");
 
 /**
- * Invalidates a list of Paths in a JSON Graph.
- * @function
- * @param {Object} model - the Model for which to insert the PathValues.
- * @param {Array.&lt;PathValue>} paths - the PathValues to set.
+ * The request cycle for set.  This is responsible for requesting to dataSource
+ * and allowing disposing inflight requests.
  */
+module.exports = function setRequestCycle(model, observer, groups,
+                                          isJSONGraph, isProgressive, count) {
+    var requestedAndOptimizedPaths = setGroupsIntoCache(model, groups);
+    var optimizedPaths = requestedAndOptimizedPaths.optimizedPaths;
+    var requestedPaths = requestedAndOptimizedPaths.requestedPaths;
 
-module.exports = function invalidatePathSets(model, paths) {
-
-    var modelRoot = model._root;
-    var lru = modelRoot;
-    var expired = modelRoot.expired;
-    var version = incrementVersion();
-    var bound = model._path;
-    var cache = modelRoot.cache;
-    var node = bound.length ? getBoundValue(model, bound).value : cache;
-    // eslint-disable-next-line camelcase
-    var parent = node.$_parent || cache;
-    // eslint-disable-next-line camelcase
-    var initialVersion = cache.$_version;
-
-    var pathIndex = -1;
-    var pathCount = paths.length;
-
-    while (++pathIndex &lt; pathCount) {
-
-        var path = paths[pathIndex];
-
-        invalidatePathSet(
-            path, 0, cache, parent, node,
-            version, expired, lru
-        );
+    // we have exceeded the maximum retry limit.
+    if (count === model._maxRetries) {
+        observer.onError(new MaxRetryExceededError(optimizedPaths));
+        return {
+            dispose: function() {}
+        };
     }
 
-    // eslint-disable-next-line camelcase
-    var newVersion = cache.$_version;
-    var rootChangeHandler = modelRoot.onChange;
+    var isMaster = model._source === undefined;
 
-    if (isFunction(rootChangeHandler) &amp;&amp; initialVersion !== newVersion) {
-        rootChangeHandler();
+    // Local set only.  We perform a follow up get.  If performance is ever
+    // a requirement simply requiring in checkCacheAndReport and use get request
+    // internals.  Figured this is more "pure".
+    if (isMaster) {
+        return subscribeToFollowupGet(model, observer, requestedPaths,
+                              isJSONGraph, isProgressive);
     }
+
+
+    // Progressively output the data from the first set.
+    if (isProgressive) {
+        var results = getWithPathsAsPathMap(model, requestedPaths, [{}]);
+        if (results.criticalError) {
+            observer.onError(results.criticalError);
+            return null;
+        }
+        observer.onNext(results.values[0]);
+    }
+
+    var currentJSONGraph = getJSONGraph(model, optimizedPaths);
+    var disposable = new AssignableDisposable();
+
+    // Sends out the setRequest.  The Queue will call the callback with the
+    // JSONGraph envelope / error.
+    var requestDisposable = model._request.
+        // TODO: There is error handling that has not been addressed yet.
+
+        // If disposed before this point then the sendSetRequest will not
+        // further any callbacks.  Therefore, if we are at this spot, we are
+        // not disposed yet.
+        set(currentJSONGraph, function(error, jsonGraphEnv) {
+            if (typeof error === InvalidSourceError) {
+                observer.onError(error);
+                return;
+            }
+
+            // TODO: This seems like there are errors with this approach, but
+            // for sanity sake I am going to keep this logic in here until a
+            // rethink can be done.
+            var isCompleted = false;
+            if (error || optimizedPaths.length === jsonGraphEnv.paths.length) {
+                isCompleted = true;
+            }
+
+            // Happy case.  One request to the dataSource will fulfill the
+            // required paths.
+            if (isCompleted) {
+                disposable.currentDisposable =
+                    subscribeToFollowupGet(model, observer, requestedPaths,
+                                          isJSONGraph, isProgressive);
+            }
+
+            // TODO: The unhappy case.  I am unsure how this can even be
+            // achieved.
+            else {
+                // We need to restart the setRequestCycle.
+                setRequestCycle(model, observer, groups, isJSONGraph,
+                                isProgressive, count + 1);
+            }
+        });
+
+    // Sets the current disposable as the requestDisposable.
+    disposable.currentDisposable = requestDisposable;
+
+    return disposable;
 };
 
-function invalidatePathSet(
-    path, depth, root, parent, node,
-    version, expired, lru) {
+function getJSONGraph(model, optimizedPaths) {
+    var boundPath = model._path;
+    var envelope = {};
+    model._path = emptyArray;
+    model._getPathValuesAsJSONG(model._materialize().withoutDataSource(), optimizedPaths, [envelope]);
+    model._path = boundPath;
 
-    var note = {};
-    var branch = depth &lt; path.length - 1;
-    var keySet = path[depth];
-    var key = iterateKeySet(keySet, note);
-
-    do {
-        var results = invalidateNode(
-            root, parent, node,
-            key, branch, false,
-            version, expired, lru
-        );
-        var nextNode = results[0];
-        var nextParent = results[1];
-        if (nextNode) {
-            if (branch) {
-                invalidatePathSet(
-                    path, depth + 1,
-                    root, nextParent, nextNode,
-                    version, expired, lru
-                );
-            } else if (removeNodeAndDescendants(nextNode, nextParent, key, lru, undefined)) {
-                updateNodeAncestors(nextParent, getSize(nextNode), lru, version);
-            }
-        }
-        key = iterateKeySet(keySet, note);
-    } while (!note.done);
+    return envelope;
 }
 
-function invalidateReference(root, node, version, expired, lru) {
+function subscribeToFollowupGet(model, observer, requestedPaths, isJSONGraph,
+                               isProgressive) {
 
-    if (isExpired(node)) {
-        expireNode(node, expired, lru);
-        return [undefined, root];
-    }
-
-    promote(lru, node);
-
-    var container = node;
-    var reference = node.value;
-    var parent = root;
-
-    // eslint-disable-next-line camelcase
-    node = node.$_context;
-
-    if (node != null) {
-        // eslint-disable-next-line camelcase
-        parent = node.$_parent || root;
-    } else {
-
-        var index = 0;
-        var count = reference.length - 1;
-
-        parent = node = root;
-
-        do {
-            var key = reference[index];
-            var branch = index &lt; count;
-            var results = invalidateNode(
-                root, parent, node,
-                key, branch, true,
-                version, expired, lru
-            );
-            node = results[0];
-            if (isPrimitive(node)) {
-                return results;
-            }
-            parent = results[1];
-        } while (index++ &lt; count);
-
-        // eslint-disable-next-line camelcase
-        if (container.$_context !== node) {
-            // eslint-disable-next-line camelcase
-            var backRefs = node.$_refsLength || 0;
-            // eslint-disable-next-line camelcase
-            node.$_refsLength = backRefs + 1;
-            node[__ref + backRefs] = container;
-            // eslint-disable-next-line camelcase
-            container.$_context = node;
-            // eslint-disable-next-line camelcase
-            container.$_refIndex = backRefs;
-        }
-    }
-
-    return [node, parent];
-}
-
-function invalidateNode(
-    root, parent, node,
-    key, branch, reference,
-    version, expired, lru) {
-
-    var type = node.$type;
-
-    while (type === $ref) {
-
-        var results = invalidateReference(root, node, version, expired, lru);
-
-        node = results[0];
-
-        if (isPrimitive(node)) {
-            return results;
-        }
-
-        parent = results[1];
-        type = node.$type;
-    }
-
-    if (type !== void 0) {
-        return [node, parent];
-    }
-
-    if (key == null) {
-        if (branch) {
-            throw new Error("`null` is not allowed in branch key positions.");
-        } else if (node) {
-            key = node.$_key;
-        }
-    } else {
-        parent = node;
-        node = parent[key];
-    }
-
-    return [node, parent];
+    // Creates a new response and subscribes to it with the original observer.
+    // Also sets forceCollect to true, incase the operation is synchronous and
+    // exceeds the cache limit size
+    var response = new GetResponse(model, requestedPaths, isJSONGraph,
+                                   isProgressive, true);
+    return response.subscribe(observer);
 }
 </code></pre>
     </article>
