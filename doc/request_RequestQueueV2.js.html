@@ -121,7 +121,7 @@ RequestQueueV2.prototype = {
         }
 
         // This is a simple refCount callback.
-        function refCountCallback(err) {
+        function refCountCallback(err, data, hasInvalidatedResult) {
             if (disposed) {
                 return;
             }
@@ -131,7 +131,7 @@ RequestQueueV2.prototype = {
             // If the count becomes 0, then its time to notify the
             // listener that the request is done.
             if (count === 0) {
-                cb(err);
+                cb(err, data, hasInvalidatedResult);
             }
         }
 
