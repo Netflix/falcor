@@ -1,5 +1,6 @@
 #!/bin/bash
 set -e
+set -x
 
 if [ "$TRAVIS_PULL_REQUEST" == "false" ]; then
   echo -e "Building and committing dist and docs...\n"
