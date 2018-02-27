@@ -17,6 +17,9 @@ id: api
     <article>
         <pre class="prettyprint source linenums"><code>var complement = require("./complement");
 var flushGetRequest = require("./flushGetRequest");
+var incrementVersion = require("../support/incrementVersion");
+var currentCacheVersion = require("../support/currentCacheVersion");
+
 var REQUEST_ID = 0;
 var GetRequestType = require("./RequestTypes").GetRequest;
 var setJSONGraphs = require("./../set/setJSONGraphs");
@@ -101,6 +104,22 @@ GetRequestV2.prototype = {
                         // If there is at least one callback remaining, then
                         // callback the callbacks.
                         if (self._count) {
+                            // currentVersion will get added to each inserted
+                            // node as node.$_version inside of self._merge.
+                            //
+                            // atom values just downloaded with $expires: 0
+                            // (now-expired) will get assigned $_version equal
+                            // to currentVersion, and checkCacheAndReport will
+                            // later consider those nodes to not have expired
+                            // for the duration of current event loop tick
+                            //
+                            // we unset currentCacheVersion after all callbacks
+                            // have been called, to ensure that only these
+                            // particular callbacks and any synchronous model.get
+                            // callbacks inside of these, get the now-expired
+                            // values
+                            var currentVersion = incrementVersion.getCurrentVersion();
+                            currentCacheVersion.setVersion(currentVersion);
                             var mergeContext = {hasInvalidatedResult : false};
 
                             var pathsErr = model._useServerPaths &amp;&amp; data &amp;&amp; data.paths === undefined ?
@@ -119,6 +138,7 @@ GetRequestV2.prototype = {
                                     fn(pathsErr || err, data, mergeContext.hasInvalidatedResult);
                                 }
                             }
+                            currentCacheVersion.setVersion(null);
                         }
                     });
             });
@@ -140,13 +160,16 @@ GetRequestV2.prototype = {
     /**
      * Attempts to add paths to the outgoing request.  If there are added
      * paths then the request callback will be added to the callback list.
+     * Handles adding partial paths as well
      *
-     * @returns {Array} - the remaining paths in the request.
+     * @returns {Array} - whether new requested paths were inserted in this
+     *                    request, the remaining paths that could not be added,
+     *                    and disposable for the inserted requested paths.
      */
-    add: function(requested, optimized, callback) {
+    add: function(requested, optimized, depthDifferences, callback) {
         // uses the length tree complement calculator.
         var self = this;
-        var complementTuple = complement(requested, optimized, self._pathMap);
+        var complementTuple = complement(requested, optimized, depthDifferences, self._pathMap);
         var optimizedComplement;
         var requestedComplement;
 
@@ -161,10 +184,9 @@ GetRequestV2.prototype = {
         var inserted = false;
         var disposable = false;
 
-        // If the out paths is less than the passed in paths, then there
-        // has been an intersection and the complement has been returned.
-        // Therefore, this can be deduped across requests.
-        if (optimizedComplement.length &lt; optimized.length) {
+        // If we found an intersection, then just add new callback
+        // as one of the dependents of that request
+        if (complementTuple &amp;&amp; complementTuple[0].length) {
             inserted = true;
             var idx = self._callbacks.length;
             self._callbacks[idx] = callback;

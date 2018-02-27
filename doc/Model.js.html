@@ -107,7 +107,7 @@ function Model(o) {
     if (typeof options.maxRetries === "number") {
         this._maxRetries = options.maxRetries;
     } else {
-        this._maxRetries = options._maxRetries || Model.prototype._maxRetries;
+        this._maxRetries = options.maxRetries || Model.prototype._maxRetries;
     }
 
     if (typeof options.collectRatio === "number") {
@@ -136,7 +136,6 @@ function Model(o) {
         options._allowFromWhenceYouCame || false;
 
     this._treatDataSourceErrorsAsJSONGraphErrors = options._treatDataSourceErrorsAsJSONGraphErrors || false;
-    this._emitReferencesInOutput = options._emitReferencesInOutput || false;
 
     if (options.cache) {
         this.setCache(options.cache);
@@ -160,6 +159,18 @@ Model.prototype._collectRatio = 0.75;
  * @return {ModelResponse.&lt;JSONEnvelope>} - the requested data as JSON
  */
 Model.prototype.get = require("./response/get");
+
+/**
+ * _getOptimizedBoundPath is an extension point for internal users to polyfill
+ * legacy soft-bind behavior, as opposed to deref (hardBind). Current falcor
+ * only supports deref, and assumes _path to be a fully optimized path.
+ * @function
+ * @private
+ * @return {Path} - fully optimized bound path for the model
+ */
+Model.prototype._getOptimizedBoundPath = function _getOptimizedBoundPath() {
+    return arrayClone(this._path);
+};
 
 /**
  * The get method retrieves several {@link Path}s or {@link PathSet}s from a {@link Model}. The get method loads each value into a JSON object and returns in a ModelResponse.
@@ -246,7 +257,7 @@ Model.prototype.invalidate = function invalidate() {
     args = [];
     while (++argsIdx &lt; argsLen) {
         args[argsIdx] = pathSyntax.fromPath(arguments[argsIdx]);
-        if (!Array.isArray(args[argsIdx])) {
+        if (!Array.isArray(args[argsIdx]) || !args[argsIdx].length) {
             throw new Error("Invalid argument");
         }
     }
@@ -650,7 +661,6 @@ Model.prototype._fromWhenceYouCame = function fromWhenceYouCame(allow) {
 
 Model.prototype._getBoundValue = require("./get/getBoundValue");
 Model.prototype._getVersion = require("./get/getVersion");
-Model.prototype._getValueSync = require("./get/getValueSync");
 
 Model.prototype._getPathValuesAsPathMap = get.getWithPathsAsPathMap;
 Model.prototype._getPathValuesAsJSONG = get.getWithPathsAsJSONGraph;

@@ -58,6 +58,121 @@ id: api
     
         
 
+        <h4 class="name section-header function-name" id="findPartialIntersections"><span class="type-signature"></span>findPartialIntersections<span class="signature">()</span><span class="type-signature return-signature"></span></h4>
+
+        
+    
+
+        
+        <div class="description">
+            <p>Recursive function to calculate intersection and complement paths in 2 given
+pathsets at a given depth
+Parameters:</p>
+<ul>
+<li><code>requestedPath</code>: full requested path (can include ranges)</li>
+<li><code>optimizedPath</code>: corresponding optimized path (can include ranges)</li>
+<li><code>currentTree</code>: path map for in-flight request, against which to dedupe</li>
+<li><code>depth</code>: index of optimized path that we are trying to match with <code>currentTree</code></li>
+<li><code>rCurrentPath</code>: current accumulated requested path by previous recursive<pre class="prettyprint source"><code>            iterations. Could also have been pre-initialized as stated
+            above.
+            This path cannot contain ranges, instead contains a key
+            from the range, representing one of the individual paths
+            in `requestedPath` pathset</code></pre></li>
+<li><code>oCurrentPath</code>: corresponding accumulated optimized path, to be matched<pre class="prettyprint source"><code>            with `currentTree`. Could have been pre-initialized.
+            Cannot contain ranges, instead contains a key from the
+            range at given `depth` in `optimizedPath`</code></pre></li>
+<li><p><code>depthDiff</code>: difference in length between <code>requestedPath</code> and <code>optimizedPath</code></p>
+<p>Example scenario:</p>
+<ul>
+<li>requestedPath: ['lolomo', 0, 0, 'tags', { from: 0, to: 2 }]</li>
+<li>optimizedPath: ['videosById', 11, 'tags', { from: 0, to: 2 }]</li>
+<li>currentTree: { videosById: 11: { tags: { 0: null, 1: null }}}
+// since requested path is longer, optimized path index starts from depth 0
+// and accumulated requested path starts pre-initialized (rCurrentPath)</li>
+<li>depth: 0</li>
+<li>rCurrentPath: ['lolomo']</li>
+<li>oCurrentPath: []</li>
+<li>depthDiff: 1</li>
+</ul>
+</li>
+</ul>
+        </div>
+        
+
+    
+
+    
+
+    
+
+    
+
+    
+
+
+
+
+  <dl class="details">
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+      <dt class="tag-source">Source:</dt>
+      <dd class="tag-source">
+          <a href="request_complement.js.html">request/complement.js</a>, <a href="request_complement.js.html#line127">line 127</a>
+      </dd>
+      
+
+      
+
+      
+
+      
+  </dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</section>
+          
+              
+<section class="method-section">
+    
+        
+
         <h4 class="name section-header function-name" id="GetRequestV2"><span class="type-signature"></span>GetRequestV2<span class="signature">(scheduler, requestQueue)</span><span class="type-signature return-signature"></span></h4>
 
         
@@ -191,7 +306,7 @@ merged back into the cache and all callbacks are notified.</p>
       
       <dt class="tag-source">Source:</dt>
       <dd class="tag-source">
-          <a href="request_GetRequestV2.js.html">request/GetRequestV2.js</a>, <a href="request_GetRequestV2.js.html#line20">line 20</a>
+          <a href="request_GetRequestV2.js.html">request/GetRequestV2.js</a>, <a href="request_GetRequestV2.js.html#line23">line 23</a>
       </dd>
       
 
