@@ -1,4 +1,5 @@
 # 1.x to 2.x
+
 Models always (usually) onNext
 -------
 When starting with the following json graph
@@ -253,7 +254,7 @@ var model = new Model({
 ```
 
 If we were to use `deref` in the **old** way we would have to perform the
-following to derefernce to [genreLists, 0, 0].
+following to dereference to [genreLists, 0, 0].
 ```javascript
 model.
     // Creates a dataSource (more than likely means a network call) call since

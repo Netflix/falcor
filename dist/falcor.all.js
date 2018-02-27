@@ -25066,9 +25066,6 @@ Promise.disableSynchronous = function() {
 };
 
 },{"218":218}],225:[function(require,module,exports){
-module.exports = require(226);
-
-},{"226":226}],226:[function(require,module,exports){
 (function (global){
 'use strict';
 
@@ -25076,7 +25073,7 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-var _ponyfill = require(227);
+var _ponyfill = require(226);
 
 var _ponyfill2 = _interopRequireDefault(_ponyfill);
 
@@ -25100,7 +25097,7 @@ if (typeof self !== 'undefined') {
 var result = (0, _ponyfill2['default'])(root);
 exports['default'] = result;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"227":227}],227:[function(require,module,exports){
+},{"226":226}],226:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {

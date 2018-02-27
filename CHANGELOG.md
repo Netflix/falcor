@@ -1,3 +1,24 @@
+2.0.0
+------------------
+
+## Features
+- [Dedupe requests partially with existing requests](https://github.com/Netflix/falcor/pull/897)
+- [Add missing paths information when raising
+  MaxRetryExceededError](https://github.com/Netflix/falcor/pull/874)
+
+## Bugs
+- [Fix "expires: 0" metadata on atoms](https://github.com/Netflix/falcor/pull/905/commits)
+- [Protect against model.invalidate from destroying cache](https://github.com/Netflix/falcor/pull/903)
+- [Fix retry count logic](https://github.com/Netflix/falcor/pull/904)
+
+1.1.0
+-------------------
+
+## Bugs
+- [Fix maxRetries on clone](https://github.com/Netflix/falcor/pull/917)
+- [Disables whole-branch response merging](https://github.com/Netflix/falcor/pull/920)
+- Fix model.set claiming objects passed as argument
+
 1.0.0
 -------------------
 
