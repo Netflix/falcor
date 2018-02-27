@@ -3727,10 +3727,12 @@ var GetResponse = module.exports = function GetResponse(model, paths,
                                                         isProgressive,
                                                         forceCollect) {
     this.model = model;
-    this.currentRemainingPaths = paths;
+    this.paths = paths;
+    this.currentRemainingPaths = paths.concat();
     this.isJSONGraph = isJSONGraph || false;
     this.isProgressive = isProgressive || false;
     this.forceCollect = forceCollect || false;
+    this.responses = [];
 };
 
 GetResponse.prototype = Object.create(ModelResponse.prototype);
@@ -3900,8 +3902,8 @@ var InvalidSourceError = require(11);
 module.exports = function getRequestCycle(getResponse, model, results, observer,
                                           errors, count) {
     // we have exceeded the maximum retry limit.
-    if (count === model._maxRetries) {
-        observer.onError(new MaxRetryExceededError(results.optimizedMissingPaths));
+    if (count > model._maxRetries) {
+        observer.onError(new MaxRetryExceededError(results.optimizedMissingPaths, {paths: getResponse.paths, responses: getResponse.responses, errors: errors}));
         return {
             dispose: function() {}
         };
@@ -3930,6 +3932,8 @@ module.exports = function getRequestCycle(getResponse, model, results, observer,
 
     var currentRequestDisposable = requestQueue.
         get(boundRequestedMissingPaths, optimizedMissingPaths, function(err, data, hasInvalidatedResult) {
+            getResponse.responses.push(data);
+
             if (model._treatDataSourceErrorsAsJSONGraphErrors ? err instanceof InvalidSourceError : !!err) {
                 observer.onError(err);
                 return;
