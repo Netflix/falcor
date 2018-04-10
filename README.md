@@ -8,12 +8,12 @@
 [![Coverage Status](https://coveralls.io/repos/Netflix/falcor/badge.svg?branch=master&service=github)](https://coveralls.io/github/Netflix/falcor?branch=master)
 [![bitHound Score](https://www.bithound.io/github/Netflix/falcor/badges/score.svg)](https://www.bithound.io/github/Netflix/falcor)
 
-## 2.0.0
+## 2.0
 
-**2.0.0** is the current stable Falcor release. **0.x** and **1.x** users are
+**2.0** is the current stable Falcor release. **0.x** and **1.x** users are
 welcome to upgrade.
 
-Breaking changes between **1.x** and **2.0.0** can be reviewed
+Breaking changes between **1.x** and **2.0** can be reviewed
 [here](https://github.com/Netflix/falcor/blob/master/MIGRATIONS.md).
 
 Breaking changes between **0.x** and **1.x** can be reviewed
