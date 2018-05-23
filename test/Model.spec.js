@@ -246,6 +246,17 @@ describe("Model", function() {
         done();
     });
 
+    // https://github.com/Netflix/falcor/issues/915
+    it('maxRetries option is carried over to cloned Model instance', function(done) {
+        var model = new Model({
+            maxRetries: 10
+        });
+        expect(model._maxRetries).to.equal(10);
+        var batchingModel = model.batch(100);
+        expect(batchingModel._maxRetries).to.equal(10);
+        done();
+    });
+
     describe('JSON-Graph Specification', function() {
         require('./get-core');
 
