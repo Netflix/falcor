@@ -119,7 +119,7 @@ function Model(o) {
     if (typeof options.maxRetries === "number") {
         this._maxRetries = options.maxRetries;
     } else {
-        this._maxRetries = options.maxRetries || Model.prototype._maxRetries;
+        this._maxRetries = options._maxRetries || Model.prototype._maxRetries;
     }
 
     if (typeof options.collectRatio === "number") {
