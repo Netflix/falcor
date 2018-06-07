@@ -10,19 +10,19 @@ var MaxRetryExceededError = require('../../lib/errors/MaxRetryExceededError');
 var noOp = function() {};
 
 describe('Get Integration Tests', function() {
-    var app, server, serverUrl;
+    var app, server, serverUrl, model, onNext;
 
     beforeEach(function(done) {
         app = express();
         server = app.listen(1337, done);
         serverUrl = 'http://localhost:1337';
+        model = new falcor.Model({
+            source: new falcor.HttpDataSource(serverUrl + '/model.json')
+        });
+        onNext = sinon.spy();
     });
 
     it('should be able to return null from a router. #535', function(done) {
-        var model = new falcor.Model({
-            source: new falcor.HttpDataSource(serverUrl + '/model.json')
-        });
-        var onNext = sinon.spy();
         setRoutes([
             {
                 route: ['thing', 'prop'],
@@ -52,10 +52,6 @@ describe('Get Integration Tests', function() {
 
     describe('expiry', function() {
         it('$expires = 0 should expire immediately after current tick of event loop', function(done) {
-            var model = new falcor.Model({
-                source: new falcor.HttpDataSource(serverUrl + '/model.json')
-            });
-            var onNext = sinon.spy();
             setRoutes([{
                 route: ['path'],
                 get: function() {
@@ -92,10 +88,6 @@ describe('Get Integration Tests', function() {
         });
 
         it('$expires = 1 should never expire (unless kicked out by LRU cache)', function(done) {
-            var model = new falcor.Model({
-                source: new falcor.HttpDataSource(serverUrl + '/model.json')
-            });
-            var onNext = sinon.spy();
             setRoutes([{
                 route: ['path'],
                 get: function() {
@@ -135,10 +127,6 @@ describe('Get Integration Tests', function() {
         });
 
         it('$expires = -<timestamp> should expire in relative future', function(done) {
-            var model = new falcor.Model({
-                source: new falcor.HttpDataSource(serverUrl + '/model.json')
-            });
-            var onNext = sinon.spy();
             setRoutes([{
                 route: ['path'],
                 get: function() {
@@ -176,10 +164,6 @@ describe('Get Integration Tests', function() {
         });
 
         it('$expires = <timestamp> should expire at absolute time', function(done) {
-            var model = new falcor.Model({
-                source: new falcor.HttpDataSource(serverUrl + '/model.json')
-            });
-            var onNext = sinon.spy();
             setRoutes([{
                 route: ['path'],
                 get: function() {
@@ -217,10 +201,6 @@ describe('Get Integration Tests', function() {
         });
 
         it('$expires = <past timestamp> has already expired, causing retries', function(done) {
-            var model = new falcor.Model({
-                source: new falcor.HttpDataSource(serverUrl + '/model.json')
-            });
-            var onNext = sinon.spy();
             setRoutes([{
                 route: ['path'],
                 get: function() {
