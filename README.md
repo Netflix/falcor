@@ -159,6 +159,20 @@ retrieved from the server:
 Hello World
 ```
 
+## Steps to publish new version
+
+- Make pull request with feature/bug fix and tests
+- Merge pull request into master after code review and passing Travis CI checks
+- Run `git checkout master` to open `master` branch locally
+- Run `git pull` to merge latest code, including built `dist/` and `docs/` by Travis
+- Update CHANGELOG with features/bug fixes to be released in the new version
+- Run `npm run prepare` to build `dist/` locally
+- Ensure the built files are not different from those built by Travis CI,
+  hence creating no change to commit
+- Run `npm version patch` (or `minor`, `major`, etc) to create a new git commit and tag
+- Run `git push origin master && git push --tags` to push code and tags to github
+- Run `npm publish` to publish the latest version to NPM
+
 ## Additional Resources
 
 For detailed high-level documentation explaining the Model, the Router, and JSON
