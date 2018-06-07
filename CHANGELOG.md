@@ -1,3 +1,16 @@
+2.0.2
+------------------
+
+## Bugs
+- [Fix model.get() dispose to cancel asynchronous DataSource request](https://github.com/Netflix/falcor/pull/933)
+- [Fix model.batch() losing maxRetries config](https://github.com/Netflix/falcor/pull/932)
+
+2.0.1
+------------------
+
+## Bugs
+- [Fix build issues by replacing asap with falcor-asap](https://github.com/Netflix/falcor/pull/928)
+
 2.0.0
 ------------------
 
@@ -17,7 +30,7 @@
 ## Bugs
 - [Fix maxRetries on clone](https://github.com/Netflix/falcor/pull/917)
 - [Disables whole-branch response merging](https://github.com/Netflix/falcor/pull/920)
-- Fix model.set claiming objects passed as argument
+- [Fix model.set claiming objects passed as argument](https://github.com/Netflix/falcor/pull/920)
 
 1.0.0
 -------------------
