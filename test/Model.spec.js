@@ -1,5 +1,4 @@
 var Rx = require("rx");
-var rxjs = require("rxjs");
 
 var falcor = require("./../lib/");
 var Model = falcor.Model;
