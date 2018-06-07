@@ -235,12 +235,12 @@ describe("Model", function() {
                 done()
             }
             else {
-                done(new Error("DataSource unsubscribe not called."));
+                done(new Error("DataSource dispose not called."));
             }
         }
     });
 
-    it('unsubscribing should unsubscribe batched DataSource request, if applicable.', function(done) {
+    it('unsubscribing should "unsubscribe" batched DataSource request, if applicable.', function(done) {
         var onNextCalled = 0,
             onErrorCalled = 0,
             onCompletedCalled = 0,
