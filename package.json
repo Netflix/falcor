@@ -1,5 +1,5 @@
 {
-  "name": "falcor",
+  "name": "ggd543-falcor",
   "version": "1.1.0",
   "description": "A JavaScript library for efficient data fetching.",
   "main": "./lib/index.js",
