@@ -149,6 +149,21 @@ function Model(o) {
 
     this._treatDataSourceErrorsAsJSONGraphErrors = options._treatDataSourceErrorsAsJSONGraphErrors || false;
 
+    this._schema = options.schema || options._schema;
+    this._data = null;
+    this.data = Object.defineProperty(this, "data", {
+        get: function() {
+            if (!this._schema) {
+                return null;
+            }
+            if (this._data) {
+                return this._data;
+            }
+            this.setSchema(this._schema);
+            return this._data;
+        }
+    });
+
     if (options.cache) {
         this.setCache(options.cache);
     }
@@ -163,6 +178,82 @@ Model.prototype._treatErrorsAsValues = false;
 Model.prototype._maxSize = Math.pow(2, 53) - 1;
 Model.prototype._maxRetries = 3;
 Model.prototype._collectRatio = 0.75;
+
+Model.prototype.generateAPI = function(schema, prefixPath) {
+    var model = this;
+    var path = prefixPath || this._path;
+    function isRange(key) {
+        return typeof key === "object" && (key.to || key.length);
+    }
+    function generateAtKey(key) {
+        if (typeof key === "object" && !isRange(key)) {
+            key = JSON.stringify(key);
+        }
+        var keyPath = path.concat(key);
+        var schemaValue = schema[key];
+        if (typeof schemaValue !== "object" ||
+            schemaValue.$type === "atom") {
+            return enhanceObj({}, keyPath);
+        }
+        var objKeys = Object.keys(schemaValue);
+        var isFunction = objKeys.length === 1 && objKeys[0][0] === "$";
+        if (isFunction) {
+            return function(nextKey) {
+                return model.generateAPI(
+                    schemaValue[objKeys[0]],
+                    keyPath.concat(nextKey)
+                );
+            };
+        }
+        return enhanceObj(
+            model.generateAPI(schemaValue, keyPath),
+            keyPath
+        );
+    }
+    function then(cb, onError) {
+        // var rPath = this.path;
+        // var rangeIndices = rPath.reduce(function(indices, key, index) {
+        //     if (typeof key !== "object") { return indices; }
+        //     if (isRange(key)) {
+        //         indices.push(index);
+        //     }
+        //     return indices;
+        // });
+        // if (rangeIndices.length) {
+
+        //     return model.get(rPath).then(function(json) {
+        //         return rangeIndices.reduce(function(result, index) {
+
+        //         });
+        //     }, onError);
+        // }
+        return model.getValue(this.path).then(cb, onError);
+    }
+    function subscribe(onSuccess, onError, onComplete) {
+        return model.getValue(this.path).subscribe(onSuccess, onError, onComplete);
+    }
+    function enhanceObj(obj, objPath) {
+        obj.path = objPath;
+        obj.then = then;
+        obj.subscribe = subscribe;
+        return obj;
+    }
+    if (schema.$type === "ref") {
+        var refSchema = schema.value.reduce(
+            function(schemaObj, schemaKey) {
+                schemaObj = schemaObj[schemaKey];
+                return schemaObj;
+            },
+            model._schema
+        );
+        return model.generateAPI(refSchema, prefixPath);
+    }
+    return Object.keys(schema)
+        .reduce(function(result, key) {
+            result[key] = generateAtKey(key);
+            return result;
+        }, {});
+};
 
 /**
  * The get method retrieves several {@link Path}s or {@link PathSet}s from a {@link Model}. The get method loads each value into a JSON object and returns in a ModelResponse.
@@ -430,6 +521,11 @@ Model.prototype.setCache = function modelSetCache(cacheOrJSONGraphEnvelope) {
         this._root.cache = {};
     }
     return this;
+};
+
+Model.prototype.setSchema = function setSchema(schema) {
+    this._schema = schema;
+    this._data = this.generateAPI(this._schema);
 };
 
 /**

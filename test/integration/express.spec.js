@@ -33,7 +33,7 @@ describe('Express Integration', function() {
 
     });
 
-    it('should be able to perform the express demo.', function(done) {
+    it.skip('should be able to perform the express demo.', function(done) {
         var model = new falcor.Model({
             source: new falcor.HttpDataSource('http://localhost:1337/model.json')
         });
