@@ -14,7 +14,7 @@ function M() {
 }
 
 describe('DataSource and Deref', function() {
-    it('should get a value from from dataSource when bound.', function(done) {
+    it('should get a value from dataSource when bound.', function(done) {
         var model = new Model({cache: M(), source: new LocalDataSource(Cache())});
         model._root.unsafeMode = true;
         var onNext = sinon.spy();
@@ -41,7 +41,7 @@ describe('DataSource and Deref', function() {
             subscribe(noOp, done, done);
     });
 
-    it('should get a value from from dataSource after cache purge.', function(done) {
+    it('should get a value from dataSource after cache purge.', function(done) {
         var model = new Model({cache: M(), source: new LocalDataSource(Cache())});
         model._root.unsafeMode = true;
         var onNext = sinon.spy();
