@@ -1,3 +1,9 @@
+2.0.3
+------------------
+
+## Bugs
+- [Fix model._setValueSync() internal API to set path bound values in cache](https://github.com/Netflix/falcor/pull/933)
+
 2.0.2
 ------------------
 
