@@ -1,3 +1,43 @@
+2.0.3
+------------------
+
+## Bugs
+- [Fix model._setValueSync() internal API to set path bound values in cache](https://github.com/Netflix/falcor/pull/933)
+
+2.0.2
+------------------
+
+## Bugs
+- [Fix model.get() dispose to cancel asynchronous DataSource request](https://github.com/Netflix/falcor/pull/933)
+- [Fix model.batch() losing maxRetries config](https://github.com/Netflix/falcor/pull/932)
+
+2.0.1
+------------------
+
+## Bugs
+- [Fix build issues by replacing asap with falcor-asap](https://github.com/Netflix/falcor/pull/928)
+
+2.0.0
+------------------
+
+## Features
+- [Dedupe requests partially with existing requests](https://github.com/Netflix/falcor/pull/897)
+- [Add missing paths information when raising
+  MaxRetryExceededError](https://github.com/Netflix/falcor/pull/874)
+
+## Bugs
+- [Fix "expires: 0" metadata on atoms](https://github.com/Netflix/falcor/pull/905/commits)
+- [Protect against model.invalidate from destroying cache](https://github.com/Netflix/falcor/pull/903)
+- [Fix retry count logic](https://github.com/Netflix/falcor/pull/904)
+
+1.1.0
+-------------------
+
+## Bugs
+- [Fix maxRetries on clone](https://github.com/Netflix/falcor/pull/917)
+- [Disables whole-branch response merging](https://github.com/Netflix/falcor/pull/920)
+- [Fix model.set claiming objects passed as argument](https://github.com/Netflix/falcor/pull/920)
+
 1.0.0
 -------------------
 

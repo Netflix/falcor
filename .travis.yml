@@ -1,13 +1,14 @@
 language: node_js
 
 node_js:
-    - "4"
     - "6"
+    - "8"
 
 branches:
     only:
         - master
         - 0.x
+        - 1.0.0
 
 # Run as a docker container
 sudo: false

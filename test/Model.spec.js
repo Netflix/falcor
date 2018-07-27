@@ -1,5 +1,4 @@
 var Rx = require("rx");
-var rxjs = require("rxjs");
 
 var falcor = require("./../lib/");
 var Model = falcor.Model;
@@ -159,6 +158,168 @@ describe("Model", function() {
         }
     });
 
+    it('unsubscribing should dispose batched DataSource request.', function(done) {
+        var onNextCalled = 0,
+            onErrorCalled = 0,
+            onCompletedCalled = 0,
+            unusubscribeCalled = 0,
+            dataSourceGetCalled = 0;
+        var onDataSourceGet, onDisposedOrCompleted;
+
+        var model = new Model({
+            cache: {
+                list: {
+                    0: { name: "test" }
+                }
+            },
+            source: {
+                get: function() {
+                    return {
+                        subscribe: function(observerOrOnNext, onError, onCompleted) {
+                            dataSourceGetCalled++;
+                            var handle = setTimeout(function() {
+                                var response = {
+                                    jsonGraph: {
+                                        list: {
+                                            1: { name: "another test" }
+                                        }
+                                    },
+                                    paths: ["list", 1, "name"]
+                                };
+
+                                onDataSourceGet && onDataSourceGet();
+                                if (typeof observerOrOnNext === "function") {
+                                    observerOrOnNext(response);
+                                    onCompleted();
+                                }
+                                else {
+                                    observerOrOnNext.onNext(response);
+                                    observerOrOnNext.onCompleted();
+                                }
+
+                                onDisposedOrCompleted && onDisposedOrCompleted();
+                            });
+
+                            return {
+                                dispose: function() {
+                                    unusubscribeCalled++;
+                                    clearTimeout(handle);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        });
+        model = model.batch();
+
+        var subscription = model.get("list[0,1].name").
+            subscribe(
+                function(value) {
+                    onNextCalled++;
+                },
+                function(error) {
+                    onErrorCalled++;
+                },
+                function() {
+                    onCompletedCalled++;
+                });
+
+        onDataSourceGet = function() {
+            subscription.dispose();
+        };
+
+        onDisposedOrCompleted = function() {
+            if (dataSourceGetCalled === 1 && !onNextCalled && unusubscribeCalled === 1 && !onErrorCalled && !onCompletedCalled) {
+                done()
+            }
+            else {
+                done(new Error("DataSource dispose not called."));
+            }
+        }
+    });
+
+    it('unsubscribing should "unsubscribe" batched DataSource request, if applicable.', function(done) {
+        var onNextCalled = 0,
+            onErrorCalled = 0,
+            onCompletedCalled = 0,
+            unusubscribeCalled = 0,
+            dataSourceGetCalled = 0;
+        var onDataSourceGet, onDisposedOrCompleted;
+
+        var model = new Model({
+            cache: {
+                list: {
+                    0: { name: "test" }
+                }
+            },
+            source: {
+                get: function() {
+                    return {
+                        subscribe: function(observerOrOnNext, onError, onCompleted) {
+                            dataSourceGetCalled++;
+                            var handle = setTimeout(function() {
+                                var response = {
+                                    jsonGraph: {
+                                        list: {
+                                            1: { name: "another test" }
+                                        }
+                                    },
+                                    paths: ["list", 1, "name"]
+                                };
+
+                                onDataSourceGet && onDataSourceGet();
+                                if (typeof observerOrOnNext === "function") {
+                                    observerOrOnNext(response);
+                                    onCompleted();
+                                }
+                                else {
+                                    observerOrOnNext.onNext(response);
+                                    observerOrOnNext.onCompleted();
+                                }
+
+                                onDisposedOrCompleted && onDisposedOrCompleted();
+                            });
+
+                            return {
+                                unsubscribe: function() {
+                                    unusubscribeCalled++;
+                                    clearTimeout(handle);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        });
+        model = model.batch();
+
+        var subscription = model.get("list[0,1].name").
+            subscribe(
+                function(value) {
+                    onNextCalled++;
+                },
+                function(error) {
+                    onErrorCalled++;
+                },
+                function() {
+                    onCompletedCalled++;
+                });
+
+        onDataSourceGet = function() {
+            subscription.dispose();
+        };
+
+        onDisposedOrCompleted = function() {
+            if (dataSourceGetCalled === 1 && !onNextCalled && unusubscribeCalled === 1 && !onErrorCalled && !onCompletedCalled) {
+                done()
+            }
+            else {
+                done(new Error("DataSource unsubscribe not called."));
+            }
+        }
+    });
+
     it('Supports RxJS 5.', function(done) {
         var onNextCalled = 0,
             onErrorCalled = 0,
@@ -243,6 +404,17 @@ describe("Model", function() {
         expect(cache['$size']).to.be.greaterThan(0);
         model._setMaxSize(0);
         expect(cache['$size']).to.equal(0);
+        done();
+    });
+
+    // https://github.com/Netflix/falcor/issues/915
+    it('maxRetries option is carried over to cloned Model instance', function(done) {
+        var model = new Model({
+            maxRetries: 10
+        });
+        expect(model._maxRetries).to.equal(10);
+        var batchingModel = model.batch(100);
+        expect(batchingModel._maxRetries).to.equal(10);
         done();
     });
 

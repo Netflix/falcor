@@ -2,7 +2,7 @@
 var express = require('express');
 var bodyParser = require('body-parser');
 var FalcorServer = require('falcor-express');
-var falcorRouterDemoFactory = require('falcor-router-demo');
+var FalcorRouter = require('falcor-router');
 var falcor = require('./../../browser');
 var Model = falcor.Model;
 var HttpDataSource = falcor.HttpDataSource;
@@ -19,18 +19,19 @@ describe('Express Integration', function() {
 
         // Simple middleware to handle get/post
         app.use('/model.json', FalcorServer.dataSourceRoute(function(req, res) {
-            // Passing in the user ID, this should be retrieved via some auth system
-            return falcorRouterDemoFactory("1");
+            return new FalcorRouter([
+                {
+                    // match a request for the key "greeting"
+                    route: "greeting",
+                    // respond with a PathValue with the value of "Hello World."
+                    get: function() {
+                        return {path:["greeting"], value: "Hello World"};
+                    }
+                }
+            ]);
         }));
 
-        server = app.listen(1337, function(err) {
-            if (err) {
-                done(err);
-                return;
-            }
-            done();
-        });
-
+        server = app.listen(1337, done);
     });
 
     it('should be able to perform the express demo.', function(done) {
@@ -40,20 +41,12 @@ describe('Express Integration', function() {
         var onNext = sinon.spy();
 
         toObservable(model.
-            get('genrelist[0].titles[0].name')).
+            get('greeting')).
             doAction(onNext, noOp, function() {
                 expect(onNext.calledOnce).to.be.ok;
                 expect(strip(onNext.getCall(0).args[0])).to.deep.equals({
                     json: {
-                        genrelist: {
-                            0: {
-                                titles: {
-                                    0: {
-                                        name: 'Curious George'
-                                    }
-                                }
-                            }
-                        }
+                        greeting: 'Hello World'
                     }
                 });
             }).

@@ -1,0 +1,13 @@
+{
+  "env": {
+    "mocha": true
+  },
+  "globals": {
+    "toObservable": false
+  },
+  "rules": {
+    "space-before-function-paren": [ 0 ],
+    "quotes": [ 0 ],
+    "no-unused-expressions": [ 0 ]
+  }
+}
