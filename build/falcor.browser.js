@@ -5432,7 +5432,7 @@ module.exports = function setValueSync(pathArg, valueArg, errorSelectorArg, comp
 
     this._syncCheck("setValueSync");
     setPathValues(this, [value]);
-    return this._getValueSync(this, value.path).value;
+    return this._getValueSync(value.path);
 };
 
 },{"131":131,"69":69,"95":95}],72:[function(require,module,exports){

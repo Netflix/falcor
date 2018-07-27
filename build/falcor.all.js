@@ -5440,7 +5440,7 @@ module.exports = function setValueSync(pathArg, valueArg, errorSelectorArg, comp
 
     this._syncCheck("setValueSync");
     setPathValues(this, [value]);
-    return this._getValueSync(this, value.path).value;
+    return this._getValueSync(value.path);
 };
 
 },{"132":132,"70":70,"96":96}],73:[function(require,module,exports){
