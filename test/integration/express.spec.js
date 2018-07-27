@@ -50,9 +50,7 @@ describe('Express Integration', function() {
                     }
                 });
             }).
-            subscribe(noOp, function(err) {
-                done(err);
-            }, done);
+            subscribe(noOp, done, done);
     });
 
     afterEach(function() {
