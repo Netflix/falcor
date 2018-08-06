@@ -495,7 +495,7 @@ Model.prototype._syncCheck = function syncCheck(name) {
 
 /* eslint-disable guard-for-in */
 Model.prototype._clone = function cloneModel(opts) {
-    var clone = new Model(this);
+    var clone = new this.constructor(this);
     for (var key in opts) {
         var value = opts[key];
         if (value === "delete") {
