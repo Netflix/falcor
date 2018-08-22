@@ -95,7 +95,7 @@ app.use('/model.json', falcorExpress.dataSourceRoute(function (req, res) {
       // match a request for the key 'greeting'
       route: 'greeting',
       // respond with a PathValue with the value of 'Hello World.'
-      get: () => ({path: ['greeting'], value: 'Hello World'});
+      get: () => ({path: ['greeting'], value: 'Hello World'})
     }
   ]);
 }));
