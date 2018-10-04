@@ -29,13 +29,13 @@ describe('Values', function() {
             output: {
                 json: {
                     videos: {
-                        $__path: ['videos'],
+                        $__path: ['videos'], // eslint-disable-line camelcase
                         0: {
-                            $__path: ['videos', 0],
+                            $__path: ['videos', 0], // eslint-disable-line camelcase
                             title: {$type: 'atom'}
                         },
                         1: {
-                            $__path: ['videos', 1],
+                            $__path: ['videos', 1], // eslint-disable-line camelcase
                             title: {$type: 'atom'}
                         }
                     }
@@ -69,12 +69,12 @@ describe('Values', function() {
         var lolomo0 = {
             length: 1337
         };
-        lolomo0.$__path = ['lolomo', '0'];
+        lolomo0.$__path = ['lolomo', '0']; // eslint-disable-line camelcase
         var lolomo = {
             length: 1,
             0: lolomo0
         };
-        lolomo.$__path = ['lolomo'];
+        lolomo.$__path = ['lolomo']; // eslint-disable-line camelcase
         var output = {
             json: {
                 lolomo: lolomo
@@ -106,7 +106,7 @@ describe('Values', function() {
                 }
             },
             cache: {
-                lolomo: jsonGraph.ref(['test', 'value']),
+                lolomo: ref(['test', 'value']),
                 test: {
                     value: atom('value')
                 }
@@ -120,7 +120,7 @@ describe('Values', function() {
                 json: {}
             },
             cache: {
-                lolomo: jsonGraph.ref(['test', 'value']),
+                lolomo: ref(['test', 'value']),
                 test: {
                     value: atom('value')
                 }
@@ -141,7 +141,7 @@ describe('Values', function() {
             cache: {
                 lists: {
                     2343: {
-                        0: jsonGraph.ref(["videos", 123])
+                        0: ref(["videos", 123])
                     }
                 },
                 videos: {
@@ -171,7 +171,7 @@ describe('Values', function() {
                 cache: {
                     lists: {
                         2343: {
-                            0: jsonGraph.ref(["videos", 123])
+                            0: ref(["videos", 123])
                         }
                     },
                     videos: {
@@ -203,8 +203,8 @@ describe('Values', function() {
             cache: {
                 lists: {
                     2343: {
-                        0: jsonGraph.ref(["videos", 123]),
-                        1: jsonGraph.ref(["videos", 123])
+                        0: ref(["videos", 123]),
+                        1: ref(["videos", 123])
                     }
                 },
                 videos: {
@@ -357,7 +357,7 @@ describe('Values', function() {
                 ]
             },
             cache: {
-                reference: jsonGraph.ref(['foo', 'bar']),
+                reference: ref(['foo', 'bar']),
                 foo: {
                     bar: atom('value')
                 }
@@ -380,7 +380,7 @@ describe('Values', function() {
                 ]
             },
             cache: {
-                reference: jsonGraph.ref(['foo', 'bar']),
+                reference: ref(['foo', 'bar']),
                 foo: {
                     bar: atom('value')
                 }
