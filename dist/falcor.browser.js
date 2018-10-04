@@ -1863,8 +1863,9 @@ module.exports = function onValue(model, node, seed, depth, outerResults,
           }
         }
     }
-
-    outerResults.hasValues = hasValues;
+    if (outerResults) {
+        outerResults.hasValues = hasValues;
+    }
 };
 
 },{"114":114,"115":115,"116":116,"29":29,"41":41}],27:[function(require,module,exports){
