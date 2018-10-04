@@ -388,5 +388,24 @@ describe('Values', function() {
         });
     });
 
+    it("follows nested reference in JSONGraph mode", function () {
+        getCoreRunner({
+            input: [["first", "title"]],
+            isJSONG: true,
+            cache: {
+                first: ref(["second"]),
+                second: ref(["third"]),
+                third: { title: "title" }
+            },
+            output: {
+                "jsonGraph": {
+                    "first": { "$type": "ref", "value": ["second"] },
+                    "second": { "$type": "ref", "value": ["third"] },
+                    "third": { "title": "title" }
+                },
+                "paths": [["first", "title"]]
+            }
+        });
+    });
 });
 
