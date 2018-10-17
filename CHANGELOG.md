@@ -1,3 +1,9 @@
+# 2.0.4
+## Bugs
+- [Make Model#_clone return instance of current type](https://github.com/Netflix/falcor/pull/730)
+- [Fix error stack traces](https://github.com/Netflix/falcor/pull/941)
+- [Fix handling of outerResults as an optional argument](https://github.com/Netflix/falcor/pull/947)
+
 # 2.0.3
 ## Bugs
 - [Fix model._setValueSync() internal API to set path bound values in cache](https://github.com/Netflix/falcor/pull/933)
