@@ -4,6 +4,8 @@ var after = require('after');
 var expect = require('chai').expect;
 var sinon = require('sinon');
 var strip = require('../cleanData').stripDerefAndVersionKeys;
+var cacheGenerator = require('../CacheGenerator');
+
 var $ref = falcor.Model.ref;
 var noOp = function() {};
 
@@ -197,6 +199,23 @@ describe('Request deduping', function() {
                 ['thang', 'that', 'really', 'is', 'a', 'thing', 'of', 'course', 'tags', { from: 0, to: 1 }]
             ]);
         }, done, partDone);
+    });
+
+    it("deduplicates gets with overlapping ranges", function (done) {
+        var onGet = sinon.spy();
+        var model = new falcor.Model({ source: new LocalDataSource(cacheGenerator(0, 3), { wait: 0, onGet: onGet }) });
+
+        var partDone = after(3, function() {
+            expect(onGet.getCall(0).args[1]).to.deep.equal([["videos", 0, "title"]]);
+            expect(onGet.getCall(1).args[1]).to.deep.equal([["videos", 1, "title"]]);
+            expect(onGet.getCall(2).args[1]).to.deep.equal([["videos", 2, "title"]]);
+
+            done();
+        });
+
+        model.get(["videos", 0, "title"]).subscribe(noOp, done, partDone);
+        model.get(["videos", 1, "title"]).subscribe(noOp, done, partDone);
+        model.get(["videos", [0, 1, 2], "title"]).subscribe(noOp, done, partDone);
     });
 });
 
