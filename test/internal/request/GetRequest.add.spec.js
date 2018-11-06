@@ -1,9 +1,7 @@
 var sinon = require('sinon');
 var expect = require('chai').expect;
 var GetRequest = require('./../../../lib/request/GetRequestV2');
-var ASAPScheduler = require('./../../../lib/schedulers/ASAPScheduler');
 var ImmediateScheduler = require('./../../../lib/schedulers/ImmediateScheduler');
-var Rx = require('rx');
 var Model = require('./../../../lib').Model;
 var LocalDataSource = require('./../../data/LocalDataSource');
 var cacheGenerator = require('./../../CacheGenerator');
@@ -28,6 +26,7 @@ describe('#add', function() {
             model: model
         });
 
+        var results;
         var zip = zipSpy(2, function() {
             var onNext = sinon.spy();
             toObservable(model.
@@ -54,10 +53,10 @@ describe('#add', function() {
                 subscribe(noOp, done, done);
         });
 
-        var disposable1 = request.batch([videos0], [videos0], zip);
+        request.batch([videos0], [videos0], zip);
         expect(request.sent, 'request should be sent').to.be.ok;
 
-        var results = request.add([videos0, videos1], [videos0, videos1], [0, 0], zip);
+        results = request.add([videos0, videos1], [videos0, videos1], zip);
     });
 
     it('should send a request and dedupe another when dedupe is in second position.', function(done) {
@@ -73,6 +72,7 @@ describe('#add', function() {
             model: model
         });
 
+        var results;
         var zip = zipSpy(2, function() {
             var onNext = sinon.spy();
             toObservable(model.
@@ -99,10 +99,10 @@ describe('#add', function() {
                 subscribe(noOp, done, done);
         });
 
-        var disposable1 = request.batch([videos0], [videos0], zip);
+        request.batch([videos0], [videos0], zip);
         expect(request.sent, 'request should be sent').to.be.ok;
 
-        var results = request.add([videos1, videos0], [videos1, videos0], [0, 0], zip);
+        results = request.add([videos1, videos0], [videos1, videos0], zip);
     });
 
 
@@ -119,6 +119,7 @@ describe('#add', function() {
             model: model
         });
 
+        var results;
         var zip = zipSpy(2, function() {
             var onNext = sinon.spy();
             toObservable(model.
@@ -144,10 +145,11 @@ describe('#add', function() {
                 }).
                 subscribe(noOp, done, done);
         });
-        var disposable1 = request.batch([videos0], [videos0], zip);
+        
+        request.batch([videos0], [videos0], zip);
         expect(request.sent, 'request should be sent').to.be.ok;
 
-        var results = request.add([videos0, videos1], [videos0, videos1], [0, 0], zip);
+        results = request.add([videos0, videos1], [videos0, videos1], zip);
         zip();
     });
 
@@ -164,7 +166,7 @@ describe('#add', function() {
             model: model
         });
 
-
+        var results;
         var zip = zipSpy(2, function() {
             var onNext = sinon.spy();
             toObservable(model.
@@ -190,10 +192,11 @@ describe('#add', function() {
                 }).
                 subscribe(noOp, done, done);
         });
-        var disposable1 = request.batch([videos0], [videos0], zip);
+        
+        request.batch([videos0], [videos0], zip);
         expect(request.sent, 'request should be sent').to.be.ok;
 
-        var results = request.add([videos0, videos1], [videos0, videos1], [0, 0], zip);
+        results = request.add([videos0, videos1], [videos0, videos1], zip);
         results[3]();
         zip();
     });
@@ -202,6 +205,7 @@ describe('#add', function() {
     // Tests for partial deduping (https://github.com/Netflix/falcor/issues/779)
     // are in test/integration/get.spec.js
 });
+
 function zipSpy(count, cb) {
     return sinon.spy(function() {
         --count;
