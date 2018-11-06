@@ -76,14 +76,7 @@ describe("findPartialIntersections", function() {
     describe("with optimized paths longer than requested paths", function() {
         it("returns the complement and intersection consisting of paths than can be partially deduped", function() {
             var partialMatchingRequestedPath = ["videos", 123, ["title", "boxart"]];
-            var partialMatchingOptimizedPath = [
-                "some",
-                "weird",
-                "long",
-                "ref",
-                456,
-                ["title", "boxart"]
-            ];
+            var partialMatchingOptimizedPath = ["some", "weird", "long", "ref", 456, ["title", "boxart"]];
             var pathTree = { some: { weird: { long: { ref: { "456": { title: null } } } } } };
 
             expect(
@@ -98,4 +91,23 @@ describe("findPartialIntersections", function() {
                 [["videos", 123, "boxart"]]
             ]);
         });
-    });});
+
+        it("halts descent into the subtree", function() {
+            var requestedPath = ["videos", 123, "title"];
+            var optimizedPath = ["some", "weird", "long", "ref", 456, "title"];
+            var pathTree = { some: { differentPath: null } };
+
+            expect(
+                findPartialIntersections(
+                    requestedPath,
+                    optimizedPath,
+                    pathTree
+                )
+            ).to.deep.equal([
+                [],
+                [optimizedPath],
+                [requestedPath]
+            ]);
+        });
+    });
+});
