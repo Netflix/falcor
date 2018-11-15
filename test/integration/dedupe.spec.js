@@ -20,7 +20,7 @@ describe("Request deduping", () => {
                         2: "thing: 2"
                     }
                 },
-                { onGet }
+                { wait: 0, onGet }
             )
         });
 
@@ -59,7 +59,7 @@ describe("Request deduping", () => {
                         3: "thing: 3"
                     }
                 },
-                { onGet }
+                { wait: 0, onGet }
             )
         });
 
@@ -85,7 +85,7 @@ describe("Request deduping", () => {
                         3: "thing: 3"
                     }
                 },
-                { onGet }
+                { wait: 0, onGet }
             )
         });
 
@@ -110,7 +110,7 @@ describe("Request deduping", () => {
                         3: { name: "thing: 3" }
                     }
                 },
-                { onGet }
+                { wait: 0, onGet }
             )
         });
 
@@ -134,7 +134,7 @@ describe("Request deduping", () => {
                         2: { name: "thing: 2", tags: { 0: "t2 tag: 0", 1: "t2 tag: 1", 2: "t2 tag: 2" } }
                     }
                 },
-                { onGet }
+                { wait: 0, onGet }
             )
         });
 
@@ -180,7 +180,7 @@ describe("Request deduping", () => {
                         }
                     }
                 },
-                { onGet }
+                { wait: 0, onGet }
             ),
             cache: {
                 things: {
@@ -210,7 +210,7 @@ describe("Request deduping", () => {
 
     it("deduplicates gets with overlapping ranges", done => {
         const onGet = sinon.spy();
-        const model = new falcor.Model({ source: new LocalDataSource(cacheGenerator(0, 3), { onGet }) });
+        const model = new falcor.Model({ source: new LocalDataSource(cacheGenerator(0, 3), { wait: 0, onGet }) });
 
         const partDone = after(3, () => {
             expect(onGet.getCall(0).args[1]).to.deep.equal([["videos", 0, "title"]]);
