@@ -1,0 +1,17 @@
+env:
+  es6: true
+  mocha: true
+  node: true
+
+rules:
+  prefer-const: 
+    - warn
+    - ignoreReadBeforeAssign: true
+  no-var: warn
+  prefer-rest-params: warn
+  prefer-spread: warn
+  prefer-arrow-callback: warn
+  object-shorthand: warn
+  arrow-parens:
+      - warn
+      - as-needed
