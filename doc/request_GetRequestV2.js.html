@@ -119,7 +119,7 @@ GetRequestV2.prototype = {
                         // values
                         var currentVersion = incrementVersion.getCurrentVersion();
                         currentCacheVersion.setVersion(currentVersion);
-                        var mergeContext = {hasInvalidatedResult : false};
+                        var mergeContext = { hasInvalidatedResult: false };
 
                         var pathsErr = model._useServerPaths &amp;&amp; data &amp;&amp; data.paths === undefined ?
                             new Error("Server responses must include a 'paths' field when Model._useServerPaths === true") : undefined;
@@ -170,38 +170,28 @@ GetRequestV2.prototype = {
      *                    request, the remaining paths that could not be added,
      *                    and disposable for the inserted requested paths.
      */
-    add: function(requested, optimized, depthDifferences, callback) {
+    add: function(requested, optimized, callback) {
         // uses the length tree complement calculator.
         var self = this;
-        var complementTuple = complement(requested, optimized, depthDifferences, self._pathMap);
-        var optimizedComplement;
-        var requestedComplement;
-
-        if (complementTuple) {
-            requestedComplement = complementTuple[2];
-            optimizedComplement = complementTuple[1];
-        } else {
-            requestedComplement = requested;
-            optimizedComplement = optimized;
-        }
+        var complementResult = complement(requested, optimized, self._pathMap);
 
         var inserted = false;
         var disposable = false;
 
         // If we found an intersection, then just add new callback
         // as one of the dependents of that request
-        if (complementTuple &amp;&amp; complementTuple[0].length) {
+        if (complementResult.intersection.length) {
             inserted = true;
             var idx = self._callbacks.length;
             self._callbacks[idx] = callback;
-            self._requestedPaths[idx] = complementTuple[0];
+            self._requestedPaths[idx] = complementResult.intersection;
             self._optimizedPaths[idx] = [];
             ++self._count;
 
             disposable = createDisposable(self, idx);
         }
 
-        return [inserted, requestedComplement, optimizedComplement, disposable];
+        return [inserted, complementResult.requestedComplement, complementResult.optimizedComplement, disposable];
     },
 
     /**

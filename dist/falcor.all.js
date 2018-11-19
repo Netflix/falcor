@@ -1679,7 +1679,6 @@ module.exports = function onMissing(model, path, depth,
     if (!outerResults.requestedMissingPaths) {
         outerResults.requestedMissingPaths = [];
         outerResults.optimizedMissingPaths = [];
-        outerResults.depthDifferences = [];
     }
 
     if (depth < path.length) {
@@ -1708,8 +1707,6 @@ function concatAndInsertMissing(model, remainingPath, depth, requestedPath,
 
     results.optimizedMissingPaths[results.optimizedMissingPaths.length] =
         fastCat(arraySlice(optimizedPath, 0, optimizedLength), remainingPath);
-
-    results.depthDifferences[results.depthDifferences.length] = depth - optimizedLength;
 }
 
 function isEmptyAtom(atom) {
@@ -2852,7 +2849,7 @@ GetRequestV2.prototype = {
                         // values
                         var currentVersion = incrementVersion.getCurrentVersion();
                         currentCacheVersion.setVersion(currentVersion);
-                        var mergeContext = {hasInvalidatedResult : false};
+                        var mergeContext = { hasInvalidatedResult: false };
 
                         var pathsErr = model._useServerPaths && data && data.paths === undefined ?
                             new Error("Server responses must include a 'paths' field when Model._useServerPaths === true") : undefined;
@@ -2903,38 +2900,28 @@ GetRequestV2.prototype = {
      *                    request, the remaining paths that could not be added,
      *                    and disposable for the inserted requested paths.
      */
-    add: function(requested, optimized, depthDifferences, callback) {
+    add: function(requested, optimized, callback) {
         // uses the length tree complement calculator.
         var self = this;
-        var complementTuple = complement(requested, optimized, depthDifferences, self._pathMap);
-        var optimizedComplement;
-        var requestedComplement;
-
-        if (complementTuple) {
-            requestedComplement = complementTuple[2];
-            optimizedComplement = complementTuple[1];
-        } else {
-            requestedComplement = requested;
-            optimizedComplement = optimized;
-        }
+        var complementResult = complement(requested, optimized, self._pathMap);
 
         var inserted = false;
         var disposable = false;
 
         // If we found an intersection, then just add new callback
         // as one of the dependents of that request
-        if (complementTuple && complementTuple[0].length) {
+        if (complementResult.intersection.length) {
             inserted = true;
             var idx = self._callbacks.length;
             self._callbacks[idx] = callback;
-            self._requestedPaths[idx] = complementTuple[0];
+            self._requestedPaths[idx] = complementResult.intersection;
             self._optimizedPaths[idx] = [];
             ++self._count;
 
             disposable = createDisposable(self, idx);
         }
 
-        return [inserted, requestedComplement, optimizedComplement, disposable];
+        return [inserted, complementResult.requestedComplement, complementResult.optimizedComplement, disposable];
     },
 
     /**
@@ -3085,7 +3072,7 @@ RequestQueueV2.prototype = {
      * @param {Array} optimizedPaths -
      * @param {Function} cb -
      */
-    get: function(requestedPaths, optimizedPaths, depthDifferences, cb) {
+    get: function(requestedPaths, optimizedPaths, cb) {
         var self = this;
         var disposables = [];
         var count = 0;
@@ -3105,8 +3092,7 @@ RequestQueueV2.prototype = {
             // The request has been sent, attempt to jump on the request
             // if possible.
             if (request.sent) {
-                var results = request.add(
-                    rRemainingPaths, oRemainingPaths, depthDifferences, refCountCallback);
+                var results = request.add(rRemainingPaths, oRemainingPaths, refCountCallback);
 
                 // Checks to see if the results were successfully inserted
                 // into the outgoing results.  Then our paths will be reduced
@@ -3121,8 +3107,7 @@ RequestQueueV2.prototype = {
 
             // If there is a non sent request, then we can batch and leave.
             else {
-                request.batch(
-                    rRemainingPaths, oRemainingPaths, refCountCallback);
+                request.batch(rRemainingPaths, oRemainingPaths, refCountCallback);
                 oRemainingPaths = [];
                 rRemainingPaths = [];
                 ++count;
@@ -3140,8 +3125,7 @@ RequestQueueV2.prototype = {
             request = new GetRequest(self.scheduler, self);
             requests[requests.length] = request;
             ++count;
-            var disposable = request.batch(
-                rRemainingPaths, oRemainingPaths, refCountCallback);
+            var disposable = request.batch(rRemainingPaths, oRemainingPaths, refCountCallback);
             disposables[disposables.length] = disposable;
         }
 
@@ -3198,219 +3182,180 @@ module.exports = {
 };
 
 },{}],47:[function(require,module,exports){
-var hasIntersection = require(144).hasIntersection;
 var arraySlice = require(78);
 var arrayConcat = require(75);
 var iterateKeySet = require(144).iterateKeySet;
 
 /**
- * Figures out what paths in requested pathsets can be
- * deduped based on existing optimized path tree provided.
+ * Calculates what paths in requested path sets can be deduplicated based on an existing optimized path tree.
  *
- * ## no deduping possible:
+ * For path sets with ranges or key sets, if some expanded paths can be found in the path tree, only matching paths are
+ * returned as intersection. The non-matching expanded paths are returned as complement.
  *
- * if no existing requested sub tree at all for path,
- * just add the entire path to complement.
- *
- * ## fully deduped:
- *
- * if required path is a complete subset of given sub tree,
- * just add the entire path to intersection
- *
- * ## partial deduping:
- *
- * if some part of path, when ranges are expanded, is a subset
- * of given sub tree, then add only that part to intersection,
- * and all other parts of this path to complement
- *
- * To keep `depth` argument be a valid index for optimized path (`oPath`),
- * either requested or optimized path is sent in pre-initialized with
- * some items so that their remaining length matches exactly, keeping
- * remaining ranges in those pathsets 1:1 in correspondence
- *
- * Note that positive `depthDiff` value means that requested path is
- * longer than optimized path, and we need to pre-initialize current
- * requested path with that many offset items, so that their remaining
- * length matches. Similarly, negative `depthDiff` value means that
- * optimized path is longer, and we pre-initialize optimized path with
- * those many items. Note that because of the way requested and
- * optimized paths are accumulated from what user requested in model.get
- * (see onMissing.js), it is not possible for the pre-initialized paths
- * to have any ranges in them.
- *
- * `intersectionData` is:
- * [ requestedIntersection, optimizedComplement, requestedComplement ]
- * where `requestedIntersection` is matched requested paths that can be
- * deduped, `optimizedComplement` is missing optimized paths, and
- * `requestedComplement` is requested counterparts of those missing
- * optimized paths
+ * The function returns an object consisting of:
+ * - intersection: requested paths that were matched to the path tree
+ * - optimizedComplement: optimized paths that were not found in the path tree
+ * - requestedComplement: requested paths for the optimized paths that were not found in the path tree
  */
-module.exports = function complement(requested, optimized, depthDifferences, tree) {
+module.exports = function complement(requested, optimized, tree) {
     var optimizedComplement = [];
     var requestedComplement = [];
-    var requestedIntersection = [];
-    var intersectionLength = -1, complementLength = -1;
+    var intersection = [];
+    var i, iLen;
 
-    for (var i = 0, len = optimized.length; i < len; ++i) {
+    for (i = 0, iLen = optimized.length; i < iLen; ++i) {
         var oPath = optimized[i];
         var rPath = requested[i];
-        var depthDiff = depthDifferences[i];
         var subTree = tree[oPath.length];
 
-        // no deduping possible
-        if (!subTree) {
-            optimizedComplement[++complementLength] = oPath;
-            requestedComplement[complementLength] = rPath;
-            continue;
-        }
-        // fully deduped
-        if (hasIntersection(subTree, oPath, 0)) {
-            requestedIntersection[++intersectionLength] = rPath;
-            continue;
-        }
-
-        // partial deduping
-        var intersectionData = findPartialIntersections(
-            rPath,
-            oPath,
-            subTree,
-            depthDiff < 0 ? -depthDiff : 0,
-            depthDiff > 0 ? arraySlice(rPath, 0, depthDiff) : [],
-            depthDiff < 0 ? arraySlice(oPath, 0, -depthDiff) : [],
-            depthDiff);
-        for (var j = 0, jLen = intersectionData[0].length; j < jLen; ++j) {
-            requestedIntersection[++intersectionLength] = intersectionData[0][j];
-        }
-        for (var k = 0, kLen = intersectionData[1].length; k < kLen; ++k) {
-            optimizedComplement[++complementLength] = intersectionData[1][k];
-            requestedComplement[complementLength] = intersectionData[2][k];
-        }
+        var intersectionData = findPartialIntersections(rPath, oPath, subTree);
+        intersection = arrayConcat(intersection, intersectionData[0]);
+        optimizedComplement = arrayConcat(optimizedComplement, intersectionData[1]);
+        requestedComplement = arrayConcat(requestedComplement, intersectionData[2]);
     }
 
-    if (!requestedIntersection.length) {
-        return null;
-    }
-    return [requestedIntersection, optimizedComplement, requestedComplement];
+    return {
+        intersection: intersection,
+        optimizedComplement: optimizedComplement,
+        requestedComplement: requestedComplement
+    };
 };
 
 /**
- * Recursive function to calculate intersection and complement paths in 2 given
- * pathsets at a given depth
- * Parameters:
- *  - `requestedPath`: full requested path (can include ranges)
- *  - `optimizedPath`: corresponding optimized path (can include ranges)
- *  - `currentTree`: path map for in-flight request, against which to dedupe
- *  - `depth`: index of optimized path that we are trying to match with `currentTree`
- *  - `rCurrentPath`: current accumulated requested path by previous recursive
- *                    iterations. Could also have been pre-initialized as stated
- *                    above.
- *                    This path cannot contain ranges, instead contains a key
- *                    from the range, representing one of the individual paths
- *                    in `requestedPath` pathset
- *  - `oCurrentPath`: corresponding accumulated optimized path, to be matched
- *                    with `currentTree`. Could have been pre-initialized.
- *                    Cannot contain ranges, instead contains a key from the
- *                    range at given `depth` in `optimizedPath`
- *  - `depthDiff`: difference in length between `requestedPath` and `optimizedPath`
+ * Recursive function to calculate intersection and complement paths in 2 given pathsets at a given depth.
  *
- *  Example scenario:
- *      - requestedPath: ['lolomo', 0, 0, 'tags', { from: 0, to: 2 }]
- *      - optimizedPath: ['videosById', 11, 'tags', { from: 0, to: 2 }]
- *      - currentTree: { videosById: 11: { tags: { 0: null, 1: null }}}
- *      // since requested path is longer, optimized path index starts from depth 0
- *      // and accumulated requested path starts pre-initialized (rCurrentPath)
- *      - depth: 0
- *      - rCurrentPath: ['lolomo']
- *      - oCurrentPath: []
- *      - depthDiff: 1
+ * Parameters:
+ *  - requestedPath: full requested path set (can include ranges)
+ *  - optimizedPath: corresponding optimized path (can include ranges)
+ *  - requestTree: path tree for in-flight request, against which to dedupe
+ *
+ * Returns a 3-tuple consisting of
+ *  - the intersection of requested paths with requestTree
+ *  - the complement of optimized paths with requestTree
+ *  - the complement of corresponding requested paths with requestTree
+ *
+ * Example scenario:
+ *  - requestedPath: ['lolomo', 0, 0, 'tags', { from: 0, to: 2 }]
+ *  - optimizedPath: ['videosById', 11, 'tags', { from: 0, to: 2 }]
+ *  - requestTree: { videosById: 11: { tags: { 0: null, 1: null }}}
+ *
+ * This returns:
+ * [
+ *   [['lolomo', 0, 0, 'tags', 0], ['lolomo', 0, 0, 'tags', 1]],
+ *   [['videosById', 11, 'tags', 2]],
+ *   [['lolomo', 0, 0, 'tags', 2]]
+ * ]
+ *
  */
-function findPartialIntersections(requestedPath, optimizedPath, currentTree, depth, rCurrentPath, oCurrentPath, depthDiff) {
-    var intersections = [];
-    var rComplementPaths = [];
-    var oComplementPaths = [];
-    // iterate over optimized path, looking for deduping opportunities
-    for (; depth < optimizedPath.length; ++depth) {
-        var key = optimizedPath[depth];
-        var keyType = typeof key;
+function findPartialIntersections(requestedPath, optimizedPath, requestTree) {
+    var depthDiff = requestedPath.length - optimizedPath.length;
+    var i;
 
-        // if range key is found, start inner loop to iterate over all keys in range
-        // and add intersections and complements from each iteration separately.
-        // range keys branch-out like this, providing individual deduping
-        // opportunities for each inner key
-        if (key && keyType === "object") {
-            var note = {};
-            var innerKey = iterateKeySet(key, note);
-
-            while (!note.done) {
-                var nextTree = currentTree[innerKey];
-                if (nextTree === undefined) {
-                    // if no next sub tree exists for an inner key, it's a dead-end
-                    // and we can add this to complement paths
-                    var oPath = oCurrentPath.concat(
-                        innerKey,
-                        arraySlice(
-                            optimizedPath,
-                            depth + 1));
-                    oComplementPaths[oComplementPaths.length] = oPath;
-                    var rPath = rCurrentPath.concat(
-                        innerKey,
-                        arraySlice(
-                            requestedPath,
-                            depth + 1 + depthDiff));
-                    rComplementPaths[rComplementPaths.length] = rPath;
-                } else if (depth === optimizedPath.length - 1) {
-                    // reaching the end of optimized path means that we found a
-                    // corresponding node in the path map tree every time,
-                    // so add current path to successful intersections
-                    intersections[intersections.length] = arrayConcat(rCurrentPath, [innerKey]);
-                } else {
-                    // otherwise keep trying to find further partial deduping
-                    // opportunities in the remaining path!
-                    var intersectionData = findPartialIntersections(
-                        requestedPath,
-                        optimizedPath,
-                        nextTree,
-                        depth + 1,
-                        arrayConcat(rCurrentPath, [innerKey]),
-                        arrayConcat(oCurrentPath, [innerKey]),
-                        depthDiff);
-                    for (var j = 0, jLen = intersectionData[0].length; j < jLen; ++j) {
-                        intersections[intersections.length] = intersectionData[0][j];
-                    }
-                    for (var k = 0, kLen = intersectionData[1].length; k < kLen; ++k) {
-                        oComplementPaths[oComplementPaths.length] = intersectionData[1][k];
-                        rComplementPaths[rComplementPaths.length] = intersectionData[2][k];
-                    }
-                }
-                innerKey = iterateKeySet(key, note);
-            }
-            break;
-        }
-
-        // for simple keys, we don't need to branch out. looping over `depth`
-        // here instead of recursion, for performance
-        currentTree = currentTree[key];
-        oCurrentPath[oCurrentPath.length] = optimizedPath[depth];
-        rCurrentPath[rCurrentPath.length] = requestedPath[depth + depthDiff];
-
-        if (currentTree === undefined) {
-            // if dead-end, add this to complements
-            oComplementPaths[oComplementPaths.length] =
-                arrayConcat(oCurrentPath, arraySlice(optimizedPath, depth + 1));
-            rComplementPaths[rComplementPaths.length] =
-                arrayConcat(rCurrentPath, arraySlice(requestedPath, depth + depthDiff + 1));
-            break;
-        } else if (depth === optimizedPath.length - 1) {
-            // if reach end of optimized path successfully, add to intersections
-            intersections[intersections.length] = rCurrentPath;
-        }
-        // otherwise keep going
+    // Descend into the request path tree for the optimized-path prefix (when the optimized path is longer than the
+    // requested path)
+    for (i = 0; requestTree && i < -depthDiff; i++) {
+        requestTree = requestTree[optimizedPath[i]];
     }
 
-    // return accumulated intersection and complement pathsets
-    return [intersections, oComplementPaths, rComplementPaths];
+    // There is no matching path in the request path tree, thus no candidates for deduplication
+    if (!requestTree) {
+        return [[], [optimizedPath], [requestedPath]];
+    }
+
+    if (depthDiff === 0) {
+        return recurse(requestTree, 0, [], []);
+    } else if (depthDiff > 0) {
+        return recurse(requestTree, 0, arraySlice(requestedPath, 0, depthDiff), []);
+    } else {
+        return recurse(requestTree, -depthDiff, [], arraySlice(optimizedPath, 0, -depthDiff));
+    }
+
+    function recurse(currentTree, depth, rCurrentPath, oCurrentPath) {
+        var intersections = [];
+        var rComplementPaths = [];
+        var oComplementPaths = [];
+        var oPathLen = optimizedPath.length;
+
+        // Loop over the optimized path, looking for deduplication opportunities
+        for (; depth < oPathLen; ++depth) {
+            var key = optimizedPath[depth];
+            var keyType = typeof key;
+
+            if (key && keyType === "object") {
+                // If a range key is found, start an inner loop to iterate over all keys in the range, and add
+                // intersections and complements from each iteration separately.
+                //
+                // Range keys branch out this way, providing individual deduping opportunities for each inner key.
+                var note = {};
+                var innerKey = iterateKeySet(key, note);
+
+                while (!note.done) {
+                    var nextTree = currentTree[innerKey];
+                    if (nextTree === undefined) {
+                        // If no next sub tree exists for an inner key, it's a dead-end and we can add this to
+                        // complement paths
+                        oComplementPaths[oComplementPaths.length] = oCurrentPath.concat(
+                            innerKey,
+                            arraySlice(optimizedPath, depth + 1)
+                        );
+                        rComplementPaths[rComplementPaths.length] = rCurrentPath.concat(
+                            innerKey,
+                            arraySlice(requestedPath, depth + 1 + depthDiff)
+                        );
+                    } else if (depth === oPathLen - 1) {
+                        // Reaching the end of the optimized path means that we found the entire path in the path tree,
+                        // so add it to intersections
+                        intersections[intersections.length] = arrayConcat(rCurrentPath, [innerKey]);
+                    } else {
+                        // Otherwise keep trying to find further partial deduping opportunities in the remaining path
+                        var intersectionData = recurse(
+                            nextTree,
+                            depth + 1,
+                            arrayConcat(rCurrentPath, [innerKey]),
+                            arrayConcat(oCurrentPath, [innerKey])
+                        );
+
+                        intersections = arrayConcat(intersections, intersectionData[0]);
+                        oComplementPaths = arrayConcat(oComplementPaths, intersectionData[1]);
+                        rComplementPaths = arrayConcat(rComplementPaths, intersectionData[2]);
+                    }
+                    innerKey = iterateKeySet(key, note);
+                }
+
+                // The remainder of the path was handled by the recursive call, terminate the loop
+                break;
+            } else {
+                // For simple keys, we don't need to branch out. Loop over `depth` instead of iterating over a range.
+                currentTree = currentTree[key];
+                oCurrentPath[oCurrentPath.length] = optimizedPath[depth];
+                rCurrentPath[rCurrentPath.length] = requestedPath[depth + depthDiff];
+
+                if (currentTree === undefined) {
+                    // The path was not found in the tree, add this to complements
+                    oComplementPaths[oComplementPaths.length] = arrayConcat(
+                        oCurrentPath,
+                        arraySlice(optimizedPath, depth + 1)
+                    );
+                    rComplementPaths[rComplementPaths.length] = arrayConcat(
+                        rCurrentPath,
+                        arraySlice(requestedPath, depth + depthDiff + 1)
+                    );
+
+                    break;
+                } else if (depth === oPathLen - 1) {
+                    // The end of optimized path was reached, add to intersections
+                    intersections[intersections.length] = rCurrentPath;
+                }
+            }
+        }
+
+        // Return accumulated intersection and complement paths
+        return [intersections, oComplementPaths, rComplementPaths];
+    }
 }
 
+// Exported for unit testing.
+module.exports.__test = { findPartialIntersections: findPartialIntersections };
 
 },{"144":144,"75":75,"78":78}],48:[function(require,module,exports){
 var pathUtils = require(144);
@@ -3868,7 +3813,7 @@ ModelResponse.prototype.progressively = function progressively() {
 
 ModelResponse.prototype.subscribe =
 ModelResponse.prototype.forEach = function subscribe(a, b, c) {
-    var observer = new ModelResponseObserver(a,b,c);
+    var observer = new ModelResponseObserver(a, b, c);
     var subscription = this._subscribe(observer);
     switch (typeof subscription) {
         case "function":
@@ -4102,7 +4047,6 @@ var getWithPathsAsPathMap = gets.getWithPathsAsPathMap;
  * Return value (`results`) stores missing path information as 3 index-linked arrays:
  * `requestedMissingPaths` holds requested paths that were not found in cache
  * `optimizedMissingPaths` holds optimized versions of requested paths
- * `depthDifferences` holds the difference in length of requested and optimized paths
  *
  * Note that requestedMissingPaths is not necessarily the list of paths requested by
  * user in model.get. It does not contain those paths that were found in
@@ -4115,10 +4059,10 @@ var getWithPathsAsPathMap = gets.getWithPathsAsPathMap;
  * Example: Given cache: `{ lolomo: { 0: $ref('vid'), 1: $ref('a.b.c.d') }}`,
  * `model.get('lolomo[0..2].name').subscribe()` will result in the following
  * corresponding values:
- *    index   requestedMissingPaths   optimizedMissingPaths         depthDifferences
- *      0     ['lolomo', 0, 'name']   ['vid', 'name']                   1
- *      1     ['lolomo', 1, 'name']   ['a', 'b', 'c', 'd', 'name']     -2
- *      2     ['lolomo', 2, 'name']   ['lolomo', 2, 'name']             0
+ *    index   requestedMissingPaths   optimizedMissingPaths
+ *      0     ['lolomo', 0, 'name']   ['vid', 'name']
+ *      1     ['lolomo', 1, 'name']   ['a', 'b', 'c', 'd', 'name']
+ *      2     ['lolomo', 2, 'name']   ['lolomo', 2, 'name']
  *
  * @param {Model} model - The model that the request was made with.
  * @param {Array} requestedMissingPaths -
@@ -4164,11 +4108,7 @@ module.exports = function checkCacheAndReport(model, requestedPaths, observer,
     // 2.  The request if finished and the json key off
     // the valueNode has a value.
     if (progressive || ((progressive && results.hasValues || !progressive) && completed && valueNode !== undefined)) {
-        try {
-            observer.onNext(valueNode);
-        } catch (e) {
-            throw e;
-        }
+        observer.onNext(valueNode);
     }
 
     // We must communicate critical errors from get that are critical
@@ -4229,19 +4169,16 @@ module.exports = function getRequestCycle(getResponse, model, results, observer,
     var requestQueue = model._request;
     var requestedMissingPaths = results.requestedMissingPaths;
     var optimizedMissingPaths = results.optimizedMissingPaths;
-    var depthDifferences = results.depthDifferences;
     var disposable = new AssignableDisposable();
 
     // We need to prepend the bound path to all requested missing paths and
     // pass those into the requestQueue.
     var boundRequestedMissingPaths = [];
     var boundPath = model._path;
-    var boundPathLength = boundPath.length;
     if (boundPath.length) {
         for (var i = 0, len = requestedMissingPaths.length; i < len; ++i) {
             boundRequestedMissingPaths[i] =
                 fastCat(boundPath, requestedMissingPaths[i]);
-            depthDifferences[i] += boundPathLength;
         }
     }
 
@@ -4251,7 +4188,7 @@ module.exports = function getRequestCycle(getResponse, model, results, observer,
     }
 
     var currentRequestDisposable = requestQueue.
-        get(boundRequestedMissingPaths, optimizedMissingPaths, depthDifferences, function(err, data, hasInvalidatedResult) {
+        get(boundRequestedMissingPaths, optimizedMissingPaths, function(err, data, hasInvalidatedResult) {
             if (model._treatDataSourceErrorsAsJSONGraphErrors ? err instanceof InvalidSourceError : !!err) {
                 if (results.hasValues) {
                     observer.onNext(results.values && results.values[0]);
@@ -5612,7 +5549,7 @@ module.exports = function clone(value) {
         dest = isArray(value) ? [] : {};
         var src = value;
         for (var key in src) {
-            if (key.substr(0,2) === privatePrefix || !hasOwn(src, key)) {
+            if (key.substr(0, 2) === privatePrefix || !hasOwn(src, key)) {
                 continue;
             }
             dest[key] = src[key];
