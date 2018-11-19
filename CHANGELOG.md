@@ -1,3 +1,7 @@
+# 2.0.5
+## Bugs
+- [Fix request path deduplication](https://github.com/Netflix/falcor/pull/949)
+
 # 2.0.4
 ## Bugs
 - [Make Model#_clone return instance of current type](https://github.com/Netflix/falcor/pull/730)
