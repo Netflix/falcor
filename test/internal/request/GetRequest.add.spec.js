@@ -1,212 +1,209 @@
-var sinon = require('sinon');
-var expect = require('chai').expect;
-var GetRequest = require('./../../../lib/request/GetRequestV2');
-var ASAPScheduler = require('./../../../lib/schedulers/ASAPScheduler');
-var ImmediateScheduler = require('./../../../lib/schedulers/ImmediateScheduler');
-var Rx = require('rx');
-var Model = require('./../../../lib').Model;
-var LocalDataSource = require('./../../data/LocalDataSource');
-var cacheGenerator = require('./../../CacheGenerator');
-var strip = require('./../../cleanData').stripDerefAndVersionKeys;
-var noOp = function() {};
+const sinon = require("sinon");
+const expect = require("chai").expect;
+const after = require("lodash/after");
+const GetRequest = require("./../../../lib/request/GetRequestV2");
+const ImmediateScheduler = require("./../../../lib/schedulers/ImmediateScheduler");
+const Model = require("./../../../lib").Model;
+const LocalDataSource = require("./../../data/LocalDataSource");
+const cacheGenerator = require("./../../CacheGenerator");
+const strip = require("./../../cleanData").stripDerefAndVersionKeys;
+const toObservable = require("./../../toObs");
 
-var Cache = function() { return cacheGenerator(0, 2); };
-describe('#add', function() {
-    var videos0 = ['videos', 0, 'title'];
-    var videos1 = ['videos', 1, 'title'];
+const noOp = () => {};
 
-    it('should send a request and dedupe another.', function(done) {
-        var scheduler = new ImmediateScheduler();
-        var getSpy = sinon.spy();
-        var source = new LocalDataSource(Cache(), {
-            onGet: getSpy,
-            wait: 100
+describe("#add", () => {
+    const videos0 = ["videos", 0, "title"];
+    const videos1 = ["videos", 1, "title"];
+
+    it("should send a request and dedupe another", done => {
+        const scheduler = new ImmediateScheduler();
+        const onGet = sinon.spy();
+        const source = new LocalDataSource(cacheGenerator(0, 2), {
+            wait: 0,
+            onGet
         });
-        var model = new Model({source: source});
-        var request = new GetRequest(scheduler, {
-            removeRequest: function() { },
-            model: model
+        const model = new Model({ source });
+        const request = new GetRequest(scheduler, {
+            removeRequest: noOp,
+            model
         });
 
-        var zip = zipSpy(2, function() {
-            var onNext = sinon.spy();
-            toObservable(model.
-                withoutDataSource().
-                get(videos0, videos1)).
-                doAction(onNext, noOp, function() {
-                    expect(getSpy.calledOnce).to.be.ok;
-                    expect(getSpy.getCall(0).args[1]).to.deep.equals([videos0]);
-                    expect(onNext.calledOnce).to.be.ok;
-                    expect(strip(onNext.getCall(0).args[0])).to.deep.equals({
-                        json: {
-                            videos: {
-                                0: {
-                                    title: 'Video 0',
-                                }
+        let results;
+        const partDone = after(2, () => {
+            const onNext = sinon.spy();
+            toObservable(model.withoutDataSource().get(videos0, videos1)).subscribe(onNext, done, () => {
+                expect(onGet.calledOnce, "DataSource get should only be called once").to.equal(true);
+                expect(onGet.getCall(0).args[1]).to.deep.equal([videos0]);
+                expect(onNext.calledOnce, "onNext should only be called once").to.equal(true);
+                expect(strip(onNext.getCall(0).args[0])).to.deep.equal({
+                    json: {
+                        videos: {
+                            0: {
+                                title: "Video 0"
                             }
                         }
-                    });
+                    }
+                });
 
-                    expect(results[0]).to.be.ok;
-                    expect(results[1]).to.deep.equals([videos1]);
-                    expect(results[2]).to.deep.equals([videos1]);
-                }).
-                subscribe(noOp, done, done);
+                expect(results[0], "paths should be inserted").to.equal(true);
+                expect(results[1]).to.deep.equal([videos1]);
+                expect(results[2]).to.deep.equal([videos1]);
+
+                done();
+            });
         });
 
-        var disposable1 = request.batch([videos0], [videos0], zip);
-        expect(request.sent, 'request should be sent').to.be.ok;
+        request.batch([videos0], [videos0], partDone);
+        expect(request.sent, "request should be sent").to.equal(true);
 
-        var results = request.add([videos0, videos1], [videos0, videos1], [0, 0], zip);
+        results = request.add([videos0, videos1], [videos0, videos1], partDone);
     });
 
-    it('should send a request and dedupe another when dedupe is in second position.', function(done) {
-        var scheduler = new ImmediateScheduler();
-        var getSpy = sinon.spy();
-        var source = new LocalDataSource(Cache(), {
-            onGet: getSpy,
-            wait: 100
+    it("should send a request and dedupe another when dedupe is in second position", done => {
+        const scheduler = new ImmediateScheduler();
+        const onGet = sinon.spy();
+        const source = new LocalDataSource(cacheGenerator(0, 2), {
+            wait: 0,
+            onGet
         });
-        var model = new Model({source: source});
-        var request = new GetRequest(scheduler, {
-            removeRequest: function() { },
-            model: model
+        const model = new Model({ source });
+        const request = new GetRequest(scheduler, {
+            removeRequest: noOp,
+            model
         });
 
-        var zip = zipSpy(2, function() {
-            var onNext = sinon.spy();
-            toObservable(model.
-                withoutDataSource().
-                get(videos0, videos1)).
-                doAction(onNext, noOp, function() {
-                    expect(getSpy.calledOnce).to.be.ok;
-                    expect(getSpy.getCall(0).args[1]).to.deep.equals([videos0]);
-                    expect(onNext.calledOnce).to.be.ok;
-                    expect(strip(onNext.getCall(0).args[0])).to.deep.equals({
-                        json: {
-                            videos: {
-                                0: {
-                                    title: 'Video 0',
-                                }
+        let results;
+        const partDone = after(2, () => {
+            const onNext = sinon.spy();
+            toObservable(model.withoutDataSource().get(videos0, videos1)).subscribe(onNext, done, () => {
+                expect(onGet.calledOnce, "DataSource get should only be called once").to.equal(true);
+                expect(onGet.getCall(0).args[1]).to.deep.equal([videos0]);
+                expect(onNext.calledOnce, "onNext should only be called once").to.equal(true);
+                expect(strip(onNext.getCall(0).args[0])).to.deep.equal({
+                    json: {
+                        videos: {
+                            0: {
+                                title: "Video 0"
                             }
                         }
-                    });
+                    }
+                });
 
-                    expect(results[0]).to.be.ok;
-                    expect(results[1], 'the requested complement should be 553').to.deep.equals([videos1]);
-                    expect(results[2], 'the optimized complement should be 553').to.deep.equals([videos1]);
-                }).
-                subscribe(noOp, done, done);
+                expect(results[0], "paths should be inserted").to.equal(true);
+                expect(results[1]).to.deep.equal([videos1]);
+                expect(results[2]).to.deep.equal([videos1]);
+
+                done();
+            });
         });
 
-        var disposable1 = request.batch([videos0], [videos0], zip);
-        expect(request.sent, 'request should be sent').to.be.ok;
+        request.batch([videos0], [videos0], partDone);
+        expect(request.sent, "request should be sent").to.equal(true);
 
-        var results = request.add([videos1, videos0], [videos1, videos0], [0, 0], zip);
+        results = request.add([videos1, videos0], [videos1, videos0], partDone);
     });
 
-
-    it('should send a request and dedupe another and dispose of original.', function(done) {
-        var scheduler = new ImmediateScheduler();
-        var getSpy = sinon.spy();
-        var source = new LocalDataSource(Cache(), {
-            onGet: getSpy,
-            wait: 100
+    it("should send a request and dedupe another and dispose of original", done => {
+        const scheduler = new ImmediateScheduler();
+        const onGet = sinon.spy();
+        const source = new LocalDataSource(cacheGenerator(0, 2), {
+            wait: 0,
+            onGet
         });
-        var model = new Model({source: source});
-        var request = new GetRequest(scheduler, {
-            removeRequest: function() { },
-            model: model
+        const model = new Model({ source });
+        const request = new GetRequest(scheduler, {
+            removeRequest: noOp,
+            model
         });
 
-        var zip = zipSpy(2, function() {
-            var onNext = sinon.spy();
-            toObservable(model.
-                withoutDataSource().
-                get(videos0, videos1)).
-                doAction(onNext, noOp, function() {
-                    expect(getSpy.calledOnce, 'dataSource get').to.be.ok;
-                    expect(getSpy.getCall(0).args[1]).to.deep.equals([videos0]);
-                    expect(onNext.calledOnce, 'onNext get').to.be.ok;
-                    expect(strip(onNext.getCall(0).args[0])).to.deep.equals({
-                        json: {
-                            videos: {
-                                0: {
-                                    title: 'Video 0',
-                                }
+        let results;
+        const partDone = after(2, () => {
+            const onNext = sinon.spy();
+            toObservable(model.withoutDataSource().get(videos0, videos1)).subscribe(onNext, done, () => {
+                expect(onGet.calledOnce, "DataSource get should only be called once").to.equal(true);
+                expect(onGet.getCall(0).args[1]).to.deep.equal([videos0]);
+                expect(onNext.calledOnce, "onNext should only be called once").to.equal(true);
+                expect(strip(onNext.getCall(0).args[0])).to.deep.equal({
+                    json: {
+                        videos: {
+                            0: {
+                                title: "Video 0"
                             }
                         }
-                    });
+                    }
+                });
 
-                    expect(results[0]).to.be.ok;
-                    expect(results[1]).to.deep.equals([videos1]);
-                    expect(results[2]).to.deep.equals([videos1]);
-                }).
-                subscribe(noOp, done, done);
+                expect(results[0], "paths should be inserted").to.equal(true);
+                expect(results[1]).to.deep.equal([videos1]);
+                expect(results[2]).to.deep.equal([videos1]);
+
+                done();
+            });
         });
-        var disposable1 = request.batch([videos0], [videos0], zip);
-        expect(request.sent, 'request should be sent').to.be.ok;
 
-        var results = request.add([videos0, videos1], [videos0, videos1], [0, 0], zip);
-        zip();
+        const disposable = request.batch([videos0], [videos0], () =>
+            done(new Error("Request should have been cancelled"))
+        );
+        expect(request.sent, "request should be sent").to.equal(true);
+
+        results = request.add([videos0, videos1], [videos0, videos1], partDone);
+
+        // Cancel initial request
+        disposable();
+
+        partDone();
     });
 
-    it('should send a request and dedupe another and dispose of deduped.', function(done) {
-        var scheduler = new ImmediateScheduler();
-        var getSpy = sinon.spy();
-        var source = new LocalDataSource(Cache(), {
-            onGet: getSpy,
-            wait: 100
+    it("should send a request and dedupe another and dispose of deduped", done => {
+        const scheduler = new ImmediateScheduler();
+        const onGet = sinon.spy();
+        const source = new LocalDataSource(cacheGenerator(0, 2), {
+            wait: 0,
+            onGet
         });
-        var model = new Model({source: source});
-        var request = new GetRequest(scheduler, {
-            removeRequest: function() { },
-            model: model
+        const model = new Model({ source });
+        const request = new GetRequest(scheduler, {
+            removeRequest: noOp,
+            model
         });
 
-
-        var zip = zipSpy(2, function() {
-            var onNext = sinon.spy();
-            toObservable(model.
-                withoutDataSource().
-                get(videos0, videos1)).
-                doAction(onNext, noOp, function() {
-                    expect(getSpy.calledOnce, 'dataSource get').to.be.ok;
-                    expect(getSpy.getCall(0).args[1]).to.deep.equals([videos0]);
-                    expect(onNext.calledOnce, 'onNext get').to.be.ok;
-                    expect(strip(onNext.getCall(0).args[0])).to.deep.equals({
-                        json: {
-                            videos: {
-                                0: {
-                                    title: 'Video 0',
-                                }
+        let results;
+        const partDone = after(2, () => {
+            const onNext = sinon.spy();
+            toObservable(model.withoutDataSource().get(videos0, videos1)).subscribe(onNext, done, () => {
+                expect(onGet.calledOnce, "DataSource get should only be called once").to.equal(true);
+                expect(onGet.getCall(0).args[1]).to.deep.equal([videos0]);
+                expect(onNext.calledOnce, "onNext should only be called once").to.equal(true);
+                expect(strip(onNext.getCall(0).args[0])).to.deep.equal({
+                    json: {
+                        videos: {
+                            0: {
+                                title: "Video 0"
                             }
                         }
-                    });
+                    }
+                });
 
-                    expect(results[0]).to.be.ok;
-                    expect(results[1]).to.deep.equals([videos1]);
-                    expect(results[2]).to.deep.equals([videos1]);
-                }).
-                subscribe(noOp, done, done);
+                expect(results[0], "paths should be inserted").to.equal(true);
+                expect(results[1]).to.deep.equal([videos1]);
+                expect(results[2]).to.deep.equal([videos1]);
+
+                done();
+            });
         });
-        var disposable1 = request.batch([videos0], [videos0], zip);
-        expect(request.sent, 'request should be sent').to.be.ok;
 
-        var results = request.add([videos0, videos1], [videos0, videos1], [0, 0], zip);
+        request.batch([videos0], [videos0], partDone);
+        expect(request.sent, "request should be sent").to.equal(true);
+        results = request.add([videos0, videos1], [videos0, videos1], () =>
+            done(new Error("Request should have been cancelled"))
+        );
+
+        // Cancel added request
         results[3]();
-        zip();
-    });
 
+        partDone();
+    });
 
     // Tests for partial deduping (https://github.com/Netflix/falcor/issues/779)
-    // are in test/integration/get.spec.js
+    // are in test/integration/dedupe.spec.js
 });
-function zipSpy(count, cb) {
-    return sinon.spy(function() {
-        --count;
-        if (count === 0) {
-            cb();
-        }
-    });
-}

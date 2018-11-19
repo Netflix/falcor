@@ -6,7 +6,7 @@
     },
     "rules": {
         // possible errors
-        "comma-dangle": [ 2 ],
+        "comma-dangle": [ 2, "only-multiline" ],
         "no-console": [ 2 ],
         "no-constant-condition": [ 2 ],
         "no-control-regex": [ 2 ],
@@ -39,7 +39,6 @@
 
         // best practices
         "block-scoped-var": [ 2 ],
-        // warning for now until we get them fixed
         "consistent-return": [ 2 ],
         "curly": [ 2 ],
         "default-case": [ 2 ],
@@ -62,7 +61,7 @@
         "no-loop-func": [ 2 ],
         "no-multi-spaces": [ 2 ],
         "no-native-reassign": [ 2 ],
-        "no-new": [ 0 ],
+        "no-new": [ 2 ],
         "no-new-func": [ 2 ],
         "no-new-wrappers": [ 2 ],
         "no-octal": [ 2 ],
@@ -111,9 +110,15 @@
         "generator-star-spacing": [ 2, "after" ],
 
         // stylistic
+        "block-spacing": [ "error", "always" ],
+        // lotsa Stroustrup for else-blocks
+        // "brace-style": [ "error", "1tbs", { "allowSingleLine": true } ],
+        "comma-spacing": [ "error" ],
+        "comma-style": [ "error" ],
+        "quote-props": [ "error", "as-needed" ],
         "camelcase": [ 1, { "properties": "always" } ],
         "eol-last": [ 2 ],
-        "key-spacing": [ 0 ],
+        "key-spacing": [ 2 ],
         "keyword-spacing": [ 2 ],
         "no-lonely-if": [ 2 ],
         "no-array-constructor": [ 2 ],
