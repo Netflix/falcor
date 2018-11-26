@@ -59,7 +59,7 @@ describe('Error cases', function() {
         return done(new Error('should of thrown an error.'));
     });
 
-    it('should throw InvalidModelError on an invalidated deref path.', function() {
+    it('should throw InvalidModelError on an invalidated deref path.', function(done) {
         var model = new Model({cache: {titlesById: {32: {name: "House of Cards"}}}});
         return model.get(["titlesById", 32, "name"]).
             then(function(response) {
@@ -69,6 +69,7 @@ describe('Error cases', function() {
                     then(assert.fail).
                     catch(function(err) {
                         expect(err.message).to.equals(InvalidModelError.message);
+                        done();
                     });
             });
     });
