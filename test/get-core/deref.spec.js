@@ -80,8 +80,12 @@ describe('Deref', function() {
         })._derefSync(['videos', 0]);
 
         var res = model._getPathValuesAsJSONG(model, [['summary']], [{}]);
-        expect(res.criticalError.name).to.equals(BoundJSONGraphModelError.name);
-        expect(res.criticalError.message).to.equals(BoundJSONGraphModelError.message);
+        expect(res.criticalError.name).to.equals("BoundJSONGraphModelError");
+        expect(res.criticalError.message).to.equals(
+            "It is not legal to use the JSON Graph " +
+            "format from a bound Model. JSON Graph format" +
+            " can only be used from a root model."
+        );
     });
 
     it('should ensure that correct parents are produced for non-paths.', function(done) {

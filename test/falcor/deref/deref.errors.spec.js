@@ -35,7 +35,7 @@ describe('Error cases', function() {
                     get([0, 0, 'item', 'title'])).
                     doAction(onNext, function(err) {
                         expect(onNext.callCount).to.equal(1);
-                        expect(err.message).to.equals(InvalidModelError.message);
+                        expect(err.name).to.equals(InvalidModelError.name);
                     }).
                     subscribe(
                         noOp,
@@ -56,7 +56,7 @@ describe('Error cases', function() {
             expect(e.name).to.equals(InvalidDerefInputError.name);
             return done();
         }
-        return done(new Error('should of thrown an error.'));
+        return done(new Error('should have thrown an error.'));
     });
 
     it('should throw InvalidModelError on an invalidated deref path.', function(done) {
@@ -74,7 +74,7 @@ describe('Error cases', function() {
             });
     });
 
-    it.skip('should not error on an invalidated deref path set.', function() {
+    it.skip('should not error on an invalidated deref path set.', function(done) {
         var model = new Model({cache: {titlesById: {32: {name: "House of Cards"}}}});
         return model.get(["titlesById", 32, "name"]).
             then(function(response) {
@@ -83,6 +83,7 @@ describe('Error cases', function() {
                 return titleModel.set({json: {name: "Something Else"}}).
                     then(function(derefedResponse) {
                         expect(response.json.name).to.be("Something Else");
+                        done();
                     });
             });
     });

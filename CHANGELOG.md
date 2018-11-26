@@ -1,25 +1,27 @@
-2.0.3
-------------------
+# 2.0.5
+## Bugs
+- [Fix request path deduplication](https://github.com/Netflix/falcor/pull/949)
 
+# 2.0.4
+## Bugs
+- [Make Model#_clone return instance of current type](https://github.com/Netflix/falcor/pull/730)
+- [Fix error stack traces](https://github.com/Netflix/falcor/pull/941)
+- [Fix handling of outerResults as an optional argument](https://github.com/Netflix/falcor/pull/947)
+
+# 2.0.3
 ## Bugs
 - [Fix model._setValueSync() internal API to set path bound values in cache](https://github.com/Netflix/falcor/pull/933)
 
-2.0.2
-------------------
-
+# 2.0.2
 ## Bugs
 - [Fix model.get() dispose to cancel asynchronous DataSource request](https://github.com/Netflix/falcor/pull/933)
 - [Fix model.batch() losing maxRetries config](https://github.com/Netflix/falcor/pull/932)
 
-2.0.1
-------------------
-
+# 2.0.1
 ## Bugs
 - [Fix build issues by replacing asap with falcor-asap](https://github.com/Netflix/falcor/pull/928)
 
-2.0.0
-------------------
-
+# 2.0.0
 ## Features
 - [Dedupe requests partially with existing requests](https://github.com/Netflix/falcor/pull/897)
 - [Add missing paths information when raising
@@ -30,17 +32,13 @@
 - [Protect against model.invalidate from destroying cache](https://github.com/Netflix/falcor/pull/903)
 - [Fix retry count logic](https://github.com/Netflix/falcor/pull/904)
 
-1.1.0
--------------------
-
+# 1.1.0
 ## Bugs
 - [Fix maxRetries on clone](https://github.com/Netflix/falcor/pull/917)
 - [Disables whole-branch response merging](https://github.com/Netflix/falcor/pull/920)
 - [Fix model.set claiming objects passed as argument](https://github.com/Netflix/falcor/pull/920)
 
-1.0.0
--------------------
-
+# 1.0.0
 ## Features
 - [Allow errorSelector to change $type](https://github.com/Netflix/falcor/issues/828)
 - [Falcor.keys](https://github.com/Netflix/falcor/issues/708)
@@ -66,9 +64,7 @@
 - [New deref doesn't work when deref'ing to a reference.](https://github.com/Netflix/falcor/issues/559)
 - [New deref from an already deref'd model doesn't include the parent model's path.](https://github.com/Netflix/falcor/issues/560)
 
-0.1.15
--------------------
-
+# 0.1.15
 ## Bugs
 - [Fix deref completing without onNext'ing if preload paths fail](https://github.com/Netflix/falcor/pull/667)
 - [Fix deref handling for paths that return an $atom of undefined](https://github.com/Netflix/falcor/pull/663)

@@ -60,7 +60,7 @@ RequestQueueV2.prototype = {
      * @param {Array} optimizedPaths -
      * @param {Function} cb -
      */
-    get: function(requestedPaths, optimizedPaths, depthDifferences, cb) {
+    get: function(requestedPaths, optimizedPaths, cb) {
         var self = this;
         var disposables = [];
         var count = 0;
@@ -80,8 +80,7 @@ RequestQueueV2.prototype = {
             // The request has been sent, attempt to jump on the request
             // if possible.
             if (request.sent) {
-                var results = request.add(
-                    rRemainingPaths, oRemainingPaths, depthDifferences, refCountCallback);
+                var results = request.add(rRemainingPaths, oRemainingPaths, refCountCallback);
 
                 // Checks to see if the results were successfully inserted
                 // into the outgoing results.  Then our paths will be reduced
@@ -96,8 +95,7 @@ RequestQueueV2.prototype = {
 
             // If there is a non sent request, then we can batch and leave.
             else {
-                request.batch(
-                    rRemainingPaths, oRemainingPaths, refCountCallback);
+                request.batch(rRemainingPaths, oRemainingPaths, refCountCallback);
                 oRemainingPaths = [];
                 rRemainingPaths = [];
                 ++count;
@@ -115,8 +113,7 @@ RequestQueueV2.prototype = {
             request = new GetRequest(self.scheduler, self);
             requests[requests.length] = request;
             ++count;
-            var disposable = request.batch(
-                rRemainingPaths, oRemainingPaths, refCountCallback);
+            var disposable = request.batch(rRemainingPaths, oRemainingPaths, refCountCallback);
             disposables[disposables.length] = disposable;
         }
 

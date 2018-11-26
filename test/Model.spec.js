@@ -418,6 +418,18 @@ describe("Model", function() {
         done();
     });
 
+    it('cloned instance should retain custom type', function() {
+        function MyModel() {
+            Model.call(this);
+        }
+        MyModel.prototype = new Model();
+        MyModel.prototype.constructor = MyModel;
+        var model = new MyModel();
+        expect(model).to.be.instanceof(MyModel);
+        var clonedModel = model.batch(100);
+        expect(clonedModel).to.be.instanceof(MyModel);
+    });
+
     describe('JSON-Graph Specification', function() {
         require('./get-core');
 
