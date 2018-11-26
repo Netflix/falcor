@@ -41,9 +41,10 @@ describe('Error cases', function() {
                         noOp,
                         function(err) {
                             if (isAssertionError(err)) {
-                                return done(err);
+                                done(err);
+                            } else {
+                                done();
                             }
-                            return done();
                         },
                         done.bind(null, new Error('onCompleted shouldnt be called')));
             });
@@ -52,11 +53,11 @@ describe('Error cases', function() {
     it('should throw on invalid input.', function(done) {
         try {
             new Model().deref('testing');
+            done(new Error('should have thrown an error.'));
         } catch (e) {
             expect(e.name).to.equals(InvalidDerefInputError.name);
-            return done();
+            done();
         }
-        return done(new Error('should have thrown an error.'));
     });
 
     it('should throw InvalidModelError on an invalidated deref path.', function(done) {
