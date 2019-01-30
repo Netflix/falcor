@@ -15,7 +15,7 @@ Your application can use [Data Sources](http://netflix.github.io/falcor/document
 1. Application views typically navigate information hierarchically in JSON format, and [Data Sources](http://netflix.github.io/falcor/documentation/datasources.html) return data in [JSON Graph](http://netflix.github.io/falcor/documentation/jsongraph.html) format.
 2. Views need to be responsive to user input, but retrieving data from a [Data Source](http://netflix.github.io/falcor/documentation/datasources.html) may introduce considerable latency if the [Data Source](http://netflix.github.io/falcor/documentation/datasources.html) accesses the network.
 3. In response to user navigation (ex. scrolling through a list), views may need to repeatedly access small quantities of fine-grained data in rapid succession. [Data Sources](http://netflix.github.io/falcor/documentation/datasources.html) typically access the network, therefore fine-grained requests are often inefficient because of the overhead required to issue a request.
-4. Navigating information hierarchically rather than retrieving information using id's can lead to inefficent back-end requests.
+4. Navigating information hierarchically rather than retrieving information using id's can lead to inefficient back-end requests.
 
 For these reasons, views retrieve their data from Model objects, which act as intermediaries between the view and the [Data Source](http://netflix.github.io/falcor/documentation/datasources.html). Models abstract over [Data Sources](http://netflix.github.io/falcor/documentation/datasources.html) and provide several important services:
 
