@@ -8,6 +8,7 @@ var Router = require('falcor-router');
 var strip = require('./../cleanData').stripDerefAndVersionKeys;
 var MaxRetryExceededError = require('../../lib/errors/MaxRetryExceededError');
 var noOp = function() {};
+var toObservable = require('../toObs');
 
 describe('Get Integration Tests', function() {
     var app, server, serverUrl, model, onNext;

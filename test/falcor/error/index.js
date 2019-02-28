@@ -10,6 +10,7 @@ var noOp = function() {};
 var InvalidSourceError = require('../../../lib/errors/InvalidSourceError');
 var errorOnCompleted = require('./../../errorOnCompleted');
 var doneOnError = require('./../../doneOnError');
+var toObservable = require('../../toObs');
 
 describe("Error", function() {
     it("should get a hard error from the DataSource with _treatDataSourceErrorsAsJSONGraphErrors.", function(done) {

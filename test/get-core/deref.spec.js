@@ -8,6 +8,7 @@ var error = jsonGraph.error;
 var expect = require('chai').expect;
 var Model = require('./../../lib').Model;
 var BoundJSONGraphModelError = require('./../../lib/errors/BoundJSONGraphModelError');
+var toObservable = require('../toObs');
 var sinon = require('sinon');
 var noOp = function() {};
 

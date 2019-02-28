@@ -9,6 +9,7 @@ var sinon = require('sinon');
 var clean = require('./../../cleanData').stripDerefAndVersionKeys;
 var cacheGenerator = require('./../../CacheGenerator');
 var atom = Model.atom;
+var toObservable = require('../../toObs');
 
 describe('Cache as DataSource', function() {
     it('should return the correct empty envelope.', function(done) {

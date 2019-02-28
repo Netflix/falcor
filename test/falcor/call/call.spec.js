@@ -8,6 +8,7 @@ var expect = chai.expect;
 var noOp = function() {};
 var ModelResponse = require("./../../../lib/response/ModelResponse");
 var Rx5 = require("rxjs");
+var toObservable = require('../../toObs');
 
 /**
  * @param newModel

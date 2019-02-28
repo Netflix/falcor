@@ -4,6 +4,7 @@ var noOp = function() {};
 var falcor = require('./../../lib');
 var Model = falcor.Model;
 var strip = require("./../cleanData").stripDerefAndVersionKeys;
+var toObservable = require('../toObs');
 
 module.exports = function() {
     require("./pathMaps");

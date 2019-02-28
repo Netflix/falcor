@@ -9,6 +9,7 @@ var noOp = function() {};
 var sinon = require('sinon');
 var cacheGenerator = require('./../../CacheGenerator');
 var strip = require('./../../cleanData').stripDerefAndVersionKeys;
+var toObservable = require('../../toObs');
 var jsonGraph = require('falcor-json-graph');
 var ref = jsonGraph.ref;
 var atom = jsonGraph.atom;

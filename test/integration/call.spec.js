@@ -6,6 +6,7 @@ var chai = require('chai');
 var expect = chai.expect;
 var sinon = require('sinon');
 var strip = require('./../cleanData').stripDerefAndVersionKeys;
+var toObservable = require('../toObs');
 var $ref = falcor.Model.ref;
 
 describe('call', function() {

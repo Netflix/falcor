@@ -8,6 +8,7 @@ var isPathValue = require("./../../../lib/support/isPathValue");
 var sinon = require('sinon');
 var expect = require('chai').expect;
 var strip = require('../../cleanData').stripDerefAndVersionKeys;
+var toObservable = require('../../toObs');
 
 function Cache() { return cacheGenerator(0, 2); }
 function M() { return cacheGenerator(0, 1); }

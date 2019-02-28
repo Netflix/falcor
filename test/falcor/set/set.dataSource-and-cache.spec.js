@@ -16,6 +16,7 @@ var $error = require('./../../../lib/types/error');
 var expect = require('chai').expect;
 var sinon = require('sinon');
 var strip = require('./../../cleanData').stripDerefAndVersionKeys;
+var toObservable = require('../../toObs');
 
 describe('DataSource and Cache', function() {
     xit('should accept jsongraph without paths from the datasource', function(done) {

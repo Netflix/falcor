@@ -15,6 +15,7 @@ var ErrorDataSource = require('../../data/ErrorDataSource');
 var $error = require('./../../../lib/types/error');
 var expect = require('chai').expect;
 var strip = require('./../../cleanData').stripDerefAndVersionKeys;
+var toObservable = require('../../toObs');
 
 describe('Cache as DataSource and Cache', function() {
     describe('Seeds', function() {

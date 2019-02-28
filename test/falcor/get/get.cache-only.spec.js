@@ -8,6 +8,7 @@ var Observable = Rx.Observable;
 var sinon = require('sinon');
 var expect = require('chai').expect;
 var clean = require('./../../cleanData').stripDerefAndVersionKeys;
+var toObservable = require('../../toObs');
 
 describe('Cache Only', function() {
     describe('PathMap', function() {

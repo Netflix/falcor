@@ -10,6 +10,7 @@ var expect = require('chai').expect;
 var sinon = require('sinon');
 var noOp = function() {};
 var strip = require('./../cleanData').stripDerefAndVersionKeys;
+var toObservable = require('../toObs');
 
 describe('Express Integration', function() {
     var server;

@@ -1,6 +1,7 @@
 var falcor = require('./../../../lib/');
 var Model = falcor.Model;
 var expect = require('chai').expect;
+var toObservable = require('../../toObs');
 
 describe("root onChange handler", function () {
     it("is called when the root's version changes but before the subscription is disposed.", function () {

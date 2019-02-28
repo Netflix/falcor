@@ -10,6 +10,8 @@ var zipSpy = require('./../../zipSpy');
 
 var cacheGenerator = require('./../../CacheGenerator');
 var strip = require('./../../cleanData').stripDerefAndVersionKeys;
+var toObservable = require('../../toObs');
+
 var Cache = function() { return cacheGenerator(0, 2); };
 
 describe('#get', function() {

@@ -8,6 +8,7 @@ var cacheGenerator = require('./../../CacheGenerator');
 var noOp = function() {};
 var isAssertionError = require('./../../isAssertionError');
 var clean = require("../../cleanData").clean;
+var toObservable = require('../../toObs');
 
 describe('Error cases', function() {
     it('should error on a shorted deref path.', function(done) {

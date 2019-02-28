@@ -8,6 +8,7 @@ var Cache = require('./../../data/Cache');
 var strip = require('./../../cleanData').stripDerefAndVersionKeys;
 var MaxRetryExceededError = require('./../../../lib/errors/MaxRetryExceededError');
 var isAssertionError = require('./../../isAssertionError');
+var toObservable = require('../../toObs');
 
 describe('DataSource.', function() {
     it('should validate args are sent to the dataSource collapsed.', function(done) {

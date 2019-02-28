@@ -6,6 +6,8 @@ var sinon = require('sinon');
 var expect = require('chai').expect;
 var cacheGenerator = require('./../../CacheGenerator');
 var strip = require('./../../cleanData').stripDerefAndVersionKeys;
+var toObservable = require('../../toObs');
+
 function Cache() {
     return cacheGenerator(0, 50);
 }

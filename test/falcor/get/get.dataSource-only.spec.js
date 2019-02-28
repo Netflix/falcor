@@ -13,7 +13,7 @@ var atom = require('falcor-json-graph').atom;
 var MaxRetryExceededError = require('./../../../lib/errors/MaxRetryExceededError');
 var strip = require('./../../cleanData').stripDerefAndVersionKeys;
 var isAssertionError = require('./../../isAssertionError');
-
+var toObservable = require('../../toObs');
 
 describe('DataSource Only', function() {
     var dataSource;
