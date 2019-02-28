@@ -41,10 +41,10 @@
   "devDependencies": {
     "benchmark": "^2.1.4",
     "body-parser": "^1.13.3",
-    "browserify": "^14.4.0",
+    "browserify": "^16.2.3",
     "bundle-collapser": "^1.2.1",
     "chai": "^4.1.2",
-    "coveralls": "^2.11.2",
+    "coveralls": "^3.0.3",
     "csv-parse": "^1.2.2",
     "del": "^3.0.0",
     "express": "^4.16.3",
@@ -62,13 +62,13 @@
     "gulp-shell": "^0.6.5",
     "gulp-uglify": "^1.2.0",
     "jsdoc": "^3.3.0-beta3",
-    "karma": "^1.7.1",
-    "karma-benchmark": "^0.7.1",
+    "karma": "^4.0.0",
+    "karma-benchmark": "^1.0.1",
     "karma-chrome-launcher": "^2.2.0",
     "karma-firefox-launcher": "^1.0.1",
     "karma-junit-reporter": "^1.2.0",
     "karma-safari-launcher": "^1.0.0",
-    "lodash": "^4.17.5",
+    "lodash": "^4.17.11",
     "minimist": "^1.1.0",
     "mkdirp": "^0.5.1",
     "mocha": "^4.0.1",
@@ -84,7 +84,7 @@
     "falcor-asap": "2.0.6",
     "falcor-json-graph": "1.1.7",
     "falcor-path-syntax": "0.2.4",
-    "falcor-path-utils": "0.5.1",
+    "falcor-path-utils": "0.7.2",
     "symbol-observable": "^1.2.0"
   }
 }
