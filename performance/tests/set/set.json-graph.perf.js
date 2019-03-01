@@ -15,7 +15,7 @@ module.exports = function setJSONGraphTests(out, count) {
     out = out || {};
 
     for (var i = 0; i < count; ++i) {
-        out['set.merge row' + i] = insertJSONGraphRow;
+        out['set.merge.row' + i] = insertJSONGraphRow;
     }
 
     return out;
