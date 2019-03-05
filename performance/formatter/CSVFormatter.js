@@ -31,7 +31,7 @@ var resultsToTable = function(results) {
         }
     }
 
-    return csvTransform(table.join('\n'));
+    return table.join('\n');
 };
 
 module.exports = {

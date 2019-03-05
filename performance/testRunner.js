@@ -1,10 +1,8 @@
 var Benchmark = require('benchmark');
-var CSVFormatter = require('./formatter/CSVFormatter');
 
 var KARMA = global.__karma__;
 
 function createSuite(testCfg, log, gc) {
-
     var tests = testCfg.tests;
     var testName;
     var suite;
@@ -18,12 +16,11 @@ function createSuite(testCfg, log, gc) {
     };
 
     if (KARMA) {
-        suite = global.suite(suiteName, function() {});
+        suite = global.suite(suiteName, function() {}, {onCycle: gcRunner});
     } else {
         suite = Benchmark.Suite(suiteName);
+        suite.on('cycle', gcRunner);
     }
-
-    suite.on('cycle', gcRunner);
 
     for (testName in tests) {
         if (KARMA) {

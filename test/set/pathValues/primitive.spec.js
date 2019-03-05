@@ -6,6 +6,7 @@ var $pathValue = require("falcor-json-graph").pathValue;
 var expect = require('chai').expect;
 var getModel = require("../support/getModel");
 var setPathValues = require("../../../lib/set/setPathValues");
+var NullInPathError = require('../../../lib/errors/NullInPathError');
 
 describe("a primitive value", function() {
 
@@ -22,10 +23,10 @@ describe("a primitive value", function() {
                 $pathValue(["movies", null, "pulp-fiction", "title"], "Pulp Fiction")
             ]);
         } catch(e) {
-            expect(e.message).to.equal("`null` is not allowed in branch key positions.");
+            errored = true;
+            expect(e).instanceOf(NullInPathError);
         }
 
-        errored = true;
         expect(errored).to.be.true;
     });
 

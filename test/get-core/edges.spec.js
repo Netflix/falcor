@@ -19,7 +19,9 @@ describe('Edges', function() {
                     videos: {}
                 }
             },
-            cache: cacheGenerator(0, 1)
+            cache: cacheGenerator(0, 1),
+            requestedMissingPaths: [],
+            optimizedMissingPaths: []
         });
     });
     it('should report an atom of undefined in non-progressive mode.', function() {

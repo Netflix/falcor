@@ -8,7 +8,6 @@ module.exports = function(config) {
 
     plugins: [
         'karma-benchmark',
-        'karma-junit-reporter',
         'karma-chrome-launcher',
         'karma-firefox-launcher',
         'karma-safari-launcher',
@@ -27,7 +26,6 @@ module.exports = function(config) {
     // CLI --reporters progress
     reporters: [
         'benchmarkcsv',
-        'junit'
     ],
 
     // list of files / patterns to load in the browser
