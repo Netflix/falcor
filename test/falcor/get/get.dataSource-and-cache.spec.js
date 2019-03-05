@@ -133,25 +133,18 @@ describe('DataSource and Partial Cache', function() {
         it('should ensure empty paths do not cause dataSource requests {from:1, to:0}', function(done) {
             var onGet = sinon.spy();
             var model = new Model({
-                cache: {
-                    a: Model.ref(['c']),
-                    c: {
-                        0: Model.atom('hello')
-                    }
-                },
-                source: {
-                    get: onGet
-                }
+                cache: { b: {} },
+                source: new LocalDataSource({}, { onGet: onGet })
             });
 
-            var modelGet = model.get(['b', {to:0, from:1}]);
+            var modelGet = model.get(['b', { from: 1, to: 0 }, 'leaf']);
             var onNext = sinon.spy();
             toObservable(modelGet).
                 doAction(onNext, noOp, function() {
                     expect(onGet.callCount).to.equals(0);
                     expect(onNext.callCount).to.equals(1);
                     expect(strip(onNext.getCall(0).args[0])).to.deep.equals({
-                        json: {}
+                        json: { b: {} }
                     });
                 }).
                 subscribe(noOp, done, done);
@@ -159,25 +152,18 @@ describe('DataSource and Partial Cache', function() {
         it('should ensure empty paths do not cause dataSource requests [].', function(done) {
             var onGet = sinon.spy();
             var model = new Model({
-                cache: {
-                    a: Model.ref(['c']),
-                    c: {
-                        0: Model.atom('hello')
-                    }
-                },
-                source: {
-                    get: onGet
-                }
+                cache: { b: {} },
+                source: new LocalDataSource({}, { onGet: onGet })
             });
 
-            var modelGet = model.get(['b', []]);
+            var modelGet = model.get(['b', [], 'leaf']);
             var onNext = sinon.spy();
             toObservable(modelGet).
                 doAction(onNext, noOp, function() {
                     expect(onGet.callCount).to.equals(0);
                     expect(onNext.callCount).to.equals(1);
                     expect(strip(onNext.getCall(0).args[0])).to.deep.equals({
-                        json: {}
+                        json: { b: {} }
                     });
                 }).
                 subscribe(noOp, done, done);
