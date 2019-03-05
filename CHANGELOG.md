@@ -1,3 +1,7 @@
+# 2.0.6
+## Bugs
+- [Fix handling of empty keysets](https://github.com/Netflix/falcor/pull/955)
+
 # 2.0.5
 ## Bugs
 - [Fix request path deduplication](https://github.com/Netflix/falcor/pull/949)
