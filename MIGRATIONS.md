@@ -1,4 +1,116 @@
+# 1.x to 2.x
+
+Models always (usually) onNext
+-------
+When starting with the following json graph
+```javascript
+{
+    lists: {
+        2343: {
+            0: { $type: "ref", value: ["videos", 123] },
+            1: { $type: "ref", value: ["videos", 123] }
+        }
+    },
+    videos: {
+        123: {
+            name: { $type: "atom", value: undefined }
+        }
+    }
+}
+```
+
+A `get` would not emit values for intermediate branches found in the cache, unless an atom was found
+```javascript
+const json = await model.get(["lists", 2343, {to: 1}, "name"]);
+
+{
+  json: {
+    {
+      lists: {
+        2343: {
+          0: {}
+        }
+      }
+    }
+  }
+}
+```
+
+Where now, any branches or references found in the cache will always be emitted in the json output
+```javascript
+const json = await model.get(["lists", 2343, {to: 1}, "name"]);
+
+{
+  json: {
+    lists: {
+      2343: {
+        0: {},
+        1: {}
+      }
+    }
+  }
+}
+```
+
+That means that even requesting no paths will emit an empty object, as the cache root will be found
+```javascript
+const json = await model.get();
+
+{
+    json: {}
+}
+```
+
+The only case where get won't onNext at least one value is when it receives only errors from the underlying data source.
+
 # 0.x to 1.x
+
+Refs no longer emitted as json
+-------
+`get` no longer emits references as leaf values.
+
+When starting with the following json graph
+```javascript
+{
+  lists: {
+    2343: {
+      0: { $type: "ref", value: ["videos", 123] }
+    }
+  },
+  videos: {
+    123: {
+      name: "House of cards"
+    }
+  }
+}
+```
+
+Previously the following would emit a ref
+```javascript
+const json = await model.get(["lists", 2343, "0"]);
+
+{
+  lists: {
+    2343: {
+      0: ["videos", 123]
+    }
+  }
+}
+```
+
+Where now, a key with undefined is emitted
+```javascript
+const json = await model.get(["lists", 2343, "0"]);
+
+{
+  lists: {
+    2343: {
+      0: undefined
+    }
+  }
+}
+```
+
 No More Rx
 -------
 [Documentation on ModelResponse is found here](http://netflix.github.io/falcor/doc/ModelResponse.html)
@@ -142,7 +254,7 @@ var model = new Model({
 ```
 
 If we were to use `deref` in the **old** way we would have to perform the
-following to derefernce to [genreLists, 0, 0].
+following to dereference to [genreLists, 0, 0].
 ```javascript
 model.
     // Creates a dataSource (more than likely means a network call) call since

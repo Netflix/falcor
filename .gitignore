@@ -13,3 +13,4 @@ coverage
 *.tar.gz
 cTestFinal.js
 npm-debug.log
+.vscode

@@ -10,7 +10,7 @@ var LocalSource = module.exports = function(cache, options) {
         onGet: noOp,
         onSet: noOp,
         onResults: noOp,
-        wait: false,
+        // wait: undefined,
         materialize: false
     }, options);
     this._missCount = 0;
@@ -35,7 +35,7 @@ LocalSource.prototype = {
         var miss = options.miss;
         var onGet = options.onGet;
         var onResults = options.onResults;
-        var wait = +options.wait;
+        var wait = options.wait;
         var errorSelector = options.errorSelector;
         return Rx.Observable.create(function(observer) {
             function exec() {
@@ -61,10 +61,10 @@ LocalSource.prototype = {
                 observer.onNext(output);
                 observer.onCompleted();
             }
-            if (wait > 0) {
-                setTimeout(exec, wait);
-            } else {
+            if (wait === undefined) {
                 exec();
+            } else {
+                setTimeout(exec, wait);
             }
         });
     },
@@ -74,7 +74,7 @@ LocalSource.prototype = {
         var miss = options.miss;
         var onSet = options.onSet;
         var onResults = options.onResults;
-        var wait = +options.wait;
+        var wait = options.wait;
         var errorSelector = options.errorSelector;
         return Rx.Observable.create(function(observer) {
             function exec() {
@@ -96,10 +96,10 @@ LocalSource.prototype = {
                 observer.onCompleted();
             }
 
-            if (wait > 0) {
-                setTimeout(exec, wait);
-            } else {
+            if (wait === undefined) {
                 exec();
+            } else {
+                setTimeout(exec, wait);
             }
         });
     },

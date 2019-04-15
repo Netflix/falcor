@@ -7,8 +7,8 @@ if [ "$TRAVIS_PULL_REQUEST" == "false" ]; then
   FALCOR_DOCS_DIR=$TEMP_DIR/falcordocs
   FALCOR_BUILD_DIR=$TEMP_DIR/falcorbuild
   GH_PAGES_DIR=$TEMP_DIR/gh-pages
-  DEPLOYABLE_REPO=https://${GH_TOKEN}@github.com/Netflix/falcor.git
-  CURRENT_RELEASE=0.x
+  DEPLOYABLE_REPO=git@github.com:Netflix/falcor.git
+  CURRENT_RELEASE=master
 
   mkdir -p $TEMP_DIR
 
@@ -26,6 +26,11 @@ if [ "$TRAVIS_PULL_REQUEST" == "false" ]; then
 
   git config --global user.email "falcorbuild@netflix.com"
   git config --global user.name "Falcor Build"
+
+  openssl aes-256-cbc -K $encrypted_00000eb5a141_key -iv $encrypted_00000eb5a141_iv -in deployKey.enc -out deployKey -d
+  chmod 0600 deployKey
+  eval `ssh-agent -s`
+  ssh-add deployKey
 
   # Need https url to push changes, and also need to move from detached head to built branch.
   git remote add deployable $DEPLOYABLE_REPO

@@ -8,6 +8,7 @@ var cacheGenerator = require('./../../CacheGenerator');
 var Cache = require('./../../data/Cache');
 var toValue = function(x) { return {value: x}; };
 var jsonGraph = require('falcor-json-graph');
+var toObservable = require('../../toObs');
 
 describe('Cache Only', function() {
     describe('toJSON', function() {

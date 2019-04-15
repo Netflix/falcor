@@ -6,6 +6,7 @@ var $pathMapEnvelope = require("../support/pathMapEnvelope");
 var expect = require('chai').expect;
 var getModel = require("../support/getModel");
 var setPathMaps = require("../../../lib/set/setPathMaps");
+var NullInPathError = require('../../../lib/errors/NullInPathError');
 
 describe("a primitive value", function() {
 
@@ -23,7 +24,7 @@ describe("a primitive value", function() {
             ]);
         } catch(e) {
             errored = true;
-            expect(e.message).to.equal("`null` is not allowed in branch key positions.");
+            expect(e).instanceOf(NullInPathError);
         }
 
         expect(errored).to.be.true;

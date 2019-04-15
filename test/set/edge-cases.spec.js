@@ -13,6 +13,7 @@ var $ref = require("falcor-json-graph").ref;
 var $atom = require("falcor-json-graph").atom;
 var $error = require("falcor-json-graph").error;
 var cleanStrip = require("./../cleanData").stripDerefAndVersionKeys;
+var toObservable = require('../toObs');
 
 describe("Special Cases", function() {
     it('should set in an array and the length should be set in.', function(done) {
@@ -42,7 +43,7 @@ describe("Special Cases", function() {
         var edgeCaseCache = {
             jsonGraph: {
                 user: {
-                    name: "Jim",
+                    name: {$type: $atom, value: "Jim"},
                     location: {$type: "error", value: "Something broke!"},
                     age: {$type: $atom}
                 }

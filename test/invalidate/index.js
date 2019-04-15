@@ -4,6 +4,7 @@ var noOp = function() {};
 var falcor = require('./../../lib');
 var Model = falcor.Model;
 var strip = require("./../cleanData").stripDerefAndVersionKeys;
+var toObservable = require('../toObs');
 
 module.exports = function() {
     require("./pathMaps");
@@ -34,5 +35,23 @@ module.exports = function() {
                 });
             }).
             subscribe(noOp, done, done);
+    });
+
+    it('should throw for undefined paths', function() {
+        var model = new Model({ cache: { value: 1 } });
+        expect(() => model.invalidate(undefined)).to.throw();
+        expect(model.getCache()).to.deep.equal({ value: 1 });
+    });
+
+    it('should throw for empty paths', function() {
+        var model = new Model({ cache: { value: 1 } });
+        expect(() => model.invalidate([])).to.throw();
+        expect(model.getCache()).to.deep.equal({ value: 1 });
+    });
+
+    it('should do nothing for non-existing paths', function() {
+        var model = new Model({ cache: { value: 1 } });
+        model.invalidate('no.such.path');
+        expect(model.getCache()).to.deep.equal({ value: 1 });
     });
 };

@@ -9,6 +9,7 @@ var expect = require('chai').expect;
 var strip = require('./../../cleanData').stripDerefAndVersionKeys;
 var cacheGenerator = require('./../../CacheGenerator');
 var jsonGraph = require('falcor-json-graph');
+var toObservable = require('../../toObs');
 
 var M = function(m) {
     return cacheGenerator(0, 1);
@@ -18,6 +19,46 @@ var Cache = function(c) {
 };
 
 describe('DataSource and Partial Cache', function() {
+    it('should onNext only once even if a subset of the requested values is found in the cache', function(done) {
+        var model = new Model({
+            cache: {
+                paths: {
+                    0: 'test',
+                    1: 'test'
+                }
+            },
+            source: new LocalDataSource({
+                paths: {
+                    2: Model.atom('test'),
+                    3: Model.atom(undefined)
+                }
+            }, {materialize: true})
+        });
+
+        var onNextCount = 0;
+        toObservable(model.
+            get(['paths', {to:3}])).
+            doAction(function(value) {
+
+                onNextCount++;
+
+                if (onNextCount === 1){
+                    expect(strip(value)).to.deep.equals({
+                        json: {
+                            paths: {
+                                0: 'test',
+                                1: 'test',
+                                2: 'test'
+                            }
+                        }
+                    });
+                }
+            }).subscribe(noOp, done, function(){
+                expect(onNextCount, 'onNext called once').to.equals(1);
+                done();
+            });
+    });
+
     describe('Preload Functions', function() {
         it('should get multiple arguments with multiple selector function args.', function(done) {
             var model = new Model({cache: M(), source: new LocalDataSource(Cache())});
@@ -92,46 +133,38 @@ describe('DataSource and Partial Cache', function() {
         it('should ensure empty paths do not cause dataSource requests {from:1, to:0}', function(done) {
             var onGet = sinon.spy();
             var model = new Model({
-                cache: {
-                    a: Model.ref(['c']),
-                    c: {
-                        0: Model.atom('hello')
-                    }
-                },
-                source: {
-                    get: onGet
-                }
+                cache: { b: {} },
+                source: new LocalDataSource({}, { onGet: onGet })
             });
 
-            var modelGet = model.get(['b', {to:0, from:1}]);
+            var modelGet = model.get(['b', { from: 1, to: 0 }, 'leaf']);
             var onNext = sinon.spy();
             toObservable(modelGet).
                 doAction(onNext, noOp, function() {
                     expect(onGet.callCount).to.equals(0);
-                    expect(onNext.callCount).to.equals(0);
+                    expect(onNext.callCount).to.equals(1);
+                    expect(strip(onNext.getCall(0).args[0])).to.deep.equals({
+                        json: { b: {} }
+                    });
                 }).
                 subscribe(noOp, done, done);
         });
         it('should ensure empty paths do not cause dataSource requests [].', function(done) {
             var onGet = sinon.spy();
             var model = new Model({
-                cache: {
-                    a: Model.ref(['c']),
-                    c: {
-                        0: Model.atom('hello')
-                    }
-                },
-                source: {
-                    get: onGet
-                }
+                cache: { b: {} },
+                source: new LocalDataSource({}, { onGet: onGet })
             });
 
-            var modelGet = model.get(['b', []]);
+            var modelGet = model.get(['b', [], 'leaf']);
             var onNext = sinon.spy();
             toObservable(modelGet).
                 doAction(onNext, noOp, function() {
                     expect(onGet.callCount).to.equals(0);
-                    expect(onNext.callCount).to.equals(0);
+                    expect(onNext.callCount).to.equals(1);
+                    expect(strip(onNext.getCall(0).args[0])).to.deep.equals({
+                        json: { b: {} }
+                    });
                 }).
                 subscribe(noOp, done, done);
         });
@@ -266,6 +299,8 @@ describe('DataSource and Partial Cache', function() {
                 subscribe(noOp, done, done);
         });
     });
+
+
     describe('_toJSONG', function() {
         it('should get multiple arguments into a single _toJSONG response.', function(done) {
             var model = new Model({cache: M(), source: new LocalDataSource(Cache())});
@@ -306,6 +341,56 @@ describe('DataSource and Partial Cache', function() {
         });
     });
     describe('Progressively', function() {
+        it('should onNext twice if at least one value found in the cache - even if it is an atom of undefined', function(done) {
+            var model = new Model({
+                cache: {
+                    paths: {
+                        0: 'test',
+                        1: 'test'
+                    }
+                },
+                source: new LocalDataSource({
+                    paths: {
+                        2: Model.atom('test'),
+                        3: Model.atom(undefined)
+                    }
+                }, {materialize: true})
+            });
+
+            var onNextCount = 0;
+            toObservable(model.
+                get(['paths', {to:3}]).
+                progressively()).
+                doAction(function(value) {
+
+                    onNextCount++;
+                    if (onNextCount === 1){
+                        expect(strip(value)).to.deep.equals({
+                            json: {
+                                paths: {
+                                    0: 'test',
+                                    1: 'test'
+                                }
+                            }
+                        });
+                    }
+                    else if (onNextCount === 2){
+                        expect(strip(value)).to.deep.equals({
+                            json: {
+                                paths: {
+                                    0: 'test',
+                                    1: 'test',
+                                    2: 'test'
+                                }
+                            }
+                        });
+                    }
+                }).subscribe(noOp, done, function(){
+                    expect(onNextCount, 'onNext called twice').to.equals(2);
+                    done();
+                });
+        });
+
         it('should get multiple arguments with multiple trips to the dataSource into a single toJSON response.', function(done) {
             var model = new Model({cache: M(), source: new LocalDataSource(Cache())});
             var count = 0;
@@ -490,7 +575,10 @@ describe('DataSource and Partial Cache', function() {
                         done();
                     },
                     function() {
-                        expect(onNextSpy.callCount).to.equal(0);
+                        expect(onNextSpy.callCount).to.equal(1);
+                        expect(strip(onNextSpy.getCall(0).args[0])).to.deep.equals({
+                            json: {}
+                        });
                         expect(onErrorSpy.callCount).to.equal(1);
                         done();
                     });
@@ -644,6 +732,59 @@ describe('DataSource and Partial Cache', function() {
                     });
         });
 
+        it('should safely merge references over existing branches', function(done) {
+            var dataSource = new LocalDataSource({"shows": {"80025172": {"seasons": {"current": {"$type": "ref","value": ["seasons","80025272"],"$size": 52}}}},"seasons": {"80025272": {"episodes": {"0": {"$type": "ref","value": ["episodes","80025313"],"$size": 52}}}},"episodes": {"80025313": {"currentUser": {"$type": "ref","value": ["currentUser"],"$size": 51}}},"currentUser": {"localized": {"preferences": {"$type": "atom","value": {"languages": ["en"],"direction": ["ltr"]},"$size": 51}},"stringTable": {"$type": "ref","value": ["stringTables","en"],"$size": 52}},"stringTables": {"en": {"detailsPopup": {"expired": {"$type": "atom","value": "Expired","$size": 57}}}}});
+            var originalGet = dataSource.get;
+            dataSource.get = function() {
+                return Rx.Observable.throw({
+                    $type: 'error',
+                    value: {
+                        status: 404,
+                        "message": "Timed out"
+                    }
+                });
+            };
+
+            var model = new Model({
+                _treatDataSourceErrorsAsJSONGraphErrors: true,
+                source: dataSource,
+                errorSelector : function(path, atom) {
+                    var isError = path.indexOf('stringTable') !== -1;
+                    var o = {
+                        $type: !isError ? 'atom' : 'error',
+                        value: {
+                            message: atom.value.message,
+                            customtype: 'customtype'
+                        }
+                    };
+
+                    return o;
+                }
+            });
+
+            var fetch = toObservable(model.
+                get(
+                    ["shows",80025172,"seasons","current","episodes",0,"currentUser","localized","preferences"],
+                    ["shows",80025172,"seasons","current","episodes",0,"currentUser","stringTable","detailsPopup","expired"]
+                ));
+
+            var onNext = sinon.spy();
+            fetch.
+                delay(1).
+                catch(function(_) {
+                    dataSource.get = originalGet;
+                    model.invalidate(["shows",80025172,"seasons","current","episodes",0,"currentUser","stringTable","detailsPopup","expired"])
+                    return fetch;
+                }).
+                doAction(onNext).
+                subscribe(noOp, done,
+                    function() {
+                        var expected = ['currentUser', 'localized'];
+                        expect(model._root.cache.currentUser.localized.$_absolutePath).to.deep.equals(expected);
+                        expect(onNext.getCall(0).args[0].json.shows[80025172].seasons.current.episodes[0].currentUser.localized.$__path).to.deep.equals(expected);
+                        done();
+                    });
+        });
     });
     describe("Cached data with timestamp", function() {
         var t0 = Date.parse('2000/01/01');
@@ -703,4 +844,3 @@ describe('DataSource and Partial Cache', function() {
         });
     });
 });
-

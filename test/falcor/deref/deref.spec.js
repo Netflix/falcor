@@ -3,6 +3,7 @@ var Model = falcor.Model;
 var sinon = require('sinon');
 var expect = require('chai').expect;
 var cacheGenerator = require('./../../CacheGenerator');
+var toObservable = require('../../toObs');
 var noOp = function() {};
 
 describe('Spec', function() {

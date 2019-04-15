@@ -29,13 +29,13 @@ describe('Values', function() {
             output: {
                 json: {
                     videos: {
-                        $__path: ['videos'],
+                        $__path: ['videos'], // eslint-disable-line camelcase
                         0: {
-                            $__path: ['videos', 0],
+                            $__path: ['videos', 0], // eslint-disable-line camelcase
                             title: {$type: 'atom'}
                         },
                         1: {
-                            $__path: ['videos', 1],
+                            $__path: ['videos', 1], // eslint-disable-line camelcase
                             title: {$type: 'atom'}
                         }
                     }
@@ -69,12 +69,12 @@ describe('Values', function() {
         var lolomo0 = {
             length: 1337
         };
-        lolomo0.$__path = ['lolomo', '0'];
+        lolomo0.$__path = ['lolomo', '0']; // eslint-disable-line camelcase
         var lolomo = {
             length: 1,
             0: lolomo0
         };
-        lolomo.$__path = ['lolomo'];
+        lolomo.$__path = ['lolomo']; // eslint-disable-line camelcase
         var output = {
             json: {
                 lolomo: lolomo
@@ -106,7 +106,7 @@ describe('Values', function() {
                 }
             },
             cache: {
-                lolomo: jsonGraph.ref(['test', 'value']),
+                lolomo: ref(['test', 'value']),
                 test: {
                     value: atom('value')
                 }
@@ -117,22 +117,127 @@ describe('Values', function() {
         getCoreRunner({
             input: [['lolomo']],
             output: {
-                json: {
-                    lolomo: ['test', 'value']
-                }
+                json: {}
             },
             cache: {
-                lolomo: jsonGraph.ref(['test', 'value']),
+                lolomo: ref(['test', 'value']),
                 test: {
                     value: atom('value')
                 }
             }
         });
     });
-    it('should have no output for empty paths.', function() {
+    it('should not get references.', function() {
+        getCoreRunner({
+            input: [["lists", 2343, "0"]],
+            output: {
+                json: {
+                    lists: {
+                        2343: {
+                        }
+                    }
+                }
+            },
+            cache: {
+                lists: {
+                    2343: {
+                        0: ref(["videos", 123])
+                    }
+                },
+                videos: {
+                    123: {
+                        name: atom("House of cards")
+                    }
+                }
+            }
+        });
+    });
+
+    function intersectingTest(paths) {
+        return function() {
+            getCoreRunner({
+                input: paths,
+                output: {
+                    json: {
+                        lists: {
+                            2343: {
+                                0: {
+                                    name: 'House of cards'
+                                }
+                            }
+                        }
+                    }
+                },
+                cache: {
+                    lists: {
+                        2343: {
+                            0: ref(["videos", 123])
+                        }
+                    },
+                    videos: {
+                        123: {
+                            name: atom("House of cards")
+                        }
+                    }
+                }
+            });
+        };
+    }
+
+    it('should not clobber values with intersecting paths.', intersectingTest([['lists', 2343, '0', 'name'], ['lists', 2343, '0']]));
+    it('should not clobber values with intersecting paths reversed.', intersectingTest([['lists', 2343, '0'], ['lists', 2343, '0', 'name']]));
+
+    it('should have identical behavior when fetching a missing value or atom of undefined.', function() {
+        getCoreRunner({
+            input: [["lists", 2343, "0", "name"], ["lists", 2343, "1", "rating"]],
+            output: {
+                json: {
+                    lists: {
+                        2343: {
+                            0: {},
+                            1: {}
+                        }
+                    }
+                }
+            },
+            cache: {
+                lists: {
+                    2343: {
+                        0: ref(["videos", 123]),
+                        1: ref(["videos", 123])
+                    }
+                },
+                videos: {
+                    123: {
+                        name: atom()
+                    }
+                }
+            }
+        });
+    });
+
+    it('should emit branch structure for empty paths.', function() {
         getCoreRunner({
             input: [['lolomo', 0, [], 'item', 'title']],
-            output: {},
+            output: {
+                json: {
+                    lolomo: {
+                        0: {
+
+                        }
+                    }
+                }
+            },
+            cache: cacheGenerator(0, 1)
+        });
+    });
+
+    it('should emit branch structure for empty get.', function() {
+        getCoreRunner({
+            input: [],
+            output: {
+                json: {}
+            },
             cache: cacheGenerator(0, 1)
         });
     });
@@ -252,7 +357,7 @@ describe('Values', function() {
                 ]
             },
             cache: {
-                reference: jsonGraph.ref(['foo', 'bar']),
+                reference: ref(['foo', 'bar']),
                 foo: {
                     bar: atom('value')
                 }
@@ -275,7 +380,7 @@ describe('Values', function() {
                 ]
             },
             cache: {
-                reference: jsonGraph.ref(['foo', 'bar']),
+                reference: ref(['foo', 'bar']),
                 foo: {
                     bar: atom('value')
                 }
@@ -283,5 +388,24 @@ describe('Values', function() {
         });
     });
 
+    it("follows nested reference in JSONGraph mode", function () {
+        getCoreRunner({
+            input: [["first", "title"]],
+            isJSONG: true,
+            cache: {
+                first: ref(["second"]),
+                second: ref(["third"]),
+                third: { title: "title" }
+            },
+            output: {
+                "jsonGraph": {
+                    "first": { "$type": "ref", "value": ["second"] },
+                    "second": { "$type": "ref", "value": ["third"] },
+                    "third": { "title": "title" }
+                },
+                "paths": [["first", "title"]]
+            }
+        });
+    });
 });
 

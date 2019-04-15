@@ -14,14 +14,22 @@ describe('Edges', function() {
     it('should report nothing on empty path.', function() {
         getCoreRunner({
             input: [['videos', [], 'title']],
-            output: { },
-            cache: cacheGenerator(0, 1)
+            output: {
+                json: {
+                    videos: {}
+                }
+            },
+            cache: cacheGenerator(0, 1),
+            requestedMissingPaths: [],
+            optimizedMissingPaths: []
         });
     });
-    it('should not report an atom of undefined in non-materialize mode.', function() {
+    it('should report an atom of undefined in non-progressive mode.', function() {
         getCoreRunner({
             input: [['videos']],
-            output: { },
+            output: {
+                json: {}
+            },
             cache: {
                 videos: atom(undefined)
             }
@@ -102,7 +110,11 @@ describe('Edges', function() {
     it('should not get out an expired item through references.', function() {
         getCoreRunner({
             input: [['videos', 1234, 'title']],
-            output: { },
+            output: {
+                json: {
+                    videos: {}
+                }
+            },
             requestedMissingPaths: [['videos', 1234, 'title']],
             cache: {
                 to: {
@@ -117,4 +129,3 @@ describe('Edges', function() {
         });
     });
 });
-

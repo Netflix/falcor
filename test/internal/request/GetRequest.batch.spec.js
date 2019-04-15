@@ -7,6 +7,7 @@ var Rx = require('rx');
 var Model = require('./../../../lib').Model;
 var LocalDataSource = require('./../../data/LocalDataSource');
 var zipSpy = require('./../../zipSpy');
+var toObservable = require('../../toObs');
 
 var cacheGenerator = require('./../../CacheGenerator');
 var strip = require('./../../cleanData').stripDerefAndVersionKeys;

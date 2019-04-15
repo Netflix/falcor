@@ -9,8 +9,25 @@ var sinon = require('sinon');
 var clean = require('./../../cleanData').stripDerefAndVersionKeys;
 var cacheGenerator = require('./../../CacheGenerator');
 var atom = Model.atom;
+var toObservable = require('../../toObs');
 
 describe('Cache as DataSource', function() {
+    it('should return the correct empty envelope.', function(done) {
+        var model = new Model({
+            cache: {foo: 1}
+        }).asDataSource();
+        var onNext = sinon.spy();
+        toObservable(model.
+            get([]).
+            doAction(onNext, noOp, function() {
+                expect(onNext.calledOnce).to.be.ok;
+                expect(clean(onNext.getCall(0).args[0])).to.deep.equals({
+                    jsonGraph: {},
+                    paths: []
+                });
+            }).
+            subscribe(noOp, done, done));
+    });
     describe('toJSON', function() {
         it('should get a value from falcor.', function(done) {
             var model = new Model({
@@ -65,8 +82,9 @@ describe('Cache as DataSource', function() {
                 subscribe(noOp, done, done);
         });
     });
-    it('should report errors from a dataSource.', function(done) {
+    it('should report errors from a dataSource with _treatDataSourceErrorsAsJSONGraphErrors.', function(done) {
         var model = new Model({
+            _treatDataSourceErrorsAsJSONGraphErrors: true,
             source: new Model({
                 source: new ErrorDataSource(500, 'Oops!')
             }).asDataSource()
@@ -85,6 +103,37 @@ describe('Cache as DataSource', function() {
             subscribe(noOp, function(err) {
                 // ensure its the same error
                 if (Array.isArray(err) && isPathValue(err[0])) {
+                    done();
+                } else {
+                    done(err);
+                }
+            }, function() {
+                done('On Completed was called. ' +
+                     'OnError should have been called.');
+            });
+    });
+    it('should report errors from a dataSource.', function(done) {
+        var outputError;
+        var model = new Model({
+            source: new Model({
+                source: new ErrorDataSource(500, 'Oops!')
+            }).asDataSource()
+        });
+        toObservable(model.
+            get(['videos', 1234, 'summary'])).
+            doAction(noOp, function(err) {
+                outputError = err;
+                expect(err).to.deep.equals({
+                    $type: "error",
+                    value: {
+                        message: 'Oops!',
+                        status: 500
+                    }
+                });
+            }).
+            subscribe(noOp, function(err) {
+                // ensure its the same error
+                if (outputError === err) {
                     done();
                 } else {
                     done(err);
@@ -149,4 +198,3 @@ describe('Cache as DataSource', function() {
             subscribe(noOp, done, done);
     });
 });
-

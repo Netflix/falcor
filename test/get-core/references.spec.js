@@ -59,7 +59,7 @@ describe('References', function() {
             input: [['circular', 'title']],
             output: {
                 json: {
-                    circular: ['circular', 'next']
+                    circular: {}
                 }
             },
             cache: referenceCache

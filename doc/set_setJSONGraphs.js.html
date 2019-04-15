@@ -35,7 +35,7 @@ var NullInPathError = require("./../errors/NullInPathError");
  * @return {Array.&lt;Array.&lt;Path>>} - an Array of Arrays where each inner Array is a list of requested and optimized paths (respectively) for the successfully set values.
  */
 
-module.exports = function setJSONGraphs(model, jsonGraphEnvelopes, x, errorSelector, comparator) {
+module.exports = function setJSONGraphs(model, jsonGraphEnvelopes, x, errorSelector, comparator, replacedPaths) {
 
     var modelRoot = model._root;
     var lru = modelRoot;
@@ -70,7 +70,7 @@ module.exports = function setJSONGraphs(model, jsonGraphEnvelopes, x, errorSelec
                 cache, cache, cache,
                 jsonGraph, jsonGraph, jsonGraph,
                 requestedPaths, optimizedPaths, requestedPath, optimizedPath,
-                version, expired, lru, comparator, errorSelector
+                version, expired, lru, comparator, errorSelector, replacedPaths
             );
         }
     }
@@ -90,7 +90,7 @@ function setJSONGraphPathSet(
     path, depth, root, parent, node,
     messageRoot, messageParent, message,
     requestedPaths, optimizedPaths, requestedPath, optimizedPath,
-    version, expired, lru, comparator, errorSelector) {
+    version, expired, lru, comparator, errorSelector, replacedPaths) {
 
     var note = {};
     var branch = depth &lt; path.length - 1;
@@ -105,7 +105,7 @@ function setJSONGraphPathSet(
         var results = setNode(
             root, parent, node, messageRoot, messageParent, message,
             key, branch, false, requestedPath, optimizedPath,
-            version, expired, lru, comparator, errorSelector
+            version, expired, lru, comparator, errorSelector, replacedPaths
         );
 
         requestedPath[depth] = key;
@@ -119,7 +119,7 @@ function setJSONGraphPathSet(
                     path, depth + 1, root, nextParent, nextNode,
                     messageRoot, results[3], results[2],
                     requestedPaths, optimizedPaths, requestedPath, optimizedPath,
-                    version, expired, lru, comparator, errorSelector
+                    version, expired, lru, comparator, errorSelector, replacedPaths
                 );
             } else {
                 requestedPaths.push(requestedPath.slice(0, requestedPath.index + 1));
@@ -137,7 +137,7 @@ function setJSONGraphPathSet(
 
 function setReference(
     root, node, messageRoot, message, requestedPath, optimizedPath,
-    version, expired, lru, comparator, errorSelector) {
+    version, expired, lru, comparator, errorSelector, replacedPaths) {
 
     var reference = node.value;
     optimizedPath.splice(0, optimizedPath.length);
@@ -163,7 +163,7 @@ function setReference(
         var results = setNode(
             root, parent, node, messageRoot, messageParent, message,
             key, branch, true, requestedPath, optimizedPath,
-            version, expired, lru, comparator, errorSelector
+            version, expired, lru, comparator, errorSelector, replacedPaths
         );
         node = results[0];
         if (isPrimitive(node)) {
@@ -187,7 +187,7 @@ function setReference(
 function setNode(
     root, parent, node, messageRoot, messageParent, message,
     key, branch, reference, requestedPath, optimizedPath,
-    version, expired, lru, comparator, errorSelector) {
+    version, expired, lru, comparator, errorSelector, replacedPaths) {
 
     var type = node.$type;
 
@@ -195,7 +195,7 @@ function setNode(
 
         var results = setReference(
             root, node, messageRoot, message, requestedPath, optimizedPath,
-            version, expired, lru, comparator, errorSelector
+            version, expired, lru, comparator, errorSelector, replacedPaths
         );
 
         node = results[0];
@@ -229,7 +229,7 @@ function setNode(
 
     node = mergeJSONGraphNode(
         parent, node, message, key, requestedPath, optimizedPath,
-        version, expired, lru, comparator, errorSelector
+        version, expired, lru, comparator, errorSelector, replacedPaths
     );
 
     return [node, parent, message, messageParent];

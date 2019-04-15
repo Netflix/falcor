@@ -7,6 +7,8 @@ var expect = require('chai').expect;
 var cacheGenerator = require('./../../CacheGenerator');
 var noOp = function() {};
 var isAssertionError = require('./../../isAssertionError');
+var clean = require("../../cleanData").clean;
+var toObservable = require('../../toObs');
 
 describe('Error cases', function() {
     it('should error on a shorted deref path.', function(done) {
@@ -33,10 +35,11 @@ describe('Error cases', function() {
                 toObservable(lolomoModel.
                     get([0, 0, 'item', 'title'])).
                     doAction(onNext, function(err) {
-                        expect(err.message).to.equals(InvalidModelError.message);
+                        expect(onNext.callCount).to.equal(1);
+                        expect(err.name).to.equals(InvalidModelError.name);
                     }).
                     subscribe(
-                        done.bind(null, new Error('onNext shouldnt be called')),
+                        noOp,
                         function(err) {
                             if (isAssertionError(err)) {
                                 return done(err);
@@ -54,6 +57,6 @@ describe('Error cases', function() {
             expect(e.name).to.equals(InvalidDerefInputError.name);
             return done();
         }
-        done(new Error('should of thrown an error.'));
+        done(new Error('should have thrown an error.'));
     });
 });

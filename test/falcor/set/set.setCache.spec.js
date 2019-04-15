@@ -25,7 +25,6 @@ describe('Set Cache', function() {
             a: { b: $ref("a"),
                  c: "foo" }
         })});
-        debugger
         model.setCache(undefined);
         model.get("a.b.c").subscribe(function(x) {
             expect(clean(x)).to.deep.equal({

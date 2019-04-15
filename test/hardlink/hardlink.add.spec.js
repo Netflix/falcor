@@ -13,6 +13,7 @@ var Values = Expected.Values;
 var Bound = Expected.Bound;
 var noOp = function() {};
 var _ = require('lodash');
+var toObservable = require('../toObs');
 
 var __ref = require("./../../lib/internal/ref");
 var __context = require("./../../lib/internal/context");

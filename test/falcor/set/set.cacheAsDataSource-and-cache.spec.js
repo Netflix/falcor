@@ -15,6 +15,7 @@ var ErrorDataSource = require('../../data/ErrorDataSource');
 var $error = require('./../../../lib/types/error');
 var expect = require('chai').expect;
 var strip = require('./../../cleanData').stripDerefAndVersionKeys;
+var toObservable = require('../../toObs');
 
 describe('Cache as DataSource and Cache', function() {
     describe('Seeds', function() {
@@ -135,9 +136,7 @@ describe('Cache as DataSource and Cache', function() {
         toObservable(model.
             boxValues().
             set({path: ['genreList', 0, 0, 'summary'], value: 5})).
-            doAction(function(x) {
-                expect(false, 'onNext should not be called.').to.be.ok;
-            }, function(e) {
+            doAction(noOp, function(e) {
                 called = true;
                 testRunner.compare([{
                     path: ['genreList', 0, 0, 'summary'],
@@ -151,7 +150,7 @@ describe('Cache as DataSource and Cache', function() {
                     }
                 }], e, {strip: ['$size']});
             }, function() {
-                expect(false, 'onNext should not be called.').to.be.ok;
+                expect(false, 'onCompleted should not be called.').to.be.ok;
             }).
             subscribe(noOp, function(e) {
                 if (Array.isArray(e) && e[0].value.$foo === 'bar' && called) {

@@ -99,7 +99,7 @@ function invalidatePathSet(
                     root, nextParent, nextNode,
                     version, expired, lru
                 );
-            } else if (removeNodeAndDescendants(nextNode, nextParent, key, lru)) {
+            } else if (removeNodeAndDescendants(nextNode, nextParent, key, lru, undefined)) {
                 updateNodeAncestors(nextParent, getSize(nextNode), lru, version);
             }
         }

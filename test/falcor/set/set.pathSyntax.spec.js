@@ -5,6 +5,7 @@ var noOp = function() {};
 var cacheGenerator = require('./../../CacheGenerator');
 var sinon = require('sinon');
 var expect = require('chai').expect;
+var toObservable = require('../../toObs');
 
 describe('Path Syntax', function() {
     it('should accept strings for set in the path argument of a pathValue.', function(done) {

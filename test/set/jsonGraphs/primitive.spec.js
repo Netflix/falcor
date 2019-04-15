@@ -8,6 +8,7 @@ var $jsonGraphEnvelope = require("../support/jsonGraphEnvelope");
 var expect = require('chai').expect;
 var getModel = require("../support/getModel");
 var setJSONGraphs = require("../../../lib/set/setJSONGraphs");
+var NullInPathError = require('../../../lib/errors/NullInPathError');
 
 describe("a primitive value", function() {
 
@@ -35,7 +36,6 @@ describe("a primitive value", function() {
     });
 
     it("throws with a `null` key in a branch position", function() {
-
         var lru = new Object();
         var cache = {};
         var version = 0;
@@ -49,10 +49,10 @@ describe("a primitive value", function() {
                 ])]
             );
         } catch(e) {
-            expect(e.message).to.equal("`null` is not allowed in branch key positions.");
+            errored = true;
+            expect(e).instanceOf(NullInPathError);
         }
 
-        errored = true;
         expect(errored).to.be.true;
     });
 
