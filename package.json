@@ -49,6 +49,7 @@
     "del": "^3.0.0",
     "express": "^4.16.4",
     "falcor-express": "^0.1.2",
+    "falcor-http-datasource": "github:riversandtechnologies/falcor-http-datasource#v2.0.6-custom1",
     "falcor-router": "^0.4.0",
     "grunt": "^1.0.2",
     "gulp": "^3.9.0",
