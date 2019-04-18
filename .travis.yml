@@ -10,9 +10,6 @@ branches:
         - 0.x
         - 1.0.0
 
-# Run as a docker container
-sudo: false
-
 # Set up keys to allow pushes, and update npm to the latest version
 before_install: npm update -g npm
 
