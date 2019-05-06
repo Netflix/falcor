@@ -1,3 +1,7 @@
+# 2.0.7
+## Bugs
+- [Correct module.export usage](https://github.com/Netflix/falcor/pull/960)
+
 # 2.0.6
 ## Bugs
 - [Fix handling of empty keysets](https://github.com/Netflix/falcor/pull/955)
