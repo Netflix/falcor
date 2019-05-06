@@ -3957,10 +3957,8 @@ var getSize = require(83);
  * @augments ModelResponse
  * @private
  */
-var GetResponse = module.exports = function GetResponse(model, paths,
-                                                        isJSONGraph,
-                                                        isProgressive,
-                                                        forceCollect) {
+var GetResponse = function GetResponse(model, paths, isJSONGraph,
+                                       isProgressive, forceCollect) {
     this.model = model;
     this.currentRemainingPaths = paths;
     this.isJSONGraph = isJSONGraph || false;
@@ -4022,6 +4020,8 @@ GetResponse.prototype._subscribe = function _subscribe(observer) {
     return getRequestCycle(this, model, results,
                            observer, errors, 1);
 };
+
+module.exports = GetResponse;
 
 },{"40":40,"52":52,"55":55,"56":56,"83":83}],55:[function(require,module,exports){
 var gets = require(23);
@@ -4298,9 +4298,8 @@ var setRequestCycle = require(63);
  * @augments ModelResponse
  * @private
  */
-var SetResponse = module.exports = function SetResponse(model, args,
-                                                        isJSONGraph,
-                                                        isProgressive) {
+var SetResponse = function SetResponse(model, args, isJSONGraph,
+                                       isProgressive) {
 
     // The response properties.
     this._model = model;
@@ -4382,6 +4381,8 @@ SetResponse.prototype.progressively = function progressively() {
     return new SetResponse(this._model, this._initialArgs,
                            this._isJSONGraph, true);
 };
+
+module.exports = SetResponse;
 
 },{"132":132,"52":52,"63":63,"93":93,"94":94,"96":96}],61:[function(require,module,exports){
 var setValidInput = require(64);
