@@ -39,9 +39,8 @@ var setRequestCycle = require("./setRequestCycle");
  * @augments ModelResponse
  * @private
  */
-var SetResponse = module.exports = function SetResponse(model, args,
-                                                        isJSONGraph,
-                                                        isProgressive) {
+var SetResponse = function SetResponse(model, args, isJSONGraph,
+                                       isProgressive) {
 
     // The response properties.
     this._model = model;
@@ -123,6 +122,8 @@ SetResponse.prototype.progressively = function progressively() {
     return new SetResponse(this._model, this._initialArgs,
                            this._isJSONGraph, true);
 };
+
+module.exports = SetResponse;
 </code></pre>
     </article>
 </section>
