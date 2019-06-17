@@ -1,9 +1,7 @@
 var falcor = require("./../../lib/");
 var Model = falcor.Model;
-var expect = require('chai').expect;
 var $path = require("./../../lib/types/ref");
 var $atom = require("./../../lib/types/atom");
-var sinon = require('sinon');
 var noOp = function() {};
 var Rx = require('rx');
 var Observable = Rx.Observable;
@@ -18,7 +16,7 @@ var toObservable = require('../toObs');
 describe("Special Cases", function() {
     it('should set in an array and the length should be set in.', function(done) {
         var model = new Model();
-        var onNext = sinon.spy();
+        var onNext = jest.fn();
         toObservable(model.
             set({
                 json: {
@@ -30,8 +28,8 @@ describe("Special Cases", function() {
             }).
             doAction(onNext).
             doAction(noOp, noOp, function() {
-                expect(onNext.calledOnce).to.be.ok;
-                expect(cleanStrip(onNext.getCall(0).args[0])).to.deep.equals({
+                expect(onNext).toHaveBeenCalledTimes(1);
+                expect(cleanStrip(onNext.mock.calls[0][0])).toEqual({
                     json: {foo: { length: 1 } }
                 });
             }).
@@ -54,7 +52,7 @@ describe("Special Cases", function() {
         };
 
         model._setJSONGs(model, [edgeCaseCache]);
-        expect(strip(cache)).to.deep.equal(strip(edgeCaseCache.jsonGraph));
+        expect(strip(cache)).toEqual(strip(edgeCaseCache.jsonGraph));
     });
     it("set blows away the cache.", function() {
         var model = new Model({});
@@ -98,12 +96,12 @@ describe("Special Cases", function() {
         set.forEach(function(s, i) {
             model._setJSONGs(model, [s]);
             if (i === 2) {
-                expect(model._root.cache.lists).to.be.ok;
+                expect(model._root.cache.lists).toBeDefined();
             }
         });
 
         model._getPathValuesAsPathMap(model, get, function(x) {
-            expect(x).to.deep.equals({ json: { genreList: { 1: { 0: { summary: {
+            expect(x).toEqual({ json: { genreList: { 1: { 0: { summary: {
                     "title": "Running Man",
                     "url": "/movies/553"
                 } } } } }

@@ -2,9 +2,6 @@ var falcor = require('../../lib');
 var Rx = require('rx');
 var R = require('falcor-router');
 var noOp = function() {};
-var chai = require('chai');
-var expect = chai.expect;
-var sinon = require('sinon');
 var strip = require('./../cleanData').stripDerefAndVersionKeys;
 var toObservable = require('../toObs');
 var $ref = falcor.Model.ref;
@@ -37,12 +34,12 @@ describe('call', function() {
             source: router
         });
         var args = [falcor.Model.ref('titlesById[1]')];
-        var onNext = sinon.spy();
+        var onNext = jest.fn();
         toObservable(model.
             call("genreList[0].titles.push", args, ['name'])).
             doAction(onNext, noOp, function() {
-                expect(onNext.calledOnce).to.be.ok;
-                expect(strip(onNext.getCall(0).args[0])).to.deep.equals({
+                expect(onNext).toHaveBeenCalledTimes(1);
+                expect(strip(onNext.mock.calls[0][0])).toEqual({
                     json: {
                         genreList: {
                             0: {
@@ -77,11 +74,11 @@ describe('call', function() {
             source: router
         });
         var args = [falcor.Model.ref('titlesById[1]')];
-        var onNext = sinon.spy();
+        var onNext = jest.fn();
         toObservable(model.
             call("genreList[0].titles.push", args, ['name'])).
             doAction(onNext, noOp, function() {
-                expect(onNext.callCount).to.equal(1);
+                expect(onNext).toHaveBeenCalledTimes(1);
             }).
             subscribe(noOp, done, done);
     });
@@ -108,14 +105,14 @@ describe('call', function() {
 
         var args = [falcor.Model.ref('titlesById[1]')];
 
-        var onNext = sinon.spy();
+        var onNext = jest.fn();
 
         toObservable(model.
             call("genreList[0].titles.push", args)).
             doAction(onNext, noOp, noOp).
             subscribe(noOp, done, function() {
-                expect(onNext.callCount).to.equal(1);
-                expect(strip(onNext.getCall(0).args[0])).to.deep.equal({
+                expect(onNext).toHaveBeenCalledTimes(1);
+                expect(strip(onNext.mock.calls[0][0])).toEqual({
                     json: {
 
                     }

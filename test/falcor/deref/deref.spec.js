@@ -1,7 +1,5 @@
 var falcor = require('./../../../lib');
 var Model = falcor.Model;
-var sinon = require('sinon');
-var expect = require('chai').expect;
 var cacheGenerator = require('./../../CacheGenerator');
 var toObservable = require('../../toObs');
 var noOp = function() {};
@@ -12,16 +10,16 @@ describe('Spec', function() {
             cache: cacheGenerator(0, 1)
         });
 
-        var onNext = sinon.spy();
+        var onNext = jest.fn();
         toObservable(model.
             get(['lolomo', 0, 0, 'item', 'title'])).
             doAction(onNext, noOp, function() {
-                expect(onNext.calledOnce).to.be.ok;
+                expect(onNext).toHaveBeenCalledTimes(1);
 
-                var json = onNext.getCall(0).args[0].json;
+                var json = onNext.mock.calls[0][0].json;
                 var lolomoModel = model.deref(json.lolomo);
 
-                expect(lolomoModel._path).to.deep.equals(['lolomos', '1234']);
+                expect(lolomoModel._path).toEqual(['lolomos', '1234']);
             }).
             subscribe(noOp, done, done);
     });

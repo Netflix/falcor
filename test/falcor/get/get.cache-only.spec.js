@@ -5,8 +5,6 @@ var clean = require('./../../cleanData').clean;
 var cacheGenerator = require('./../../CacheGenerator');
 var noOp = function() {};
 var Observable = Rx.Observable;
-var sinon = require('sinon');
-var expect = require('chai').expect;
 var clean = require('./../../cleanData').stripDerefAndVersionKeys;
 var toObservable = require('../../toObs');
 
@@ -16,12 +14,12 @@ describe('Cache Only', function() {
             var model = new Model({
                 cache: cacheGenerator(0, 1)
             });
-            var onNext = sinon.spy();
+            var onNext = jest.fn();
             toObservable(model.
                 get(['videos', 0, 'title'])).
                 doAction(onNext, noOp, function() {
-                    expect(onNext.callCount).to.equal(1);
-                    expect(clean(onNext.getCall(0).args[0])).to.deep.equals({
+                    expect(onNext).toHaveBeenCalledTimes(1);
+                    expect(clean(onNext.mock.calls[0][0])).toEqual({
                         json: {
                             videos: {
                                 0: {
@@ -37,16 +35,16 @@ describe('Cache Only', function() {
             var model = new Model({
                 cache: cacheGenerator(0, 1)
             });
-            var onNext = sinon.spy();
+            var onNext = jest.fn();
             toObservable(model.
                 get(['videos', [], 'title'])).
                 doAction(onNext, noOp, function() {
-                    expect(clean(onNext.getCall(0).args[0])).to.deep.equals({
+                    expect(clean(onNext.mock.calls[0][0])).toEqual({
                         json: {
                             videos: {}
                         }
                     });
-                    expect(onNext.callCount).to.equal(1);
+                    expect(onNext).toHaveBeenCalledTimes(1);
                 }).
                 subscribe(noOp, done, done);
         });
@@ -55,18 +53,18 @@ describe('Cache Only', function() {
             var model = new Model({
                 cache: cacheGenerator(0, 1)
             });
-            var onNext = sinon.spy();
-            var onError = sinon.spy();
+            var onNext = jest.fn();
+            var onError = jest.fn();
             model.
                 get(['videos', 0, 'title']).
                 then(onNext, onError).
                 then(function() {
-                    if (onError.callCount) {
-                        throw onError.getCall(0).args[0];
+                    if (onError.mock.calls[0]) {
+                        throw onError.mock.calls[0][0];
                     }
 
-                    expect(onNext.callCount).to.equal(1);
-                    expect(clean(onNext.getCall(0).args[0])).to.deep.equals({
+                    expect(onNext).toHaveBeenCalledTimes(1);
+                    expect(clean(onNext.mock.calls[0][0])).toEqual({
                         json: {
                             videos: {
                                 0: {
@@ -85,17 +83,17 @@ describe('Cache Only', function() {
             var model = new Model({
                 cache: cacheGenerator(0, 30)
             });
-            var onNext = sinon.spy();
+            var onNext = jest.fn();
             toObservable(model.
                 get(['lolomo', 0, 0, 'item', 'title']).
                 _toJSONG()).
                 doAction(onNext, noOp, function() {
-                    var out = clean(onNext.getCall(0).args[0]);
+                    var out = clean(onNext.mock.calls[0][0]);
                     var expected = clean({
                         jsonGraph: cacheGenerator(0, 1),
                         paths: [['lolomo', 0, 0, 'item', 'title']]
                     });
-                    expect(out).to.deep.equals(expected);
+                    expect(out).toEqual(expected);
                 }).
                 subscribe(noOp, done, done);
         });

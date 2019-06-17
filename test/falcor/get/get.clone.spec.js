@@ -1,7 +1,5 @@
 var falcor = require('./../../../lib');
 var Model = falcor.Model;
-var expect = require('chai').expect;
-var sinon = require('sinon');
 var noOp = function() {};
 
 describe('Caching Issues', function() {
@@ -30,7 +28,7 @@ describe('Caching Issues', function() {
         var clone = source._clone({});
         var resSource = source._getPathValuesAsPathMap(source, [['lolomo', 'summary']], [{}]);
         var resClone = clone._getPathValuesAsPathMap(clone, [['lolomo', 'summary']], [{}]);
-        expect(resClone).to.deep.equals(resSource);
+        expect(resClone).toEqual(resSource);
 
         source.setCache({
             lolomo: {
@@ -39,6 +37,6 @@ describe('Caching Issues', function() {
         });
         resSource = source._getPathValuesAsPathMap(source, [['lolomo', 'name']], [{}]);
         resClone = clone._getPathValuesAsPathMap(clone, [['lolomo', 'name']], [{}]);
-        expect(resClone).to.deep.equals(resSource);
+        expect(resClone).toEqual(resSource);
     });
 });

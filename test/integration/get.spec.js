@@ -2,8 +2,6 @@
 var express = require('express');
 var FalcorServer = require('falcor-express');
 var falcor = require('./../../browser');
-var expect = require('chai').expect;
-var sinon = require('sinon');
 var Router = require('falcor-router');
 var strip = require('./../cleanData').stripDerefAndVersionKeys;
 var MaxRetryExceededError = require('../../lib/errors/MaxRetryExceededError');
@@ -15,12 +13,12 @@ describe('Get Integration Tests', function() {
 
     beforeEach(function(done) {
         app = express();
-        server = app.listen(1337, done);
-        serverUrl = 'http://localhost:1337';
+        server = app.listen(60002, done);
+        serverUrl = 'http://localhost:60002';
         model = new falcor.Model({
             source: new falcor.HttpDataSource(serverUrl + '/model.json')
         });
-        onNext = sinon.spy();
+        onNext = jest.fn();
     });
 
     it('should be able to return null from a router. #535', function(done) {
@@ -39,8 +37,8 @@ describe('Get Integration Tests', function() {
         toObservable(model.
             get(['thing', 'prop'])).
             doAction(onNext, noOp, function() {
-                expect(onNext.calledOnce).to.be.ok;
-                expect(strip(onNext.getCall(0).args[0])).to.deep.equals({
+                expect(onNext).toHaveBeenCalledTimes(1);
+                expect(strip(onNext.mock.calls[0][0])).toEqual({
                     json: {
                         thing: {
                             prop: null
@@ -64,15 +62,15 @@ describe('Get Integration Tests', function() {
             }]);
 
             model.get('path').subscribe(onNext, done, function() {
-                expect(onNext.calledOnce).to.be.ok;
-                expect(strip(onNext.getCall(0).args[0])).to.deep.equal({
+                expect(onNext).toHaveBeenCalledTimes(1);
+                expect(strip(onNext.mock.calls[0][0])).toEqual({
                     json: { path: 'value' }
                 });
                 model.
                     withoutDataSource().
                     get('path').
                     subscribe(function(sameTickValue) {
-                        expect(sameTickValue).to.deep.equal({
+                        expect(sameTickValue).toEqual({
                             json: { path: 'value' }
                         });
                     }, done, function() {
@@ -81,7 +79,7 @@ describe('Get Integration Tests', function() {
                                 withoutDataSource().
                                 get('path').
                                 subscribe(function(nextTickValue) {
-                                    expect(nextTickValue).to.deep.equal({ json: {} });
+                                    expect(nextTickValue).toEqual({ json: {} });
                                 }, done, done);
                         }, 0);
                     });
@@ -100,7 +98,8 @@ describe('Get Integration Tests', function() {
             }]);
 
             model.get('path').subscribe(onNext, done, function() {
-                expect(strip(onNext.getCall(0).args[0])).to.deep.equal({
+                expect(onNext).toHaveBeenCalledTimes(1);
+                expect(strip(onNext.mock.calls[0][0])).toEqual({
                     json: { path: 'value' }
                 });
                 setTimeout(function() {
@@ -108,7 +107,7 @@ describe('Get Integration Tests', function() {
                         withoutDataSource().
                         get('path').
                         subscribe(function(nearFutureValue) {
-                            expect(nearFutureValue).to.deep.equal({
+                            expect(nearFutureValue).toEqual({
                                 json: { path: 'value' }
                             });
                         }, done, function() {
@@ -117,7 +116,7 @@ describe('Get Integration Tests', function() {
                                     withoutDataSource().
                                     get('path').
                                     subscribe(function(farFutureValue) {
-                                        expect(farFutureValue).to.deep.equal({
+                                        expect(farFutureValue).toEqual({
                                             json: { path: 'value' }
                                         });
                                     }, done, done);
@@ -139,7 +138,8 @@ describe('Get Integration Tests', function() {
             }]);
 
             model.get('path').subscribe(onNext, done, function() {
-                expect(strip(onNext.getCall(0).args[0])).to.deep.equal({
+                expect(onNext).toHaveBeenCalledTimes(1);
+                expect(strip(onNext.mock.calls[0][0])).toEqual({
                     json: { path: 'value' }
                 });
                 setTimeout(function() {
@@ -147,7 +147,7 @@ describe('Get Integration Tests', function() {
                         withoutDataSource().
                         get('path').
                         subscribe(function(nearFutureValue) {
-                            expect(nearFutureValue).to.deep.equal({
+                            expect(nearFutureValue).toEqual({
                                 json: { path: 'value' }
                             });
                         }, done, function() {
@@ -156,7 +156,7 @@ describe('Get Integration Tests', function() {
                                     withoutDataSource().
                                     get('path').
                                     subscribe(function(farFutureValue) {
-                                        expect(farFutureValue).to.deep.equal({});
+                                        expect(farFutureValue).toEqual({});
                                     }, done, done);
                             }, 50);
                         });
@@ -176,7 +176,8 @@ describe('Get Integration Tests', function() {
             }]);
 
             model.get('path').subscribe(onNext, done, function() {
-                expect(strip(onNext.getCall(0).args[0])).to.deep.equal({
+                expect(onNext).toHaveBeenCalledTimes(1);
+                expect(strip(onNext.mock.calls[0][0])).toEqual({
                     json: { path: 'value' }
                 });
                 setTimeout(function() {
@@ -184,7 +185,7 @@ describe('Get Integration Tests', function() {
                         withoutDataSource().
                         get('path').
                         subscribe(function(nearFutureValue) {
-                            expect(nearFutureValue).to.deep.equal({
+                            expect(nearFutureValue).toEqual({
                                 json: { path: 'value' }
                             });
                         }, done, function() {
@@ -193,7 +194,7 @@ describe('Get Integration Tests', function() {
                                     withoutDataSource().
                                     get('path').
                                     subscribe(function(farFutureValue) {
-                                        expect(farFutureValue).to.deep.equal({});
+                                        expect(farFutureValue).toEqual({});
                                     }, done, done);
                             }, 50);
                         });
@@ -213,7 +214,7 @@ describe('Get Integration Tests', function() {
             }]);
 
             model.get('path').subscribe(noOp, function(e) {
-                expect(MaxRetryExceededError.is(e)).to.be.ok;
+                expect(MaxRetryExceededError.is(e)).toBe(true);
                 done();
             }, done.bind(null, new Error('should not complete')));
         });

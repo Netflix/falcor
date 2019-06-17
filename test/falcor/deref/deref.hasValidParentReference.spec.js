@@ -1,7 +1,5 @@
 var falcor = require('./../../../lib');
 var Model = falcor.Model;
-var sinon = require('sinon');
-var expect = require('chai').expect;
 var cacheGenerator = require('./../../CacheGenerator');
 var noOp = function() {};
 var __head = require('./../../../lib/internal/head');
@@ -25,7 +23,7 @@ describe('fromWhenceYouCame', function() {
                 lolomoModel = model.deref(lolomo);
             });
 
-        expect(lolomoModel._hasValidParentReference()).to.be.ok;
+        expect(lolomoModel._hasValidParentReference()).toBe(true);
     });
     it('should have an valid parent reference when derefd and fromWhenceYouCame is true.', function() {
         var cache = cacheGenerator(0, 30);
@@ -43,7 +41,7 @@ describe('fromWhenceYouCame', function() {
                 lolomoModel = model.deref(lolomo);
             });
 
-        expect(lolomoModel._hasValidParentReference()).to.be.ok;
+        expect(lolomoModel._hasValidParentReference()).toBe(true);
     });
     it('should have an valid parent reference when derefd and fromWhenceYouCame is true with non reference keys.', function() {
         var cache = cacheGenerator(0, 30);
@@ -67,7 +65,7 @@ describe('fromWhenceYouCame', function() {
                 aModel = model.deref(a);
             });
 
-        expect(aModel._hasValidParentReference()).to.be.ok;
+        expect(aModel._hasValidParentReference()).toBe(true);
     });
     it('should invalidate the derefs reference and maintain correct deref and hasValidParentReference becomes false.', function() {
         var cache = cacheGenerator(0, 30);
@@ -86,7 +84,7 @@ describe('fromWhenceYouCame', function() {
             });
         model.invalidate(['lolomo']);
 
-        expect(lolomoModel._hasValidParentReference()).to.not.be.ok;
+        expect(lolomoModel._hasValidParentReference()).toBe(false);
     });
 
     it('should allow for set overwrite to signal derefs become invalid, but maintain derefd reference.', function() {
@@ -111,7 +109,7 @@ describe('fromWhenceYouCame', function() {
             }).
             subscribe();
 
-        expect(lolomoModel._hasValidParentReference()).to.not.be.ok;
+        expect(lolomoModel._hasValidParentReference()).toBe(false);
     });
 
     it('should set and exceed maxSize and maintain correct deref and hasValidParentReference becomes false.', function() {
@@ -165,7 +163,7 @@ describe('fromWhenceYouCame', function() {
 
         var node = model._root[__head];
         while (node) {
-            expect(node[__key]).to.not.equals('lolomo');
+            expect(node[__key]).not.toBe('lolomo');
             node = node[__next];
         }
 
@@ -177,11 +175,11 @@ describe('fromWhenceYouCame', function() {
             foundC = foundC || node.value[1] === 'C';
             node = node[__next];
         }
-        expect(foundA, 'List A does not exist').to.be.ok;
-        expect(foundB, 'List B does not exist').to.be.ok;
-        expect(foundC, 'List C does not exist').to.be.ok;
+        expect(foundA).toBe(true);
+        expect(foundB).toBe(true);
+        expect(foundC).toBe(true);
 
-        expect(lolomoModel._hasValidParentReference()).to.not.be.ok;
+        expect(lolomoModel._hasValidParentReference()).toBe(false);
     });
 });
 

@@ -1,6 +1,5 @@
 var falcor = require("./../../lib/");
 var Model = falcor.Model;
-var expect = require('chai').expect;
 var Cache = require("../data/Cache");
 var ReducedCache = require("../data/ReducedCache");
 var Expected = require("../data/expected");
@@ -63,16 +62,16 @@ function getTest(query, output) {
     var lhs = model._root.cache.genreList[0];
     var rhs = model._root.cache.lists.abcd;
 
-    expect(lhs[__ref_index]).to.not.be.ok;
-    expect(rhs[__refs_length]).to.not.be.ok;
-    expect(lhs[__context]).to.not.be.ok;
+    expect(lhs[__ref_index]).toBeUndefined();
+    expect(rhs[__refs_length]).toBeUndefined();
+    expect(lhs[__context]).toBeUndefined();
 
     return toObservable(testRunner.get(model, _.cloneDeep(query), output)).
         do(noOp, noOp, function() {
-            expect(lhs[__ref_index]).to.equal(0);
-            expect(rhs[__refs_length]).to.equal(1);
-            expect(rhs[__ref + lhs[__ref_index]]).to.equal(lhs);
-            expect(lhs[__context]).to.equal(rhs);
+            expect(lhs[__ref_index]).toBe(0);
+            expect(rhs[__refs_length]).toBe(1);
+            expect(rhs[__ref + lhs[__ref_index]]).toBe(lhs);
+            expect(lhs[__context]).toBe(rhs);
         });
 }
 
@@ -83,8 +82,8 @@ function setTest(query, output) {
 
     return toObservable(testRunner.set(model, _.cloneDeep(query), output)).
         do(noOp, noOp, function() {
-            expect(lhs[__ref_index]).to.not.be.ok;
-            expect(rhs[__refs_length]).to.not.be.ok;
-            expect(lhs[__context]).to.not.equal(rhs);
+            expect(lhs[__ref_index]).toBeUndefined();
+            expect(rhs[__refs_length]).toBeUndefined();
+            expect(lhs[__context]).not.toBe(rhs);
         });
 }

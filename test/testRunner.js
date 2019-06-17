@@ -1,8 +1,6 @@
 var falcor = require("./../lib/");
 var Model = falcor.Model;
 var inspect = require("util").inspect;
-var chai = require("chai");
-var expect = chai.expect;
 var Cache = require("./data/Cache");
 var LocalDataSource = require("./data/LocalDataSource");
 var _ = require("lodash");
@@ -44,15 +42,11 @@ module.exports = {
         strip = strip || [];
         return clean(item, {strip: strip});
     },
-    compare: function(expected, actual, messageOrOptions, options) {
+    compare: function(expected, actual, options) {
         var opts = _.extend({
             strip: []
         }, options);
-        if (typeof messageOrOptions === 'object') {
-            _.extend(opts, messageOrOptions);
-            messageOrOptions = undefined;
-        }
-        expect(clean(actual, opts), messageOrOptions).to.deep.equals(clean(expected, opts));
+        expect(clean(actual, opts)).toEqual(clean(expected, opts));
     },
     getModel: function(dataSource, cache, errorSelector) {
         dataSource = dataSource || dataSource !== null && new LocalDataSource(Cache(), {errorSelector: errorSelector});
@@ -90,15 +84,15 @@ module.exports = {
 };
 
 function validateData(expected, actual) {
-    expect(actual, "actual").to.be.ok;
-    expect(expected, "expected").to.be.ok;
+    expect(actual).toBe(true);
+    expect(expected).toBe(true);
     var keys = Object.keys(expected);
 
     keys.forEach(function(key) {
         if(key == "values" && !actual[key]) {
             return;
         }
-        expect(actual[key], "actual." + key).to.be.ok;
+        expect(actual[key]).toBe(true);
     });
 }
 
@@ -112,23 +106,23 @@ function validateOperation(name, expected, actual, messageSuffix) {
     strip(actual, __key, "pathSetIndex");
 
     if (expected.values) {
-        expect(actual.values, name + ".values " + messageSuffix).
+        expect(actual.values).
             to.deep.equals(expected.values);
     }
     if (expected.errors) {
-        expect(actual.errors, name + ".errors " + messageSuffix).
+        expect(actual.errors).
             to.deep.equals(expected.errors);
     }
     if (expected.optimizedPaths) {
-        expect(actual.optimizedPaths, name + ".optimizedPaths " + messageSuffix).
+        expect(actual.optimizedPaths).
             to.deep.equals(expected.optimizedPaths);
     }
     if (expected.requestedMissingPaths) {
-        expect(actual.requestedMissingPaths, name + ".requestedMissingPaths " + messageSuffix).
+        expect(actual.requestedMissingPaths).
             to.deep.equals(expected.requestedMissingPaths);
     }
     if (expected.optimizedMissingPaths) {
-        expect(actual.optimizedMissingPaths, name + ".optimizedMissingPaths " + messageSuffix).
+        expect(actual.optimizedMissingPaths).
             to.deep.equals(expected.optimizedMissingPaths);
     }
 }

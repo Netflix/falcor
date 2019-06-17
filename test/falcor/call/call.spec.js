@@ -2,9 +2,6 @@ var falcor = require("./../../../lib/");
 var Model = falcor.Model;
 var LocalDataSource = require("../../data/LocalDataSource");
 var strip = require("../../cleanData").stripDerefAndVersionKeys;
-var chai = require("chai");
-var sinon = require("sinon");
-var expect = chai.expect;
 var noOp = function() {};
 var ModelResponse = require("./../../../lib/response/ModelResponse");
 var Rx5 = require("rxjs");
@@ -23,8 +20,8 @@ describe("Call", function() {
         var model = new Model({
             source: {
                 call: function(callPath, args, suffixes, extraPaths) {
-                    expect(callPath).to.deep.equal(["lists", "add"]);
-                    expect(extraPaths).to.deep.equal([[0, "summary"]]);
+                    expect(callPath).toEqual(["lists", "add"]);
+                    expect(extraPaths).toEqual([[0, "summary"]]);
                     done();
 
                     return {subscribe: noOp};
@@ -60,13 +57,13 @@ describe("Call", function() {
             }
         });
 
-        var onNext = sinon.spy();
-        var onNext2 = sinon.spy();
+        var onNext = jest.fn();
+        var onNext2 = jest.fn();
         toObservable(model.
             call(["test"], [])).
             doAction(onNext, noOp, function() {
-                expect(onNext.calledOnce).to.be.ok;
-                expect(strip(onNext.getCall(0).args[0])).to.deep.equals({
+                expect(onNext).toHaveBeenCalledTimes(1);
+                expect(strip(onNext.mock.calls[0][0])).toEqual({
                     json: {
                         a: "test"
                     }
@@ -78,8 +75,8 @@ describe("Call", function() {
                     get(["a"], ["b"]);
             }).
             doAction(onNext2, noOp, function() {
-                expect(onNext2.calledOnce).to.be.ok;
-                expect(strip(onNext2.getCall(0).args[0])).to.deep.equals({
+                expect(onNext2).toHaveBeenCalledTimes(1);
+                expect(strip(onNext2.mock.calls[0][0])).toEqual({
                     json: {
                         a: "test"
                     }
@@ -88,7 +85,7 @@ describe("Call", function() {
             subscribe(noOp, done, done);
     });
     it("should sent parsed arguments to the dataSource.", function(done) {
-        var call = sinon.spy(function() {
+        var call = jest.fn(function() {
             return {
                 subscribe: function(onNext, onError, onCompleted) {
                     onNext({jsonGraph: {
@@ -110,16 +107,16 @@ describe("Call", function() {
         toObservable(model.
             call("test.again", [], ["oneSuffix.a", "twoSuffix.b"], ["onePath.a", "twoPath.b"])).
             doAction(noOp, noOp, function() {
-                expect(call.calledOnce).to.be.ok;
+                expect(call).toHaveBeenCalledTimes(1);
 
-                var callArgs = call.getCall(0).args;
-                expect(callArgs[0]).to.deep.equals(["test", "again"]);
-                expect(callArgs[1]).to.deep.equals([]);
-                expect(callArgs[2]).to.deep.equals([
+                var callArgs = call.mock.calls[0];
+                expect(callArgs[0]).toEqual(["test", "again"]);
+                expect(callArgs[1]).toEqual([]);
+                expect(callArgs[2]).toEqual([
                     ["oneSuffix", "a"],
                     ["twoSuffix", "b"]
                 ]);
-                expect(callArgs[3]).to.deep.equals([
+                expect(callArgs[3]).toEqual([
                     ["onePath", "a"],
                     ["twoPath", "b"]
                 ]);
@@ -128,7 +125,7 @@ describe("Call", function() {
     });
 
     it("does not re-execute a call on multiple thens", function(done) {
-        var call = sinon.spy(function() {
+        var call = jest.fn(function() {
             return new ModelResponse(function(observer) {
                 observer.onNext({
                     jsonGraph: { a: "test" },
@@ -145,7 +142,7 @@ describe("Call", function() {
         var response = model.call(["add"], [], [], [[0, "summary"]]);
         response.then();
         response.then(function() {
-          expect(call.calledOnce).to.be.ok;
+          expect(call).toHaveBeenCalledTimes(1);
           done();
         }).catch(done);
     });
@@ -169,7 +166,7 @@ describe("ModelResponse", function() {
                 function(value) { results.push(value); },
                 null,
                 function() {
-                    expect(results).to.deep.equals([{
+                    expect(results).toEqual([{
                         jsonGraph: { a: "test" },
                         paths: [["a"]],
                         invalidated: []

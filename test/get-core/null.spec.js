@@ -3,7 +3,6 @@ var jsonGraph = require('falcor-json-graph');
 var atom = jsonGraph.atom;
 var ref = jsonGraph.ref;
 var NullInPathError = require('./../../lib/errors/NullInPathError');
-var expect = require('chai').expect;
 
 describe('Nulls', function() {
     it('should allow null at end of path.', function() {
@@ -22,8 +21,7 @@ describe('Nulls', function() {
     });
 
     it('should throw an error if null is in middle of path.', function() {
-        var error;
-        try {
+        expect(() => 
             getCoreRunner({
                 input: [['a', null, 'c']],
                 output: {
@@ -37,14 +35,7 @@ describe('Nulls', function() {
                         c: 'title'
                     }
                 }
-            });
-        }
-        catch (e) {
-            error = e;
-        }
-        finally {
-            expect(error instanceof NullInPathError).to.be.ok;
-        }
+            })).toThrow(NullInPathError)
     });
 });
 

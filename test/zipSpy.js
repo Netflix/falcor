@@ -1,4 +1,3 @@
-var sinon = require('sinon');
 module.exports = function zipSpy(count, cb, maxTime) {
     var done = false;
     if (maxTime) {
@@ -10,7 +9,7 @@ module.exports = function zipSpy(count, cb, maxTime) {
         }, maxTime);
     }
 
-    return sinon.spy(function() {
+    return jest.fn(function() {
         if (done) {
             return;
         }

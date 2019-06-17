@@ -1,5 +1,3 @@
-var chai = require("chai");
-var expect = chai.expect;
 var ModelResponseObserver = require("../../lib/response/ModelResponseObserver");
 
 describe("ModelResponseObserver", function() {
@@ -26,7 +24,7 @@ describe("ModelResponseObserver", function() {
             });
             modelResponseObserver.onNext(5);
 
-            expect(onNextValue).to.equal(5);
+            expect(onNextValue).toBe(5);
         }
     );
 
@@ -42,7 +40,7 @@ describe("ModelResponseObserver", function() {
             modelResponseObserver.onCompleted();
             modelResponseObserver.onNext(5);
 
-            expect(onNextValue).to.equal(undefined);
+            expect(onNextValue).toBe(undefined);
         }
     );
 
@@ -58,7 +56,7 @@ describe("ModelResponseObserver", function() {
             modelResponseObserver.onError();
             modelResponseObserver.onNext(5);
 
-            expect(onNextValue).to.equal(undefined);
+            expect(onNextValue).toBe(undefined);
         }
     );
 
@@ -75,8 +73,8 @@ describe("ModelResponseObserver", function() {
             modelResponseObserver.onError(1);
             modelResponseObserver.onError(2);
 
-            expect(onErrorValues.length).to.equal(1);
-            expect(onErrorValues[0]).to.equal(1);
+            expect(onErrorValues.length).toBe(1);
+            expect(onErrorValues[0]).toBe(1);
         }
     );
 
@@ -94,8 +92,8 @@ describe("ModelResponseObserver", function() {
             modelResponseObserver.onCompleted(1);
             modelResponseObserver.onCompleted(2);
 
-            expect(onCompletedValues.length).to.equal(1);
-            expect(onCompletedValues[0]).to.equal(undefined);
+            expect(onCompletedValues.length).toBe(1);
+            expect(onCompletedValues[0]).toBe(undefined);
         }
     );
 
@@ -110,7 +108,7 @@ describe("ModelResponseObserver", function() {
             });
             modelResponseObserver.onNext(5);
 
-            expect(onNextValue).to.equal(5);
+            expect(onNextValue).toBe(5);
         }
     );
 
@@ -126,7 +124,7 @@ describe("ModelResponseObserver", function() {
             modelResponseObserver.onCompleted();
             modelResponseObserver.onNext(5);
 
-            expect(onNextValue).to.equal(undefined);
+            expect(onNextValue).toBe(undefined);
         }
     );
 
@@ -142,7 +140,7 @@ describe("ModelResponseObserver", function() {
             modelResponseObserver.onError();
             modelResponseObserver.onNext(5);
 
-            expect(onNextValue).to.equal(undefined);
+            expect(onNextValue).toBe(undefined);
         }
     );
 
@@ -159,8 +157,8 @@ describe("ModelResponseObserver", function() {
             modelResponseObserver.onError(1);
             modelResponseObserver.onError(2);
 
-            expect(onErrorValues.length).to.equal(1);
-            expect(onErrorValues[0]).to.equal(1);
+            expect(onErrorValues.length).toBe(1);
+            expect(onErrorValues[0]).toBe(1);
         }
     );
 
@@ -178,8 +176,8 @@ describe("ModelResponseObserver", function() {
             modelResponseObserver.onCompleted(1);
             modelResponseObserver.onCompleted(2);
 
-            expect(onCompletedValues.length).to.equal(1);
-            expect(onCompletedValues[0]).to.equal(undefined);
+            expect(onCompletedValues.length).toBe(1);
+            expect(onCompletedValues[0]).toBe(undefined);
         }
     );
 });

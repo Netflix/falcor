@@ -6,7 +6,6 @@ var $pathValue = require("falcor-json-graph").pathValue;
 var $jsonGraph = require("../support/jsonGraph");
 var $jsonGraphEnvelope = require("../support/jsonGraphEnvelope");
 
-var expect = require('chai').expect;
 var getModel = require("../support/getModel");
 var setJSONGraphs = require("../../../lib/set/setJSONGraphs");
 
@@ -43,7 +42,7 @@ describe("an old reference over a newer reference", function() {
             }]
         );
 
-        expect(strip(cache)).to.deep.equal(strip({
+        expect(strip(cache)).toEqual(strip({
             grid: $ref("grids['id']"),
             grids: { id: { 0: $ref("lists['id']") } },
             lists: { id: { 0: $ref("movies['pulp-fiction']") } },

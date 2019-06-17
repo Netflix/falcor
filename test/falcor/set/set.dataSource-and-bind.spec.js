@@ -5,8 +5,6 @@ var noOp = function() {};
 var LocalDataSource = require('../../data/LocalDataSource');
 var ErrorDataSource = require('../../data/ErrorDataSource');
 var isPathValue = require("./../../../lib/support/isPathValue");
-var sinon = require('sinon');
-var expect = require('chai').expect;
 var strip = require('../../cleanData').stripDerefAndVersionKeys;
 var toObservable = require('../../toObs');
 
@@ -34,7 +32,7 @@ describe('DataSource and Deref', function() {
                 }
             })
         });
-        var onNext = sinon.spy();
+        var onNext = jest.fn();
         toObservable(model.
             get(['lolomo', 0, 0, 'item', 'title'])).
             flatMap(function(x) {
@@ -46,9 +44,9 @@ describe('DataSource and Deref', function() {
             }).
             doAction(onNext).
             doAction(noOp, noOp, function() {
-                expect(count).to.equals(2);
-                expect(onNext.calledOnce).to.be.ok;
-                expect(strip(onNext.getCall(0).args[0])).to.deep.equals({
+                expect(count).toBe(2);
+                expect(onNext).toHaveBeenCalledTimes(1);
+                expect(strip(onNext.mock.calls[0][0])).toEqual({
                     json: {
                         0: {
                             item: {

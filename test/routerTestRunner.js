@@ -1,5 +1,3 @@
-var chai = require('chai');
-var expect = chai.expect;
 var TestRunner = require('falcor-router/test/TestRunner');
 var RouterTestRunner = {
     run: function(obs, expected) {
@@ -12,7 +10,7 @@ var RouterTestRunner = {
                 });
                 count++;
             }, undefined, function() {
-                expect(count, 'The observable should have onNext\'d one time').to.equal(1);
+                expect(count).toBe(1);
             });
 
     },

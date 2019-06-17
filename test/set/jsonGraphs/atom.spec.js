@@ -5,7 +5,6 @@ var $pathValue = require("falcor-json-graph").pathValue;
 var $jsonGraph = require("../support/jsonGraph");
 var $jsonGraphEnvelope = require("../support/jsonGraphEnvelope");
 
-var expect = require('chai').expect;
 var getModel = require("../support/getModel");
 var setJSONGraphs = require("../../../lib/set/setJSONGraphs");
 
@@ -26,7 +25,7 @@ describe("an atom", function() {
             ])]
         );
 
-        expect(strip(cache)).to.deep.equal(strip({
+        expect(strip(cache)).toEqual(strip({
             movies: {
                 "pulp-fiction": {
                     "summary": $atom({
@@ -66,7 +65,7 @@ describe("an atom", function() {
             }]
         );
 
-        expect(strip(cache)).to.deep.equal(strip({
+        expect(strip(cache)).toEqual(strip({
             grid: $ref("grids['id']"),
             grids: { id: { 0: $ref("lists['id']") } },
             lists: { id: { 0: $ref("movies['pulp-fiction']") } },
@@ -100,7 +99,7 @@ describe("an atom", function() {
             ])]
         );
 
-        expect(strip(cache)).to.deep.equal(strip({
+        expect(strip(cache)).toEqual(strip({
             grid: $ref("grids['id']"),
             grids: { id: { 0: $ref("lists['id']") } },
             lists: { id: { 1: $ref("movies['kill-bill-1']") } },
@@ -133,7 +132,7 @@ describe("an atom", function() {
             ])]
         );
 
-        expect(strip(cache)).to.deep.equal(strip({
+        expect(strip(cache)).toEqual(strip({
             grid: $ref("grids['id']"),
             grids: { id: { 0: $ref("lists['id']") } },
             lists: { id: { 2: $ref("movies['reservior-dogs']") } },
@@ -166,7 +165,7 @@ describe("an atom", function() {
             ])]
         );
 
-        expect(strip(cache)).to.deep.equal(strip({
+        expect(strip(cache)).toEqual(strip({
             grid: $ref("grids['id']"),
             grids: { id: { 0: $ref("lists['id']") } },
             lists: { id: { 2: $ref("movies['reservior-dogs']") } },
@@ -204,7 +203,7 @@ describe("an atom", function() {
             ])]
         );
 
-        expect(strip(cache)).to.deep.equal(strip({
+        expect(strip(cache)).toEqual(strip({
             movies: {
                 "pulp-fiction": {
                     "summary": $atom({
@@ -230,7 +229,7 @@ describe("an atom", function() {
                     ])]
                 );
 
-                expect(strip(cache)).to.deep.equal(strip({
+                expect(strip(cache)).toEqual(strip({
                     movies: {
                         "pulp-fiction": { "genres": $atom(["Crime", "Drama", "Thriller"]) },
                         "kill-bill-1": { "genres": $atom(["Crime", "Drama", "Thriller"]) },
@@ -256,7 +255,7 @@ describe("an atom", function() {
                     ])]
                 );
 
-                expect(strip(cache)).to.deep.equal(strip({
+                expect(strip(cache)).toEqual(strip({
                     grid: $ref("grids['id']"),
                     grids: { id: { 0: $ref("lists['id']") } },
                     lists: { id: {
@@ -291,7 +290,7 @@ describe("an atom", function() {
                     ])]
                 );
 
-                expect(strip(cache)).to.deep.equal(strip({
+                expect(strip(cache)).toEqual(strip({
                     grid: $ref("grids['id']"),
                     grids: { id: { 0: $ref("lists['id']") } },
                     lists: { id: {
@@ -323,7 +322,7 @@ describe("an atom", function() {
                     ])]
                 );
 
-                expect(strip(cache)).to.deep.equal(strip({
+                expect(strip(cache)).toEqual(strip({
                     grid: $ref("grids['id']"),
                     grids: { id: { 0: $ref("lists['id']") } },
                     lists: { id: {
@@ -354,7 +353,7 @@ describe("an atom", function() {
                     ])]
                 );
 
-                expect(strip(cache)).to.deep.equal(strip({
+                expect(strip(cache)).toEqual(strip({
                     grid: $ref("grids['id']"),
                     grids: { id: { 0: $ref("lists['id']") } },
                     lists: { id: {
@@ -386,7 +385,7 @@ describe("an atom", function() {
                     ])]
                 );
 
-                expect(strip(cache)).to.deep.equal(strip({
+                expect(strip(cache)).toEqual(strip({
                     grid: $ref("grids['id']"),
                     grids: { id: { 0: $ref("lists['id']") } },
                     lists: { id: {
@@ -417,7 +416,7 @@ describe("an atom", function() {
                     ])]
                 );
 
-                expect(strip(cache)).to.deep.equal(strip({
+                expect(strip(cache)).toEqual(strip({
                     grid: $ref("grids['id']"),
                     grids: { id: { 0: $ref("lists['id']") } },
                     lists: { id: {

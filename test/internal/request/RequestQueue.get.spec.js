@@ -1,5 +1,3 @@
-var sinon = require('sinon');
-var expect = require('chai').expect;
 var RequestQueue = require('./../../../lib/request/RequestQueueV2');
 var ASAPScheduler = require('./../../../lib/schedulers/ASAPScheduler');
 var ImmediateScheduler = require('./../../../lib/schedulers/ImmediateScheduler');
@@ -22,16 +20,16 @@ describe('#get', function() {
         var source = new LocalDataSource(Cache());
         var model = new Model({source: source});
         var queue = new RequestQueue(model, scheduler);
-        var callback = sinon.spy();
+        var callback = jest.fn();
         queue.get([videos0], [videos0], callback);
 
-        expect(callback.calledOnce, 'callback should be called once.').to.be.ok;
-        var onNext = sinon.spy();
+        expect(callback).toHaveBeenCalledTimes(1);
+        var onNext = jest.fn();
         toObservable(model.
             withoutDataSource().
             get(videos0)).
             doAction(onNext, noOp, function() {
-                expect(strip(onNext.getCall(0).args[0])).to.deep.equals({
+                expect(strip(onNext.mock.calls[0][0])).toEqual({
                     json: {
                         videos: {
                             0: {
@@ -51,15 +49,15 @@ describe('#get', function() {
         var queue = new RequestQueue(model, scheduler);
 
         var zip = zipSpy(2, function() {
-            expect(queue._requests.length).to.equal(0);
-            expect(zip.callCount).to.equal(2);
+            expect(queue._requests.length).toBe(0);
+            expect(zip).toHaveBeenCalledTimes(2);
 
-            var onNext = sinon.spy();
+            var onNext = jest.fn();
             toObservable(model.
                 withoutDataSource().
                 get(videos0, videos1)).
                 doAction(onNext, noOp, function() {
-                    expect(strip(onNext.getCall(0).args[0])).to.deep.equals({
+                    expect(strip(onNext.mock.calls[0][0])).toEqual({
                         json: {
                             videos: {
                                 0: {
@@ -78,9 +76,9 @@ describe('#get', function() {
         queue.get([videos0], [videos0], zip);
         queue.get([videos1], [videos1], zip);
 
-        expect(queue._requests.length).to.equal(1);
-        expect(queue._requests[0].sent).to.equal(false);
-        expect(queue._requests[0].scheduled).to.equal(true);
+        expect(queue._requests.length).toBe(1);
+        expect(queue._requests[0].sent).toBe(false);
+        expect(queue._requests[0].scheduled).toBe(true);
     });
 
     it('should make a couple requests where the second argument is deduped.', function(done) {
@@ -90,15 +88,15 @@ describe('#get', function() {
         var queue = new RequestQueue(model, scheduler);
 
         var zip = zipSpy(2, function() {
-            expect(queue._requests.length).to.equal(0);
-            expect(zip.callCount).to.equal(2);
+            expect(queue._requests.length).toBe(0);
+            expect(zip).toHaveBeenCalledTimes(2);
 
-            var onNext = sinon.spy();
+            var onNext = jest.fn();
             toObservable(model.
                 withoutDataSource().
                 get(videos0, videos1)).
                 doAction(onNext, noOp, function() {
-                    expect(strip(onNext.getCall(0).args[0])).to.deep.equals({
+                    expect(strip(onNext.mock.calls[0][0])).toEqual({
                         json: {
                             videos: {
                                 0: {
@@ -112,14 +110,14 @@ describe('#get', function() {
         });
 
         queue.get([videos0], [videos0], zip);
-        expect(queue._requests.length).to.equal(1);
-        expect(queue._requests[0].sent).to.equal(true);
-        expect(queue._requests[0].scheduled).to.equal(false);
+        expect(queue._requests.length).toBe(1);
+        expect(queue._requests[0].sent).toBe(true);
+        expect(queue._requests[0].scheduled).toBe(false);
 
         queue.get([videos0], [videos0], zip);
-        expect(queue._requests.length).to.equal(1);
-        expect(queue._requests[0].sent).to.equal(true);
-        expect(queue._requests[0].scheduled).to.equal(false);
+        expect(queue._requests.length).toBe(1);
+        expect(queue._requests[0].sent).toBe(true);
+        expect(queue._requests[0].scheduled).toBe(false);
     });
 
     it('should make a couple requests where only part of the second request is deduped then first request is disposed.', function(done) {
@@ -130,13 +128,13 @@ describe('#get', function() {
 
         var zip = zipSpy(2, function() {
 
-            var onNext = sinon.spy();
+            var onNext = jest.fn();
             toObservable(model.
                 withoutDataSource().
                 get(videos0, videos1)).
                 doAction(onNext, noOp, function() {
-                    expect(zip.calledOnce, 'zip should be called once.').to.be.ok;
-                    expect(strip(onNext.getCall(0).args[0])).to.deep.equals({
+                    expect(zip).toHaveBeenCalledTimes(1);
+                    expect(strip(onNext.mock.calls[0][0])).toEqual({
                         json: {
                             videos: {
                                 0: {
@@ -153,16 +151,16 @@ describe('#get', function() {
         }, 300);
 
         var disposable = queue.get([videos0], [videos0], zip);
-        expect(queue._requests.length).to.equal(1);
-        expect(queue._requests[0].sent).to.equal(true);
-        expect(queue._requests[0].scheduled).to.equal(false);
+        expect(queue._requests.length).toBe(1);
+        expect(queue._requests[0].sent).toBe(true);
+        expect(queue._requests[0].scheduled).toBe(false);
 
         queue.get([videos0, videos1], [videos0, videos1], zip);
-        expect(queue._requests.length).to.equal(2);
-        expect(queue._requests[0].sent).to.equal(true);
-        expect(queue._requests[1].sent).to.equal(true);
-        expect(queue._requests[0].scheduled).to.equal(false);
-        expect(queue._requests[1].scheduled).to.equal(false);
+        expect(queue._requests.length).toBe(2);
+        expect(queue._requests[0].sent).toBe(true);
+        expect(queue._requests[1].sent).toBe(true);
+        expect(queue._requests[0].scheduled).toBe(false);
+        expect(queue._requests[1].scheduled).toBe(false);
 
         disposable();
     });
@@ -175,13 +173,13 @@ describe('#get', function() {
 
         var zip = zipSpy(2, function() {
 
-            var onNext = sinon.spy();
+            var onNext = jest.fn();
             toObservable(model.
                 withoutDataSource().
                 get(videos0, videos1)).
                 doAction(onNext, noOp, function() {
-                    expect(zip.calledOnce).to.be.ok;
-                    expect(strip(onNext.getCall(0).args[0])).to.deep.equals({
+                    expect(zip).toHaveBeenCalledTimes(1);
+                    expect(strip(onNext.mock.calls[0][0])).toEqual({
                         json: {
                             videos: {
                                 0: {
@@ -195,14 +193,14 @@ describe('#get', function() {
         }, 300);
 
         var disposable = queue.get([videos0], [videos0], zip);
-        expect(queue._requests.length).to.equal(1);
-        expect(queue._requests[0].sent).to.equal(true);
-        expect(queue._requests[0].scheduled).to.equal(false);
+        expect(queue._requests.length).toBe(1);
+        expect(queue._requests[0].sent).toBe(true);
+        expect(queue._requests[0].scheduled).toBe(false);
 
         queue.get([videos0], [videos0], zip);
-        expect(queue._requests.length).to.equal(1);
-        expect(queue._requests[0].sent).to.equal(true);
-        expect(queue._requests[0].scheduled).to.equal(false);
+        expect(queue._requests.length).toBe(1);
+        expect(queue._requests[0].sent).toBe(true);
+        expect(queue._requests[0].scheduled).toBe(false);
 
         disposable();
     });
@@ -215,26 +213,26 @@ describe('#get', function() {
 
         var zip = zipSpy(2, function() {
 
-            var onNext = sinon.spy();
+            var onNext = jest.fn();
             toObservable(model.
                 withoutDataSource().
                 get(videos0, videos1)).
                 doAction(onNext, noOp, function() {
-                    expect(zip.callCount).to.equal(0);
-                    expect(onNext.callCount).to.equal(1);
+                    expect(zip).not.toHaveBeenCalled();
+                    expect(onNext).toHaveBeenCalledTimes(1);
                 }).
                 subscribe(noOp, done, done);
         }, 300);
 
         var disposable = queue.get([videos0], [videos0], zip);
-        expect(queue._requests.length).to.equal(1);
-        expect(queue._requests[0].sent).to.equal(true);
-        expect(queue._requests[0].scheduled).to.equal(false);
+        expect(queue._requests.length).toBe(1);
+        expect(queue._requests[0].sent).toBe(true);
+        expect(queue._requests[0].scheduled).toBe(false);
 
         var disposable2 = queue.get([videos0], [videos0], zip);
-        expect(queue._requests.length).to.equal(1);
-        expect(queue._requests[0].sent).to.equal(true);
-        expect(queue._requests[0].scheduled).to.equal(false);
+        expect(queue._requests.length).toBe(1);
+        expect(queue._requests[0].sent).toBe(true);
+        expect(queue._requests[0].scheduled).toBe(false);
 
         disposable();
         disposable2();
@@ -248,13 +246,13 @@ describe('#get', function() {
 
         var zip = zipSpy(2, function() {
 
-            var onNext = sinon.spy();
+            var onNext = jest.fn();
             toObservable(model.
                 withoutDataSource().
                 get(videos0, videos1)).
                 doAction(onNext, noOp, function() {
-                    expect(zip.calledOnce).to.be.ok;
-                    expect(strip(onNext.getCall(0).args[0])).to.deep.equals({
+                    expect(zip).toHaveBeenCalledTimes(1);
+                    expect(strip(onNext.mock.calls[0][0])).toEqual({
                         json: {
                             videos: {
                                 0: {
@@ -268,14 +266,14 @@ describe('#get', function() {
         }, 300);
 
         queue.get([videos0], [videos0], zip);
-        expect(queue._requests.length).to.equal(1);
-        expect(queue._requests[0].sent).to.equal(true);
-        expect(queue._requests[0].scheduled).to.equal(false);
+        expect(queue._requests.length).toBe(1);
+        expect(queue._requests[0].sent).toBe(true);
+        expect(queue._requests[0].scheduled).toBe(false);
 
         var disposable2 = queue.get([videos0, videos1], [videos0, videos1], zip);
-        expect(queue._requests.length).to.equal(2);
-        expect(queue._requests[1].sent).to.equal(true);
-        expect(queue._requests[1].scheduled).to.equal(false);
+        expect(queue._requests.length).toBe(2);
+        expect(queue._requests[1].sent).toBe(true);
+        expect(queue._requests[1].scheduled).toBe(false);
 
         disposable2();
     });
@@ -287,26 +285,26 @@ describe('#get', function() {
         var queue = new RequestQueue(model, scheduler);
 
         var zip = zipSpy(2, function() {
-            var onNext = sinon.spy();
+            var onNext = jest.fn();
             toObservable(model.
                 withoutDataSource().
                 get(videos0, videos1)).
                 doAction(onNext, noOp, function() {
-                    expect(zip.callCount).to.equal(0);
-                    expect(onNext.callCount).to.equal(1);
+                    expect(zip).not.toHaveBeenCalled();
+                    expect(onNext).toHaveBeenCalledTimes(1);
                 }).
                 subscribe(noOp, done, done);
         }, 300);
 
         var disposable = queue.get([videos0], [videos0], zip);
-        expect(queue._requests.length).to.equal(1);
-        expect(queue._requests[0].sent).to.equal(true);
-        expect(queue._requests[0].scheduled).to.equal(false);
+        expect(queue._requests.length).toBe(1);
+        expect(queue._requests[0].sent).toBe(true);
+        expect(queue._requests[0].scheduled).toBe(false);
 
         var disposable2 = queue.get([videos0, videos1], [videos0, videos1], zip);
-        expect(queue._requests.length).to.equal(2);
-        expect(queue._requests[1].sent).to.equal(true);
-        expect(queue._requests[1].scheduled).to.equal(false);
+        expect(queue._requests.length).toBe(2);
+        expect(queue._requests[1].sent).toBe(true);
+        expect(queue._requests[1].scheduled).toBe(false);
 
         disposable();
         disposable2();

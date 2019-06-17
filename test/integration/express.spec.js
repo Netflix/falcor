@@ -6,8 +6,6 @@ var FalcorRouter = require('falcor-router');
 var falcor = require('./../../browser');
 var Model = falcor.Model;
 var HttpDataSource = falcor.HttpDataSource;
-var expect = require('chai').expect;
-var sinon = require('sinon');
 var noOp = function() {};
 var strip = require('./../cleanData').stripDerefAndVersionKeys;
 var toObservable = require('../toObs');
@@ -32,20 +30,20 @@ describe('Express Integration', function() {
             ]);
         }));
 
-        server = app.listen(1337, done);
+        server = app.listen(60001, done);
     });
 
     it('should be able to perform the express demo.', function(done) {
         var model = new falcor.Model({
-            source: new falcor.HttpDataSource('http://localhost:1337/model.json')
+            source: new falcor.HttpDataSource('http://localhost:60001/model.json')
         });
-        var onNext = sinon.spy();
+        var onNext = jest.fn();
 
         toObservable(model.
             get('greeting')).
             doAction(onNext, noOp, function() {
-                expect(onNext.calledOnce).to.be.ok;
-                expect(strip(onNext.getCall(0).args[0])).to.deep.equals({
+                expect(onNext).toHaveBeenCalledTimes(1);
+                expect(strip(onNext.mock.calls[0][0])).toEqual({
                     json: {
                         greeting: 'Hello World'
                     }

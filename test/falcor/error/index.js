@@ -3,9 +3,6 @@ var LocalDataSource = require("../../data/ErrorDataSource");
 var clean = require("../../cleanData").clean;
 var falcor = require("./../../../lib/");
 var Model = falcor.Model;
-var chai = require("chai");
-var expect = chai.expect;
-var sinon = require('sinon');
 var noOp = function() {};
 var InvalidSourceError = require('../../../lib/errors/InvalidSourceError');
 var errorOnCompleted = require('./../../errorOnCompleted');
@@ -18,12 +15,12 @@ describe("Error", function() {
             source: new ErrorDataSource(503, "Timeout"),
             _treatDataSourceErrorsAsJSONGraphErrors: true
         });
-        var onNext = sinon.spy();
+        var onNext = jest.fn();
         toObservable(model.
             get(["test", {to: 5}, "summary"])).
             doAction(onNext, function(err) {
-                expect(onNext.callCount).to.equal(1);
-                expect(clean(onNext.getCall(0).args[0])).to.deep.equal({
+                expect(onNext).toHaveBeenCalledTimes(1);
+                expect(clean(onNext.mock.calls[0][0])).toEqual({
                     json: {
                         test: {
                             0: {},
@@ -35,7 +32,7 @@ describe("Error", function() {
                         }
                     }
                 });
-                expect(err.length).to.equal(6);
+                expect(err.length).toBe(6);
                 // not in boxValue mode
                 var expected = {
                     path: [],
@@ -46,7 +43,7 @@ describe("Error", function() {
                 };
                 err.forEach(function(e, i) {
                     expected.path = ["test", i, "summary"];
-                    expect(e).to.deep.equals(expected);
+                    expect(e).toEqual(expected);
                 });
             }).
             subscribe(noOp,
@@ -78,7 +75,7 @@ describe("Error", function() {
                     }
                 };
 
-                expect(err).to.deep.equals(expected);
+                expect(err).toEqual(expected);
             }).
             subscribe(noOp,
             function(e) {
@@ -108,14 +105,14 @@ describe("Error", function() {
                 }
             }
         });
-        var onNext = sinon.spy();
+        var onNext = jest.fn();
         toObservable(model.
             get(["test", {to: 5}, "summary"])).
             doAction(onNext, function(err) {
 
                 // Ensure onNext is called correctly
-                expect(onNext.callCount).to.equal(1);
-                expect(err.length).to.equal(4);
+                expect(onNext).toHaveBeenCalledTimes(1);
+                expect(err.length).toBe(4);
                 // not in boxValue mode
                 var expected = {
                     path: [],
@@ -126,7 +123,7 @@ describe("Error", function() {
                 };
                 err.forEach(function(e, i) {
                     expected.path = ["test", i + 1, "summary"];
-                    expect(e).to.deep.equals(expected);
+                    expect(e).toEqual(expected);
                 });
             }).
             subscribe(noOp, doneOnError(done), errorOnCompleted(done));
@@ -146,13 +143,13 @@ describe("Error", function() {
                 }
             }
         });
-        var onNext = sinon.spy();
+        var onNext = jest.fn();
         toObservable(model.
             get(["test", {to: 5}, "summary"])).
             doAction(onNext, function(err) {
 
-                expect(onNext.callCount, 'onNext called').to.equal(1);
-                expect(clean(onNext.getCall(0).args[0])).to.deep.equal({
+                expect(onNext).toHaveBeenCalledTimes(1);
+                expect(clean(onNext.mock.calls[0][0])).toEqual({
                     json: {
                         test: {
                             0: {
@@ -173,7 +170,7 @@ describe("Error", function() {
                         message: "Timeout"
                     }
                 };
-                expect(err).to.deep.equals(expected);
+                expect(err).toEqual(expected);
             }).
             subscribe(noOp, doneOnError(done), errorOnCompleted(done));
     });
@@ -205,13 +202,13 @@ describe("Error", function() {
                 }
             }).asDataSource()
         });
-        var onNext = sinon.spy();
+        var onNext = jest.fn();
         toObservable(model.
             get(["test", {to: 1}, "summary"])).
             doAction(onNext, function(err) {
 
-                expect(onNext.callCount, 'onNext called').to.equal(1);
-                expect(clean(onNext.getCall(0).args[0])).to.deep.equal({
+                expect(onNext).toHaveBeenCalledTimes(1);
+                expect(clean(onNext.mock.calls[0][0])).toEqual({
                     json: {
                         test: {
                             0: {},
@@ -225,7 +222,7 @@ describe("Error", function() {
                     {"path":["test",0,"summary"],"value":{"message":"Oops!","status":500}},
                     {"path":["test",1,"summary"],"value":{"message":"Oops!","status":500}}
                 ];
-                expect(err).to.deep.equals(expected);
+                expect(err).toEqual(expected);
             }).
             subscribe(noOp, doneOnError(done), errorOnCompleted(done));
     });
@@ -257,13 +254,13 @@ describe("Error", function() {
                 }
             }).asDataSource()
         });
-        var onNext = sinon.spy();
+        var onNext = jest.fn();
         toObservable(model.
             get(["test", {to: 5}, "summary"])).
             doAction(onNext, function(err) {
 
-                expect(onNext.callCount, 'onNext called').to.equal(1);
-                expect(clean(onNext.getCall(0).args[0]), 'json from onNext').to.deep.equals({
+                expect(onNext).toHaveBeenCalledTimes(1);
+                expect(clean(onNext.mock.calls[0][0]), 'json from onNext').toEqual({
                     json: {
                         test: {
                             0: {},
@@ -277,7 +274,7 @@ describe("Error", function() {
                     {"path":["test",0,"summary"],"value":{"message":"Oops!","status":500}},
                     {"path":["test",5,"summary"],"value":{"message":"Oops!","status":500}}
                 ];
-                expect(err).to.deep.equals(expected);
+                expect(err).toEqual(expected);
             }).
             subscribe(noOp, doneOnError(done), errorOnCompleted(done));
     });
@@ -289,8 +286,8 @@ describe("Error", function() {
             }
         };
         var model = new falcor.Model({ source: routes });
-        var onNext = sinon.spy();
-        var onError = sinon.spy();
+        var onNext = jest.fn();
+        var onError = jest.fn();
         toObservable(model.
             set({
                 paths: [['titlesById', 242, 'rating']],
@@ -304,9 +301,9 @@ describe("Error", function() {
             })).
             doAction(onNext, onError).
             doAction(noOp, function() {
-                expect(onNext.callCount).to.equal(0);
-                expect(onError.calledOnce).to.be.ok;
-                expect(onError.getCall(0).args[0].name).to.equals(InvalidSourceError.name);
+                expect(onNext).not.toHaveBeenCalled();
+                expect(onError).toHaveBeenCalledTimes(1);
+                expect(onError.mock.calls[0][0].name).toBe(InvalidSourceError.name);
             }).
             subscribe(noOp, function(e) {
                 if (isAssertionError(e)) {
@@ -323,18 +320,18 @@ describe("Error", function() {
             }
         };
         var model = new falcor.Model({ source: routes });
-        var onNext = sinon.spy();
-        var onError = sinon.spy();
+        var onNext = jest.fn();
+        var onError = jest.fn();
         toObservable(model.
             get(['path', 'to', 'value'])).
             doAction(onNext, function(e) {
-                expect(onNext.callCount).to.equal(1);
-                expect(clean(onNext.getCall(0).args[0])).to.deep.equal({
+                expect(onNext).toHaveBeenCalledTimes(1);
+                expect(clean(onNext.mock.calls[0][0])).toEqual({
                     json: {
 
                     }
                 })
-                expect(e.name, 'Expect error to be an InvalidSourceError').to.equals(InvalidSourceError.name);
+                expect(e.name).toBe(InvalidSourceError.name);
             }).
             subscribe(noOp, function(e) {
                 if (isAssertionError(e)) {
@@ -351,13 +348,13 @@ describe("Error", function() {
             }
         };
         var model = new falcor.Model({ source: routes });
-        var onNext = sinon.spy();
+        var onNext = jest.fn();
         toObservable(model.
             call(['videos', 1234, 'rating'], 5)).
             doAction(onNext).
             doAction(noOp, function(err) {
-                expect(onNext.callCount).to.equal(0);
-                expect(err.name).to.equals(InvalidSourceError.name);
+                expect(onNext).not.toHaveBeenCalled();
+                expect(err.name).toBe(InvalidSourceError.name);
             }).
             subscribe(noOp, function(e) {
                 if (isAssertionError(e)) {

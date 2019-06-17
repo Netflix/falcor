@@ -1,8 +1,6 @@
 var falcor = require("./../../../lib/");
 var Model = falcor.Model;
 var noOp = function() {};
-var expect = require('chai').expect;
-var sinon = require('sinon');
 var strip = require('./../../cleanData').stripDerefAndVersionKeys;
 var cacheGenerator = require('./../../CacheGenerator');
 var Cache = require('./../../data/Cache');
@@ -16,12 +14,12 @@ describe('Cache Only', function() {
             var model = new Model({
                 cache: cacheGenerator(0, 1)
             });
-            var onNext = sinon.spy();
+            var onNext = jest.fn();
             toObservable(model.
                 set({path: ['videos', 0, 'title'], value: 'V0'})).
                 doAction(onNext, noOp, function() {
-                    expect(onNext.calledOnce).to.be.ok;
-                    expect(strip(onNext.getCall(0).args[0])).to.deep.equals({
+                    expect(onNext).toHaveBeenCalledTimes(1);
+                    expect(strip(onNext.mock.calls[0][0])).toEqual({
                         json: {
                             videos: {
                                 0: {
@@ -38,7 +36,7 @@ describe('Cache Only', function() {
             var model = new Model({
                 cache: cacheGenerator(0, 3)
             });
-            var onNext = sinon.spy();
+            var onNext = jest.fn();
             toObservable(model.
                 set({
                     path: ['videos', 0, 'title'],
@@ -62,8 +60,8 @@ describe('Cache Only', function() {
                     }
                 })).
                 doAction(onNext, noOp, function() {
-                    expect(onNext.calledOnce).to.be.ok;
-                    expect(strip(onNext.getCall(0).args[0])).to.deep.equals({
+                    expect(onNext).toHaveBeenCalledTimes(1);
+                    expect(strip(onNext.mock.calls[0][0])).toEqual({
                         json: {
                             videos: {
                                 0: {
@@ -87,13 +85,13 @@ describe('Cache Only', function() {
             var model = new Model({
                 cache: cacheGenerator(0, 1)
             });
-            var onNext = sinon.spy();
+            var onNext = jest.fn();
             toObservable(model.
                 set({path: ['videos', 0, 'title'], value: 'V0'}).
                 _toJSONG()).
                 doAction(onNext, noOp, function() {
-                    expect(onNext.calledOnce).to.be.ok;
-                    expect(strip(onNext.getCall(0).args[0])).to.deep.equals({
+                    expect(onNext).toHaveBeenCalledTimes(1);
+                    expect(strip(onNext.mock.calls[0][0])).toEqual({
                         jsonGraph: {
                             videos: {
                                 0: {
@@ -111,9 +109,9 @@ describe('Cache Only', function() {
     describe('Error Selector (during set)', function() {
 
         function generateErrorSelectorSpy(expectedPath) {
-            return sinon.spy(function(path, atom) {
-                expect(atom.$type).to.equal('error');
-                expect(atom.value.message).to.equal('errormsg');
+            return jest.fn(function(path, atom) {
+                expect(atom.$type).toBe('error');
+                expect(atom.value.message).toBe('errormsg');
 
                 var o = {
                     $type: atom.$type,
@@ -133,11 +131,11 @@ describe('Cache Only', function() {
             var value = e.value;
 
             // To avoid hardcoding/scrubbing $size, and other internals
-            expect(path).to.deep.equals(expectedPath);
+            expect(path).toEqual(expectedPath);
 
-            expect(value.$type).to.equal('error');
-            expect(value.$custom).to.equal('custom');
-            expect(value.value).to.deep.equals({
+            expect(value.$type).toBe('error');
+            expect(value.$custom).toBe('custom');
+            expect(value.value).toEqual({
                 message: 'errormsg',
                 customtype: 'customtype'
             });
@@ -149,8 +147,8 @@ describe('Cache Only', function() {
 
             var modelCache = Cache();
 
-            var onNextSpy = sinon.spy();
-            var onErrorSpy = sinon.spy();
+            var onNextSpy = jest.fn();
+            var onErrorSpy = jest.fn();
             var errorSelectorSpy = generateErrorSelectorSpy(testPath);
 
             var model = new Model({
@@ -165,19 +163,19 @@ describe('Cache Only', function() {
                 subscribe(
                     noOp,
                     function(e) {
-                        expect(errorSelectorSpy.callCount).to.equal(1);
-                        expect(errorSelectorSpy.getCall(0).args[0]).to.deep.equals(testPath);
+                        expect(errorSelectorSpy).toHaveBeenCalledTimes(1);
+                        expect(errorSelectorSpy.mock.calls[0][0]).toEqual(testPath);
 
-                        expect(onErrorSpy.callCount).to.equal(1);
+                        expect(onErrorSpy).toHaveBeenCalledTimes(1);
 
-                        expect(e.length).to.equal(1);
+                        expect(e.length).toBe(1);
                         assertExpectedErrorPayload(e[0], testPath);
 
                         done();
                     },
                     function() {
-                        expect(onNextSpy.callCount).to.equal(0);
-                        expect(onErrorSpy.callCount).to.equal(1);
+                        expect(onNextSpy).not.toHaveBeenCalled();
+                        expect(onErrorSpy).toHaveBeenCalledTimes(1);
                         done();
                     });
         });
@@ -187,8 +185,8 @@ describe('Cache Only', function() {
 
             var modelCache = Cache();
 
-            var onNextSpy = sinon.spy();
-            var onErrorSpy = sinon.spy();
+            var onNextSpy = jest.fn();
+            var onErrorSpy = jest.fn();
             var errorSelectorSpy = generateErrorSelectorSpy(testPath);
 
             var model = new Model({
@@ -206,19 +204,19 @@ describe('Cache Only', function() {
                 subscribe(
                     noOp,
                     function(e) {
-                        expect(errorSelectorSpy.callCount).to.equal(2);
-                        expect(errorSelectorSpy.getCall(0).args[0]).to.deep.equals(['genreList',0,0,'errorPath']);
-                        expect(errorSelectorSpy.getCall(1).args[0]).to.deep.equals(['genreList',1,0,'errorPath']);
+                        expect(errorSelectorSpy).toHaveBeenCalledTimes(2);
+                        expect(errorSelectorSpy.mock.calls[0][0]).toEqual(['genreList',0,0,'errorPath']);
+                        expect(errorSelectorSpy.mock.calls[1][0]).toEqual(['genreList',1,0,'errorPath']);
 
-                        expect(e.length).to.equal(2);
+                        expect(e.length).toBe(2);
                         assertExpectedErrorPayload(e[0], ['genreList',0,0,'errorPath']);
                         assertExpectedErrorPayload(e[1], ['genreList',1,0,'errorPath']);
 
                         done();
                     },
                     function() {
-                        expect(onNextSpy.callCount).to.equal(0);
-                        expect(onErrorSpy.callCount).to.equal(1);
+                        expect(onNextSpy).not.toHaveBeenCalled();
+                        expect(onErrorSpy).toHaveBeenCalledTimes(1);
                         done();
                     });
         });
@@ -229,8 +227,8 @@ describe('Cache Only', function() {
 
             var modelCache = Cache();
 
-            var onNextSpy = sinon.spy();
-            var onErrorSpy = sinon.spy();
+            var onNextSpy = jest.fn();
+            var onErrorSpy = jest.fn();
 
             var model = new Model({
                 cache : modelCache,
@@ -255,15 +253,15 @@ describe('Cache Only', function() {
                 subscribe(
                     noOp,
                     function(e) {
-                        expect(onErrorSpy.callCount).to.equal(0);
+                        expect(onErrorSpy).not.toHaveBeenCalled();
                         done();
                     },
                     function() {
 
-                        expect(onErrorSpy.callCount).to.equal(0);
-                        expect(onNextSpy.callCount).to.equal(1);
+                        expect(onErrorSpy).not.toHaveBeenCalled();
+                        expect(onNextSpy).toHaveBeenCalledTimes(1);
 
-                        expect(onNextSpy.getCall(0).args[0]).to.deep.equals({
+                        expect(onNextSpy.mock.calls[0][0]).toEqual({
                             $type: 'atom',
                             $custom: 'custom',
                             value: {

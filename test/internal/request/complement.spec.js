@@ -1,10 +1,9 @@
-const expect = require("chai").expect;
 const complement = require("../../../lib/request/complement");
 const findPartialIntersections = require("../../../lib/request/complement").__test.findPartialIntersections;
 
 describe("complement", () => {
     it("handles empty path sets", () => {
-        expect(complement([], [], {})).to.deep.equal({
+        expect(complement([], [], {})).toEqual({
             intersection: [],
             optimizedComplement: [],
             requestedComplement: []
@@ -13,7 +12,7 @@ describe("complement", () => {
 
     it("returns all paths if no deduping possible", () => {
         const paths = [["videos", 0, "title"]];
-        expect(complement(paths, paths, {})).to.deep.equal({
+        expect(complement(paths, paths, {})).toEqual({
             intersection: [],
             optimizedComplement: paths,
             requestedComplement: paths
@@ -25,7 +24,7 @@ describe("complement", () => {
         const paths = [partialMatchingPath];
         const pathTree = { 3: { videos: { 0: { title: null } } } };
 
-        expect(complement(paths, paths, pathTree)).to.deep.equal({
+        expect(complement(paths, paths, pathTree)).toEqual({
             intersection: [["videos", 0, "title"]],
             optimizedComplement: [["videos", 1, "title"]],
             requestedComplement: [["videos", 1, "title"]]
@@ -46,7 +45,7 @@ describe("findPartialIntersections", () => {
         const requestedPath = ["videos", 0, "title"];
         const optimizedPath = ["videosById", 1232, "title"];
 
-        expect(findPartialIntersections(requestedPath, optimizedPath, {})).to.deep.equal([
+        expect(findPartialIntersections(requestedPath, optimizedPath, {})).toEqual([
             [],
             [optimizedPath],
             [requestedPath]
@@ -54,7 +53,7 @@ describe("findPartialIntersections", () => {
     });
 
     it("returns the intersection consisting of paths that can be fully deduped", () => {
-        expect(findPartialIntersections(matchingPath, matchingPath, matchingPathTree)).to.deep.equal([
+        expect(findPartialIntersections(matchingPath, matchingPath, matchingPathTree)).toEqual([
             [matchingPath],
             [],
             []
@@ -69,7 +68,7 @@ describe("findPartialIntersections", () => {
 
             expect(
                 findPartialIntersections(partialMatchingRequestedPath, partialMatchingOptimizedPath, pathTree)
-            ).to.deep.equal([
+            ).toEqual([
                 [["lolomo", 123, 0, 0, "title"]],
                 [["videosById", 456, "boxart"]],
                 [["lolomo", 123, 0, 0, "boxart"]]
@@ -85,7 +84,7 @@ describe("findPartialIntersections", () => {
 
             expect(
                 findPartialIntersections(partialMatchingRequestedPath, partialMatchingOptimizedPath, pathTree)
-            ).to.deep.equal([
+            ).toEqual([
                 [["videos", 123, "title"]],
                 [["some", "weird", "long", "ref", 456, "boxart"]],
                 [["videos", 123, "boxart"]]
@@ -97,7 +96,7 @@ describe("findPartialIntersections", () => {
             const optimizedPath = ["some", "weird", "long", "ref", 456, "title"];
             const pathTree = { some: { differentPath: null } };
 
-            expect(findPartialIntersections(requestedPath, optimizedPath, pathTree)).to.deep.equal([
+            expect(findPartialIntersections(requestedPath, optimizedPath, pathTree)).toEqual([
                 [],
                 [optimizedPath],
                 [requestedPath]

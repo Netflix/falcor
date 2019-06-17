@@ -1,5 +1,3 @@
-var sinon = require('sinon');
-var expect = require('chai').expect;
 var ASAPScheduler = require('./../../../lib/schedulers/ASAPScheduler');
 var Rx = require('rx');
 var Model = require('./../../../lib').Model;
@@ -10,7 +8,7 @@ describe('GetRequest', function() {
 
     it('unsubscribing should cancel DataSource request (sync scheduler).', function() {
         var unsubscribeSpy;
-        var subscribeSpy = sinon.spy(function(observerOrOnNext, onError, onCompleted) {
+        var subscribeSpy = jest.fn(function(observerOrOnNext, onError, onCompleted) {
             var handle = setTimeout(function() {
                 var response = {
                     jsonGraph: {
@@ -31,7 +29,7 @@ describe('GetRequest', function() {
                 }
             });
 
-            unsubscribeSpy = sinon.spy(function() {
+            unsubscribeSpy = jest.fn(function() {
                 clearTimeout(handle);
             });
 
@@ -55,29 +53,24 @@ describe('GetRequest', function() {
             }
         });
 
-        var onNext = sinon.spy();
-        var onError = sinon.spy();
-        var onCompleted = sinon.spy();
+        var onNext = jest.fn();
+        var onError = jest.fn();
+        var onCompleted = jest.fn();
 
         var subscription = model.get("list[0,1].name").
             subscribe(onNext, onError, onCompleted);
 
         subscription.dispose();
 
-        if (!subscribeSpy.calledOnce) {
-            throw new Error("subscribe not called.");
-        }
-        if (!unsubscribeSpy.calledOnce) {
-            throw new Error("DataSource unsubscribe not called.");
-        }
-
-        if (onNext.callCount + onError.callCount + onCompleted.callCount !== 0) {
-            throw new Error("onNext, onError, or onCompleted was called.");
-        }
+        expect(subscribeSpy).toHaveBeenCalledTimes(1);
+        expect(unsubscribeSpy).toHaveBeenCalledTimes(1);
+        expect(onNext).not.toHaveBeenCalled();
+        expect(onError).not.toHaveBeenCalled();
+        expect(onCompleted).not.toHaveBeenCalled();
     });
 
     it('unsubscribing should cancel DataSource request (async scheduler, unsubscribed immediate).', function() {
-        var subscribeSpy = sinon.spy(function(observerOrOnNext, onError, onCompleted) {
+        var subscribeSpy = jest.fn(function(observerOrOnNext, onError, onCompleted) {
             var handle = setTimeout(function() {
                 var response = {
                     jsonGraph: {
@@ -120,27 +113,24 @@ describe('GetRequest', function() {
             }
         });
 
-        var onNext = sinon.spy();
-        var onError = sinon.spy();
-        var onCompleted = sinon.spy();
+        var onNext = jest.fn();
+        var onError = jest.fn();
+        var onCompleted = jest.fn();
 
         var subscription = model.get("list[0,1].name").
             subscribe(onNext, onError, onCompleted);
 
         subscription.dispose();
 
-        if (subscribeSpy.callCount !== 0) {
-            throw new Error("subscribe called at least once.");
-        }
-
-        if (onNext.callCount + onError.callCount + onCompleted.callCount !== 0) {
-            throw new Error("onNext, onError, or onCompleted was called.");
-        }
+        expect(subscribeSpy).not.toHaveBeenCalled();
+        expect(onNext).not.toHaveBeenCalled();
+        expect(onError).not.toHaveBeenCalled();
+        expect(onCompleted).not.toHaveBeenCalled();
     });
 
     it('unsubscribing should cancel DataSource request (async scheduler, unsubscribed after subscribe).', function(done) {
         var unsubscribeSpy;
-        var subscribeSpy = sinon.spy(function(observerOrOnNext, onError, onCompleted) {
+        var subscribeSpy = jest.fn(function(observerOrOnNext, onError, onCompleted) {
             var handle = setTimeout(function() {
                 var response = {
                     jsonGraph: {
@@ -161,7 +151,7 @@ describe('GetRequest', function() {
                 }
             }, 100000);
 
-            unsubscribeSpy = sinon.spy(function() {
+            unsubscribeSpy = jest.fn(function() {
                 clearTimeout(handle);
             });
 
@@ -185,9 +175,9 @@ describe('GetRequest', function() {
             }
         });
 
-        var onNext = sinon.spy();
-        var onError = sinon.spy();
-        var onCompleted = sinon.spy();
+        var onNext = jest.fn();
+        var onError = jest.fn();
+        var onCompleted = jest.fn();
 
         var subscription = model.get("list[0,1].name").
             subscribe(onNext, onError, onCompleted);
@@ -199,16 +189,12 @@ describe('GetRequest', function() {
             }
             subscription.dispose();
 
-            if (!subscribeSpy.calledOnce) {
-                return done(new Error("subscribe not called."));
-            }
-            if (!unsubscribeSpy.calledOnce) {
-                return done(new Error("DataSource unsubscribe not called."));
-            }
-
-            if (onNext.callCount + onError.callCount + onCompleted.callCount !== 0) {
-                return done(new Error("onNext, onError, or onCompleted was called."));
-            }
+            expect(subscribeSpy).toHaveBeenCalledTimes(1);
+            expect(unsubscribeSpy).toHaveBeenCalledTimes(1);
+            expect(onNext).not.toHaveBeenCalled();
+            expect(onError).not.toHaveBeenCalled();
+            expect(onCompleted).not.toHaveBeenCalled();
+    
             return done();
         }
         waitOrExpect();
