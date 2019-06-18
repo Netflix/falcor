@@ -1,5 +1,3 @@
-const sinon = require("sinon");
-const expect = require("chai").expect;
 const after = require("lodash/after");
 const GetRequest = require("./../../../lib/request/GetRequestV2");
 const ImmediateScheduler = require("./../../../lib/schedulers/ImmediateScheduler");
@@ -17,7 +15,7 @@ describe("#add", () => {
 
     it("should send a request and dedupe another", done => {
         const scheduler = new ImmediateScheduler();
-        const onGet = sinon.spy();
+        const onGet = jest.fn();
         const source = new LocalDataSource(cacheGenerator(0, 2), {
             wait: 0,
             onGet
@@ -30,12 +28,12 @@ describe("#add", () => {
 
         let results;
         const partDone = after(2, () => {
-            const onNext = sinon.spy();
+            const onNext = jest.fn();
             toObservable(model.withoutDataSource().get(videos0, videos1)).subscribe(onNext, done, () => {
-                expect(onGet.calledOnce, "DataSource get should only be called once").to.equal(true);
-                expect(onGet.getCall(0).args[1]).to.deep.equal([videos0]);
-                expect(onNext.calledOnce, "onNext should only be called once").to.equal(true);
-                expect(strip(onNext.getCall(0).args[0])).to.deep.equal({
+                expect(onGet).toHaveBeenCalledTimes(1);
+                expect(onGet.mock.calls[0][1]).toEqual([videos0]);
+                expect(onNext).toHaveBeenCalledTimes(1);
+                expect(strip(onNext.mock.calls[0][0])).toEqual({
                     json: {
                         videos: {
                             0: {
@@ -45,23 +43,23 @@ describe("#add", () => {
                     }
                 });
 
-                expect(results[0], "paths should be inserted").to.equal(true);
-                expect(results[1]).to.deep.equal([videos1]);
-                expect(results[2]).to.deep.equal([videos1]);
+                expect(results[0]).toBe(true);
+                expect(results[1]).toEqual([videos1]);
+                expect(results[2]).toEqual([videos1]);
 
                 done();
             });
         });
 
         request.batch([videos0], [videos0], partDone);
-        expect(request.sent, "request should be sent").to.equal(true);
+        expect(request.sent).toBe(true);
 
         results = request.add([videos0, videos1], [videos0, videos1], partDone);
     });
 
     it("should send a request and dedupe another when dedupe is in second position", done => {
         const scheduler = new ImmediateScheduler();
-        const onGet = sinon.spy();
+        const onGet = jest.fn();
         const source = new LocalDataSource(cacheGenerator(0, 2), {
             wait: 0,
             onGet
@@ -74,12 +72,12 @@ describe("#add", () => {
 
         let results;
         const partDone = after(2, () => {
-            const onNext = sinon.spy();
+            const onNext = jest.fn();
             toObservable(model.withoutDataSource().get(videos0, videos1)).subscribe(onNext, done, () => {
-                expect(onGet.calledOnce, "DataSource get should only be called once").to.equal(true);
-                expect(onGet.getCall(0).args[1]).to.deep.equal([videos0]);
-                expect(onNext.calledOnce, "onNext should only be called once").to.equal(true);
-                expect(strip(onNext.getCall(0).args[0])).to.deep.equal({
+                expect(onGet).toHaveBeenCalledTimes(1);
+                expect(onGet.mock.calls[0][1]).toEqual([videos0]);
+                expect(onNext).toHaveBeenCalledTimes(1);
+                expect(strip(onNext.mock.calls[0][0])).toEqual({
                     json: {
                         videos: {
                             0: {
@@ -89,23 +87,23 @@ describe("#add", () => {
                     }
                 });
 
-                expect(results[0], "paths should be inserted").to.equal(true);
-                expect(results[1]).to.deep.equal([videos1]);
-                expect(results[2]).to.deep.equal([videos1]);
+                expect(results[0]).toBe(true);
+                expect(results[1]).toEqual([videos1]);
+                expect(results[2]).toEqual([videos1]);
 
                 done();
             });
         });
 
         request.batch([videos0], [videos0], partDone);
-        expect(request.sent, "request should be sent").to.equal(true);
+        expect(request.sent).toBe(true);
 
         results = request.add([videos1, videos0], [videos1, videos0], partDone);
     });
 
     it("should send a request and dedupe another and dispose of original", done => {
         const scheduler = new ImmediateScheduler();
-        const onGet = sinon.spy();
+        const onGet = jest.fn();
         const source = new LocalDataSource(cacheGenerator(0, 2), {
             wait: 0,
             onGet
@@ -118,12 +116,12 @@ describe("#add", () => {
 
         let results;
         const partDone = after(2, () => {
-            const onNext = sinon.spy();
+            const onNext = jest.fn();
             toObservable(model.withoutDataSource().get(videos0, videos1)).subscribe(onNext, done, () => {
-                expect(onGet.calledOnce, "DataSource get should only be called once").to.equal(true);
-                expect(onGet.getCall(0).args[1]).to.deep.equal([videos0]);
-                expect(onNext.calledOnce, "onNext should only be called once").to.equal(true);
-                expect(strip(onNext.getCall(0).args[0])).to.deep.equal({
+                expect(onGet).toHaveBeenCalledTimes(1);
+                expect(onGet.mock.calls[0][1]).toEqual([videos0]);
+                expect(onNext).toHaveBeenCalledTimes(1);
+                expect(strip(onNext.mock.calls[0][0])).toEqual({
                     json: {
                         videos: {
                             0: {
@@ -133,9 +131,9 @@ describe("#add", () => {
                     }
                 });
 
-                expect(results[0], "paths should be inserted").to.equal(true);
-                expect(results[1]).to.deep.equal([videos1]);
-                expect(results[2]).to.deep.equal([videos1]);
+                expect(results[0]).toBe(true);
+                expect(results[1]).toEqual([videos1]);
+                expect(results[2]).toEqual([videos1]);
 
                 done();
             });
@@ -144,7 +142,7 @@ describe("#add", () => {
         const disposable = request.batch([videos0], [videos0], () =>
             done(new Error("Request should have been cancelled"))
         );
-        expect(request.sent, "request should be sent").to.equal(true);
+        expect(request.sent).toBe(true);
 
         results = request.add([videos0, videos1], [videos0, videos1], partDone);
 
@@ -156,7 +154,7 @@ describe("#add", () => {
 
     it("should send a request and dedupe another and dispose of deduped", done => {
         const scheduler = new ImmediateScheduler();
-        const onGet = sinon.spy();
+        const onGet = jest.fn();
         const source = new LocalDataSource(cacheGenerator(0, 2), {
             wait: 0,
             onGet
@@ -169,12 +167,12 @@ describe("#add", () => {
 
         let results;
         const partDone = after(2, () => {
-            const onNext = sinon.spy();
+            const onNext = jest.fn();
             toObservable(model.withoutDataSource().get(videos0, videos1)).subscribe(onNext, done, () => {
-                expect(onGet.calledOnce, "DataSource get should only be called once").to.equal(true);
-                expect(onGet.getCall(0).args[1]).to.deep.equal([videos0]);
-                expect(onNext.calledOnce, "onNext should only be called once").to.equal(true);
-                expect(strip(onNext.getCall(0).args[0])).to.deep.equal({
+                expect(onGet).toHaveBeenCalledTimes(1);
+                expect(onGet.mock.calls[0][1]).toEqual([videos0]);
+                expect(onNext).toHaveBeenCalledTimes(1);
+                expect(strip(onNext.mock.calls[0][0])).toEqual({
                     json: {
                         videos: {
                             0: {
@@ -184,16 +182,16 @@ describe("#add", () => {
                     }
                 });
 
-                expect(results[0], "paths should be inserted").to.equal(true);
-                expect(results[1]).to.deep.equal([videos1]);
-                expect(results[2]).to.deep.equal([videos1]);
+                expect(results[0]).toBe(true);
+                expect(results[1]).toEqual([videos1]);
+                expect(results[2]).toEqual([videos1]);
 
                 done();
             });
         });
 
         request.batch([videos0], [videos0], partDone);
-        expect(request.sent, "request should be sent").to.equal(true);
+        expect(request.sent).toBe(true);
         results = request.add([videos0, videos1], [videos0, videos1], () =>
             done(new Error("Request should have been cancelled"))
         );

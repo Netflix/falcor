@@ -5,7 +5,6 @@ var gulpShell = require("gulp-shell");
 // Registers build tasks
 require("./build/gulp-clean");
 require("./build/gulp-build");
-require("./build/gulp-test");
 require("./build/gulp-perf");
 
 var srcDir = "lib";

@@ -2,11 +2,8 @@ var falcor = require("./../../../lib/");
 var Model = falcor.Model;
 var Rx = require("rx");
 var LocalDataSource = require("../../data/LocalDataSource");
-var chai = require("chai");
-var expect = chai.expect;
 var inspect = require("util").inspect;
 var noOp = function() {};
-var sinon = require('sinon');
 var cacheGenerator = require('./../../CacheGenerator');
 var strip = require('./../../cleanData').stripDerefAndVersionKeys;
 var toObservable = require('../../toObs');
@@ -19,7 +16,7 @@ describe("Cache Only", function() {
         var model = new Model({
             cache: cacheGenerator(0, 1, ['title', 'art'])
         });
-        var onNext = sinon.spy();
+        var onNext = jest.fn();
         model.
             invalidate(["videos", 0, "title"]);
 
@@ -27,7 +24,7 @@ describe("Cache Only", function() {
             get(["videos", 0, "title"])).
             concat(model.get(["videos", 0, "art"])).
             doAction(onNext, noOp, function() {
-                expect(strip(onNext.getCall(1).args[0])).to.deep.equals({
+                expect(strip(onNext.mock.calls[1][0])).toEqual({
                     json: {
                         videos: {
                             0: {
@@ -41,8 +38,8 @@ describe("Cache Only", function() {
     });
 
     it("should re-fetch an invalidated value progressively.", function(done) {
-        var onGet = sinon.spy();
-        var onNext = sinon.spy();
+        var onGet = jest.fn();
+        var onNext = jest.fn();
         var model = new Model({
             cache: {
                 lolomo: {
@@ -64,19 +61,19 @@ describe("Cache Only", function() {
         toObservable(model.
             get(["lolomo", 0, "title"]).progressively()).
             doAction(onNext, noOp, function() {
-                expect(onGet.callCount).to.equal(2);
-                expect(onNext.callCount).to.equal(3);
-                expect(strip(onNext.getCall(0).args[0])).to.deep.equals({
+                expect(onGet).toHaveBeenCalledTimes(2);
+                expect(onNext).toHaveBeenCalledTimes(3);
+                expect(strip(onNext.mock.calls[0][0])).toEqual({
                     json: {
                         lolomo: {}
                     }
                 });
-                expect(strip(onNext.getCall(1).args[0])).to.deep.equals({
+                expect(strip(onNext.mock.calls[1][0])).toEqual({
                     json: {
                         lolomo: {}
                     }
                 });
-                expect(strip(onNext.getCall(2).args[0])).to.deep.equals({
+                expect(strip(onNext.mock.calls[2][0])).toEqual({
                     json: {
                         lolomo: {
                             0: {
@@ -92,8 +89,8 @@ describe("Cache Only", function() {
     });
 
     it("should re-fetch an invalidated value.", function(done) {
-        var onGet = sinon.spy();
-        var onNext = sinon.spy();
+        var onGet = jest.fn();
+        var onNext = jest.fn();
         var model = new Model({
             cache: {
                 lolomo: {
@@ -115,9 +112,9 @@ describe("Cache Only", function() {
         toObservable(model.
             get(["lolomo", 0, "title"])).
             doAction(onNext, noOp, function() {
-                expect(onGet.callCount).to.equal(2);
-                expect(onNext.callCount).to.equal(1);
-                expect(strip(onNext.getCall(0).args[0])).to.deep.equals({
+                expect(onGet).toHaveBeenCalledTimes(2);
+                expect(onNext).toHaveBeenCalledTimes(1);
+                expect(strip(onNext.mock.calls[0][0])).toEqual({
                     json: {
                         lolomo: {
                             0: {
@@ -136,7 +133,7 @@ describe("Cache Only", function() {
         var dataSourceCount = 0;
         var summary = ["videos", 0, "summary"];
         var art = ["videos", 0, "art"];
-        var onGet = sinon.spy();
+        var onGet = jest.fn();
         var dataSource = new LocalDataSource(cacheGenerator(0, 1, ['summary', 'art']), {
             onGet: onGet
         });
@@ -144,7 +141,7 @@ describe("Cache Only", function() {
             cache: cacheGenerator(0, 1, ['summary', 'art']),
             source: dataSource
         });
-        var onNext = sinon.spy();
+        var onNext = jest.fn();
         model.
             invalidate(["videos", 0]);
 
@@ -153,12 +150,12 @@ describe("Cache Only", function() {
             get(summary.slice())).
             concat(model.get(art.slice())).
             doAction(onNext, noOp, function() {
-                expect(onGet.calledOnce).to.be.ok;
-                expect(onGet.getCall(0).args[1]).to.deep.equals([art]);
-                expect(strip(onNext.getCall(0).args[0])).to.deep.equals({
+                expect(onGet).toHaveBeenCalledTimes(1);
+                expect(onGet.mock.calls[0][1]).toEqual([art]);
+                expect(strip(onNext.mock.calls[0][0])).toEqual({
                     json: {}
                 });
-                expect(strip(onNext.getCall(1).args[0])).to.deep.equals({
+                expect(strip(onNext.mock.calls[1][0])).toEqual({
                     json: {
                         videos: {
                             0: {
@@ -176,7 +173,7 @@ describe("Cache Only", function() {
         var model = new Model({
             cache: cacheGenerator(0, 1, ['summary', 'art'])
         });
-        var onNext = sinon.spy();
+        var onNext = jest.fn();
         model.
             invalidate(["lolomo", 0]);
 
@@ -185,10 +182,10 @@ describe("Cache Only", function() {
             get(summary.slice())).
             concat(model.get(["lists", "A", 0, "item", "summary"])).
             doAction(onNext, noOp, function() {
-                 expect(strip(onNext.getCall(0).args[0])).to.deep.equals({
+                 expect(strip(onNext.mock.calls[0][0])).toEqual({
                     json: {}
                 });
-                expect(strip(onNext.getCall(1).args[0])).to.deep.equals({
+                expect(strip(onNext.mock.calls[1][0])).toEqual({
                     json: {
                         lists: {
                             A: {

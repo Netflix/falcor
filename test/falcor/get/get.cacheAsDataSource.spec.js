@@ -4,8 +4,6 @@ var noOp = function() {};
 var LocalDataSource = require('../../data/LocalDataSource');
 var ErrorDataSource = require('../../data/ErrorDataSource');
 var isPathValue = require("./../../../lib/support/isPathValue");
-var expect = require("chai").expect;
-var sinon = require('sinon');
 var clean = require('./../../cleanData').stripDerefAndVersionKeys;
 var cacheGenerator = require('./../../CacheGenerator');
 var atom = Model.atom;
@@ -16,17 +14,17 @@ describe('Cache as DataSource', function() {
         var model = new Model({
             cache: {foo: 1}
         }).asDataSource();
-        var onNext = sinon.spy();
+        var onNext = jest.fn();
         toObservable(model.
-            get([]).
+            get([])).
             doAction(onNext, noOp, function() {
-                expect(onNext.calledOnce).to.be.ok;
-                expect(clean(onNext.getCall(0).args[0])).to.deep.equals({
+                expect(onNext).toHaveBeenCalledTimes(1);
+                expect(clean(onNext.mock.calls[0][0])).toEqual({
                     jsonGraph: {},
                     paths: []
                 });
             }).
-            subscribe(noOp, done, done));
+            subscribe(noOp, done, done);
     });
     describe('toJSON', function() {
         it('should get a value from falcor.', function(done) {
@@ -35,12 +33,12 @@ describe('Cache as DataSource', function() {
                     source: new LocalDataSource(cacheGenerator(0, 1))
                 }).asDataSource()
             });
-            var onNext = sinon.spy();
+            var onNext = jest.fn();
             toObservable(model.
                 get(['videos', 0, 'title'])).
                 doAction(onNext, noOp, function() {
-                    expect(onNext.calledOnce).to.be.ok;
-                    expect(clean(onNext.getCall(0).args[0])).to.deep.equals({
+                    expect(onNext).toHaveBeenCalledTimes(1);
+                    expect(clean(onNext.mock.calls[0][0])).toEqual({
                         json: {
                             videos: {
                                 0: {
@@ -60,13 +58,13 @@ describe('Cache as DataSource', function() {
                     source: new LocalDataSource(cacheGenerator(0, 1))
                 }).asDataSource()
             });
-            var onNext = sinon.spy();
+            var onNext = jest.fn();
             toObservable(model.
                 get(['videos', 0, 'title']).
                 _toJSONG()).
                 doAction(onNext, noOp, function() {
-                    expect(onNext.calledOnce).to.be.ok;
-                    expect(clean(onNext.getCall(0).args[0])).to.deep.equals({
+                    expect(onNext).toHaveBeenCalledTimes(1);
+                    expect(clean(onNext.mock.calls[0][0])).toEqual({
                         jsonGraph: {
                             videos: {
                                 0: {
@@ -92,7 +90,7 @@ describe('Cache as DataSource', function() {
         toObservable(model.
             get(['videos', 1234, 'summary'])).
             doAction(noOp, function(err) {
-                expect(err).to.deep.equals([{
+                expect(err).toEqual([{
                     path: ['videos', 1234, 'summary'],
                     value: {
                         message: 'Oops!',
@@ -123,7 +121,7 @@ describe('Cache as DataSource', function() {
             get(['videos', 1234, 'summary'])).
             doAction(noOp, function(err) {
                 outputError = err;
-                expect(err).to.deep.equals({
+                expect(err).toEqual({
                     $type: "error",
                     value: {
                         message: 'Oops!',
@@ -181,19 +179,19 @@ describe('Cache as DataSource', function() {
         }});
 
 
-        var onNext = sinon.spy();
+        var onNext = jest.fn();
         toObservable(model.
             get("lolomo.summary", "lolomo[0..2].summary")).
             doAction(onNext).
             doAction(noOp, noOp, function() {
-                var data = onNext.getCall(0).args[0];
+                var data = onNext.mock.calls[0][0];
                 var json = data.json;
                 var lolomo = json.lolomo;
-                expect(lolomo.summary).to.be.ok;
-                expect(lolomo[0].summary).to.be.ok;
-                expect(lolomo[1].summary).to.be.ok;
-                expect(lolomo[2].summary).to.be.ok;
-                expect(serviceCalls).to.equal(1);
+                expect(lolomo.summary).toBeDefined();
+                expect(lolomo[0].summary).toBeDefined();
+                expect(lolomo[1].summary).toBeDefined();
+                expect(lolomo[2].summary).toBeDefined();
+                expect(serviceCalls).toBe(1);
             }).
             subscribe(noOp, done, done);
     });

@@ -1,5 +1,3 @@
-var chai = require("chai");
-var expect = chai.expect;
 var ImmediateScheduler = require('./../../../lib/schedulers/ImmediateScheduler');
 var TimeoutScheduler = require('./../../../lib/schedulers/TimeoutScheduler');
 
@@ -12,7 +10,7 @@ describe("Schedulers", function() {
     it("should do an immediate scheduler", function() {
         var trigger = true;
         immediate.schedule(function() {
-            expect(trigger).to.be.ok;
+            expect(trigger).toBe(true);
         });
         trigger = false;
     });
@@ -20,7 +18,7 @@ describe("Schedulers", function() {
     it("should do a timeout", function(done) {
         var trigger = true;
         timeout16.schedule(function() {
-            expect(trigger).to.not.be.ok;
+            expect(trigger).toBe(false);
             done();
         });
         trigger = false;
@@ -29,11 +27,11 @@ describe("Schedulers", function() {
     it("should verify that longer timeouts happen after shorter timeouts.", function(done) {
         var trigger = true;
         timeout16.schedule(function() {
-            expect(trigger).to.not.be.ok;
+            expect(trigger).toBe(false);
             trigger = true;
         });
         timeout100.schedule(function() {
-            expect(trigger).to.be.ok;
+            expect(trigger).toBe(true);
             done();
         });
         trigger = false;

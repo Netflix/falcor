@@ -1,8 +1,6 @@
 const falcor = require("../../browser");
 const LocalDataSource = require("../data/LocalDataSource");
 const after = require("lodash/after");
-const expect = require("chai").expect;
-const sinon = require("sinon");
 const strip = require("../cleanData").stripDerefAndVersionKeys;
 const cacheGenerator = require("../CacheGenerator");
 
@@ -10,7 +8,7 @@ const noOp = () => {};
 
 describe("Request deduping", () => {
     it("should dedupe new requested paths with previous in-flight requests", done => {
-        const onGet = sinon.spy();
+        const onGet = jest.fn();
         const model = new falcor.Model({
             source: new LocalDataSource(
                 {
@@ -25,7 +23,7 @@ describe("Request deduping", () => {
         });
 
         const partDone = after(2, () => {
-            expect(onGet.getCall(1).args[1]).to.deep.equal([["things", "2"]]);
+            expect(onGet.mock.calls[1][1]).toEqual([["things", "2"]]);
 
             done();
         });
@@ -33,7 +31,7 @@ describe("Request deduping", () => {
         model
             .get(["things", { from: 0, to: 1 }])
             .subscribe(
-                response => expect(strip(response.json)).to.deep.equal({ things: { 0: "thing: 0", 1: "thing: 1" } }),
+                response => expect(strip(response.json)).toEqual({ things: { 0: "thing: 0", 1: "thing: 1" } }),
                 done,
                 partDone
             );
@@ -41,14 +39,14 @@ describe("Request deduping", () => {
         model
             .get(["things", { from: 1, to: 2 }])
             .subscribe(
-                response => expect(strip(response.json)).to.deep.equal({ things: { 1: "thing: 1", 2: "thing: 2" } }),
+                response => expect(strip(response.json)).toEqual({ things: { 1: "thing: 1", 2: "thing: 2" } }),
                 done,
                 partDone
             );
     });
 
     it("should dedupe from both ends of overlapping ranges", done => {
-        const onGet = sinon.spy();
+        const onGet = jest.fn();
         const model = new falcor.Model({
             source: new LocalDataSource(
                 {
@@ -64,7 +62,7 @@ describe("Request deduping", () => {
         });
 
         const partDone = after(2, () => {
-            expect(onGet.getCall(1).args[1]).to.deep.equal([["things", [0, 3]]]);
+            expect(onGet.mock.calls[1][1]).toEqual([["things", [0, 3]]]);
 
             done();
         });
@@ -74,7 +72,7 @@ describe("Request deduping", () => {
     });
 
     it("should leave ranges unrolled if possible", done => {
-        const onGet = sinon.spy();
+        const onGet = jest.fn();
         const model = new falcor.Model({
             source: new LocalDataSource(
                 {
@@ -90,7 +88,7 @@ describe("Request deduping", () => {
         });
 
         const partDone = after(2, () => {
-            expect(onGet.getCall(1).args[1]).to.deep.equal([["things", { from: 2, to: 3 }]]);
+            expect(onGet.mock.calls[1][1]).toEqual([["things", { from: 2, to: 3 }]]);
             done();
         });
 
@@ -99,7 +97,7 @@ describe("Request deduping", () => {
     });
 
     it("should work for properties after ranges", done => {
-        const onGet = sinon.spy();
+        const onGet = jest.fn();
         const model = new falcor.Model({
             source: new LocalDataSource(
                 {
@@ -115,7 +113,7 @@ describe("Request deduping", () => {
         });
 
         const partDone = after(2, () => {
-            expect(onGet.getCall(1).args[1]).to.deep.equal([["things", { from: 2, to: 3 }, "name"]]);
+            expect(onGet.mock.calls[1][1]).toEqual([["things", { from: 2, to: 3 }, "name"]]);
             done();
         });
 
@@ -124,7 +122,7 @@ describe("Request deduping", () => {
     });
 
     it("should work for multiple ranges in path sets", done => {
-        const onGet = sinon.spy();
+        const onGet = jest.fn();
         const model = new falcor.Model({
             source: new LocalDataSource(
                 {
@@ -139,7 +137,7 @@ describe("Request deduping", () => {
         });
 
         const partDone = after(2, () => {
-            expect(onGet.getCall(1).args[1]).to.deep.equal([
+            expect(onGet.mock.calls[1][1]).toEqual([
                 ["things", { from: 0, to: 1 }, "tags", "0"],
                 ["things", 2, "tags", { from: 0, to: 2 }]
             ]);
@@ -152,7 +150,7 @@ describe("Request deduping", () => {
     });
 
     it("should work when different optimized and requested path lengths", done => {
-        const onGet = sinon.spy();
+        const onGet = jest.fn();
         const model = new falcor.Model({
             source: new LocalDataSource(
                 {
@@ -191,7 +189,7 @@ describe("Request deduping", () => {
         });
 
         const partDone = after(2, () => {
-            expect(onGet.getCall(1).args[1]).to.deep.equal([
+            expect(onGet.mock.calls[1][1]).toEqual([
                 ["oneoff", "tags", { from: 0, to: 1 }],
                 ["things", 0, "tags", "1"],
                 ["thang", "that", "really", "is", "a", "thing", "of", "course", "tags", { from: 0, to: 1 }]
@@ -209,13 +207,13 @@ describe("Request deduping", () => {
     });
 
     it("deduplicates gets with overlapping ranges", done => {
-        const onGet = sinon.spy();
+        const onGet = jest.fn();
         const model = new falcor.Model({ source: new LocalDataSource(cacheGenerator(0, 3), { wait: 0, onGet }) });
 
         const partDone = after(3, () => {
-            expect(onGet.getCall(0).args[1]).to.deep.equal([["videos", 0, "title"]]);
-            expect(onGet.getCall(1).args[1]).to.deep.equal([["videos", 1, "title"]]);
-            expect(onGet.getCall(2).args[1]).to.deep.equal([["videos", 2, "title"]]);
+            expect(onGet.mock.calls[0][1]).toEqual([["videos", 0, "title"]]);
+            expect(onGet.mock.calls[1][1]).toEqual([["videos", 1, "title"]]);
+            expect(onGet.mock.calls[2][1]).toEqual([["videos", 2, "title"]]);
 
             done();
         });

@@ -2,8 +2,6 @@ var falcor = require('./../../../lib');
 var InvalidModelError = require('./../../../lib/errors/InvalidModelError');
 var InvalidDerefInputError = require('./../../../lib/errors/InvalidDerefInputError');
 var Model = falcor.Model;
-var sinon = require('sinon');
-var expect = require('chai').expect;
 var cacheGenerator = require('./../../CacheGenerator');
 var noOp = function() {};
 var isAssertionError = require('./../../isAssertionError');
@@ -16,13 +14,13 @@ describe('Error cases', function() {
             cache: cacheGenerator(0, 1)
         });
 
-        var onNext = sinon.spy();
+        var onNext = jest.fn();
         model.
             get(['lolomo', 0, 0, 'item', 'title']).
             subscribe(onNext, noOp, function() {
-                expect(onNext.calledOnce).to.be.ok;
+                expect(onNext).toHaveBeenCalledTimes(1);
 
-                var json = onNext.getCall(0).args[0].json;
+                var json = onNext.mock.calls[0][0].json;
                 var lolomoModel = model.deref(json.lolomo);
                 model.
                     set({
@@ -35,8 +33,8 @@ describe('Error cases', function() {
                 toObservable(lolomoModel.
                     get([0, 0, 'item', 'title'])).
                     doAction(onNext, function(err) {
-                        expect(onNext.callCount).to.equal(1);
-                        expect(err.name).to.equals(InvalidModelError.name);
+                        expect(onNext).toHaveBeenCalledTimes(1);
+                        expect(err.name).toBe(InvalidModelError.name);
                     }).
                     subscribe(
                         noOp,
@@ -54,7 +52,7 @@ describe('Error cases', function() {
         try {
             new Model().deref('testing');
         } catch (e) {
-            expect(e.name).to.equals(InvalidDerefInputError.name);
+            expect(e.name).toBe(InvalidDerefInputError.name);
             return done();
         }
         done(new Error('should have thrown an error.'));

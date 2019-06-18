@@ -7,7 +7,6 @@ var $pathValue = require("falcor-json-graph").pathValue;
 var $jsonGraph = require("../support/jsonGraph");
 var $jsonGraphEnvelope = require("../support/jsonGraphEnvelope");
 
-var expect = require('chai').expect;
 var getModel = require("../support/getModel");
 var setJSONGraphs = require("../../../lib/set/setJSONGraphs");
 var NullInPathError = require('./../../../lib/errors/NullInPathError');
@@ -16,33 +15,23 @@ var Model = require('./../../../lib');
 describe("a primitive over a branch", function() {
     it('should allow null at end of path.', function() {
         var model = new Model();
-        var error;
-        try {
-            setJSONGraphs(
-                model,
-                [{
-                    jsonGraph: {
-                        a: $ref(['b']),
-                        b: 'title'
-                    },
-                    paths: [
-                        ['a', null]
-                    ]
-                }]
-            );
-        }
-        catch (e) {
-            error = e;
-        }
-        finally {
-            expect(error).to.not.be.ok;
-        }
+        setJSONGraphs(
+            model,
+            [{
+                jsonGraph: {
+                    a: $ref(['b']),
+                    b: 'title'
+                },
+                paths: [
+                    ['a', null]
+                ]
+            }]
+        );
     });
 
     it('should throw an error if null is in middle of path.', function() {
         var model = new Model();
-        var error;
-        try {
+        expect(() => 
             setJSONGraphs(
                 model,
                 [{
@@ -56,19 +45,11 @@ describe("a primitive over a branch", function() {
                         ['a', null, 'c']
                     ]
                 }]
-            );
-        }
-        catch (e) {
-            error = e;
-        }
-        finally {
-            expect(error instanceof NullInPathError).to.be.ok;
-        }
+            )).toThrow(NullInPathError);
     });
 
     it("directly", function() {
-
-        var lru = new Object();
+        var lru = {};
         var cache = {};
         var version = 0;
 
@@ -86,14 +67,13 @@ describe("a primitive over a branch", function() {
             ])]
         )
 
-        expect(strip(cache)).to.deep.equal(strip({
+        expect(strip(cache)).toEqual(strip({
             movies: { "pulp-fiction": $atom("Pulp Fiction") }
         }));
     });
 
     it("through a reference with a null last key", function() {
-
-        var lru = new Object();
+        var lru = {};
         var cache = {};
         var version = 0;
 
@@ -116,7 +96,7 @@ describe("a primitive over a branch", function() {
             }]
         );
 
-        expect(strip(cache)).to.deep.equal(strip({
+        expect(strip(cache)).toEqual(strip({
             grid: $ref("grids['id']"),
             grids: { id: { 0: $ref("lists['id']") } },
             lists: { id: { 0: $ref("movies['pulp-fiction']") } },
@@ -128,8 +108,7 @@ describe("a primitive over a branch", function() {
 describe("set an error over a branch", function() {
 
     it("directly", function() {
-
-        var lru = new Object();
+        var lru = {};
         var cache = {};
         var version = 0;
 
@@ -147,14 +126,13 @@ describe("set an error over a branch", function() {
             ])]
         )
 
-        expect(strip(cache)).to.deep.equal(strip({
+        expect(strip(cache)).toEqual(strip({
             movies: { "pulp-fiction": $error("oops") }
         }));
     });
 
     it("through a reference with a null last key", function() {
-
-        var lru = new Object();
+        var lru = {};
         var cache = {};
         var version = 0;
 
@@ -177,7 +155,7 @@ describe("set an error over a branch", function() {
             }]
         );
 
-        expect(strip(cache)).to.deep.equal(strip({
+        expect(strip(cache)).toEqual(strip({
             grid: $ref("grids['id']"),
             grids: { id: { 0: $ref("lists['id']") } },
             lists: { id: { 0: $ref("movies['pulp-fiction']") } },

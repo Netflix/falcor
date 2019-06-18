@@ -1,10 +1,9 @@
-var sinon = require('sinon');
-var expect = require('chai').expect;
-var noOp = function() {};
 var falcor = require('./../../lib');
 var Model = falcor.Model;
 var strip = require("./../cleanData").stripDerefAndVersionKeys;
 var toObservable = require('../toObs');
+
+var noOp = function() {};
 
 module.exports = function() {
     require("./pathMaps");
@@ -21,12 +20,12 @@ module.exports = function() {
 
         model.invalidate('foo.bar');
 
-        var onNext = sinon.spy();
+        var onNext = jest.fn();
         toObservable(model.
             get('foo.bar', 'foo.bazz')).
             doAction(onNext, noOp, function() {
-                expect(onNext.calledOnce).to.be.ok;
-                expect(strip(onNext.getCall(0).args[0])).to.deep.equals({
+                expect(onNext).toHaveBeenCalledTimes(1);
+                expect(strip(onNext.mock.calls[0][0])).toEqual({
                     json: {
                         foo: {
                             bazz: 7
@@ -39,19 +38,19 @@ module.exports = function() {
 
     it('should throw for undefined paths', function() {
         var model = new Model({ cache: { value: 1 } });
-        expect(() => model.invalidate(undefined)).to.throw();
-        expect(model.getCache()).to.deep.equal({ value: 1 });
+        expect(() => model.invalidate(undefined)).toThrow();
+        expect(model.getCache()).toEqual({ value: 1 });
     });
 
     it('should throw for empty paths', function() {
         var model = new Model({ cache: { value: 1 } });
-        expect(() => model.invalidate([])).to.throw();
-        expect(model.getCache()).to.deep.equal({ value: 1 });
+        expect(() => model.invalidate([])).toThrow();
+        expect(model.getCache()).toEqual({ value: 1 });
     });
 
     it('should do nothing for non-existing paths', function() {
         var model = new Model({ cache: { value: 1 } });
         model.invalidate('no.such.path');
-        expect(model.getCache()).to.deep.equal({ value: 1 });
+        expect(model.getCache()).toEqual({ value: 1 });
     });
 };

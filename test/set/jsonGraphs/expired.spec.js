@@ -5,7 +5,6 @@ var $pathValue = require("falcor-json-graph").pathValue;
 var $jsonGraph = require("../support/jsonGraph");
 var $jsonGraphEnvelope = require("../support/jsonGraphEnvelope");
 
-var expect = require('chai').expect;
 var getModel = require("../support/getModel");
 var setJSONGraphs = require("../../../lib/set/setJSONGraphs");
 
@@ -29,8 +28,8 @@ describe("an expired value", function() {
         var value = cache.grids.id[0];
         var expires = value.$expires;
 
-        expect(expires > Date.now()).to.be.true;
-        expect(strip(cache)).to.deep.equal(strip({
+        expect(expires > Date.now()).toBe(true);
+        expect(strip(cache)).toEqual(strip({
             grid: $ref("grids['id']"),
             grids: { id: { 0: $ref("lists['id']") } }
         }));
@@ -56,8 +55,8 @@ describe("an expired value", function() {
             }]
         );
 
-        expect(expired.length).to.equal(1);
-        expect(strip(cache)).to.deep.equal(strip({
+        expect(expired.length).toBe(1);
+        expect(strip(cache)).toEqual(strip({
             grid: $ref("grids['id']"),
             grids: { id: { 0: $ref("lists['id']") } },
             lists: { id: { 0: $ref("movies['pulp-fiction']") } },
@@ -90,8 +89,8 @@ describe("an expired value", function() {
             }]
         );
 
-        expect(expired.length).to.equal(1);
-        expect(strip(cache)).to.deep.equal(strip({
+        expect(expired.length).toBe(1);
+        expect(strip(cache)).toEqual(strip({
             grid: $ref("grids['id']"),
             grids: { id: { 0: $ref("lists['id']") } }
         }));
@@ -130,8 +129,8 @@ describe("an expired value", function() {
             }]
         );
 
-        expect(successfulPaths[1].length).to.equal(0);
-        expect(strip(cache)).to.deep.equal(strip({
+        expect(successfulPaths[1].length).toBe(0);
+        expect(strip(cache)).toEqual(strip({
             grid: $ref("grids['id']"),
             grids: { id: { 0: $ref("lists['id']") } },
             lists: { id: { 0: $ref("movies['pulp-fiction']") } },

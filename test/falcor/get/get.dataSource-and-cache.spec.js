@@ -4,8 +4,6 @@ var Rx = require('rx');
 var noOp = function() {};
 var LocalDataSource = require('../../data/LocalDataSource');
 var Observable = Rx.Observable;
-var sinon = require('sinon');
-var expect = require('chai').expect;
 var strip = require('./../../cleanData').stripDerefAndVersionKeys;
 var cacheGenerator = require('./../../CacheGenerator');
 var jsonGraph = require('falcor-json-graph');
@@ -43,7 +41,7 @@ describe('DataSource and Partial Cache', function() {
                 onNextCount++;
 
                 if (onNextCount === 1){
-                    expect(strip(value)).to.deep.equals({
+                    expect(strip(value)).toEqual({
                         json: {
                             paths: {
                                 0: 'test',
@@ -54,7 +52,7 @@ describe('DataSource and Partial Cache', function() {
                     });
                 }
             }).subscribe(noOp, done, function(){
-                expect(onNextCount, 'onNext called once').to.equals(1);
+                expect(onNextCount).toBe(1);
                 done();
             });
     });
@@ -62,20 +60,20 @@ describe('DataSource and Partial Cache', function() {
     describe('Preload Functions', function() {
         it('should get multiple arguments with multiple selector function args.', function(done) {
             var model = new Model({cache: M(), source: new LocalDataSource(Cache())});
-            var onNext = sinon.spy();
-            var secondOnNext = sinon.spy();
+            var onNext = jest.fn();
+            var secondOnNext = jest.fn();
             toObservable(model.
                 preload(['videos', 0, 'title'], ['videos', 1, 'title'])).
                 doAction(onNext, noOp, function() {
-                    expect(onNext.callCount).to.equal(0);
+                    expect(onNext).not.toHaveBeenCalled();
                 }).
                 defaultIfEmpty({}).
                 flatMap(function() {
                     return model.get(['videos', 0, 'title'], ['videos', 1, 'title']);
                 }).
                 doAction(secondOnNext, noOp, function() {
-                    expect(secondOnNext.calledOnce).to.be.ok;
-                    expect(strip(secondOnNext.getCall(0).args[0])).to.deep.equals({
+                    expect(secondOnNext).toHaveBeenCalledTimes(1);
+                    expect(strip(secondOnNext.mock.calls[0][0])).toEqual({
                         json: {
                             videos: {
                                 0: {
@@ -93,21 +91,21 @@ describe('DataSource and Partial Cache', function() {
 
         it('should get a complex argument into a single arg.', function(done) {
             var model = new Model({cache: M(), source: new LocalDataSource(Cache())});
-            var onNext = sinon.spy();
-            var secondOnNext = sinon.spy();
+            var onNext = jest.fn();
+            var secondOnNext = jest.fn();
             toObservable(model.
                 preload(['lolomo', 0, {to: 1}, 'item', 'title'])).
                 doAction(onNext).
                 doAction(noOp, noOp, function() {
-                    expect(onNext.callCount).to.equal(0);
+                    expect(onNext).not.toHaveBeenCalled();
                 }).
                 defaultIfEmpty({}).
                 flatMap(function() {
                     return model.get(['lolomo', 0, {to: 1}, 'item', 'title']);
                 }).
                 doAction(secondOnNext, noOp, function() {
-                    expect(secondOnNext.calledOnce).to.be.ok;
-                    expect(strip(secondOnNext.getCall(0).args[0])).to.deep.equals({
+                    expect(secondOnNext).toHaveBeenCalledTimes(1);
+                    expect(strip(secondOnNext.mock.calls[0][0])).toEqual({
                         json: {
                             lolomo: {
                                 0: {
@@ -131,38 +129,38 @@ describe('DataSource and Partial Cache', function() {
     });
     describe('PathMap', function() {
         it('should ensure empty paths do not cause dataSource requests {from:1, to:0}', function(done) {
-            var onGet = sinon.spy();
+            var onGet = jest.fn();
             var model = new Model({
                 cache: { b: {} },
                 source: new LocalDataSource({}, { onGet: onGet })
             });
 
             var modelGet = model.get(['b', { from: 1, to: 0 }, 'leaf']);
-            var onNext = sinon.spy();
+            var onNext = jest.fn();
             toObservable(modelGet).
                 doAction(onNext, noOp, function() {
-                    expect(onGet.callCount).to.equals(0);
-                    expect(onNext.callCount).to.equals(1);
-                    expect(strip(onNext.getCall(0).args[0])).to.deep.equals({
+                    expect(onGet).not.toHaveBeenCalled();
+                    expect(onNext).toHaveBeenCalledTimes(1);
+                    expect(strip(onNext.mock.calls[0][0])).toEqual({
                         json: { b: {} }
                     });
                 }).
                 subscribe(noOp, done, done);
         });
         it('should ensure empty paths do not cause dataSource requests [].', function(done) {
-            var onGet = sinon.spy();
+            var onGet = jest.fn();
             var model = new Model({
                 cache: { b: {} },
                 source: new LocalDataSource({}, { onGet: onGet })
             });
 
             var modelGet = model.get(['b', [], 'leaf']);
-            var onNext = sinon.spy();
+            var onNext = jest.fn();
             toObservable(modelGet).
                 doAction(onNext, noOp, function() {
-                    expect(onGet.callCount).to.equals(0);
-                    expect(onNext.callCount).to.equals(1);
-                    expect(strip(onNext.getCall(0).args[0])).to.deep.equals({
+                    expect(onGet).not.toHaveBeenCalled();
+                    expect(onNext).toHaveBeenCalledTimes(1);
+                    expect(strip(onNext.mock.calls[0][0])).toEqual({
                         json: { b: {} }
                     });
                 }).
@@ -171,12 +169,12 @@ describe('DataSource and Partial Cache', function() {
 
         it('should get multiple arguments into a single toJSON response.', function(done) {
             var model = new Model({cache: M(), source: new LocalDataSource(Cache())});
-            var onNext = sinon.spy();
+            var onNext = jest.fn();
             toObservable(model.
                 get(['lolomo', 0, 0, 'item', 'title'], ['lolomo', 0, 1, 'item', 'title'])).
                 doAction(onNext, noOp, function() {
-                    expect(onNext.calledOnce).to.be.ok;
-                    expect(strip(onNext.getCall(0).args[0])).to.deep.equals({
+                    expect(onNext).toHaveBeenCalledTimes(1);
+                    expect(strip(onNext.mock.calls[0][0])).toEqual({
                         json: {
                             lolomo: {
                                 0: {
@@ -200,12 +198,12 @@ describe('DataSource and Partial Cache', function() {
 
         it('should get a complex argument into a single arg.', function(done) {
             var model = new Model({cache: M(), source: new LocalDataSource(Cache())});
-            var onNext = sinon.spy();
+            var onNext = jest.fn();
             toObservable(model.
                 get(['lolomo', 0, {to: 1}, 'item', 'title'])).
                 doAction(onNext, noOp, function() {
-                    expect(onNext.calledOnce).to.be.ok;
-                    expect(strip(onNext.getCall(0).args[0])).to.deep.equals({
+                    expect(onNext).toHaveBeenCalledTimes(1);
+                    expect(strip(onNext.mock.calls[0][0])).toEqual({
                         json: {
                             lolomo: {
                                 0: {
@@ -234,12 +232,12 @@ describe('DataSource and Partial Cache', function() {
                 maxSize: 0
             });
             var cache = model._root.cache;
-            var onNext = sinon.spy();
+            var onNext = jest.fn();
             toObservable(model.
                 get(['lolomo', 0, {to: 1}, 'item', 'title'])).
                 doAction(onNext, noOp, function() {
-                    expect(onNext.calledOnce).to.be.ok;
-                    expect(strip(onNext.getCall(0).args[0])).to.deep.equals({
+                    expect(onNext).toHaveBeenCalledTimes(1);
+                    expect(strip(onNext.mock.calls[0][0])).toEqual({
                         json: {
                             lolomo: {
                                 0: {
@@ -259,7 +257,7 @@ describe('DataSource and Partial Cache', function() {
                     });
                 }).
                 finally(function() {
-                    expect(cache['$size']).to.equal(0);
+                    expect(cache['$size']).toBe(0);
                     done();
                 }).
                 subscribe(noOp, done, noOp);
@@ -282,12 +280,12 @@ describe('DataSource and Partial Cache', function() {
                 }, {materialize: true})
             });
 
-            var onNext = sinon.spy();
+            var onNext = jest.fn();
             toObservable(model.
                 get(['paths', {to:3}])).
                 doAction(onNext, noOp, function() {
-                    expect(onNext.calledOnce, 'onNext called').to.be.ok;
-                    expect(strip(onNext.getCall(0).args[0])).to.deep.equals({
+                    expect(onNext).toHaveBeenCalledTimes(1);
+                    expect(strip(onNext.mock.calls[0][0])).toEqual({
                         json: {
                             paths: {
                                 0: 'test',
@@ -304,38 +302,38 @@ describe('DataSource and Partial Cache', function() {
     describe('_toJSONG', function() {
         it('should get multiple arguments into a single _toJSONG response.', function(done) {
             var model = new Model({cache: M(), source: new LocalDataSource(Cache())});
-            var onNext = sinon.spy();
+            var onNext = jest.fn();
             toObservable(model.
                 get(['lolomo', 0, 0, 'item', 'title'], ['lolomo', 0, 1, 'item', 'title']).
                 _toJSONG()).
                 doAction(onNext, noOp, function() {
-                    expect(onNext.calledOnce).to.be.ok;
-                    var out = strip(onNext.getCall(0).args[0]);
+                    expect(onNext).toHaveBeenCalledTimes(1);
+                    var out = strip(onNext.mock.calls[0][0]);
                     var expected = strip({
                         jsonGraph: cacheGenerator(0, 2),
                         paths: [['lolomo', 0, 0, 'item', 'title'],
                             ['lolomo', 0, 1, 'item', 'title']]
                     });
-                    expect(out).to.deep.equals(expected);
+                    expect(out).toEqual(expected);
                 }).
                 subscribe(noOp, done, done);
         });
 
         it('should get a complex argument into a single arg.', function(done) {
             var model = new Model({cache: M(), source: new LocalDataSource(Cache())});
-            var onNext = sinon.spy();
+            var onNext = jest.fn();
             toObservable(model.
                 get(['lolomo', 0, {to: 1}, 'item', 'title']).
                 _toJSONG()).
                 doAction(onNext, noOp, function() {
-                    expect(onNext.calledOnce).to.be.ok;
-                    var out = strip(onNext.getCall(0).args[0]);
+                    expect(onNext).toHaveBeenCalledTimes(1);
+                    var out = strip(onNext.mock.calls[0][0]);
                     var expected = strip({
                         jsonGraph: cacheGenerator(0, 2),
                         paths: [['lolomo', 0, 0, 'item', 'title'],
                             ['lolomo', 0, 1, 'item', 'title']]
                     });
-                    expect(out).to.deep.equals(expected);
+                    expect(out).toEqual(expected);
                 }).
                 subscribe(noOp, done, done);
         });
@@ -365,7 +363,7 @@ describe('DataSource and Partial Cache', function() {
 
                     onNextCount++;
                     if (onNextCount === 1){
-                        expect(strip(value)).to.deep.equals({
+                        expect(strip(value)).toEqual({
                             json: {
                                 paths: {
                                     0: 'test',
@@ -375,7 +373,7 @@ describe('DataSource and Partial Cache', function() {
                         });
                     }
                     else if (onNextCount === 2){
-                        expect(strip(value)).to.deep.equals({
+                        expect(strip(value)).toEqual({
                             json: {
                                 paths: {
                                     0: 'test',
@@ -386,7 +384,7 @@ describe('DataSource and Partial Cache', function() {
                         });
                     }
                 }).subscribe(noOp, done, function(){
-                    expect(onNextCount, 'onNext called twice').to.equals(2);
+                    expect(onNextCount).toBe(2);
                     done();
                 });
         });
@@ -400,7 +398,7 @@ describe('DataSource and Partial Cache', function() {
                 doAction(function(x) {
                     count++;
                     if (count === 1) {
-                        expect(strip(x)).to.deep.equals({
+                        expect(strip(x)).toEqual({
                             json: {
                                 lolomo: {
                                     0: {
@@ -414,7 +412,7 @@ describe('DataSource and Partial Cache', function() {
                             }
                         });
                     } else {
-                        expect(strip(x)).to.deep.equals({
+                        expect(strip(x)).toEqual({
                             json: {
                                 lolomo: {
                                     0: {
@@ -434,7 +432,7 @@ describe('DataSource and Partial Cache', function() {
                         });
                     }
                 }, noOp, function() {
-                    expect(count).to.equals(2);
+                    expect(count).toBe(2);
                 }).
                 subscribe(noOp, done, done);
         });
@@ -448,7 +446,7 @@ describe('DataSource and Partial Cache', function() {
                 doAction(function(x) {
                     count++;
                     if (count === 1) {
-                        expect(strip(x)).to.deep.equals({
+                        expect(strip(x)).toEqual({
                             json: {
                                 lolomo: {
                                     0: {
@@ -462,7 +460,7 @@ describe('DataSource and Partial Cache', function() {
                             }
                         });
                     } else {
-                        expect(strip(x)).to.deep.equals({
+                        expect(strip(x)).toEqual({
                             json: {
                                 lolomo: {
                                     0: {
@@ -482,7 +480,7 @@ describe('DataSource and Partial Cache', function() {
                         });
                     }
                 }, noOp, function() {
-                    expect(count).to.equals(2);
+                    expect(count).toBe(2);
                 }).
                 subscribe(noOp, done, done);
         });
@@ -496,10 +494,10 @@ describe('DataSource and Partial Cache', function() {
                 doAction(function(x) {
                     revisions.push(x);
                 }, noOp, function() {
-                    expect(revisions.length).to.equals(2);
-                    expect(revisions[1]).to.not.equal(revisions[0]);
-                    expect(revisions[1].json.lolomo[0]).to.not.equal(revisions[0].json.lolomo[0]);
-                    expect(revisions[1].json.lolomo[0][0]).to.equal(revisions[0].json.lolomo[0][0]);
+                    expect(revisions.length).toBe(2);
+                    expect(revisions[1]).not.toBe(revisions[0]);
+                    expect(revisions[1].json.lolomo[0]).not.toBe(revisions[0].json.lolomo[0]);
+                    expect(revisions[1].json.lolomo[0][0]).toBe(revisions[0].json.lolomo[0][0]);
 
                 }).
                 subscribe(noOp, done, done);
@@ -509,11 +507,11 @@ describe('DataSource and Partial Cache', function() {
     describe('Error Selector (during merge)', function() {
 
         function generateErrorSelectorSpy(expectedPath) {
-            return sinon.spy(function(path, atom) {
+            return jest.fn(function(path, atom) {
 
                 // Needs to be asserted before mutation.
-                expect(atom.$type).to.equal('error');
-                expect(atom.value).to.deep.equals({message:'errormsg'});
+                expect(atom.$type).toBe('error');
+                expect(atom.value).toEqual({message:'errormsg'});
 
                 atom.$custom = 'custom';
                 atom.value.customtype = 'customtype';
@@ -527,11 +525,11 @@ describe('DataSource and Partial Cache', function() {
             var value = e.value;
 
             // To avoid hardcoding/scrubbing $size, and other internals
-            expect(path).to.deep.equals(expectedPath);
+            expect(path).toEqual(expectedPath);
 
-            expect(value.$type).to.equal('error');
-            expect(value.$custom).to.equal('custom');
-            expect(value.value).to.deep.equals({
+            expect(value.$type).toBe('error');
+            expect(value.$custom).toBe('custom');
+            expect(value.value).toEqual({
                 message: 'errormsg',
                 customtype: 'customtype'
             });
@@ -547,8 +545,8 @@ describe('DataSource and Partial Cache', function() {
             // [lolomo,0,0,item]->[videos,0]
             dataSourceCache.videos[0].errorPath = jsonGraph.error({message:'errormsg'});
 
-            var onNextSpy = sinon.spy();
-            var onErrorSpy = sinon.spy();
+            var onNextSpy = jest.fn();
+            var onErrorSpy = jest.fn();
             var errorSelectorSpy = generateErrorSelectorSpy(testPath);
 
             var model = new Model({
@@ -564,22 +562,22 @@ describe('DataSource and Partial Cache', function() {
                 subscribe(
                     noOp,
                     function(e) {
-                        expect(errorSelectorSpy.callCount).to.equal(1);
-                        expect(errorSelectorSpy.getCall(0).args[0]).to.deep.equals(testPath);
+                        expect(errorSelectorSpy).toHaveBeenCalledTimes(1);
+                        expect(errorSelectorSpy.mock.calls[0][0]).toEqual(testPath);
 
-                        expect(onErrorSpy.callCount).to.equal(1);
+                        expect(onErrorSpy).toHaveBeenCalledTimes(1);
 
-                        expect(e.length).to.equal(1);
+                        expect(e.length).toBe(1);
                         assertExpectedErrorPayload(e[0], testPath);
 
                         done();
                     },
                     function() {
-                        expect(onNextSpy.callCount).to.equal(1);
-                        expect(strip(onNextSpy.getCall(0).args[0])).to.deep.equals({
+                        expect(onNextSpy).toHaveBeenCalledTimes(1);
+                        expect(strip(onNextSpy.mock.calls[0][0])).toEqual({
                             json: {}
                         });
-                        expect(onErrorSpy.callCount).to.equal(1);
+                        expect(onErrorSpy).toHaveBeenCalledTimes(1);
                         done();
                     });
         });
@@ -595,8 +593,8 @@ describe('DataSource and Partial Cache', function() {
             // [lolomo,1,0,item]->[videos,10]
             dataSourceCache.videos[10].errorPath = jsonGraph.error({message:'errormsg'});
 
-            var onNextSpy = sinon.spy();
-            var onErrorSpy = sinon.spy();
+            var onNextSpy = jest.fn();
+            var onErrorSpy = jest.fn();
             var errorSelectorSpy = generateErrorSelectorSpy(testPath);
 
             var model = new Model({
@@ -612,19 +610,19 @@ describe('DataSource and Partial Cache', function() {
                 subscribe(
                     noOp,
                     function(e) {
-                        expect(errorSelectorSpy.callCount).to.equal(1);
-                        expect(errorSelectorSpy.getCall(0).args[0]).to.deep.equals(testPath);
+                        expect(errorSelectorSpy).toHaveBeenCalledTimes(1);
+                        expect(errorSelectorSpy.mock.calls[0][0]).toEqual(testPath);
 
-                        expect(onErrorSpy.callCount).to.equal(1);
+                        expect(onErrorSpy).toHaveBeenCalledTimes(1);
 
-                        expect(e.length).to.equal(1);
+                        expect(e.length).toBe(1);
                         assertExpectedErrorPayload(e[0], testPath);
 
                         done();
                     },
                     function() {
-                        expect(onNextSpy.callCount).to.equal(0);
-                        expect(onErrorSpy.callCount).to.equal(1);
+                        expect(onNextSpy).not.toHaveBeenCalled();
+                        expect(onErrorSpy).toHaveBeenCalledTimes(1);
                         done();
                     });
         });
@@ -638,8 +636,8 @@ describe('DataSource and Partial Cache', function() {
             dataSourceCache.videos[0].errorPath = jsonGraph.error({message:'errormsg'});
             dataSourceCache.videos[10].errorPath = jsonGraph.error({message:'errormsg'});
 
-            var onNextSpy = sinon.spy();
-            var onErrorSpy = sinon.spy();
+            var onNextSpy = jest.fn();
+            var onErrorSpy = jest.fn();
             var errorSelectorSpy = generateErrorSelectorSpy(testPath);
 
             var model = new Model({
@@ -655,21 +653,21 @@ describe('DataSource and Partial Cache', function() {
                 subscribe(
                     noOp,
                     function(e) {
-                        expect(onErrorSpy.callCount).to.equal(1);
+                        expect(onErrorSpy).toHaveBeenCalledTimes(1);
 
-                        expect(errorSelectorSpy.callCount).to.equal(2);
-                        expect(errorSelectorSpy.getCall(0).args[0]).to.deep.equals(['lolomo',0,0,'item','errorPath']);
-                        expect(errorSelectorSpy.getCall(1).args[0]).to.deep.equals(['lolomo',1,0,'item','errorPath']);
+                        expect(errorSelectorSpy).toHaveBeenCalledTimes(2);
+                        expect(errorSelectorSpy.mock.calls[0][0]).toEqual(['lolomo',0,0,'item','errorPath']);
+                        expect(errorSelectorSpy.mock.calls[1][0]).toEqual(['lolomo',1,0,'item','errorPath']);
 
-                        expect(e.length).to.equal(2);
+                        expect(e.length).toBe(2);
                         assertExpectedErrorPayload(e[0], ['lolomo',0,0,'item','errorPath']);
                         assertExpectedErrorPayload(e[1], ['lolomo',1,0,'item','errorPath']);
 
                         done();
                     },
                     function() {
-                        expect(onNextSpy.callCount).to.equal(0);
-                        expect(onErrorSpy.callCount).to.equal(1);
+                        expect(onNextSpy).not.toHaveBeenCalled();
+                        expect(onErrorSpy).toHaveBeenCalledTimes(1);
                         done();
                     });
         });
@@ -683,8 +681,8 @@ describe('DataSource and Partial Cache', function() {
             // [lolomo,0,0,item]->[videos,0]
             dataSourceCache.videos[0].errorPath = jsonGraph.error({message:'errormsg'});
 
-            var onNextSpy = sinon.spy();
-            var onErrorSpy = sinon.spy();
+            var onNextSpy = jest.fn();
+            var onErrorSpy = jest.fn();
 
             var model = new Model({
                 cache : modelCache,
@@ -710,15 +708,15 @@ describe('DataSource and Partial Cache', function() {
                 subscribe(
                     noOp,
                     function(e) {
-                        expect(onErrorSpy.callCount).to.equal(0);
+                        expect(onErrorSpy).not.toHaveBeenCalled();
                         done();
                     },
                     function() {
 
-                        expect(onErrorSpy.callCount).to.equal(0);
-                        expect(onNextSpy.callCount).to.equal(1);
+                        expect(onErrorSpy).not.toHaveBeenCalled();
+                        expect(onNextSpy).toHaveBeenCalledTimes(1);
 
-                        expect(onNextSpy.getCall(0).args[0]).to.deep.equals({
+                        expect(onNextSpy.mock.calls[0][0]).toEqual({
                             $type: 'atom',
                             $custom: 'custom',
                             value: {
@@ -768,7 +766,7 @@ describe('DataSource and Partial Cache', function() {
                     ["shows",80025172,"seasons","current","episodes",0,"currentUser","stringTable","detailsPopup","expired"]
                 ));
 
-            var onNext = sinon.spy();
+            var onNext = jest.fn();
             fetch.
                 delay(1).
                 catch(function(_) {
@@ -780,8 +778,8 @@ describe('DataSource and Partial Cache', function() {
                 subscribe(noOp, done,
                     function() {
                         var expected = ['currentUser', 'localized'];
-                        expect(model._root.cache.currentUser.localized.$_absolutePath).to.deep.equals(expected);
-                        expect(onNext.getCall(0).args[0].json.shows[80025172].seasons.current.episodes[0].currentUser.localized.$__path).to.deep.equals(expected);
+                        expect(model._root.cache.currentUser.localized.$_absolutePath).toEqual(expected);
+                        expect(onNext.mock.calls[0][0].json.shows[80025172].seasons.current.episodes[0].currentUser.localized.$__path).toEqual(expected);
                         done();
                     });
         });
@@ -815,7 +813,7 @@ describe('DataSource and Partial Cache', function() {
             var model = new Model({cache: cache, source: source});
             model.getValue(['videos', 2, 'previous', 'bookmark']).
                 then(function(value) {
-                    expect(value).to.equal('cached value');
+                    expect(value).toBe('cached value');
                     done();
                 }).
                 catch(function(e) {
@@ -835,7 +833,7 @@ describe('DataSource and Partial Cache', function() {
             var model = new Model({cache: cache, source: source});
             model.getValue(['videos', 2, 'previous', 'bookmark']).
                 then(function(value) {
-                    expect(value).to.equal('remote value');
+                    expect(value).toBe('remote value');
                     done();
                 }).
                 catch(function(e) {

@@ -13,8 +13,6 @@ var noOp = function() {};
 var LocalDataSource = require('../../data/LocalDataSource');
 var ErrorDataSource = require('../../data/ErrorDataSource');
 var $error = require('./../../../lib/types/error');
-var expect = require('chai').expect;
-var sinon = require('sinon');
 var strip = require('./../../cleanData').stripDerefAndVersionKeys;
 var toObservable = require('../../toObs');
 
@@ -39,11 +37,13 @@ describe('DataSource and Cache', function() {
         model.
             setValue('titlesById[0].rating', 5).then(function(value) {
                 return model.withoutDataSource().getValue('titlesById[0].rating').then(function(postSetValue) {
-                    testRunner.compare(postSetValue, value, 'value after Model.set without paths not equal to same value retrieved from Model.')
+                    // value after Model.set without paths shuold be equal to same value retrieved from Model
+                    testRunner.compare(postSetValue, value)
                     done();
                 });
             }, function(error) {
-                testRunner.compare(true, false, 'Model.set operation was not able to accept jsonGraph without paths from the dataSource.');
+                // Model.set operation should be able to accept jsonGraph without paths from the dataSource
+                testRunner.compare(true, false);
             });
     });
 
@@ -78,7 +78,8 @@ describe('DataSource and Cache', function() {
                         }
                     }}, strip(x));
                 }, noOp, function() {
-                    testRunner.compare(true, next, 'Expect to be onNext at least 1 time.');
+                    // onNext at least once
+                    testRunner.compare(true, next);
                 }).
                 subscribe(noOp, done, done);
         });
@@ -109,13 +110,14 @@ describe('DataSource and Cache', function() {
                         }
                     }}, strip(x));
                 }, noOp, function() {
-                    testRunner.compare(true, next, 'Expect to be onNext at least 1 time.');
+                    // onNext at least once
+                    testRunner.compare(true, next);
                 }).
                 subscribe(noOp, done, done);
         });
         it('should perform multiple trips to a dataSource.', function(done) {
             var count = 0;
-            var onSet = sinon.spy(function(source, tmp, jsongEnv) {
+            var onSet = jest.fn(function(source, tmp, jsongEnv) {
                 count++;
                 if (count === 1) {
 
@@ -133,15 +135,15 @@ describe('DataSource and Cache', function() {
                     onSet: onSet
                 })
             });
-            var onNext = sinon.spy();
+            var onNext = jest.fn();
             toObservable(model.
                 set(
                     {path: ['genreList', 0, 0, 'summary'], value: 1337},
                     {path: ['genreList', 1, 1, 'summary'], value: 7331})).
                 doAction(onNext, noOp, function() {
-                    expect(onSet.calledTwice, 'onSet to be called 2x').to.be.ok;
-                    expect(onNext.calledOnce, 'onNext to be called 1x').to.be.ok;
-                    expect(strip(onNext.getCall(0).args[0])).to.deep.equals({
+                    expect(onSet).toHaveBeenCalledTimes(2);
+                    expect(onNext).toHaveBeenCalledTimes(1);
+                    expect(strip(onNext.mock.calls[0][0])).toEqual({
                         json: {
                             genreList: {
                                 0: {
@@ -166,13 +168,13 @@ describe('DataSource and Cache', function() {
             var model = new Model({
                 source: new LocalDataSource(Cache())
             });
-            var onNext = sinon.spy();
+            var onNext = jest.fn();
             toObservable(model.
                 set({path: ['genreList', 0, 0, 'summary'], value: 1337}).
                 progressively()).
                 doAction(onNext, noOp, function() {
-                    expect(onNext.callCount).to.be.equal(1);
-                    expect(strip(onNext.getCall(0).args[0])).to.deep.equals({
+                    expect(onNext).toHaveBeenCalledTimes(1);
+                    expect(strip(onNext.mock.calls[0][0])).toEqual({
                         json: {
                             genreList: {
                                 0: {
@@ -198,13 +200,13 @@ describe('DataSource and Cache', function() {
                     }
                 })
             });
-            var onNext = sinon.spy();
+            var onNext = jest.fn();
             toObservable(model.
                 set({path: ['genreList', 0, 0, 'summary'], value: 1337}).
                 progressively()).
                 doAction(onNext, noOp, function() {
-                    expect(onNext.callCount).to.be.equal(2);
-                    expect(strip(onNext.getCall(0).args[0])).to.deep.equals({
+                    expect(onNext).toHaveBeenCalledTimes(2);
+                    expect(strip(onNext.mock.calls[0][0])).toEqual({
                         json: {
                             genreList: {
                                 0: {
@@ -215,7 +217,7 @@ describe('DataSource and Cache', function() {
                             }
                         }
                     });
-                    expect(strip(onNext.getCall(1).args[0])).to.deep.equals({
+                    expect(strip(onNext.mock.calls[1][0])).toEqual({
                         json: {
                             genreList: {
                                 0: {
@@ -258,8 +260,8 @@ describe('DataSource and Cache', function() {
             doAction(function(x) {
                 called = true;
             }, noOp, function() {
-                testRunner.compare(true, called, 'Expected onNext to be called');
-                testRunner.compare(true, sourceCalled, 'Expected source.set to be called.');
+                testRunner.compare(true, called);
+                testRunner.compare(true, sourceCalled);
             }).
             subscribe(noOp, done, done);
     });
@@ -289,7 +291,7 @@ describe('DataSource and Cache', function() {
                     }
                 }], e, {strip: ['$size']});
             }, function() {
-                expect(false, 'onNext should not be called.').to.be.ok;
+                done('onNext should not be called.');
             }).
             subscribe(noOp, function(e) {
                 if (Array.isArray(e) && e[0].value.$foo === 'bar' && called) {

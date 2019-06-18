@@ -1,9 +1,5 @@
 var falcor = require("./../../../lib/");
 var Model = falcor.Model;
-var expect = require('chai').expect;
-var sinon = require('sinon');
-var chai = require('chai');
-var expect = chai.expect;
 var noOp = function() {};
 var toObs = require('./../../toObs');
 
@@ -15,13 +11,13 @@ describe('ModelDataSourceAdapter', function() {
             }
         });
 
-        var onNext = sinon.spy();
+        var onNext = jest.fn();
         toObs(model.
             asDataSource().
             get([['hello']])).
             doAction(onNext, noOp, function() {
-                expect(onNext.callCount).to.equals(1);
-                expect(onNext.getCall(0).args[0]).to.deep.equals({
+                expect(onNext).toHaveBeenCalledTimes(1);
+                expect(onNext.mock.calls[0][0]).toEqual({
                     jsonGraph: {
                         hello: 'world'
                     },

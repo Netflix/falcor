@@ -1,4 +1,9 @@
 var Rx = require("rx");
+var testRunner = require('./testRunner');
+var $ref = require('./../lib/types/ref');
+var $error = require('./../lib/types/error');
+var $atom = require('./../lib/types/atom');
+var rxjs = require('rxjs');
 
 var falcor = require("./../lib/");
 var Model = falcor.Model;
@@ -50,14 +55,6 @@ Model.prototype.call = function() {
     return new ResponseObservable(modelCall.apply(this, arguments));
 };
 
-var testRunner = require('./testRunner');
-var chai = require("chai");
-var expect = chai.expect;
-var $ref = require('./../lib/types/ref');
-var $error = require('./../lib/types/error');
-var $atom = require('./../lib/types/atom');
-var rxjs = require('rxjs');
-
 describe("Model", function() {
 
     it("should construct a new Model", function() {
@@ -65,7 +62,7 @@ describe("Model", function() {
     });
 
     it("should construct a new Model when calling the falcor module function", function() {
-        expect(falcor() instanceof falcor.Model).to.equal(true);
+        expect(falcor() instanceof falcor.Model).toBe(true);
     });
 
     it('should have access to static helper methods.', function() {
@@ -400,9 +397,9 @@ describe("Model", function() {
             }
         });
         var cache = model._root.cache;
-        expect(cache['$size']).to.be.greaterThan(0);
+        expect(cache['$size']).toBeGreaterThan(0);
         model._setMaxSize(0);
-        expect(cache['$size']).to.equal(0);
+        expect(cache['$size']).toBe(0);
         done();
     });
 
@@ -411,9 +408,9 @@ describe("Model", function() {
         var model = new Model({
             maxRetries: 10
         });
-        expect(model._maxRetries).to.equal(10);
+        expect(model._maxRetries).toBe(10);
         var batchingModel = model.batch(100);
-        expect(batchingModel._maxRetries).to.equal(10);
+        expect(batchingModel._maxRetries).toBe(10);
         done();
     });
 
@@ -424,9 +421,9 @@ describe("Model", function() {
         MyModel.prototype = new Model();
         MyModel.prototype.constructor = MyModel;
         var model = new MyModel();
-        expect(model).to.be.instanceof(MyModel);
+        expect(model).toBeInstanceOf(MyModel);
         var clonedModel = model.batch(100);
-        expect(clonedModel).to.be.instanceof(MyModel);
+        expect(clonedModel).toBeInstanceOf(MyModel);
     });
 
     describe('JSON-Graph Specification', function() {

@@ -1,10 +1,7 @@
 var falcor = require("./../../lib/");
 var Model = falcor.Model;
 var Rx = require("rx");
-var chai = require("chai");
-var expect = chai.expect;
 var noOp = function() {};
-var sinon = require('sinon');
 
 var __head = require("./../../lib/internal/head");
 var __tail = require("./../../lib/internal/tail");
@@ -25,18 +22,18 @@ describe('Expired', function() {
             }
         }});
 
-        expect(model._root[__head].value).to.equal('sad panda');
+        expect(model._root[__head].value).toBe('sad panda');
 
-        var onNext = sinon.spy();
+        var onNext = jest.fn();
         Rx.Observable.
             timer(100).
             flatMap(function() {
                 return model.get(['expireSoon', 'summary']);
             }).
             doAction(onNext, noOp, function() {
-                expect(onNext.callCount).to.equal(1);
-                expect(model._root[__head]).to.be.not.ok;
-                expect(model._root[__tail]).to.be.not.ok;
+                expect(onNext).toHaveBeenCalledTimes(1);
+                expect(model._root[__head]).toBeUndefined();
+                expect(model._root[__tail]).toBeUndefined();
             }).
             subscribe(noOp, done, done);
     });

@@ -1,5 +1,3 @@
-var sinon = require('sinon');
-var expect = require('chai').expect;
 var GetRequest = require('./../../../lib/request/GetRequestV2');
 var ASAPScheduler = require('./../../../lib/schedulers/ASAPScheduler');
 var ImmediateScheduler = require('./../../../lib/schedulers/ImmediateScheduler');
@@ -21,7 +19,7 @@ describe('#batch', function() {
     it('should make a request to the dataSource with an immediate scheduler', function(done) {
         var inlineBoolean = true;
         var scheduler = new ImmediateScheduler();
-        var getSpy = sinon.spy();
+        var getSpy = jest.fn();
         var source = new LocalDataSource(Cache(), {
             onGet: getSpy
         });
@@ -32,16 +30,16 @@ describe('#batch', function() {
         });
 
         var disposable = request.batch([videos0], [videos0], function(err, data) {
-            var onNext = sinon.spy();
+            var onNext = jest.fn();
             toObservable(model.
                 withoutDataSource().
                 get(videos0)).
                 doAction(onNext, noOp, function() {
-                    expect(inlineBoolean).to.be.ok;
-                    expect(getSpy.calledOnce).to.be.ok;
-                    expect(getSpy.getCall(0).args[1]).to.deep.equals([videos0]);
-                    expect(onNext.calledOnce).to.be.ok;
-                    expect(strip(onNext.getCall(0).args[0])).to.deep.equals({
+                    expect(inlineBoolean).toBe(true);
+                    expect(getSpy).toHaveBeenCalledTimes(1);
+                    expect(getSpy.mock.calls[0][1]).toEqual([videos0]);
+                    expect(onNext).toHaveBeenCalledTimes(1);
+                    expect(strip(onNext.mock.calls[0][0])).toEqual({
                         json: {
                             videos: {
                                 0: {
@@ -59,7 +57,7 @@ describe('#batch', function() {
     it('should make a request to the dataSource with an async scheduler.', function(done) {
         var inlineBoolean = true;
         var scheduler = new ASAPScheduler();
-        var getSpy = sinon.spy();
+        var getSpy = jest.fn();
         var source = new LocalDataSource(Cache(), {
             onGet: getSpy
         });
@@ -68,17 +66,17 @@ describe('#batch', function() {
             removeRequest: function() { },
             model: model
         });
-        var callback = sinon.spy(function(err, data) {
-            var onNext = sinon.spy();
+        var callback = jest.fn(function(err, data) {
+            var onNext = jest.fn();
             toObservable(model.
                 withoutDataSource().
                 get(videos0)).
                 doAction(onNext, noOp, function() {
-                    expect(inlineBoolean).to.not.be.ok;
-                    expect(getSpy.calledOnce).to.be.ok;
-                    expect(getSpy.getCall(0).args[1]).to.deep.equals([videos0]);
-                    expect(onNext.calledOnce).to.be.ok;
-                    expect(strip(onNext.getCall(0).args[0])).to.deep.equals({
+                    expect(inlineBoolean).toBe(false);
+                    expect(getSpy).toHaveBeenCalledTimes(1);
+                    expect(getSpy.mock.calls[0][1]).toEqual([videos0]);
+                    expect(onNext).toHaveBeenCalledTimes(1);
+                    expect(strip(onNext.mock.calls[0][0])).toEqual({
                         json: {
                             videos: {
                                 0: {
@@ -97,7 +95,7 @@ describe('#batch', function() {
 
     it('should batch some requests together.', function(done) {
         var scheduler = new ASAPScheduler();
-        var getSpy = sinon.spy();
+        var getSpy = jest.fn();
         var source = new LocalDataSource(Cache(), {
             onGet: getSpy
         });
@@ -108,12 +106,12 @@ describe('#batch', function() {
         });
 
         var zip = zipSpy(2, function() {
-            var onNext = sinon.spy();
+            var onNext = jest.fn();
             toObservable(model.
                 withoutDataSource().
                 get(videos0, videos1)).
                 doAction(onNext, noOp, function() {
-                    expect(strip(onNext.getCall(0).args[0])).to.deep.equals({
+                    expect(strip(onNext.mock.calls[0][0])).toEqual({
                         json: {
                             videos: {
                                 0: {
@@ -134,7 +132,7 @@ describe('#batch', function() {
 
     it('should batch some requests together and dispose the first one.', function(done) {
         var scheduler = new ASAPScheduler();
-        var getSpy = sinon.spy();
+        var getSpy = jest.fn();
         var source = new LocalDataSource(Cache(), {
             onGet: getSpy
         });
@@ -145,13 +143,13 @@ describe('#batch', function() {
         });
 
         var zip = zipSpy(2, function() {
-            var onNext = sinon.spy();
+            var onNext = jest.fn();
             toObservable(model.
                 withoutDataSource().
                 get(videos0, videos1)).
                 doAction(onNext, noOp, function() {
-                    expect(zip.calledOnce).to.be.ok;
-                    expect(strip(onNext.getCall(0).args[0])).to.deep.equals({
+                    expect(zip).toHaveBeenCalledTimes(1);
+                    expect(strip(onNext.mock.calls[0][0])).toEqual({
                         json: {
                             videos: {
                                 1: {
@@ -171,7 +169,7 @@ describe('#batch', function() {
 
     it('should batch some requests together and dispose the second one.', function(done) {
         var scheduler = new ASAPScheduler();
-        var getSpy = sinon.spy();
+        var getSpy = jest.fn();
         var source = new LocalDataSource(Cache(), {
             onGet: getSpy
         });
@@ -182,13 +180,13 @@ describe('#batch', function() {
         });
 
         var zip = zipSpy(2, function() {
-            var onNext = sinon.spy();
+            var onNext = jest.fn();
             toObservable(model.
                 withoutDataSource().
                 get(videos0, videos1)).
                 doAction(onNext, noOp, function() {
-                    expect(zip.calledOnce).to.be.ok;
-                    expect(strip(onNext.getCall(0).args[0])).to.deep.equals({
+                    expect(zip).toHaveBeenCalledTimes(1);
+                    expect(strip(onNext.mock.calls[0][0])).toEqual({
                         json: {
                             videos: {
                                 0: {

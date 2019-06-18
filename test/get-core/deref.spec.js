@@ -5,11 +5,9 @@ var jsonGraph = require('falcor-json-graph');
 var atom = jsonGraph.atom;
 var _ = require('lodash');
 var error = jsonGraph.error;
-var expect = require('chai').expect;
 var Model = require('./../../lib').Model;
 var BoundJSONGraphModelError = require('./../../lib/errors/BoundJSONGraphModelError');
 var toObservable = require('../toObs');
-var sinon = require('sinon');
 var noOp = function() {};
 
 describe('Deref', function() {
@@ -81,8 +79,8 @@ describe('Deref', function() {
         })._derefSync(['videos', 0]);
 
         var res = model._getPathValuesAsJSONG(model, [['summary']], [{}]);
-        expect(res.criticalError.name).to.equals("BoundJSONGraphModelError");
-        expect(res.criticalError.message).to.equals(
+        expect(res.criticalError.name).toBe("BoundJSONGraphModelError");
+        expect(res.criticalError.message).toBe(
             "It is not legal to use the JSON Graph " +
             "format from a bound Model. JSON Graph format" +
             " can only be used from a root model."
@@ -100,27 +98,27 @@ describe('Deref', function() {
             }
         });
 
-        var onNext = sinon.spy();
+        var onNext = jest.fn();
         toObservable(model.
             get(['a', 'b', 'e'])).
             doAction(onNext, noOp, function() {
-                expect(onNext.calledOnce).to.be.ok;
-                var json = onNext.getCall(0).args[0].json;
+                expect(onNext).toHaveBeenCalledTimes(1);
+                var json = onNext.mock.calls[0][0].json;
 
                 // Top level
-                expect(json.$__path).to.be.not.ok;
+                expect(json.$__path).toBeUndefined();
 
                 // a
                 var a = json.a;
-                expect(a.$__path).to.deep.equals(['a']);
+                expect(a.$__path).toEqual(['a']);
 
                 // b
                 var b = a.b;
-                expect(b.$__path).to.deep.equals(['a', 'b']);
+                expect(b.$__path).toEqual(['a', 'b']);
 
                 // e
                 var e = b.e;
-                expect(e).to.equals('&');
+                expect(e).toBe('&');
             }).
             subscribe(noOp, done, done);
     });
@@ -144,12 +142,12 @@ describe('Deref', function() {
             model = model.deref(json.json.b);
         });
 
-        var onNext = sinon.spy();
+        var onNext = jest.fn();
         toObservable(model.
             get(['e'])).
             doAction(onNext, noOp, function() {
-                expect(onNext.calledOnce).to.be.ok;
-                expect(onNext.getCall(0).args[0]).to.deep.equals({
+                expect(onNext).toHaveBeenCalledTimes(1);
+                expect(onNext.mock.calls[0][0]).toEqual({
                     json: {
                         e: '&'
                     }

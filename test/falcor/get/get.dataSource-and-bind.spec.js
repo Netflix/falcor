@@ -2,8 +2,6 @@ var falcor = require("./../../../lib/");
 var Model = falcor.Model;
 var noOp = function() {};
 var LocalDataSource = require('../../data/LocalDataSource');
-var sinon = require('sinon');
-var expect = require('chai').expect;
 var cacheGenerator = require('./../../CacheGenerator');
 var strip = require('./../../cleanData').stripDerefAndVersionKeys;
 var toObservable = require('../../toObs');
@@ -19,7 +17,7 @@ describe('DataSource and Deref', function() {
     it('should get a value from from dataSource when bound.', function(done) {
         var model = new Model({cache: M(), source: new LocalDataSource(Cache())});
         model._root.unsafeMode = true;
-        var onNext = sinon.spy();
+        var onNext = jest.fn();
         toObservable(model.
             get(['lolomo', 0, 0, 'item', 'title'])).
             flatMap(function(x) {
@@ -29,8 +27,8 @@ describe('DataSource and Deref', function() {
             }).
             doAction(onNext).
             doAction(noOp, noOp, function() {
-                expect(onNext.calledOnce).to.be.ok;
-                expect(strip(onNext.getCall(0).args[0])).to.deep.equals({
+                expect(onNext).toHaveBeenCalledTimes(1);
+                expect(strip(onNext.mock.calls[0][0])).toEqual({
                     json: {
                         1: {
                             item: {
@@ -46,7 +44,7 @@ describe('DataSource and Deref', function() {
     it('should get a value from from dataSource after cache purge.', function(done) {
         var model = new Model({cache: M(), source: new LocalDataSource(Cache())});
         model._root.unsafeMode = true;
-        var onNext = sinon.spy();
+        var onNext = jest.fn();
         toObservable(model.
             get(['lolomo', 0, 0, 'item', 'title'])).
             map(function(x) {
@@ -62,8 +60,8 @@ describe('DataSource and Deref', function() {
             }).
             doAction(onNext).
             doAction(noOp, noOp, function() {
-                expect(onNext.calledOnce).to.be.ok;
-                expect(strip(onNext.getCall(0).args[0])).to.deep.equals({
+                expect(onNext).toHaveBeenCalledTimes(1);
+                expect(strip(onNext.mock.calls[0][0])).toEqual({
                     json: {
                         1: {
                             item: {

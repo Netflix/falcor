@@ -6,21 +6,19 @@ var Observable = Rx.Observable;
 var CacheGenerator = require('./../../CacheGenerator');
 var toObservable = require('./../../toObs');
 var strip = require('./../../cleanData').stripDerefAndVersionKeys;
-var sinon = require('sinon');
-var expect = require('chai').expect;
 
 describe('Path Syntax', function() {
     var model;
-    before(function() {
+    beforeEach(function() {
         model = new Model({cache: CacheGenerator(0, 2)});
         model._root.unsafeMode = true;
     });
 
     it('should accept strings for get.', function(done) {
-        var onNext = sinon.spy();
+        var onNext = jest.fn();
         toObservable(model.get('lolomo[0][0].item.title', 'lolomo[0][1].item.title')).
             doAction(onNext, noOp, function() {
-                expect(strip(onNext.getCall(0).args[0])).to.deep.equals({
+                expect(strip(onNext.mock.calls[0][0])).toEqual({
                     json: {
                         lolomo: {
                             0: {
@@ -38,10 +36,10 @@ describe('Path Syntax', function() {
             subscribe(noOp, done, done);
     });
     it('should accept strings for getValue', function(done) {
-        var onNext = sinon.spy();
+        var onNext = jest.fn();
         toObservable(model.getValue('videos[0].title')).
             doAction(onNext, noOp, function() {
-                expect(onNext.getCall(0).args[0]).to.deep.equals('Video 0');
+                expect(onNext.mock.calls[0][0]).toEqual('Video 0');
             }).
             subscribe(noOp, done, done);
     });

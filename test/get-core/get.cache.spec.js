@@ -3,7 +3,6 @@ var falcor = require("./../../lib/");
 var isInternalKey = require("./../../lib/support/isInternalKey");
 var clean = require('./../cleanData').clean;
 var Model = falcor.Model;
-var expect = require('chai').expect;
 var atom = Model.atom;
 
 function deepExpectations(o, expectExpression) {
@@ -22,14 +21,14 @@ describe('getCache', function() {
         var model = new Model({ cache: cacheGenerator(0, 1) });
         var cache = model.getCache();
         clean(cache);
-        expect(cache).to.deep.equals(cacheGenerator(0, 1));
+        expect(cache).toEqual(cacheGenerator(0, 1));
     });
 
     it("should serialize part of the cache", function() {
         var model = new Model({ cache: cacheGenerator(0, 10) });
         var cache = model.getCache(['lolomo', 0, 3, 'item', 'title']);
         clean(cache);
-        expect(cache).to.deep.equals(cacheGenerator(3, 1));
+        expect(cache).toEqual(cacheGenerator(3, 1));
     });
 
     it("serialized cache should not contain internal keys (including $size, on boxedValues)", function(done) {
@@ -39,7 +38,7 @@ describe('getCache', function() {
             var cache = model.getCache();
 
             deepExpectations(cache, function(key) {
-                expect(isInternalKey(key)).to.equal(false);
+                expect(isInternalKey(key)).toBe(false);
             });
 
             done();
@@ -57,7 +56,7 @@ describe('getCache', function() {
         model._root.cache.testing = undefined;
         var cache = model.getCache();
         clean(cache);
-        expect(cache).to.deep.equals({
+        expect(cache).toEqual({
             test: 'foo'
         });
     });

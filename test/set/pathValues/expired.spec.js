@@ -3,7 +3,6 @@ var strip = require("../support/strip");
 var $atom = require("falcor-json-graph").atom;
 var $pathValue = require("falcor-json-graph").pathValue;
 
-var expect = require('chai').expect;
 var getModel = require("../support/getModel");
 var setPathValues = require("../../../lib/set/setPathValues");
 
@@ -25,8 +24,8 @@ describe("an expired value", function() {
         var value = cache.grids.id[0];
         var expires = value.$expires;
 
-        expect(expires > Date.now()).to.be.true;
-        expect(strip(cache)).to.deep.equal(strip({
+        expect(expires > Date.now()).toBe(true);
+        expect(strip(cache)).toEqual(strip({
             grid: $ref("grids['id']"),
             grids: { id: { 0: $ref("lists['id']") } }
         }));
@@ -49,8 +48,8 @@ describe("an expired value", function() {
             ]
         );
 
-        expect(expired.length).to.equal(1);
-        expect(strip(cache)).to.deep.equal(strip({
+        expect(expired.length).toBe(1);
+        expect(strip(cache)).toEqual(strip({
             grid: $ref("grids['id']"),
             grids: { id: { 0: { 0: { title: $atom("Pulp Fiction") } } } }
         }));
@@ -73,8 +72,8 @@ describe("an expired value", function() {
             ]
         );
 
-        expect(expired.length).to.equal(1);
-        expect(strip(cache)).to.deep.equal(strip({
+        expect(expired.length).toBe(1);
+        expect(strip(cache)).toEqual(strip({
             grid: $ref("grids['id']"),
             grids: { id: { 0: { 0: { title: $atom("Pulp Fiction") } } } }
         }));

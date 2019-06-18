@@ -4,7 +4,6 @@ var $atom = require("falcor-json-graph").atom;
 var $pathMapEnvelope = require("../../set/support/pathMapEnvelope");
 var $pathValue = require("falcor-json-graph").pathValue;
 
-var expect = require('chai').expect;
 var getModel = require("../../set/support/getModel");
 var setPathValues = require("../../../lib/set/setPathValues");
 var invalidatePathMaps = require("../../../lib/invalidate/invalidatePathMaps");
@@ -27,7 +26,7 @@ describe("invalidatePathMaps", function() {
             $pathMapEnvelope("movies['pulp-fiction'].title")
         ]);
 
-        expect(strip(cache)).to.deep.equal(strip({}));
+        expect(strip(cache)).toEqual(strip({}));
     });
 
     it("through a reference", function() {
@@ -51,7 +50,7 @@ describe("invalidatePathMaps", function() {
             ]
         );
 
-        expect(strip(cache)).to.deep.equal(strip({
+        expect(strip(cache)).toEqual(strip({
             grid: $ref("grids['id']"),
             grids: { id: { 0: $ref("lists['id']") } },
             lists: { id: { 0: $ref("movies['pulp-fiction']") } }
@@ -79,7 +78,7 @@ describe("invalidatePathMaps", function() {
             ]
         );
 
-        expect(strip(cache)).to.deep.equal(strip({
+        expect(strip(cache)).toEqual(strip({
             grid: $ref("grids['id']"),
             grids: { id: { 0: $ref("lists['id']") } },
             lists: { id: { 1: $ref("movies['kill-bill-1']") } }
@@ -107,7 +106,7 @@ describe("invalidatePathMaps", function() {
             ]
         );
 
-        expect(strip(cache)).to.deep.equal(strip({
+        expect(strip(cache)).toEqual(strip({
             grid: $ref("grids['id']"),
             grids: { id: { 0: $ref("lists['id']") } },
             lists: { id: { 2: $ref("movies['reservior-dogs']") } }
@@ -135,7 +134,7 @@ describe("invalidatePathMaps", function() {
             ]
         );
 
-        expect(strip(cache)).to.deep.equal(strip({
+        expect(strip(cache)).toEqual(strip({
             grid: $ref("grids['id']"),
             grids: { id: { 0: $ref("lists['id']") } },
             lists: { id: { 2: $ref("movies['reservior-dogs']") } }
@@ -162,7 +161,7 @@ describe("invalidatePathMaps", function() {
                     ]
                 );
 
-                expect(strip(cache)).to.deep.equal(strip({}));
+                expect(strip(cache)).toEqual(strip({}));
             });
             it("through successful, short-circuit, and broken references", function() {
 
@@ -187,7 +186,7 @@ describe("invalidatePathMaps", function() {
                     ]
                 );
 
-                expect(strip(cache)).to.deep.equal(strip({
+                expect(strip(cache)).toEqual(strip({
                     grid: $ref("grids['id']"),
                     grids: { id: { 0: $ref("lists['id']") } },
                     lists: { id: {
@@ -222,7 +221,7 @@ describe("invalidatePathMaps", function() {
                     ]
                 );
 
-                expect(strip(cache)).to.deep.equal(strip({
+                expect(strip(cache)).toEqual(strip({
                     grid: $ref("grids['id']"),
                     grids: { id: { 0: $ref("lists['id']") } },
                     lists: { id: {
@@ -254,7 +253,7 @@ describe("invalidatePathMaps", function() {
                     ]
                 );
 
-                expect(strip(cache)).to.deep.equal(strip({
+                expect(strip(cache)).toEqual(strip({
                     grid: $ref("grids['id']"),
                     grids: { id: { 0: $ref("lists['id']") } },
                     lists: { id: {
@@ -286,7 +285,7 @@ describe("invalidatePathMaps", function() {
                     ]
                 );
 
-                expect(strip(cache)).to.deep.equal(strip({
+                expect(strip(cache)).toEqual(strip({
                     grid: $ref("grids['id']"),
                     grids: { id: { 0: $ref("lists['id']") } },
                     lists: { id: {
@@ -318,7 +317,7 @@ describe("invalidatePathMaps", function() {
                     ]
                 );
 
-                expect(strip(cache)).to.deep.equal(strip({
+                expect(strip(cache)).toEqual(strip({
                     grid: $ref("grids['id']"),
                     grids: { id: { 0: $ref("lists['id']") } },
                     lists: { id: {
@@ -350,7 +349,7 @@ describe("invalidatePathMaps", function() {
                     ]
                 );
 
-                expect(strip(cache)).to.deep.equal(strip({
+                expect(strip(cache)).toEqual(strip({
                     grid: $ref("grids['id']"),
                     grids: { id: { 0: $ref("lists['id']") } },
                     lists: { id: {

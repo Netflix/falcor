@@ -1,6 +1,5 @@
 var get = require('./../lib/get');
 var Model = require('./../lib');
-var expect = require('chai').expect;
 var clean = require('./cleanData').clean;
 var convert = require('./cleanData').convert;
 var internalKeys = require('./../lib/internal');
@@ -90,15 +89,15 @@ module.exports = function(testConfig) {
     clean(expectedOutput, {strip: ['$size', '$__path']});
 
     if (expectedOutput) {
-        expect(valueNode).to.deep.equals(expectedOutput);
+        expect(valueNode).toEqual(expectedOutput);
     }
     if (requestedMissingPaths) {
-        expect(out.requestedMissingPaths).to.deep.equals(requestedMissingPaths);
+        expect(out.requestedMissingPaths).toEqual(requestedMissingPaths);
     }
     if (optimizedMissingPaths) {
-        expect(out.optimizedMissingPaths).to.deep.equals(optimizedMissingPaths);
+        expect(out.optimizedMissingPaths).toEqual(optimizedMissingPaths);
     }
     if (errors) {
-        expect(out.errors).to.deep.equals(errors);
+        expect(out.errors).toEqual(errors);
     }
 };

@@ -13,7 +13,6 @@ var noOp = function() {};
 var LocalDataSource = require('../../data/LocalDataSource');
 var ErrorDataSource = require('../../data/ErrorDataSource');
 var $error = require('./../../../lib/types/error');
-var expect = require('chai').expect;
 var strip = require('./../../cleanData').stripDerefAndVersionKeys;
 var toObservable = require('../../toObs');
 
@@ -51,7 +50,8 @@ describe('Cache as DataSource and Cache', function() {
                         }
                     }}, strip(x));
                 }, noOp, function() {
-                    testRunner.compare(true, next, 'Expect to be onNext at least 1 time.');
+                    // onNext at least once
+                    testRunner.compare(true, next);
                 }).
                 subscribe(noOp, done, done);
         });
@@ -84,7 +84,8 @@ describe('Cache as DataSource and Cache', function() {
                         }
                     }}, strip(x));
                 }, noOp, function() {
-                    testRunner.compare(true, next, 'Expect to be onNext at least 1 time.');
+                    // onNext at least once
+                    testRunner.compare(true, next);
                 }).
                 subscribe(noOp, done, done);
         });
@@ -118,8 +119,8 @@ describe('Cache as DataSource and Cache', function() {
             doAction(function(x) {
                 called = true;
             }, noOp, function() {
-                testRunner.compare(true, called, 'Expected onNext to be called');
-                testRunner.compare(true, sourceCalled, 'Expected source.set to be called.');
+                testRunner.compare(true, called);
+                testRunner.compare(true, sourceCalled);
             }).
             subscribe(noOp, done, done);
     });
@@ -150,7 +151,7 @@ describe('Cache as DataSource and Cache', function() {
                     }
                 }], e, {strip: ['$size']});
             }, function() {
-                expect(false, 'onCompleted should not be called.').to.be.ok;
+                done('onCompleted should not be called.');
             }).
             subscribe(noOp, function(e) {
                 if (Array.isArray(e) && e[0].value.$foo === 'bar' && called) {

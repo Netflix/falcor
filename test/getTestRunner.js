@@ -3,8 +3,6 @@ var _ = require("lodash");
 var Rx = require("rx");
 var testRunner = require("./testRunner");
 var noOp = function() {};
-var chai = require("chai");
-var expect = chai.expect;
 var Model = falcor.Model;
 var Cache = require("./data/Cache");
 function getTestRunner(data, options) {
@@ -116,7 +114,7 @@ function getTestRunner(data, options) {
                 testRunner.validateOperation(op, expected, actual);
 
                 if (suffix === 'AsValues' && expectedCount > 0) {
-                    expect(actualCount).to.equal(expectedCount);
+                    expect(actualCount).toBe(expectedCount);
                 }
             });
         });

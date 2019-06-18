@@ -1,6 +1,5 @@
 var falcor = require('./../../../lib/');
 var Model = falcor.Model;
-var expect = require('chai').expect;
 var toObservable = require('../../toObs');
 
 describe("root onChange handler", function () {
@@ -25,7 +24,7 @@ describe("root onChange handler", function () {
             }).
             subscribe();
 
-        expect(changed, "onChange wasn't called.").to.be.ok;
-        expect(calledBeforeEnsure, "onChange wasn't called before the subscription was disposed.").to.be.ok;
+        expect(changed).toBe(true);
+        expect(calledBeforeEnsure).toBe(true);
     });
 });

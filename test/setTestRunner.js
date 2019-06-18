@@ -1,7 +1,5 @@
 var falcor = require("./../lib/");
 var Model = falcor.Model;
-var chai = require("chai");
-var expect = chai.expect;
 var _ = require("lodash");
 var noOp = function() {};
 var Cache = require("./data/Cache");

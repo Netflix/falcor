@@ -4,7 +4,6 @@ var $atom = require("falcor-json-graph").atom;
 var $error = require("falcor-json-graph").error;
 var $pathMapEnvelope = require("../support/pathMapEnvelope");
 
-var expect = require('chai').expect;
 var getModel = require("../support/getModel");
 var setPathMaps = require("../../../lib/set/setPathMaps");
 
@@ -21,7 +20,7 @@ describe("a primitive over a branch", function() {
             ]
         );
 
-        expect(strip(cache)).to.deep.equal(strip({
+        expect(strip(cache)).toEqual(strip({
             movies: { "pulp-fiction": $atom("Pulp Fiction") }
         }));
     });
@@ -45,7 +44,7 @@ describe("a primitive over a branch", function() {
             ]
         );
 
-        expect(strip(cache)).to.deep.equal(strip({
+        expect(strip(cache)).toEqual(strip({
             grid: $ref("grids['id']"),
             grids: { id: { 0: $ref("lists['id']") } },
             lists: { id: { 0: $ref("movies['pulp-fiction']") } },
@@ -67,7 +66,7 @@ describe("set an error over a branch", function() {
             ]
         );
 
-        expect(strip(cache)).to.deep.equal(strip({
+        expect(strip(cache)).toEqual(strip({
             movies: { "pulp-fiction": $error("oops") }
         }));
     });
@@ -91,7 +90,7 @@ describe("set an error over a branch", function() {
             ]
         );
 
-        expect(strip(cache)).to.deep.equal(strip({
+        expect(strip(cache)).toEqual(strip({
             grid: $ref("grids['id']"),
             grids: { id: { 0: $ref("lists['id']") } },
             lists: { id: { 0: $ref("movies['pulp-fiction']") } },
