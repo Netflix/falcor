@@ -1,76 +1,76 @@
-var RequestQueue = require('./../../../lib/request/RequestQueueV2');
-var ASAPScheduler = require('./../../../lib/schedulers/ASAPScheduler');
-var ImmediateScheduler = require('./../../../lib/schedulers/ImmediateScheduler');
-var Model = require('./../../../lib').Model;
-var LocalDataSource = require('./../../data/LocalDataSource');
-var noOp = function() {};
-var zipSpy = require('./../../zipSpy');
+const RequestQueue = require("./../../../lib/request/RequestQueueV2");
+const ASAPScheduler = require("./../../../lib/schedulers/ASAPScheduler");
+const ImmediateScheduler = require("./../../../lib/schedulers/ImmediateScheduler");
+const Model = require("./../../../lib").Model;
+const LocalDataSource = require("./../../data/LocalDataSource");
+const noOp = function() {};
+const zipSpy = require("./../../zipSpy");
 
-var cacheGenerator = require('./../../CacheGenerator');
-var strip = require('./../../cleanData').stripDerefAndVersionKeys;
-var toObservable = require('../../toObs');
+const cacheGenerator = require("./../../CacheGenerator");
+const strip = require("./../../cleanData").stripDerefAndVersionKeys;
+const toObservable = require("../../toObs");
 
-var Cache = function() { return cacheGenerator(0, 2); };
+const Cache = function() {
+    return cacheGenerator(0, 2);
+};
 
-describe('#get', function() {
-    var videos0 = ['videos', 0, 'title'];
-    var videos1 = ['videos', 1, 'title'];
-    it('should make a simple get request.', function(done) {
-        var scheduler = new ImmediateScheduler();
-        var source = new LocalDataSource(Cache());
-        var model = new Model({source: source});
-        var queue = new RequestQueue(model, scheduler);
-        var callback = jest.fn();
+describe("#get", () => {
+    const videos0 = ["videos", 0, "title"];
+    const videos1 = ["videos", 1, "title"];
+
+    it("makes a simple get request", done => {
+        const scheduler = new ImmediateScheduler();
+        const source = new LocalDataSource(Cache());
+        const model = new Model({ source });
+        const queue = new RequestQueue(model, scheduler);
+        const callback = jest.fn();
         queue.get([videos0], [videos0], callback);
 
         expect(callback).toHaveBeenCalledTimes(1);
-        var onNext = jest.fn();
-        toObservable(model.
-            withoutDataSource().
-            get(videos0)).
-            doAction(onNext, noOp, function() {
+        const onNext = jest.fn();
+        toObservable(model.withoutDataSource().get(videos0))
+            .doAction(onNext, noOp, () => {
                 expect(strip(onNext.mock.calls[0][0])).toEqual({
                     json: {
                         videos: {
                             0: {
-                                title: 'Video 0'
+                                title: "Video 0"
                             }
                         }
                     }
                 });
-            }).
-            subscribe(noOp, done, done);
+            })
+            .subscribe(noOp, done, done);
     });
 
-    it('should make a couple requests and have them batched together.', function(done) {
-        var scheduler = new ASAPScheduler();
-        var source = new LocalDataSource(Cache());
-        var model = new Model({source: source});
-        var queue = new RequestQueue(model, scheduler);
+    it("makes a couple requests and have them batched together", done => {
+        const scheduler = new ASAPScheduler();
+        const source = new LocalDataSource(Cache());
+        const model = new Model({ source });
+        const queue = new RequestQueue(model, scheduler);
 
-        var zip = zipSpy(2, function() {
+        let zip;
+        zip = zipSpy(2, () => {
             expect(queue._requests.length).toBe(0);
             expect(zip).toHaveBeenCalledTimes(2);
 
-            var onNext = jest.fn();
-            toObservable(model.
-                withoutDataSource().
-                get(videos0, videos1)).
-                doAction(onNext, noOp, function() {
+            const onNext = jest.fn();
+            toObservable(model.withoutDataSource().get(videos0, videos1))
+                .doAction(onNext, noOp, () => {
                     expect(strip(onNext.mock.calls[0][0])).toEqual({
                         json: {
                             videos: {
                                 0: {
-                                    title: 'Video 0'
+                                    title: "Video 0"
                                 },
                                 1: {
-                                    title: 'Video 1'
+                                    title: "Video 1"
                                 }
                             }
                         }
                     });
-                }).
-                subscribe(noOp, done, done);
+                })
+                .subscribe(noOp, done, done);
         });
 
         queue.get([videos0], [videos0], zip);
@@ -81,32 +81,31 @@ describe('#get', function() {
         expect(queue._requests[0].scheduled).toBe(true);
     });
 
-    it('should make a couple requests where the second argument is deduped.', function(done) {
-        var scheduler = new ImmediateScheduler();
-        var source = new LocalDataSource(Cache(), {wait: 100});
-        var model = new Model({source: source});
-        var queue = new RequestQueue(model, scheduler);
+    it("makes a couple requests where the second argument is deduped", done => {
+        const scheduler = new ImmediateScheduler();
+        const source = new LocalDataSource(Cache(), { wait: 100 });
+        const model = new Model({ source });
+        const queue = new RequestQueue(model, scheduler);
 
-        var zip = zipSpy(2, function() {
+        let zip;
+        zip = zipSpy(2, () => {
             expect(queue._requests.length).toBe(0);
             expect(zip).toHaveBeenCalledTimes(2);
 
-            var onNext = jest.fn();
-            toObservable(model.
-                withoutDataSource().
-                get(videos0, videos1)).
-                doAction(onNext, noOp, function() {
+            const onNext = jest.fn();
+            toObservable(model.withoutDataSource().get(videos0, videos1))
+                .doAction(onNext, noOp, () => {
                     expect(strip(onNext.mock.calls[0][0])).toEqual({
                         json: {
                             videos: {
                                 0: {
-                                    title: 'Video 0'
+                                    title: "Video 0"
                                 }
                             }
                         }
                     });
-                }).
-                subscribe(noOp, done, done);
+                })
+                .subscribe(noOp, done, done);
         });
 
         queue.get([videos0], [videos0], zip);
@@ -120,37 +119,39 @@ describe('#get', function() {
         expect(queue._requests[0].scheduled).toBe(false);
     });
 
-    it('should make a couple requests where only part of the second request is deduped then first request is disposed.', function(done) {
-        var scheduler = new ImmediateScheduler();
-        var source = new LocalDataSource(Cache(), {wait: 100});
-        var model = new Model({source: source});
-        var queue = new RequestQueue(model, scheduler);
+    it("makes a couple requests where only part of the second request is deduped then first request is disposed", done => {
+        const scheduler = new ImmediateScheduler();
+        const source = new LocalDataSource(Cache(), { wait: 100 });
+        const model = new Model({ source });
+        const queue = new RequestQueue(model, scheduler);
 
-        var zip = zipSpy(2, function() {
-
-            var onNext = jest.fn();
-            toObservable(model.
-                withoutDataSource().
-                get(videos0, videos1)).
-                doAction(onNext, noOp, function() {
-                    expect(zip).toHaveBeenCalledTimes(1);
-                    expect(strip(onNext.mock.calls[0][0])).toEqual({
-                        json: {
-                            videos: {
-                                0: {
-                                    title: 'Video 0'
-                                },
-                                1: {
-                                    title: 'Video 1'
+        let zip;
+        zip = zipSpy(
+            2,
+            () => {
+                const onNext = jest.fn();
+                toObservable(model.withoutDataSource().get(videos0, videos1))
+                    .doAction(onNext, noOp, () => {
+                        expect(zip).toHaveBeenCalledTimes(1);
+                        expect(strip(onNext.mock.calls[0][0])).toEqual({
+                            json: {
+                                videos: {
+                                    0: {
+                                        title: "Video 0"
+                                    },
+                                    1: {
+                                        title: "Video 1"
+                                    }
                                 }
                             }
-                        }
-                    });
-                }).
-                subscribe(noOp, done, done);
-        }, 300);
+                        });
+                    })
+                    .subscribe(noOp, done, done);
+            },
+            300
+        );
 
-        var disposable = queue.get([videos0], [videos0], zip);
+        const disposable = queue.get([videos0], [videos0], zip);
         expect(queue._requests.length).toBe(1);
         expect(queue._requests[0].sent).toBe(true);
         expect(queue._requests[0].scheduled).toBe(false);
@@ -165,34 +166,36 @@ describe('#get', function() {
         disposable();
     });
 
-    it('should make a couple requests where the second request is deduped and the first is disposed.', function(done) {
-        var scheduler = new ImmediateScheduler();
-        var source = new LocalDataSource(Cache(), {wait: 100});
-        var model = new Model({source: source});
-        var queue = new RequestQueue(model, scheduler);
+    it("makes a couple requests where the second request is deduped and the first is disposed", done => {
+        const scheduler = new ImmediateScheduler();
+        const source = new LocalDataSource(Cache(), { wait: 100 });
+        const model = new Model({ source });
+        const queue = new RequestQueue(model, scheduler);
 
-        var zip = zipSpy(2, function() {
-
-            var onNext = jest.fn();
-            toObservable(model.
-                withoutDataSource().
-                get(videos0, videos1)).
-                doAction(onNext, noOp, function() {
-                    expect(zip).toHaveBeenCalledTimes(1);
-                    expect(strip(onNext.mock.calls[0][0])).toEqual({
-                        json: {
-                            videos: {
-                                0: {
-                                    title: 'Video 0'
+        let zip;
+        zip = zipSpy(
+            2,
+            () => {
+                const onNext = jest.fn();
+                toObservable(model.withoutDataSource().get(videos0, videos1))
+                    .doAction(onNext, noOp, () => {
+                        expect(zip).toHaveBeenCalledTimes(1);
+                        expect(strip(onNext.mock.calls[0][0])).toEqual({
+                            json: {
+                                videos: {
+                                    0: {
+                                        title: "Video 0"
+                                    }
                                 }
                             }
-                        }
-                    });
-                }).
-                subscribe(noOp, done, done);
-        }, 300);
+                        });
+                    })
+                    .subscribe(noOp, done, done);
+            },
+            300
+        );
 
-        var disposable = queue.get([videos0], [videos0], zip);
+        const disposable = queue.get([videos0], [videos0], zip);
         expect(queue._requests.length).toBe(1);
         expect(queue._requests[0].sent).toBe(true);
         expect(queue._requests[0].scheduled).toBe(false);
@@ -205,31 +208,33 @@ describe('#get', function() {
         disposable();
     });
 
-    it('should make a couple requests where the second argument is deduped and all the requests are disposed.', function(done) {
-        var scheduler = new ImmediateScheduler();
-        var source = new LocalDataSource(Cache(), {wait: 100});
-        var model = new Model({source: source});
-        var queue = new RequestQueue(model, scheduler);
+    it("makes a couple requests where the second argument is deduped and all the requests are disposed", done => {
+        const scheduler = new ImmediateScheduler();
+        const source = new LocalDataSource(Cache(), { wait: 100 });
+        const model = new Model({ source });
+        const queue = new RequestQueue(model, scheduler);
 
-        var zip = zipSpy(2, function() {
+        let zip;
+        zip = zipSpy(
+            2,
+            () => {
+                const onNext = jest.fn();
+                toObservable(model.withoutDataSource().get(videos0, videos1))
+                    .doAction(onNext, noOp, () => {
+                        expect(zip).not.toHaveBeenCalled();
+                        expect(onNext).toHaveBeenCalledTimes(1);
+                    })
+                    .subscribe(noOp, done, done);
+            },
+            300
+        );
 
-            var onNext = jest.fn();
-            toObservable(model.
-                withoutDataSource().
-                get(videos0, videos1)).
-                doAction(onNext, noOp, function() {
-                    expect(zip).not.toHaveBeenCalled();
-                    expect(onNext).toHaveBeenCalledTimes(1);
-                }).
-                subscribe(noOp, done, done);
-        }, 300);
-
-        var disposable = queue.get([videos0], [videos0], zip);
+        const disposable = queue.get([videos0], [videos0], zip);
         expect(queue._requests.length).toBe(1);
         expect(queue._requests[0].sent).toBe(true);
         expect(queue._requests[0].scheduled).toBe(false);
 
-        var disposable2 = queue.get([videos0], [videos0], zip);
+        const disposable2 = queue.get([videos0], [videos0], zip);
         expect(queue._requests.length).toBe(1);
         expect(queue._requests[0].sent).toBe(true);
         expect(queue._requests[0].scheduled).toBe(false);
@@ -238,39 +243,41 @@ describe('#get', function() {
         disposable2();
     });
 
-    it('should make a couple requests where only part of the second request is deduped then disposed.', function(done) {
-        var scheduler = new ImmediateScheduler();
-        var source = new LocalDataSource(Cache(), {wait: 100});
-        var model = new Model({source: source});
-        var queue = new RequestQueue(model, scheduler);
+    it("makes a couple requests where only part of the second request is deduped then disposed", done => {
+        const scheduler = new ImmediateScheduler();
+        const source = new LocalDataSource(Cache(), { wait: 100 });
+        const model = new Model({ source });
+        const queue = new RequestQueue(model, scheduler);
 
-        var zip = zipSpy(2, function() {
-
-            var onNext = jest.fn();
-            toObservable(model.
-                withoutDataSource().
-                get(videos0, videos1)).
-                doAction(onNext, noOp, function() {
-                    expect(zip).toHaveBeenCalledTimes(1);
-                    expect(strip(onNext.mock.calls[0][0])).toEqual({
-                        json: {
-                            videos: {
-                                0: {
-                                    title: 'Video 0'
+        let zip;
+        zip = zipSpy(
+            2,
+            () => {
+                const onNext = jest.fn();
+                toObservable(model.withoutDataSource().get(videos0, videos1))
+                    .doAction(onNext, noOp, () => {
+                        expect(zip).toHaveBeenCalledTimes(1);
+                        expect(strip(onNext.mock.calls[0][0])).toEqual({
+                            json: {
+                                videos: {
+                                    0: {
+                                        title: "Video 0"
+                                    }
                                 }
                             }
-                        }
-                    });
-                }).
-                subscribe(noOp, done, done);
-        }, 300);
+                        });
+                    })
+                    .subscribe(noOp, done, done);
+            },
+            300
+        );
 
         queue.get([videos0], [videos0], zip);
         expect(queue._requests.length).toBe(1);
         expect(queue._requests[0].sent).toBe(true);
         expect(queue._requests[0].scheduled).toBe(false);
 
-        var disposable2 = queue.get([videos0, videos1], [videos0, videos1], zip);
+        const disposable2 = queue.get([videos0, videos1], [videos0, videos1], zip);
         expect(queue._requests.length).toBe(2);
         expect(queue._requests[1].sent).toBe(true);
         expect(queue._requests[1].scheduled).toBe(false);
@@ -278,30 +285,33 @@ describe('#get', function() {
         disposable2();
     });
 
-    it('should make a couple requests where only part of the second request is deduped then both are disposed.', function(done) {
-        var scheduler = new ImmediateScheduler();
-        var source = new LocalDataSource(Cache(), {wait: 100});
-        var model = new Model({source: source});
-        var queue = new RequestQueue(model, scheduler);
+    it("makes a couple requests where only part of the second request is deduped then both are disposed", done => {
+        const scheduler = new ImmediateScheduler();
+        const source = new LocalDataSource(Cache(), { wait: 100 });
+        const model = new Model({ source });
+        const queue = new RequestQueue(model, scheduler);
 
-        var zip = zipSpy(2, function() {
-            var onNext = jest.fn();
-            toObservable(model.
-                withoutDataSource().
-                get(videos0, videos1)).
-                doAction(onNext, noOp, function() {
-                    expect(zip).not.toHaveBeenCalled();
-                    expect(onNext).toHaveBeenCalledTimes(1);
-                }).
-                subscribe(noOp, done, done);
-        }, 300);
+        let zip;
+        zip = zipSpy(
+            2,
+            () => {
+                const onNext = jest.fn();
+                toObservable(model.withoutDataSource().get(videos0, videos1))
+                    .doAction(onNext, noOp, () => {
+                        expect(zip).not.toHaveBeenCalled();
+                        expect(onNext).toHaveBeenCalledTimes(1);
+                    })
+                    .subscribe(noOp, done, done);
+            },
+            300
+        );
 
-        var disposable = queue.get([videos0], [videos0], zip);
+        const disposable = queue.get([videos0], [videos0], zip);
         expect(queue._requests.length).toBe(1);
         expect(queue._requests[0].sent).toBe(true);
         expect(queue._requests[0].scheduled).toBe(false);
 
-        var disposable2 = queue.get([videos0, videos1], [videos0, videos1], zip);
+        const disposable2 = queue.get([videos0, videos1], [videos0, videos1], zip);
         expect(queue._requests.length).toBe(2);
         expect(queue._requests[1].sent).toBe(true);
         expect(queue._requests[1].scheduled).toBe(false);
