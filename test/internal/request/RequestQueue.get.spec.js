@@ -17,6 +17,7 @@ const Cache = function() {
 describe("#get", () => {
     const videos0 = ["videos", 0, "title"];
     const videos1 = ["videos", 1, "title"];
+    const videos2 = ["videos", 2, "title"];
 
     it("makes a simple get request", done => {
         const scheduler = new ImmediateScheduler();
@@ -318,5 +319,100 @@ describe("#get", () => {
 
         disposable();
         disposable2();
+    });
+
+    it("does not dedupe requests when it is disabled", done => {
+        const scheduler = new ImmediateScheduler();
+        const dsGetSpy = jest.fn();
+        const source = new LocalDataSource(Cache(), { wait: 100, onGet: dsGetSpy });
+        const model = new Model({ source, disableRequestDeduplication: true });
+        const queue = new RequestQueue(model, scheduler);
+
+        let zip;
+        zip = zipSpy(2, () => {
+            expect(queue._requests.length).toBe(0);
+            expect(zip).toHaveBeenCalledTimes(2);
+
+            expect(dsGetSpy).toHaveBeenCalledTimes(2);
+
+            // Paths should still be collapsed
+            expect(dsGetSpy).toHaveBeenNthCalledWith(1, expect.anything(), [["videos", { from: 0, to: 1 }, "title"]]);
+            expect(dsGetSpy).toHaveBeenNthCalledWith(2, expect.anything(), [["videos", { from: 1, to: 2 }, "title"]]);
+
+            done();
+        });
+
+        queue.get([videos0, videos1], [videos0, videos1], zip);
+        queue.get([videos1, videos2], [videos1, videos2], zip);
+    });
+
+    it("does not collapse paths when it is disabled", done => {
+        const scheduler = new ImmediateScheduler();
+        const dsGetSpy = jest.fn();
+        const source = new LocalDataSource(Cache(), { wait: 100, onGet: dsGetSpy });
+        const model = new Model({ source, disablePathCollapse: true });
+        const queue = new RequestQueue(model, scheduler);
+
+        let zip;
+        zip = zipSpy(2, () => {
+            expect(queue._requests.length).toBe(0);
+            expect(zip).toHaveBeenCalledTimes(2);
+
+            // Requests should still be deduplicated
+            expect(dsGetSpy).toHaveBeenCalledTimes(2);
+            expect(dsGetSpy).toHaveBeenNthCalledWith(1, expect.anything(), [videos0, videos1]);
+            expect(dsGetSpy).toHaveBeenNthCalledWith(2, expect.anything(), [videos2]);
+
+            done();
+        });
+
+        queue.get([videos0, videos1], [videos0, videos1], zip);
+        queue.get([videos1, videos2], [videos1, videos2], zip);
+    });
+
+    it("does not collapse paths or dedupe requests when disabled", done => {
+        const scheduler = new ImmediateScheduler();
+        const dsGetSpy = jest.fn();
+        const source = new LocalDataSource(Cache(), { wait: 100, onGet: dsGetSpy });
+        const model = new Model({ source, disablePathCollapse: true, disableRequestDeduplication: true });
+        const queue = new RequestQueue(model, scheduler);
+
+        let zip;
+        zip = zipSpy(2, () => {
+            expect(queue._requests.length).toBe(0);
+            expect(zip).toHaveBeenCalledTimes(2);
+
+            // No path collapse, no request dedupe
+            expect(dsGetSpy).toHaveBeenCalledTimes(2);
+            expect(dsGetSpy).toHaveBeenNthCalledWith(1, expect.anything(), [videos0, videos1]);
+            expect(dsGetSpy).toHaveBeenNthCalledWith(2, expect.anything(), [videos1, videos2]);
+
+            done();
+        });
+
+        queue.get([videos0, videos1], [videos0, videos1], zip);
+        queue.get([videos1, videos2], [videos1, videos2], zip);
+    });
+
+    it("combines batched paths without collapse when it is disables", done => {
+        const scheduler = new ASAPScheduler();
+        const dsGetSpy = jest.fn();
+        const source = new LocalDataSource(Cache(), { wait: 100, onGet: dsGetSpy });
+        const model = new Model({ source, disablePathCollapse: true, disableRequestDeduplication: true });
+        const queue = new RequestQueue(model, scheduler);
+
+        let zip;
+        zip = zipSpy(2, () => {
+            expect(queue._requests.length).toBe(0);
+            expect(zip).toHaveBeenCalledTimes(2);
+
+            expect(dsGetSpy).toHaveBeenCalledTimes(1);
+            expect(dsGetSpy).toHaveBeenNthCalledWith(1, expect.anything(), [videos0, videos1, videos1, videos2]);
+
+            done();
+        });
+
+        queue.get([videos0, videos1], [videos0, videos1], zip);
+        queue.get([videos1, videos2], [videos1, videos2], zip);
     });
 });

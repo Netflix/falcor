@@ -439,6 +439,41 @@ describe("Model", () => {
         expect(clonedModel).toBeInstanceOf(MyModel);
     });
 
+    describe("algorithm options", () => {
+        it("accepts boolean to disable algorithms", () => {
+            let model = new Model({ disablePathCollapse: true });
+            expect(model._enablePathCollapse).toBe(false);
+
+            model = new Model({ disableRequestDeduplication: true });
+            expect(model._enableRequestDeduplication).toBe(false);
+
+            const values = [false, 0, -1, 1, "no", ""];
+            for (let index = 0; index < values.length; index++) {
+                model = new Model({ disablePathCollapse: values[index], disableRequestDeduplication: values[index] });
+                expect(model._enablePathCollapse).toBe(true);
+                expect(model._enableRequestDeduplication).toBe(true);
+            }
+        });
+
+        it("is enabled by default", () => {
+            let model = new Model();
+            expect(model._enablePathCollapse).toBe(true);
+            expect(model._enableRequestDeduplication).toBe(true);
+
+            model = new Model({});
+            expect(model._enablePathCollapse).toBe(true);
+            expect(model._enableRequestDeduplication).toBe(true);
+        });
+
+        it("is copied on clone", () => {
+            const model = new Model({ disablePathCollapse: true, disableRequestDeduplication: true });
+            const clone = model._clone();
+
+            expect(clone._enablePathCollapse).toBe(model._enablePathCollapse);
+            expect(clone._enableRequestDeduplication).toBe(model._enableRequestDeduplication);
+        });
+    });
+
     describe("JSON-Graph Specification", () => {
         require("./get-core");
 
