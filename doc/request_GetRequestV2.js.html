@@ -66,16 +66,16 @@ GetRequestV2.prototype = {
      */
     batch: function(requestedPaths, optimizedPaths, callback) {
         var self = this;
-        var oPaths = self._optimizedPaths;
-        var rPaths = self._requestedPaths;
-        var callbacks = self._callbacks;
-        var idx = oPaths.length;
+        var batchedOptPathSets = self._optimizedPaths;
+        var batchedReqPathSets = self._requestedPaths;
+        var batchedCallbacks = self._callbacks;
+        var batchIx = batchedOptPathSets.length;
 
         // If its not sent, simply add it to the requested paths
         // and callbacks.
-        oPaths[idx] = optimizedPaths;
-        rPaths[idx] = requestedPaths;
-        callbacks[idx] = callback;
+        batchedOptPathSets[batchIx] = optimizedPaths;
+        batchedReqPathSets[batchIx] = requestedPaths;
+        batchedCallbacks[batchIx] = callback;
         ++self._count;
 
         // If it has not been scheduled, then schedule the action
@@ -84,15 +84,15 @@ GetRequestV2.prototype = {
 
             var flushedDisposable;
             var scheduleDisposable = self._scheduler.schedule(function() {
-                flushedDisposable = flushGetRequest(self, oPaths, function(err, data) {
+                flushedDisposable = flushGetRequest(self, batchedOptPathSets, function(err, data) {
                     var i, fn, len;
                     var model = self.requestQueue.model;
                     self.requestQueue.removeRequest(self);
                     self._disposed = true;
 
                     if (model._treatDataSourceErrorsAsJSONGraphErrors ? err instanceof InvalidSourceError : !!err) {
-                        for (i = 0, len = callbacks.length; i &lt; len; ++i) {
-                            fn = callbacks[i];
+                        for (i = 0, len = batchedCallbacks.length; i &lt; len; ++i) {
+                            fn = batchedCallbacks[i];
                             if (fn) {
                                 fn(err);
                             }
@@ -125,14 +125,14 @@ GetRequestV2.prototype = {
                             new Error("Server responses must include a 'paths' field when Model._useServerPaths === true") : undefined;
 
                         if (!pathsErr) {
-                            self._merge(rPaths, err, data, mergeContext);
+                            self._merge(batchedReqPathSets, err, data, mergeContext);
                         }
 
                         // Call the callbacks.  The first one inserts all
                         // the data so that the rest do not have consider
                         // if their data is present or not.
-                        for (i = 0, len = callbacks.length; i &lt; len; ++i) {
-                            fn = callbacks[i];
+                        for (i = 0, len = batchedCallbacks.length; i &lt; len; ++i) {
+                            fn = batchedCallbacks[i];
                             if (fn) {
                                 fn(pathsErr || err, data, mergeContext.hasInvalidatedResult);
                             }
@@ -158,7 +158,7 @@ GetRequestV2.prototype = {
         // Disposes this batched request.  This does not mean that the
         // entire request has been disposed, but just the local one, if all
         // requests are disposed, then the outer disposable will be removed.
-        return createDisposable(self, idx);
+        return createDisposable(self, batchIx);
     },
 
     /**
@@ -182,13 +182,13 @@ GetRequestV2.prototype = {
         // as one of the dependents of that request
         if (complementResult.intersection.length) {
             inserted = true;
-            var idx = self._callbacks.length;
-            self._callbacks[idx] = callback;
-            self._requestedPaths[idx] = complementResult.intersection;
-            self._optimizedPaths[idx] = [];
+            var batchIx = self._callbacks.length;
+            self._callbacks[batchIx] = callback;
+            self._requestedPaths[batchIx] = complementResult.intersection;
+            self._optimizedPaths[batchIx] = [];
             ++self._count;
 
-            disposable = createDisposable(self, idx);
+            disposable = createDisposable(self, batchIx);
         }
 
         return [inserted, complementResult.requestedComplement, complementResult.optimizedComplement, disposable];
@@ -253,9 +253,9 @@ GetRequestV2.prototype = {
 };
 
 // Creates a more efficient closure of the things that are
-// needed.  So the request and the idx.  Also prevents code
+// needed.  So the request and the batch index.  Also prevents code
 // duplication.
-function createDisposable(request, idx) {
+function createDisposable(request, batchIx) {
     var disposed = false;
     return function() {
         if (disposed || request._disposed) {
@@ -263,9 +263,9 @@ function createDisposable(request, idx) {
         }
 
         disposed = true;
-        request._callbacks[idx] = null;
-        request._optimizedPaths[idx] = [];
-        request._requestedPaths[idx] = [];
+        request._callbacks[batchIx] = null;
+        request._optimizedPaths[batchIx] = [];
+        request._requestedPaths[batchIx] = [];
 
         // If there are no more requests, then dispose all of the request.
         var count = --request._count;
@@ -675,6 +675,10 @@ module.exports = GetRequestV2;
                         
                             <li class="toc-api-type">
                                 <a href="global.html#KeySet" data-target="#KeySet">KeySet</a>
+                            </li>
+                        
+                            <li class="toc-api-type">
+                                <a href="global.html#Options" data-target="#Options">Options</a>
                             </li>
                         
                             <li class="toc-api-type">

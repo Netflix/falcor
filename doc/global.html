@@ -1393,6 +1393,444 @@ or
               
                   
 <section class="member-section">
+    <h4 class="name section-header members-header" id="Options">Options</h4>
+
+    
+
+    
+
+    
+        <dl class="member-type">
+            <dt><span class="h5">Type:</span></dt>
+            <dd>
+<span class="param-type">Object</span>
+
+</dd>
+        </dl>
+    
+
+    
+
+
+    <h5 class="subsection-title">Properties</h5>
+
+    
+
+<table class="props">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name">
+                    source
+                </td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="DataSource.html">DataSource</a></span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>A data source to retrieve and manage the <a href="global.html#JSONGraph">JSONGraph</a></p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name">
+                    cache
+                </td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="global.html#JSONGraph">JSONGraph</a></span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>Initial state of the <a href="global.html#JSONGraph">JSONGraph</a></p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name">
+                    maxSize
+                </td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>The maximum size of the cache before cache pruning is performed. The unit of this value
+depends on the algorithm used to calculate the <code>$size</code> field on graph nodes by the backing source for the Model's
+DataSource. If no DataSource is used, or the DataSource does not provide <code>$size</code> values, a naive algorithm is used
+where the cache size is calculated in terms of graph node count and, for arrays and strings, element count.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name">
+                    collectRatio
+                </td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>The ratio of the maximum size to collect when the maxSize is exceeded.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name">
+                    maxRetries
+                </td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>The maximum number of times that the Model will attempt to retrieve the value from
+its DataSource. Defaults to <code>3</code>.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name">
+                    errorSelector
+                </td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="Model.html#~errorSelector">Model~errorSelector</a></span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>A function used to translate errors before they are returned</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name">
+                    onChange
+                </td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="Model.html#~onChange">Model~onChange</a></span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>A function called whenever the Model's cache is changed</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name">
+                    comparator
+                </td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="Model.html#~comparator">Model~comparator</a></span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>A function called whenever a value in the Model's cache is about to be
+replaced with a new value.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name">
+                    disablePathCollapse
+                </td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">boolean</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>Disables the algorithm that collapses paths on GET requests. The algorithm
+is enabled by default. This is a relatively computationally expensive feature.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name">
+                    disableRequestDeduplication
+                </td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">boolean</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>Disables the algorithm that deduplicates paths across in-flight GET
+requests. The algorithm is enabled by default. This is a computationally expensive feature.</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+  <dl class="details">
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+      <dt class="tag-source">Source:</dt>
+      <dd class="tag-source">
+          <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line65">line 65</a>
+      </dd>
+      
+
+      
+
+      
+
+      
+  </dl>
+
+
+    
+
+    
+</section>
+
+              
+                  
+<section class="member-section">
     <h4 class="name section-header members-header" id="Path">Path</h4>
 
     
@@ -2339,6 +2777,10 @@ or
                         
                             <li class="toc-api-type">
                                 <a href="global.html#KeySet" data-target="#KeySet">KeySet</a>
+                            </li>
+                        
+                            <li class="toc-api-type">
+                                <a href="global.html#Options" data-target="#Options">Options</a>
                             </li>
                         
                             <li class="toc-api-type">
