@@ -1,4 +1,11 @@
 # 2.0.7
+## Features
+- [Added flags for potentially expensive algorithms](https://github.com/Netflix/falcor/pull/962)
+
+## Other
+- [Unit tests converted to Jest](https://github.com/Netflix/falcor/pull/961)
+
+# 2.0.7
 ## Bugs
 - [Correct module.export usage](https://github.com/Netflix/falcor/pull/960)
 
