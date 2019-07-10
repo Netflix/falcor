@@ -1,4 +1,4 @@
-# 2.0.7
+# 2.1.0
 ## Features
 - [Added flags for potentially expensive algorithms](https://github.com/Netflix/falcor/pull/962)
 
