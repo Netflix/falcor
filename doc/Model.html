@@ -33,7 +33,7 @@ id: api
     
         
 
-        <h4 class="name section-header function-name" id="Model"><span class="type-signature"></span>new Model<span class="signature">(options<span class="signature-attributes">nullable</span>)</span><span class="type-signature return-signature"></span></h4>
+        <h4 class="name section-header function-name" id="Model"><span class="type-signature"></span>new Model<span class="signature">(o<span class="signature-attributes">optional</span>)</span><span class="type-signature return-signature"></span></h4>
 
         
     
@@ -81,13 +81,13 @@ id: api
             <tr>
                 
                     <td>
-                        <span class="name">options</span>
-                        
-                            
+                        <span class="name">o</span>
                         
                             
                                 <br>
-                                <span class="attribute">nullable</span>
+                                <span class="attribute">optional</span>
+                            
+                        
                             
                         
                             
@@ -98,7 +98,7 @@ id: api
                 <td class="type">
                 
                     
-<span class="param-type">Object</span>
+<span class="param-type"><a href="global.html#Options">Options</a></span>
 
 
                 
@@ -106,302 +106,7 @@ id: api
 
                 
 
-                <td class="description last"><p>a set of options to customize behavior</p>
-                    <h6>Properties</h6>
-                    
-
-<div class="parameters-section">
-    <table class="params">
-        <thead>
-        <tr>
-            
-            <th class="header-name-and-attributes">
-              Name
-              
-                &amp; Attributes
-              
-            </th>
-            
-
-            <th class="header-type">Type</th>
-
-            
-
-            <th class="last header-description">Description</th>
-        </tr>
-        </thead>
-
-        <tbody>
-        
-
-            <tr>
-                
-                    <td>
-                        <span class="name">source</span>
-                        
-                            
-                        
-                            
-                                <br>
-                                <span class="attribute">nullable</span>
-                            
-                        
-                            
-                        
-                    </td>
-                
-
-                <td class="type">
-                
-                    
-<span class="param-type"><a href="DataSource.html">DataSource</a></span>
-
-
-                
-                </td>
-
-                
-
-                <td class="description last"><p>a data source to retrieve and manage the <a href="global.html#JSONGraph">JSONGraph</a></p></td>
-            </tr>
-
-        
-
-            <tr>
-                
-                    <td>
-                        <span class="name">cache</span>
-                        
-                            
-                        
-                            
-                                <br>
-                                <span class="attribute">nullable</span>
-                            
-                        
-                            
-                        
-                    </td>
-                
-
-                <td class="type">
-                
-                    
-<span class="param-type"><a href="global.html#JSONGraph">JSONGraph</a></span>
-
-
-                
-                </td>
-
-                
-
-                <td class="description last"><p>initial state of the <a href="global.html#JSONGraph">JSONGraph</a></p></td>
-            </tr>
-
-        
-
-            <tr>
-                
-                    <td>
-                        <span class="name">maxSize</span>
-                        
-                            
-                        
-                            
-                                <br>
-                                <span class="attribute">nullable</span>
-                            
-                        
-                            
-                        
-                    </td>
-                
-
-                <td class="type">
-                
-                    
-<span class="param-type">number</span>
-
-
-                
-                </td>
-
-                
-
-                <td class="description last"><p>the maximum size of the cache. This value roughly correlates to item count (where itemCount = maxSize / 50). Each item by default is given a metadata <code>$size</code> of 50 (or its length when it's an array or string). You can get better control of falcor's memory usage by tweaking <code>$size</code></p></td>
-            </tr>
-
-        
-
-            <tr>
-                
-                    <td>
-                        <span class="name">maxRetries</span>
-                        
-                            
-                        
-                            
-                                <br>
-                                <span class="attribute">nullable</span>
-                            
-                        
-                            
-                        
-                    </td>
-                
-
-                <td class="type">
-                
-                    
-<span class="param-type">number</span>
-
-
-                
-                </td>
-
-                
-
-                <td class="description last"><p>the maximum number of times that the Model will attempt to retrieve the value from the server.</p></td>
-            </tr>
-
-        
-
-            <tr>
-                
-                    <td>
-                        <span class="name">collectRatio</span>
-                        
-                            
-                        
-                            
-                                <br>
-                                <span class="attribute">nullable</span>
-                            
-                        
-                            
-                        
-                    </td>
-                
-
-                <td class="type">
-                
-                    
-<span class="param-type">number</span>
-
-
-                
-                </td>
-
-                
-
-                <td class="description last"><p>the ratio of the maximum size to collect when the maxSize is exceeded</p></td>
-            </tr>
-
-        
-
-            <tr>
-                
-                    <td>
-                        <span class="name">errorSelector</span>
-                        
-                            
-                        
-                            
-                                <br>
-                                <span class="attribute">nullable</span>
-                            
-                        
-                            
-                        
-                    </td>
-                
-
-                <td class="type">
-                
-                    
-<span class="param-type"><a href="Model.html#~errorSelector">Model~errorSelector</a></span>
-
-
-                
-                </td>
-
-                
-
-                <td class="description last"><p>a function used to translate errors before they are returned</p></td>
-            </tr>
-
-        
-
-            <tr>
-                
-                    <td>
-                        <span class="name">onChange</span>
-                        
-                            
-                        
-                            
-                                <br>
-                                <span class="attribute">nullable</span>
-                            
-                        
-                            
-                        
-                    </td>
-                
-
-                <td class="type">
-                
-                    
-<span class="param-type"><a href="Model.html#~onChange">Model~onChange</a></span>
-
-
-                
-                </td>
-
-                
-
-                <td class="description last"><p>a function called whenever the Model's cache is changed</p></td>
-            </tr>
-
-        
-
-            <tr>
-                
-                    <td>
-                        <span class="name">comparator</span>
-                        
-                            
-                        
-                            
-                                <br>
-                                <span class="attribute">nullable</span>
-                            
-                        
-                            
-                        
-                    </td>
-                
-
-                <td class="type">
-                
-                    
-<span class="param-type"><a href="Model.html#~comparator">Model~comparator</a></span>
-
-
-                
-                </td>
-
-                
-
-                <td class="description last"><p>a function called whenever a value in the Model's cache is about to be replaced with a new value.</p></td>
-            </tr>
-
-        
-        </tbody>
-    </table>
-</div>
-
-                </td>
+                <td class="description last"><p>a set of options to customize behavior</p></td>
             </tr>
 
         
@@ -445,7 +150,7 @@ id: api
       
       <dt class="tag-source">Source:</dt>
       <dd class="tag-source">
-          <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line74">line 74</a>
+          <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line91">line 91</a>
       </dd>
       
 
@@ -536,7 +241,7 @@ id: api
       
       <dt class="tag-source">Source:</dt>
       <dd class="tag-source">
-          <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line330">line 330</a>
+          <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line369">line 369</a>
       </dd>
       
 
@@ -615,7 +320,7 @@ id: api
       
       <dt class="tag-source">Source:</dt>
       <dd class="tag-source">
-          <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line348">line 348</a>
+          <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line387">line 387</a>
       </dd>
       
 
@@ -763,7 +468,7 @@ id: api
       
       <dt class="tag-source">Source:</dt>
       <dd class="tag-source">
-          <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line431">line 431</a>
+          <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line470">line 470</a>
       </dd>
       
 
@@ -848,7 +553,7 @@ id: api
       
       <dt class="tag-source">Source:</dt>
       <dd class="tag-source">
-          <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line545">line 545</a>
+          <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line590">line 590</a>
       </dd>
       
 
@@ -1027,7 +732,7 @@ or
       
       <dt class="tag-source">Source:</dt>
       <dd class="tag-source">
-          <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line488">line 488</a>
+          <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line533">line 533</a>
       </dd>
       
 
@@ -1136,7 +841,7 @@ or
       
       <dt class="tag-source">Source:</dt>
       <dd class="tag-source">
-          <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line565">line 565</a>
+          <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line610">line 610</a>
       </dd>
       
 
@@ -1364,7 +1069,7 @@ or
       
       <dt class="tag-source">Source:</dt>
       <dd class="tag-source">
-          <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line208">line 208</a>
+          <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line246">line 246</a>
       </dd>
       
 
@@ -1525,7 +1230,7 @@ Model</p></td>
       
       <dt class="tag-source">Source:</dt>
       <dd class="tag-source">
-          <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line300">line 300</a>
+          <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line339">line 339</a>
       </dd>
       
 
@@ -1731,7 +1436,7 @@ model.
       
       <dt class="tag-source">Source:</dt>
       <dd class="tag-source">
-          <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line144">line 144</a>
+          <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line179">line 179</a>
       </dd>
       
 
@@ -1909,7 +1614,7 @@ model.
       
       <dt class="tag-source">Source:</dt>
       <dd class="tag-source">
-          <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line414">line 414</a>
+          <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line453">line 453</a>
       </dd>
       
 
@@ -2024,7 +1729,7 @@ model.
       
       <dt class="tag-source">Source:</dt>
       <dd class="tag-source">
-          <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line630">line 630</a>
+          <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line675">line 675</a>
       </dd>
       
 
@@ -2222,7 +1927,7 @@ model.
       
       <dt class="tag-source">Source:</dt>
       <dd class="tag-source">
-          <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line449">line 449</a>
+          <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line494">line 494</a>
       </dd>
       
 
@@ -2395,7 +2100,7 @@ model.
       
       <dt class="tag-source">Source:</dt>
       <dd class="tag-source">
-          <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line236">line 236</a>
+          <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line276">line 276</a>
       </dd>
       
 
@@ -2544,7 +2249,7 @@ model.
       
       <dt class="tag-source">Source:</dt>
       <dd class="tag-source">
-          <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line180">line 180</a>
+          <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line215">line 215</a>
       </dd>
       
 
@@ -2655,7 +2360,7 @@ model.
       
       <dt class="tag-source">Source:</dt>
       <dd class="tag-source">
-          <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line172">line 172</a>
+          <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line207">line 207</a>
       </dd>
       
 
@@ -2819,7 +2524,7 @@ model.
       
       <dt class="tag-source">Source:</dt>
       <dd class="tag-source">
-          <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line376">line 376</a>
+          <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line415">line 415</a>
       </dd>
       
 
@@ -2904,7 +2609,7 @@ model.
       
       <dt class="tag-source">Source:</dt>
       <dd class="tag-source">
-          <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line518">line 518</a>
+          <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line563">line 563</a>
       </dd>
       
 
@@ -3007,7 +2712,7 @@ model.
       
       <dt class="tag-source">Source:</dt>
       <dd class="tag-source">
-          <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line501">line 501</a>
+          <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line546">line 546</a>
       </dd>
       
 
@@ -3116,7 +2821,7 @@ model.
       
       <dt class="tag-source">Source:</dt>
       <dd class="tag-source">
-          <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line575">line 575</a>
+          <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line620">line 620</a>
       </dd>
       
 
@@ -3219,7 +2924,7 @@ model.
       
       <dt class="tag-source">Source:</dt>
       <dd class="tag-source">
-          <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line585">line 585</a>
+          <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line630">line 630</a>
       </dd>
       
 
@@ -3282,7 +2987,9 @@ model.
 
         
         <div class="description">
-            <p>This function is invoked every time a value in the Model cache is about to be replaced with a new value. If the function returns true, the existing value is replaced with a new value and the version flag on all of the value's ancestors in the tree are incremented.</p>
+            <p>This function is invoked every time a value in the Model cache is about to be replaced with a new value. If the
+function returns true, the existing value is replaced with a new value and the version flag on all of the value's
+ancestors in the tree are incremented.</p>
         </div>
         
 
@@ -3405,7 +3112,7 @@ model.
       
       <dt class="tag-source">Source:</dt>
       <dd class="tag-source">
-          <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line53">line 53</a>
+          <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line55">line 55</a>
       </dd>
       
 
@@ -3468,7 +3175,8 @@ model.
 
         
         <div class="description">
-            <p>This function is invoked on every JSONGraph Error retrieved from the DataSource. This function allows Error objects to be transformed before being stored in the Model's cache.</p>
+            <p>This function is invoked on every JSONGraph Error retrieved from the DataSource. This function allows Error objects
+to be transformed before being stored in the Model's cache.</p>
         </div>
         
 
@@ -3567,7 +3275,7 @@ model.
       
       <dt class="tag-source">Source:</dt>
       <dd class="tag-source">
-          <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line46">line 46</a>
+          <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line47">line 47</a>
       </dd>
       
 
@@ -3676,7 +3384,7 @@ model.
       
       <dt class="tag-source">Source:</dt>
       <dd class="tag-source">
-          <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line41">line 41</a>
+          <a href="Model.js.html">Model.js</a>, <a href="Model.js.html#line42">line 42</a>
       </dd>
       
 
@@ -4086,6 +3794,10 @@ model.
                         
                             <li class="toc-api-type">
                                 <a href="global.html#KeySet" data-target="#KeySet">KeySet</a>
+                            </li>
+                        
+                            <li class="toc-api-type">
+                                <a href="global.html#Options" data-target="#Options">Options</a>
                             </li>
                         
                             <li class="toc-api-type">

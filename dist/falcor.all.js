@@ -75,20 +75,24 @@ Model.ref = jsong.ref;
 Model.atom = jsong.atom;
 Model.error = jsong.error;
 Model.pathValue = jsong.pathValue;
+
 /**
  * This callback is invoked when the Model's cache is changed.
  * @callback Model~onChange
  */
 
- /**
- * This function is invoked on every JSONGraph Error retrieved from the DataSource. This function allows Error objects to be transformed before being stored in the Model's cache.
+/**
+ * This function is invoked on every JSONGraph Error retrieved from the DataSource. This function allows Error objects
+ * to be transformed before being stored in the Model's cache.
  * @callback Model~errorSelector
  * @param {Object} jsonGraphError - the JSONGraph Error object to transform before it is stored in the Model's cache.
  * @returns {Object} the JSONGraph Error object to store in the Model cache.
  */
 
- /**
- * This function is invoked every time a value in the Model cache is about to be replaced with a new value. If the function returns true, the existing value is replaced with a new value and the version flag on all of the value's ancestors in the tree are incremented.
+/**
+ * This function is invoked every time a value in the Model cache is about to be replaced with a new value. If the
+ * function returns true, the existing value is replaced with a new value and the version flag on all of the value's
+ * ancestors in the tree are incremented.
  * @callback Model~comparator
  * @param {Object} existingValue - the current value in the Model cache.
  * @param {Object} newValue - the value about to be set into the Model cache.
@@ -96,26 +100,38 @@ Model.pathValue = jsong.pathValue;
  */
 
 /**
+ * @typedef {Object} Options
+ * @property {DataSource} [source] A data source to retrieve and manage the {@link JSONGraph}
+ * @property {JSONGraph} [cache] Initial state of the {@link JSONGraph}
+ * @property {number} [maxSize] The maximum size of the cache before cache pruning is performed. The unit of this value
+ * depends on the algorithm used to calculate the `$size` field on graph nodes by the backing source for the Model's
+ * DataSource. If no DataSource is used, or the DataSource does not provide `$size` values, a naive algorithm is used
+ * where the cache size is calculated in terms of graph node count and, for arrays and strings, element count.
+ * @property {number} [collectRatio] The ratio of the maximum size to collect when the maxSize is exceeded.
+ * @property {number} [maxRetries] The maximum number of times that the Model will attempt to retrieve the value from
+ * its DataSource. Defaults to `3`.
+ * @property {Model~errorSelector} [errorSelector] A function used to translate errors before they are returned
+ * @property {Model~onChange} [onChange] A function called whenever the Model's cache is changed
+ * @property {Model~comparator} [comparator] A function called whenever a value in the Model's cache is about to be
+ * replaced with a new value.
+ * @property {boolean} [disablePathCollapse] Disables the algorithm that collapses paths on GET requests. The algorithm
+ * is enabled by default. This is a relatively computationally expensive feature.
+ * @property {boolean} [disableRequestDeduplication] Disables the algorithm that deduplicates paths across in-flight GET
+ * requests. The algorithm is enabled by default. This is a computationally expensive feature.
+ */
+
+/**
  * A Model object is used to execute commands against a {@link JSONGraph} object. {@link Model}s can work with a local JSONGraph cache, or it can work with a remote {@link JSONGraph} object through a {@link DataSource}.
  * @constructor
- * @param {?Object} options - a set of options to customize behavior
- * @param {?DataSource} options.source - a data source to retrieve and manage the {@link JSONGraph}
- * @param {?JSONGraph} options.cache - initial state of the {@link JSONGraph}
- * @param {?number} options.maxSize - the maximum size of the cache. This value roughly correlates to item count (where itemCount = maxSize / 50). Each item by default is given a metadata `$size` of 50 (or its length when it's an array or string). You can get better control of falcor's memory usage by tweaking `$size`
- * @param {?number} options.maxRetries - the maximum number of times that the Model will attempt to retrieve the value from the server.
- * @param {?number} options.collectRatio - the ratio of the maximum size to collect when the maxSize is exceeded
- * @param {?Model~errorSelector} options.errorSelector - a function used to translate errors before they are returned
- * @param {?Model~onChange} options.onChange - a function called whenever the Model's cache is changed
- * @param {?Model~comparator} options.comparator - a function called whenever a value in the Model's cache is about to be replaced with a new value.
+ * @param {Options} [o] - a set of options to customize behavior
  */
 function Model(o) {
-
     var options = o || {};
     this._root = options._root || new ModelRoot(options);
     this._path = options.path || options._path || [];
-    this._scheduler = options.scheduler || options._scheduler || new ImmediateScheduler();
     this._source = options.source || options._source;
-    this._request = options.request || options._request || new RequestQueue(this, this._scheduler);
+    this._request =
+        options.request || options._request || new RequestQueue(this, options.scheduler || new ImmediateScheduler());
     this._ID = ID++;
 
     if (typeof options.maxSize === "number") {
@@ -148,12 +164,29 @@ function Model(o) {
         this._treatErrorsAsValues = options.treatErrorsAsValues;
     } else if (options.hasOwnProperty("_treatErrorsAsValues")) {
         this._treatErrorsAsValues = options._treatErrorsAsValues;
+    } else {
+        this._treatErrorsAsValues = false;
+    }
+
+    if (typeof options.disablePathCollapse === "boolean") {
+        this._enablePathCollapse = !options.disablePathCollapse;
+    } else if (options.hasOwnProperty("_enablePathCollapse")) {
+        this._enablePathCollapse = options._enablePathCollapse;
+    } else {
+        this._enablePathCollapse = true;
+    }
+
+    if (typeof options.disableRequestDeduplication === "boolean") {
+        this._enableRequestDeduplication = !options.disableRequestDeduplication;
+    } else if (options.hasOwnProperty("_enableRequestDeduplication")) {
+        this._enableRequestDeduplication = options._enableRequestDeduplication;
+    } else {
+        this._enableRequestDeduplication = true;
     }
 
     this._useServerPaths = options._useServerPaths || false;
 
-    this._allowFromWhenceYouCame = options.allowFromWhenceYouCame ||
-        options._allowFromWhenceYouCame || false;
+    this._allowFromWhenceYouCame = options.allowFromWhenceYouCame || options._allowFromWhenceYouCame || false;
 
     this._treatDataSourceErrorsAsJSONGraphErrors = options._treatDataSourceErrorsAsJSONGraphErrors || false;
 
@@ -171,6 +204,8 @@ Model.prototype._treatErrorsAsValues = false;
 Model.prototype._maxSize = Math.pow(2, 53) - 1;
 Model.prototype._maxRetries = 3;
 Model.prototype._collectRatio = 0.75;
+Model.prototype._enablePathCollapse = true;
+Model.prototype._enableRequestDeduplication = true;
 
 /**
  * The get method retrieves several {@link Path}s or {@link PathSet}s from a {@link Model}. The get method loads each value into a JSON object and returns in a ModelResponse.
@@ -224,12 +259,15 @@ Model.prototype.preload = function preload() {
     var args = Array.prototype.slice.call(arguments);
     var self = this;
     return new ModelResponse(function(obs) {
-        return self.get.apply(self, args).subscribe(function() {
-        }, function(err) {
-            obs.onError(err);
-        }, function() {
-            obs.onCompleted();
-        });
+        return self.get.apply(self, args).subscribe(
+            function() {},
+            function(err) {
+                obs.onError(err);
+            },
+            function() {
+                obs.onCompleted();
+            }
+        );
     });
 };
 
@@ -251,9 +289,11 @@ Model.prototype.call = function call() {
         var arg = arguments[argsIdx];
         args[argsIdx] = arg;
         var argType = typeof arg;
-        if (argsIdx > 1 && !Array.isArray(arg) ||
-            argsIdx === 0 && !Array.isArray(arg) && argType !== "string" ||
-            argsIdx === 1 && !Array.isArray(arg) && !isPrimitive(arg)) {
+        if (
+            (argsIdx > 1 && !Array.isArray(arg)) ||
+            (argsIdx === 0 && !Array.isArray(arg) && argType !== "string") ||
+            (argsIdx === 1 && !Array.isArray(arg) && !isPrimitive(arg))
+        ) {
             /* eslint-disable no-loop-func */
             return new ModelResponse(function(o) {
                 o.onError(new Error("Invalid argument"));
@@ -283,10 +323,9 @@ Model.prototype.invalidate = function invalidate() {
     }
 
     // creates the obs, subscribes and will throw the errors if encountered.
-    (new InvalidateResponse(this, args)).
-        subscribe(noOp, function(e) {
-            throw e;
-        });
+    new InvalidateResponse(this, args).subscribe(noOp, function(e) {
+        throw e;
+    });
 };
 
 /**
@@ -473,8 +512,14 @@ Model.prototype._setMaxSize = function setMaxSize(maxSize) {
         var modelCache = modelRoot.cache;
         // eslint-disable-next-line no-cond-assign
         var currentVersion = modelCache.$_version;
-        collectLru(modelRoot, modelRoot.expired, getSize(modelCache),
-                this._maxSize, this._collectRatio, currentVersion);
+        collectLru(
+            modelRoot,
+            modelRoot.expired,
+            getSize(modelCache),
+            this._maxSize,
+            this._collectRatio,
+            currentVersion
+        );
     }
 };
 
@@ -484,7 +529,7 @@ Model.prototype._setMaxSize = function setMaxSize(maxSize) {
  * @return {Number} a version number which changes whenever a value is changed underneath the Model or provided Path
  */
 Model.prototype.getVersion = function getVersion(pathArg) {
-    var path = pathArg && pathSyntax.fromPath(pathArg) || [];
+    var path = (pathArg && pathSyntax.fromPath(pathArg)) || [];
     if (Array.isArray(path) === false) {
         throw new Error("Model#getVersion must be called with an Array path.");
     }
@@ -2792,16 +2837,16 @@ GetRequestV2.prototype = {
      */
     batch: function(requestedPaths, optimizedPaths, callback) {
         var self = this;
-        var oPaths = self._optimizedPaths;
-        var rPaths = self._requestedPaths;
-        var callbacks = self._callbacks;
-        var idx = oPaths.length;
+        var batchedOptPathSets = self._optimizedPaths;
+        var batchedReqPathSets = self._requestedPaths;
+        var batchedCallbacks = self._callbacks;
+        var batchIx = batchedOptPathSets.length;
 
         // If its not sent, simply add it to the requested paths
         // and callbacks.
-        oPaths[idx] = optimizedPaths;
-        rPaths[idx] = requestedPaths;
-        callbacks[idx] = callback;
+        batchedOptPathSets[batchIx] = optimizedPaths;
+        batchedReqPathSets[batchIx] = requestedPaths;
+        batchedCallbacks[batchIx] = callback;
         ++self._count;
 
         // If it has not been scheduled, then schedule the action
@@ -2810,15 +2855,15 @@ GetRequestV2.prototype = {
 
             var flushedDisposable;
             var scheduleDisposable = self._scheduler.schedule(function() {
-                flushedDisposable = flushGetRequest(self, oPaths, function(err, data) {
+                flushedDisposable = flushGetRequest(self, batchedOptPathSets, function(err, data) {
                     var i, fn, len;
                     var model = self.requestQueue.model;
                     self.requestQueue.removeRequest(self);
                     self._disposed = true;
 
                     if (model._treatDataSourceErrorsAsJSONGraphErrors ? err instanceof InvalidSourceError : !!err) {
-                        for (i = 0, len = callbacks.length; i < len; ++i) {
-                            fn = callbacks[i];
+                        for (i = 0, len = batchedCallbacks.length; i < len; ++i) {
+                            fn = batchedCallbacks[i];
                             if (fn) {
                                 fn(err);
                             }
@@ -2851,14 +2896,14 @@ GetRequestV2.prototype = {
                             new Error("Server responses must include a 'paths' field when Model._useServerPaths === true") : undefined;
 
                         if (!pathsErr) {
-                            self._merge(rPaths, err, data, mergeContext);
+                            self._merge(batchedReqPathSets, err, data, mergeContext);
                         }
 
                         // Call the callbacks.  The first one inserts all
                         // the data so that the rest do not have consider
                         // if their data is present or not.
-                        for (i = 0, len = callbacks.length; i < len; ++i) {
-                            fn = callbacks[i];
+                        for (i = 0, len = batchedCallbacks.length; i < len; ++i) {
+                            fn = batchedCallbacks[i];
                             if (fn) {
                                 fn(pathsErr || err, data, mergeContext.hasInvalidatedResult);
                             }
@@ -2884,7 +2929,7 @@ GetRequestV2.prototype = {
         // Disposes this batched request.  This does not mean that the
         // entire request has been disposed, but just the local one, if all
         // requests are disposed, then the outer disposable will be removed.
-        return createDisposable(self, idx);
+        return createDisposable(self, batchIx);
     },
 
     /**
@@ -2908,13 +2953,13 @@ GetRequestV2.prototype = {
         // as one of the dependents of that request
         if (complementResult.intersection.length) {
             inserted = true;
-            var idx = self._callbacks.length;
-            self._callbacks[idx] = callback;
-            self._requestedPaths[idx] = complementResult.intersection;
-            self._optimizedPaths[idx] = [];
+            var batchIx = self._callbacks.length;
+            self._callbacks[batchIx] = callback;
+            self._requestedPaths[batchIx] = complementResult.intersection;
+            self._optimizedPaths[batchIx] = [];
             ++self._count;
 
-            disposable = createDisposable(self, idx);
+            disposable = createDisposable(self, batchIx);
         }
 
         return [inserted, complementResult.requestedComplement, complementResult.optimizedComplement, disposable];
@@ -2979,9 +3024,9 @@ GetRequestV2.prototype = {
 };
 
 // Creates a more efficient closure of the things that are
-// needed.  So the request and the idx.  Also prevents code
+// needed.  So the request and the batch index.  Also prevents code
 // duplication.
-function createDisposable(request, idx) {
+function createDisposable(request, batchIx) {
     var disposed = false;
     return function() {
         if (disposed || request._disposed) {
@@ -2989,9 +3034,9 @@ function createDisposable(request, idx) {
         }
 
         disposed = true;
-        request._callbacks[idx] = null;
-        request._optimizedPaths[idx] = [];
-        request._requestedPaths[idx] = [];
+        request._callbacks[batchIx] = null;
+        request._optimizedPaths[batchIx] = [];
+        request._requestedPaths[batchIx] = [];
 
         // If there are no more requests, then dispose all of the request.
         var count = --request._count;
@@ -3057,7 +3102,10 @@ RequestQueueV2.prototype = {
      * @param {JSONGraphEnvelope) jsonGraph -
      */
     set: function(jsonGraph, cb) {
-        jsonGraph.paths = falcorPathUtils.collapse(jsonGraph.paths);
+        if (this.model._enablePathCollapse) {
+            jsonGraph.paths = falcorPathUtils.collapse(jsonGraph.paths);
+        }
+
         return sendSetRequest(jsonGraph, this.model, cb);
     },
 
@@ -3088,36 +3136,39 @@ RequestQueueV2.prototype = {
             // The request has been sent, attempt to jump on the request
             // if possible.
             if (request.sent) {
-                var results = request.add(rRemainingPaths, oRemainingPaths, refCountCallback);
+                if (this.model._enableRequestDeduplication) {
+                    var results = request.add(rRemainingPaths, oRemainingPaths, refCountCallback);
 
-                // Checks to see if the results were successfully inserted
-                // into the outgoing results.  Then our paths will be reduced
-                // to the complement.
-                if (results[0]) {
-                    rRemainingPaths = results[1];
-                    oRemainingPaths = results[2];
-                    disposables[disposables.length] = results[3];
-                    ++count;
+                    // Checks to see if the results were successfully inserted
+                    // into the outgoing results.  Then our paths will be reduced
+                    // to the complement.
+                    if (results[0]) {
+                        rRemainingPaths = results[1];
+                        oRemainingPaths = results[2];
+                        disposables[disposables.length] = results[3];
+                        ++count;
+
+                        // If there are no more remaining paths then exit the loop.
+                        if (!oRemainingPaths.length) {
+                            break;
+                        }
+                    }
                 }
             }
 
-            // If there is a non sent request, then we can batch and leave.
+            // If there is an unsent request, then we can batch and leave.
             else {
                 request.batch(rRemainingPaths, oRemainingPaths, refCountCallback);
-                oRemainingPaths = [];
-                rRemainingPaths = [];
+                oRemainingPaths = null;
+                rRemainingPaths = null;
                 ++count;
-            }
-
-            // If there are no more remaining paths then exit the loop.
-            if (!oRemainingPaths.length) {
                 break;
             }
         }
 
         // After going through all the available requests if there are more
         // paths to process then a new request must be made.
-        if (oRemainingPaths.length) {
+        if (oRemainingPaths && oRemainingPaths.length) {
             request = new GetRequest(self.scheduler, self);
             requests[requests.length] = request;
             ++count;
@@ -3360,15 +3411,15 @@ var toPaths = pathUtils.toPaths;
 var InvalidSourceError = require(12);
 
 /**
- * Flushes the current set of requests.  This will send the paths to the
- * dataSource.  * The results of the dataSource will be sent to callback which
- * should perform the zip of all callbacks.
- * @param {GetRequest} request -
- * @param {Array} listOfPaths -
+ * Flushes the current set of requests.  This will send the paths to the dataSource.
+ * The results of the dataSource will be sent to callback which should perform the zip of all callbacks.
+ *
+ * @param {GetRequest} request - GetRequestV2 to be flushed to the DataSource
+ * @param {Array} pathSetArrayBatch - Array of Arrays of path sets
  * @param {Function} callback -
  * @private
  */
-module.exports = function flushGetRequest(request, listOfPaths, callback) {
+module.exports = function flushGetRequest(request, pathSetArrayBatch, callback) {
     if (request._count === 0) {
         request.requestQueue.removeRequest(request);
         return null;
@@ -3377,42 +3428,58 @@ module.exports = function flushGetRequest(request, listOfPaths, callback) {
     request.sent = true;
     request.scheduled = false;
 
-    // TODO: Move this to the collapse algorithm,
-    // TODO: we should have a collapse that returns the paths and
-    // TODO: the trees.
+    var requestPaths;
 
-    // Take all the paths and add them to the pathMap by length.
-    // Since its a list of paths
-    var pathMap = request._pathMap;
-    var listKeys = Object.keys(listOfPaths);
-    var listIdx = 0, listLen = listKeys.length;
-    for (; listIdx < listLen; ++listIdx) {
-        var paths = listOfPaths[listIdx];
-        for (var j = 0, pathLen = paths.length; j < pathLen; ++j) {
-            var pathSet = paths[j];
-            var len = pathSet.length;
+    var model = request.requestQueue.model;
+    if (model._enablePathCollapse || model._enableRequestDeduplication) {
+        // Note on the if-condition: request deduplication uses request._pathMap,
+        // so we need to populate that field if the feature is enabled.
 
-            if (!pathMap[len]) {
-                pathMap[len] = [pathSet];
-            } else {
-                var pathSetsByLength = pathMap[len];
-                pathSetsByLength[pathSetsByLength.length] = pathSet;
+        // TODO: Move this to the collapse algorithm,
+        // TODO: we should have a collapse that returns the paths and
+        // TODO: the trees.
+
+        // Take all the paths and add them to the pathMap by length.
+        // Since its a list of paths
+        var pathMap = request._pathMap;
+        var listIdx = 0,
+            listLen = pathSetArrayBatch.length;
+        for (; listIdx < listLen; ++listIdx) {
+            var paths = pathSetArrayBatch[listIdx];
+            for (var j = 0, pathLen = paths.length; j < pathLen; ++j) {
+                var pathSet = paths[j];
+                var len = pathSet.length;
+
+                if (!pathMap[len]) {
+                    pathMap[len] = [pathSet];
+                } else {
+                    var pathSetsByLength = pathMap[len];
+                    pathSetsByLength[pathSetsByLength.length] = pathSet;
+                }
             }
+        }
+
+        // now that we have them all by length, convert each to a tree.
+        var pathMapKeys = Object.keys(pathMap);
+        var pathMapIdx = 0,
+            pathMapLen = pathMapKeys.length;
+        for (; pathMapIdx < pathMapLen; ++pathMapIdx) {
+            var pathMapKey = pathMapKeys[pathMapIdx];
+            pathMap[pathMapKey] = toTree(pathMap[pathMapKey]);
         }
     }
 
-    // now that we have them all by length, convert each to a tree.
-    var pathMapKeys = Object.keys(pathMap);
-    var pathMapIdx = 0, pathMapLen = pathMapKeys.length;
-    for (; pathMapIdx < pathMapLen; ++pathMapIdx) {
-        var pathMapKey = pathMapKeys[pathMapIdx];
-        pathMap[pathMapKey] = toTree(pathMap[pathMapKey]);
+    if (model._enablePathCollapse) {
+        // Take the pathMapTree and create the collapsed paths and send those
+        // off to the server.
+        requestPaths = toPaths(request._pathMap);
+    } else if (pathSetArrayBatch.length === 1) {
+        // Single batch Array of path sets, just extract it
+        requestPaths = pathSetArrayBatch[0];
+    } else {
+        // Multiple batches of Arrays of path sets, shallowly flatten into an Array of path sets
+        requestPaths = Array.prototype.concat.apply([], pathSetArrayBatch);
     }
-
-    // Take the pathMapTree and create the collapsed paths and send those
-    // off to the server.
-    var collapsedPaths = request._collasped = toPaths(pathMap);
-    var jsonGraphData;
 
     // Make the request.
     // You are probably wondering why this is not cancellable.  If a request
@@ -3423,28 +3490,28 @@ module.exports = function flushGetRequest(request, listOfPaths, callback) {
     // we cancel at the callback above.
     var getRequest;
     try {
-        getRequest = request.
-            requestQueue.
-            model._source.
-            get(collapsedPaths);
+        getRequest = model._source.get(requestPaths);
     } catch (e) {
         callback(new InvalidSourceError());
         return null;
     }
 
     // Ensures that the disposable is available for the outside to cancel.
-    var disposable = getRequest.
-        subscribe(function(data) {
+    var jsonGraphData;
+    var disposable = getRequest.subscribe(
+        function(data) {
             jsonGraphData = data;
-        }, function(err) {
+        },
+        function(err) {
             callback(err, jsonGraphData);
-        }, function() {
+        },
+        function() {
             callback(null, jsonGraphData);
-        });
+        }
+    );
 
     return disposable;
 };
-
 
 },{"12":12,"145":145}],49:[function(require,module,exports){
 var arrayMap = require(77);
