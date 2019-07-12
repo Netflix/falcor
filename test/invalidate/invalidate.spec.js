@@ -5,9 +5,6 @@ var toObservable = require('../toObs');
 
 var noOp = function() {};
 
-require("./pathMaps");
-require("./pathSets");
-
 it('should invalidate with pathSyntax', function(done) {
     var model = new Model({
         cache: {

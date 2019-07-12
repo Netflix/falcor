@@ -473,22 +473,4 @@ describe("Model", () => {
             expect(clone._enableRequestDeduplication).toBe(model._enableRequestDeduplication);
         });
     });
-
-    describe("JSON-Graph Specification", () => {
-        require("./get-core");
-
-        describe("#set", () => {
-            require("./set");
-        });
-
-        describe("#invalidate", () => {
-            require("./invalidate");
-        });
-    });
-
-    require("./lru");
-    require("./hardlink");
-    require("./falcor");
-    require("./internal");
-    require("./response");
 });

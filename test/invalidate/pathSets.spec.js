@@ -1,14 +1,14 @@
 var $ref = require("falcor-json-graph").ref;
-var strip = require("../../set/support/strip");
+var strip = require("../set/support/strip");
 var $atom = require("falcor-json-graph").atom;
-var $pathMapEnvelope = require("../../set/support/pathMapEnvelope");
+var $path = require("falcor-path-syntax").fromPath;
 var $pathValue = require("falcor-json-graph").pathValue;
 
-var getModel = require("../../set/support/getModel");
-var setPathValues = require("../../../lib/set/setPathValues");
-var invalidatePathMaps = require("../../../lib/invalidate/invalidatePathMaps");
+var getModel = require("../set/support/getModel");
+var setPathValues = require("../../lib/set/setPathValues");
+var invalidatePathSets = require("../../lib/invalidate/invalidatePathSets");
 
-describe("invalidatePathMaps", function() {
+describe("invalidatePathSets", function() {
 
     it("directly", function() {
 
@@ -21,9 +21,9 @@ describe("invalidatePathMaps", function() {
             $pathValue("movies['pulp-fiction'].title")
         ]);
 
-        invalidatePathMaps(
+        invalidatePathSets(
             getModel({ lru: lru, cache: cache, version: version++ }), [
-            $pathMapEnvelope("movies['pulp-fiction'].title")
+            $path("movies['pulp-fiction'].title")
         ]);
 
         expect(strip(cache)).toEqual(strip({}));
@@ -44,9 +44,9 @@ describe("invalidatePathMaps", function() {
             ]
         );
 
-        invalidatePathMaps(
+        invalidatePathSets(
             getModel({ lru: lru, cache: cache, version: version++ }), [
-                $pathMapEnvelope("grid[0][0].title")
+                $path("grid[0][0].title")
             ]
         );
 
@@ -72,9 +72,9 @@ describe("invalidatePathMaps", function() {
             ]
         );
 
-        invalidatePathMaps(
+        invalidatePathSets(
             getModel({ lru: lru, cache: cache, version: version++ }), [
-                $pathMapEnvelope("grid[0][1].title")
+                $path("grid[0][1].title")
             ]
         );
 
@@ -100,9 +100,9 @@ describe("invalidatePathMaps", function() {
             ]
         );
 
-        invalidatePathMaps(
+        invalidatePathSets(
             getModel({ lru: lru, cache: cache, version: version++ }), [
-                $pathMapEnvelope("grid[0][2].title")
+                $path("grid[0][2].title")
             ]
         );
 
@@ -113,7 +113,7 @@ describe("invalidatePathMaps", function() {
         }));
     });
 
-    xit("through a reference with a null last key", function() {
+    it("through a reference with a null last key", function() {
 
         var lru = new Object();
         var cache = {};
@@ -128,9 +128,9 @@ describe("invalidatePathMaps", function() {
             ]
         );
 
-        invalidatePathMaps(
+        invalidatePathSets(
             getModel({ lru: lru, cache: cache, version: version++ }), [
-                $pathMapEnvelope(["grid", 0, 2, null])
+                $path(["grid", 0, 2, null])
             ]
         );
 
@@ -155,9 +155,9 @@ describe("invalidatePathMaps", function() {
                     ]
                 );
 
-                invalidatePathMaps(
+                invalidatePathSets(
                     getModel({ lru: lru, cache: cache, version: version++ }), [
-                        $pathMapEnvelope("movies['pulp-fiction', 'kill-bill-1', 'reservior-dogs'].director")
+                        $path("movies['pulp-fiction', 'kill-bill-1', 'reservior-dogs'].director")
                     ]
                 );
 
@@ -180,9 +180,9 @@ describe("invalidatePathMaps", function() {
                     ]
                 );
 
-                invalidatePathMaps(
+                invalidatePathSets(
                     getModel({ lru: lru, cache: cache, version: version++ }), [
-                        $pathMapEnvelope("grid[0][0, 1, 2].director")
+                        $path("grid[0][0, 1, 2].director")
                     ]
                 );
 
@@ -215,9 +215,9 @@ describe("invalidatePathMaps", function() {
                     ]
                 );
 
-                invalidatePathMaps(
+                invalidatePathSets(
                     getModel({ lru: lru, cache: cache, version: version++ }), [
-                        $pathMapEnvelope("grid[0][0..2].director")
+                        $path("grid[0][0..2].director")
                     ]
                 );
 
@@ -247,9 +247,9 @@ describe("invalidatePathMaps", function() {
                     ]
                 );
 
-                invalidatePathMaps(
+                invalidatePathSets(
                     getModel({ lru: lru, cache: cache, version: version++ }), [
-                        $pathMapEnvelope("grid[0][1..2].director")
+                        $path("grid[0][1..2].director")
                     ]
                 );
 
@@ -279,9 +279,9 @@ describe("invalidatePathMaps", function() {
                     ]
                 );
 
-                invalidatePathMaps(
+                invalidatePathSets(
                     getModel({ lru: lru, cache: cache, version: version++ }), [
-                        $pathMapEnvelope(["grid", 0, {length: 3}, "director"])
+                        $path(["grid", 0, {length: 3}, "director"])
                     ]
                 );
 
@@ -311,9 +311,9 @@ describe("invalidatePathMaps", function() {
                     ]
                 );
 
-                invalidatePathMaps(
+                invalidatePathSets(
                     getModel({ lru: lru, cache: cache, version: version++ }), [
-                        $pathMapEnvelope(["grid", 0, {from: 1, length: 2}, "director"])
+                        $path(["grid", 0, {from: 1, length: 2}, "director"])
                     ]
                 );
 
@@ -343,9 +343,9 @@ describe("invalidatePathMaps", function() {
                     ]
                 );
 
-                invalidatePathMaps(
+                invalidatePathSets(
                     getModel({ lru: lru, cache: cache, version: version++ }), [
-                        $pathMapEnvelope(["grid", 0, [{length: 3}], "director"])
+                        $path(["grid", 0, [{length: 3}], "director"])
                     ]
                 );
 

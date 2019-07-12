@@ -1,18 +1,10 @@
-var falcor = require('./../../lib');
+var falcor = require('../../lib');
 var Model = falcor.Model;
-var toObservable = require('./../toObs');
+var toObservable = require('../toObs');
 
 var noOp = function() {};
 
 describe('Operations', function() {
-    require('./get');
-    require('./set');
-    require('./call');
-    require('./invalidate');
-    require('./schedulers');
-    require('./deref');
-    require('./error');
-
     it('should filter the meta data from a falcor response.', function(done) {
         var model = new Model({
             cache: {

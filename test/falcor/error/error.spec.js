@@ -1,13 +1,27 @@
 var ErrorDataSource = require("../../data/ErrorDataSource");
 var LocalDataSource = require("../../data/ErrorDataSource");
 var clean = require("../../cleanData").clean;
-var falcor = require("./../../../lib/");
+var falcor = require("../../../lib");
 var Model = falcor.Model;
 var noOp = function() {};
 var InvalidSourceError = require('../../../lib/errors/InvalidSourceError');
-var errorOnCompleted = require('./../../errorOnCompleted');
-var doneOnError = require('./../../doneOnError');
 var toObservable = require('../../toObs');
+var isAssertionError = require('./../../isAssertionError');
+
+function errorOnCompleted(done) {
+    return function() {
+        done(new Error('should not onCompleted'));
+    };
+};
+
+function doneOnError(done) {
+    return function(e) {
+        if (isAssertionError(e)) {
+            return done(e);
+        }
+        return done();
+    };
+};
 
 describe("Error", function() {
     it("should get a hard error from the DataSource with _treatDataSourceErrorsAsJSONGraphErrors.", function(done) {
@@ -364,7 +378,3 @@ describe("Error", function() {
             }, done.bind(null, new Error('should not complete')));
     });
 });
-
-function isAssertionError(e) {
-    return e.hasOwnProperty('expected') && e.hasOwnProperty('actual');
-}
