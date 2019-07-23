@@ -1,22 +1,24 @@
-module.exports = function zipSpy(count, cb, maxTime) {
-    var done = false;
+module.exports = function zipSpy(maxCount, cb, maxTime) {
+    let isTimedOut = false;
+    let callCount = 0;
+
     if (maxTime) {
-        setTimeout(function() {
-            if (count !== 0) {
-                done = true;
-                cb();
+        setTimeout(() => {
+            if (callCount !== maxCount) {
+                isTimedOut = true;
+                cb(callCount);
             }
         }, maxTime);
     }
 
-    return jest.fn(function() {
-        if (done) {
+    return jest.fn(() => {
+        if (isTimedOut) {
             return;
         }
 
-        --count;
-        if (count === 0) {
-            cb();
+        callCount++;
+        if (callCount === maxCount) {
+            cb(callCount);
         }
     });
 };

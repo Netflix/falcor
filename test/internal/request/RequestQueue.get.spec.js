@@ -14,7 +14,7 @@ const Cache = function() {
     return cacheGenerator(0, 2);
 };
 
-describe("#get", () => {
+describe("RequestQueue#get", () => {
     const videos0 = ["videos", 0, "title"];
     const videos1 = ["videos", 1, "title"];
     const videos2 = ["videos", 2, "title"];
@@ -45,15 +45,14 @@ describe("#get", () => {
     });
 
     it("makes a couple requests and have them batched together", done => {
-        const scheduler = new ASAPScheduler();
+        const scheduler = new ASAPScheduler(); // ASAP to allow batching
         const source = new LocalDataSource(Cache());
         const model = new Model({ source });
         const queue = new RequestQueue(model, scheduler);
 
-        let zip;
-        zip = zipSpy(2, () => {
+        const zip = zipSpy(2, callCount => {
+            expect(callCount).toBe(2);
             expect(queue._requests.length).toBe(0);
-            expect(zip).toHaveBeenCalledTimes(2);
 
             const onNext = jest.fn();
             toObservable(model.withoutDataSource().get(videos0, videos1))
@@ -88,10 +87,9 @@ describe("#get", () => {
         const model = new Model({ source });
         const queue = new RequestQueue(model, scheduler);
 
-        let zip;
-        zip = zipSpy(2, () => {
+        const zip = zipSpy(2, callCount => {
+            expect(callCount).toBe(2);
             expect(queue._requests.length).toBe(0);
-            expect(zip).toHaveBeenCalledTimes(2);
 
             const onNext = jest.fn();
             toObservable(model.withoutDataSource().get(videos0, videos1))
@@ -126,14 +124,14 @@ describe("#get", () => {
         const model = new Model({ source });
         const queue = new RequestQueue(model, scheduler);
 
-        let zip;
-        zip = zipSpy(
+        const zip = zipSpy(
             2,
-            () => {
+            callCount => {
+                expect(callCount).toBe(1);
+
                 const onNext = jest.fn();
                 toObservable(model.withoutDataSource().get(videos0, videos1))
                     .doAction(onNext, noOp, () => {
-                        expect(zip).toHaveBeenCalledTimes(1);
                         expect(strip(onNext.mock.calls[0][0])).toEqual({
                             json: {
                                 videos: {
@@ -173,14 +171,14 @@ describe("#get", () => {
         const model = new Model({ source });
         const queue = new RequestQueue(model, scheduler);
 
-        let zip;
-        zip = zipSpy(
+        const zip = zipSpy(
             2,
-            () => {
+            callCount => {
+                expect(callCount).toBe(1);
+
                 const onNext = jest.fn();
                 toObservable(model.withoutDataSource().get(videos0, videos1))
                     .doAction(onNext, noOp, () => {
-                        expect(zip).toHaveBeenCalledTimes(1);
                         expect(strip(onNext.mock.calls[0][0])).toEqual({
                             json: {
                                 videos: {
@@ -215,14 +213,14 @@ describe("#get", () => {
         const model = new Model({ source });
         const queue = new RequestQueue(model, scheduler);
 
-        let zip;
-        zip = zipSpy(
+        const zip = zipSpy(
             2,
-            () => {
+            callCount => {
+                expect(callCount).toBe(0);
+
                 const onNext = jest.fn();
                 toObservable(model.withoutDataSource().get(videos0, videos1))
                     .doAction(onNext, noOp, () => {
-                        expect(zip).not.toHaveBeenCalled();
                         expect(onNext).toHaveBeenCalledTimes(1);
                     })
                     .subscribe(noOp, done, done);
@@ -250,14 +248,14 @@ describe("#get", () => {
         const model = new Model({ source });
         const queue = new RequestQueue(model, scheduler);
 
-        let zip;
-        zip = zipSpy(
+        const zip = zipSpy(
             2,
-            () => {
+            callCount => {
+                expect(callCount).toBe(1);
+
                 const onNext = jest.fn();
                 toObservable(model.withoutDataSource().get(videos0, videos1))
                     .doAction(onNext, noOp, () => {
-                        expect(zip).toHaveBeenCalledTimes(1);
                         expect(strip(onNext.mock.calls[0][0])).toEqual({
                             json: {
                                 videos: {
@@ -292,14 +290,14 @@ describe("#get", () => {
         const model = new Model({ source });
         const queue = new RequestQueue(model, scheduler);
 
-        let zip;
-        zip = zipSpy(
+        const zip = zipSpy(
             2,
-            () => {
+            callCount => {
+                expect(callCount).toBe(0);
+
                 const onNext = jest.fn();
                 toObservable(model.withoutDataSource().get(videos0, videos1))
                     .doAction(onNext, noOp, () => {
-                        expect(zip).not.toHaveBeenCalled();
                         expect(onNext).toHaveBeenCalledTimes(1);
                     })
                     .subscribe(noOp, done, done);
@@ -321,17 +319,16 @@ describe("#get", () => {
         disposable2();
     });
 
-    it("does not dedupe requests when it is disabled", done => {
+    it("does not dedupe requests when request deduplication is disabled", done => {
         const scheduler = new ImmediateScheduler();
         const dsGetSpy = jest.fn();
         const source = new LocalDataSource(Cache(), { wait: 100, onGet: dsGetSpy });
         const model = new Model({ source, disableRequestDeduplication: true });
         const queue = new RequestQueue(model, scheduler);
 
-        let zip;
-        zip = zipSpy(2, () => {
+        const zip = zipSpy(2, callCount => {
+            expect(callCount).toBe(2);
             expect(queue._requests.length).toBe(0);
-            expect(zip).toHaveBeenCalledTimes(2);
 
             expect(dsGetSpy).toHaveBeenCalledTimes(2);
 
@@ -346,17 +343,16 @@ describe("#get", () => {
         queue.get([videos1, videos2], [videos1, videos2], zip);
     });
 
-    it("does not collapse paths when it is disabled", done => {
+    it("does not collapse paths when path collapse is disabled", done => {
         const scheduler = new ImmediateScheduler();
         const dsGetSpy = jest.fn();
         const source = new LocalDataSource(Cache(), { wait: 100, onGet: dsGetSpy });
         const model = new Model({ source, disablePathCollapse: true });
         const queue = new RequestQueue(model, scheduler);
 
-        let zip;
-        zip = zipSpy(2, () => {
+        const zip = zipSpy(2, callCount => {
+            expect(callCount).toBe(2);
             expect(queue._requests.length).toBe(0);
-            expect(zip).toHaveBeenCalledTimes(2);
 
             // Requests should still be deduplicated
             expect(dsGetSpy).toHaveBeenCalledTimes(2);
@@ -370,49 +366,49 @@ describe("#get", () => {
         queue.get([videos1, videos2], [videos1, videos2], zip);
     });
 
-    it("does not collapse paths or dedupe requests when disabled", done => {
-        const scheduler = new ImmediateScheduler();
-        const dsGetSpy = jest.fn();
-        const source = new LocalDataSource(Cache(), { wait: 100, onGet: dsGetSpy });
-        const model = new Model({ source, disablePathCollapse: true, disableRequestDeduplication: true });
-        const queue = new RequestQueue(model, scheduler);
+    describe("when path collapse and request deduplication are disabled", () => {
+        it("does not collapse paths or dedupe requests", done => {
+            const scheduler = new ImmediateScheduler();
+            const dsGetSpy = jest.fn();
+            const source = new LocalDataSource(Cache(), { wait: 100, onGet: dsGetSpy });
+            const model = new Model({ source, disablePathCollapse: true, disableRequestDeduplication: true });
+            const queue = new RequestQueue(model, scheduler);
 
-        let zip;
-        zip = zipSpy(2, () => {
-            expect(queue._requests.length).toBe(0);
-            expect(zip).toHaveBeenCalledTimes(2);
+            const zip = zipSpy(2, callCount => {
+                expect(callCount).toBe(2);
+                expect(queue._requests.length).toBe(0);
 
-            // No path collapse, no request dedupe
-            expect(dsGetSpy).toHaveBeenCalledTimes(2);
-            expect(dsGetSpy).toHaveBeenNthCalledWith(1, expect.anything(), [videos0, videos1]);
-            expect(dsGetSpy).toHaveBeenNthCalledWith(2, expect.anything(), [videos1, videos2]);
+                // No path collapse, no request dedupe
+                expect(dsGetSpy).toHaveBeenCalledTimes(2);
+                expect(dsGetSpy).toHaveBeenNthCalledWith(1, expect.anything(), [videos0, videos1]);
+                expect(dsGetSpy).toHaveBeenNthCalledWith(2, expect.anything(), [videos1, videos2]);
 
-            done();
+                done();
+            });
+
+            queue.get([videos0, videos1], [videos0, videos1], zip);
+            queue.get([videos1, videos2], [videos1, videos2], zip);
         });
 
-        queue.get([videos0, videos1], [videos0, videos1], zip);
-        queue.get([videos1, videos2], [videos1, videos2], zip);
-    });
+        it("combines batched paths without collapse", done => {
+            const scheduler = new ASAPScheduler(); // ASAP to allow batching
+            const dsGetSpy = jest.fn();
+            const source = new LocalDataSource(Cache(), { wait: 100, onGet: dsGetSpy });
+            const model = new Model({ source, disablePathCollapse: true, disableRequestDeduplication: true });
+            const queue = new RequestQueue(model, scheduler);
 
-    it("combines batched paths without collapse when it is disables", done => {
-        const scheduler = new ASAPScheduler();
-        const dsGetSpy = jest.fn();
-        const source = new LocalDataSource(Cache(), { wait: 100, onGet: dsGetSpy });
-        const model = new Model({ source, disablePathCollapse: true, disableRequestDeduplication: true });
-        const queue = new RequestQueue(model, scheduler);
+            const zip = zipSpy(2, callCount => {
+                expect(callCount).toBe(2);
+                expect(queue._requests.length).toBe(0);
 
-        let zip;
-        zip = zipSpy(2, () => {
-            expect(queue._requests.length).toBe(0);
-            expect(zip).toHaveBeenCalledTimes(2);
+                expect(dsGetSpy).toHaveBeenCalledTimes(1);
+                expect(dsGetSpy).toHaveBeenNthCalledWith(1, expect.anything(), [videos0, videos1, videos1, videos2]);
 
-            expect(dsGetSpy).toHaveBeenCalledTimes(1);
-            expect(dsGetSpy).toHaveBeenNthCalledWith(1, expect.anything(), [videos0, videos1, videos1, videos2]);
+                done();
+            });
 
-            done();
+            queue.get([videos0, videos1], [videos0, videos1], zip);
+            queue.get([videos1, videos2], [videos1, videos2], zip);
         });
-
-        queue.get([videos0, videos1], [videos0, videos1], zip);
-        queue.get([videos1, videos2], [videos1, videos2], zip);
     });
 });
