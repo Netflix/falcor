@@ -440,55 +440,60 @@ describe("Model", () => {
     });
 
     describe("algorithm options", () => {
-        it("accepts boolean to disable algorithms", () => {
-            let model = new Model({ disablePathCollapse: true });
-            expect(model._enablePathCollapse).toBe(false);
+        const notTrue = [false, 0, -1, 1, "no", ""];
 
-            model = new Model({ disableRequestDeduplication: true });
-            expect(model._enableRequestDeduplication).toBe(false);
+        describe("path collapse algorithm", () => {
+            it("accepts boolean to disable", () => {
+                let model = new Model({ disablePathCollapse: true });
+                expect(model._enablePathCollapse).toBe(false);
 
-            const values = [false, 0, -1, 1, "no", ""];
-            for (let index = 0; index < values.length; index++) {
-                model = new Model({ disablePathCollapse: values[index], disableRequestDeduplication: values[index] });
+                for (let index = 0; index < notTrue.length; index++) {
+                    model = new Model({ disablePathCollapse: notTrue[index] });
+                    expect(model._enablePathCollapse).toBe(true);
+                }
+            });
+
+            it("is enabled by default", () => {
+                let model = new Model();
                 expect(model._enablePathCollapse).toBe(true);
+
+                model = new Model({});
+                expect(model._enablePathCollapse).toBe(true);
+            });
+
+            it("is copied on clone", () => {
+                const model = new Model({ disablePathCollapse: true });
+                const clone = model._clone();
+
+                expect(clone._enablePathCollapse).toBe(model._enablePathCollapse);
+            });
+        });
+
+        describe("request deduplication algorithm", () => {
+            it("accepts boolean to disable", () => {
+                let model = new Model({ disableRequestDeduplication: true });
+                expect(model._enableRequestDeduplication).toBe(false);
+
+                for (let index = 0; index < notTrue.length; index++) {
+                    model = new Model({ disableRequestDeduplication: notTrue[index] });
+                    expect(model._enableRequestDeduplication).toBe(true);
+                }
+            });
+
+            it("is enabled by default", () => {
+                let model = new Model();
                 expect(model._enableRequestDeduplication).toBe(true);
-            }
-        });
 
-        it("is enabled by default", () => {
-            let model = new Model();
-            expect(model._enablePathCollapse).toBe(true);
-            expect(model._enableRequestDeduplication).toBe(true);
+                model = new Model({});
+                expect(model._enableRequestDeduplication).toBe(true);
+            });
 
-            model = new Model({});
-            expect(model._enablePathCollapse).toBe(true);
-            expect(model._enableRequestDeduplication).toBe(true);
-        });
+            it("is copied on clone", () => {
+                const model = new Model({ disableRequestDeduplication: true });
+                const clone = model._clone();
 
-        it("is copied on clone", () => {
-            const model = new Model({ disablePathCollapse: true, disableRequestDeduplication: true });
-            const clone = model._clone();
-
-            expect(clone._enablePathCollapse).toBe(model._enablePathCollapse);
-            expect(clone._enableRequestDeduplication).toBe(model._enableRequestDeduplication);
+                expect(clone._enableRequestDeduplication).toBe(model._enableRequestDeduplication);
+            });
         });
     });
-
-    describe("JSON-Graph Specification", () => {
-        require("./get-core");
-
-        describe("#set", () => {
-            require("./set");
-        });
-
-        describe("#invalidate", () => {
-            require("./invalidate");
-        });
-    });
-
-    require("./lru");
-    require("./hardlink");
-    require("./falcor");
-    require("./internal");
-    require("./response");
 });
