@@ -277,7 +277,7 @@ Model.prototype.preload = function preload() {
  * @param {Path} functionPath - the path to the function to invoke
  * @param {Array.<Object>} args - the arguments to pass to the function
  * @param {Array.<PathSet>} refPaths - the paths to retrieve from the JSON Graph References in the message returned from the function
- * @param {Array.<PathSet>} thisPaths - the paths to retrieve from function's this object after successful function execution
+ * @param {Array.<PathSet>} extraPaths - additional paths to retrieve after successful function execution
  * @return {ModelResponse.<JSONEnvelope> - a JSONEnvelope contains the values returned from the function
  */
 Model.prototype.call = function call() {
