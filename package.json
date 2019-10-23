@@ -44,7 +44,7 @@
     "browserify": "^16.2.3",
     "bundle-collapser": "^1.2.1",
     "coveralls": "^3.0.3",
-    "csv-parse": "^1.2.2",
+    "csv-parse": "^4.4.6",
     "del": "^3.0.0",
     "express": "^4.16.4",
     "falcor-express": "^0.1.2",
