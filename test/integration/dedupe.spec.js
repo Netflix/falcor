@@ -7,7 +7,7 @@ const cacheGenerator = require("../CacheGenerator");
 const noOp = () => {};
 
 describe("Request deduping", () => {
-    it("should dedupe new requested paths with previous in-flight requests", done => {
+    it("dedupes new requested paths with previous in-flight requests", done => {
         const onGet = jest.fn();
         const model = new falcor.Model({
             source: new LocalDataSource(
@@ -45,7 +45,7 @@ describe("Request deduping", () => {
             );
     });
 
-    it("should dedupe from both ends of overlapping ranges", done => {
+    describe("dedupes from both ends of overlapping key sets", () => {
         const onGet = jest.fn();
         const model = new falcor.Model({
             source: new LocalDataSource(
@@ -54,24 +54,66 @@ describe("Request deduping", () => {
                         0: "thing: 0",
                         1: "thing: 1",
                         2: "thing: 2",
-                        3: "thing: 3"
+                        3: "thing: 3",
+                        4: "thing: 4",
+                        5: "thing: 5"
                     }
                 },
                 { wait: 0, onGet }
             )
         });
 
-        const partDone = after(2, () => {
-            expect(onGet.mock.calls[1][1]).toEqual([["things", [0, 3]]]);
-
-            done();
+        beforeEach(() => {
+            onGet.mockClear();
+            model.setCache({});
         });
 
-        model.get(["things", { from: 1, to: 2 }]).subscribe(noOp, done, partDone);
-        model.get(["things", { from: 0, to: 3 }]).subscribe(noOp, done, partDone);
+        it("using ranges", done => {
+            const partDone = after(2, () => {
+                expect(onGet.mock.calls[1][1]).toEqual([["things", [0, 3]]]);
+
+                done();
+            });
+
+            model.get(["things", { from: 1, to: 2 }]).subscribe(noOp, done, partDone);
+            model.get(["things", { from: 0, to: 3 }]).subscribe(noOp, done, partDone);
+        });
+
+        it("using arrays", done => {
+            const partDone = after(2, () => {
+                expect(onGet.mock.calls[1][1]).toEqual([["things", [0, 5]]]);
+
+                done();
+            });
+
+            model.get(["things", [2, 4]]).subscribe(noOp, done, partDone);
+            model.get(["things", [0, 4, 5]]).subscribe(noOp, done, partDone);
+        });
+
+        it("from range to array", done => {
+            const partDone = after(2, () => {
+                expect(onGet.mock.calls[1][1]).toEqual([["things", [0, 5]]]);
+
+                done();
+            });
+
+            model.get(["things", { from: 2, to: 3 }]).subscribe(noOp, done, partDone);
+            model.get(["things", [0, 3, 5]]).subscribe(noOp, done, partDone);
+        });
+
+        it("from array to range", done => {
+            const partDone = after(2, () => {
+                expect(onGet.mock.calls[1][1]).toEqual([["things", [2, 4]]]);
+
+                done();
+            });
+
+            model.get(["things", [0, 3, 5]]).subscribe(noOp, done, partDone);
+            model.get(["things", { from: 2, to: 4 }]).subscribe(noOp, done, partDone);
+        });
     });
 
-    it("should leave ranges unrolled if possible", done => {
+    it("leaves ranges unrolled if possible", done => {
         const onGet = jest.fn();
         const model = new falcor.Model({
             source: new LocalDataSource(
@@ -96,7 +138,7 @@ describe("Request deduping", () => {
         model.get(["things", { from: 0, to: 3 }]).subscribe(noOp, done, partDone);
     });
 
-    it("should work for properties after ranges", done => {
+    it("handles properties after ranges", done => {
         const onGet = jest.fn();
         const model = new falcor.Model({
             source: new LocalDataSource(
@@ -121,7 +163,7 @@ describe("Request deduping", () => {
         model.get(["things", { from: 1, to: 3 }, "name"]).subscribe(noOp, done, partDone);
     });
 
-    it("should work for multiple ranges in path sets", done => {
+    it("handles multiple ranges in path sets", done => {
         const onGet = jest.fn();
         const model = new falcor.Model({
             source: new LocalDataSource(
@@ -149,7 +191,7 @@ describe("Request deduping", () => {
         model.get(["things", { from: 0, to: 2 }, "tags", { from: 0, to: 2 }]).subscribe(noOp, done, partDone);
     });
 
-    it("should work when different optimized and requested path lengths", done => {
+    it("handles optimized and requested paths of different lengths", done => {
         const onGet = jest.fn();
         const model = new falcor.Model({
             source: new LocalDataSource(
