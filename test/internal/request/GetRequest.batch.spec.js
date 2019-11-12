@@ -1,5 +1,5 @@
 const GetRequest = require("./../../../lib/request/GetRequestV2");
-const ASAPScheduler = require("./../../../lib/schedulers/ASAPScheduler");
+const TimeoutScheduler = require("./../../../lib/schedulers/TimeoutScheduler");
 const ImmediateScheduler = require("./../../../lib/schedulers/ImmediateScheduler");
 const Model = require("./../../../lib").Model;
 const LocalDataSource = require("./../../data/LocalDataSource");
@@ -59,7 +59,7 @@ describe("#batch", () => {
 
     it("should make a request to the dataSource with an async scheduler.", done => {
         let inlineBoolean = true;
-        const scheduler = new ASAPScheduler();
+        const scheduler = new TimeoutScheduler(1);
         const getSpy = jest.fn();
         const source = new LocalDataSource(Cache(), {
             onGet: getSpy
@@ -99,7 +99,7 @@ describe("#batch", () => {
     });
 
     it("should batch some requests together.", done => {
-        const scheduler = new ASAPScheduler();
+        const scheduler = new TimeoutScheduler(1);
         const getSpy = jest.fn();
         const source = new LocalDataSource(Cache(), {
             onGet: getSpy
@@ -136,7 +136,7 @@ describe("#batch", () => {
     });
 
     it("should batch some requests together and dispose the first one.", done => {
-        const scheduler = new ASAPScheduler();
+        const scheduler = new TimeoutScheduler(1);
         const getSpy = jest.fn();
         const source = new LocalDataSource(Cache(), {
             onGet: getSpy
@@ -175,7 +175,7 @@ describe("#batch", () => {
     });
 
     it("should batch some requests together and dispose the second one.", done => {
-        const scheduler = new ASAPScheduler();
+        const scheduler = new TimeoutScheduler(1);
         const getSpy = jest.fn();
         const source = new LocalDataSource(Cache(), {
             onGet: getSpy

@@ -78,7 +78,6 @@
     "vinyl-source-stream": "^1.1.0"
   },
   "dependencies": {
-    "falcor-asap": "2.0.6",
     "falcor-json-graph": "1.1.7",
     "falcor-path-syntax": "0.2.4",
     "falcor-path-utils": "0.7.2",
