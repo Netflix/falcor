@@ -1,5 +1,5 @@
 const RequestQueue = require("./../../../lib/request/RequestQueueV2");
-const ASAPScheduler = require("./../../../lib/schedulers/ASAPScheduler");
+const TimeoutScheduler = require("./../../../lib/schedulers/TimeoutScheduler");
 const ImmediateScheduler = require("./../../../lib/schedulers/ImmediateScheduler");
 const Model = require("./../../../lib").Model;
 const LocalDataSource = require("./../../data/LocalDataSource");
@@ -45,7 +45,7 @@ describe("RequestQueue#get", () => {
     });
 
     it("makes a couple requests and have them batched together", done => {
-        const scheduler = new ASAPScheduler(); // ASAP to allow batching
+        const scheduler = new TimeoutScheduler(1); // To allow batching
         const source = new LocalDataSource(Cache());
         const model = new Model({ source });
         const queue = new RequestQueue(model, scheduler);
@@ -391,7 +391,7 @@ describe("RequestQueue#get", () => {
         });
 
         it("combines batched paths without collapse", done => {
-            const scheduler = new ASAPScheduler(); // ASAP to allow batching
+            const scheduler = new TimeoutScheduler(1); // To allow batching
             const dsGetSpy = jest.fn();
             const source = new LocalDataSource(Cache(), { wait: 100, onGet: dsGetSpy });
             const model = new Model({ source, disablePathCollapse: true, disableRequestDeduplication: true });

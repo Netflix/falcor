@@ -1,16 +1,15 @@
-var ASAPScheduler = require('./../../../lib/schedulers/ASAPScheduler');
-var Rx = require('rx');
-var Model = require('./../../../lib').Model;
+const TimeoutScheduler = require("./../../../lib/schedulers/TimeoutScheduler");
+const Model = require("./../../../lib").Model;
 
-describe('GetRequest', function() {
-    require('./GetRequest.batch.spec');
-    require('./GetRequest.add.spec');
+describe("GetRequest", () => {
+    require("./GetRequest.batch.spec");
+    require("./GetRequest.add.spec");
 
-    it('unsubscribing should cancel DataSource request (sync scheduler).', function() {
-        var unsubscribeSpy;
-        var subscribeSpy = jest.fn(function(observerOrOnNext, onError, onCompleted) {
-            var handle = setTimeout(function() {
-                var response = {
+    it("unsubscribing should cancel DataSource request (sync scheduler).", () => {
+        let unsubscribeSpy;
+        const subscribeSpy = jest.fn((observerOrOnNext, onError, onCompleted) => {
+            const handle = setTimeout(() => {
+                const response = {
                     jsonGraph: {
                         list: {
                             1: { name: "another test" }
@@ -22,14 +21,13 @@ describe('GetRequest', function() {
                 if (typeof observerOrOnNext === "function") {
                     observerOrOnNext(response);
                     onCompleted();
-                }
-                else {
+                } else {
                     observerOrOnNext.onNext(response);
                     observerOrOnNext.onCompleted();
                 }
             });
 
-            unsubscribeSpy = jest.fn(function() {
+            unsubscribeSpy = jest.fn(() => {
                 clearTimeout(handle);
             });
 
@@ -38,27 +36,26 @@ describe('GetRequest', function() {
             };
         });
 
-        var model = new Model({
+        const model = new Model({
             cache: {
                 list: {
                     0: { name: "test" }
                 }
             },
             source: {
-                get: function() {
+                get() {
                     return {
                         subscribe: subscribeSpy
-                    }
+                    };
                 }
             }
         });
 
-        var onNext = jest.fn();
-        var onError = jest.fn();
-        var onCompleted = jest.fn();
+        const onNext = jest.fn();
+        const onError = jest.fn();
+        const onCompleted = jest.fn();
 
-        var subscription = model.get("list[0,1].name").
-            subscribe(onNext, onError, onCompleted);
+        const subscription = model.get("list[0,1].name").subscribe(onNext, onError, onCompleted);
 
         subscription.dispose();
 
@@ -69,10 +66,10 @@ describe('GetRequest', function() {
         expect(onCompleted).not.toHaveBeenCalled();
     });
 
-    it('unsubscribing should cancel DataSource request (async scheduler, unsubscribed immediate).', function() {
-        var subscribeSpy = jest.fn(function(observerOrOnNext, onError, onCompleted) {
-            var handle = setTimeout(function() {
-                var response = {
+    it("unsubscribing should cancel DataSource request (async scheduler, unsubscribed immediate).", () => {
+        const subscribeSpy = jest.fn((observerOrOnNext, onError, onCompleted) => {
+            setTimeout(() => {
+                const response = {
                     jsonGraph: {
                         list: {
                             1: { name: "another test" }
@@ -84,8 +81,7 @@ describe('GetRequest', function() {
                 if (typeof observerOrOnNext === "function") {
                     observerOrOnNext(response);
                     onCompleted();
-                }
-                else {
+                } else {
                     observerOrOnNext.onNext(response);
                     observerOrOnNext.onCompleted();
                 }
@@ -93,32 +89,31 @@ describe('GetRequest', function() {
 
             // No need to have a spy, if subscribe is called, we fail.
             return {
-                dispose: function() {}
+                dispose() {}
             };
         });
 
-        var model = new Model({
-            scheduler: new ASAPScheduler(),
+        const model = new Model({
+            scheduler: new TimeoutScheduler(1),
             cache: {
                 list: {
                     0: { name: "test" }
                 }
             },
             source: {
-                get: function() {
+                get() {
                     return {
                         subscribe: subscribeSpy
-                    }
+                    };
                 }
             }
         });
 
-        var onNext = jest.fn();
-        var onError = jest.fn();
-        var onCompleted = jest.fn();
+        const onNext = jest.fn();
+        const onError = jest.fn();
+        const onCompleted = jest.fn();
 
-        var subscription = model.get("list[0,1].name").
-            subscribe(onNext, onError, onCompleted);
+        const subscription = model.get("list[0,1].name").subscribe(onNext, onError, onCompleted);
 
         subscription.dispose();
 
@@ -128,11 +123,11 @@ describe('GetRequest', function() {
         expect(onCompleted).not.toHaveBeenCalled();
     });
 
-    it('unsubscribing should cancel DataSource request (async scheduler, unsubscribed after subscribe).', function(done) {
-        var unsubscribeSpy;
-        var subscribeSpy = jest.fn(function(observerOrOnNext, onError, onCompleted) {
-            var handle = setTimeout(function() {
-                var response = {
+    it("unsubscribing should cancel DataSource request (async scheduler, unsubscribed after subscribe).", done => {
+        let unsubscribeSpy;
+        const subscribeSpy = jest.fn((observerOrOnNext, onError, onCompleted) => {
+            const handle = setTimeout(() => {
+                const response = {
                     jsonGraph: {
                         list: {
                             1: { name: "another test" }
@@ -144,14 +139,13 @@ describe('GetRequest', function() {
                 if (typeof observerOrOnNext === "function") {
                     observerOrOnNext(response);
                     onCompleted();
-                }
-                else {
+                } else {
                     observerOrOnNext.onNext(response);
                     observerOrOnNext.onCompleted();
                 }
             }, 100000);
 
-            unsubscribeSpy = jest.fn(function() {
+            unsubscribeSpy = jest.fn(() => {
                 clearTimeout(handle);
             });
 
@@ -160,27 +154,26 @@ describe('GetRequest', function() {
             };
         });
 
-        var model = new Model({
+        const model = new Model({
             cache: {
                 list: {
                     0: { name: "test" }
                 }
             },
             source: {
-                get: function() {
+                get() {
                     return {
                         subscribe: subscribeSpy
-                    }
+                    };
                 }
             }
         });
 
-        var onNext = jest.fn();
-        var onError = jest.fn();
-        var onCompleted = jest.fn();
+        const onNext = jest.fn();
+        const onError = jest.fn();
+        const onCompleted = jest.fn();
 
-        var subscription = model.get("list[0,1].name").
-            subscribe(onNext, onError, onCompleted);
+        const subscription = model.get("list[0,1].name").subscribe(onNext, onError, onCompleted);
 
         function waitOrExpect() {
             if (!unsubscribeSpy) {
@@ -194,10 +187,10 @@ describe('GetRequest', function() {
             expect(onNext).not.toHaveBeenCalled();
             expect(onError).not.toHaveBeenCalled();
             expect(onCompleted).not.toHaveBeenCalled();
-    
-            return done();
-        }
-        waitOrExpect();
 
+            done();
+        }
+
+        waitOrExpect();
     });
 });
