@@ -60,10 +60,7 @@ module.exports = function invalidatePathSets(model, paths) {
 
         var path = paths[pathIndex];
 
-        invalidatePathSet(
-            path, 0, cache, parent, node,
-            version, expired, lru
-        );
+        invalidatePathSet(path, 0, cache, parent, node, version, expired, lru);
     }
 
     // eslint-disable-next-line camelcase
@@ -85,11 +82,7 @@ function invalidatePathSet(
     var key = iterateKeySet(keySet, note);
 
     do {
-        var results = invalidateNode(
-            root, parent, node,
-            key, branch, false,
-            version, expired, lru
-        );
+        var results = invalidateNode(root, parent, node, key, branch, expired, lru);
         var nextNode = results[0];
         var nextParent = results[1];
         if (nextNode) {
@@ -107,7 +100,7 @@ function invalidatePathSet(
     } while (!note.done);
 }
 
-function invalidateReference(root, node, version, expired, lru) {
+function invalidateReference(root, node, expired, lru) {
 
     if (isExpired(node)) {
         expireNode(node, expired, lru);
@@ -136,11 +129,7 @@ function invalidateReference(root, node, version, expired, lru) {
         do {
             var key = reference[index];
             var branch = index &lt; count;
-            var results = invalidateNode(
-                root, parent, node,
-                key, branch, true,
-                version, expired, lru
-            );
+            var results = invalidateNode(root, parent, node, key, branch, expired, lru);
             node = results[0];
             if (isPrimitive(node)) {
                 return results;
@@ -165,16 +154,12 @@ function invalidateReference(root, node, version, expired, lru) {
     return [node, parent];
 }
 
-function invalidateNode(
-    root, parent, node,
-    key, branch, reference,
-    version, expired, lru) {
+function invalidateNode(root, parent, node, key, branch, expired, lru) {
 
     var type = node.$type;
 
     while (type === $ref) {
-
-        var results = invalidateReference(root, node, version, expired, lru);
+        var results = invalidateReference(root, node, expired, lru);
 
         node = results[0];
 
