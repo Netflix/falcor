@@ -1,7 +1,7 @@
 var falcor = require('./../../../lib/');
 var Model = falcor.Model;
 var Rx = require('rx');
-var noOp = function() {};
+var noOp = function () { };
 var LocalDataSource = require('../../data/LocalDataSource');
 var ErrorDataSource = require('../../data/ErrorDataSource');
 var asyncifyDataSource = require('../../data/asyncifyDataSource')
@@ -13,44 +13,45 @@ var strip = require('./../../cleanData').stripDerefAndVersionKeys;
 var isAssertionError = require('./../../isAssertionError');
 var toObservable = require('../../toObs');
 
-describe('DataSource Only', function() {
+describe('DataSource Only', function () {
     var dataSource;
-    beforeEach(function() {
+    beforeEach(function () {
         dataSource = new LocalDataSource(cacheGenerator(0, 2, ['title', 'art'], false));
     });
 
-    describe('Preload Functions', function() {
-        it('should get a value from falcor.', function(done) {
-            var model = new Model({source: dataSource});
+    describe('Preload Functions', function () {
+        it('should get a value from falcor.', function (done) {
+            var model = new Model({ source: dataSource });
             var onNext = jest.fn();
             var secondOnNext = jest.fn();
             toObservable(model.
                 preload(['videos', 0, 'title'])).
-                doAction(onNext, noOp, function() {
+                doAction(onNext, noOp, function () {
                     expect(onNext).not.toHaveBeenCalled();
                 }).
                 defaultIfEmpty({}).
-                flatMap(function() {
+                flatMap(function () {
                     return model.get(['videos', 0, 'title']);
                 }).
-                doAction(secondOnNext, noOp, function() {
+                doAction(secondOnNext, noOp, function () {
                     expect(secondOnNext).toHaveBeenCalledTimes(1);
                     expect(strip(secondOnNext.mock.calls[0][0])).toEqual({
                         json: {
-                            videos: {0: {title: 'Video 0'}}}
+                            videos: { 0: { title: 'Video 0' } }
+                        }
                     });
                 }).
                 subscribe(noOp, done, done);
         });
 
-        it('should perform multiple trips to a dataSource.', function(done) {
-            var get = jest.fn(function(source, paths) {
+        it('should perform multiple trips to a dataSource.', function (done) {
+            var get = jest.fn(function (source, paths) {
                 if (paths.length === 0) {
                     paths.pop();
                 }
             });
             var model = new Model({
-                source: new LocalDataSource(cacheGenerator(0, 2, ['title', 'art']), {onGet: get})
+                source: new LocalDataSource(cacheGenerator(0, 2, ['title', 'art']), { onGet: get })
 
             });
             var onNext = jest.fn();
@@ -59,37 +60,37 @@ describe('DataSource Only', function() {
                 preload(['videos', 0, 'title'],
                     ['videos', 1, 'art'])).
                 doAction(onNext).
-                doAction(noOp, noOp, function() {
+                doAction(noOp, noOp, function () {
                     expect(onNext).not.toHaveBeenCalled();
                 }).
                 defaultIfEmpty({}).
-                flatMap(function() {
+                flatMap(function () {
                     return model.get(['videos', 0, 'title']);
                 }).
                 doAction(secondOnNext).
-                doAction(noOp, noOp, function() {
+                doAction(noOp, noOp, function () {
                     expect(secondOnNext).toHaveBeenCalledTimes(1);
                     expect(strip(secondOnNext.mock.calls[0][0])).toEqual({
-                        json: {videos: {0: {title: 'Video 0'}}}
+                        json: { videos: { 0: { title: 'Video 0' } } }
                     });
                 }).
                 subscribe(noOp, done, done);
         });
     });
-    describe('PathMap', function() {
-        it('should get a value from falcor.', function(done) {
-            var model = new Model({source: dataSource});
+    describe('PathMap', function () {
+        it('should get a value from falcor.', function (done) {
+            var model = new Model({ source: dataSource });
             var onNext = jest.fn();
             toObservable(model.
                 get(['videos', 0, 'title'])).
-                doAction(onNext, noOp, function() {
+                doAction(onNext, noOp, function () {
                     expect(strip(onNext.mock.calls[0][0])).toEqual({
-                        json: {videos: {0: {title: 'Video 0'}}}
+                        json: { videos: { 0: { title: 'Video 0' } } }
                     });
                 }).
                 subscribe(noOp, done, done);
         });
-        it('should get a directly referenced value from falcor.', function(done) {
+        it('should get a directly referenced value from falcor.', function (done) {
             var cache = {
                 reference: {
                     $type: 'ref',
@@ -102,26 +103,26 @@ describe('DataSource Only', function() {
                     }
                 }
             };
-            var model = new Model({source: new LocalDataSource(cache)});
+            var model = new Model({ source: new LocalDataSource(cache) });
             var onNext = jest.fn();
             toObservable(model.
                 get(['reference', null])).
-                doAction(onNext, noOp, function() {
+                doAction(onNext, noOp, function () {
                     expect(strip(onNext.mock.calls[0][0])).toEqual({
-                        json: {reference: 'value'}
+                        json: { reference: 'value' }
                     });
                 }).
                 subscribe(noOp, done, done);
         });
     });
-    describe('_toJSONG', function() {
-        it('should get a value from falcor.', function(done) {
-            var model = new Model({source: dataSource});
+    describe('_toJSONG', function () {
+        it('should get a value from falcor.', function (done) {
+            var model = new Model({ source: dataSource });
             var onNext = jest.fn();
             toObservable(model.
                 get(['videos', 0, 'title']).
                 _toJSONG()).
-                doAction(onNext, noOp, function() {
+                doAction(onNext, noOp, function () {
                     expect(strip(onNext.mock.calls[0][0])).toEqual({
                         jsonGraph: {
                             videos: {
@@ -136,14 +137,14 @@ describe('DataSource Only', function() {
                 subscribe(noOp, done, done);
         });
     });
-    it('should report errors from a dataSource with _treatDataSourceErrorsAsJSONGraphErrors.', function(done) {
+    it('should report errors from a dataSource with _treatDataSourceErrorsAsJSONGraphErrors.', function (done) {
         var model = new Model({
             _treatDataSourceErrorsAsJSONGraphErrors: true,
             source: new ErrorDataSource(500, 'Oops!')
         });
         toObservable(model.
             get(['videos', 0, 'title'])).
-            doAction(noOp, function(err) {
+            doAction(noOp, function (err) {
                 expect(err).toEqual([{
                     path: ['videos', 0, 'title'],
                     value: {
@@ -151,11 +152,11 @@ describe('DataSource Only', function() {
                         status: 500
                     }
                 }]);
-            }, function() {
+            }, function () {
                 throw new Error('On Completed was called. ' +
-                     'OnError should have been called.');
+                    'OnError should have been called.');
             }).
-            subscribe(noOp, function(err) {
+            subscribe(noOp, function (err) {
                 // ensure its the same error
                 if (Array.isArray(err) && isPathValue(err[0])) {
                     return done();
@@ -163,14 +164,14 @@ describe('DataSource Only', function() {
                 return done(err);
             });
     });
-    it('should report errors from a dataSource.', function(done) {
+    it('should report errors from a dataSource.', function (done) {
         var outputError = null;
         var model = new Model({
             source: new ErrorDataSource(500, 'Oops!')
         });
         toObservable(model.
             get(['videos', 0, 'title'])).
-            doAction(noOp, function(err) {
+            doAction(noOp, function (err) {
                 outputError = err;
                 expect(err).toEqual({
                     $type: 'error',
@@ -179,11 +180,11 @@ describe('DataSource Only', function() {
                         status: 500
                     }
                 });
-            }, function() {
+            }, function () {
                 throw new Error('On Completed was called. ' +
-                     'OnError should have been called.');
+                    'OnError should have been called.');
             }).
-            subscribe(noOp, function(err) {
+            subscribe(noOp, function (err) {
                 if (err === outputError) {
                     return done();
                 }
@@ -192,7 +193,7 @@ describe('DataSource Only', function() {
                 }
             });
     });
-    it('should get all missing paths in a single request', function(done) {
+    it('should get all missing paths in a single request', function (done) {
         var serviceCalls = 0;
         var cacheModel = new Model({
             cache: {
@@ -222,18 +223,20 @@ describe('DataSource Only', function() {
                 }
             }
         });
-        var model = new Model({ source: {
-            get: function(paths) {
-                serviceCalls++;
-                return cacheModel.get.apply(cacheModel, paths)._toJSONG();
+        var model = new Model({
+            source: {
+                get: function (paths) {
+                    serviceCalls++;
+                    return cacheModel.get.apply(cacheModel, paths)._toJSONG();
+                }
             }
-        }});
+        });
 
 
         var onNext = jest.fn();
         toObservable(model.
             get('lolomo.summary', 'lolomo[0..2].summary')).
-            doAction(onNext, noOp, function() {
+            doAction(onNext, noOp, function () {
                 var data = onNext.mock.calls[0][0];
                 var json = data.json;
                 var lolomo = json.lolomo;
@@ -246,44 +249,44 @@ describe('DataSource Only', function() {
             subscribe(noOp, done, done);
     });
 
-    it('should be able to dispose of getRequests.', function(done) {
+    it('should be able to dispose of getRequests.', function (done) {
         var onGet = jest.fn();
         var source = new LocalDataSource(cacheGenerator(0, 2), {
             onGet: onGet
         });
-        var model = new Model({source: source}).batch();
+        var model = new Model({ source: source }).batch();
         var onNext = jest.fn();
         var disposable = toObservable(model.
             get(['videos', 0, 'title'])).
-            doAction(onNext, noOp, function() {
+            doAction(onNext, noOp, function () {
                 throw new Error('Should not of completed.  It was disposed.');
             }).
             subscribe(noOp, done);
 
 
         disposable.dispose();
-        setTimeout(function() {
+        setTimeout(function () {
             try {
                 expect(onNext).not.toHaveBeenCalled();
                 expect(onGet).not.toHaveBeenCalled();
-            } catch(e) {
+            } catch (e) {
                 return done(e);
             }
             return done();
         }, 200);
     });
 
-    it('should ignore response-stuffed paths.', function(done) {
+    it('should ignore response-stuffed paths.', function (done) {
         var onGet = jest.fn();
         var source = new LocalDataSource(cacheGenerator(0, 2), {
             onGet: onGet,
             wait: 100
         });
-        var model = new Model({source: source}).batch(1);
+        var model = new Model({ source: source }).batch(1);
         var onNext = jest.fn();
         var disposable1 = toObservable(model.
             get(['videos', 0, 'title'])).
-            doAction(onNext, noOp, function() {
+            doAction(onNext, noOp, function () {
                 throw new Error('Should not of completed.  It was disposed.');
             }).
             subscribe(noOp, done);
@@ -292,37 +295,37 @@ describe('DataSource Only', function() {
             get(['videos', 1, 'title'])).
             subscribe(noOp, done);
 
-        setTimeout(function() {
+        setTimeout(function () {
             disposable1.dispose();
         }, 30);
 
-        setTimeout(function() {
+        setTimeout(function () {
             try {
                 expect(model._root.cache.videos[0]).toBeUndefined();
-            } catch(e) {
+            } catch (e) {
                 return done(e);
             }
             return done();
         }, 200);
     });
 
-    it('should honor response-stuffed paths with _useServerPaths == true.', function(done) {
+    it('should honor response-stuffed paths with _useServerPaths == true.', function (done) {
         var onGet = jest.fn();
         var source = new LocalDataSource(cacheGenerator(0, 2), {
             onGet: onGet,
             wait: 100,
-            onResults: function(data) {
+            onResults: function (data) {
                 data.paths = [
                     ['videos', 0, 'title'],
                     ['videos', 1, 'title']
                 ];
             }
         });
-        var model = new Model({source: source, _useServerPaths: true}).batch(1);
+        var model = new Model({ source: source, _useServerPaths: true }).batch(1);
         var onNext = jest.fn();
         var disposable1 = toObservable(model.
             get(['videos', 0, 'title'])).
-            doAction(onNext, noOp, function() {
+            doAction(onNext, noOp, function () {
                 throw new Error('Should not of completed.  It was disposed.');
             }).
             subscribe(noOp, done);
@@ -331,41 +334,41 @@ describe('DataSource Only', function() {
             get(['videos', 1, 'title'])).
             subscribe(noOp, done);
 
-        setTimeout(function() {
+        setTimeout(function () {
             disposable1.dispose();
         }, 30);
 
-        setTimeout(function() {
+        setTimeout(function () {
             try {
                 expect(model._root.cache.videos[0].$_absolutePath).toEqual(['videos', 0]);
-            } catch(e) {
+            } catch (e) {
                 return done(e);
             }
             return done();
         }, 200);
     });
 
-    it('should throw when server paths are missing and _useServerPaths == true.', function(done) {
+    it('should throw when server paths are missing and _useServerPaths == true.', function (done) {
         var source = new LocalDataSource(cacheGenerator(0, 2));
-        var model = new Model({source: source, _useServerPaths: true}).batch(1);
+        var model = new Model({ source: source, _useServerPaths: true }).batch(1);
         toObservable(model.
             get(['videos', 0, 'title'])).
-            subscribe(noOp, function(err) {
+            subscribe(noOp, function (err) {
                 expect(err.message).toBe("Server responses must include a 'paths' field when Model._useServerPaths === true");
                 done();
             });
     });
 
-    it('should be able to dispose one of two get requests..', function(done) {
+    it('should be able to dispose one of two get requests..', function (done) {
         var onGet = jest.fn();
         var source = new LocalDataSource(cacheGenerator(0, 2), {
             onGet: onGet
         });
-        var model = new Model({source: source}).batch();
+        var model = new Model({ source: source }).batch();
         var onNext = jest.fn();
         var disposable = toObservable(model.
             get(['videos', 0, 'title'])).
-            doAction(onNext, noOp, function() {
+            doAction(onNext, noOp, function () {
                 throw new Error('Should not of completed.  It was disposed.');
             }).
             subscribe(noOp, done);
@@ -375,9 +378,8 @@ describe('DataSource Only', function() {
             doAction(onNext2).
             subscribe(noOp, done);
 
-
         disposable.dispose();
-        setTimeout(function() {
+        setTimeout(function () {
             try {
                 expect(onNext).not.toHaveBeenCalled();
                 expect(onGet).toHaveBeenCalledTimes(1);
@@ -391,20 +393,20 @@ describe('DataSource Only', function() {
                         }
                     }
                 });
-            } catch(e) {
+            } catch (e) {
                 return done(e);
             }
             return done();
         }, 200);
     });
-    it('should onError a MaxRetryExceededError when data source is sync.', function(done) {
+    it('should onError a MaxRetryExceededError when data source is sync.', function (done) {
         var model = new Model({ source: new LocalDataSource({}) });
         toObservable(model.
             get(['videos', 0, 'title'])).
-            doAction(noOp, function(e) {
+            doAction(noOp, function (e) {
                 expect(MaxRetryExceededError.is(e), 'MaxRetryExceededError expected.').toBe(true);
             }).
-            subscribe(noOp, function(e) {
+            subscribe(noOp, function (e) {
                 if (isAssertionError(e)) {
                     return done(e);
                 }
@@ -412,14 +414,14 @@ describe('DataSource Only', function() {
             }, done.bind(null, new Error('should not complete')));
     });
 
-    it('should onError a MaxRetryExceededError when data source is async.', function(done) {
+    it('should onError a MaxRetryExceededError when data source is async.', function (done) {
         var model = new Model({ source: asyncifyDataSource(new LocalDataSource({})) });
         toObservable(model.
             get(['videos', 0, 'title'])).
-            doAction(noOp, function(e) {
+            doAction(noOp, function (e) {
                 expect(MaxRetryExceededError.is(e), 'MaxRetryExceededError expected.').toBe(true);
             }).
-            subscribe(noOp, function(e) {
+            subscribe(noOp, function (e) {
                 if (isAssertionError(e)) {
                     return done(e);
                 }
@@ -427,7 +429,7 @@ describe('DataSource Only', function() {
             }, done.bind(null, new Error('should not complete')));
     });
 
-    it('should return missing optimized paths with MaxRetryExceededError', function(done) {
+    it('should return missing optimized paths with MaxRetryExceededError', function (done) {
         var model = new Model({
             source: asyncifyDataSource(new LocalDataSource({})),
             cache: {
@@ -446,14 +448,14 @@ describe('DataSource Only', function() {
         });
         toObservable(model.
             get(['lolomo', 0, 'title'], 'videos[0].title', 'hall[0].ween')).
-            doAction(noOp, function(e) {
+            doAction(noOp, function (e) {
                 expect(MaxRetryExceededError.is(e), 'MaxRetryExceededError expected.').toBe(true);
                 expect(e.missingOptimizedPaths).toEqual([
                     ['videos', 1, 'title'],
                     ['hall', 0, 'ween']
                 ]);
             }).
-            subscribe(noOp, function(e) {
+            subscribe(noOp, function (e) {
                 if (isAssertionError(e)) {
                     return done(e);
                 }
@@ -461,7 +463,7 @@ describe('DataSource Only', function() {
             }, done.bind(null, new Error('should not complete')));
     });
 
-    it('should throw MaxRetryExceededError after retrying said times', function(done) {
+    it('should throw MaxRetryExceededError after retrying said times', function (done) {
         var onGet = jest.fn();
         var model = new Model({
             maxRetries: 5,
@@ -471,14 +473,34 @@ describe('DataSource Only', function() {
         });
         toObservable(model.
             get('some.path')).
-            doAction(noOp, function(e) {
+            doAction(noOp, function (e) {
                 expect(MaxRetryExceededError.is(e), 'MaxRetryExceededError expected').toBe(true);
                 expect(onGet).toHaveBeenCalledTimes(5);
             }).
-            subscribe(noOp, function(e) {
+            subscribe(noOp, function (e) {
                 if (isAssertionError(e)) { return done(e); }
                 return done();
             }, done.bind(null, new Error('should not complete')));
+    });
+
+    it('passes retry count to the DataSource', function () {
+        const onGet = jest.fn();
+        const model = new Model({
+            source: asyncifyDataSource(new LocalDataSource({}, { onGet }))
+        });
+        const path = ['some', 'path'];
+
+        return model.
+            get(path).
+            then(() => {
+                throw new Error('should have rejected with MaxRetryExceededError');
+            }, (e) => {
+                expect(e).toBeInstanceOf(MaxRetryExceededError);
+                expect(onGet).toHaveBeenCalledTimes(3);
+                expect(onGet).toHaveBeenNthCalledWith(1, expect.anything(), [path], { retryCount: 1 });
+                expect(onGet).toHaveBeenNthCalledWith(2, expect.anything(), [path], { retryCount: 2 });
+                expect(onGet).toHaveBeenNthCalledWith(3, expect.anything(), [path], { retryCount: 3 });
+            });
     });
 });
 

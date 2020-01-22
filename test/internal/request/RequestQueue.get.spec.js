@@ -3,14 +3,14 @@ const TimeoutScheduler = require("./../../../lib/schedulers/TimeoutScheduler");
 const ImmediateScheduler = require("./../../../lib/schedulers/ImmediateScheduler");
 const Model = require("./../../../lib").Model;
 const LocalDataSource = require("./../../data/LocalDataSource");
-const noOp = function() {};
+const noOp = function () { };
 const zipSpy = require("./../../zipSpy");
 
 const cacheGenerator = require("./../../CacheGenerator");
 const strip = require("./../../cleanData").stripDerefAndVersionKeys;
 const toObservable = require("../../toObs");
 
-const Cache = function() {
+const Cache = function () {
     return cacheGenerator(0, 2);
 };
 
@@ -21,11 +21,12 @@ describe("RequestQueue#get", () => {
 
     it("makes a simple get request", done => {
         const scheduler = new ImmediateScheduler();
-        const source = new LocalDataSource(Cache());
+        const onGet = jest.fn();
+        const source = new LocalDataSource(Cache(), { onGet });
         const model = new Model({ source });
         const queue = new RequestQueue(model, scheduler);
         const callback = jest.fn();
-        queue.get([videos0], [videos0], callback);
+        queue.get([videos0], [videos0], { retryCount: 1 }, callback);
 
         expect(callback).toHaveBeenCalledTimes(1);
         const onNext = jest.fn();
@@ -40,6 +41,7 @@ describe("RequestQueue#get", () => {
                         }
                     }
                 });
+                expect(onGet).toHaveBeenCalledWith(expect.anything(), [videos0], { retryCount: 1 });
             })
             .subscribe(noOp, done, done);
     });
@@ -333,8 +335,8 @@ describe("RequestQueue#get", () => {
             expect(dsGetSpy).toHaveBeenCalledTimes(2);
 
             // Paths should still be collapsed
-            expect(dsGetSpy).toHaveBeenNthCalledWith(1, expect.anything(), [["videos", { from: 0, to: 1 }, "title"]]);
-            expect(dsGetSpy).toHaveBeenNthCalledWith(2, expect.anything(), [["videos", { from: 1, to: 2 }, "title"]]);
+            expect(dsGetSpy).toHaveBeenNthCalledWith(1, expect.anything(), [["videos", { from: 0, to: 1 }, "title"]], undefined);
+            expect(dsGetSpy).toHaveBeenNthCalledWith(2, expect.anything(), [["videos", { from: 1, to: 2 }, "title"]], undefined);
 
             done();
         });
@@ -356,8 +358,8 @@ describe("RequestQueue#get", () => {
 
             // Requests should still be deduplicated
             expect(dsGetSpy).toHaveBeenCalledTimes(2);
-            expect(dsGetSpy).toHaveBeenNthCalledWith(1, expect.anything(), [videos0, videos1]);
-            expect(dsGetSpy).toHaveBeenNthCalledWith(2, expect.anything(), [videos2]);
+            expect(dsGetSpy).toHaveBeenNthCalledWith(1, expect.anything(), [videos0, videos1], undefined);
+            expect(dsGetSpy).toHaveBeenNthCalledWith(2, expect.anything(), [videos2], undefined);
 
             done();
         });
@@ -380,8 +382,8 @@ describe("RequestQueue#get", () => {
 
                 // No path collapse, no request dedupe
                 expect(dsGetSpy).toHaveBeenCalledTimes(2);
-                expect(dsGetSpy).toHaveBeenNthCalledWith(1, expect.anything(), [videos0, videos1]);
-                expect(dsGetSpy).toHaveBeenNthCalledWith(2, expect.anything(), [videos1, videos2]);
+                expect(dsGetSpy).toHaveBeenNthCalledWith(1, expect.anything(), [videos0, videos1], undefined);
+                expect(dsGetSpy).toHaveBeenNthCalledWith(2, expect.anything(), [videos1, videos2], undefined);
 
                 done();
             });
@@ -402,7 +404,7 @@ describe("RequestQueue#get", () => {
                 expect(queue._requests.length).toBe(0);
 
                 expect(dsGetSpy).toHaveBeenCalledTimes(1);
-                expect(dsGetSpy).toHaveBeenNthCalledWith(1, expect.anything(), [videos0, videos1, videos1, videos2]);
+                expect(dsGetSpy).toHaveBeenNthCalledWith(1, expect.anything(), [videos0, videos1, videos1, videos2], undefined);
 
                 done();
             });

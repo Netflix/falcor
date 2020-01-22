@@ -29,7 +29,7 @@ LocalSource.prototype = {
             this.model = new falcor.Model({cache: modelOrCache});
         }
     },
-    get: function(paths) {
+    get: function(paths, dsRequestOpts) {
         var self = this;
         var options = this._options;
         var miss = options.miss;
@@ -42,7 +42,7 @@ LocalSource.prototype = {
                 var results;
                 var values = [{}];
                 if (self._missCount >= miss) {
-                    onGet(self, paths);
+                    onGet(self, paths, dsRequestOpts);
                     self.model._getPathValuesAsJSONG(self.model, paths, values, errorSelector);
                 } else {
                     self._missCount++;
@@ -68,7 +68,7 @@ LocalSource.prototype = {
             }
         });
     },
-    set: function(jsongEnv) {
+    set: function(jsongEnv, dsRequestOpts) {
         var self = this;
         var options = this._options;
         var miss = options.miss;
@@ -82,7 +82,7 @@ LocalSource.prototype = {
                 var tempModel = new falcor.Model({
                     cache: jsongEnv.jsonGraph,
                     errorSelector: errorSelector});
-                jsongEnv = onSet(self, tempModel, jsongEnv);
+                jsongEnv = onSet(self, tempModel, jsongEnv, dsRequestOpts);
 
                 tempModel.set(jsongEnv).subscribe();
                 tempModel._getPathValuesAsJSONG(
