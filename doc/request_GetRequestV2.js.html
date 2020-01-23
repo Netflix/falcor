@@ -36,8 +36,9 @@ var InvalidSourceError = require("./../errors/InvalidSourceError");
  *
  * @param {Scheduler} scheduler -
  * @param {RequestQueueV2} requestQueue -
+ * @param {number} attemptCount
  */
-var GetRequestV2 = function(scheduler, requestQueue) {
+var GetRequestV2 = function(scheduler, requestQueue, attemptCount) {
     this.sent = false;
     this.scheduled = false;
     this.requestQueue = requestQueue;
@@ -45,6 +46,7 @@ var GetRequestV2 = function(scheduler, requestQueue) {
     this.type = GetRequestType;
 
     this._scheduler = scheduler;
+    this._attemptCount = attemptCount;
     this._pathMap = {};
     this._optimizedPaths = [];
     this._requestedPaths = [];
@@ -358,39 +360,6 @@ module.exports = GetRequestV2;
                                 <a href="FromEsObserverAdapter.html" data-target="#FromEsObserverAdapter">FromEsObserverAdapter</a>
                                 
                                 
-
-
-                                
-
-
-                                
-
-
-                            </li>
-                        
-                            <li class="toc-api-class ">
-                                <a href="HttpDataSource.html" data-target="#HttpDataSource">HttpDataSource</a>
-                                
-                                
-
-    <ul class="toc-api-subgroup toc-api-subgroup-methods">
-        <li>
-            <span class="toc-api-subgroup-title">Methods</span>
-        </li>
-        
-            <li class="toc-api-subgroup-item">
-                <a href="HttpDataSource.html#call" data-target="#call">call</a>
-            </li>
-        
-            <li class="toc-api-subgroup-item">
-                <a href="HttpDataSource.html#get" data-target="#get">get</a>
-            </li>
-        
-            <li class="toc-api-subgroup-item">
-                <a href="HttpDataSource.html#set" data-target="#set">set</a>
-            </li>
-         
-    </ul>
 
 
                                 

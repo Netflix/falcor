@@ -384,7 +384,7 @@ Model.prototype._hasValidParentReference = require(5);
  * @param {Path} path - the path to retrieve
  * @return {Observable.<*>} - the value for the path
  * @example
- var model = new falcor.Model({source: new falcor.HttpDataSource("/model.json") });
+ var model = new falcor.Model({source: new HttpDataSource("/model.json") });
 
  model.
      getValue('user.name').
@@ -402,7 +402,7 @@ Model.prototype.getValue = require(20);
  * @param {Object} value - the value to set
  * @return {Observable.<*>} - the value for the path
  * @example
- var model = new falcor.Model({source: new falcor.HttpDataSource("/model.json") });
+ var model = new falcor.Model({source: new HttpDataSource("/model.json") });
 
  model.
      setValue('user.name', 'Jim').
@@ -2770,8 +2770,9 @@ var InvalidSourceError = require(11);
  *
  * @param {Scheduler} scheduler -
  * @param {RequestQueueV2} requestQueue -
+ * @param {number} attemptCount
  */
-var GetRequestV2 = function(scheduler, requestQueue) {
+var GetRequestV2 = function(scheduler, requestQueue, attemptCount) {
     this.sent = false;
     this.scheduled = false;
     this.requestQueue = requestQueue;
@@ -2779,6 +2780,7 @@ var GetRequestV2 = function(scheduler, requestQueue) {
     this.type = GetRequestType;
 
     this._scheduler = scheduler;
+    this._attemptCount = attemptCount;
     this._pathMap = {};
     this._optimizedPaths = [];
     this._requestedPaths = [];
@@ -3062,14 +3064,21 @@ RequestQueueV2.prototype = {
      * currently could be batched potentially in the future.  Since no batching
      * is required the setRequest action is simplified significantly.
      *
-     * @param {JSONGraphEnvelope) jsonGraph -
+     * @param {JSONGraphEnvelope} jsonGraph -
+     * @param {number} attemptCount
+     * @param {Function} cb
      */
-    set: function(jsonGraph, cb) {
+    set: function(jsonGraph, attemptCount, cb) {
         if (this.model._enablePathCollapse) {
             jsonGraph.paths = falcorPathUtils.collapse(jsonGraph.paths);
         }
 
-        return sendSetRequest(jsonGraph, this.model, cb);
+        if (cb === undefined) {
+            cb = attemptCount;
+            attemptCount = undefined;
+        }
+
+        return sendSetRequest(jsonGraph, this.model, attemptCount, cb);
     },
 
     /**
@@ -3077,9 +3086,10 @@ RequestQueueV2.prototype = {
      * scheduler is how the getRequest will be flushed.
      * @param {Array} requestedPaths -
      * @param {Array} optimizedPaths -
+     * @param {number} attemptCount
      * @param {Function} cb -
      */
-    get: function(requestedPaths, optimizedPaths, cb) {
+    get: function(requestedPaths, optimizedPaths, attemptCount, cb) {
         var self = this;
         var disposables = [];
         var count = 0;
@@ -3089,6 +3099,11 @@ RequestQueueV2.prototype = {
         var rRemainingPaths = requestedPaths;
         var disposed = false;
         var request;
+
+        if (cb === undefined) {
+            cb = attemptCount;
+            attemptCount = undefined;
+        }
 
         for (i = 0, len = requests.length; i < len; ++i) {
             request = requests[i];
@@ -3132,7 +3147,7 @@ RequestQueueV2.prototype = {
         // After going through all the available requests if there are more
         // paths to process then a new request must be made.
         if (oRemainingPaths && oRemainingPaths.length) {
-            request = new GetRequest(self.scheduler, self);
+            request = new GetRequest(self.scheduler, self, attemptCount);
             requests[requests.length] = request;
             ++count;
             var disposable = request.batch(rRemainingPaths, oRemainingPaths, refCountCallback);
@@ -3453,7 +3468,7 @@ module.exports = function flushGetRequest(request, pathSetArrayBatch, callback) 
     // we cancel at the callback above.
     var getRequest;
     try {
-        getRequest = model._source.get(requestPaths);
+        getRequest = model._source.get(requestPaths, request._attemptCount);
     } catch (e) {
         callback(new InvalidSourceError());
         return null;
@@ -3492,9 +3507,10 @@ var emptyDisposable = {dispose: function() {}};
  * @private
  * @param {JSONGraphEnvelope} jsonGraph -
  * @param {Model} model -
+ * @param {number} attemptCount
  * @param {Function} callback -
  */
-var sendSetRequest = function(originalJsonGraph, model, callback) {
+var sendSetRequest = function(originalJsonGraph, model, attemptCount, callback) {
     var paths = originalJsonGraph.paths;
     var modelRoot = model._root;
     var errorSelector = modelRoot.errorSelector;
@@ -3507,7 +3523,7 @@ var sendSetRequest = function(originalJsonGraph, model, callback) {
     var setObservable;
     try {
         setObservable = model._source.
-            set(originalJsonGraph);
+            set(originalJsonGraph, attemptCount);
     } catch (e) {
         callback(new InvalidSourceError());
         return emptyDisposable;
@@ -4210,7 +4226,7 @@ module.exports = function getRequestCycle(getResponse, model, results, observer,
     }
 
     var currentRequestDisposable = requestQueue.
-        get(boundRequestedMissingPaths, optimizedMissingPaths, function(err, data, hasInvalidatedResult) {
+        get(boundRequestedMissingPaths, optimizedMissingPaths, count, function(err, data, hasInvalidatedResult) {
             if (model._treatDataSourceErrorsAsJSONGraphErrors ? err instanceof InvalidSourceError : !!err) {
                 if (results.hasValues) {
                     observer.onNext(results.values && results.values[0]);
@@ -4398,7 +4414,7 @@ SetResponse.prototype._subscribe = function _subscribe(observer) {
 
     // Starts the async request cycle.
     return setRequestCycle(
-        model, observer, groups, isJSONGraph, isProgressive, 0);
+        model, observer, groups, isJSONGraph, isProgressive, 1);
 };
 
 /**
@@ -4520,7 +4536,7 @@ module.exports = function setRequestCycle(model, observer, groups,
     var requestedPaths = requestedAndOptimizedPaths.requestedPaths;
 
     // we have exceeded the maximum retry limit.
-    if (count === model._maxRetries) {
+    if (count > model._maxRetries) {
         observer.onError(new MaxRetryExceededError(optimizedPaths));
         return {
             dispose: function() {}
@@ -4562,7 +4578,7 @@ module.exports = function setRequestCycle(model, observer, groups,
         // If disposed before this point then the sendSetRequest will not
         // further any callbacks.  Therefore, if we are at this spot, we are
         // not disposed yet.
-        set(currentJSONGraph, function(error, jsonGraphEnv) {
+        set(currentJSONGraph, count, function(error, jsonGraphEnv) {
             if (error instanceof InvalidSourceError) {
                 observer.onError(error);
                 return;

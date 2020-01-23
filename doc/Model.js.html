@@ -372,7 +372,7 @@ Model.prototype._hasValidParentReference = require("./deref/hasValidParentRefere
  * @param {Path} path - the path to retrieve
  * @return {Observable.&lt;*>} - the value for the path
  * @example
- var model = new falcor.Model({source: new falcor.HttpDataSource("/model.json") });
+ var model = new falcor.Model({source: new HttpDataSource("/model.json") });
 
  model.
      getValue('user.name').
@@ -390,7 +390,7 @@ Model.prototype.getValue = require("./get/getValue");
  * @param {Object} value - the value to set
  * @return {Observable.&lt;*>} - the value for the path
  * @example
- var model = new falcor.Model({source: new falcor.HttpDataSource("/model.json") });
+ var model = new falcor.Model({source: new HttpDataSource("/model.json") });
 
  model.
      setValue('user.name', 'Jim').
@@ -789,39 +789,6 @@ Model.prototype._invalidatePathMaps = require("./invalidate/invalidatePathMaps")
                                 <a href="FromEsObserverAdapter.html" data-target="#FromEsObserverAdapter">FromEsObserverAdapter</a>
                                 
                                 
-
-
-                                
-
-
-                                
-
-
-                            </li>
-                        
-                            <li class="toc-api-class ">
-                                <a href="HttpDataSource.html" data-target="#HttpDataSource">HttpDataSource</a>
-                                
-                                
-
-    <ul class="toc-api-subgroup toc-api-subgroup-methods">
-        <li>
-            <span class="toc-api-subgroup-title">Methods</span>
-        </li>
-        
-            <li class="toc-api-subgroup-item">
-                <a href="HttpDataSource.html#call" data-target="#call">call</a>
-            </li>
-        
-            <li class="toc-api-subgroup-item">
-                <a href="HttpDataSource.html#get" data-target="#get">get</a>
-            </li>
-        
-            <li class="toc-api-subgroup-item">
-                <a href="HttpDataSource.html#set" data-target="#set">set</a>
-            </li>
-         
-    </ul>
 
 
                                 
