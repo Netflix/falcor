@@ -3,14 +3,14 @@ const TimeoutScheduler = require("./../../../lib/schedulers/TimeoutScheduler");
 const ImmediateScheduler = require("./../../../lib/schedulers/ImmediateScheduler");
 const Model = require("./../../../lib").Model;
 const LocalDataSource = require("./../../data/LocalDataSource");
-const noOp = function () { };
+const noOp = function() { };
 const zipSpy = require("./../../zipSpy");
 
 const cacheGenerator = require("./../../CacheGenerator");
 const strip = require("./../../cleanData").stripDerefAndVersionKeys;
 const toObservable = require("../../toObs");
 
-const Cache = function () {
+const Cache = function() {
     return cacheGenerator(0, 2);
 };
 
@@ -26,7 +26,7 @@ describe("RequestQueue#get", () => {
         const model = new Model({ source });
         const queue = new RequestQueue(model, scheduler);
         const callback = jest.fn();
-        queue.get([videos0], [videos0], { retryCount: 1 }, callback);
+        queue.get([videos0], [videos0], 1, callback);
 
         expect(callback).toHaveBeenCalledTimes(1);
         const onNext = jest.fn();
@@ -41,7 +41,7 @@ describe("RequestQueue#get", () => {
                         }
                     }
                 });
-                expect(onGet).toHaveBeenCalledWith(expect.anything(), [videos0], { retryCount: 1 });
+                expect(onGet).toHaveBeenCalledWith(expect.anything(), [videos0], 1);
             })
             .subscribe(noOp, done, done);
     });
