@@ -46,14 +46,21 @@ RequestQueueV2.prototype = {
      * currently could be batched potentially in the future.  Since no batching
      * is required the setRequest action is simplified significantly.
      *
-     * @param {JSONGraphEnvelope) jsonGraph -
+     * @param {JSONGraphEnvelope} jsonGraph -
+     * @param {number} attemptCount
+     * @param {Function} cb
      */
-    set: function(jsonGraph, cb) {
+    set: function(jsonGraph, attemptCount, cb) {
         if (this.model._enablePathCollapse) {
             jsonGraph.paths = falcorPathUtils.collapse(jsonGraph.paths);
         }
 
-        return sendSetRequest(jsonGraph, this.model, cb);
+        if (cb === undefined) {
+            cb = attemptCount;
+            attemptCount = undefined;
+        }
+
+        return sendSetRequest(jsonGraph, this.model, attemptCount, cb);
     },
 
     /**
@@ -61,9 +68,10 @@ RequestQueueV2.prototype = {
      * scheduler is how the getRequest will be flushed.
      * @param {Array} requestedPaths -
      * @param {Array} optimizedPaths -
+     * @param {number} attemptCount
      * @param {Function} cb -
      */
-    get: function(requestedPaths, optimizedPaths, cb) {
+    get: function(requestedPaths, optimizedPaths, attemptCount, cb) {
         var self = this;
         var disposables = [];
         var count = 0;
@@ -73,6 +81,11 @@ RequestQueueV2.prototype = {
         var rRemainingPaths = requestedPaths;
         var disposed = false;
         var request;
+
+        if (cb === undefined) {
+            cb = attemptCount;
+            attemptCount = undefined;
+        }
 
         for (i = 0, len = requests.length; i &lt; len; ++i) {
             request = requests[i];
@@ -116,7 +129,7 @@ RequestQueueV2.prototype = {
         // After going through all the available requests if there are more
         // paths to process then a new request must be made.
         if (oRemainingPaths &amp;&amp; oRemainingPaths.length) {
-            request = new GetRequest(self.scheduler, self);
+            request = new GetRequest(self.scheduler, self, attemptCount);
             requests[requests.length] = request;
             ++count;
             var disposable = request.batch(rRemainingPaths, oRemainingPaths, refCountCallback);
@@ -232,39 +245,6 @@ module.exports = RequestQueueV2;
                                 <a href="FromEsObserverAdapter.html" data-target="#FromEsObserverAdapter">FromEsObserverAdapter</a>
                                 
                                 
-
-
-                                
-
-
-                                
-
-
-                            </li>
-                        
-                            <li class="toc-api-class ">
-                                <a href="HttpDataSource.html" data-target="#HttpDataSource">HttpDataSource</a>
-                                
-                                
-
-    <ul class="toc-api-subgroup toc-api-subgroup-methods">
-        <li>
-            <span class="toc-api-subgroup-title">Methods</span>
-        </li>
-        
-            <li class="toc-api-subgroup-item">
-                <a href="HttpDataSource.html#call" data-target="#call">call</a>
-            </li>
-        
-            <li class="toc-api-subgroup-item">
-                <a href="HttpDataSource.html#get" data-target="#get">get</a>
-            </li>
-        
-            <li class="toc-api-subgroup-item">
-                <a href="HttpDataSource.html#set" data-target="#set">set</a>
-            </li>
-         
-    </ul>
 
 
                                 
