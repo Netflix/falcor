@@ -1,22 +1,19 @@
-var falcor = require("./../../../lib/");
-var Model = falcor.Model;
-var noOp = function() {};
-var LocalDataSource = require('./../../data/LocalDataSource');
-var Cache = require('./../../data/Cache');
-var strip = require('./../../cleanData').stripDerefAndVersionKeys;
-var MaxRetryExceededError = require('./../../../lib/errors/MaxRetryExceededError');
-var isAssertionError = require('./../../isAssertionError');
-var toObservable = require('../../toObs');
+const falcor = require("./../../../lib/");
+const Model = falcor.Model;
+const noOp = function() { };
+const LocalDataSource = require("./../../data/LocalDataSource");
+const Cache = require("./../../data/Cache");
+const strip = require("./../../cleanData").stripDerefAndVersionKeys;
+const MaxRetryExceededError = require("./../../../lib/errors/MaxRetryExceededError");
+const toObservable = require("../../toObs");
 
-describe('DataSource.', function() {
-    it('should validate args are sent to the dataSource collapsed.', function(done) {
-        var onSet = jest.fn(function(source, tmpGraph, jsonGraphFromSet) {
+describe("DataSource.", () => {
+    it("should validate args are sent to the dataSource collapsed.", done => {
+        const onSet = jest.fn((source, tmpGraph, jsonGraphFromSet, dsRequestOpts) => {
             return jsonGraphFromSet;
         });
-        var dataSource = new LocalDataSource(Cache(), {
-            onSet: onSet
-        });
-        var model = new Model({
+        const dataSource = new LocalDataSource(Cache(), { onSet });
+        const model = new Model({
             source: dataSource
         });
 
@@ -33,10 +30,11 @@ describe('DataSource.', function() {
                     }
                 }
             })).
-            doAction(noOp, noOp, function() {
+            doAction(noOp, noOp, () => {
                 expect(onSet).toHaveBeenCalledTimes(1);
+                expect(onSet).toHaveBeenCalledWith(expect.anything(), expect.anything(), expect.anything(), 1);
 
-                var cleaned = onSet.mock.calls[0][2];
+                const cleaned = onSet.mock.calls[0][2];
                 cleaned.paths[0][1] = cleaned.paths[0][1].concat();
                 expect(cleaned).toEqual({
                     jsonGraph: {
@@ -50,53 +48,53 @@ describe('DataSource.', function() {
                         }
                     },
                     paths: [
-                        ['videos', [444, 1234], 'rating']
+                        ["videos", [444, 1234], "rating"]
                     ]
                 });
             }).
             subscribe(noOp, done, done);
     });
 
-    it('should send off an empty string on a set to the server.', function(done) {
-        var onSet = jest.fn(function(source, tmpGraph, jsonGraphFromSet) {
+    it("should send off an empty string on a set to the server.", done => {
+        const onSet = jest.fn((source, tmpGraph, jsonGraphFromSet) => {
             return jsonGraphFromSet;
         });
-        var dataSource = new LocalDataSource(Cache(), {
-            onSet: onSet
+        const dataSource = new LocalDataSource(Cache(), {
+            onSet
         });
-        var model = new Model({
+        const model = new Model({
             source: dataSource
         });
         toObservable(model.
-            setValue('videos[1234].another_prop', '')).
-            doAction(noOp, noOp, function() {
+            setValue("videos[1234].another_prop", "")).
+            doAction(noOp, noOp, () => {
                 expect(onSet).toHaveBeenCalledTimes(1);
 
-                var cleaned = onSet.mock.calls[0][2];
+                const cleaned = onSet.mock.calls[0][2];
                 expect(cleaned).toEqual({
                     jsonGraph: {
                         videos: {
                             1234: {
-                                another_prop: ''
+                                another_prop: ""
                             }
                         }
                     },
                     paths: [
-                        ['videos', 1234, 'another_prop']
+                        ["videos", 1234, "another_prop"]
                     ]
                 });
             }).
             subscribe(noOp, done, done);
     });
 
-    it('should send off undefined on a set to the server.', function(done) {
-        var onSet = jest.fn(function(source, tmpGraph, jsonGraphFromSet) {
+    it("should send off undefined on a set to the server.", done => {
+        const onSet = jest.fn((source, tmpGraph, jsonGraphFromSet) => {
             return jsonGraphFromSet;
         });
-        var dataSource = new LocalDataSource(Cache(), {
-            onSet: onSet
+        const dataSource = new LocalDataSource(Cache(), {
+            onSet
         });
-        var model = new Model({
+        const model = new Model({
             source: dataSource
         });
         toObservable(model.
@@ -109,41 +107,41 @@ describe('DataSource.', function() {
                     }
                 }
             })).
-            doAction(noOp, noOp, function() {
+            doAction(noOp, noOp, () => {
                 expect(onSet).toHaveBeenCalledTimes(1);
 
-                var cleaned = onSet.mock.calls[0][2];
+                const cleaned = onSet.mock.calls[0][2];
                 expect(cleaned).toEqual({
                     jsonGraph: {
                         videos: {
                             1234: {
                                 another_prop: {
-                                    $type: 'atom'
+                                    $type: "atom"
                                 }
                             }
                         }
                     },
                     paths: [
-                        ['videos', 1234, 'another_prop']
+                        ["videos", 1234, "another_prop"]
                     ]
                 });
             }).
             subscribe(noOp, done, done);
     });
 
-    it('should report paths progressively.', function(done) {
-        var onSet = function(source, tmpGraph, jsonGraphFromSet) {
+    it("should report paths progressively.", done => {
+        const onSet = function(source, tmpGraph, jsonGraphFromSet) {
             jsonGraphFromSet.jsonGraph.videos[444].rating = 5;
             return jsonGraphFromSet;
         };
-        var dataSource = new LocalDataSource(Cache(), {
-            onSet: onSet
+        const dataSource = new LocalDataSource(Cache(), {
+            onSet
         });
-        var model = new Model({
+        const model = new Model({
             source: dataSource
         });
 
-        var count = 0;
+        let count = 0;
         toObservable(model.
             set({
                 json: {
@@ -158,7 +156,7 @@ describe('DataSource.', function() {
                 }
             }).
             progressively()).
-            doAction(function(x) {
+            doAction(x => {
                 if (count === 0) {
                     expect(strip(x)).toEqual({
                         json: {
@@ -190,51 +188,49 @@ describe('DataSource.', function() {
                 }
 
                 count++;
-            }, noOp, function() {
+            }, noOp, () => {
                 expect(count === 2).toBe(true);
             }).
             subscribe(noOp, done, done);
     });
 
-    it('should return missing optimized paths with a MaxRetryExceededError.', function(done) {
-        var onSet = function(source, tmpGraph, jsonGraphFromSet) {
-            model.invalidate('videos[1234].title');
+    it("should return missing optimized paths with a MaxRetryExceededError.", () => {
+        const onSet = jest.fn((source, tmpGraph, jsonGraphFromSet, dsRequestOpts) => {
+            // eslint-disable-next-line no-use-before-define
+            model.invalidate("videos[1234].title");
             return {
-              jsonGraph: {
-                videos: {
-                  1234: {}
-                }
-              },
-              paths: []
+                jsonGraph: {
+                    videos: {
+                        1234: {}
+                    }
+                },
+                paths: []
             };
-        };
-        var dataSource = new LocalDataSource(Cache(), {
-            onSet: onSet
         });
-        var model = new Model({
+        const dataSource = new LocalDataSource(Cache(), { onSet });
+        const model = new Model({
             source: dataSource
         });
 
-        toObservable(model.
-            set({
-                json: {
-                    videos: {
-                        1234: {
-                            title: 'Nowhere to be found'
-                        }
+        return model.set({
+            json: {
+                videos: {
+                    1234: {
+                        title: "Nowhere to be found"
                     }
                 }
-            })).
-            doAction(noOp, function(e) {
-              expect(MaxRetryExceededError.is(err), 'MaxRetryExceededError expected').toBe(true);
-              expect(err.missingOptimizedPaths).toEqual([['videos', '1234', 'title']]);
-            }).
-            subscribe(noOp, function(e) {
-              if (isAssertionError(e)) {
-                return done(e);
-              }
-              return done();
-            }, done.bind(null, new Error('should not complete')));
+            }
+        }).then(() => {
+            throw new Error("should have rejected with MaxRetryExceededError");
+        }, e => {
+            expect(e).toBeInstanceOf(MaxRetryExceededError);
+            expect(e.missingOptimizedPaths).toEqual([["videos", "1234", "title"]]);
+
+            expect(onSet).toHaveBeenCalledTimes(3);
+            expect(onSet).toHaveBeenNthCalledWith(1, expect.anything(), expect.anything(), expect.anything(), 1 );
+            expect(onSet).toHaveBeenNthCalledWith(2, expect.anything(), expect.anything(), expect.anything(), 2 );
+            expect(onSet).toHaveBeenNthCalledWith(3, expect.anything(), expect.anything(), expect.anything(), 3 );
+        });
     });
 });
 

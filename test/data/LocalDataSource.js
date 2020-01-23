@@ -1,10 +1,9 @@
-var Rx = require("rx");
-var Observable = Rx.Observable;
-var falcor = require("./../../lib/");
-var _ = require("lodash");
-var noOp = function(a, b, c) { return c; };
+const Rx = require("rx");
+const falcor = require("./../../lib/");
+const _ = require("lodash");
+const noOp = function(a, b, c) { return c; };
 
-var LocalSource = module.exports = function(cache, options) {
+const LocalSource = module.exports = function(cache, options) {
     this._options = _.extend({
         miss: 0,
         onGet: noOp,
@@ -14,7 +13,7 @@ var LocalSource = module.exports = function(cache, options) {
         materialize: false
     }, options);
     this._missCount = 0;
-    this.model = new falcor.Model({cache: cache});
+    this.model = new falcor.Model({cache});
 
     if (this._options.materialize) {
         this.model = this.model._materialize();
@@ -22,34 +21,33 @@ var LocalSource = module.exports = function(cache, options) {
 };
 
 LocalSource.prototype = {
-    setModel: function(modelOrCache) {
+    setModel(modelOrCache) {
         if (modelOrCache instanceof falcor.Model) {
             this.model = modelOrCache;
         } else {
             this.model = new falcor.Model({cache: modelOrCache});
         }
     },
-    get: function(paths) {
-        var self = this;
-        var options = this._options;
-        var miss = options.miss;
-        var onGet = options.onGet;
-        var onResults = options.onResults;
-        var wait = options.wait;
-        var errorSelector = options.errorSelector;
-        return Rx.Observable.create(function(observer) {
+    get(paths, dsRequestOpts) {
+        const self = this;
+        const options = this._options;
+        const miss = options.miss;
+        const onGet = options.onGet;
+        const onResults = options.onResults;
+        const wait = options.wait;
+        const errorSelector = options.errorSelector;
+        return Rx.Observable.create(observer => {
             function exec() {
-                var results;
-                var values = [{}];
+                const values = [{}];
                 if (self._missCount >= miss) {
-                    onGet(self, paths);
+                    onGet(self, paths, dsRequestOpts);
                     self.model._getPathValuesAsJSONG(self.model, paths, values, errorSelector);
                 } else {
                     self._missCount++;
                 }
 
                 // always output all the paths
-                var output = {
+                const output = {
                     // paths: paths,
                     jsonGraph: {}
                 };
@@ -68,21 +66,20 @@ LocalSource.prototype = {
             }
         });
     },
-    set: function(jsongEnv) {
-        var self = this;
-        var options = this._options;
-        var miss = options.miss;
-        var onSet = options.onSet;
-        var onResults = options.onResults;
-        var wait = options.wait;
-        var errorSelector = options.errorSelector;
-        return Rx.Observable.create(function(observer) {
+    set(jsongEnv, dsRequestOpts) {
+        const self = this;
+        const options = this._options;
+        const onSet = options.onSet;
+        const onResults = options.onResults;
+        const wait = options.wait;
+        const errorSelector = options.errorSelector;
+        return Rx.Observable.create(observer => {
             function exec() {
-                var seed = [{}];
-                var tempModel = new falcor.Model({
+                const seed = [{}];
+                const tempModel = new falcor.Model({
                     cache: jsongEnv.jsonGraph,
-                    errorSelector: errorSelector});
-                jsongEnv = onSet(self, tempModel, jsongEnv);
+                    errorSelector});
+                jsongEnv = onSet(self, tempModel, jsongEnv, dsRequestOpts);
 
                 tempModel.set(jsongEnv).subscribe();
                 tempModel._getPathValuesAsJSONG(
@@ -103,7 +100,7 @@ LocalSource.prototype = {
             }
         });
     },
-    call: function(path, args, suffixes, paths) {
+    call(path, args, suffixes, paths) {
         return Rx.Observable.empty();
     }
 };
