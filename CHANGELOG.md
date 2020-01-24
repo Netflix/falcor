@@ -1,3 +1,7 @@
+# 2.2.0
+## Features
+- [Request attempt count passed down to DataSource get/set](https://github.com/Netflix/falcor/pull/970)
+
 # 2.1.0
 ## Features
 - [Added flags for potentially expensive algorithms](https://github.com/Netflix/falcor/pull/962)
