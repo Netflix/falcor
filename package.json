@@ -1,6 +1,6 @@
 {
   "name": "falcor",
-  "version": "2.2.0",
+  "version": "2.2.1",
   "description": "A JavaScript library for efficient data fetching.",
   "main": "./lib/index.js",
   "homepage": "https://github.com/Netflix/falcor",
