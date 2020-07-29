@@ -1,32 +1,29 @@
-var gulp = require("gulp");
 var del = require("del");
 
-function clean(paths, cb) {
-    del(paths).then(function() {
-        cb();
-    });
+function cleanPerf() {
+    return del(["./performance/bin", "./performance/out"]);
 }
 
-gulp.task("clean.perf", function(cb) {
-    clean(["./performance/bin", "./performance/out"], cb);
-});
+function cleanDoc() {
+    return del(["./doc"]);
+}
 
-gulp.task("clean.doc", function(cb) {
-    clean(["./doc"], cb);
-});
+function cleanBin() {
+    return del(["./bin"]);
+}
 
-gulp.task("clean.bin", function(cb) {
-    clean(["./bin"], cb);
-});
+function cleanDist() {
+    return del(["./dist"]);
+}
 
-gulp.task("clean.dist", function(cb) {
-    clean(["./dist"], cb);
-});
+function cleanCoverage() {
+    return del(["./coverage"]);
+}
 
-gulp.task("clean.coverage", function(cb) {
-    clean(["./coverage"], cb);
-});
-
-gulp.task("clean", ["clean.doc", "clean.bin", "clean.coverage", "clean.perf"]);
-gulp.task("clean.dev", ["clean.bin"]);
-
+module.exports = {
+    bin: cleanBin,
+    coverage: cleanCoverage,
+    dist: cleanDist,
+    doc: cleanDoc,
+    perf: cleanPerf,
+};

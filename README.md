@@ -159,7 +159,7 @@ Hello World
 - Run `git checkout master` to open `master` branch locally
 - Run `git pull` to merge latest code, including built `dist/` and `docs/` by Travis
 - Update CHANGELOG with features/bug fixes to be released in the new version
-- Run `npm run prepare` to build `dist/` locally
+- Run `npm run dist` to build `dist/` locally
 - Ensure the built files are not different from those built by Travis CI,
   hence creating no change to commit
 - Run `npm version patch` (or `minor`, `major`, etc) to create a new git commit and tag

@@ -9,12 +9,11 @@ var path = require('jsdoc/path');
 var taffy = require('taffydb').taffy;
 var template = require('jsdoc/template');
 var util = require('util');
-var _ = require('underscore');
+var _ = require('lodash');
 
 var htmlsafe = helper.htmlsafe;
 var linkto = helper.linkto;
 var resolveAuthorLinks = helper.resolveAuthorLinks;
-var scopeToPunc = helper.scopeToPunc;
 var hasOwnProp = Object.prototype.hasOwnProperty;
 
 var data;

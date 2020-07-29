@@ -1,95 +1,94 @@
-var gulp = require('gulp');
-var browserify = require('browserify');
-var license = require('gulp-license');
-var uglify = require('gulp-uglify');
-var vinyl = require('vinyl-source-stream');
-var bundle_collapser = require('bundle-collapser/plugin');
-var _ = require('lodash');
-var path = require('path');
+var gulp = require("gulp");
+var browserify = require("browserify");
+var license = require("gulp-license");
+var uglify = require("gulp-uglify");
+var vinyl = require("vinyl-source-stream");
+var bundleCollapser = require("bundle-collapser/plugin");
+var _ = require("lodash");
+var path = require("path");
 
 var licenseInfo = {
-    organization: 'Netflix, Inc',
-    year: '2015'
+    organization: "Netflix, Inc",
+    year: "2020",
 };
-
-gulp.task('build', ['build.browser', 'build.all']);
-gulp.task('dist', ['dist.browser', 'dist.all']);
-gulp.task('all', ['build.browser', 'dist.browser', 'build.all', 'dist.all', 'lint']);
-gulp.task('build-with-lint', ['build.browser', 'dist.browser', 'lint']);
 
 var browserifyOptions = {
-    standalone: 'falcor',
+    standalone: "falcor",
     insertGlobalVars: {
-        Promise: function (file, basedir) {
+        Promise: function(file, basedir) {
             return 'typeof Promise === "function" ? Promise : require("promise")';
-        }
-    }
+        },
+    },
 };
 
-gulp.task('dist.browser', ['clean.dist'], function(cb) {
-    build({
-        file: ['./browser.js'],
+function buildDistBrowser() {
+    return build({
+        file: ["./browser.js"],
         outName: "falcor.browser",
         browserifyOptions: browserifyOptions,
-        debug: false
-    }, cb);
-});
+        debug: false,
+    });
+}
 
-gulp.task('build.browser', ['clean.dist'], function(cb) {
-    build({
-        file: ['./browser.js'],
+function buildBrowser() {
+    return build({
+        file: ["./browser.js"],
         outName: "falcor.browser",
-        browserifyOptions: browserifyOptions
-    }, cb);
-});
+        browserifyOptions: browserifyOptions,
+    });
+}
 
-gulp.task('dist.all', ['clean.dist'], function(cb) {
-    build({
-        file: ['./all.js'],
+function buildDistAll() {
+    return build({
+        file: ["./all.js"],
         outName: "falcor.all",
         browserifyOptions: browserifyOptions,
-        debug: false
-    }, cb);
-});
+        debug: false,
+    });
+}
 
-gulp.task('build.all', ['clean.dist'], function(cb) {
-    build({
-        file: ['./all.js'],
+function buildAll() {
+    return build({
+        file: ["./all.js"],
         outName: "falcor.all",
-        browserifyOptions: browserifyOptions
-    }, cb);
-});
+        browserifyOptions: browserifyOptions,
+    });
+}
 
-function build(options, cb) {
-    options = _.assign({
-        file: '',
-        browserifyOptions: {},
-        outName: options.outName,
-        dest: 'dist',
-        debug: true
-    }, options);
+function build(options) {
+    options = _.assign(
+        {
+            file: "",
+            browserifyOptions: {},
+            outName: options.outName,
+            dest: "dist",
+            debug: true,
+        },
+        options
+    );
 
-    var name = options.outName + (!options.debug && '.min' || '') + '.js';
-    browserify(options.file, options.browserifyOptions).
-        plugin(bundle_collapser).
-        bundle().
-        pipe(vinyl(name)).
-        pipe(license('Apache', licenseInfo)).
-        pipe(gulp.dest(options.dest)).
-        on('finish', function() {
-            if (options.debug) {
-                return cb();
+    var name = options.outName + ((!options.debug && ".min") || "") + ".js";
+    return browserify(options.file, options.browserifyOptions)
+        .plugin(bundleCollapser)
+        .bundle()
+        .pipe(vinyl(name))
+        .pipe(license("Apache", licenseInfo))
+        .pipe(gulp.dest(options.dest))
+        // eslint-disable-next-line consistent-return
+        .on("finish", function() {
+            if (!options.debug) {
+                // minify output
+                var destAndName = path.join(options.dest, name);
+                return gulp.src(destAndName)
+                    .pipe(uglify())
+                    .pipe(gulp.dest(options.dest));
             }
-
-            var destAndName = path.join(options.dest, name);
-            gulp.
-                src(destAndName).
-                pipe(uglify()).
-                pipe(gulp.dest(options.dest)).
-                on('finish', function() {
-                    return cb();
-                });
         });
 }
 
-module.exports = build;
+module.exports = {
+    buildAll: buildAll,
+    buildBrowser: buildBrowser,
+    buildDistAll: buildDistAll,
+    buildDistBrowser: buildDistBrowser,
+};

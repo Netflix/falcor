@@ -1,26 +1,27 @@
 var gulp = require("gulp");
-var eslint = require("gulp-eslint");
 var gulpShell = require("gulp-shell");
+var eslint = require("gulp-eslint");
 
-// Registers build tasks
-require("./build/gulp-clean");
-require("./build/gulp-build");
-require("./build/gulp-perf");
+var clean = require("./build/gulp-clean");
+var build = require("./build/gulp-build");
+var perf = require("./build/gulp-perf");
 
-var srcDir = "lib";
-
-gulp.task("lint", function() {
-    return gulp.src(["*.js", srcDir + "/**/*.js"]).
+function lint() {
+    return gulp.src(["*.js", "lib/**/*.js"]).
         pipe(eslint()).
         pipe(eslint.format()).
         pipe(eslint.failAfterError()); // dz: change back after finishing to failAfterError
-});
+}
 
-gulp.task("doc", ["clean.doc", "doc-d"]);
+function generateDocs() {
+    return gulpShell.task("./node_modules/.bin/jsdoc lib -r -d doc -c ./build/jsdoc.json --verbose")();
+}
 
-gulp.task("doc-d", gulpShell.task([
-    "./node_modules/.bin/jsdoc lib -r -d doc -c ./build/jsdoc.json --verbose"
-]));
-
-// Run in serial to fail build if lint fails.
-gulp.task("default", ["build-with-lint", "lint"]);
+module.exports = {
+    build: gulp.series(clean.dist, lint, gulp.parallel(build.buildAll, build.buildBrowser, build.buildDistAll, build.buildDistBrowser)),
+    clean: gulp.parallel(clean.bin, clean.coverage, clean.doc, clean.perf),
+    doc: gulp.series(clean.doc, generateDocs),
+    lint: lint,
+    perfBuild: gulp.series(clean.perf, gulp.parallel(perf.buildBrowser, perf.buildDevice)),
+    perfRun: gulp.series(clean.perf, gulp.parallel(perf.buildBrowser, perf.buildDevice), perf.runBrowser, perf.runNode),
+};
