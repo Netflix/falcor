@@ -1915,7 +1915,9 @@ module.exports = function onValue(model, node, seed, depth, outerResults,
         if (valueNode !== undefined) {
           if (k != null) {
               hasValues = true;
-              curr[k] = valueNode;
+              if (!curr[k]) {
+                curr[k] = valueNode;
+              }
           } else {
               // We are protected from reaching here when depth is 1 and prev is
               // undefined by the InvalidModelError and NullInPathError checks.
@@ -2130,8 +2132,8 @@ module.exports = function walkPath(model, root, curr, path, depth, seed,
         onValueType(model, curr, path, depth, seed, outerResults, branchInfo,
             requestedPath, optimizedPath, optimizedLength,
             isJSONG, fromReference);
-    return;
-}
+        return;
+    }
 
     var allowFromWhenceYouCame = model._allowFromWhenceYouCame;
     var optimizedLengthPlus1 = optimizedLength + 1;
