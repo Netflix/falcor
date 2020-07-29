@@ -44,6 +44,23 @@ describe("Cache Only", () => {
                 .subscribe(noOp, done, done);
         });
 
+        it("should not void data on empty paths.", done => {
+            const model = new Model({
+                cache: cacheGenerator(0, 1),
+            });
+            const onNext = jest.fn();
+            toObservable(model.get(["videos", 0, "title"], ["videos", [], "title"]))
+                .doAction(onNext, noOp, () => {
+                    expect(clean(onNext.mock.calls[0][0])).toEqual({
+                        json: {
+                            videos: { 0: { title: "Video 0" } },
+                        },
+                    });
+                    expect(onNext).toHaveBeenCalledTimes(1);
+                })
+                .subscribe(noOp, done, done);
+        });
+
         it("should use a promise to get request.", done => {
             const model = new Model({
                 cache: cacheGenerator(0, 1),
