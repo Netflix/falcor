@@ -1,10 +1,10 @@
 # Running Performance Tests
 
-* `gulp run perf`
+* `npm run perf`
 
-       Runs performance tests on configured browsers, and NodeJS, after building bundles.
+       Runs performance tests on configured browsers and NodeJS, after building bundles.
 
-* `gulp perf-all`
+* `gulp perfBuild`
 
        Build bundles for browser/device testing.
 
