@@ -1,3 +1,7 @@
+# 2.2.1
+## Bugs
+- [Empty key sets in path sets could result in an incomplete response](https://github.com/Netflix/falcor/pull/979)
+
 # 2.2.0
 ## Features
 - [Request attempt count passed down to DataSource get/set](https://github.com/Netflix/falcor/pull/970)
