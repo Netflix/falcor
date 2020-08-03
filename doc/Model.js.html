@@ -26,9 +26,6 @@ var InvalidateResponse = require("./response/InvalidateResponse");
 var TimeoutScheduler = require("./schedulers/TimeoutScheduler");
 var ImmediateScheduler = require("./schedulers/ImmediateScheduler");
 
-var arrayClone = require("./support/array-clone");
-var arraySlice = require("./support/array-slice");
-
 var collectLru = require("./lru/collect");
 var pathSyntax = require("falcor-path-syntax");
 
@@ -203,7 +200,7 @@ Model.prototype.get = require("./response/get");
  * @return {Path} - fully optimized bound path for the model
  */
 Model.prototype._getOptimizedBoundPath = function _getOptimizedBoundPath() {
-    return arrayClone(this._path);
+    return this._path ? this._path.slice() : this._path;
 };
 
 /**
@@ -467,7 +464,7 @@ Model.prototype.setCache = function modelSetCache(cacheOrJSONGraphEnvelope) {
  localStorage.setItem('cache', JSON.stringify(model.getCache("genreLists[0...10][0...10].boxshot")));
  */
 Model.prototype.getCache = function _getCache() {
-    var paths = arraySlice(arguments);
+    var paths = Array.prototype.slice.call(arguments);
     if (paths.length === 0) {
         return getCache(this._root.cache);
     }
@@ -699,7 +696,7 @@ model.
 // ["usersById", 32] - because userModel refers to target of reference at ["users", 0]
  */
 Model.prototype.getPath = function getPath() {
-    return arrayClone(this._path);
+    return this._path ? this._path.slice() : this._path;
 };
 
 /**
