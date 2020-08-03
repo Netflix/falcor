@@ -1,3 +1,7 @@
+# 2.2.2
+## Changes
+- Updated falcor-path-utils to pull in changes: [Use NOINLINE to avoid inlining function definitions](https://github.com/Netflix/falcor-path-utils/pull/23)
+
 # 2.2.1
 ## Bugs
 - [Empty key sets in path sets could result in an incomplete response](https://github.com/Netflix/falcor/pull/979)
