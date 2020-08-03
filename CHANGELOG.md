@@ -1,6 +1,7 @@
 # 2.2.2
 ## Changes
 - Updated falcor-path-utils to pull in changes: [Use NOINLINE to avoid inlining function definitions](https://github.com/Netflix/falcor-path-utils/pull/23)
+- [Reduced allocation garbage](https://github.com/Netflix/falcor/pull/980)
 
 # 2.2.1
 ## Bugs
