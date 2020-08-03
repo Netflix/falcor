@@ -8068,7 +8068,7 @@ var isArray = Array.isArray;
  */
 module.exports = function iterateKeySet(keySet, note) {
     if (note.isArray === undefined) {
-        initializeNote(keySet, note);
+        /*#__NOINLINE__*/ initializeNote(keySet, note);
     }
 
     // Array iteration
@@ -8533,14 +8533,12 @@ var maybeIntegerKey = require(137).maybeIntegerKey;
 var isIntegerKey = require(137).isIntegerKey;
 var isArray = Array.isArray;
 var typeOfObject = "object";
-var typeOfString = "string";
 var typeOfNumber = "number";
 
 /* jshint forin: false */
 module.exports = function toPaths(lengths) {
     var pathmap;
     var allPaths = [];
-    var allPathsLength = 0;
     for (var length in lengths) {
         var num = maybeIntegerKey(length);
         if (typeof num === typeOfNumber && isObject(pathmap = lengths[length])) {
@@ -8548,7 +8546,7 @@ module.exports = function toPaths(lengths) {
             var pathsIndex = -1;
             var pathsCount = paths.length;
             while (++pathsIndex < pathsCount) {
-                allPaths[allPathsLength++] = collapsePathSetIndexes(paths[pathsIndex]);
+                allPaths.push(collapsePathSetIndexes(paths[pathsIndex]));
             }
         }
     }
@@ -8749,11 +8747,13 @@ var iterateKeySet = require(138);
  * @returns {Object} -
  */
 module.exports = function toTree(paths) {
-    return paths.reduce(function(acc, path) {
-        innerToTree(acc, path, 0);
-        return acc;
-    }, {});
+    return paths.reduce(__reducer, {});
 };
+
+function __reducer(acc, path) {
+    /*#__NOINLINE__*/ innerToTree(acc, path, 0);
+    return acc;
+}
 
 function innerToTree(seed, path, depth) {
     var keySet = path[depth];
