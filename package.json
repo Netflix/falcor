@@ -78,7 +78,7 @@
   "dependencies": {
     "falcor-json-graph": "^1.1.7",
     "falcor-path-syntax": "^0.2.4",
-    "falcor-path-utils": "^0.7.4",
+    "falcor-path-utils": "^0.7.5",
     "symbol-observable": "^1.2.0"
   }
 }
