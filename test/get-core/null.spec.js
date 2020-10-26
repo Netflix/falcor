@@ -1,41 +1,71 @@
-var getCoreRunner = require('./../getCoreRunner');
-var jsonGraph = require('falcor-json-graph');
-var atom = jsonGraph.atom;
-var ref = jsonGraph.ref;
-var NullInPathError = require('./../../lib/errors/NullInPathError');
+var getCoreRunner = require("./../getCoreRunner");
 
-describe('Nulls', function() {
-    it('should allow null at end of path.', function() {
+describe("Nulls", function() {
+    it("should allow null past end of path.", function() {
         getCoreRunner({
-            input: [['a', null]],
+            input: [["a", "b", "c", null]],
             output: {
                 json: {
-                    a: 'title'
-                }
+                    a: { b: { c: "title" } },
+                },
             },
             cache: {
-                a: ref(['b']),
-                b: 'title'
-            }
+                a: { b: { c: "title" } },
+            },
         });
     });
 
-    it('should throw an error if null is in middle of path.', function() {
-        expect(() => 
-            getCoreRunner({
-                input: [['a', null, 'c']],
-                output: {
-                    json: {
-                        a: 'title'
-                    }
+    it("should allow null at end of path.", function() {
+        getCoreRunner({
+            input: [["a", "b", null]],
+            output: {
+                json: {
+                    a: { b: {} },
                 },
-                cache: {
-                    a: ref(['b']),
-                    b: {
-                        c: 'title'
-                    }
-                }
-            })).toThrow(NullInPathError)
+            },
+            cache: {
+                a: { b: { c: "title" } },
+            },
+        });
+    });
+
+    it("should allow null in middle of path.", function() {
+        getCoreRunner({
+            input: [["a", null, "c"]],
+            output: {
+                json: {
+                    a: {},
+                },
+            },
+            cache: {
+                a: { b: { c: "title" } },
+            },
+        });
+    });
+
+    it("should allow null in key sets.", function() {
+        getCoreRunner({
+            input: [["a", [null, "b"], "c"]],
+            output: {
+                json: {
+                    a: { b: { c: "title" } },
+                },
+            },
+            cache: {
+                a: { b: { c: "title" } },
+            },
+        });
+
+        getCoreRunner({
+            input: [["a", ["b", null], "c"]],
+            output: {
+                json: {
+                    a: { b: { c: "title" } },
+                },
+            },
+            cache: {
+                a: { b: { c: "title" } },
+            },
+        });
     });
 });
-
