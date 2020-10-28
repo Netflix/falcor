@@ -21,3 +21,4 @@ jobs:
         publish_dir: ./doc
         destination_dir: doc
         keep_files: true
+        enable_jekyll: true
