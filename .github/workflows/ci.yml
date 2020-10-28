@@ -11,9 +11,7 @@ jobs:
       with:
         node-version: 10.x
     - run: npm install
-    - run: npm run dist
     - run: npm test
     - uses: coverallsapp/github-action@master
       with:
         github-token: ${{ secrets.GITHUB_TOKEN }}
-    - run: npm run deploy-ghpages
