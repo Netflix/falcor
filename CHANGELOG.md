@@ -1,3 +1,7 @@
+# 2.3.0
+## Changes
+- [Skip nulls in path instead of throwing](https://github.com/Netflix/falcor/pull/982)
+
 # 2.2.2
 ## Changes
 - Updated falcor-path-utils to pull in changes: [Use NOINLINE to avoid inlining function definitions](https://github.com/Netflix/falcor-path-utils/pull/23)
