@@ -2057,7 +2057,6 @@ var onValue = require(27);
 var isExpired = require(31);
 var iterateKeySet = require(137).iterateKeySet;
 var $ref = require(111);
-var NullInPathError = require(14);
 var promote = require(41);
 
 module.exports = function walkPath(model, root, curr, path, depth, seed,
@@ -2090,14 +2089,6 @@ module.exports = function walkPath(model, root, curr, path, depth, seed,
         key = iterateKeySet(keySet, iteratorNote);
     }
 
-    // Avoid iterating on empty keysets
-    if (isKeySet && iteratorNote.done) {
-        onValueType(model, curr, path, depth, seed, outerResults, branchInfo,
-            requestedPath, optimizedPath, optimizedLength,
-            isJSONG, fromReference);
-        return;
-    }
-
     var allowFromWhenceYouCame = model._allowFromWhenceYouCame;
     var optimizedLengthPlus1 = optimizedLength + 1;
     var nextDepth = depth + 1;
@@ -2106,7 +2097,16 @@ module.exports = function walkPath(model, root, curr, path, depth, seed,
     // loop over every key in the key set
     do {
         if (key == null) {
-            throw new NullInPathError();
+            // Skip null/undefined/empty keysets in path and do not descend, but capture the partial path in the result
+            onValueType(model, curr, path, depth, seed, outerResults, branchInfo,
+                requestedPath, optimizedPath, optimizedLength,
+                isJSONG, fromReference);
+
+            if (iteratorNote && !iteratorNote.done) {
+                key = iterateKeySet(keySet, iteratorNote);
+            }
+
+            continue;
         }
 
         fromReference = false;
@@ -2191,7 +2191,7 @@ module.exports = function walkPath(model, root, curr, path, depth, seed,
     } while (iteratorNote && !iteratorNote.done);
 };
 
-},{"111":111,"137":137,"14":14,"16":16,"27":27,"28":28,"31":31,"41":41}],34:[function(require,module,exports){
+},{"111":111,"137":137,"16":16,"27":27,"28":28,"31":31,"41":41}],34:[function(require,module,exports){
 "use strict";
 
 function falcor(opts) {
