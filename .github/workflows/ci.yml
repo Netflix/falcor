@@ -1,32 +1,19 @@
 name: CI
 
-on:
-  push:
-    branches:
-      - master
-      - 0.x
-      - 1.0.0
-  pull_request:
-    branches:
-      - master
-      - 0.x
-      - 1.0.0
+on: ["push", "pull_request"]
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
-
     steps:
     - uses: actions/checkout@v2
     - uses: actions/setup-node@v1
       with:
         node-version: 10.x
-    - run: npm update -g npm
     - run: npm install
     - run: npm run dist
     - run: npm test
-    - run: cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js
-      if: ${{ always() }}
+    - uses: coverallsapp/github-action@master
+      with:
+        github-token: ${{ secrets.GITHUB_TOKEN }}
     - run: npm run deploy-ghpages
-      if: ${{ always() }}
