@@ -5,7 +5,7 @@ on:
     branches: [ master ]
 
 jobs:
-  deploy-ghpages:
+  deploy:
     runs-on: ubuntu-latest
 
     steps:
@@ -20,3 +20,4 @@ jobs:
         github_token: ${{ secrets.GITHUB_TOKEN }}
         publish_dir: ./doc
         destination_dir: doc
+        keep_files: true
