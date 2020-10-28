@@ -1,1 +1,0 @@
-<a href="{{ site.baseurl }}{{site.pages | where:'id',include.id | map:'url' | first}}">{{ include.text }}</a>
