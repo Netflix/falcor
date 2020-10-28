@@ -1,0 +1,15 @@
+node_modules
+.DS_Store
+bin/
+performance/bin/
+!tasks/bin
+*.iml
+coverage
+.idea
+tmp/
+*.tar.gz
+cTestFinal.js
+bin2
+out.csv
+npm-debug.log
+_site

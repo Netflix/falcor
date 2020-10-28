@@ -1,0 +1,222 @@
+// override bootstrap defaults with our configuration
+@import "includes/variables.less";
+@import "includes/bootstrap-customized.less";
+@import "includes/table-of-contents.less";
+@import "includes/bootstrap-overrides.less";
+@import "includes/homepage.less";
+@import "includes/api-documentation.less";
+@import "includes/prettify-theme-tomorrow.less";
+@import "includes/prettify-theme-tomorrow-night-eighties.less";
+@import "includes/prettify-theme-terminal.less";
+@import "includes/icons.less";
+@import "includes/intrasection-navigation.less";
+
+// Left here in case it becomes useful to try out later
+// @import "includes/prettify-theme-tomorrow-night.less";
+
+
+// General site styles that don't fit into a subcategory
+//------------------------------------------------------
+
+
+body {
+
+  // Font improvement tweaks.
+  // MDN recommends against using the first two, as they aren't on track to be included
+  // in the spec, but just about everyone (including Netflix, Apple, Google, etc.)
+  // uses them and they greatly improve readability when supported.
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+
+  &.video-page {
+    background-color: @video-page-bg;
+    color: @video-page-text-color;
+  }
+}
+
+
+// Fixed navbar and sticky footer
+//-------------------------------
+
+html {
+  position: relative;
+  min-height: 100%;
+}
+body {
+  // Ensure there is room for the sticky footer
+  margin-bottom: @site-footer-height;
+
+  // Add some standard padding between the navbar and page content
+  & > .container, & > .hero-banner > .container {
+    padding-top: @navbar-height + @site-content-padding-top;
+  }
+
+  // Lessen the content padding on mobile
+  @media (max-width: @screen-xs-max) {
+    & > .container {
+      padding-top: @navbar-height;
+    }
+  }
+}
+.site-footer {
+  background-color: @site-footer-background-color;
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  height: @site-footer-height;
+
+  & .site-footer-item {
+    height: @site-footer-height;
+    display: flex;
+    align-items: center;
+    color: @site-footer-text-color;
+
+    & a {
+      color: @site-footer-link-color;
+    }
+  }
+
+  & .site-footer-branding {
+
+    justify-content: flex-end;
+
+    .copyright-notice {
+      font-size: 0.75em;
+    }
+
+    @media (max-width: @screen-xs-max) {
+      line-height: 1;
+
+      .copyright-notice {
+        font-size: 0.6em;
+      }
+    }
+
+    .netflix-oss-logo {
+      &:hover, &:focus {
+        text-decoration: none;
+      }
+    }
+  }
+
+  & .netflix-logo {
+    @logo-height: 0.4 * @site-footer-height;
+    height: @logo-height;
+  }
+
+}
+
+.standard-page {
+  padding-bottom: @site-content-padding-bottom;
+  // Necessary hack so the anchors will align with the top of the content area
+  // rather than the top of the page. Please read that page for limitations
+  // of the method (this is method #2) before modifying header styles.
+  // See http://nicolasgallagher.com/jump-links-and-viewport-positioning/
+  // Additionally modified to set manual z index stacking order so headers are behind other
+  // elements and thus don't devour the clicks intended for them.
+  h1, h2, h3, h4 {
+    position: relative;
+    border-top: (@navbar-height + @site-content-padding-top) solid transparent;
+    // subtract the height of the border, then re-add bootstrap's standard margin
+    // so the style appears the same as before the hack
+    margin-top: -1 * (@navbar-height + @site-content-padding-top) + @line-height-computed;
+    background-clip: padding-box;
+    z-index: -1;
+  }
+  h4 {
+    margin-top: -1 * (@navbar-height + @site-content-padding-top) + @line-height-computed / 2;
+  }
+  h5, .h5 {
+    font-weight: bold;
+    margin-top: @line-height-computed;
+    margin-bottom: @line-height-computed / 2;
+  }
+}
+// Place a subtle border around images in standard content sections since they're
+// generally set on a light gray site background.
+// Also make all images responsive by default, so they can't overflow the bounds of the page.
+// Lastly, give them some margins so they aren't too close to neighboring text.
+// Standard pages are any pages that inherit from the page or *-page templates, which is generally
+// all but the homepage and potentially other special one off pages
+.standard-page img, .main-homepage-content img {
+  border: 1px solid @nested-item-border-color;
+  margin: @nested-item-margin;
+  .img-responsive();
+}
+
+.video-page {
+  // Even out the vertical balance around the 16x9 video on a
+  // (usually) portrait oriented phone display
+  @media (max-width: @screen-xs-max) {
+    .video-player {
+      margin-top: 15px;
+    }
+  }
+  .video-description {
+    margin: 15px 0px 30px 0px;
+
+    @media (max-width: @screen-xs-max) {
+      margin-top: 0;
+    }
+  }
+}
+
+img.img-plain {
+  border: none;
+}
+
+hr {
+  border-color: @gray-dark;
+}
+
+// ==================
+// = Utility Styles =
+// ==================
+
+// Easy vertical spacing improvements -- TODO: make into loop
+.row {
+  &.row-gap-small {
+    margin-top: 15px;
+  }
+  &.row-gap-medium {
+    margin-top: 30px;
+  }
+  &.row-gap-large {
+    margin-top: 45px;
+  }
+  &.row-gap-huge {
+    margin-top: 60px;
+  }
+}
+@media (max-width: @screen-xs-max) {
+  .row {
+    &.row-gap-small {
+      margin-top: 10px;
+    }
+    &.row-gap-medium {
+      margin-top: 20px;
+    }
+    &.row-gap-large {
+      margin-top: 30px;
+    }
+    &.row-gap-huge {
+      margin-top: 40px;
+    }
+  }
+}
+
+// =====================
+// = Try it out button =
+// =====================
+
+.runnable-container {
+    position: relative;
+}
+.try-out {
+    position: absolute;
+    top: 0;
+    right: 0;
+    margin: 7px;
+    font-size: 15px;
+}

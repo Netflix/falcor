@@ -1,0 +1,21 @@
+---
+layout: base
+---
+
+<body {% if page.page_class %}class="{{ page.page_class }}"{% endif %}>
+  <a class="sr-only" href="#main-content">Skip to main content</a>
+  {% include navigation.html %}
+
+  <!-- the id is used exclusively for easy access by assistive technology -->
+  <main class="container standard-page" id="main-content">
+    <div class="row">
+      <div class="col-xs-12 col-lg-10 col-lg-offset-1">
+        {{ content }}        
+      </div>
+    </div>
+  </main>
+  
+  {% include site-footer.html %}
+  
+  {% include javascript-includes.html %}
+</body>

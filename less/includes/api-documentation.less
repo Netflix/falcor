@@ -1,0 +1,174 @@
+.api-page {
+    // Hide the method/type lists for all but the current page
+    .toc-api-class > .toc-api-subgroup {
+        display: none;
+    }
+    .toc-api-class.current-page > .toc-api-subgroup {
+        display: block;
+    }
+
+    // Quick fix in case the line wraps, since the default doesn't
+    // leave enough space between lines in this instance
+    h4 {
+        line-height: 1.6;
+    }
+    
+    .method-section, .member-section {
+        margin-bottom: 40px;
+    }
+
+    // Remove the return type signature entirely for now, as the information
+    // is already displayed just below and it clutters up the line
+    .return-signature {
+        display: none;
+    }
+
+    .class-description:empty {
+        margin: 0;
+    }
+
+    .variation {
+        display: none;
+    }
+
+    .details, .member-type, .return-type {
+        margin-top: 20px;
+        margin-bottom: 10px;
+        
+        dt {
+            float: left;
+            padding-right: 5px;
+        }
+        ul {
+            margin: 0;
+            list-style-type: none;
+
+            li {
+                margin-left: 15px;
+            }
+        }
+        pre.prettyprint {
+            margin: 0
+        }
+        .object-value {
+            padding-top: 0;
+        }
+    }
+
+    .code-caption {
+        font-style: italic;
+        margin: 0;
+    }
+
+
+    // There is occasionally a table that's way too wide to fit in its
+    // area, and since tables don't collapse very responsively, we'll
+    // just have to fall back to horizontal scrolling so it's still usable
+    .parameters-section {
+        width: 100%;
+        overflow: auto;
+    }
+
+    .params, .props
+    {
+        border-spacing: 0;
+        border: 0;
+        border-collapse: collapse;
+    }
+
+    .params td,
+    .params th,
+    .props td,
+    .props th {
+        border: 1px solid @parameters-table-border-color;
+        margin: 0px;
+        text-align: left;
+        vertical-align: top;
+        padding: 4px 6px;
+        display: table-cell;
+    }
+    .params th, .props th {
+        color: @parameters-table-header-color;
+        background-color: @parameters-table-header-background-color;
+        font-weight: 500;
+    }
+    .header-name-and-attributes {
+        // Just enough to fit the necessary words in without ever wrapping
+        min-width: 137px;
+    }    
+
+    // Type and token styles
+    .name {
+        background-color: transparent;
+        padding-left: 0;
+        padding-right: 0;
+    }
+    
+    // Function name headers (including the constructor)
+    .section-header.name {
+        background-color: @section-header-background-color;
+        padding: 3px 5px;
+        
+        .signature-attributes {
+            background-color: @section-function-token-attribute-background-color
+        }
+    }
+    .name, .signature {
+        font-family: @font-family-monospace;
+    }
+    .attribute, .signature-attributes {
+        display: inline-block;
+        position: relative;
+        // same as the padding, so the baseline appears consistent
+        top: -2px;
+        padding: 2px 4px;
+        border-radius: 2px;
+        background-color: @token-attribute-background-color;
+        color: @token-attribute-color;
+        font-style: normal;
+    }
+    .signature-attributes {
+        font-size: 0.6em;
+    }
+
+    .tag-deprecated
+    {
+        font-weight: bold;
+        color: #FF3146;
+    }
+    
+    // Standalone code page code pretty printing widget
+    .prettyprint {
+        &.source {
+            width: inherit;
+        }
+
+        & code span.line {
+            display: inline-block;
+        }
+
+        &.linenums {
+            user-select: none;
+            padding-left: 60px;
+            ol {
+                padding-left: 0;
+            }
+
+
+            li.selected, li.selected * {
+                background-color: lightyellow;
+            }
+
+            li * {
+                user-select: text;
+            }
+        }
+    }
+    
+
+    // From the default JSDoc template. Appears to only be used in conjunction with
+    // deprecated taags
+    .yes-def {
+        text-indent: -1000px;
+    }
+}

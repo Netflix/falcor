@@ -1,0 +1,32 @@
+<footer class="site-footer">
+  <div class="container">
+    <div class="row">
+      <div class="col-xs-12 col-lg-10 col-lg-offset-1">
+        <div class="row">
+          <div class="col-xs-4 site-footer-item site-footer-links">
+            <div>
+              <strong>Open Source</strong>
+              <br>
+              <a class="uppercase" href="https://www.github.com/netflix">Netflix Open Source</a>
+              <br>
+              <a class="uppercase" href="https://jobs.netflix.com/">Get in on the fun, join us!</a>
+            </div>
+          </div>
+          <div class="col-xs-8 text-right site-footer-item site-footer-branding">
+            <div>
+              <a href="https://netflix.github.io/" class="netflix-oss-logo">
+                <img src="{{ site.baseurl }}/images/Netflix-OSS-Logo-Small-cropped.png">
+              </a>
+              <br>
+              <span class="copyright-notice">
+                {% assign current_year = site.time | date: '%Y' %}
+                &copy; 2015{% unless current_year == '2015'%}-{{ current_year }}{% endunless %}
+                NETFLIX, INC. ALL RIGHTS RESERVED
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</footer>

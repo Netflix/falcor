@@ -1,0 +1,87 @@
+// Overall site variables. Inclues the bootstrap variables and some additions.
+@import './bootstrap-variables.less';
+
+// Custom site colors
+//-------------------
+@falcor-blue-dark: #0062AE;
+@falcor-blue: #BFE6FF;
+@falcor-purple-light: #D99EDB;
+@falcor-purple: #B987BB;
+@falcor-purple-dark: #934C98;
+@text-inverse-link-color: darken(white, 15%);
+
+// Nested images, code snippets, etc.
+//-----------------------------------
+@nested-item-border-color: #C7C7C7;
+@nested-item-margin: 10px 0;
+
+// Top border and arrow on desktop navbar dropdown menus
+//------------------------------------------------------
+@navbar-dropdown-menu-top-color: #CCC;
+@navbar-dropdown-arrow-size: 9px;
+
+// Spacing before and after the main content for a page
+//---------------------------------------------------------------
+
+// Between where the nav bar ends and the content starts
+@site-content-padding-top: 20px;
+// Between where the content ends and the footer starts
+@site-content-padding-bottom: 60px;
+
+// Widgets/modules such as the table of contents
+//----------------------------------------------
+@module-background-blue: @falcor-blue;
+
+// Table of contents
+//------------------
+@toc-width-lg: 31%;
+@toc-width-md: 32%;
+@toc-width-sm: 38%;
+// The horizontal space between the main page content and ToC
+@content-toc-gap: 40px;
+@toc-background: @module-background-blue;
+// Background color for the current first level item
+@toc-active-background: rgba(0, 0, 0, 15%);
+// And second level item
+@toc-active-background-sub-item: darken(@toc-background, 15%);
+// And third level item
+@toc-active-background-sub-item-sub-item: transparent;
+@toc-indentation-per-level: 20px;
+@toc-link-color: @gray-darker;
+@toc-subgroup-title-color: lighten(@gray, 5%);
+
+// API Documentation
+//------------------
+@section-header-background-color: lighten(@falcor-purple, 12%);
+@parameters-table-border-color: lighten(@gray, 40%);
+@parameters-table-border-width: 1px;
+@parameters-table-header-background-color: lighten(black, 80%);
+@parameters-table-header-color: @text-color;
+@token-attribute-background-color: lighten(black, 85%);
+@section-function-token-attribute-background-color: rgba(217, 217, 217, 0.5);
+@token-attribute-color: @gray-darker;
+
+// Video pages
+//------------
+@video-page-bg: black;
+@video-page-text-color: darken(white, 25%);
+
+// Homepage
+//---------
+@hero-banner-background-color: #111;
+@hero-banner-tagline-color: darken(white, 20%);
+
+// Site main (top) navigation
+//---------------------------
+@site-navigation-font-size: 16px;
+
+// Intrasection navigation (such as between different video pages)
+@intrasection-navigation-height: 45px;
+
+// Site footer
+//------------
+@site-footer-height: 85px;
+@site-footer-text-color: @text-inverse-link-color;
+@site-footer-link-color: @text-inverse-link-color;
+@site-footer-font-size: 16px;
+@site-footer-background-color: #111;
