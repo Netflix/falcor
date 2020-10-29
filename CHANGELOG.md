@@ -1,3 +1,7 @@
+# 2.3.1
+## Bugfix
+- [Avoid fetching null paths](https://github.com/Netflix/falcor/pull/984)
+
 # 2.3.0
 ## Changes
 - [Skip nulls in path instead of throwing](https://github.com/Netflix/falcor/pull/982)
