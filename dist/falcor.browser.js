@@ -2089,10 +2089,10 @@ module.exports = function walkPath(model, root, curr, path, depth, seed,
     // loop over every key in the key set
     do {
         if (key == null) {
-            // Skip null/undefined/empty keysets in path and do not descend, but capture the partial path in the result
-            onValueType(model, curr, path, depth, seed, outerResults, branchInfo,
-                requestedPath, optimizedPath, optimizedLength,
-                isJSONG, fromReference);
+            // Skip null/undefined/empty keysets in path and do not descend,
+            // but capture the partial path in the result
+            onValue(model, curr, seed, depth, outerResults, branchInfo,
+                    requestedPath, optimizedPath, optimizedLength, isJSONG);
 
             if (iteratorNote && !iteratorNote.done) {
                 key = iterateKeySet(keySet, iteratorNote);
