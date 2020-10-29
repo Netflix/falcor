@@ -20,8 +20,6 @@ describe('Edges', function() {
                 }
             },
             cache: cacheGenerator(0, 1),
-            requestedMissingPaths: [],
-            optimizedMissingPaths: []
         });
     });
     it('should report an atom of undefined in non-progressive mode.', function() {
