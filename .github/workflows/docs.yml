@@ -13,9 +13,12 @@ jobs:
     - uses: actions/setup-node@v1
       with:
         node-version: 10.x
-    - run: npm install
-    - run: npm run doc
-    - uses: peaceiris/actions-gh-pages@v3
+    - name: Install dependencies
+      run: npm install
+    - name: Generate docs
+      run: npm run doc
+    - name: Publish docs to gh-pages
+      uses: peaceiris/actions-gh-pages@v3
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
         publish_dir: ./doc
