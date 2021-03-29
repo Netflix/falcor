@@ -14,23 +14,27 @@ function ResponseObservable(response) {
 
 ResponseObservable.prototype = Object.create(Rx.Observable.prototype);
 
-ResponseObservable.prototype._subscribe = function(observer) {
+ResponseObservable.prototype._subscribe = function (observer) {
     return this.response.subscribe(observer);
 };
 
-ResponseObservable.prototype._toJSONG = function() {
-    return new ResponseObservable(this.response._toJSONG.apply(this.response, arguments));
+ResponseObservable.prototype._toJSONG = function () {
+    return new ResponseObservable(
+        this.response._toJSONG.apply(this.response, arguments)
+    );
 };
 
-ResponseObservable.prototype.progressively = function() {
-    return new ResponseObservable(this.response.progressively.apply(this.response, arguments));
+ResponseObservable.prototype.progressively = function () {
+    return new ResponseObservable(
+        this.response.progressively.apply(this.response, arguments)
+    );
 };
 
-ResponseObservable.prototype.then = function() {
+ResponseObservable.prototype.then = function () {
     return this.response.then.apply(this.response, arguments);
 };
 
-ResponseObservable.prototype[Symbol.observable] = function() {
+ResponseObservable.prototype[Symbol.observable] = function () {
     return this.response[Symbol.observable].apply(this.response, arguments);
 };
 
@@ -39,19 +43,19 @@ const modelSet = Model.prototype.set;
 const modelCall = Model.prototype.call;
 const modelPreload = Model.prototype.preload;
 
-Model.prototype.get = function() {
+Model.prototype.get = function () {
     return new ResponseObservable(modelGet.apply(this, arguments));
 };
 
-Model.prototype.set = function() {
+Model.prototype.set = function () {
     return new ResponseObservable(modelSet.apply(this, arguments));
 };
 
-Model.prototype.preload = function() {
+Model.prototype.preload = function () {
     return new ResponseObservable(modelPreload.apply(this, arguments));
 };
 
-Model.prototype.call = function() {
+Model.prototype.call = function () {
     return new ResponseObservable(modelCall.apply(this, arguments));
 };
 
@@ -81,7 +85,7 @@ describe("Model", () => {
         testRunner.compare({ $type: $atom, value: 1337 }, out);
     });
 
-    it("unsubscribing should cancel DataSource request.", done => {
+    it("unsubscribing should cancel DataSource request.", (done) => {
         let onNextCalled = 0,
             onErrorCalled = 0,
             onCompletedCalled = 0,
@@ -91,8 +95,8 @@ describe("Model", () => {
         const model = new Model({
             cache: {
                 list: {
-                    0: { name: "test" }
-                }
+                    0: { name: "test" },
+                },
             },
             source: {
                 get() {
@@ -103,10 +107,10 @@ describe("Model", () => {
                                 const response = {
                                     jsonGraph: {
                                         list: {
-                                            1: { name: "another test" }
-                                        }
+                                            1: { name: "another test" },
+                                        },
                                     },
-                                    paths: ["list", 1, "name"]
+                                    paths: ["list", 1, "name"],
                                 };
 
                                 if (typeof observerOrOnNext === "function") {
@@ -122,19 +126,19 @@ describe("Model", () => {
                                 dispose() {
                                     unusubscribeCalled++;
                                     clearTimeout(handle);
-                                }
+                                },
                             };
-                        }
+                        },
                     };
-                }
-            }
+                },
+            },
         });
 
         const subscription = model.get("list[0,1].name").subscribe(
-            value => {
+            (value) => {
                 onNextCalled++;
             },
-            error => {
+            (error) => {
                 onErrorCalled++;
             },
             () => {
@@ -157,7 +161,7 @@ describe("Model", () => {
         }
     });
 
-    it("unsubscribing should dispose batched DataSource request.", done => {
+    it("unsubscribing should dispose batched DataSource request.", (done) => {
         let onNextCalled = 0,
             onErrorCalled = 0,
             onCompletedCalled = 0,
@@ -168,8 +172,8 @@ describe("Model", () => {
         let model = new Model({
             cache: {
                 list: {
-                    0: { name: "test" }
-                }
+                    0: { name: "test" },
+                },
             },
             source: {
                 get() {
@@ -180,10 +184,10 @@ describe("Model", () => {
                                 const response = {
                                     jsonGraph: {
                                         list: {
-                                            1: { name: "another test" }
-                                        }
+                                            1: { name: "another test" },
+                                        },
                                     },
-                                    paths: ["list", 1, "name"]
+                                    paths: ["list", 1, "name"],
                                 };
 
                                 onDataSourceGet && onDataSourceGet();
@@ -195,27 +199,28 @@ describe("Model", () => {
                                     observerOrOnNext.onCompleted();
                                 }
 
-                                onDisposedOrCompleted && onDisposedOrCompleted();
+                                onDisposedOrCompleted &&
+                                    onDisposedOrCompleted();
                             });
 
                             return {
                                 dispose() {
                                     unusubscribeCalled++;
                                     clearTimeout(handle);
-                                }
+                                },
                             };
-                        }
+                        },
                     };
-                }
-            }
+                },
+            },
         });
         model = model.batch();
 
         const subscription = model.get("list[0,1].name").subscribe(
-            value => {
+            (value) => {
                 onNextCalled++;
             },
-            error => {
+            (error) => {
                 onErrorCalled++;
             },
             () => {
@@ -223,11 +228,11 @@ describe("Model", () => {
             }
         );
 
-        onDataSourceGet = function() {
+        onDataSourceGet = function () {
             subscription.dispose();
         };
 
-        onDisposedOrCompleted = function() {
+        onDisposedOrCompleted = function () {
             if (
                 dataSourceGetCalled === 1 &&
                 !onNextCalled &&
@@ -242,7 +247,7 @@ describe("Model", () => {
         };
     });
 
-    it('unsubscribing should "unsubscribe" batched DataSource request, if applicable.', done => {
+    it('unsubscribing should "unsubscribe" batched DataSource request, if applicable.', (done) => {
         let onNextCalled = 0,
             onErrorCalled = 0,
             onCompletedCalled = 0,
@@ -253,8 +258,8 @@ describe("Model", () => {
         let model = new Model({
             cache: {
                 list: {
-                    0: { name: "test" }
-                }
+                    0: { name: "test" },
+                },
             },
             source: {
                 get() {
@@ -265,10 +270,10 @@ describe("Model", () => {
                                 const response = {
                                     jsonGraph: {
                                         list: {
-                                            1: { name: "another test" }
-                                        }
+                                            1: { name: "another test" },
+                                        },
                                     },
-                                    paths: ["list", 1, "name"]
+                                    paths: ["list", 1, "name"],
                                 };
 
                                 onDataSourceGet && onDataSourceGet();
@@ -280,27 +285,28 @@ describe("Model", () => {
                                     observerOrOnNext.onCompleted();
                                 }
 
-                                onDisposedOrCompleted && onDisposedOrCompleted();
+                                onDisposedOrCompleted &&
+                                    onDisposedOrCompleted();
                             });
 
                             return {
                                 unsubscribe() {
                                     unusubscribeCalled++;
                                     clearTimeout(handle);
-                                }
+                                },
                             };
-                        }
+                        },
                     };
-                }
-            }
+                },
+            },
         });
         model = model.batch();
 
         const subscription = model.get("list[0,1].name").subscribe(
-            value => {
+            (value) => {
                 onNextCalled++;
             },
-            error => {
+            (error) => {
                 onErrorCalled++;
             },
             () => {
@@ -308,11 +314,11 @@ describe("Model", () => {
             }
         );
 
-        onDataSourceGet = function() {
+        onDataSourceGet = function () {
             subscription.dispose();
         };
 
-        onDisposedOrCompleted = function() {
+        onDisposedOrCompleted = function () {
             if (
                 dataSourceGetCalled === 1 &&
                 !onNextCalled &&
@@ -327,7 +333,7 @@ describe("Model", () => {
         };
     });
 
-    it("Supports RxJS 5.", done => {
+    it("Supports RxJS 5.", (done) => {
         let onNextCalled = 0,
             onErrorCalled = 0,
             onCompletedCalled = 0,
@@ -337,8 +343,8 @@ describe("Model", () => {
         const model = new Model({
             cache: {
                 list: {
-                    0: { name: "test" }
-                }
+                    0: { name: "test" },
+                },
             },
             source: {
                 get() {
@@ -349,10 +355,10 @@ describe("Model", () => {
                                 const response = {
                                     jsonGraph: {
                                         list: {
-                                            1: { name: "another test" }
-                                        }
+                                            1: { name: "another test" },
+                                        },
                                     },
-                                    paths: ["list", 1, "name"]
+                                    paths: ["list", 1, "name"],
                                 };
 
                                 if (typeof observerOrOnNext === "function") {
@@ -368,19 +374,21 @@ describe("Model", () => {
                                 dispose() {
                                     unusubscribeCalled++;
                                     clearTimeout(handle);
-                                }
+                                },
                             };
-                        }
+                        },
                     };
-                }
-            }
+                },
+            },
         });
 
-        const subscription = rxjs.Observable.from(model.get("list[0,1].name")).subscribe(
-            value => {
+        const subscription = rxjs.Observable.from(
+            model.get("list[0,1].name")
+        ).subscribe(
+            (value) => {
                 onNextCalled++;
             },
-            error => {
+            (error) => {
                 onErrorCalled++;
             },
             () => {
@@ -407,9 +415,9 @@ describe("Model", () => {
         const model = new Model({
             cache: {
                 list: {
-                    0: { name: "test" }
-                }
-            }
+                    0: { name: "test" },
+                },
+            },
         });
         const cache = model._root.cache;
         expect(cache.$size).toBeGreaterThan(0);
@@ -420,7 +428,7 @@ describe("Model", () => {
     // https://github.com/Netflix/falcor/issues/915
     it("maxRetries option is carried over to cloned Model instance", () => {
         const model = new Model({
-            maxRetries: 10
+            maxRetries: 10,
         });
         expect(model._maxRetries).toBe(10);
         const batchingModel = model.batch(100);
@@ -465,7 +473,9 @@ describe("Model", () => {
                 const model = new Model({ disablePathCollapse: true });
                 const clone = model._clone();
 
-                expect(clone._enablePathCollapse).toBe(model._enablePathCollapse);
+                expect(clone._enablePathCollapse).toBe(
+                    model._enablePathCollapse
+                );
             });
         });
 
@@ -475,7 +485,9 @@ describe("Model", () => {
                 expect(model._enableRequestDeduplication).toBe(false);
 
                 for (let index = 0; index < notTrue.length; index++) {
-                    model = new Model({ disableRequestDeduplication: notTrue[index] });
+                    model = new Model({
+                        disableRequestDeduplication: notTrue[index],
+                    });
                     expect(model._enableRequestDeduplication).toBe(true);
                 }
             });
@@ -492,8 +504,54 @@ describe("Model", () => {
                 const model = new Model({ disableRequestDeduplication: true });
                 const clone = model._clone();
 
-                expect(clone._enableRequestDeduplication).toBe(model._enableRequestDeduplication);
+                expect(clone._enableRequestDeduplication).toBe(
+                    model._enableRequestDeduplication
+                );
             });
+        });
+    });
+
+    describe("set and get", () => {
+        it("should throw an error on invalid input when calling Model:get", (done) => {
+            const model = new Model();
+            model.get('{"foobar":[]}').subscribe(
+                () => {},
+                (e) => {
+                    expect(e instanceof Error).toBe(true);
+                    expect(e.message).toMatchInlineSnapshot(
+                        `"Path syntax validation error -- Unexpected token. -- {\\""`
+                    );
+                    done();
+                },
+                () => {
+                    done(
+                        new Error(
+                            "Did not receive an error when one was expected"
+                        )
+                    );
+                }
+            );
+        });
+
+        it("should throw an error on invalid input when calling Model:set", (done) => {
+            const model = new Model();
+            model.set('{"foobar":[]}').subscribe(
+                () => {},
+                (e) => {
+                    expect(e instanceof Error).toBe(true);
+                    expect(e.message).toMatchInlineSnapshot(
+                        `"Path syntax validation error -- Unexpected token. -- {\\""`
+                    );
+                    done();
+                },
+                () => {
+                    done(
+                        new Error(
+                            "Did not receive an error when one was expected"
+                        )
+                    );
+                }
+            );
         });
     });
 });
