@@ -496,4 +496,30 @@ describe("Model", () => {
             });
         });
     });
+
+    describe("set and get", () => {
+        it("should throw an error on invalid input when calling Model:get", (done) => {
+            const model = new Model();
+            model.get("{\"foobar\":[]}").subscribe(() => {
+                done(new Error("Did not receive an error when one was expected"));
+            }, (e) => {
+                console.log(e);
+                expect(e instanceof Error).toBe(true);
+                expect(e.message.indexOf("Path syntax validation error")).toBeGreaterThan(-1);
+                done();
+            })
+        });
+
+        it("should throw an error on invalid input when calling Model:set", (done) => {
+            const model = new Model();
+            model.set("{\"foobar\":[]}").subscribe(() => {
+                done(new Error("Did not receive an error when one was expected"));
+            }, (e) => {
+                console.log(e);
+                expect(e instanceof Error).toBe(true);
+                expect(e.message.indexOf("Path syntax validation error")).toBeGreaterThan(-1);
+                done();
+            })
+        });
+    })
 });
