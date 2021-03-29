@@ -517,7 +517,7 @@ describe("Model", () => {
             model.get('{"foobar":[]}').subscribe(
                 () => {},
                 (e) => {
-                    expect(e instanceof Error).toBe(true);
+                    expect(e).toBeInstanceOf(Error);
                     expect(e.message).toMatchInlineSnapshot(
                         `"Path syntax validation error -- Unexpected token. -- {\\""`
                     );
@@ -535,10 +535,10 @@ describe("Model", () => {
 
         it("should throw an error on invalid input when calling Model:set", (done) => {
             const model = new Model();
-            model.set('{"foobar":[]}').subscribe(
+            model.set({ path: '{"foobar":[]}' }).subscribe(
                 () => {},
                 (e) => {
-                    expect(e instanceof Error).toBe(true);
+                    expect(e).toBeInstanceOf(Error);
                     expect(e.message).toMatchInlineSnapshot(
                         `"Path syntax validation error -- Unexpected token. -- {\\""`
                     );
