@@ -14,8 +14,13 @@ jobs:
     - uses: actions/setup-node@v1
       with:
         node-version: 10.x
-    - run: npm install
-    - run: npm test
-    - uses: coverallsapp/github-action@master
+    - name: Install dependencies
+      run: npm install
+    - name: Run eslint
+      run: eslint *.js lib/**/*.js
+    - name: Run tests
+      run: npm test
+    - name: Run test coverage report
+      uses: coverallsapp/github-action@master
       with:
         github-token: ${{ secrets.GITHUB_TOKEN }}
