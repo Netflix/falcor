@@ -5,8 +5,8 @@ id: json_graph
 lang: en
 ---
 
--   Table of contents. This line is required to start the list.
-    {:toc}
+* Table of contents. This line is required to start the list.
+{:toc}
 
 # JSON Graph
 
