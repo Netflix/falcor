@@ -5585,6 +5585,11 @@ prelude-ls@~1.1.2:
   resolved "https://artifacts.netflix.com/api/npm/npm-netflix/prelude-ls/-/prelude-ls-1.1.2.tgz#21932a549f5e52ffd9a827f570e04be62a97da54"
   integrity sha1-IZMqVJ9eUv/ZqCf1cOBL5iqX2lQ=
 
+prettier@^2.2.1:
+  version "2.2.1"
+  resolved "https://artifacts.netflix.com/api/npm/npm-netflix/prettier/-/prettier-2.2.1.tgz#795a1a78dd52f073da0cd42b21f9c91381923ff5"
+  integrity sha1-eVoaeN1S8HPaDNQrIfnJE4GSP/U=
+
 pretty-format@^26.6.2:
   version "26.6.2"
   resolved "https://artifacts.netflix.com/api/npm/npm-netflix/pretty-format/-/pretty-format-26.6.2.tgz#e35c2705f14cb7fe2fe94fa078345b444120fc93"
