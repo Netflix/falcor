@@ -5,8 +5,8 @@ id: data_sources
 lang: en
 ---
 
--   Table of contents. This line is required to start the list.
-    {:toc}
+* Table of contents. This line is required to start the list.
+{:toc}
 
 <a name="Data-Sources"></a>
 
