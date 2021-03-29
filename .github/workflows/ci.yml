@@ -17,7 +17,7 @@ jobs:
     - name: Install dependencies
       run: npm install
     - name: Run eslint
-      run: eslint *.js lib/**/*.js
+      run: npx eslint *.js lib/**/*.js
     - name: Run tests
       run: npm test
     - name: Run test coverage report
