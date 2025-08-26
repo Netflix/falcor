@@ -1,3 +1,7 @@
+# 2.4.0
+## Changes
+- [Handling fromPath errors in SetResponse constructor](https://github.com/Netflix/falcor/pull/989)
+
 # 2.3.2
 ## Bugfix
 - [Handling fromPath errors in SetResponse constructor](https://github.com/Netflix/falcor/pull/989)

@@ -1104,9 +1104,12 @@ var applyErrorPrototype = require(15);
  * Does not allow null in path
  *
  * @private
+ * @param {Object} [options] - Optional object containing additional error information
+ * @param {Array} [options.requestedPath] - The path that was being processed when the error occurred
  */
-function NullInPathError() {
-    var instance = new Error("`null` and `undefined` are not allowed in branch key positions");
+function NullInPathError(options) {
+    var requestedPathString = options && options.requestedPath && options.requestedPath.join ? options.requestedPath.join(", ") : "";
+    var instance = new Error("`null` and `undefined` are not allowed in branch key positions for requested path: " + requestedPathString);
 
     instance.name = "NullInPathError";
 
@@ -3775,7 +3778,7 @@ InvalidateResponse.prototype._subscribe = function _subscribe(observer) {
 module.exports = InvalidateResponse;
 
 },{"52":52,"88":88,"91":91}],52:[function(require,module,exports){
-(function (Promise){
+(function (Promise){(function (){
 var ModelResponseObserver = require(53);
 var $$observable = require(310).default;
 var toEsObservable = require(108);
@@ -3927,7 +3930,7 @@ ModelResponse.prototype.then = function then(onNext, onError) {
 
 module.exports = ModelResponse;
 
-}).call(this,typeof Promise === "function" ? Promise : require(302))
+}).call(this)}).call(this,typeof Promise === "function" ? Promise : require(302))
 },{"108":108,"302":302,"310":310,"53":53}],53:[function(require,module,exports){
 var noop = require(95);
 
@@ -4925,7 +4928,7 @@ function setNode(
 
     if (key == null) {
         if (branch) {
-            throw new NullInPathError();
+            throw new NullInPathError({ requestedPath: requestedPath });
         } else if (node) {
             key = node.$_key;
         }
@@ -5156,7 +5159,7 @@ function setNode(
 
     if (key == null) {
         if (branch) {
-            throw new NullInPathError();
+            throw new NullInPathError({ requestedPath: requestedPath });
         } else if (node) {
             key = node.$_key;
         }
@@ -5396,7 +5399,7 @@ function setNode(
 
     if (key == null) {
         if (branch) {
-            throw new NullInPathError();
+            throw new NullInPathError({ requestedPath: requestedPath });
         } else if (node) {
             key = node.$_key;
         }
@@ -6480,7 +6483,7 @@ RawTask.prototype.call = function () {
 };
 
 },{"115":115}],115:[function(require,module,exports){
-(function (global){
+(function (global){(function (){
 "use strict";
 
 // Use the fastest means possible to execute a task in its own turn, with
@@ -6705,7 +6708,7 @@ rawAsap.makeRequestCallFromTimer = makeRequestCallFromTimer;
 // back into ASAP proper.
 // https://github.com/tildeio/rsvp.js/blob/cddf7232546a9cf858524b75cde6f9edf72620a7/lib/rsvp/asap.js
 
-}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
+}).call(this)}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 },{}],116:[function(require,module,exports){
 'use strict';
 var request = require(120);
@@ -6837,7 +6840,7 @@ module.exports = function buildQueryObject(url, method, queryData) {
 };
 
 },{}],118:[function(require,module,exports){
-(function (global){
+(function (global){(function (){
 'use strict';
 // Get CORS support even for older IE
 module.exports = function getCORSRequest() {
@@ -6851,9 +6854,9 @@ module.exports = function getCORSRequest() {
     }
 };
 
-}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
+}).call(this)}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 },{}],119:[function(require,module,exports){
-(function (global){
+(function (global){(function (){
 'use strict';
 module.exports = function getXMLHttpRequest() {
   var progId,
@@ -6879,7 +6882,7 @@ module.exports = function getXMLHttpRequest() {
   }
 };
 
-}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
+}).call(this)}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 },{}],120:[function(require,module,exports){
 'use strict';
 var getXMLHttpRequest = require(119);
@@ -13147,7 +13150,7 @@ function isScheduler(value) {
 exports.isScheduler = isScheduler;
 
 },{}],233:[function(require,module,exports){
-(function (global){
+(function (global){(function (){
 "use strict";
 /**
  * window: browser in DOM main thread
@@ -13161,7 +13164,7 @@ if (!exports.root) {
     throw new Error('RxJS could not find any global context (window, self, global)');
 }
 
-}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
+}).call(this)}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 },{}],234:[function(require,module,exports){
 "use strict";
 var root_1 = require(233);
@@ -16949,7 +16952,7 @@ module.exports = {
 module.exports = require(307)
 
 },{"307":307}],303:[function(require,module,exports){
-(function (Promise){
+(function (Promise){(function (){
 'use strict';
 
 var asap = require(115);
@@ -17164,7 +17167,7 @@ function doResolve(fn, promise) {
   }
 }
 
-}).call(this,typeof Promise === "function" ? Promise : require(302))
+}).call(this)}).call(this,typeof Promise === "function" ? Promise : require(302))
 },{"115":115,"302":302}],304:[function(require,module,exports){
 'use strict';
 
@@ -17526,7 +17529,7 @@ Promise.disableSynchronous = function() {
 };
 
 },{"303":303}],310:[function(require,module,exports){
-(function (global){
+(function (global){(function (){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -17556,7 +17559,7 @@ if (typeof self !== 'undefined') {
 
 var result = (0, _ponyfill2['default'])(root);
 exports['default'] = result;
-}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
+}).call(this)}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 },{"311":311}],311:[function(require,module,exports){
 'use strict';
 
