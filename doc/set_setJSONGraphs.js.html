@@ -229,7 +229,7 @@ function setNode(
 
     if (key == null) {
         if (branch) {
-            throw new NullInPathError();
+            throw new NullInPathError({ requestedPath: requestedPath });
         } else if (node) {
             key = node.$_key;
         }
