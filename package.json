@@ -12,6 +12,9 @@
     "type": "git",
     "url": "https://github.com/Netflix/falcor.git"
   },
+  "publishConfig": {
+    "registry": "https://registry.npmjs.com"
+  },
   "license": "Apache-2.0",
   "scripts": {
     "test": "jest --coverage --collectCoverageFrom='./lib/**/*.js'",
