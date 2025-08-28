@@ -1,3 +1,7 @@
+# 2.4.1
+## Bugfix
+- Republished to remove an issue with a hash generation of 2.4.0
+
 # 2.4.0
 ## Changes
 - [Handling fromPath errors in SetResponse constructor](https://github.com/Netflix/falcor/pull/989)
